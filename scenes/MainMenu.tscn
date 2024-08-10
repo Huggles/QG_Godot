@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=3 uid="uid://mkqa1n4o3kva"]
+
+[ext_resource type="Script" path="res://scripts/Menu/MainMenuUIScript.gd" id="1_nly4e"]
+[ext_resource type="Texture2D" uid="uid://bac4xdyyb4tvc" path="res://assets/textures/Menu_Background.jpg" id="2_7ots7"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_right = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_nly4e")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_7ots7")
+expand_mode = 3
+
+[node name="HostButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 769.0
+offset_top = 392.0
+offset_right = 1148.0
+offset_bottom = 501.0
+text = "Host
+"
+
+[node name="MultiplayerButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -48.5
+offset_top = -15.5
+offset_right = 48.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Multiplayer
+"
+
+[node name="ExitGameButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -48.5
+offset_top = 26.0
+offset_right = 48.5
+offset_bottom = 57.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Exit Game
+"
+
+[node name="DEBUG" type="Button" parent="."]
+layout_mode = 0
+offset_left = 768.0
+offset_top = 722.0
+offset_right = 1147.0
+offset_bottom = 831.0
+text = "Debug
+"
+
+[connection signal="pressed" from="HostButton" to="." method="_on_host_button_pressed"]
+[connection signal="pressed" from="MultiplayerButton" to="." method="_on_multiplayer_button_pressed"]
+[connection signal="pressed" from="ExitGameButton" to="." method="_on_exit_game_button_pressed"]
+[connection signal="pressed" from="DEBUG" to="." method="_on_debug_pressed"]

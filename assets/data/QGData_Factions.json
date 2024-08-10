@@ -1,0 +1,68 @@
+[
+	{
+		"name": "GERMANY",
+		"index": 0,
+		"clabel": "Germany",
+		"color_string": "#5f5f5e",
+		"team" : "AXIS",
+		"homespace" : "GERMANY",
+		"deck" : [],
+		"number_army_units" : 5,
+		"number_navy_units" : 5
+	},
+	{
+		"name": "UNITED_KINGDOM",
+		"index": 1,
+		"clabel": "United Kingdom",
+		"color_string": "#b1b103",
+		"team" : "ALLIES",
+		"homespace" : "UNITED_KINGDOM",
+		"deck" : [],
+		"number_army_units" : 5,
+		"number_navy_units" : 5
+	},
+	{
+		"name": "JAPAN",
+		"index": 2,
+		"clabel": "Japan",
+		"color_string": "#ccddee",
+		"team" : "AXIS",
+		"homespace" : "JAPAN",
+		"deck" : [],
+		"number_army_units" : 5,
+		"number_navy_units" : 5
+	},
+	{
+		"name": "SOVIET",
+		"index": 3,
+		"clabel": "Soviet Union",
+		"color_string": "#b60101",
+		"team" : "ALLIES",
+		"homespace" : "MOSCOW",
+		"deck" : [],
+		"number_army_units" : 5,
+		"number_navy_units" : 5
+	},
+	{
+		"name": "ITALY",
+		"index": 4,
+		"clabel": "Italy",
+		"color_string": "#c20070",
+		"team" : "AXIS",
+		"homespace" : "ITALY",
+		"deck" : [],
+		"number_army_units" : 5,
+		"number_navy_units" : 5
+	},
+	{
+		"name": "UNITED_STATES",
+		"index": 5,
+		"clabel": "United States",
+		"color_string": "#006d23",
+		"team" : "ALLIES",
+		"homespace" : "US_EAST",
+		"deck" : [],
+		"number_army_units" : 5,
+		"number_navy_units" : 5
+	}
+]

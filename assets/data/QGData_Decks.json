@@ -1,0 +1,28 @@
+[
+	{
+		"faction" : "GERMANY",
+		"cards": [
+			{
+				"card_name" : "BuildArmy",
+				"number" : 3
+			},
+			{
+				"card_name" : "BuildNavy",
+				"number" : 3
+			}		
+		],
+	},
+	{
+		"faction" : "UNITED_KINGDOM",
+		"cards": [
+			{
+				"card_name" : "BuildArmy",
+				"number" : 2
+			},
+			{
+				"card_name" : "BuildNavy",
+				"number" : 3
+			}		
+		],
+	}
+]

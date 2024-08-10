@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=3 uid="uid://ulu5d3pvyttl"]
+
+[ext_resource type="Script" path="res://scripts/World/WorldScene.gd" id="1_byfi5"]
+[ext_resource type="Texture2D" uid="uid://b6rlobc622abu" path="res://assets/textures/World/World_Clean.png" id="3_uu1v5"]
+[ext_resource type="Texture2D" uid="uid://ly4yeqnos5w3" path="res://assets/textures/WoodTable.jpg" id="5_50r1o"]
+
+[node name="World" type="Node3D"]
+transform = Transform3D(0.999998, -0.001184, 0.00164214, 0.00118397, 0.999999, 2.16277e-05, -0.00164217, -1.97052e-05, 0.999999, 0, 0, 0)
+script = ExtResource("1_byfi5")
+
+[node name="Countries" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Background" type="Node3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -5, 0)
+
+[node name="WorldSprite" type="Sprite3D" parent="Background"]
+transform = Transform3D(0.76, 0, 0, 0, -3.32207e-08, 0.76, 0, -0.76, -3.32207e-08, 1055.17, -1, 279.545)
+layers = 2
+pixel_size = 1.0
+transparent = false
+alpha_cut = 2
+texture = ExtResource("3_uu1v5")
+
+[node name="TableSprite" type="Sprite3D" parent="Background"]
+transform = Transform3D(1, 0, 0, 0, 1.19249e-08, 1, 0, -1, 1.19249e-08, 1727.94, -10, 772.326)
+layers = 2
+pixel_size = 4.0
+transparent = false
+alpha_cut = 2
+texture = ExtResource("5_50r1o")
+
+[node name="PlayerSpawnPosition" type="Node3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 3.44997e-10, 0, -1.56362e-10, 1, 0, -1.16415e-10, -3.63798e-12, 1, 1009.78, 475.443, 750.43)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, 941.515, 435.886, 1.55472)

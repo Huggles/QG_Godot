@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dq8x7bh4owopy"
+path="res://.godot/imported/Navy.obj-c05d74ba46ee66320471d4607072e3e0.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Navy.obj-c05d74ba46ee66320471d4607072e3e0.mesh"]
+
+source_file="res://assets/meshes/Navy.obj"
+dest_files=["res://.godot/imported/Navy.obj-c05d74ba46ee66320471d4607072e3e0.mesh", "res://.godot/imported/Navy.obj-c05d74ba46ee66320471d4607072e3e0.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

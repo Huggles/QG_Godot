@@ -1,0 +1,41 @@
+[gd_scene load_steps=8 format=3 uid="uid://cqotfa6hcbdg1"]
+
+[ext_resource type="Script" path="res://scripts/Player/PlayerScene.gd" id="1_g70y1"]
+[ext_resource type="Script" path="res://scripts/Player/PlayerInputSynchronizer.gd" id="2_1n8jb"]
+[ext_resource type="Script" path="res://scenes/Player/PlayerCamera3D.gd" id="2_r6i5k"]
+[ext_resource type="Script" path="res://scenes/Player/PlayerServerSynchronizer.gd" id="2_uvkuy"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_a5pth"]
+properties/0/path = NodePath(".:peer_id")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:player_name")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_2n48r"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_12hdh"]
+radius = 0.001
+
+[node name="Player" type="CharacterBody3D"]
+collision_mask = 2
+script = ExtResource("1_g70y1")
+
+[node name="ServerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_a5pth")
+script = ExtResource("2_uvkuy")
+
+[node name="PlayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_2n48r")
+script = ExtResource("2_1n8jb")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.999997, -0.00159702, 0.0015778, -0.000554104, 0.505497, 0.862828, -0.00217553, -0.862827, 0.505495, 0, 1.81571, 1.39794)
+current = true
+script = ExtResource("2_r6i5k")
+_sprite_layers = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.81571, 1.39794)
+shape = SubResource("SphereShape3D_12hdh")

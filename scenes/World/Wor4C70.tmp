@@ -1,0 +1,34 @@
+[gd_scene load_steps=7 format=3 uid="uid://ulu5d3pvyttl"]
+
+[ext_resource type="Script" path="res://scripts/World/WorldScene.gd" id="1_byfi5"]
+[ext_resource type="PackedScene" uid="uid://cqotfa6hcbdg1" path="res://scenes/Player/Player.tscn" id="2_h5ujk"]
+[ext_resource type="Texture2D" uid="uid://b6rlobc622abu" path="res://assets/textures/World/World_Clean.png" id="3_uu1v5"]
+[ext_resource type="Script" path="res://scripts/Managers/GameLevelManager.gd" id="4_bplv0"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h052l"]
+albedo_texture = ExtResource("3_uu1v5")
+
+[sub_resource type="QuadMesh" id="QuadMesh_hg8w4"]
+material = SubResource("StandardMaterial3D_h052l")
+size = Vector2(264, 138)
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_byfi5")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("4_bplv0")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("../Players")
+
+[node name="Players" type="Node3D" parent="."]
+
+[node name="Player" parent="Players" instance=ExtResource("2_h5ujk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 36.1412, 69)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1.19249e-08, 1, 0, -1, 1.19249e-08, 0, 0, 0)
+cast_shadow = 0
+mesh = SubResource("QuadMesh_hg8w4")
+
+[node name="Countries" type="Node3D" parent="."]

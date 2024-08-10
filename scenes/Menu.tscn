@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://cnggx6v2smwxk"]
+
+[ext_resource type="Script" path="res://scripts/Menu/MainMenuNodeScript.gd" id="1_ds0k8"]
+[ext_resource type="PackedScene" uid="uid://mkqa1n4o3kva" path="res://scenes/MainMenu.tscn" id="1_it6ho"]
+[ext_resource type="Script" path="res://scripts/Managers/GameManager.gd" id="2_ds6ln"]
+
+[node name="Menu" type="Node2D"]
+script = ExtResource("1_ds0k8")
+
+[node name="GameLoader" type="Node" parent="."]
+script = ExtResource("2_ds6ln")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MainMenu" parent="CanvasLayer" instance=ExtResource("1_it6ho")]
+size_flags_horizontal = 3
+size_flags_vertical = 3

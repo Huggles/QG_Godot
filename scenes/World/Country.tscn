@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://l5548wfmcdsi"]
+
+[ext_resource type="Script" path="res://scripts/World/CountryScene.gd" id="1_x87g1"]
+[ext_resource type="Script" path="res://scenes/World/CountrySprite3D.gd" id="2_7m026"]
+[ext_resource type="Texture2D" uid="uid://cc3bm42v83po1" path="res://assets/textures/World/Africa.png" id="2_w3vv8"]
+[ext_resource type="Script" path="res://scenes/World/RayTraceHandler.gd" id="4_jn0qh"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mpjw5"]
+size = Vector3(1, 1, 0)
+
+[node name="CountryRoot" type="Node3D"]
+script = ExtResource("1_x87g1")
+
+[node name="UnitContainer" type="Node3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -2)
+
+[node name="ClickableSprite3D" type="Sprite3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1.19249e-08, 1, 0, -1, 1.19249e-08, -0.0123878, 0.00945282, -1.00557)
+layers = 2
+modulate = Color(100, 100, 1, 1)
+pixel_size = 1.0
+double_sided = false
+render_priority = 1
+texture = ExtResource("2_w3vv8")
+script = ExtResource("2_7m026")
+
+[node name="ClickableSpriteArea" type="Area3D" parent="ClickableSprite3D"]
+unique_name_in_owner = true
+disable_mode = 2
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("4_jn0qh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ClickableSprite3D/ClickableSpriteArea"]
+unique_name_in_owner = true
+shape = SubResource("BoxShape3D_mpjw5")
+
+[connection signal="texture_changed" from="ClickableSprite3D" to="ClickableSprite3D" method="_on_texture_changed"]

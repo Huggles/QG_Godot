@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://6g7c3c7dw4ys"]
+
+[ext_resource type="Script" path="res://scenes/HostLabel.gd" id="1_7kkia"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ys2y3"]
+font_color = Color(0, 1, 1, 1)
+
+[node name="Game" type="Node3D"]
+
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/Player/Player.tscn")
+spawn_path = NodePath("../Players")
+
+[node name="UnitSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/Units/Unit.tscn")
+spawn_path = NodePath("../Units")
+
+[node name="Players" type="Node3D" parent="."]
+
+[node name="Units" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Control" type="Control" parent="Node2D"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 415.0
+offset_bottom = 98.0
+
+[node name="Label" type="Label" parent="Node2D/Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Hello World"
+label_settings = SubResource("LabelSettings_ys2y3")
+script = ExtResource("1_7kkia")

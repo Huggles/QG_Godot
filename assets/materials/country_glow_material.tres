@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bt408etorppfv"]
+
+[ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="1_5mkdi"]
+[ext_resource type="Texture2D" uid="uid://dx4jk1ifahsot" path="res://assets/textures/World/Australia.png" id="2_kg1xb"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_5mkdi")
+shader_parameter/Texture2DParameter = ExtResource("2_kg1xb")
