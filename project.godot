@@ -23,6 +23,10 @@ MultiplayerManager="*res://scripts/Menu/MultiplayerManager.gd"
 GameManager="*res://scripts/Managers/GameManager.gd"
 Globals="*res://scripts/Globals.gd"
 
+[debug]
+
+gdscript/warnings/unused_signal=0
+
 [display]
 
 window/size/viewport_width=1920

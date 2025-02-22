@@ -1,12 +1,12 @@
 extends Object
 class_name PathFindingService
 
-static func calculate_path(node_implementation:IPathFindingNode, _faction:Enum.Faction, from_country_id:int, to_country_id:int) -> bool:
+static func calculate_path(_node_implementation:IPathFindingNode, _faction:Enum.Faction, from_country_id:int, to_country_id:int) -> bool:
 	var astar = AStar2D.new();
 	
 	for country_state:CountryState in GameManager.game_state.country_states:
-		if(node_implementation.country_links_supply_for_faction(country_state.id, _faction)):
-			var world_position = country_state.static_country_data.WorldPositionCenter;
+		if(_node_implementation.country_links_supply_for_faction(country_state.id, _faction)):
+			var _world_position = country_state.static_country_data.WorldPositionCenter;
 			astar.add_point(country_state.id, Vector2.ONE, 1)			
 				
 	for country_state:CountryState in GameManager.game_state.country_states:

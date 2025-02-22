@@ -1,7 +1,6 @@
 class_name RayTraceHandler
 extends Area3D
 
-var _mouse_input_received := false
 var mouse_previously_over_opaque := false
 var mouse_currently_over_opaque := false
 

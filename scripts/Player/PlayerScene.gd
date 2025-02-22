@@ -5,7 +5,6 @@ const MOVEMENT_SPEED = 3000.0
 const ZOOM_SPEED = 7500.0
 
 @onready var root_node = $"."
-@onready var player_synchronizer = $PlayerSynchronizer
 @onready var camera = $Camera3D
 
  
@@ -51,7 +50,7 @@ func _physics_process(_delta):
 func _handle_input():
 	pass
 	
-func _input(event: InputEvent) -> void:
+func _input(_event: InputEvent) -> void:
 	if Input.is_key_pressed(KEY_1):
 		var country_state:CountryState = Globals.countries_by_name["WESTERN_EUROPE"];
 		GameManager.game_state.deploy_unit_to_country(country_state.id, Enum.Faction.GERMANY, Enum.UnitType.ARMY)

@@ -1,5 +1,6 @@
-extends DataObject
 class_name CountryState
+extends DataObject
+
 
 signal COUNTRY_BECOMES_CLICKABLE
 signal COUNTRY_BECOMES_UNCLICKABLE
@@ -22,7 +23,7 @@ var clickable_callback:Callable
 func set_clickable(callback:Callable):
 	clickable_callback = callback
 	node.COUNTRY_CLICKED.connect(		
-		func(country_scene:CountryScene):			
+		func(_country_scene:CountryScene):			
 			COUNTRY_BECOMES_UNCLICKABLE.emit()			
 			if clickable_callback != null:
 				clickable_callback.call(self)

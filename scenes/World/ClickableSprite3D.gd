@@ -22,9 +22,9 @@ signal mouse_left_click_opaque
 signal mouse_left_double_click_opaque
 
 static var clickable_sprite_scene_file = preload("res://scenes/clickable_sprite_3d.tscn")
-static func create_with_texture(texture:Texture2D) -> ClickableSprite3D:
+static func create_with_texture(_texture:Texture2D) -> ClickableSprite3D:
 	var clickableSpriteScene:ClickableSprite3D = clickable_sprite_scene_file.instantiate();
-	clickableSpriteScene.clickable_texture = texture;			
+	clickableSpriteScene.clickable_texture = _texture;			
 	return clickableSpriteScene
 
 func _ready():			
@@ -76,24 +76,24 @@ func is_pixel_opaque(input_position: Vector3) -> bool:
 func set_glow_color(color:Color):
 	self.get_material_override().set_shader_parameter("glow_color", color)	
 
-func _on_clickable_sprite_area_mouse_enter(raycast_handler:RayTraceHandler) -> void:
+func _on_clickable_sprite_area_mouse_enter(_raycast_handler:RayTraceHandler) -> void:
 	mouse_enter.emit(self);
 
-func _on_clickable_sprite_area_mouse_exit(raycast_handler:RayTraceHandler) -> void:
+func _on_clickable_sprite_area_mouse_exit(_raycast_handler:RayTraceHandler) -> void:
 	mouse_exit.emit(self);
 
-func _on_clickable_sprite_area_mouse_enter_opaque(raycast_handler:RayTraceHandler) -> void:
+func _on_clickable_sprite_area_mouse_enter_opaque(_raycast_handler:RayTraceHandler) -> void:
 	set_glow_color(hover_color)
 	mouse_enter_opaque.emit(self)	
 
-func _on_clickable_sprite_area_mouse_exit_opaque(raycast_handler:RayTraceHandler) -> void:
+func _on_clickable_sprite_area_mouse_exit_opaque(_raycast_handler:RayTraceHandler) -> void:
 	set_glow_color(selectable_color)
 	mouse_exit_opaque.emit(self)
 
-func _on_clickable_sprite_area_mouse_single_clicked_opaque_area(raycast_handler:RayTraceHandler) -> void:
+func _on_clickable_sprite_area_mouse_single_clicked_opaque_area(_raycast_handler:RayTraceHandler) -> void:
 	mouse_left_click_opaque.emit(self)
 
-func _on_clickable_sprite_area_mouse_double_clicked_opaque_area(raycast_handler:RayTraceHandler) -> void:
+func _on_clickable_sprite_area_mouse_double_clicked_opaque_area(_raycast_handler:RayTraceHandler) -> void:
 	mouse_left_double_click_opaque.emit(self)
 
 

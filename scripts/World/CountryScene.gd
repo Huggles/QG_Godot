@@ -20,14 +20,14 @@ signal COUNTRY_CLICKED
 
 static var country_scene = preload("res://scenes/World/Country.tscn")
 
-static func spawn_country(country_state:CountryState) -> CountryScene:
-	var country_scene_instance:CountryScene = country_scene.instantiate()	
-	print(str("spawn country: ", country_state.clabel))
-	country_scene_instance.country_state = country_state		
-	country_scene_instance.name = country_state.name 		
-	country_state.COUNTRY_BECOMES_CLICKABLE.connect(country_scene_instance.on_become_clickable)
-	country_state.COUNTRY_BECOMES_UNCLICKABLE.connect(country_scene_instance.on_become_unclickable)	
-	return country_scene_instance
+static func spawn_country(_country_state:CountryState) -> CountryScene:
+	var _country_scene_instance:CountryScene = country_scene.instantiate()	
+	print(str("spawn country: ", _country_state.clabel))
+	_country_scene_instance.country_state = _country_state		
+	_country_scene_instance.name = _country_state.name 		
+	_country_state.COUNTRY_BECOMES_CLICKABLE.connect(_country_scene_instance.on_become_clickable)
+	_country_state.COUNTRY_BECOMES_UNCLICKABLE.connect(_country_scene_instance.on_become_unclickable)	
+	return _country_scene_instance
 	
 func _ready() -> void:
 	if static_country_data.texture:					
@@ -37,11 +37,6 @@ func _ready() -> void:
 		
 func _apply_texture():	
 	clickable_sprite_node.clickable_texture = static_country_data.texture
-	print("get_node().name")
-	print(get_node(".").name)
-	get_node(".").add_child(clickable_sprite_node)	
-	print(get_node(".").get_children())
-	
 
 func add_unit(unit:UnitSceneBase):
 	unit.get_parent().remove_child(unit)	
@@ -70,5 +65,5 @@ func _set_clickable(clickable:bool) -> void:
 	
 
 
-func _on_clickable_sprite_3d_mouse_enter_opaque(sprite:ClickableSprite3D) -> void:	
+func _on_clickable_sprite_3d_mouse_enter_opaque(_sprite:ClickableSprite3D) -> void:	
 	pass # Replace with function body.

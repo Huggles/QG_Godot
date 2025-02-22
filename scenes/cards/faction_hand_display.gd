@@ -34,10 +34,10 @@ func _init_cards(cards:Array[CardBase]) -> void:
 		cards_container.add_child(card_scene_instance)		
 		card_scene_instance.position = Vector2(cards_container.size.x * card_scale.x,0)
 		card_scene_instance.position -= Vector2(card_scene_instance.pivot_offset.x, card_scene_instance.pivot_offset.y/2)
-		card_scene_instance.position -= Vector2(total_size_x/2, 0)
+		card_scene_instance.position -= Vector2(total_size_x/2.0, 0)
 		card_scene_instance.position += Vector2(index * card_step_size, 0)
 		card_scene_instance.z_index = index
-		card_scene_instance.set_rotation_degrees(index* rotation_step_size - (total_rotation_size/2) )
+		card_scene_instance.set_rotation_degrees(index* rotation_step_size - (total_rotation_size/2.0) )
 
 		
 		index+=1

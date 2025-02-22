@@ -6,7 +6,6 @@ const RAY_LENGTH = 5000
 var casting_camera:PlayerCamera3D
 var current_raycast_collisions = []		
 var current_raycast_colliders = []
-
 @export_flags_3d_physics var _sprite_layers = 0x000F
 
 
@@ -59,8 +58,7 @@ func _shoot_rays() -> Array:
 	var from = casting_camera.project_ray_origin(casting_camera.mouse_position)
 	var to = from + casting_camera.project_ray_normal(casting_camera.mouse_position) * RAY_LENGTH	
 	var colliders_to_ignore = []
-	var results = []
-	var _sprite_layers = 0x000F
+	var results = []	
 	while true:
 		var query:PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to, _sprite_layers, colliders_to_ignore)		
 		query.collide_with_areas = true;		

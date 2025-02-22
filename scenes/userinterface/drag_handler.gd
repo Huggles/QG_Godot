@@ -25,8 +25,6 @@ func _ready() -> void:
 	else:
 		printerr("Could not determine draggable node")
 
-func _process(delta: float) -> void:
-	pass
 	
 func _on_mouse_entered():
 	#print("mouse entered")
@@ -39,7 +37,7 @@ func _on_mouse_exited():
 	target_node.scale = Vector2(1, 1)
 	target_node.z_index = original_z_index	
 		
-func _get_drag_data(at_position: Vector2) -> Variant:		
+func _get_drag_data(_at_position: Vector2) -> Variant:		
 	var drag_data = DragInfo.new(target_node, _create_item_preview())
 	set_drag_preview(drag_data.preview)
 	return drag_data
@@ -50,15 +48,13 @@ func _create_item_preview() -> Control:
 	preview.pivot_offset = Vector2(-preview.size.x/2, -preview.size.y/2)
 	return preview
 	
-func _can_drop_data(at_position:Vector2, data:Variant)->bool:
-	if !data is DragInfo: return false
-	var drag_data := data as DragInfo
-	# Check if the item can fit in the inventory at this position
+func _can_drop_data(_at_position:Vector2, _data:Variant)->bool:
+	if !_data is DragInfo: return false
 	return true
 
-func _drop_data(at_position:Vector2, data:Variant)->void:
-	if !data is DragInfo: return
-	var drag_data := data as DragInfo
+func _drop_data(_at_position:Vector2, _data:Variant)->void:
+	if !_data is DragInfo: return
+	var drag_data := _data as DragInfo
 
 	drag_data.destination = self
 	if drag_data.source: drag_data.source.remove_item(drag_data.item)

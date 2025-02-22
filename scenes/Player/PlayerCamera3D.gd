@@ -5,7 +5,6 @@ extends Camera3D
 var dragging = false
 
 @export var camera_speed:float = 10;
-@onready var _player = $".."
 
 const INITIAL_POSITION:Vector3 = Vector3(0,1500,0)
 const ZOOM_STEP:float = 100
@@ -36,7 +35,7 @@ func _unhandled_input(event):
 		if Input.is_action_pressed("game_zoom_out"):
 			_zoom_out()
 	
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	_keyboard_movement();	
 	if ray_trace_caster != null:
 		ray_trace_caster.cast_rays(null)		

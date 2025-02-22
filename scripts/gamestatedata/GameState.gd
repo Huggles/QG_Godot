@@ -64,7 +64,7 @@ func attack_unit(_unit_id:int) -> void:
 	unit_state.AFTER_UNIT_REMOVED_FROM_COUNTRY.emit();
 	return	
 	
-func eliminate_unit(unit_id:String) -> void:	
+func eliminate_unit(_unit_id:String) -> void:	
 	return
 	
 func score_victory_points(_faction:Enum.Faction, _victory_points:int) -> void:	
@@ -90,15 +90,15 @@ func activate_status_card(_card_id:String) -> void:
 func activate_response_card(_card_id:String) -> void:	
 	return
 	
-func request_country_selection(_faction:Enum.Faction, callback:Callable):
-	var country_state:CountryState = Globals.countries_by_name["US_EAST"];
+func request_country_selection(_faction:Enum.Faction, _callback:Callable):
+	var _country_state:CountryState = Globals.countries_by_name["US_EAST"];
 	
 	
-func _set_countries_selectable(country_states:Array[CountryState], _faction:Enum.Faction, callback:Callable):
-	for country_state:CountryState in country_states:
+func _set_countries_selectable(_country_states:Array[CountryState], _faction:Enum.Faction, _callback:Callable):
+	for country_state:CountryState in _country_states:
 		GameManager.my_camera.enable_ray_trace_casting()
 		country_state.set_clickable(
-			func(country_state:CountryState): 
+			func(_country_state:CountryState): 
 				print("Clicked: "+ country_state.clabel)
 		
 	)
