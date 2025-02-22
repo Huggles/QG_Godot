@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://ulu5d3pvyttl"]
 
 [ext_resource type="Script" path="res://scripts/World/WorldScene.gd" id="1_byfi5"]
-[ext_resource type="Texture2D" uid="uid://b6rlobc622abu" path="res://assets/textures/World/World_Clean.png" id="3_uu1v5"]
-[ext_resource type="Texture2D" uid="uid://ly4yeqnos5w3" path="res://assets/textures/WoodTable.jpg" id="5_50r1o"]
+[ext_resource type="Texture2D" uid="uid://b6rlobc622abu" path="res://assets/textures/Countries/World_Clean.png" id="3_uu1v5"]
+[ext_resource type="Texture2D" uid="uid://ly4yeqnos5w3" path="res://assets/textures/Other/WoodTable.jpg" id="5_50r1o"]
 
 [node name="World" type="Node3D"]
 transform = Transform3D(0.999998, -0.001184, 0.00164214, 0.00118397, 0.999999, 2.16277e-05, -0.00164217, -1.97052e-05, 0.999999, 0, 0, 0)
@@ -15,7 +15,7 @@ unique_name_in_owner = true
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, -5, 0)
 
 [node name="WorldSprite" type="Sprite3D" parent="Background"]
-transform = Transform3D(0.76, 0, 0, 0, -3.32207e-08, 0.76, 0, -0.76, -3.32207e-08, 1055.17, -1, 279.545)
+transform = Transform3D(0.76, -1.16415e-10, 2.5679e-11, 2.2311e-12, -3.32202e-08, 0.76, 0, -0.76, -3.3222e-08, 1055, -4.491, 280)
 layers = 2
 pixel_size = 1.0
 transparent = false

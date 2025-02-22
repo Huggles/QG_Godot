@@ -37,26 +37,29 @@ func _ready():
 	multiplayer.connection_failed.connect(_on_connected_fail)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 	
-
-
 func create_game(_max_number_of_players:int, player_name: String) -> bool:
 	var peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(PORT, MAX_CONNECTIONS)
-	if error:
-		print("ERROR HOSTING GAME: ")
-		print(error)
-		return false
-		
+	if error:		
+		DebugUtilities.print_peer_err("ERROR HOSTING GAME: ")
+		DebugUtilities.print_peer_err(error)
+		return false		
+	self.player_info = {
+		"player_name" : player_name,
+		"factions" :  ["GERMANY", "JAPAN", "ITALY"]
+	}
+	
 	self.max_number_of_players = _max_number_of_players
 	multiplayer.multiplayer_peer = peer
 	var peer_id = 1
-	player_scenes[peer_id] = _instantiate_player_scene(peer_id, player_name)	
+	var pc = _instantiate_player_scene(peer_id, player_name)		
+	pc.faction_strings = self.player_info.factions
+	player_scenes[peer_id] = pc
+	
 	player_connected.emit(peer_id)
 	hosting = true
 	
-	self.player_info = {
-		"player_name" : player_name
-	}
+	
 	
 	DebugUtilities.print_peer("Multiplayer Game Created!")
 	return true	
@@ -73,18 +76,11 @@ func join_game(player_name: String, address = "") -> bool:
 		return false
 	
 	self.player_info = {		
-		"player_name" : player_name
+		"player_name" : player_name,
+		"factions" : ["UNITED_KINGDOM", "SOVIET", "UNITED_STATES"]
 	}
-	
-	
-	#var peer_id = peer.get_unique_id()
-	#my_player_controller = PlayerController.new(peer_id, player_name)
-	#players[peer_id] = my_player_controller
-	
-	multiplayer.multiplayer_peer = peer
-	
+	multiplayer.multiplayer_peer = peer	
 	return true
-
 
 func remove_multiplayer_peer():
 	multiplayer.multiplayer_peer = null
@@ -98,13 +94,11 @@ func _on_player_connected(id):
 
 @rpc("any_peer", "call_remote", "reliable")
 func _register_player(_player_info):		
-	DebugUtilities.print_peer("_register_player")
-	
-	var new_player_id = multiplayer.get_remote_sender_id()	
-	DebugUtilities.print_peer(new_player_id)
-	DebugUtilities.print_peer(_player_info)
-	var pc =  _instantiate_player_scene(new_player_id, _player_info.player_name)	
-	player_scenes[new_player_id] = pc	
+	DebugUtilities.print_peer("_register_player")	
+	var new_player_id = multiplayer.get_remote_sender_id()		
+	var pc:PlayerScene =  _instantiate_player_scene(new_player_id, _player_info.player_name)			
+	pc.faction_strings = _player_info.factions
+	player_scenes[new_player_id] = pc
 	
 	if number_of_players == max_number_of_players:
 		DebugUtilities.print_peer("All Players Connected1")

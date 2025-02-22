@@ -2,6 +2,5 @@
 
 [resource]
 resource_local_to_scene = true
-transparency = 2
-alpha_scissor_threshold = 0.5
-alpha_antialiasing_mode = 0
+transparency = 1
+blend_mode = 3

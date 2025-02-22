@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cpvndj078knfq"]
 
 [ext_resource type="Script" path="res://MultiplayerDebugScene.gd" id="1_gkdyn"]
-[ext_resource type="Texture2D" uid="uid://bctbrnlsgsxmv" path="res://assets/textures/LoadingScreen.png" id="2_vy7i8"]
+[ext_resource type="Texture2D" uid="uid://bctbrnlsgsxmv" path="res://assets/textures/Other/LoadingScreen.png" id="2_vy7i8"]
 
 [node name="GameLoadingTransitionRoot" type="Node3D"]
 script = ExtResource("1_gkdyn")

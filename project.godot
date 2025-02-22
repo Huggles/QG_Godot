@@ -17,10 +17,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Constants="*res://scripts/Utilities/NodeUtilities.gd"
+NodeUtilities="*res://scripts/Utilities/NodeUtilities.gd"
 DebugUtilities="*res://scripts/Utilities/DebugUtilities.gd"
 MultiplayerManager="*res://scripts/Menu/MultiplayerManager.gd"
 GameManager="*res://scripts/Managers/GameManager.gd"
+Globals="*res://scripts/Globals.gd"
 
 [display]
 
@@ -34,7 +35,7 @@ project/assembly_name="Quartermaster General"
 
 [editor]
 
-run/main_run_args="--is_debug=1 --local_multiplayer_game --game_mode=default"
+run/main_run_args="--is_debug=1 --game_mode=default"
 
 [input]
 

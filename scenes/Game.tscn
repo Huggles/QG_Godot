@@ -21,15 +21,24 @@ spawn_path = NodePath("../Units")
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1000)
 
-[node name="Node2D" type="Node2D" parent="."]
+[node name="Networked" type="Node3D" parent="."]
 
-[node name="Control" type="Control" parent="Node2D"]
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/World/WorldScene.tscn")
+spawn_path = NodePath("../Networked")
+
+[node name="UserInterface" type="CanvasLayer" parent="."]
+follow_viewport_enabled = true
+
+[node name="Node2D" type="Node2D" parent="UserInterface"]
+
+[node name="Control" type="Control" parent="UserInterface/Node2D"]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 415.0
 offset_bottom = 98.0
 
-[node name="Label" type="Label" parent="Node2D/Control"]
+[node name="Label" type="Label" parent="UserInterface/Node2D/Control"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0

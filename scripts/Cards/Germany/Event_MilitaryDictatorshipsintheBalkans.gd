@@ -1,0 +1,3 @@
+extends CardBase
+
+class_name Event_MilitaryDictatorshipsintheBalkans

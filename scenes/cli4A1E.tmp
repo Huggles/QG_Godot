@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3 uid="uid://p05f75g6qm2o"]
+
+[ext_resource type="Material" uid="uid://bt408etorppfv" path="res://assets/materials/country_glow_material.tres" id="1_ogh2l"]
+[ext_resource type="Texture2D" uid="uid://b4npdllfftdpp" path="res://assets/textures/Countries/Africa.png" id="2_cufxb"]
+[ext_resource type="Script" path="res://scenes/World/ClickableSprite3D.gd" id="3_sxvri"]
+[ext_resource type="Script" path="res://scenes/World/RayTraceHandler.gd" id="4_whime"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mpjw5"]
+margin = 0.0
+size = Vector3(770, 870, 1)
+
+[node name="ClickableSprite3D" type="Sprite3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.0123878, 0.00945282, -2.00557)
+layers = 2
+material_override = ExtResource("1_ogh2l")
+pixel_size = 1.0
+double_sided = false
+render_priority = 1
+texture = ExtResource("2_cufxb")
+script = ExtResource("3_sxvri")
+
+[node name="ClickableSpriteArea" type="Area3D" parent="."]
+unique_name_in_owner = true
+disable_mode = 2
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("4_whime")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ClickableSpriteArea"]
+unique_name_in_owner = true
+shape = SubResource("BoxShape3D_mpjw5")
+
+[connection signal="texture_changed" from="." to="." method="_on_texture_changed"]
+[connection signal="mouse_double_clicked_opaque_area" from="ClickableSpriteArea" to="." method="_on_clickable_sprite_area_mouse_double_clicked_opaque_area"]
+[connection signal="mouse_enter" from="ClickableSpriteArea" to="." method="_on_clickable_sprite_area_mouse_enter"]
+[connection signal="mouse_enter_opaque" from="ClickableSpriteArea" to="." method="_on_clickable_sprite_area_mouse_enter_opaque"]
+[connection signal="mouse_entered" from="ClickableSpriteArea" to="." method="_on_mouse_entered"]
+[connection signal="mouse_exit" from="ClickableSpriteArea" to="." method="_on_clickable_sprite_area_mouse_exit"]
+[connection signal="mouse_exit_opaque" from="ClickableSpriteArea" to="." method="_on_clickable_sprite_area_mouse_exit_opaque"]
+[connection signal="mouse_exited" from="ClickableSpriteArea" to="." method="_on_mouse_exited"]
+[connection signal="mouse_single_clicked_opaque_area" from="ClickableSpriteArea" to="." method="_on_clickable_sprite_area_mouse_single_clicked_opaque_area"]

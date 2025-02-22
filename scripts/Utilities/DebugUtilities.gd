@@ -7,13 +7,21 @@ var cmd_arguments: Dictionary:
 			_cmd_arguments = _parse_cmd_arguments()
 		return _cmd_arguments
 
+func print_peer_err(message):
+	var messageString:String = str(message);
+		
+	if MultiplayerManager.multiplayer.is_server():		
+		printerr("("+Time.get_time_string_from_system() +")"+" Server: " + messageString)
+	else:
+		printerr("("+Time.get_time_string_from_system() +")"+" Client: " + messageString)
+
 func print_peer(message):
 	var messageString:String = str(message);
 		
-	if MultiplayerManager.multiplayer.is_server():
-		print("Server: " + messageString)
+	if MultiplayerManager.multiplayer.is_server():		
+		print("("+Time.get_time_string_from_system() +")"+" Server: " + messageString)
 	else:
-		print("Client: " + messageString)
+		print("("+Time.get_time_string_from_system() +")"+" Client: " + messageString)
 		
 	
 	

@@ -9,7 +9,11 @@
 			{
 				"card_name" : "BuildNavy",
 				"number" : 3
-			}		
+			},
+			{
+				"card_name" : "Event_MilitaryDictatorshipsintheBalkans",
+				"number" : 1
+			}	
 		],
 	},
 	{

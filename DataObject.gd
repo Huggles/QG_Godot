@@ -1,4 +1,3 @@
-extends Resource
 class_name DataObject
 
 func stringify() -> String:

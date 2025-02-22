@@ -10,7 +10,7 @@ var is_supply:String
 var is_harbor:String
 var harbor1
 var harbor2
-var neightbors = []
+var neighbors = []
 var world_pos_x: float
 var world_pos_y: float
 var world_pos_z: float
@@ -31,18 +31,18 @@ func _init(json_object:Dictionary):
 			self[key] = value
 	_setNeighborCountries(json_object)
 		
-	var texture_path = "res://assets/textures/World/"+name_camel_case+".png"		
+	var texture_path = "res://assets/textures/Countries/"+name_camel_case+".png"		
+	print(str("loading", texture_path))
 	texture = load(texture_path)
-	
+	print(texture)
 
 func _setNeighborCountries(json_object:Dictionary):
 	var array = [];
 	for n in 10:
-		var key = "Neighbor" + str(n+1)		
+		var key = "neighbor" + str(n+1)		
 		if key in json_object: 
 			var value = json_object[key]
 			if value != null:
-				array.push_back(json_object[key])
-			
-	neightbors = array;
+				array.push_back(json_object[key])			
+	neighbors = array;
 	

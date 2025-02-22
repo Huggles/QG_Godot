@@ -1,85 +1,72 @@
 class_name PlayerCamera3D
 extends Camera3D
 
-const RAY_LENGTH = 10000 
+
 var dragging = false
 
-signal mouse_ray_processed()
+@export var camera_speed:float = 10;
 @onready var _player = $".."
 
+const INITIAL_POSITION:Vector3 = Vector3(0,1500,0)
+const ZOOM_STEP:float = 100
+const MIN_ZOOM_LEVEL:float = -10
+const MAX_ZOOM_LEVEL:float = 10
+var ZOOM_LEVEL:int = 0;
+
+var ray_trace_caster:RayTraceCaster
 
 
-const ZOOM_SPEED: float = 100
-const MIN_ZOOM_Y: float = 1000
-const MAX_ZOOM_Y: float = 100
+var mouse_position:
+	get: return get_viewport().get_mouse_position()
 
-var ZOOM_RATIO:
-	get:
-		var ratio = _player.position.y / (MIN_ZOOM_Y - MAX_ZOOM_Y)
-		return ratio
+func enable_ray_trace_casting():	
+	if ray_trace_caster == null:
+		ray_trace_caster = RayTraceCaster.new(self)
 
-
-@export_flags_3d_physics var _sprite_layers
-
-var _query_mouse := false
-var _mouse_event : InputEventMouse
-
+func disable_ray_trace_casting():
+	if ray_trace_caster != null:
+		ray_trace_caster = null
+	
 func _unhandled_input(event):
-	if event is InputEventMouse:
-		_query_mouse = true
-		_mouse_event = event
-	if event is InputEventMouseMotion:
-		if Input.is_action_pressed("camera_drag"):
-			_player.position -= Vector3(event.relative.x, 0, event.relative.y) * ZOOM_RATIO
-		if Input.is_action_pressed("camera_drag"):
-			pass
 	if event is InputEventMouseButton:
-			if Input.is_action_pressed("game_zoom_in"):
-				_zoom_in()
-			if Input.is_action_pressed("game_zoom_out"):
-				_zoom_out()
-
-func _physics_process(_delta):
-	if _query_mouse:
-		_check_sprite_input()
-		_query_mouse = false
-		mouse_ray_processed.emit()
+		if ray_trace_caster != null:
+			ray_trace_caster.cast_rays(event)
+		if Input.is_action_pressed("game_zoom_in"):
+			_zoom_in()
+		if Input.is_action_pressed("game_zoom_out"):
+			_zoom_out()
 	
-		
-func _check_sprite_input() -> bool:
-	var not_hits = []
-	
-	var space_state = get_world_3d().direct_space_state
-	var from = project_ray_origin(_mouse_event.position)
-	var to = from + project_ray_normal(_mouse_event.position) * RAY_LENGTH
-	
-	while true:
-		var query = PhysicsRayQueryParameters3D.create(from, to, _sprite_layers, not_hits)
-		query.collide_with_areas = true;
-		var result = space_state.intersect_ray(query)
-		if result.is_empty():
-			return false		
-		
-		var collision_object = result.collider		
-		if collision_object.has_method("try_mouse_input"):				
-			return collision_object.try_mouse_input(self, _mouse_event, result.position, result.normal)		
-			
-		else:
-			not_hits.append(result.collider)
-			
-	return true
+func _process(delta: float) -> void:
+	_keyboard_movement();	
+	if ray_trace_caster != null:
+		ray_trace_caster.cast_rays(null)		
 	
 func _zoom_in() -> void:
 	print('zoom in')	
-	var _zoom_vector = -(self.transform.basis.z) * ZOOM_SPEED
-	var _new_position = _player.position + _zoom_vector
-	if _new_position.y > MAX_ZOOM_Y:
-		_player.position = _new_position
+	if ZOOM_LEVEL > MIN_ZOOM_LEVEL:
+		ZOOM_LEVEL -= 1;
+		_zoom();	
 	
 func _zoom_out() -> void:
-	print('zoom out')
-	var _zoom_vector = (self.transform.basis.z) * ZOOM_SPEED
-	var _new_position = _player.position + _zoom_vector
-	if _new_position.y < MIN_ZOOM_Y:
-		_player.position = _new_position
+	print('zoom out')	
+	if ZOOM_LEVEL < MAX_ZOOM_LEVEL:
+		ZOOM_LEVEL += 1;	
+		_zoom();
+		
+func _zoom() -> void:		
+	self.position.y = INITIAL_POSITION.y + (ZOOM_LEVEL * ZOOM_STEP)	
+		
+func _keyboard_movement() -> void:
+	var input_up:int = Input.is_action_pressed("ui_up");
+	var input_down:int = Input.is_action_pressed("ui_down");
+	var input_left:int = Input.is_action_pressed("ui_left");
+	var input_right:int = Input.is_action_pressed("ui_right");
+	
+	var zoom_multiplier = 10 - ZOOM_LEVEL; #Move faster when zoomed in.
+	var x_delta:float = (-input_left + input_right) * camera_speed;
+	var z_delta:float = (-input_up + input_down) * camera_speed;
+	
+	var delta:Vector3 = Vector3(x_delta, 0, z_delta) * clamp(zoom_multiplier, 3,20)
+	self.position += delta
+	return
 	
