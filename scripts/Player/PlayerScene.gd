@@ -96,5 +96,14 @@ func _input(_event: InputEvent) -> void:
 				print(country.clabel)
 		)
 	
+	if Input.is_key_pressed(KEY_8):		
+		var picked_unit_state = GameManager.game_state.unit_states[0];
+		GameManager.game_state._set_units_selectable(
+			[picked_unit_state],
+			Enum.Faction.GERMANY, 
+			func(unit_state:UnitState):
+				print(unit_state.clabel)
+		)
+	
 
 	

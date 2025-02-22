@@ -10,8 +10,7 @@ const unit_positions = [
 	Vector3(-100,0,0), 	
 	Vector3(100,0,0)]
 
-var unit_scenes:Array[UnitSceneBase]
-
+var unit_scenes:Array[UnitScene]
 
 @onready var unit_container_node:Node3D = %UnitContainer
 @onready var clickable_sprite_node:ClickableSprite3D = %ClickableSprite3D
@@ -38,13 +37,13 @@ func _ready() -> void:
 func _apply_texture():	
 	clickable_sprite_node.clickable_texture = static_country_data.texture
 
-func add_unit(unit:UnitSceneBase):
+func add_unit(unit:UnitScene):
 	unit.get_parent().remove_child(unit)	
 	%UnitContainer.add_child(unit)
 	unit.position = unit_positions[unit_scenes.size()]	
 	unit_scenes.push_back(unit)
 	
-func remove_unit(unit:UnitSceneBase):	
+func remove_unit(unit:UnitScene):	
 	%UnitContainer.remove_child(unit)
 	NodeUtilities.units_node.add_child(unit)
 	unit.position = Vector3.ZERO	
@@ -62,8 +61,6 @@ func _set_clickable(clickable:bool) -> void:
 			clickable_sprite_node.enable()
 		else:
 			clickable_sprite_node.disable()
-	
-
 
 func _on_clickable_sprite_3d_mouse_enter_opaque(_sprite:ClickableSprite3D) -> void:	
 	pass # Replace with function body.

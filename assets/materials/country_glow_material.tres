@@ -1,11 +1,11 @@
 [gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://bt408etorppfv"]
 
 [ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="1_5mkdi"]
-[ext_resource type="Texture2D" uid="uid://5vd6jd6ljm1j" path="res://assets/textures/Countries/NorthAfrica.png" id="2_cny1p"]
+[ext_resource type="Texture2D" uid="uid://b4npdllfftdpp" path="res://assets/textures/Countries/Africa.png" id="2_bclkc"]
 
 [resource]
 resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_5mkdi")
 shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
-shader_parameter/country_texture = ExtResource("2_cny1p")
+shader_parameter/texture = ExtResource("2_bclkc")

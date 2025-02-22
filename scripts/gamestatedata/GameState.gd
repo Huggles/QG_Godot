@@ -95,11 +95,20 @@ func request_country_selection(_faction:Enum.Faction, _callback:Callable):
 	
 	
 func _set_countries_selectable(_country_states:Array[CountryState], _faction:Enum.Faction, _callback:Callable):
-	for country_state:CountryState in _country_states:
+	for _country_state:CountryState in _country_states:
 		GameManager.my_camera.enable_ray_trace_casting()
-		country_state.set_clickable(
+		_country_state.set_clickable(
 			func(_country_state:CountryState): 
-				print("Clicked: "+ country_state.clabel)
+				print("Clicked: "+ _country_state.clabel)
+		
+	)
+
+func _set_units_selectable(_unit_states:Array[UnitState], _faction:Enum.Faction, _callback:Callable):
+	for _unit_state:UnitState in _unit_states:
+		GameManager.my_camera.enable_ray_trace_casting()
+		_unit_state.set_clickable(
+			func(_unit_state:UnitState): 
+				print("Clicked: "+ _unit_state.clabel)
 		
 	)
 	

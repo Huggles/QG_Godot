@@ -31,14 +31,11 @@ func _ready():
 	collision_shape.shape = collision_shape.shape.duplicate()			
 	set_glow_color(selectable_color)
 	disable()
+	_set_collision_shape()
 
-func _set_region():
-	self.region_enabled = true
+
 	
-	var texture_width_scaled = texture.get_width() * pixel_size;
-	var texture_height_scaled = texture.get_height() * pixel_size
 	
-	self.region_rect = Rect2(5,5,texture_width_scaled-5,texture_height_scaled-5)
 	
 
 func enable():
@@ -50,25 +47,36 @@ func disable():
 	collision_shape.disabled = true
 
 func _on_texture_changed() -> void:		
-	self.get_material_override().set_shader_parameter("country_texture", texture)	
-	_set_region()
+	self.get_material_override().set_shader_parameter("texture", texture)		
 	image = texture.get_image()
 	if image:		
 		if image.is_compressed():
-			image.decompress()
+			image.decompress()		
+		_set_collision_shape()
 		
-		if collision_shape:		
-			collision_shape.shape.size.x = texture.get_width() * pixel_size
-			collision_shape.shape.size.y = texture.get_height() * pixel_size
+func _set_collision_shape():
+	if collision_shape:		
+		collision_shape.shape.size.x = texture.get_width() * pixel_size
+		collision_shape.shape.size.y = texture.get_height() * pixel_size
 		
 func is_pixel_opaque(input_position: Vector3) -> bool:
 	if image:
 		var pixel_position = (input_position - global_position) / (pixel_size*scale)
 		var texture_local_x = pixel_position.x + (texture.get_width() / 2.0)
 		var texture_local_y = pixel_position.z + (texture.get_height() / 2.0)		
+		#print("-------------------------")		
+		#print(input_position)
+		#print(global_position)
+		#print(input_position - global_position)
+		#print(pixel_position)
+		#print(texture_local_x)
+		#print(texture_local_y)
+		
 		if texture_local_x < 0 || texture_local_y < 0 || texture_local_x > image.get_size().x || texture_local_y > image.get_size().y:
 			return false		
 		var pixel = image.get_pixel(texture_local_x, texture_local_y);
+		#print(pixel)
+		
 		return pixel.a > 0
 	else:
 		return false
@@ -95,8 +103,3 @@ func _on_clickable_sprite_area_mouse_single_clicked_opaque_area(_raycast_handler
 
 func _on_clickable_sprite_area_mouse_double_clicked_opaque_area(_raycast_handler:RayTraceHandler) -> void:
 	mouse_left_double_click_opaque.emit(self)
-
-
-func _on_visibility_changed() -> void:
-	print(str("visibility changed: ", self.visible))
-	pass # Replace with function body.

@@ -32,7 +32,7 @@ source = 5
 default_input_values = [0, 0.0, 1, 0.1]
 
 [sub_resource type="VisualShaderNodeTexture2DParameter" id="VisualShaderNodeTexture2DParameter_grlay"]
-parameter_name = "country_texture"
+parameter_name = "texture"
 
 [sub_resource type="VisualShaderNodeIf" id="VisualShaderNodeIf_5fb0l"]
 
@@ -49,7 +49,7 @@ op_type = 2
 code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
 
-uniform sampler2D country_texture;
+uniform sampler2D texture;
 uniform vec4 glow_color : source_color = vec4(0.972549, 0.000000, 0.952941, 1.000000);
 
 
@@ -57,7 +57,7 @@ uniform vec4 glow_color : source_color = vec4(0.972549, 0.000000, 0.952941, 1.00
 void fragment() {
 	vec4 n_out2p0;
 // Texture2D:2
-	n_out2p0 = texture(country_texture, UV);
+	n_out2p0 = texture(texture, UV);
 	float n_out2p4 = n_out2p0.a;
 
 
@@ -134,7 +134,7 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-543.002, 128.094)
+graph_offset = Vector2(-735.668, -118.572)
 nodes/fragment/0/position = Vector2(1320, 320)
 nodes/fragment/2/node = SubResource("VisualShaderNodeTexture_787p5")
 nodes/fragment/2/position = Vector2(-660, 240)

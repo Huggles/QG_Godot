@@ -1,16 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://l5548wfmcdsi"]
+[gd_scene load_steps=5 format=3 uid="uid://l5548wfmcdsi"]
 
 [ext_resource type="Script" path="res://scripts/World/CountryScene.gd" id="1_x87g1"]
 [ext_resource type="PackedScene" uid="uid://p05f75g6qm2o" path="res://scenes/clickable_sprite_3d.tscn" id="2_2bigx"]
 [ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="3_8bpq5"]
-[ext_resource type="Texture2D" uid="uid://5vd6jd6ljm1j" path="res://assets/textures/Countries/NorthAfrica.png" id="4_wkew7"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_y1v86"]
 resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("3_8bpq5")
 shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
-shader_parameter/country_texture = ExtResource("4_wkew7")
 
 [node name="CountryRoot" type="Node3D"]
 script = ExtResource("1_x87g1")

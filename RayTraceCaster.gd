@@ -14,7 +14,8 @@ func _init(camera:Camera3D):
 	
 func cast_rays(_mouse_event:InputEventMouse) -> void:		
 	var results = _shoot_rays()	
-	var result_colliders = results.map(func(result): return result.collider)		
+	var result_colliders = results.map(func(result): return result.collider)			
+	
 	var exited_results = [];	
 	var entered_results = [];
 
