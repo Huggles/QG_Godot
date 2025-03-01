@@ -1,5 +1,7 @@
 class_name DataObject
 
+var data_class:String
+
 func stringify() -> String:
 	var object_as_dictionary:Dictionary = {}				
 	var flags = PROPERTY_USAGE_SCRIPT_VARIABLE
@@ -23,10 +25,33 @@ func parse_string(json_string:String)->DataObject:
 func _init(json):		
 	if json is String:
 		json = JSON.parse_string(json)		
-	for key in json.keys():		
-		var value = json[key]
-		if key in self:			
-			if not value == null:
-				self[key] = value
+	for _key in json.keys():		
+		var _value = json[_key]
+		if _key in self and not _value == null:			
+			if _value is Dictionary:
+				var _data_class = _value.get("data_class")
+				if _data_class != null: 
+					self[_key] = _init_child_object(_key,_value, _data_class)				
+			else:
+				self[_key] = _value
+				
+func _init_child_object(_key:String, _value:Dictionary, _data_class:String) -> DataObject:		
+	var _class_ref = DataUtilities.class_map.get(_data_class)
+	if _class_ref == null: 
+		DebugUtilities.print_peer_err(str("Couldnt find clas: ", _data_class))
+		return null		
+	var _class_path = _class_ref.path
+	var instance:DataObject = load(_class_path).new(_value)
+	return instance
+
+func class_for_key(_key:String) -> String:
+	return "";
+			
+				
+static func parse_to_data_object(json_object:Dictionary, _class_name:String)->DataObject:
+	var _class = DataUtilities.class_map.get(_class_name)
+	for key in json_object.keys():		
+		var value = json_object[key]
+	return null
 	
 	

@@ -3,7 +3,6 @@ class_name FactionData
 
 var name:String
 var index:int
-
 var clabel:String
 var color_string:String
 var team:String

@@ -1,14 +1,17 @@
-[gd_scene load_steps=5 format=3 uid="uid://l5548wfmcdsi"]
+[gd_scene load_steps=7 format=3 uid="uid://l5548wfmcdsi"]
 
 [ext_resource type="Script" path="res://scripts/World/CountryScene.gd" id="1_x87g1"]
 [ext_resource type="PackedScene" uid="uid://p05f75g6qm2o" path="res://scenes/clickable_sprite_3d.tscn" id="2_2bigx"]
 [ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="3_8bpq5"]
+[ext_resource type="Texture2D" uid="uid://b4npdllfftdpp" path="res://assets/textures/Countries/Africa.png" id="4_08qdj"]
+[ext_resource type="Texture2D" uid="uid://c73fkdd7t4mmu" path="res://assets/textures/Other/SupplyStar.png" id="5_twgbx"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_y1v86"]
 resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("3_8bpq5")
 shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
+shader_parameter/selectable_texture = ExtResource("4_08qdj")
 
 [node name="CountryRoot" type="Node3D"]
 script = ExtResource("1_x87g1")
@@ -20,3 +23,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -2)
 [node name="ClickableSprite3D" parent="." instance=ExtResource("2_2bigx")]
 unique_name_in_owner = true
 material_override = SubResource("ShaderMaterial_y1v86")
+
+[node name="SupplyStarSprite3D" type="Sprite3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 10, 0)
+pixel_size = 0.15
+texture = ExtResource("5_twgbx")
+
+[connection signal="mouse_left_click_opaque" from="ClickableSprite3D" to="." method="_on_clickable_sprite_3d_mouse_left_click_opaque"]

@@ -12,11 +12,11 @@ collision_mask = 2
 script = ExtResource("1_g70y1")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 1500, 0)
 current = true
 near = 0.001
 script = ExtResource("2_r6i5k")
+camera_speed = 2.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.81571, 1.39794)

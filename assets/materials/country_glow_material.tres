@@ -8,4 +8,4 @@ resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_5mkdi")
 shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
-shader_parameter/texture = ExtResource("2_bclkc")
+shader_parameter/selectable_texture = ExtResource("2_bclkc")

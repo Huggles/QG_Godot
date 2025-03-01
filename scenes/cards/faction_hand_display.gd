@@ -13,9 +13,9 @@ func show_node(_visible:bool):
 	cards_container.visible = _visible
 
 func _init_hand():	
-	_init_cards( Globals.deck_data_map[faction].deck_cards )	
+	_init_cards( StaticGameData.deck_data_map[faction].deck_cards )	
 
-func _init_cards(cards:Array[CardBase]) -> void:
+func _init_cards(cards:Array[CardLogicBase]) -> void:
 	_delete_current_cards()
 	
 	const card_step_size = 100

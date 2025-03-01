@@ -1,6 +1,5 @@
 extends Node
 
-@rpc("authority","call_local", "reliable")
 func _init_static_data(data:String):
 	var data_map:Dictionary = JSON.parse_string(data)	
 	DebugUtilities.print_peer("Init factions constants")
@@ -13,18 +12,22 @@ func _init_static_data(data:String):
 	for faction_row in faction_rows:
 		var faction = FactionData.new(faction_row)
 		faction_data.push_back(faction)
+	DebugUtilities.print_peer(str("Loaded ", faction_data.size(), " factions"))
 	
 	for card_row in card_rows:
 		var carddata = CardData.new(card_row)
 		card_data.push_back(carddata)	
+	DebugUtilities.print_peer(str("Loaded ", card_data.size(), " cards"))
 	
 	for deck_row in deck_rows:				
 		var deckdata = DeckData.new(deck_row)
 		deck_data.push_back(deckdata)	
+	DebugUtilities.print_peer(str("Loaded ", deck_data.size(), " decks"))
 		
 	for country_row in country_rows:
 		var countrydata = CountryData.new(country_row)
 		country_data.push_back(countrydata)
+	DebugUtilities.print_peer(str("Loaded ", country_data.size(), " countries"))
 
 var player_scenes:Array[PlayerScene] = []
 var player_scenes_map:Dictionary:
@@ -54,12 +57,12 @@ var faction_data_map:Dictionary:
 
 ##Card Data
 var card_data:Array[CardData]
-var card_data_map:Dictionary:
+var card_data_by_name:Dictionary:
 	get: 
-		if not card_data_map or card_data_map.size() == 0: 
+		if not card_data_by_name or card_data_by_name.size() == 0: 
 			for card_d in card_data:
-				card_data_map[card_d.name] = card_d
-		return card_data_map
+				card_data_by_name[card_d.name] = card_d
+		return card_data_by_name
 
 
 ##Deck Data
@@ -68,7 +71,7 @@ var deck_data_map:Dictionary:
 	get: 
 		if not deck_data_map or deck_data_map.size() == 0: 
 			for deck_d in deck_data:
-				deck_data_map[deck_d.faction] = deck_d
+				deck_data_map[deck_d.faction_enum] = deck_d
 		return deck_data_map
 
 ##Countries

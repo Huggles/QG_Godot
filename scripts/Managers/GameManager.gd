@@ -18,9 +18,13 @@ var player_instance:Node3D
 
 var game_mode:GameMode
 var game_state:GameState
+var game_flow:GameFlow
+var player_states:Array[PlayerScene] = []
 
-var my_camera:PlayerCamera3D:
+var my_camera:PlayerCamera3D: 
 	get: return get_viewport().get_camera_3d()
+var my_input_manager:InputManager: 
+	get: return player_states[0].input_manager
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -35,6 +39,7 @@ func _load_singleplayer_game():
 	DebugUtilities.print_peer("Starting single player game")	
 	player_instance = player_scene.instantiate()
 	NodeUtilities.players_node.add_child(player_instance)
+	player_states.push_back(player_instance)
 	_setup_game_mode()
 
 func _load_multiplayer_game():
@@ -54,8 +59,12 @@ func _setup_game_mode():
 			self.game_state = GameState.new()
 			self.game_mode = GameMode_Default.new() 
 			self.game_mode._start()
-			world_scene_instance = game_mode.world_scene_instance						
+			world_scene_instance = game_mode.world_scene_instance
 			_switch_level.rpc()
+			
+			self.game_flow = GameFlow.new()
+			self.game_flow.start_game()
+			self.game_flow.progress_game()
 			pass
 		else:
 			DebugUtilities.print_peer("Couldn't determine game mode")

@@ -3,6 +3,7 @@
 [ext_resource type="Shader" uid="uid://cewg4d65b2btt" path="res://assets/materials/unit_shader.tres" id="1_te8bp"]
 
 [resource]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_te8bp")
-shader_parameter/ColorParameter = Color(1, 0.321569, 0, 1)
+shader_parameter/unit_color = Color(1, 0.321569, 0, 1)

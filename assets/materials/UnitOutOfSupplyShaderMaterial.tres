@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://d216wgix5kwp8"]
+
+[ext_resource type="Shader" uid="uid://dgeemnmsrd3vf" path="res://assets/materials/UnitOutOfSupplyShader.tres" id="1_amoh2"]
+
+[resource]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("1_amoh2")
+shader_parameter/out_of_supply_color = Color(1, 0, 0, 1)
+shader_parameter/unit_color = Color(1, 0.321569, 0, 1)

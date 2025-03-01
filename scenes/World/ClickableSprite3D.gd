@@ -47,7 +47,7 @@ func disable():
 	collision_shape.disabled = true
 
 func _on_texture_changed() -> void:		
-	self.get_material_override().set_shader_parameter("texture", texture)		
+	self.get_material_override().set_shader_parameter("selectable_texture", texture)		
 	image = texture.get_image()
 	if image:		
 		if image.is_compressed():

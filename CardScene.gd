@@ -6,7 +6,7 @@ class_name CardScene
 @onready var text_node:RichTextLabel = $Panel/TextContainerNode/TextBoxTexture/VBoxContainer/Text
 @onready var card_texture_node:TextureRect = $Panel/CardTexture
 
-var card:CardBase
+var card:CardLogicBase
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -14,7 +14,7 @@ func _ready() -> void:
 			
 func _build_card()->void:
 	if card:	
-		self.name = card.faction.name + "-" + card.card_data.name		
+		self.name = str(card.faction) + "-" + card.card_data.name		
 		if card.is_publicly_visible || card.player.peer_id == multiplayer.get_unique_id():
 			card_texture_node.texture = card.card_front_texture
 			if card.card_data.text:

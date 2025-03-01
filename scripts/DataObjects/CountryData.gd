@@ -1,5 +1,4 @@
-class_name CountryData
-extends Object
+class_name CountryData extends DataObject
 
 var name:String
 var name_camel_case:String
@@ -16,6 +15,10 @@ var world_pos_y: float
 var world_pos_z: float
 var texture
 
+var supply_star_transform_data:TransformData
+var unit_transform_data:UnitTransformData
+
+
 #Properties
 var WorldPositionCenter:
 	get: return Vector3(world_pos_x, world_pos_z, world_pos_y)/2
@@ -25,16 +28,12 @@ var ImageSize:
 	get: return Vector2(texture.get_width(), texture.get_height())
 
 func _init(json_object:Dictionary):
-	for key in json_object.keys():		
-		var value = json_object[key]
-		if key in self:
-			self[key] = value
+	super(json_object)	
 	_setNeighborCountries(json_object)
 		
 	var texture_path = "res://assets/textures/Countries/"+name_camel_case+".png"		
-	print(str("loading", texture_path))
 	texture = load(texture_path)
-	print(texture)
+	if texture == null: DebugUtilities.print_peer_err(str("Error loading texture: ", texture_path))
 
 func _setNeighborCountries(json_object:Dictionary):
 	var array = [];

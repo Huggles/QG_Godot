@@ -3,14 +3,16 @@ class_name RayTraceCaster
 
 const RAY_LENGTH = 5000
 
-var casting_camera:PlayerCamera3D
+var input_manager:InputManager
+var camera:PlayerCamera3D:
+	get: return input_manager.camera
 var current_raycast_collisions = []		
 var current_raycast_colliders = []
 @export_flags_3d_physics var _sprite_layers = 0x000F
 
 
-func _init(camera:Camera3D):
-	casting_camera = camera;	
+func _init(_input_manager:InputManager):
+	self.input_manager = _input_manager;	
 	
 func cast_rays(_mouse_event:InputEventMouse) -> void:		
 	var results = _shoot_rays()	
@@ -37,27 +39,27 @@ func cast_rays(_mouse_event:InputEventMouse) -> void:
 		var collision_object = entered_result.collider			
 		if collision_object is RayTraceHandler:
 			var rth:RayTraceHandler = collision_object;					
-			rth.on_start_hit(casting_camera, _mouse_event, entered_result.position, entered_result.normal)					
+			rth.on_start_hit(camera, _mouse_event, entered_result.position, entered_result.normal)					
 		
 	for exited_result in exited_results:
 		var collision_object = exited_result.collider			
 		if collision_object is RayTraceHandler:
 			var rth:RayTraceHandler = collision_object;					
-			rth.on_stop_hit(casting_camera, _mouse_event, exited_result.position, exited_result.normal)					
+			rth.on_stop_hit(camera, _mouse_event, exited_result.position, exited_result.normal)					
 	
 	for current_raycast_collision in current_raycast_collisions:
 		var collision_object = current_raycast_collision.collider			
 		if collision_object is RayTraceHandler:
 			var rth:RayTraceHandler = collision_object;					
-			rth.on_hitting(casting_camera, _mouse_event, current_raycast_collision.position, current_raycast_collision.normal)					
+			rth.on_hitting(camera, _mouse_event, current_raycast_collision.position, current_raycast_collision.normal)					
 	
 	#_debug_targets(current_raycast_colliders)
 			
 			
-func _shoot_rays() -> Array:
-	var space_state = casting_camera.get_world_3d().direct_space_state	
-	var from = casting_camera.project_ray_origin(casting_camera.mouse_position)
-	var to = from + casting_camera.project_ray_normal(casting_camera.mouse_position) * RAY_LENGTH	
+func _shoot_rays() -> Array:	
+	var space_state = camera.get_world_3d().direct_space_state	
+	var from = camera.project_ray_origin(input_manager.mouse_position)
+	var to = from + camera.project_ray_normal(input_manager.mouse_position) * RAY_LENGTH	
 	var colliders_to_ignore = []
 	var results = []	
 	while true:

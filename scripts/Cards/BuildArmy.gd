@@ -1,11 +1,19 @@
-extends CardBase
-class_name BuildArmy
+class_name BuildArmy extends CardLogicBase
 
+func can_execute_card() -> bool:	
+	return UnitPool.faction_has_available_army(faction)
 
-func execute_card()->bool:
-	var unit = GameManager.game_mode.all_units[0]	
-	var country = GameManager.game_mode.country_map["Australia"]
-	print(unit)
-	print(country)
-	country.add_unit(unit)
-	return true
+func _start_card()->void:	 	
+	_request_country()	
+	
+func _request_country():		
+	GameManager.game_state.request_single_country_selection(
+		CountryState.for_ids(GameManager.game_state.buildable_countries_for_faction(faction)).filter(func(_country_state:CountryState): return _country_state.type == Enum.CountryType.LAND),
+		faction, 
+		func(_selected_country_id:int):		
+			if _selected_country_id >= 0:
+				var deploy_unit_change_event:DeployUnitChangeEvent = DeployUnitChangeEvent.new(faction, _selected_country_id, Enum.DeployType.BUILD)			
+				deploy_unit_change_event.apply_change()						
+				#card_execution_finished();
+	)
+	

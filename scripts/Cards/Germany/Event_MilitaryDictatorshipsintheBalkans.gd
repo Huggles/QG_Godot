@@ -1,3 +1,3 @@
-extends CardBase
+extends CardLogicBase
 
 class_name Event_MilitaryDictatorshipsintheBalkans
