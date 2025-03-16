@@ -11,6 +11,4 @@ var faction_enum:Enum.Faction:
 
 func _init(_deck:Dictionary):
 	self.faction = _deck.faction	
-	print(_deck.cards)
-
 	self.cards = _deck.cards	

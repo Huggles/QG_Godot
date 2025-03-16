@@ -1,33 +1,63 @@
-[gd_scene load_steps=7 format=3 uid="uid://l5548wfmcdsi"]
+[gd_scene load_steps=9 format=3 uid="uid://l5548wfmcdsi"]
 
 [ext_resource type="Script" path="res://scripts/World/CountryScene.gd" id="1_x87g1"]
 [ext_resource type="PackedScene" uid="uid://p05f75g6qm2o" path="res://scenes/clickable_sprite_3d.tscn" id="2_2bigx"]
+[ext_resource type="Texture2D" uid="uid://ceg5tibtem12g" path="res://assets/textures/Other/StraightIcon.png" id="2_llf52"]
 [ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="3_8bpq5"]
-[ext_resource type="Texture2D" uid="uid://b4npdllfftdpp" path="res://assets/textures/Countries/Africa.png" id="4_08qdj"]
+[ext_resource type="Texture2D" uid="uid://5vd6jd6ljm1j" path="res://assets/textures/Countries/NorthAfrica.png" id="4_in3gy"]
 [ext_resource type="Texture2D" uid="uid://c73fkdd7t4mmu" path="res://assets/textures/Other/SupplyStar.png" id="5_twgbx"]
+[ext_resource type="Texture2D" uid="uid://djmosa56yw024" path="res://assets/textures/Other/circle.png" id="7_trmnm"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_y1v86"]
 resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("3_8bpq5")
 shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
-shader_parameter/selectable_texture = ExtResource("4_08qdj")
+shader_parameter/selectable_texture = ExtResource("4_in3gy")
 
 [node name="CountryRoot" type="Node3D"]
+rotation_order = 0
 script = ExtResource("1_x87g1")
 
 [node name="UnitContainer" type="Node3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -2)
 
 [node name="ClickableSprite3D" parent="." instance=ExtResource("2_2bigx")]
 unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.86102e-05, 0.181, -0.00460052)
+rotation_order = 0
 material_override = SubResource("ShaderMaterial_y1v86")
+pixel_size = 0.08
+texture = null
 
 [node name="SupplyStarSprite3D" type="Sprite3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 10, 0)
-pixel_size = 0.15
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
+visible = false
+pixel_size = 0.015
 texture = ExtResource("5_twgbx")
+
+[node name="StraightSprite3D" type="Sprite3D" parent="."]
+unique_name_in_owner = true
+visible = false
+pixel_size = 0.03
+texture = ExtResource("2_llf52")
+
+[node name="DEBUG_UnitPositions" type="Node3D" parent="."]
+
+[node name="DEBUG_UnitPosition_Sprite1" type="Sprite3D" parent="DEBUG_UnitPositions"]
+unique_name_in_owner = true
+pixel_size = 0.005
+texture = ExtResource("7_trmnm")
+
+[node name="DEBUG_UnitPosition_Sprite2" type="Sprite3D" parent="DEBUG_UnitPositions"]
+unique_name_in_owner = true
+pixel_size = 0.005
+texture = ExtResource("7_trmnm")
+
+[node name="DEBUG_UnitPosition_Sprite3" type="Sprite3D" parent="DEBUG_UnitPositions"]
+unique_name_in_owner = true
+pixel_size = 0.005
+texture = ExtResource("7_trmnm")
 
 [connection signal="mouse_left_click_opaque" from="ClickableSprite3D" to="." method="_on_clickable_sprite_3d_mouse_left_click_opaque"]

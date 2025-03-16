@@ -51,9 +51,7 @@ func cast_rays(_mouse_event:InputEventMouse) -> void:
 		var collision_object = current_raycast_collision.collider			
 		if collision_object is RayTraceHandler:
 			var rth:RayTraceHandler = collision_object;					
-			rth.on_hitting(camera, _mouse_event, current_raycast_collision.position, current_raycast_collision.normal)					
-	
-	#_debug_targets(current_raycast_colliders)
+			rth.on_hitting(camera, _mouse_event, current_raycast_collision.position, current_raycast_collision.normal)	
 			
 			
 func _shoot_rays() -> Array:	
@@ -76,6 +74,7 @@ func _debug_targets(target_colliders:Array):
 	for target_collider in target_colliders:					
 		if target_collider is RayTraceHandler:
 			var rth:RayTraceHandler = target_collider;		
-			print(str("current_raycast_target: ",rth.clickable_sprite.identifier))
-		else:
-			print(target_collider)
+			#print(str("current_raycast_target: ",rth.clickable_sprite.identifier))
+		else:			
+			#print(target_collider)
+			pass

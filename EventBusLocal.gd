@@ -1,0 +1,37 @@
+extends Node
+
+signal player_joined
+signal player_left
+
+signal country_clicked 
+signal unit_clicked
+
+signal set_countries_clickable
+signal set_all_countries_unclickable
+
+signal set_units_clickable
+signal set_all_units_unclickable
+
+signal game_change_event_occurred
+
+signal request_status_card
+signal request_response_card
+
+signal card_play_started
+signal card_play_completed
+
+signal no_status_card_activated
+signal status_card_activation_started
+signal status_card_activation_completed
+
+signal no_response_card_activated
+signal response_card_activation_started
+signal response_card_activation_completed
+
+signal new_turn_started
+signal next_step_started
+
+signal faction_scored_points
+
+signal recalculate_supply
+signal recalculate_straights

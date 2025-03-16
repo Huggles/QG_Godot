@@ -23,7 +23,7 @@ var player_states:Array[PlayerScene] = []
 
 var my_camera:PlayerCamera3D: 
 	get: return get_viewport().get_camera_3d()
-var my_input_manager:InputManager: 
+var my_input_manager:InputManager:  
 	get: return player_states[0].input_manager
 
 # Called when the node enters the scene tree for the first time.
@@ -56,15 +56,17 @@ func _setup_game_mode():
 	if DebugUtilities.cmd_arguments.has(GAME_MODE_ARG):
 		var game_mode_arg = DebugUtilities.cmd_arguments.get(GAME_MODE_ARG)		
 		if game_mode_arg == "default":						
+			self.game_flow = GameFlow.new()
 			self.game_state = GameState.new()
 			self.game_mode = GameMode_Default.new() 
-			self.game_mode._start()
+			
+			self.game_mode._start()			
+			
 			world_scene_instance = game_mode.world_scene_instance
 			_switch_level.rpc()
 			
-			self.game_flow = GameFlow.new()
 			self.game_flow.start_game()
-			self.game_flow.progress_game()
+			
 			pass
 		else:
 			DebugUtilities.print_peer("Couldn't determine game mode")
@@ -89,3 +91,6 @@ func _show_ui():
 	NodeUtilities.user_interface.add_child(ui_screen_instantiated)
 
 	
+func create_timer(miliseconds:float):
+	var seconds:float = miliseconds / 1000;
+	await get_tree().create_timer(seconds).timeout

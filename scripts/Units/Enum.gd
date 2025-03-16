@@ -7,4 +7,4 @@ enum TurnStep { START, PLAY_CARD, SUPPLY, DISCARD, DRAW  }
 
 enum UnitType { ARMY, NAVY }
 enum DeployType { BUILD, RECRUIT }
-enum AttackType { BATTLE, ELIMINATE }
+enum UnitRemovalReason { BATTLE, ELIMINATE, SUPPLY }

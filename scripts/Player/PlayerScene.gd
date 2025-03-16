@@ -1,5 +1,4 @@
-class_name PlayerScene
-extends CharacterBody3D
+class_name PlayerScene extends CharacterBody3D
 
 
 @onready var root_node = $"."

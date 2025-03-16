@@ -7,8 +7,11 @@ func stringify() -> String:
 	var flags = PROPERTY_USAGE_SCRIPT_VARIABLE
 	
 	for prop in self.get_property_list():
+		var value = self.get(prop.name)
+		if value is DataObject:
+			object_as_dictionary[prop.name] = value.stringify()
 		if(prop.usage & flags > 0):
-			object_as_dictionary[prop.name] = self.get(prop.name)
+			object_as_dictionary[prop.name] = value
 	
 	return JSON.stringify(object_as_dictionary)
 
@@ -46,12 +49,4 @@ func _init_child_object(_key:String, _value:Dictionary, _data_class:String) -> D
 
 func class_for_key(_key:String) -> String:
 	return "";
-			
-				
-static func parse_to_data_object(json_object:Dictionary, _class_name:String)->DataObject:
-	var _class = DataUtilities.class_map.get(_class_name)
-	for key in json_object.keys():		
-		var value = json_object[key]
-	return null
-	
 	

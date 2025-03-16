@@ -1,20 +1,26 @@
 class_name CardLogicBase extends Object
 
 var peer_id:int
-var card_data:CardData
+var card_state:CardState
+var card_data:CardData:
+	get: return card_state.card_data
 var faction:Enum.Faction:
-	get: return card_data.faction
+	get: return card_state.faction
 var faction_data:FactionData:
-	get: return StaticGameData.faction_data_map[faction];
+	get: return StaticGameData.faction_data_map[faction] if StaticGameData.faction_data_map.has(faction) else null;
 
 var player:PlayerScene:
-	get:
-		return StaticGameData.faction_player_map[faction_data.name]		
+	get: return StaticGameData.faction_player_map[faction_data.name] if faction_data != null else null;		
 
 var is_played:bool
-var is_activated:bool
+var activated_in_turns:Array[int]
+var is_activated_once:bool:
+	get: return activated_in_turns.size() > 0
+var is_activated_this_turn:bool:
+	get: return activated_in_turns.has(GameManager.game_flow.game_turn)
+
 var is_publicly_visible:bool:
-	get: return is_played || (card_data.type == "RESPONSE" && is_activated)
+	get: return is_played || (card_data.type == "RESPONSE" && is_activated_once)
 
 var card_front_texture: Texture2D: 
 	get:
@@ -31,24 +37,44 @@ var card_front_texture: Texture2D:
 	
 var card_back_texture: Texture2D:
 	get: return load(faction_data.card_back_texture)
+	
+func _init(_card_state:CardState)->void:	
+	card_state = _card_state	
 
-func _init(_card_data:CardData)->void:	
-	card_data = _card_data	
-
-func can_execute_card() -> bool:
-	print("CardLogicBase.can_execute_card")
+func can_play_card() -> bool:
+	return true
+	
+func can_activate_card(_game_change_event:GameChangeEvent) -> bool:
 	return true
 
-func execute_card():
-	if can_execute_card():
-		_start_card()
+func play_card():
+	if can_play_card():
+		_play_card()
 	else:
 		DebugUtilities.print_peer_err(str("Cannot execute card: ", card_data.name))
 
-func _start_card():
+func activate_card(_game_change_event:GameChangeEvent):
+	if can_activate_card(_game_change_event):
+		EventBusLocal.status_card_activation_started.emit(self.card_state.id)
+		_activate_card(_game_change_event)
+	else:
+		DebugUtilities.print_peer_err(str("Cannot activate card: ", card_data.name))
+
+func _play_card():
 	pass
 
-func card_execution_finished():
-	GameManager.game_flow.progress_game()	
+func _activate_card(_game_change_event:GameChangeEvent):
 	pass
+
+func card_play_finished():
+	print(str("Finished play: ",self.get_script().get_global_name()))
+	EventBusLocal.card_play_completed.emit(self.card_state.id)
+	pass
+
+func card_activation_finished():	
+	print(str("Finished activation: ",self.get_script().get_global_name()))
+	EventBusLocal.status_card_activation_completed.emit(self.card_state.id)
+	pass
+	
+
 	

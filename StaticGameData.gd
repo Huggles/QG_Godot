@@ -76,7 +76,6 @@ var deck_data_map:Dictionary:
 
 ##Countries
 var country_data:Array[CountryData]
-
 var countries_by_name:Dictionary:
 	get: 
 		if not countries_by_name or countries_by_name.size() == 0: 
@@ -104,6 +103,13 @@ var unit_states_by_faction_enum:Dictionary:
 
 func faction_team_for_faction(_faction:Enum.Faction) -> Enum.FactionTeam:
 	if( _faction == Enum.Faction.GERMANY || _faction == Enum.Faction.JAPAN || _faction == Enum.Faction.ITALY ):
+		return Enum.FactionTeam.AXIS
+	if( _faction == Enum.Faction.UNITED_KINGDOM || _faction == Enum.Faction.SOVIET || _faction == Enum.Faction.UNITED_STATES ):
+		return Enum.FactionTeam.ALLIES
+	return Enum.FactionTeam.NONE
+	
+func other_faction_team_for_faction(_faction:Enum.Faction) -> Enum.FactionTeam:
+	if( _faction == Enum.Faction.UNITED_KINGDOM || _faction == Enum.Faction.SOVIET || _faction == Enum.Faction.UNITED_STATES ):	
 		return Enum.FactionTeam.AXIS
 	if( _faction == Enum.Faction.GERMANY || _faction == Enum.Faction.JAPAN || _faction == Enum.Faction.ITALY ):
 		return Enum.FactionTeam.ALLIES

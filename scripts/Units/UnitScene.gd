@@ -1,15 +1,27 @@
 extends Node3D
 class_name UnitScene
 
-const ARMY_MESH_PATH  = "res://assets/meshes/game_elements/Army.obj" 
-const NAVY_MESH_PATH  = "res://assets/meshes/game_elements/Navy.obj" 
-
+const ARMY_SPRITE_PATH  = "res://assets/textures/Units/QGArmy.png"
+const ARMY_SPRITE  = preload(ARMY_SPRITE_PATH)
+const NAVY_SPRITE_PATH  = "res://assets/textures/Units/QGNavy.png"
+const NAVY_SPRITE  = preload(NAVY_SPRITE_PATH)
 static var unit_scene = preload("res://scenes/Units/Unit.tscn")
 
 var unit_state:UnitState
 
-@onready var clickable_sprite_node:ClickableSprite3D = %ClickableSprite3D
-@onready var out_of_supply_node:Sprite3D = %OutOfSupplyIcon
+var unit_sprite_node:Sprite3D:
+	get: return %UnitSprite3D
+var clickable_sprite_node:ClickableSprite3D:
+	get: return %ClickableSprite3D
+var out_of_supply_node:Sprite3D:
+	get: return %OutOfSupplyIcon
+var debug_label_node:Label3D:
+	get: return %DebugLabel3D
+
+var clickable:bool
+var click_callback:Callable
+
+
 
 var normal_shader_material:ShaderMaterial = preload("res://assets/materials/unit_shader_material.tres").duplicate()
 var out_of_supply_shader_material:ShaderMaterial = preload("res://assets/materials/UnitOutOfSupplyShaderMaterial.tres").duplicate()
@@ -42,27 +54,24 @@ static func spawn_unit(_unit_state:UnitState) -> Node3D:
 	_unit_state.AFTER_UNIT_REMOVED_FROM_COUNTRY.connect(unit_scene_instance.on_after_unit_removed_from_country)	
 	return unit_scene_instance
 	
-
-	
 func _ready():
-	_set_mesh()
-	_set_color()
+	_set_sprite()
+	
+	debug_label_node.visible = false
 	clickable_sprite_node.identifier = str(unit_state.faction,unit_state.id)	
 	if unit_state.country_id >= 0 && !unit_state.in_supply:
 		show_out_of_supply()
 	
-func _set_mesh():	
-	if IS_ARMY:		
-		%MeshInstance3D.mesh = load(ARMY_MESH_PATH)
-		%MeshInstance3D.scale = Vector3(10,10,10)
+func _set_sprite():	
+	
+	if IS_ARMY:
+		unit_sprite_node.texture = ARMY_SPRITE
 	elif IS_NAVY:		
-		%MeshInstance3D.mesh = load(NAVY_MESH_PATH)
-		%MeshInstance3D.scale = Vector3(20,20,20)
-		%MeshInstance3D.rotation = Vector3(0,90,45)
+		unit_sprite_node.texture = NAVY_SPRITE
 		
-func _set_color():		
-	normal_shader_material.set_shader_parameter("unit_color", faction_data.color())	
-	%MeshInstance3D.material_override = normal_shader_material
+	unit_sprite_node.modulate = faction_data.color()		
+	unit_sprite_node.sorting_offset = 50 + faction_data.faction_enum
+	
 
 func set_clickable(_callback:Callable) -> void:		
 	self.clickable = true
@@ -71,15 +80,13 @@ func set_clickable(_callback:Callable) -> void:
 	
 func set_unclickable():
 	self.clickable = false
-	clickable_sprite_node.disable()
-	
+	clickable_sprite_node.disable()	
 
 func show_out_of_supply():			
 	%OutOfSupplyIcon.visible = true
 
 func hide_out_of_supply():
-	%OutOfSupplyIcon.visible = false
-	
+	%OutOfSupplyIcon.visible = false	
 	
 func on_before_unit_deployed_to_country() -> void:	
 	return
@@ -95,10 +102,6 @@ func on_before_unit_removed_from_country() -> void:
 func on_after_unit_removed_from_country() -> void:		
 	return
 
-
 func _on_clickable_sprite_3d_mouse_left_click_opaque(_clickable_sprite:ClickableSprite3D) -> void:
-	UNIT_CLICKED.emit(self)
-
-
-func _on_clickable_sprite_3d_mouse_left_double_click_opaque(_clickable_sprite:ClickableSprite3D) -> void:
-	UNIT_DOUBLE_CLICKED.emit(self)
+	if clickable == true && click_callback != null:
+		click_callback.call(self)

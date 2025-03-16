@@ -1,19 +1,22 @@
-[gd_scene load_steps=5 format=3 uid="uid://cqotfa6hcbdg1"]
+[gd_scene load_steps=8 format=3 uid="uid://cqotfa6hcbdg1"]
 
 [ext_resource type="Script" path="res://scripts/Player/PlayerScene.gd" id="1_g70y1"]
 [ext_resource type="Script" path="res://scenes/Player/PlayerCamera3D.gd" id="2_r6i5k"]
 [ext_resource type="Script" path="res://scripts/Player/InputManager.gd" id="3_0gvbl"]
+[ext_resource type="PackedScene" uid="uid://bvqke4p6ev0eg" path="res://scenes/userinterface/GameChangeEvents/GameChangeEvents.tscn" id="4_vv50f"]
+[ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://InputMessaging.tscn" id="5_dthr0"]
+[ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://FactionsContainer.tscn" id="6_0gq80"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_12hdh"]
 radius = 0.001
 
 [node name="Player" type="CharacterBody3D"]
 collision_mask = 2
+up_direction = Vector3(0, 0, 1)
 script = ExtResource("1_g70y1")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 1500, 0)
 current = true
 near = 0.001
 script = ExtResource("2_r6i5k")
@@ -25,3 +28,10 @@ shape = SubResource("SphereShape3D_12hdh")
 [node name="InputManager" type="Node3D" parent="."]
 unique_name_in_owner = true
 script = ExtResource("3_0gvbl")
+
+[node name="GameEventsScene" parent="." instance=ExtResource("4_vv50f")]
+mouse_filter = 2
+
+[node name="InputMessaging" parent="." instance=ExtResource("5_dthr0")]
+
+[node name="FactionsContainer" parent="." instance=ExtResource("6_0gq80")]

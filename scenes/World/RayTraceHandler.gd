@@ -34,8 +34,7 @@ func on_hitting(_camera: Node, _event: InputEvent, _input_position:Vector3, _nor
 		mouse_enter_opaque.emit(self)	
 	elif mouse_previously_over_opaque == true && mouse_currently_over_opaque == false:
 		print(str("mouse_exit_opaque: ",clickable_sprite.identifier))		
-		mouse_exit_opaque.emit(self)		
-		
+		mouse_exit_opaque.emit(self)	
 	if _event is InputEventMouseButton:	
 		var mouse_button_event:InputEventMouseButton = _event
 		if mouse_currently_over_opaque:

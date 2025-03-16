@@ -1,5 +1,4 @@
-extends Object
-class_name GameMode
+class_name GameMode extends Object
 
 signal game_mode_setup_finished()
 

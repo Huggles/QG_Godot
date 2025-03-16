@@ -21,7 +21,6 @@ func _ready() -> void:
 		target_node.connect("mouse_entered", _on_mouse_entered)
 		target_node.connect("mouse_exited", _on_mouse_exited)
 		add_to_group("DRAGGABLE")
-		#print("connected")		
 	else:
 		printerr("Could not determine draggable node")
 

@@ -4,17 +4,33 @@
 		"cards": [
 			{
 				"card_name" : "BuildArmy",
-				"number" : 3
+				"number" : 2
 			},
 			{
 				"card_name" : "BuildNavy",
-				"number" : 3
+				"number" : 2
+			},
+			{
+				"card_name" : "LandBattle",
+				"number" : 2
+			},
+			{
+				"card_name" : "SeaBattle",
+				"number" : 2
 			},
 			{
 				"card_name" : "Event_MilitaryDictatorshipsintheBalkans",
 				"number" : 1
-			}	
-		],
+			},
+			{
+				"card_name" : "Status_Blitzkrieg",
+				"number" : 1				
+			},
+			{
+				"card_name" : "Status_SyntheticFuel",
+				"number" : 1				
+			}		
+		]
 	},
 	{
 		"faction" : "UNITED_KINGDOM",
@@ -25,8 +41,100 @@
 			},
 			{
 				"card_name" : "BuildNavy",
-				"number" : 3
+				"number" : 2
+			},
+			{
+				"card_name" : "LandBattle",
+				"number" : 2
+			},
+			{
+				"card_name" : "SeaBattle",
+				"number" : 2
 			}		
+		],
+	},
+	{
+		"faction" : "JAPAN",
+		"cards": [
+			{
+				"card_name" : "BuildArmy",
+				"number" : 2
+			},
+			{
+				"card_name" : "BuildNavy",
+				"number" : 2
+			},
+			{
+				"card_name" : "LandBattle",
+				"number" : 2
+			},
+			{
+				"card_name" : "SeaBattle",
+				"number" : 2
+			}		
+		],
+	},
+	{
+		"faction" : "SOVIET",
+		"cards": [
+			{
+				"card_name" : "BuildArmy",
+				"number" : 2
+			},
+			{
+				"card_name" : "BuildNavy",
+				"number" : 2
+			},
+			{
+				"card_name" : "LandBattle",
+				"number" : 2
+			},
+			{
+				"card_name" : "SeaBattle",
+				"number" : 2
+			}		
+		],
+	},
+	{
+		"faction" : "ITALY",
+		"cards": [
+			{
+				"card_name" : "BuildArmy",
+				"number" : 2
+			},
+			{
+				"card_name" : "BuildNavy",
+				"number" : 2
+			},
+			{
+				"card_name" : "LandBattle",
+				"number" : 2
+			},
+			{
+				"card_name" : "SeaBattle",
+				"number" : 2
+			}		
+		],
+	},
+	{
+		"faction" : "UNITED_STATES",
+		"cards": [
+			{
+				"card_name" : "BuildArmy",
+				"number" : 2
+			},
+			{
+				"card_name" : "BuildNavy",
+				"number" : 2
+			},
+			{
+				"card_name" : "LandBattle",
+				"number" : 2
+			},
+			{
+				"card_name" : "SeaBattle",
+				"number" : 2
+			}	
 		],
 	}
 ]

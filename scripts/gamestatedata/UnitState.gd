@@ -16,28 +16,33 @@ var faction:String
 var faction_enum:Enum.Faction:
 	get: return Enum.Faction.get(faction)
 
-
 var country_id:int = -1
 var is_deployed_to_country:bool:
 	get: return country_id != null && country_id >= 0
 var country_state:CountryState:
-	get: return GameManager.game_state.country_state_by_id[country_id]
+	get: return GameManager.game_state.country_state_by_id[country_id] if country_id >= 0 else null
 	
 var in_supply:bool = false
+var is_army:bool:
+	get: return self.type == Enum.UnitType.ARMY
+var is_navy:bool:
+	get: return self.type == Enum.UnitType.NAVY
+
 var node:UnitScene
 var clickable_callback:Callable	
 
 func _init(_type:Enum.UnitType, _faction:String) -> void:			
 	self.id = UnitPool.get_unique_unit_id()
 	self.type = _type;
-	self.faction = _faction;	
+	self.faction = _faction;
+	EventBusLocal.set_units_clickable.connect(set_clickable)	
+	EventBusLocal.set_all_units_unclickable.connect(set_unclickable)	
 	return
 
 func _init_node() -> void:	
 	node = UnitScene.spawn_unit(self)	
 	node.name += "_"+str(id)
-	NodeUtilities.units_node.add_child(node, true)	
-	node.rotate_y(PI)
+	NodeUtilities.units_node.add_child(node, true)		
 	
 func debug() -> void:
 	var debug_string:String = str(id);
@@ -47,13 +52,14 @@ func debug() -> void:
 	print(debug_string)
 	
 
-func set_clickable(callback:Callable):
-	clickable_callback = callback
-	node.set_clickable(func(_unit_scene:UnitScene):				
-			set_unclickable()
-			if clickable_callback != null:				
-				clickable_callback.call(self)			
-	)
+
+func set_clickable(_unit_ids:Array[int]):
+	if _unit_ids.has(self.id):		
+		node.set_clickable(
+			func(_unit_scene:UnitScene):				
+				set_unclickable()
+				EventBusLocal.unit_clicked.emit(self.id)
+				)
 
 func set_unclickable():
 	node.set_unclickable()
@@ -69,7 +75,7 @@ func set_out_of_supply():
 func can_attack(_faction:Enum.Faction) -> bool:	
 	if !is_deployed_to_country: 
 		return false
-	for connected_country_state:CountryState in country_state.connected_countries(StaticGameData.faction_team_for_faction(_faction)):
+	for connected_country_state:CountryState in country_state.connected_countries(_faction):
 		if connected_country_state.occupying_factions.has(_faction):
 			return true	
 	return false;

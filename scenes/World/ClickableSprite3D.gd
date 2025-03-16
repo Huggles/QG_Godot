@@ -5,7 +5,8 @@ var mouse_over := false
 
 var identifier:String
 var clickable_texture:Texture2D:
-	set(value): texture = value
+	set(value): 
+		self.texture = value
 var image : Image
 
 var selectable_color:Color = Color.WHITE	
@@ -33,11 +34,6 @@ func _ready():
 	disable()
 	_set_collision_shape()
 
-
-	
-	
-	
-
 func enable():
 	visible = true
 	collision_shape.disabled = false
@@ -47,36 +43,28 @@ func disable():
 	collision_shape.disabled = true
 
 func _on_texture_changed() -> void:		
-	self.get_material_override().set_shader_parameter("selectable_texture", texture)		
-	image = texture.get_image()
-	if image:		
-		if image.is_compressed():
-			image.decompress()		
-		_set_collision_shape()
+	if texture != null:	
+		self.get_material_override().set_shader_parameter("selectable_texture", texture)		
+		image = texture.get_image()
+		if image:		
+			if image.is_compressed():
+				image.decompress()		
+			_set_collision_shape()
 		
 func _set_collision_shape():
-	if collision_shape:		
+	if collision_shape != null && texture != null:		
 		collision_shape.shape.size.x = texture.get_width() * pixel_size
 		collision_shape.shape.size.y = texture.get_height() * pixel_size
 		
 func is_pixel_opaque(input_position: Vector3) -> bool:
 	if image:
-		var pixel_position = (input_position - global_position) / (pixel_size*scale)
+		var pixel_position = (input_position - global_position) / (pixel_size)
 		var texture_local_x = pixel_position.x + (texture.get_width() / 2.0)
-		var texture_local_y = pixel_position.z + (texture.get_height() / 2.0)		
-		#print("-------------------------")		
-		#print(input_position)
-		#print(global_position)
-		#print(input_position - global_position)
-		#print(pixel_position)
-		#print(texture_local_x)
-		#print(texture_local_y)
+		var texture_local_y = texture.get_height() - (pixel_position.y + (texture.get_height() / 2.0))
 		
 		if texture_local_x < 0 || texture_local_y < 0 || texture_local_x > image.get_size().x || texture_local_y > image.get_size().y:
 			return false		
 		var pixel = image.get_pixel(texture_local_x, texture_local_y);
-		#print(pixel)
-		
 		return pixel.a > 0
 	else:
 		return false

@@ -1,0 +1,58 @@
+[gd_scene load_steps=3 format=3 uid="uid://dha0cuwpqimxr"]
+
+[ext_resource type="Script" path="res://scenes/userinterface/GameChangeEvents/GameChangeEventRow.gd" id="1_yraim"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_n6305"]
+font_size = 14
+outline_size = 2
+outline_color = Color(0, 0, 0, 1)
+
+[node name="GameChangeEventRow" type="Control"]
+custom_minimum_size = Vector2(200, 100)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1720.0
+offset_bottom = -980.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_yraim")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 200.0
+offset_bottom = 100.0
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Panel" type="Panel" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Panel"]
+custom_minimum_size = Vector2(190, 90)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Label" type="Label" parent="MarginContainer/Panel/MarginContainer"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(180, 80)
+layout_mode = 2
+text = "This is a test text This is a test text This is a test text "
+label_settings = SubResource("LabelSettings_n6305")
+horizontal_alignment = 3
+autowrap_mode = 2
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]

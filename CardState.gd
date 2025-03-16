@@ -1,27 +1,43 @@
-extends StateObject
-class_name CardState
+class_name CardState extends StateObject
 
 var id:int
 var card_data:CardData
+var faction:Enum.Faction
+
+var triggered_by_change_event:GameChangeEvent
 
 var card_execution_class:CardLogicBase:
 	get: 
 		if card_execution_class == null:
-			card_execution_class = card_data.get_card_logic_class()
+			card_execution_class = get_card_logic_class()
 		return card_execution_class
 
 func _init(_card_data:CardData):
 	card_data = _card_data
 
 func can_play_card() -> bool:
-	return card_execution_class.can_execute_card()
+	if card_execution_class != null: 
+		return card_execution_class.can_play_card()
+	return false
 
-func execute_card()->void:
-	DebugUtilities.print_peer("execute_card")
-	card_execution_class.execute_card()
+func play_card()->void:
+	DebugUtilities.print_peer("play_card")
+	card_execution_class.play_card()
 	pass
+
+func get_card_logic_class()->CardLogicBase:	
+	if DataUtilities.class_map.has(card_data.execution_class):
+		var class_path = DataUtilities.class_map.get(card_data.execution_class).path
+		var instance:CardLogicBase = load(class_path).new(self)		
+		return instance
+	else:		
+		DebugUtilities.print_peer_err(str("Could not find card logic class for: ", card_data.clabel))
+		return null
 	
-	
+func activate_card(_game_change_event:GameChangeEvent)->void:
+	DebugUtilities.print_peer("activate_cards")
+	card_execution_class.activate_card(_game_change_event)
+	pass	
 
 	
 static func for_id(_card_id:int) -> CardState:	
@@ -32,3 +48,6 @@ static func for_ids(_card_ids:Array[int]) -> Array[CardState]:
 	for _card_id in _card_ids:
 		response.push_back(for_id(_card_id))	
 	return response
+
+static func for_name(_card_name:String) -> CardState:
+	return GameManager.game_state.card_states_by_name.get(_card_name)

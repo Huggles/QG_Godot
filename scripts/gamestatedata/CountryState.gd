@@ -1,5 +1,4 @@
-class_name CountryState
-extends StateObject
+class_name CountryState extends StateObject
 
 var static_country_data:CountryData
 
@@ -9,26 +8,17 @@ var name_camel_case:String
 var clabel:String
 var type:Enum.CountryType
 var is_supply:bool
-var is_harbor:bool
-var harbor1:String
-var harbor2:String
 var neighbors = []
 var neighbor_country_states:Array[CountryState] = []	
-		
-var clickable_callback:Callable	
-func set_clickable(callback:Callable):
-	clickable_callback = callback
-	node.set_clickable(func(_country_scene:CountryScene):				
-			set_unclickable()
-			if clickable_callback != null:				
-				clickable_callback.call(self)
-			GameManager.game_state.COUNTRY_CLICKED.emit(self))
 
-func set_unclickable():
-	node.set_unclickable()
+var straight_state:StraightState
 
 #Map of FactionEnum -> Unit Id
 var units:Dictionary = {}
+var is_land:bool:
+	get: return self.type == Enum.CountryType.LAND
+var is_sea:bool:
+	get: return self.type == Enum.CountryType.SEA
 var is_country_empty:bool:
 	get: return self.units.size() == 0
 var is_country_full:bool:
@@ -39,7 +29,7 @@ var occupying_factions:Array[Enum.Faction]:
 		of.assign(units.keys())
 		return of
 
-var occupied_by_team:Enum.FactionTeam:
+var occupying_team:Enum.FactionTeam:
 	get: 
 		if occupying_factions.size() == 0:
 			return Enum.FactionTeam.NONE
@@ -48,6 +38,8 @@ var occupied_by_team:Enum.FactionTeam:
 			
 var node:CountryScene
 
+
+
 func _init(_country_data:CountryData) -> void:
 	self.static_country_data = _country_data
 	self.id = 				_country_data.number
@@ -55,11 +47,11 @@ func _init(_country_data:CountryData) -> void:
 	self.name_camel_case = 	_country_data.name_camel_case
 	self.clabel = 			_country_data.clabel	
 	self.type = 				_country_data.type
-	self.is_supply = 		true if _country_data.is_supply == "true" else false
-	self.is_harbor = 		true if _country_data.is_harbor == "true" else false
-	self.harbor1 = (_country_data.harbor1 if _country_data.harbor1 != null else "")
-	self.harbor2 = (_country_data.harbor2 if _country_data.harbor2 != null else "")
-	self.neighbors = 		_country_data.neighbors			
+	self.is_supply = 		true if _country_data.is_supply == "true" else false	
+	self.neighbors = 		_country_data.neighbors
+	
+	EventBusLocal.set_countries_clickable.connect(set_clickable	)
+	EventBusLocal.set_all_countries_unclickable.connect(set_unclickable)
 	
 func init_neighbor_country_state_array() -> void:
 	for neighbor in neighbors:
@@ -75,49 +67,69 @@ func _init_node() -> void:
 	NodeUtilities.countries_node.add_child(node, false )	
 	node.position = static_country_data.WorldPositionCenter	
 	
-func connected_countries(_faction_team:Enum.FactionTeam) -> Array[CountryState]:
+func set_clickable(_country_ids:Array[int]):
+	if _country_ids.has(self.id):
+		node.set_clickable(func(_country_scene:CountryScene): EventBusLocal.country_clicked.emit(self.id))	
+
+func set_unclickable():
+	node.set_unclickable()
+
+func connected_country_ids(_faction:Enum.Faction) -> Array[int]:
+	var cc_ids:Array[int] = [];
+	for _cc:CountryState in connected_countries(_faction):
+		cc_ids.push_back(_cc.id)
+	return cc_ids
+
+func connected_countries(_faction:Enum.Faction) -> Array[CountryState]:
 	var cc:Array[CountryState] = [];
-	for neighbor_country_state in neighbor_country_states:
-		if(self.type == Enum.CountryType.LAND && neighbor_country_state.type == Enum.CountryType.LAND):
-			cc.push_back(neighbor_country_state)
-		if(self.type == Enum.CountryType.SEA && neighbor_country_state.type == Enum.CountryType.LAND):
-			cc.push_back(neighbor_country_state)
-		if(self.type == Enum.CountryType.LAND && neighbor_country_state.type == Enum.CountryType.SEA):
-			cc.push_back(neighbor_country_state)
-		if(self.type == Enum.CountryType.SEA && neighbor_country_state.type == Enum.CountryType.SEA):
-			for country_state in GameManager.game_state.country_states:
-				if country_state.is_harbor_for(self, neighbor_country_state):
-					if country_state.is_occupied_by_team(_faction_team):
-						cc.push_back(neighbor_country_state)
-					else:
-						break;		
-	return cc;
+	cc = neighbor_country_states.filter(
+		func(_neighbor_country_state:CountryState):
+			if self.is_sea && _neighbor_country_state.is_sea:
+				var _straight_state:StraightState = GameStateUtilities.straight_state_for_neighbors(self.id, _neighbor_country_state.id)				
+				return _straight_state == null || _straight_state.controlling_country_state.occupying_team == StaticGameData.faction_team_for_faction(_faction)
+			else:
+				return true
+				)
+	return cc
 	
+func has_harbor(_faction:Enum.Faction) -> bool:
+	return self.is_sea && connected_countries(_faction).any(
+					func(_connected_country_state:CountryState): 
+						return _connected_country_state.is_land && _connected_country_state.occupying_team == StaticGameData.faction_team_for_faction(_faction)
+						)
+	
+
+func deploy_unit():
+	pass
+	
+func remove_unit():
+	pass
 
 func can_build(_faction:Enum.Faction) -> bool:
 	var _can_build = true
 	_can_build = _can_build && can_recruit(_faction)
-	if self.type == Enum.CountryType.SEA:
-		_can_build = _can_build && neighbor_country_states.any(func(_neighbor_country_state:CountryState):return _neighbor_country_state.type == Enum.CountryType.LAND && _neighbor_country_state.occupying_factions.has(_faction))
+	_can_build = _can_build && !self.occupying_factions.has(_faction) #This faction is not there already
+	_can_build = _can_build && (self.occupying_team != StaticGameData.other_faction_team_for_faction(_faction)) #The other faction doesn't control it yet
+	if self.type == Enum.CountryType.SEA: #Check if theres a harbor
+		var _faction_team = StaticGameData.faction_team_for_faction(_faction)
+		_can_build = _can_build && neighbor_country_states.any(
+			func(_neighbor_country_state:CountryState): return _neighbor_country_state.type == Enum.CountryType.LAND && _neighbor_country_state.occupying_team == _faction_team
+			)	
 	return _can_build;
 	
 func can_recruit(_faction:Enum.Faction) -> bool:
 	var _can_recruit = true
-	_can_recruit = _can_recruit && (occupied_by_team == Enum.FactionTeam.NONE || !occupying_factions.has(_faction))	
+	_can_recruit = _can_recruit && (occupying_team == Enum.FactionTeam.NONE || !occupying_factions.has(_faction))	
 	return _can_recruit;
 	
 func in_range_for_attack(_faction:Enum.Faction) -> bool:	
-	for connected_country_state:CountryState in connected_countries(StaticGameData.faction_team_for_faction(_faction)):
+	for connected_country_state:CountryState in connected_countries(_faction):
 		if connected_country_state.occupying_factions.has(_faction):
 			return true	
 	return false
 	
 func can_attack_when_empty(_faction:Enum.Faction) -> bool:	
-	return in_range_for_attack(_faction) && is_country_empty
-
-func is_harbor_for(country_state_1:CountryState, country_state_2:CountryState):
-	return (self.harbor1 == country_state_1.name && self.harbor2 == country_state_2.name) || (self.harbor2 == country_state_1.name && self.harbor1 == country_state_2.name)
-	
+	return in_range_for_attack(_faction) && is_country_empty	
 	
 static func for_id(_country_id:int)->CountryState:
 	return GameManager.game_state.country_state_by_id.get(_country_id)
