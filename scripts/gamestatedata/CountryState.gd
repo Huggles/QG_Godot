@@ -65,7 +65,7 @@ func init_neighbor_country_state_array() -> void:
 func _init_node() -> void:
 	node = CountryScene.spawn_country(self)
 	NodeUtilities.countries_node.add_child(node, false )	
-	node.position = static_country_data.WorldPositionCenter	
+	node.position = static_country_data.WorldPositionCenter	 
 	
 func set_clickable(_country_ids:Array[int]):
 	if _country_ids.has(self.id):

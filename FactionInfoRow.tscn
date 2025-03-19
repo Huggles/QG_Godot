@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://bjpmsri3am6gm"]
+[gd_scene load_steps=5 format=3 uid="uid://bjpmsri3am6gm"]
 
 [ext_resource type="Script" path="res://FactionInfoRow.gd" id="1_sdgdn"]
 
@@ -13,9 +13,24 @@ border_color = Color(0, 0, 0, 1)
 border_blend = true
 
 [sub_resource type="LabelSettings" id="LabelSettings_rib18"]
+resource_local_to_scene = true
 font_size = 36
 outline_size = 7
 outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sfxx1"]
+resource_local_to_scene = true
+resource_name = "default_style_box_flat_1"
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="FactionInfoRow" type="Control"]
 custom_minimum_size = Vector2(100, 50)
@@ -27,6 +42,7 @@ offset_right = -1820.0
 offset_bottom = -1030.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_default_cursor_shape = 2
 script = ExtResource("1_sdgdn")
 
 [node name="BackgroundPanel" type="Panel" parent="."]
@@ -38,6 +54,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0g7yh")
 
 [node name="ScoreLabel" type="Label" parent="BackgroundPanel"]
@@ -53,3 +70,43 @@ text = "9
 label_settings = SubResource("LabelSettings_rib18")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="DetailPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = 55.0
+offset_right = 100.0
+offset_bottom = 305.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sfxx1")
+
+[node name="MarginContainer" type="MarginContainer" parent="DetailPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="TurnSummariesRichText" type="RichTextLabel" parent="DetailPanel/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_force_pass_scroll_events = false
+bbcode_enabled = true
+text = "Lorem Ipsum is slechts een proeftekst uit het drukkerij- en zetterijwezen. Lorem Ipsum is de standaard proeftekst in deze bedrijfstak sinds de 16e eeuw, toen een onbekende drukker een zethaak met letters nam en ze door elkaar husselde om een font-catalogus te maken. Het heeft niet alleen vijf eeuwen overleefd maar is ook, vrijwel onveranderd, overgenomen in elektronische letterzetting. Het is in de jaren '60 populair geworden met de introductie van Letraset vellen met Lorem Ipsum passages en meer recentelijk door desktop publishing software zoals Aldus PageMaker die versies van Lorem Ipsum bevatten."
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

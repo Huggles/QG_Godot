@@ -3,9 +3,17 @@ class_name GameFlow
 var game_started:bool = false
 var game_turn:int = 0;
 var turn_step:int = 0;
+
+
+var round:int:	
+	get:
+		@warning_ignore("integer_division") 
+		return ((game_turn-1) / Enum.Faction.keys().size())+1
+
 var current_faction:Enum.Faction:
 	get: 
 		var faction_int = ((game_turn-1) % Enum.Faction.keys().size())				
+		@warning_ignore("integer_division")
 		return faction_int if game_turn > 0 else Enum.Faction.GERMANY
 		
 var current_faction_state:FactionState:
@@ -18,8 +26,12 @@ var current_faction_team:Enum.FactionTeam:
 	
 var turn_step_methods:Array[Callable] = [_start_turn_step, _play_card_step, _supply_step, _victory_point_step, _discard_step, _draw_step, _start_new_turn]
 
+var vp_step_handler:VictoryPointStepHandlerDefault = VictoryPointStepHandlerDefault.new()
+
 var game_state:GameState:
 	get: return GameManager.game_state
+
+var victory_point_summaries:Dictionary = {}
 
 func _init() -> void:
 	pass
@@ -28,6 +40,8 @@ func start_game() -> void:
 	for _faction:FactionState in game_state.faction_states.values():
 		_faction.deck_state.draw_cards(7)		
 	EventBusLocal.recalculate_supply.emit()
+	for _faction:Enum.Faction in Enum.Faction.values():
+		victory_point_summaries[_faction] = []
 	game_started = true
 	_start_new_turn()
 
@@ -80,16 +94,8 @@ func _supply_step() -> void:
 
 func _victory_point_step() -> void:
 	print("_victory_point_step")
-	var _total_score = 0
-	var _faction_state = GameManager.game_state.faction_state_for_enum(current_faction)
-	for _cs:CountryState in CountryState.for_ids(_faction_state.occupied_country_ids):
-		if _cs.is_supply == true:			
-			_total_score += max(3 - _cs.units.keys().size(), 1)
-
-	_faction_state.score += _total_score
-
+	vp_step_handler.process_turn(current_faction)
 	progress_game()
-
 	pass
 	
 func _discard_step() -> void:

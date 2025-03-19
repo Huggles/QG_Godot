@@ -18,13 +18,10 @@ var clickable_sprite_node:ClickableSprite3D:
 var supply_star_sprite:Sprite3D:
 	get: return %SupplyStarSprite3D
 var straight_sprite_node:ClickableSprite3D:
-	get: return %StraightSprite3D
-	
+	get: return %StraightSprite3D	
 
 var clickable:bool
 var click_callback:Callable
-
-
 
 static var country_scene = preload("res://scenes/World/Country.tscn")
 
@@ -75,7 +72,6 @@ func add_unit(_unit_scene:UnitScene):
 			var _transform = unit_transform_data.get(key)	
 			_unit_scene.position = Vector3(_transform.x_position, _transform.y_position, _transform.z_position)
 			_unit_scene.scale = Vector3(_transform.scale,_transform.scale,_transform.scale)
-		
 		
 func _get_unit_position(_unit_scene:UnitScene) -> int:
 	if self.unit_scene_1 == _unit_scene: return 1

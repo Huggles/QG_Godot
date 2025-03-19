@@ -1090,8 +1090,8 @@
 		"supply_star_transform_data": {
 			"data_class": "TransformData",
 			"scale": 1,
-			"x_position": 1,
-			"y_position": 0,
+			"x_position": 2,
+			"y_position": 5,
 			"z_position": 0
 		},
 		"unit_transform_data": {
@@ -2133,10 +2133,10 @@
 		},
 		"neighbor1": "AFRICA",
 		"neighbor2": "MEDITERRANEAN_SEA",
-		"neighbor3": "NORTH_AFRICA",
+		"neighbor3": "NORTH_SEA",
 		"neighbor4": "MIDDLE_EAST",
 		"neighbor5": "BAY_OF_BENGAL",
-		"neighbor6": "NORTH_SEA",
+		"neighbor6": null,
 		"neighbor7": null,
 		"neighbor8": null,
 		"neighbor9": null,
@@ -3349,8 +3349,8 @@
 			"data_class": "TransformData",
 			"scale": 1,
 			"x_position": 0,
-			"y_position": 0,
-			"z_position": -50
+			"y_position": 2,
+			"z_position": 0
 		},
 		"unit_transform_data": {
 			"data_class": "UnitTransformData",

@@ -86,7 +86,15 @@ func _place_starting_units():
 	_country_state = StaticGameData.countries_by_name["MEDITERRANEAN_SEA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.GERMANY, _country_state.id, Enum.DeployType.RECRUIT)			
 	ChangeEventHandler.execute_change_event(_deploy_unit_change_event)
-	
+
+	_country_state = StaticGameData.countries_by_name["NORTH_AFRICA"]			
+	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.GERMANY, _country_state.id, Enum.DeployType.RECRUIT)			
+	ChangeEventHandler.execute_change_event(_deploy_unit_change_event)	
+
+	_country_state = StaticGameData.countries_by_name["NORTH_SEA"]
+	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_KINGDOM, _country_state.id, Enum.DeployType.RECRUIT)			
+	ChangeEventHandler.execute_change_event(_deploy_unit_change_event)
+
 	_country_state = StaticGameData.countries_by_name["UKRAINE"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
 	ChangeEventHandler.execute_change_event(_deploy_unit_change_event)

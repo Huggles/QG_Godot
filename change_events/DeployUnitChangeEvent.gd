@@ -16,8 +16,7 @@ func _init(_triggering_faction:Enum.Faction, _country_id:int, _deployment_type:E
 func _apply_change_event():	
 	print("_apply_change_event")
 	GameManager.game_state.deploy_unit_to_country(country_id, triggering_faction, unit_type, deployment_type)
-	EventBusLocal.recalculate_straights.emit()
-	EventBusLocal.recalculate_supply.emit()	
+	
 
 	
 func trace_text() -> String:

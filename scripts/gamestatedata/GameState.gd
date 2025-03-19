@@ -129,9 +129,9 @@ func deploy_unit_to_country(_country_id:int, _faction:Enum.Faction, _unit_type:E
 func remove_unit_from_country(_unit_id:int) -> void:
 	if(_unit_id == null):
 		return	
-	var _unit_state:UnitState = UnitState.for_id(_unit_id)
-	var _country_state:CountryState = country_state_by_id[_unit_state.country_id];
-	_unit_state.BEFORE_UNIT_REMOVED_FROM_COUNTRY.emit();
+	var _unit_state:UnitState = UnitState.for_id(_unit_id)	
+	var _country_state:CountryState = CountryState.for_id(_unit_state.country_id)
+	_unit_state.BEFORE_UNIT_REMOVED_FROM_COUNTRY.emit(_unit_id, _country_state.id);
 	_country_state.units.erase(_unit_state.faction_enum)
 	_unit_state.country_id = -1
 	_unit_state.AFTER_UNIT_REMOVED_FROM_COUNTRY.emit();
@@ -140,11 +140,13 @@ func remove_unit_from_country(_unit_id:int) -> void:
 func attack_unit(_unit_id:int) -> void:	
 	if(_unit_id == null):		
 		return		
-	var unit_state:UnitState = unit_states_by_id[_unit_id];	
-	unit_state.BEFORE_UNIT_REMOVED_FROM_COUNTRY.emit();
-	unit_state.country_state.units.erase(unit_state.faction_enum)
-	unit_state.country_id = -1;
-	unit_state.AFTER_UNIT_REMOVED_FROM_COUNTRY.emit();
+	var _unit_state:UnitState = unit_states_by_id[_unit_id];	
+	var _country_id = _unit_state.country_id
+
+	_unit_state.BEFORE_UNIT_REMOVED_FROM_COUNTRY.emit(_unit_id, _country_id);
+	_unit_state.country_state.units.erase(_unit_state.faction_enum)
+	_unit_state.country_id = -1;
+	_unit_state.AFTER_UNIT_REMOVED_FROM_COUNTRY.emit();
 	return	
 	
 func eliminate_unit(_unit_id:String) -> void:	

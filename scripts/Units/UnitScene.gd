@@ -62,8 +62,7 @@ func _ready():
 	if unit_state.country_id >= 0 && !unit_state.in_supply:
 		show_out_of_supply()
 	
-func _set_sprite():	
-	
+func _set_sprite():		
 	if IS_ARMY:
 		unit_sprite_node.texture = ARMY_SPRITE
 	elif IS_NAVY:		
@@ -93,10 +92,18 @@ func on_before_unit_deployed_to_country() -> void:
 	
 func on_after_unit_deployed_to_country() -> void:		
 	country_state.node.add_unit(self)	
+	var tween = get_tree().create_tween()	
+	tween.tween_property(unit_sprite_node, "pixel_size", 0.04, 0.2)
+	tween.tween_property(unit_sprite_node, "pixel_size", 0.02, 0.2)
+	await tween.finished
 	return
 	
-func on_before_unit_removed_from_country() -> void:		
-	country_state.node.remove_unit(self)
+func on_before_unit_removed_from_country(_unit_id:int, _country_id:int) -> void:		
+	var tween = get_tree().create_tween()	
+	tween.tween_property(unit_sprite_node, "pixel_size", 0.025, 0.2)
+	tween.tween_property(unit_sprite_node, "pixel_size", 0.00, 0.4)
+	await tween.finished
+	CountryState.for_id(_country_id).node.remove_unit(self)
 	return
 	
 func on_after_unit_removed_from_country() -> void:		

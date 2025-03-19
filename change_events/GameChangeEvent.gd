@@ -27,6 +27,9 @@ func apply_change(_callback:Callable):
 	EventBusLocal.game_change_event_occurred.emit(self)		
 	if can_trigger_status:
 		pass
+	
+	EventBusLocal.recalculate_straights.emit()
+	EventBusLocal.recalculate_supply.emit()	
 	_callback.call(self)
 	
 func _apply_change_event():

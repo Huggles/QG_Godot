@@ -35,3 +35,5 @@ signal faction_scored_points
 
 signal recalculate_supply
 signal recalculate_straights
+
+signal vp_details_panel_opened

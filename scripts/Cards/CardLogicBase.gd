@@ -56,6 +56,7 @@ func play_card():
 func activate_card(_game_change_event:GameChangeEvent):
 	if can_activate_card(_game_change_event):
 		EventBusLocal.status_card_activation_started.emit(self.card_state.id)
+		activated_in_turns.push_back(GameManager.game_flow.game_turn)
 		_activate_card(_game_change_event)
 	else:
 		DebugUtilities.print_peer_err(str("Cannot activate card: ", card_data.name))
