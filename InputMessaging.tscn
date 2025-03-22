@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cxp1fbs41rbk7"]
 
-[ext_resource type="Script" path="res://InputMessageLabel.gd" id="1_t7e4m"]
+[ext_resource type="Script" uid="uid://cnb5rvi76yc0x" path="res://InputMessageLabel.gd" id="1_t7e4m"]
 
 [node name="InputMessaging" type="Control"]
 layout_mode = 3

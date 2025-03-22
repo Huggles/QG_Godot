@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://6g7c3c7dw4ys"]
 
-[ext_resource type="Script" path="res://scenes/HostLabel.gd" id="1_7kkia"]
+[ext_resource type="Script" uid="uid://dmrgckqv1ap05" path="res://scenes/HostLabel.gd" id="1_7kkia"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_ys2y3"]
 font_color = Color(0, 1, 1, 1)

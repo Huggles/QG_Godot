@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://cqotfa6hcbdg1"]
 
-[ext_resource type="Script" path="res://scripts/Player/PlayerScene.gd" id="1_g70y1"]
-[ext_resource type="Script" path="res://scenes/Player/PlayerCamera3D.gd" id="2_r6i5k"]
-[ext_resource type="Script" path="res://scripts/Player/InputManager.gd" id="3_0gvbl"]
+[ext_resource type="Script" uid="uid://34bjx5enlffn" path="res://scripts/Player/PlayerScene.gd" id="1_g70y1"]
+[ext_resource type="Script" uid="uid://dv6w6oqpeakjj" path="res://scenes/Player/PlayerCamera3D.gd" id="2_r6i5k"]
+[ext_resource type="Script" uid="uid://b03od2414ql6g" path="res://scripts/Player/InputManager.gd" id="3_0gvbl"]
 [ext_resource type="PackedScene" uid="uid://bvqke4p6ev0eg" path="res://scenes/userinterface/GameChangeEvents/GameChangeEvents.tscn" id="4_vv50f"]
 [ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://InputMessaging.tscn" id="5_dthr0"]
 [ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://FactionsContainer.tscn" id="6_0gq80"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bpeoi7oc011hk"]
 
-[ext_resource type="Script" path="res://scenes/userinterface/drag_handler.gd" id="1_fae3y"]
+[ext_resource type="Script" uid="uid://b5mvv1h3vhgdp" path="res://scenes/userinterface/drag_handler.gd" id="1_fae3y"]
 
 [node name="DragHandler" type="Control"]
 layout_mode = 3

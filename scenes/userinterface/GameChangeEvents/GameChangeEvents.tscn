@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bvqke4p6ev0eg"]
 
-[ext_resource type="Script" path="res://scenes/userinterface/GameChangeEvents/GameChangeEventContainer.gd" id="1_n3eb8"]
+[ext_resource type="Script" uid="uid://dbkx1eshfngll" path="res://scenes/userinterface/GameChangeEvents/GameChangeEventContainer.gd" id="1_n3eb8"]
 
 [node name="GameEventsScene" type="Control"]
 layout_mode = 3

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://djinib8j6dupy"]
 
-[ext_resource type="Script" path="res://scripts/Menu/MultiplayerLobby.gd" id="1_k3llq"]
+[ext_resource type="Script" uid="uid://bt3og0kfho0tq" path="res://scripts/Menu/MultiplayerLobby.gd" id="1_k3llq"]
 [ext_resource type="Texture2D" uid="uid://bac4xdyyb4tvc" path="res://assets/textures/Other/Menu_Background.jpg" id="2_e7qq4"]
 
 [node name="Control" type="Control"]

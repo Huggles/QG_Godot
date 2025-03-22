@@ -2,8 +2,8 @@
 
 [ext_resource type="Material" uid="uid://bt408etorppfv" path="res://assets/materials/country_glow_material.tres" id="1_ogh2l"]
 [ext_resource type="Texture2D" uid="uid://q2b8u8hycl85" path="res://assets/textures/Countries/USEast.png" id="2_t5w0j"]
-[ext_resource type="Script" path="res://scenes/World/ClickableSprite3D.gd" id="3_sxvri"]
-[ext_resource type="Script" path="res://scenes/World/RayTraceHandler.gd" id="4_whime"]
+[ext_resource type="Script" uid="uid://dfhna5fk0i8m1" path="res://scenes/World/ClickableSprite3D.gd" id="3_sxvri"]
+[ext_resource type="Script" uid="uid://bpivry2mhvrap" path="res://scenes/World/RayTraceHandler.gd" id="4_whime"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mpjw5"]
 margin = 0.0
