@@ -3,6 +3,9 @@ class_name DeployUnitChangeEvent extends GameChangeEvent
 var unit_id:int
 var country_id:int
 var deployment_type:Enum.DeployType
+
+var unit_state:UnitState:
+	get: return UnitState.for_id(self.unit_id)
 var unit_type:Enum.UnitType:
 	get: 
 		var country:CountryState = CountryState.for_id(country_id)
@@ -22,8 +25,10 @@ func _apply_change_event():
 func trace_text() -> String:
 	return str(script_name,"-", Enum.Faction.keys()[triggering_faction], "-",CountryState.for_id(country_id).clabel, "-", Enum.UnitType.keys()[unit_type])
 
+func summary_text() -> String:
+	return str(unit_state.faction," deployed to ", CountryState.for_id(country_id).clabel)	 
 
-func display_text() -> String:				
+func debug_text() -> String:				
 	var _unit_state
 	return str("Deployed ", Enum.Faction.keys()[triggering_faction]," ", Enum.UnitType.keys()[unit_type], " to country: ", CountryState.for_id(country_id).clabel)
 

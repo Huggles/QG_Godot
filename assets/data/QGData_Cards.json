@@ -80,12 +80,12 @@
 		"text": "Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to build an Army in the space battled."
 	},
 	{
-		"name": "Status_BiasforAction",
+		"name": "Status_BiasForAction",
 		"number": "29",
 		"type": "STATUS",
 		"implemented": "0",
 		"testing": "0",
-		"execution_class": "StatusBiasforAction",
+		"execution_class": "StatusBiasForAction",
 		"clabel": "Bias for Action [WIP]",
 		"text": "Use once per turn when you build an Army. Discard the top 1 card of your draw deck to battle a land space adjacent to the Army just built."
 	},

@@ -22,21 +22,21 @@ var is_activated_this_turn:bool:
 var is_publicly_visible:bool:
 	get: return is_played || (card_data.type == "RESPONSE" && is_activated_once)
 
-var card_front_texture: Texture2D: 
-	get:
-		match card_data.type:
-			"BUILD_ARMY": return load(faction_data.card_front_build_army_texture)	
-			"BUILD_NAVY": return load(faction_data.card_front_build_navy_texture)	
-			"LAND_BATTLE": return load(faction_data.card_front_land_battle_texture)	
-			"SEA_BATTLE": return load(faction_data.card_front_sea_battle_texture)	
-			"STATUS": return load(faction_data.card_front_status_texture)	
-			"RESPONSE": return load(faction_data.card_front_response_texture)	
-			"EVENT": return load(faction_data.card_front_event_texture)	
-			"EW": return load(faction_data.card_front_ew_texture)	
-		return 
+# var card_front_texture: Texture2D: 
+# 	get:
+# 		match card_data.type:
+# 			"BUILD_ARMY": return load(faction_data.card_front_build_army_texture)	
+# 			"BUILD_NAVY": return load(faction_data.card_front_build_navy_texture)	
+# 			"LAND_BATTLE": return load(faction_data.card_front_land_battle_texture)	
+# 			"SEA_BATTLE": return load(faction_data.card_front_sea_battle_texture)	
+# 			"STATUS": return load(faction_data.card_front_status_texture)	
+# 			"RESPONSE": return load(faction_data.card_front_response_texture)	
+# 			"EVENT": return load(faction_data.card_front_event_texture)	
+# 			"EW": return load(faction_data.card_front_ew_texture)	
+# 		return 
 	
-var card_back_texture: Texture2D:
-	get: return load(faction_data.card_back_texture)
+# var card_back_texture: Texture2D:
+# 	get: return load(faction_data.card_back_texture)
 	
 func _init(_card_state:CardState)->void:	
 	card_state = _card_state	
@@ -45,7 +45,12 @@ func can_play_card() -> bool:
 	return true
 	
 func can_activate_card(_game_change_event:GameChangeEvent) -> bool:
-	return true
+	var _activatable:bool = _can_activate_card(_game_change_event) && !is_activated_this_turn
+	DebugUtilities.print_peer(str(self.card_data.clabel, " is activatable: ", _activatable, " for ", _game_change_event.summary_text()))
+	return _activatable
+
+func _can_activate_card(_game_change_event:GameChangeEvent) -> bool:
+	return false
 
 func play_card():
 	if can_play_card():

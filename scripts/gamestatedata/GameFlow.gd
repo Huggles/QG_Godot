@@ -35,6 +35,11 @@ var victory_point_summaries:Dictionary = {}
 
 func _init() -> void:
 	pass
+
+func _reset_card_hanlder():
+	if GameManager.game_state.card_play_handler != null:
+		GameManager.game_state.card_play_handler.disable()
+	GameManager.game_state.card_play_handler = CardPlayHandler.new();	
 	
 func start_game() -> void:
 	for _faction:FactionState in game_state.faction_states.values():
@@ -46,7 +51,10 @@ func start_game() -> void:
 	_start_new_turn()
 
 func progress_game() -> void:
-	print(str("progress_game: ", game_turn))	
+	print(str("progress_game: ", game_turn))
+	if GameManager.game_state.card_play_handler != null:
+		GameManager.game_state.card_play_handler.disable()
+	GameManager.game_state.card_play_handler = CardPlayHandler.new();	
 	_start_next_step()
 
 func _start_next_step() -> void:
@@ -64,31 +72,25 @@ func _start_new_turn() -> void:
 	_start_next_step()
 
 func _start_turn_step() -> void:	
-	print("_start_turn_step")
+	print("_start_turn_step")	
 	progress_game()
 	pass
 
 func _play_card_step() -> void:	
 	print("_play_card_step")
-	GameManager.player_states[0].input_manager.set_play_card_input_active()
-	current_faction_deck_state.debug_hand()	
-	var _card_play_outcome;
-	while(true):		
-		_card_play_outcome = await EventBusLocal.card_play_completed		
-		print(_card_play_outcome)
-		if CardState.for_id(_card_play_outcome).triggered_by_change_event == null:
-			break
-
+	GameManager.game_state.card_play_handler.request_card_play()
+	await EventBusLocal.card_play_handler_completed	
 	progress_game()
-	pass
 	
 func _supply_step() -> void:
 	print("_supply_step")
 	EventBusLocal.recalculate_supply.emit()
 	for _unit_id in GameStateUtilities.unsupplied_unit_ids(current_faction):
 		var _unit_out_of_supply_event:UnitOutOfSupplyEvent = UnitOutOfSupplyEvent.new(_unit_id)
-		await ChangeEventHandler.execute_change_event(_unit_out_of_supply_event).change_event_finished
-
+		ChangeEventHandler.execute_change_event(_unit_out_of_supply_event, true)
+		await EventBusLocal.card_play_handler_completed	
+		_reset_card_hanlder()
+	
 	progress_game()
 	pass
 

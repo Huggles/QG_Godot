@@ -34,7 +34,7 @@ func _add_event(game_change_event:GameChangeEvent, index:int):
 	var row_name = str(event_class,index)			
 	var row_instance:GameChangeEventRow = row_control.duplicate()			
 	row_instance.name = row_name
-	row_instance.label_node.text = game_change_event.display_text()
+	row_instance.label_node.text = game_change_event.debug_text()
 	
 	self.add_child(row_instance)
 			

@@ -29,6 +29,14 @@
 			{
 				"card_name" : "Status_SyntheticFuel",
 				"number" : 1				
+			},
+			{
+				"card_name" : "Status_BiasForAction",
+				"number" : 1				
+			},
+			{
+				"card_name" : "Status_DiveBombers",
+				"number" : 1
 			}		
 		]
 	},

@@ -25,10 +25,9 @@ func _init() -> void:
 func on_key_clicked(_key_event:InputEventKey):
 	for key in HAND_CARD_KEYS:		
 		if _key_event.keycode == key:
-			var index = HAND_CARD_KEYS.find(key)			
-			if GameManager.game_flow.current_faction_deck_state.hand_card_states[index].can_play_card():
-				GameManager.my_input_manager.set_no_input_active()
-				InputMessageLabel.hide_node()
-				GameManager.game_flow.current_faction_deck_state.play_card_at_hand_index(index, func():)
-			return
+			var index = HAND_CARD_KEYS.find(key)
+			var _card_id = GameManager.game_flow.current_faction_deck_state.hand_card_states[index].id
+			var _activation_option = CardActivationOption.new(_card_id, "play")			
+			EventBusLocal.card_selected.emit(_activation_option)			
+			
 	

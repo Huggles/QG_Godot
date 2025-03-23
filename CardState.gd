@@ -3,6 +3,8 @@ class_name CardState extends StateObject
 var id:int
 var card_data:CardData
 var faction:Enum.Faction
+var card_name:String:
+	get: return card_data.clabel if card_data != null else ""
 
 var triggered_by_change_event:GameChangeEvent
 

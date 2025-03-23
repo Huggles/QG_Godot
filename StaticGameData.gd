@@ -108,7 +108,7 @@ func faction_team_for_faction(_faction:Enum.Faction) -> Enum.FactionTeam:
 		return Enum.FactionTeam.ALLIES
 	return Enum.FactionTeam.NONE
 	
-func other_faction_team_for_faction(_faction:Enum.Faction) -> Enum.FactionTeam:
+func opponent_faction_team_for_faction(_faction:Enum.Faction) -> Enum.FactionTeam:
 	if( _faction == Enum.Faction.UNITED_KINGDOM || _faction == Enum.Faction.SOVIET || _faction == Enum.Faction.UNITED_STATES ):	
 		return Enum.FactionTeam.AXIS
 	if( _faction == Enum.Faction.GERMANY || _faction == Enum.Faction.JAPAN || _faction == Enum.Faction.ITALY ):
@@ -119,6 +119,14 @@ func factions_for_team(_faction_team:Enum.FactionTeam) -> Array[Enum.Faction]:
 	if _faction_team == Enum.FactionTeam.AXIS:
 		return [Enum.Faction.GERMANY, Enum.Faction.JAPAN, Enum.Faction.ITALY ]
 	if _faction_team == Enum.FactionTeam.ALLIES:
+		return [Enum.Faction.UNITED_KINGDOM, Enum.Faction.SOVIET, Enum.Faction.UNITED_STATES ]
+		
+	return []
+
+func opponent_factions_for_team(_faction_team:Enum.FactionTeam) -> Array[Enum.Faction]:
+	if _faction_team == Enum.FactionTeam.ALLIES:
+		return [Enum.Faction.GERMANY, Enum.Faction.JAPAN, Enum.Faction.ITALY ]
+	if _faction_team == Enum.FactionTeam.AXIS:
 		return [Enum.Faction.UNITED_KINGDOM, Enum.Faction.SOVIET, Enum.Faction.UNITED_STATES ]
 		
 	return []

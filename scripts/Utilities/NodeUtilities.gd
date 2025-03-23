@@ -3,9 +3,9 @@ extends Node
 var game_node:Node
 
 var world_node:Node:
-	get: return network_node.get_node("World")
+	get: return network_node.get_node("World") if network_node != null else null
 var countries_node:Node:
-	get: return world_node.get_node("Countries")
+	get: return world_node.get_node("Countries") if world_node != null else null
 
 var players_node:Node
 var units_node:Node

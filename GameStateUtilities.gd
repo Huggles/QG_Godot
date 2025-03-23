@@ -69,12 +69,5 @@ static func request_status_card_activation(_game_change_event:GameChangeEvent, _
 		request_response_card_activation_for_faction(_game_change_event, _faction, _callback)
 		pass
 	
-static func request_status_card_activation_for_faction(_game_change_event:GameChangeEvent, _faction:Enum.Faction, _callback:Callable):
-	var _activatable_status_cards:Array[int] = []
-	if DeckState.for_faction(_faction).status_card_ids.size() > 0:
-		_activatable_status_cards = DeckState.for_faction(_faction).activatable_status_card_ids(_game_change_event)			
-	else:
-		_callback.call()
-	
 	
 	

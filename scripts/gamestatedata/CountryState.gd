@@ -109,7 +109,7 @@ func can_build(_faction:Enum.Faction) -> bool:
 	var _can_build = true
 	_can_build = _can_build && can_recruit(_faction)
 	_can_build = _can_build && !self.occupying_factions.has(_faction) #This faction is not there already
-	_can_build = _can_build && (self.occupying_team != StaticGameData.other_faction_team_for_faction(_faction)) #The other faction doesn't control it yet
+	_can_build = _can_build && (self.occupying_team != StaticGameData.opponent_faction_team_for_faction(_faction)) #The other faction doesn't control it yet
 	if self.type == Enum.CountryType.SEA: #Check if theres a harbor
 		var _faction_team = StaticGameData.faction_team_for_faction(_faction)
 		_can_build = _can_build && neighbor_country_states.any(
@@ -123,8 +123,8 @@ func can_recruit(_faction:Enum.Faction) -> bool:
 	return _can_recruit;
 	
 func in_range_for_attack(_faction:Enum.Faction) -> bool:	
-	for connected_country_state:CountryState in connected_countries(_faction):
-		if connected_country_state.occupying_factions.has(_faction):
+	for _ccs:CountryState in connected_countries(_faction):
+		if _ccs.occupying_factions.has(_faction) && UnitState.for_id(_ccs.units.get(_faction)).in_supply:
 			return true	
 	return false
 	

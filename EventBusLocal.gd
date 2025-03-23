@@ -14,11 +14,15 @@ signal set_all_units_unclickable
 
 signal game_change_event_occurred
 
+signal card_selected
+
 signal request_status_card
 signal request_response_card
 
 signal card_play_started
 signal card_play_completed
+
+signal card_play_handler_completed
 
 signal no_status_card_activated
 signal status_card_activation_started
@@ -27,6 +31,9 @@ signal status_card_activation_completed
 signal no_response_card_activated
 signal response_card_activation_started
 signal response_card_activation_completed
+
+signal game_change_event_before
+signal game_change_event_after
 
 signal new_turn_started
 signal next_step_started

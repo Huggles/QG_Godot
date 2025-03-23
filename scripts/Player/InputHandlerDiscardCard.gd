@@ -14,7 +14,7 @@ func on_key_clicked(_key_event:InputEventKey):
 		if _key_event.keycode == key:
 			var index = HAND_CARD_KEYS.find(key)
 			if index < GameManager.game_flow.current_faction_deck_state.hand_card_ids.size(): 
-				GameManager.game_flow.current_faction_deck_state.discard_card_at_hand_index(index, func():)
+				GameManager.game_flow.current_faction_deck_state.discard_card_at_hand_index(index)
 				GameManager.game_flow.current_faction_deck_state.debug_hand()
 				return	
 	

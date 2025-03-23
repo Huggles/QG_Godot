@@ -1,9 +1,9 @@
-extends DataObject
-class_name GameState
+class_name GameState extends DataObject
 
 var game_mode:GameMode
 var faction_states:Dictionary
 var game_change_events:Array[GameChangeEvent]
+var card_play_handler:CardPlayHandler
 
 var active_player_card:CardState
 
@@ -60,7 +60,6 @@ var card_states_by_name:Dictionary:
 func _init() -> void:	
 	EventBusLocal.recalculate_supply.connect(recalculate_supply)		
 	EventBusLocal.recalculate_straights.connect(recalculate_straights)
-	EventBusLocal.game_change_event_occurred.connect(_register_game_change_event)
 	return
 
 func recalculate_supply():
@@ -106,9 +105,6 @@ func recalculate_straights():
 		_straight_state.recalulate_controlled_by()
 	pass
 	
-func _register_game_change_event(_game_change_event:GameChangeEvent):
-	game_change_events.push_back(_game_change_event)
-
 func faction_state_for_enum(_faction:Enum.Faction) -> FactionState:
 	return faction_states[_faction]
 
@@ -208,7 +204,7 @@ func attackable_units_for_faction(_faction:Enum.Faction) -> Array[int]:
 	if supplied_unit_ids.size() > 0:
 		for _country_state in CountryState.for_unit_ids(supplied_unit_ids):
 			for _connected_country_state in _country_state.connected_countries(_faction):
-				if _connected_country_state.occupying_team == StaticGameData.other_faction_team_for_faction(_faction):
+				if _connected_country_state.occupying_team == StaticGameData.opponent_faction_team_for_faction(_faction):
 					response.append_array(_connected_country_state.units.values())					
 	return response
 

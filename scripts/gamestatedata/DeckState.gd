@@ -36,12 +36,30 @@ var status_card_ids:Array[int]
 var status_card_states:Array[CardState]: 
 	get: return CardState.for_ids(status_card_ids)
 	
-func activatable_status_card_ids(_game_change_event:GameChangeEvent)->Array[int]:
-	var _activatable_status_cards:Array[int] = [] 
-	for _status_card_id in status_card_ids:
-		if (CardState.for_id(_status_card_id).card_execution_class as CardLogicStatus).can_activate_card(_game_change_event):
-			_activatable_status_cards.push_back(_status_card_id)			
-	return _activatable_status_cards
+func activatable_status_cards()->Array[CardActivationOption]:
+	var _activatable_options:Array[CardActivationOption] = [] 
+	for _status_card_state in status_card_states:		
+		for _gce in GameManager.game_state.card_play_handler.succesful_change_events:
+			if _status_card_state.card_execution_class.can_activate_card(_gce): 
+				var _card_activation_option = CardActivationOption.new(_status_card_state.id, "status")
+				_card_activation_option.change_event_id = _gce.id
+				_activatable_options.push_back(_card_activation_option)		
+	return _activatable_options
+
+func activatable_response_cards()->Array[CardActivationOption]:
+	var _activatable_options:Array[CardActivationOption] = [] 
+	for _response_card_state in response_card_states:		
+		for _gce in GameManager.game_state.card_play_handler.succesful_change_events:
+			if _response_card_state.card_execution_class.can_activate_card(_gce): 
+				var _card_activation_option = CardActivationOption.new(_response_card_state.id, "response")
+				_card_activation_option.change_event = _gce.id
+				_activatable_options.push_back(_card_activation_option)				
+	return _activatable_options
+
+func activatable_cards()->Array[CardActivationOption]:
+	var _ac = activatable_status_cards()
+	_ac.append_array(activatable_response_cards())
+	return _ac
 
 func _init(_faction_state:FactionState) -> void:
 	self.faction_state = _faction_state;
@@ -75,39 +93,47 @@ func draw_cards(number:int) -> Array[int]:
 			response.push_back(_top_card_id)	
 	return response
 
-func play_card_at_hand_index(_hand_index, _callback:Callable) -> void:
+func play_card_at_hand_index(_hand_index) -> void:
 	if _hand_index >= hand_card_ids.size():
 		return
 	var _card_id = hand_card_ids[_hand_index]
-	play_card(_card_id, _callback)
+	play_card(_card_id)
 
-func play_card(_card_id, _callback:Callable) -> void:
+func play_card(_card_id) -> void:
 	var _card_state:CardState = CardState.for_id(_card_id)	
 	if !_card_state.can_play_card():
 		DebugUtilities.print_peer_err(str("Cannot play card: ", _card_state.card_data.clabel ) )		
 		return	
 	
 	if hand_card_ids.has(_card_id):
-		play_card_from_hand(_card_id, _callback)
+		play_card_from_hand(_card_id)
 	elif discarded_card_ids.has(_card_id):
-		play_card_from_discard(_card_id, _callback)
+		play_card_from_discard(_card_id)
 	elif deck_card_ids.has(_card_id):
-		play_card_from_deck(_card_id, _callback)
+		play_card_from_deck(_card_id)
 
-func activate_status_card(_card_id:int, _game_change_event:GameChangeEvent) -> void:
+func activate_card(_activation_option:CardActivationOption):
+	if status_card_ids.has(_activation_option.card_id):
+		activate_status_card(_activation_option.card_id, _activation_option.change_event_id)
+	elif response_card_ids.has(_activation_option.card_id):
+		activate_response_card(_activation_option.card_id, _activation_option.change_event_id)
+
+func activate_status_card(_card_id:int, _change_event_id:int) -> void:
 	if !status_card_ids.has(_card_id):
 		return
-
-	var _card_state:CardState = CardState.for_id(_card_id)
-	_card_state.triggered_by_change_event = _game_change_event
-	_card_state.activate_card(_game_change_event)
+	var _card_state:CardState = CardState.for_id(_card_id)	
+	_card_state.activate_card(GameChangeEvent.for_id(_change_event_id))
 	pass
 
-func activate_response_card(_card_id:int, game_change_event:GameChangeEvent) -> void:
+func activate_response_card(_card_id:int, _change_event_id:int) -> void:
+	if !response_card_ids.has(_card_id):
+		return
+	var _card_state:CardState = CardState.for_id(_card_id)	
+	_card_state.activate_card(GameChangeEvent.for_id(_change_event_id))
 	pass
 	
 
-func play_card_from_deck(_card_id, _callback:Callable) -> void:
+func play_card_from_deck(_card_id) -> void:
 	if deck_card_ids.has(_card_id):
 		var _card_state:CardState = CardState.for_id(_card_id)
 		_card_state.play_card()
@@ -115,13 +141,13 @@ func play_card_from_deck(_card_id, _callback:Callable) -> void:
 		deck_card_ids.pop_at(_deck_index)
 		discarded_card_ids.push_back(_card_id)
 
-func play_card_from_discard(_card_id, _callback:Callable) -> void:
+func play_card_from_discard(_card_id) -> void:
 	if discarded_card_ids.has(_card_id):
 		var _card_state:CardState = CardState.for_id(_card_id)
 		_card_state.play_card()
 	
 
-func play_card_from_hand(_card_id, _callback:Callable) -> void:
+func play_card_from_hand(_card_id) -> void:
 	if hand_card_ids.has(_card_id):		
 		var _card_state:CardState = CardState.for_id(_card_id)
 		if !self.hand_card_ids.has(_card_id):		
@@ -135,19 +161,19 @@ func play_card_from_hand(_card_id, _callback:Callable) -> void:
 		hand_card_ids.pop_at(_hand_index)
 		discarded_card_ids.push_back(_card_id)
 	
-func play_card_by_name(_card_name, _callback:Callable) -> void:
+func play_card_by_name(_card_name) -> void:
 	for _card_state in CardState.for_ids(all_card_ids):
 		if _card_state.card_data.name == _card_name:
-			play_card(_card_state.id, func():)
+			play_card(_card_state.id)
 	return
 	
-func discard_card_at_hand_index(_hand_index, _callback:Callable) -> void:
+func discard_card_at_hand_index(_hand_index) -> void:
 	if _hand_index >= hand_card_ids.size():
 		return
 	var _card_id = hand_card_ids[_hand_index]
-	discard_card(_card_id, _callback)
+	discard_card(_card_id)
 	
-func discard_card(_card_id, _callback:Callable) -> void:
+func discard_card(_card_id) -> void:
 	var _card_state:CardState = CardState.for_id(_card_id)
 	if !self.hand_card_ids.has(_card_id):		
 		DebugUtilities.print_peer_err(str("Card not in hand: ", _card_state.card_data.clabel ) )		
@@ -155,7 +181,6 @@ func discard_card(_card_id, _callback:Callable) -> void:
 	var _hand_index = hand_card_ids.find(_card_id)
 	hand_card_ids.pop_at(_hand_index)
 	discarded_card_ids.push_back(_card_id)
-	_callback.call()
 
 func debug_hand() -> void:
 	DebugUtilities.print_peer( str("Player ", faction_label ," has following cards in hand: ") )		
@@ -169,12 +194,23 @@ func debug_status_cards() -> void:
 		DebugUtilities.print_peer(str(status_card_states.find(_card_state), ". " ,_card_state.card_data.name))
 	pass
 
-func debug_activatable_status_cards(_game_change_event) -> void:
-	DebugUtilities.print_peer( str("Player ", faction_label ," has following activatable status cards: ") )		
-	var _activatable_status_card_ids:Array[int] = activatable_status_card_ids(_game_change_event)
-	for _card_id in _activatable_status_card_ids:		
-		DebugUtilities.print_peer(str(_activatable_status_card_ids.find(_card_id), ". " ,CardState.for_id(_card_id).card_data.name))
-	pass			
+func debug_activatable_status_cards() -> void:
+	DebugUtilities.print_peer( str("Faction ", faction_label ," has following activatable status cards: ") )		
+	var _activatable_response_options:Array[CardActivationOption] = activatable_status_cards()
+	var _counter = 0;
+	for _activation_option in _activatable_response_options:
+		for _gce in _activation_option.change_events:
+			DebugUtilities.print_peer(str(_counter, ". " ,CardState.for_id(_activation_option.card_id).card_data.name, "(", GameChangeEvent.for_id(_gce).display_text, ")"))
+	pass	
+
+func debug_activatable_response_cards() -> void:
+	DebugUtilities.print_peer( str("Faction ", faction_label ," has following activatable response cards: ") )		
+	var _activatable_response_options:Array[CardActivationOption] = activatable_response_cards()
+	var _counter = 0;
+	for _activation_option in _activatable_response_options:
+		for _gce in _activation_option.change_events:
+			DebugUtilities.print_peer(str(_counter, ". " ,CardState.for_id(_activation_option.card_id).card_data.name, "(", GameChangeEvent.for_id(_gce).display_text, ")"))
+	pass				
 
 func shuffle_deck():
 	deck_card_ids.shuffle()
