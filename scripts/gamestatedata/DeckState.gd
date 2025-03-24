@@ -40,7 +40,7 @@ func activatable_status_cards()->Array[CardActivationOption]:
 	var _activatable_options:Array[CardActivationOption] = [] 
 	for _status_card_state in status_card_states:		
 		for _gce in GameManager.game_state.card_play_handler.succesful_change_events:
-			if _status_card_state.card_execution_class.can_activate_card(_gce): 
+			if _status_card_state.card_execution_class.can_activate_action(_gce): 
 				var _card_activation_option = CardActivationOption.new(_status_card_state.id, "status")
 				_card_activation_option.change_event_id = _gce.id
 				_activatable_options.push_back(_card_activation_option)		
@@ -50,7 +50,7 @@ func activatable_response_cards()->Array[CardActivationOption]:
 	var _activatable_options:Array[CardActivationOption] = [] 
 	for _response_card_state in response_card_states:		
 		for _gce in GameManager.game_state.card_play_handler.succesful_change_events:
-			if _response_card_state.card_execution_class.can_activate_card(_gce): 
+			if _response_card_state.card_execution_class.can_activate_action(_gce): 
 				var _card_activation_option = CardActivationOption.new(_response_card_state.id, "response")
 				_card_activation_option.change_event = _gce.id
 				_activatable_options.push_back(_card_activation_option)				

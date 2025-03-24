@@ -15,6 +15,10 @@
 				"number" : 2
 			},
 			{
+				"card_name" : "Event_BroadFront",
+				"number" : 1
+			}, 
+			{
 				"card_name" : "SeaBattle",
 				"number" : 2
 			},
@@ -37,7 +41,8 @@
 			{
 				"card_name" : "Status_DiveBombers",
 				"number" : 1
-			}		
+			}
+			
 		]
 	},
 	{

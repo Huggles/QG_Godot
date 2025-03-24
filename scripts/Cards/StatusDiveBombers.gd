@@ -2,20 +2,23 @@ class_name StatusDiveBombers extends CardLogicStatus
 
 func _targetable_countries(_initial_country_id:int) -> Array[CountryState]:
 	var _cs = CountryState.for_id(_initial_country_id)
-	return _cs.connected_countries(self.faction).filter(
+	var _ccs = _cs.connected_countries(self.faction).filter(
 		func(_cc:CountryState): 
 			return _cc.in_range_for_attack(faction) && _cc.is_land && _cc.occupying_team == StaticGameData.opponent_faction_team_for_faction(self.faction)
 			)
+	if _cs.occupying_team == StaticGameData.opponent_faction_team_for_faction(faction):
+		_ccs.push_back(_cs)
+	return _ccs
 		
 
-func _can_activate_card(_game_change_event:GameChangeEvent)->bool:
+func _can_activate_action(_game_change_event:GameChangeEvent)->bool:
 	if _game_change_event is BattleUnitChangeEvent && _game_change_event.triggering_faction == self.faction:
 		var _battle_unit_change_event:BattleUnitChangeEvent = _game_change_event	
 		if _targetable_countries(_battle_unit_change_event.country_id).size() > 0:
 			return true		
 	return false
 	
-func _activate_card(_game_change_event:GameChangeEvent):
+func _activate_action(_game_change_event:GameChangeEvent, _part_counter:int):
 	var _original_battle_unit_change_event:BattleUnitChangeEvent = _game_change_event	
 	var _unit_ids:Array[int] = []
 	for _target_country in _targetable_countries(_original_battle_unit_change_event.country_id):

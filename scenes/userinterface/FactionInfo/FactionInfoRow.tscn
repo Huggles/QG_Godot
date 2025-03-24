@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bjpmsri3am6gm"]
 
-[ext_resource type="Script" uid="uid://baq6uu0epu2br" path="res://FactionInfoRow.gd" id="1_sdgdn"]
+[ext_resource type="Script" uid="uid://baq6uu0epu2br" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.gd" id="1_sdgdn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
 resource_local_to_scene = true

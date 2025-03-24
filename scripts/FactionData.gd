@@ -5,6 +5,7 @@ var name:String
 var index:int
 var clabel:String
 var color_string:String
+var color_string_text:String
 var team:String
 var homespace:String
 
@@ -43,3 +44,6 @@ var number_navy_units:int
 	
 func color()->Color:
 	return Color.from_string(color_string, Color.WHITE)
+
+func color_text()->Color:
+	return Color.from_string(color_string_text, Color.WHITE)

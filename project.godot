@@ -21,7 +21,7 @@ NodeUtilities="*res://scripts/Utilities/NodeUtilities.gd"
 DebugUtilities="*res://scripts/Utilities/DebugUtilities.gd"
 MultiplayerManager="*res://scripts/Menu/MultiplayerManager.gd"
 GameManager="*res://scripts/Managers/GameManager.gd"
-StaticGameData="*res://StaticGameData.gd"
+StaticGameData="*res://scripts/DataObjects/StaticGameData.gd"
 EventBusLocal="*res://EventBusLocal.gd"
 
 [debug]

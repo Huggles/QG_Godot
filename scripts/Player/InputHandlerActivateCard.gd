@@ -27,15 +27,13 @@ func _init(_faction:Enum.Faction) -> void:
 		var _gce:GameChangeEvent = GameChangeEvent.for_id(_activation_option.change_event_id)
 		DebugUtilities.print_peer(_gce.id)
 		DebugUtilities.print_peer(_gce.summary_text())
-
-		
-
 		_text_lines.push_back(str(index, " - ", CardState.for_id(_activation_option.card_id).card_data.clabel,"\n          (", _gce.summary_text(),")"))
 		_text_lines.push_back(str("\n"))
 		index += 1
 
 	DebugUtilities.print_peer(str("Requesting card activation for ", Enum.Faction.keys()[_faction]))
 	InputMessageLabel.show_text("\n".join(_text_lines))	
+	PlayerActionLabel.show_text("Choose a status or response to activate")
 	pass
 
 func on_key_clicked(_key_event:InputEventKey):	

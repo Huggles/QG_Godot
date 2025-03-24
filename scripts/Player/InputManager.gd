@@ -29,7 +29,7 @@ func set_play_card_input_active() -> InputHandlerPlayCard:
 	self.input_handler = InputHandlerPlayCard.new()
 	return self.input_handler
 	
-func set_activate_card_input_active(_faction:Enum.Faction) -> InputHandlerActivateCard:
+func set_activate_action_input_active(_faction:Enum.Faction) -> InputHandlerActivateCard:
 	self.input_handler = InputHandlerActivateCard.new(_faction)
 	return self.input_handler
 	

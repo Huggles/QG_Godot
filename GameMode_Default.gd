@@ -103,6 +103,10 @@ func _place_starting_units():
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
 	ChangeEventHandler.execute_change_event(_deploy_unit_change_event, false)
 
+	_country_state = StaticGameData.countries_by_name["EASTERN_EUROPE"]			
+	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
+	ChangeEventHandler.execute_change_event(_deploy_unit_change_event, false)
+
 	_country_state = StaticGameData.countries_by_name["RUSSIA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
 	ChangeEventHandler.execute_change_event(_deploy_unit_change_event, false)
@@ -132,6 +136,14 @@ func _place_starting_units():
 	ChangeEventHandler.execute_change_event(_deploy_unit_change_event, false)
 	
 	_country_state = StaticGameData.countries_by_name["CENTRAL_PACIFIC"]			
+	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_STATES, _country_state.id, Enum.DeployType.RECRUIT)			
+	ChangeEventHandler.execute_change_event(_deploy_unit_change_event, false)
+
+	_country_state = StaticGameData.countries_by_name["UKRAINE"]			
+	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_STATES, _country_state.id, Enum.DeployType.RECRUIT)			
+	ChangeEventHandler.execute_change_event(_deploy_unit_change_event, false)
+
+	_country_state = StaticGameData.countries_by_name["EASTERN_EUROPE"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_STATES, _country_state.id, Enum.DeployType.RECRUIT)			
 	ChangeEventHandler.execute_change_event(_deploy_unit_change_event, false)
 	

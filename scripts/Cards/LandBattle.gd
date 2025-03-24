@@ -3,10 +3,10 @@ class_name LandBattle extends CardLogicBase
 var _attackable_units:Array[int]:
 	get: return GameManager.game_state.attackable_units_for_faction(faction).filter(func(_unit_id:int): return UnitState.for_id(_unit_id).country_state.is_land)	
 
-func can_play_card() -> bool:		
+func _can_play_card(_part:int) -> bool:		
 	return _attackable_units.size() > 0
 
-func _play_card()->void:	 	
+func _play_card(_part:int)->void:	 	
 	_request_country()	
 
 func _request_country():	

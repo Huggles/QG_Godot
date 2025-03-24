@@ -1,11 +1,11 @@
 class_name BuildArmy extends CardLogicBase
 
-func can_play_card() -> bool:	
+func _can_play_card(_part:int) -> bool:	
 	var _buildable_countries = GameManager.game_state.buildable_land_countries_for_faction(faction)
 	var _has_available_units = UnitPool.faction_has_available_army(faction)
 	return _buildable_countries.size() > 0 && _has_available_units
 
-func _play_card()->void:	 	
+func _play_card(_part:int)->void:	 	
 	_request_country()	
 	
 func _request_country():	

@@ -9,7 +9,7 @@ var horizontal_container:HBoxContainer:
 var faction_info_nodes:Dictionary
 var row_scene
 
-const CHANGE_EVENT_ROW_SCENE_RESOURCE = preload("res://FactionInfoRow.tscn")
+const CHANGE_EVENT_ROW_SCENE_RESOURCE = preload("res://scenes/userinterface/FactionInfo/FactionInfoRow.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

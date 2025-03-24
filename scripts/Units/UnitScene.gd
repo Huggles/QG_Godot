@@ -21,8 +21,6 @@ var debug_label_node:Label3D:
 var clickable:bool
 var click_callback:Callable
 
-
-
 var normal_shader_material:ShaderMaterial = preload("res://assets/materials/unit_shader_material.tres").duplicate()
 var out_of_supply_shader_material:ShaderMaterial = preload("res://assets/materials/UnitOutOfSupplyShaderMaterial.tres").duplicate()
 
@@ -75,10 +73,12 @@ func _set_sprite():
 func set_clickable(_callback:Callable) -> void:		
 	self.clickable = true
 	self.click_callback = _callback
+	self.hide_out_of_supply()
 	clickable_sprite_node.enable()
 	
 func set_unclickable():
 	self.clickable = false
+	self.show_out_of_supply()
 	clickable_sprite_node.disable()	
 
 func show_out_of_supply():			

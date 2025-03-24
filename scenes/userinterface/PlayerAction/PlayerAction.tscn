@@ -1,0 +1,53 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6hfp06nmb2ux"]
+
+[ext_resource type="Script" uid="uid://b8wel7b0cmcrb" path="res://scenes/userinterface/PlayerAction/PlayerActionLabel.gd" id="1_gvner"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gvner"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+
+[node name="PlayerAction" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ContainerPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -500.0
+offset_top = 86.0
+offset_right = 500.0
+offset_bottom = 136.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gvner")
+
+[node name="PlayerActionMessage" type="RichTextLabel" parent="ContainerPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 30
+bbcode_enabled = true
+text = "[color=red] ABC [/color]"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("1_gvner")

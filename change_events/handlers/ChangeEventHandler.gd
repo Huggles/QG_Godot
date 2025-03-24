@@ -15,6 +15,7 @@ static func execute_change_event(_change_event:GameChangeEvent, _is_trigger:bool
 	_change_event_counter += 1;
 	_change_event.handler = change_event_handler
 	_change_event.is_trigger = _is_trigger
+	DebugUtilities.print_peer(str("pushed gce to back with id: ", _change_event.id))
 	GameManager.game_state.game_change_events.push_back(_change_event)
 	change_event_handler._execute_change_event()
 	return change_event_handler

@@ -1,4 +1,4 @@
-class_name StatusBiasForAction extends CardLogicStatus
+class_name ResponseBanzaiCharge extends CardLogicResponse
 
 func _targetable_countries(_initial_country_id:int) -> Array[CountryState]:
 	var _cs = CountryState.for_id(_initial_country_id)
@@ -9,13 +9,13 @@ func _targetable_countries(_initial_country_id:int) -> Array[CountryState]:
 		
 
 func _can_activate_action(_game_change_event:GameChangeEvent)->bool:
-	if _game_change_event is DeployUnitChangeEvent && _game_change_event.triggering_faction == self.faction:
-		var _deploy_unit_change_event:DeployUnitChangeEvent = _game_change_event	
-		if _targetable_countries(_deploy_unit_change_event.country_id).size() > 0:
+	if _game_change_event is BattleUnitChangeEvent && _game_change_event.triggering_faction == self.faction:
+		var _change_event:BattleUnitChangeEvent = _game_change_event	
+		if GameStateUtilities.game_state.attackable_units_for_faction(self.faction).size() > 0 || GameStateUtilities.game_state.attackable_countries_for_faction(self.faction):
 			return true		
 	return false
 	
-func _activate_action(_game_change_event:GameChangeEvent, _part_counter:int):
+func _activate_action(_game_change_event:GameChangeEvent, part:int):
 	var _deploy_unit_change_event:DeployUnitChangeEvent = _game_change_event	
 	var _unit_ids:Array[int] = []
 	for _target_country in _targetable_countries(_deploy_unit_change_event.country_id):

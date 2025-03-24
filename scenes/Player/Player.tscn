@@ -1,11 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://cqotfa6hcbdg1"]
+[gd_scene load_steps=9 format=3 uid="uid://cqotfa6hcbdg1"]
 
 [ext_resource type="Script" uid="uid://34bjx5enlffn" path="res://scripts/Player/PlayerScene.gd" id="1_g70y1"]
 [ext_resource type="Script" uid="uid://dv6w6oqpeakjj" path="res://scenes/Player/PlayerCamera3D.gd" id="2_r6i5k"]
 [ext_resource type="Script" uid="uid://b03od2414ql6g" path="res://scripts/Player/InputManager.gd" id="3_0gvbl"]
 [ext_resource type="PackedScene" uid="uid://bvqke4p6ev0eg" path="res://scenes/userinterface/GameChangeEvents/GameChangeEvents.tscn" id="4_vv50f"]
-[ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://InputMessaging.tscn" id="5_dthr0"]
-[ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://FactionsContainer.tscn" id="6_0gq80"]
+[ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="5_dthr0"]
+[ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://scenes/userinterface/FactionInfo/FactionsContainer.tscn" id="6_0gq80"]
+[ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="7_fxc31"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_12hdh"]
 radius = 0.001
@@ -35,3 +36,5 @@ mouse_filter = 2
 [node name="InputMessaging" parent="." instance=ExtResource("5_dthr0")]
 
 [node name="FactionsContainer" parent="." instance=ExtResource("6_0gq80")]
+
+[node name="PlayerAction" parent="." instance=ExtResource("7_fxc31")]

@@ -10,8 +10,6 @@ func _init() -> void:
 	var _text_lines:Array[String] = []
 	_text_lines.push_back("[color=%s][b]%s: Select a card to play:[/b][/color]" % [_faction_color_string, Enum.Faction.keys()[_current_faction]])
 
-
-
 	var index = 0
 	for _card_state:CardState in DeckState.for_faction(GameManager.game_flow.current_faction).hand_card_states:
 		if _card_state.can_play_card():
@@ -21,6 +19,7 @@ func _init() -> void:
 		index += 1
 		pass
 	InputMessageLabel.show_text("\n".join(_text_lines))
+	PlayerActionLabel.show_text("Choose a card", GameManager.game_flow.current_faction)
 
 func on_key_clicked(_key_event:InputEventKey):
 	for key in HAND_CARD_KEYS:		
