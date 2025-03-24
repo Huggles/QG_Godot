@@ -8,6 +8,11 @@ var origin_card_id:int = -1
 
 signal chain_finished
 
+static var instance:CardPlayHandler:
+	get:
+		if GameManager.game_state.card_play_handler == null:
+			GameManager.game_state.card_play_handler = CardPlayHandler.new() 
+		return GameManager.game_state.card_play_handler
 
 var request_order:Array:
 	get:
@@ -21,7 +26,7 @@ func _init() -> void:
 
 func enable():
 	EventBusLocal.game_change_event_before.connect(handle_change_event)
-	EventBusLocal.game_change_event_after.connect(request_card_activation)
+	EventBusLocal.game_change_event_after.connect(request_card_activation) 
 
 func disable():
 	EventBusLocal.game_change_event_before.disconnect(handle_change_event)
@@ -105,3 +110,23 @@ func try_play_card(_card_id:int):
 		InputMessageLabel.hide_node()
 		DeckState.for_faction(_card_state.faction).play_card(_card_id)        
 	pass
+
+static var _change_event_counter:int = 0
+
+func execute_change_event(_change_event:GameChangeEvent, _is_trigger:bool = true):	
+	#Enrich
+	print(str("ChangeEventHandler ", _change_event.trace_text()))
+	_change_event.id = _change_event_counter;
+	_change_event_counter += 1;	
+	_change_event.is_trigger = _is_trigger
+	DebugUtilities.print_peer(str("pushed gce to back with id: ", _change_event.id))
+	GameManager.game_state.game_change_events.push_back(_change_event)
+
+
+	#execute
+	EventBusLocal.game_change_event_before.emit(_change_event.id)	
+	_change_event.apply_change()
+	await GameManager.create_timer(200)
+	EventBusLocal.game_change_event_after.emit(_change_event.id)
+
+	

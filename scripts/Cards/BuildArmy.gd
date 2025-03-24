@@ -15,6 +15,6 @@ func _request_country():
 			print("click callback in BuildArmy")
 			var _deploy_unit_change_event:DeployUnitChangeEvent = DeployUnitChangeEvent.new(faction, _selected_country_id, Enum.DeployType.BUILD)			
 			_deploy_unit_change_event.source_card_id = card_state.id
-			ChangeEventHandler.execute_change_event(_deploy_unit_change_event)
+			CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event)
 			card_play_finished()
 			)

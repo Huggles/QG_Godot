@@ -17,7 +17,7 @@ func _activate_action(_game_change_event:GameChangeEvent, _part_counter:int):
 		func (_selected_country_id:int):
 			var _deploy_unit_change_event:DeployUnitChangeEvent = DeployUnitChangeEvent.new(faction, _selected_country_id, Enum.DeployType.BUILD)			
 			_deploy_unit_change_event.source_card_id = card_state.id
-			ChangeEventHandler.execute_change_event(_deploy_unit_change_event)
+			CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event)
 			
 			card_activation_finished();
 			)

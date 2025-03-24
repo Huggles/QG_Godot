@@ -22,7 +22,7 @@ func _play_card(_part:int)->void:
         func(_selected_unit_id):
             var _battle_unit_change_event:BattleUnitChangeEvent = BattleUnitChangeEvent.new(faction, _selected_unit_id)		
             _battle_unit_change_event.source_card_id = card_state.id				
-            ChangeEventHandler.execute_change_event(_battle_unit_change_event)
+            CardPlayHandler.instance.execute_change_event(_battle_unit_change_event)
             print("execute_change_event")
             card_play_finished()
             )

@@ -87,10 +87,9 @@ func _supply_step() -> void:
 	EventBusLocal.recalculate_supply.emit()
 	for _unit_id in GameStateUtilities.unsupplied_unit_ids(current_faction):
 		var _unit_out_of_supply_event:UnitOutOfSupplyEvent = UnitOutOfSupplyEvent.new(_unit_id)
-		ChangeEventHandler.execute_change_event(_unit_out_of_supply_event, true)
+		CardPlayHandler.instance.execute_change_event(_unit_out_of_supply_event, true)
 		await EventBusLocal.card_play_handler_completed
-		_reset_card_hanlder()
-	
+		_reset_card_hanlder()	
 	progress_game()
 	pass
 
