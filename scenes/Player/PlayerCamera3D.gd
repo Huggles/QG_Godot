@@ -1,2 +1,1 @@
-class_name PlayerCamera3D
-extends Camera3D
+class_name PlayerCamera3D extends Camera3D

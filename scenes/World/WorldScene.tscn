@@ -1,11 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://ulu5d3pvyttl"]
+[gd_scene load_steps=3 format=3 uid="uid://ulu5d3pvyttl"]
 
-[ext_resource type="Script" uid="uid://l4ws6s4410i8" path="res://scripts/World/WorldScene.gd" id="1_byfi5"]
 [ext_resource type="Texture2D" uid="uid://b6rlobc622abu" path="res://assets/textures/Countries/World_Clean.png" id="3_uu1v5"]
 [ext_resource type="Texture2D" uid="uid://ly4yeqnos5w3" path="res://assets/textures/Other/WoodTable.jpg" id="5_50r1o"]
 
 [node name="World" type="Node3D"]
-script = ExtResource("1_byfi5")
 
 [node name="Countries" type="Node3D" parent="."]
 unique_name_in_owner = true

@@ -1,4 +1,4 @@
-class_name DataObject
+class_name DataObject extends Object
 
 var data_class:String
 

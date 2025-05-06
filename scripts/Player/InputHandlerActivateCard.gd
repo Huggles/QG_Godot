@@ -11,7 +11,7 @@ func _calculate_activation_options():
 
 
 func _init(_faction:Enum.Faction) -> void:	
-	self.faction = faction
+	self.faction = _faction
 	_calculate_activation_options()
 	
 	var _text_lines:Array[String] = []

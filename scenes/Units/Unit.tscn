@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://btx0cwjn67mo2"]
 
-[ext_resource type="Script" uid="uid://dmhaj56hd3vyy" path="res://scripts/Units/UnitScene.gd" id="1_buvj4"]
+[ext_resource type="Script" uid="uid://buwmfq5vmxxi8" path="res://scripts/C#/Scenes/UnitScene.cs" id="1_8vg5g"]
 [ext_resource type="Texture2D" uid="uid://cqehtwpiof1rd" path="res://assets/textures/Other/SupplyIcon.png" id="3_ided0"]
 [ext_resource type="PackedScene" uid="uid://p05f75g6qm2o" path="res://scenes/clickable_sprite_3d.tscn" id="3_v5sho"]
 [ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="4_iecer"]
@@ -14,7 +14,7 @@ shader_parameter/selectable_texture = ExtResource("5_1bc45")
 shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
 
 [node name="Unit" type="Node3D"]
-script = ExtResource("1_buvj4")
+script = ExtResource("1_8vg5g")
 
 [node name="UnitSprite3D" type="Sprite3D" parent="."]
 unique_name_in_owner = true
@@ -40,6 +40,3 @@ render_priority = 2
 outline_render_priority = 1
 text = "ASDASDA"
 outline_size = 15
-
-[connection signal="mouse_left_click_opaque" from="ClickableSprite3D" to="." method="_on_clickable_sprite_3d_mouse_left_click_opaque"]
-[connection signal="mouse_left_double_click_opaque" from="ClickableSprite3D" to="." method="_on_clickable_sprite_3d_mouse_left_double_click_opaque"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://6g7c3c7dw4ys"]
 
-[ext_resource type="Script" uid="uid://dmrgckqv1ap05" path="res://scenes/HostLabel.gd" id="1_7kkia"]
+[ext_resource type="PackedScene" uid="uid://ulu5d3pvyttl" path="res://scenes/World/WorldScene.tscn" id="1_qbsmt"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_ys2y3"]
 font_color = Color(0, 1, 1, 1)
@@ -13,7 +13,7 @@ font_color = Color(0, 1, 1, 1)
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1000)
 
-[node name="Networked" type="Node3D" parent="."]
+[node name="World" parent="." instance=ExtResource("1_qbsmt")]
 
 [node name="UserInterface" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
@@ -32,4 +32,3 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "Hello World"
 label_settings = SubResource("LabelSettings_ys2y3")
-script = ExtResource("1_7kkia")

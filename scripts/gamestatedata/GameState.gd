@@ -7,6 +7,8 @@ var card_play_handler:CardPlayHandler
 
 var active_player_card:CardState
 
+var _change_event_counter:int = 0
+
 signal COUNTRY_CLICKED
 
 #List of country states, containing live data about the countries in this game. 

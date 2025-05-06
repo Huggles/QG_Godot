@@ -12,17 +12,14 @@ config_version=5
 
 config/name="Quartermaster General"
 run/main_scene="res://scenes/Game.tscn"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-NodeUtilities="*res://scripts/Utilities/NodeUtilities.gd"
-DebugUtilities="*res://scripts/Utilities/DebugUtilities.gd"
-MultiplayerManager="*res://scripts/Menu/MultiplayerManager.gd"
-GameManager="*res://scripts/Managers/GameManager.gd"
-StaticGameData="*res://scripts/DataObjects/StaticGameData.gd"
-EventBusLocal="*res://EventBusLocal.gd"
+NodeUtilities="*res://scripts/C#/Utils/NodeUtilities.cs"
+DebugUtilities="*res://scripts/C#/Utils/DebugUtilities.cs"
+GameManager="*res://scripts/C#/Game/GameManager.cs"
 
 [debug]
 

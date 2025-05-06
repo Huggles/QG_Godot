@@ -1,0 +1,74 @@
+[
+	{
+		"UniqueName": "GERMANY",
+		"Index": 0,
+		"Label": "Germany",
+		"ColorString": "#5f5f5e",
+		"ColorStringText": "#ffffff",
+		"Team" : "AXIS",
+		"Homespace" : "GERMANY",
+		"Deck" : [],
+		"NumberOfArmyUnits" : 10,
+		"NumberOfNavyUnits" : 10
+	},
+	{
+		"UniqueName": "UNITED_KINGDOM",
+		"Index": 1,
+		"Label": "United Kingdom",
+		"ColorString": "#b1b103",
+		"ColorStringText": "#ffffff",
+		"Team" : "ALLIES",
+		"Homespace" : "UNITED_KINGDOM",
+		"Deck" : [],
+		"NumberOfArmyUnits" : 10,
+		"NumberOfNavyUnits" : 10
+	},
+	{
+		"UniqueName": "JAPAN",
+		"Index": 2,
+		"Label": "Japan",
+		"ColorString": "#ccddee",
+		"ColorStringText": "#000000",
+		"Team" : "AXIS",
+		"Homespace" : "JAPAN",
+		"Deck" : [],
+		"NumberOfArmyUnits" : 10,
+		"NumberOfNavyUnits" : 10
+	},
+	{
+		"UniqueName": "SOVIET",
+		"Index": 3,
+		"Label": "Soviet Union",
+		"ColorString": "#b60101",
+		"ColorStringText": "#ffffff",
+		"Team" : "ALLIES",
+		"Homespace" : "MOSCOW",
+		"Deck" : [],
+		"NumberOfArmyUnits" : 10,
+		"NumberOfNavyUnits" : 10
+	},
+	{
+		"UniqueName": "ITALY",
+		"Index": 4,
+		"Label": "Italy",
+		"ColorString": "#c20070",
+		"ColorStringText": "#fffff",
+		"Team" : "AXIS",
+		"Homespace" : "ITALY",
+		"Deck" : [],
+		"NumberOfArmyUnits" : 10,
+		"NumberOfNavyUnits" : 10
+	},
+	{
+		"UniqueName": "UNITED_STATES",
+		"Index": 5,
+		"Label": "United States",		
+		"ColorString": "#006d23",
+		"ColorStringText": "#ffffff",
+		"Team" : "ALLIES",
+		"Homespace" : "US_EAST",
+		"Deck" : [],
+		"NumberOfArmyUnits" : 10,
+		"NumberOfNavyUnits" : 10
+	}
+]

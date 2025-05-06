@@ -5,12 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Play",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "C:/Users/Hugo/Desktop/Utilities/Godot/Godot_v4.4.1-stable_mono_win64",
+            "preLaunchTask": "build",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+          },
+        {
             "name": "Launch",
             "type": "godot",
             "request": "launch",
             "project": "${workspaceFolder}",
             "address": "127.0.0.1",
             "port": 6007,
+            "preLaunchTask": "build",
             // engine command line flags
             "profiling": false,
             "single_threaded_scene": false,

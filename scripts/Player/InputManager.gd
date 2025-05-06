@@ -32,6 +32,10 @@ func set_play_card_input_active() -> InputHandlerPlayCard:
 func set_activate_action_input_active(_faction:Enum.Faction) -> InputHandlerActivateCard:
 	self.input_handler = InputHandlerActivateCard.new(_faction)
 	return self.input_handler
+
+func set_activate_before_action_input_active(_faction:Enum.Faction, _gce:GameChangeEvent) -> InputHandlerActivateCard:
+	self.input_handler = InputHandlerActivateBeforeCard.new(_faction, _gce)
+	return self.input_handler
 	
 func set_discard_input_active() -> InputHandlerDiscardCard:
 	self.input_handler = InputHandlerDiscardCard.new()

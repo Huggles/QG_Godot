@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bsfwdbone0b1r"]
+[gd_scene load_steps=2 format=3 uid="uid://bsfwdbone0b1r"]
 
-[ext_resource type="Script" uid="uid://26t0oibst5yn" path="res://scenes/cards/faction_hand_display.gd" id="1_wt6hf"]
-[ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_t87bm"]
+[ext_resource type="Script" uid="uid://1urdnsxckvlr" path="res://scripts/C#/UI/FactionHandDisplay.cs" id="1_yrcqs"]
 
 [node name="FactionHandDisplay" type="Control"]
 layout_mode = 3
@@ -11,7 +10,7 @@ anchor_bottom = 1.0
 offset_bottom = -730.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_wt6hf")
+script = ExtResource("1_yrcqs")
 
 [node name="CardsContainerPanel" type="Panel" parent="."]
 layout_mode = 1
@@ -20,17 +19,3 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Card1" parent="CardsContainerPanel" instance=ExtResource("2_t87bm")]
-layout_mode = 1
-offset_left = -250.0
-offset_top = -350.0
-offset_right = 250.0
-offset_bottom = 350.0
-
-[node name="Card2" parent="CardsContainerPanel" instance=ExtResource("2_t87bm")]
-layout_mode = 1
-offset_left = -250.0
-offset_top = -350.0
-offset_right = 250.0
-offset_bottom = 350.0

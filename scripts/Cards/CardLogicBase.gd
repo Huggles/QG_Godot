@@ -22,6 +22,8 @@ var is_activated_this_turn:bool:
 var is_publicly_visible:bool:
 	get: return is_played || (card_data.type == "RESPONSE" && is_activated_once)
 
+
+
 var completed_parts:Array[int]
 
 # var card_front_texture: Texture2D: 
@@ -57,9 +59,6 @@ func can_activate_action(_game_change_event:GameChangeEvent) -> bool:
 func _can_activate_action(_game_change_event:GameChangeEvent) -> bool:
 	return false
 
-
-
-
 func play_card():
 	if _can_play_card(part_counter):
 		PlayerActionLabel.show_text(_play_action_guidance(part_counter))		
@@ -85,8 +84,22 @@ func _activate_action_guidance(_part:int)->String:
 func _play_card(_part:int):
 	pass
 
-func _activate_action(_game_change_event:GameChangeEvent, part:int):
+func _activate_action(_game_change_event:GameChangeEvent, _part:int):
 	pass
+
+
+func can_activate_before(_game_change_event:GameChangeEvent) -> bool:
+	return _can_activate_before(_game_change_event)
+
+func _can_activate_before(_game_change_event:GameChangeEvent) -> bool:
+	return false
+
+func activate_before(_game_change_event:GameChangeEvent):
+	return _activate_before(_game_change_event)
+
+func _activate_before(_game_change_event:GameChangeEvent):
+	pass
+
 
 #For cards with multiple actions
 var part_counter = 1

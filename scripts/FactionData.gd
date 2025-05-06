@@ -1,5 +1,5 @@
-extends DataObject
-class_name FactionData
+
+class_name FactionData extends DataObject
 
 var name:String
 var index:int

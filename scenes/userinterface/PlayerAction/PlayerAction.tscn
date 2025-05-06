@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b6hfp06nmb2ux"]
 
-[ext_resource type="Script" uid="uid://b8wel7b0cmcrb" path="res://scenes/userinterface/PlayerAction/PlayerActionLabel.gd" id="1_gvner"]
+[ext_resource type="Script" uid="uid://dee08ewurrpis" path="res://scripts/C#/UI/PlayerActionLabel.cs" id="1_gvner"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gvner"]
 bg_color = Color(1, 1, 1, 1)

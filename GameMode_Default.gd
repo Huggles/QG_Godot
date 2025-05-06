@@ -25,9 +25,7 @@ func _generate_faction_states():
 				card_counter+=1
 				card_states_for_faction.push_back(card_state)				
 				_faction_state.deck_state.deck_card_ids.push_back(card_state.id)
-	
-
-func _generate_country_states():
+	func _generate_country_states():
 	#First create all country states
 	for _data in StaticGameData.country_data:
 		var _country_state:CountryState = CountryState.new(_data)		
@@ -73,85 +71,89 @@ func _place_starting_units():
 	for _faction_data in StaticGameData.faction_data:
 		_country_state = StaticGameData.countries_by_name[_faction_data.homespace]
 		_deploy_unit_change_event = DeployUnitChangeEvent.new(_faction_data.faction_enum, _country_state.id, Enum.DeployType.RECRUIT)
-		CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)							
+		ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)	
 	
 	_country_state = StaticGameData.countries_by_name["SIBERIA"]
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.GERMANY, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event,  false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 	
 	_country_state = StaticGameData.countries_by_name["BALKANS"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.GERMANY, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 	
 	_country_state = StaticGameData.countries_by_name["MEDITERRANEAN_SEA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.GERMANY, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["NORTH_AFRICA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.GERMANY, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)	
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["NORTH_SEA"]
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_KINGDOM, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["SEA_OF_JAPAN"]
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.JAPAN, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["UKRAINE"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["EASTERN_EUROPE"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["RUSSIA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["INDIA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["CHINA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["SOUTH_EAST_ASIA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["SZECHUAN"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["SOUTH_CHINA_SEA"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.SOVIET, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 	
 	_country_state = StaticGameData.countries_by_name["EAST_PACIFIC"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_STATES, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 	
 	_country_state = StaticGameData.countries_by_name["CENTRAL_PACIFIC"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_STATES, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["UKRAINE"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_STATES, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 
 	_country_state = StaticGameData.countries_by_name["EASTERN_EUROPE"]			
 	_deploy_unit_change_event = DeployUnitChangeEvent.new(Enum.Faction.UNITED_STATES, _country_state.id, Enum.DeployType.RECRUIT)			
-	CardPlayHandler.instance.execute_change_event(_deploy_unit_change_event, false)
+	ChangeEventHandler.execute_change_event_without_trigger(_deploy_unit_change_event)
 	
 	var _deck_state_germany = DeckState.for_faction(Enum.Faction.GERMANY)
 	_deck_state_germany.play_card_by_name("Status_Blitzkrieg")
 	_deck_state_germany.play_card_by_name("Status_SyntheticFuel")
 	_deck_state_germany.play_card_by_name("Status_DiveBombers")
 	_deck_state_germany.play_card_by_name("Status_BiasForAction")
+
+	var _deck_state_soviet = DeckState.for_faction(Enum.Faction.SOVIET)
+	_deck_state_soviet.play_card_by_name("Response_Stalingrad")
+	
 
 	
 	

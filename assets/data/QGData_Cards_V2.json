@@ -1,0 +1,1172 @@
+[
+	{
+		"UniqueName": "BuildArmy",
+		"Number": "1",
+		"Type": "BUILD_ARMY",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "BuildArmy",
+		"Label": null,
+		"Text": null
+	},
+	{
+		"UniqueName": "BuildNavy",
+		"Number": "2",
+		"Type": "BUILD_NAVY",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "BuildNavy",
+		"Label": null,
+		"Text": null
+	},
+	{
+		"UniqueName": "LandBattle",
+		"Number": "3",
+		"Type": "LAND_BATTLE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "LandBattle",
+		"Label": null,
+		"Text": null
+	},
+	{
+		"UniqueName": "SeaBattle",
+		"Number": "4",
+		"Type": "SEA_BATTLE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "SeaBattle",
+		"Label": null,
+		"Text": null
+	},
+	{
+		"UniqueName": "Event_MilitaryDictatorshipsintheBalkans",
+		"Number": "25",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventMilitaryDictatorshipsintheBalkans",
+		"Label": "Military Dictatorships in the Balkans [WIP]",
+		"Text": "Recruit an Italian Army in the Balkans: then eliminate an Allied Army in Ukraine."
+	},
+	{
+		"UniqueName": "Status_DiveBombers",
+		"Number": "26",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusDiveBombers",
+		"Label": "Dive Bombers [WIP]",
+		"Text": "Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to battle in the same or adjacent land space to the one battled."
+	},
+	{
+		"UniqueName": "Status_WolfPacks",
+		"Number": "27",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusWolfPacks",
+		"Label": "Wolf Packs [WIP]",
+		"Text": "German EW cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia."
+	},
+	{
+		"UniqueName": "Status_Blitzkrieg",
+		"Number": "28",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusBlitzkrieg",
+		"Label": "Blitzkrieg [WIP]",
+		"Text": "Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to build an Army in the space battled."
+	},
+	{
+		"UniqueName": "Status_BiasForAction",
+		"Number": "29",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusBiasForAction",
+		"Label": "Bias for Action [WIP]",
+		"Text": "Use once per turn when you build an Army. Discard the top 1 card of your draw deck to battle a land space adjacent to the Army just built."
+	},
+	{
+		"UniqueName": "Status_SuperiorPlanning",
+		"Number": "30",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusSuperiorPlanning",
+		"Label": "Superior Planning [WIP]",
+		"Text": "Use once per turn at the beginning of your turn. Examine the top 4 cards of your draw deck and put them back in the order of your choice."
+	},
+	{
+		"UniqueName": "Status_AbundantResources",
+		"Number": "31",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusAbundantResources",
+		"Label": "Abundant Resources [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point for each German Army in Ukraine, Kazakhstan, or Russia."
+	},
+	{
+		"UniqueName": "Status_SyntheticFuel",
+		"Number": "32",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusSyntheticFuel",
+		"Label": "Synthetic Fuel [WIP]",
+		"Text": "Use once per turn when you build an Army. Discard the top 2 cards of your draw deck to build an Army adjacent to the Army just built."
+	},
+	{
+		"UniqueName": "EW_SubmarinesRaidMurmanskConvoy",
+		"Number": "33",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWSubmarinesRaidMurmanskConvoy",
+		"Label": "Submarines Raid Murmansk Convoy [WIP]",
+		"Text": "For each German Army or Navy in or adjacent to Scandinavia: gain +1 Victory Point and the Soviet Union must discard the top 2 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Status_AtlanticWall",
+		"Number": "34",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusAtlanticWall",
+		"Label": "Atlantic Wall [WIP]",
+		"Text": "Use once per turn when an Axis Army is battled in Western Europe. The country initiating the battle must discard the top 3 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Status_Volksturm",
+		"Number": "35",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusVolksturm",
+		"Label": "Volksturm [WIP]",
+		"Text": "Use once per turn, at the beginning of your turn. Discard the top 1 card of your draw deck to recruit an Army in Germany. (This is in addition to your Play step.)"
+	},
+	{
+		"UniqueName": "EW_SubmarinesoftheMonsoonGroup",
+		"Number": "36",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWSubmarinesoftheMonsoonGroup",
+		"Label": "Submarines of the Monsoon Group [WIP]",
+		"Text": "The Allied country of your choice must discard the top 2 cards of its draw deck. Gain +2 Victory Points."
+	},
+	{
+		"UniqueName": "Event_BroadFront",
+		"Number": "37",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventBroadFront",
+		"Label": "Broad Front [WIP]",
+		"Text": "Conduct up to 3 battles, each in a space that was occupied by a Soviet Army adjacent to a German Army at the beginning of the turn."
+	},
+	{
+		"UniqueName": "Event_GunsandButter",
+		"Number": "38",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventGunsandButter",
+		"Label": "Guns and Butter [WIP]",
+		"Text": "This card can be used to: build an Army; build a Navy; land battle; or sea battle."
+	},
+	{
+		"UniqueName": "EW_SubmarinesEnforceBlockade",
+		"Number": "39",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWSubmarinesEnforceBlockade",
+		"Label": "Submarines Enforce Blockade [WIP]",
+		"Text": "For each German Army adjacent to the North Sea, gain +1 Victory Point and the United Kingdom must discard the top 2 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Status_SwedishIronOre",
+		"Number": "40",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusSwedishIronOre",
+		"Label": "Swedish Iron Ore [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point if a German Navy is in the Baltic Sea; then gain +1 Victory Point if a German Army is in Scandinavia."
+	},
+	{
+		"UniqueName": "EW_SubmarinesLeadtheBattleoftheAtlantic",
+		"Number": "41",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWSubmarinesLeadtheBattleoftheAtlantic",
+		"Label": "Submarines Lead the Battle of the Atlantic [WIP]",
+		"Text": "For each German Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 2 cards of its draw deck."
+	},
+	{
+		"UniqueName": "EW_VWeapons",
+		"Number": "42",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWVWeapons",
+		"Label": "V-Weapons [WIP]",
+		"Text": "If a German Army is in Western Europe, gain +3 Victory Points and the United Kingdom must discard the top 1 card of its draw deck."
+	},
+	{
+		"UniqueName": "Status_Conscription",
+		"Number": "43",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusConscription",
+		"Label": "Conscription [WIP]",
+		"Text": "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army."
+	},
+	{
+		"UniqueName": "Event_Plunder",
+		"Number": "44",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventPlunder",
+		"Label": "Plunder [WIP]",
+		"Text": "Gain +1 Victory Point for each German Army or Navy outside Germany."
+	},
+	{
+		"UniqueName": "Event_ForcedConscription",
+		"Number": "45",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventForcedConscription",
+		"Label": "Forced Conscription [WIP]",
+		"Text": "Recruit 1 or 2 Armies in or adjacent to Germany."
+	},
+	{
+		"UniqueName": "Status_JetFighters",
+		"Number": "46",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusJetFighters",
+		"Label": "Jet Fighters [WIP]",
+		"Text": "When you are the target of an EW card, reduce the number of cards you must discard by 3 (minimum 0)."
+	},
+	{
+		"UniqueName": "EW_SubmarinesPreyonUnprotectedShipping",
+		"Number": "47",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWSubmarinesPreyonUnprotectedShipping",
+		"Label": "Submarines Prey on Unprotected Shipping [WIP]",
+		"Text": "The United Kingdom must discard the top 2 cards of its draw deck; and 3 more if there is no Allied Navy in the North Sea. Gain +1 Victory Point."
+	},
+	{
+		"UniqueName": "Event_TheAutobahn",
+		"Number": "48",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventTheAutobahn",
+		"Label": "The Autobahn [WIP]",
+		"Text": "One at a time, once per Army, you may eliminate each German Army on the board and then build that Army."
+	},
+	{
+		"UniqueName": "Status_MackenzieKingDraftstheNationalResourcesMobilizationAct",
+		"Number": "49",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusMackenzieKingDraftstheNationalResourcesMobilizationAct",
+		"Label": "Mackenzie King Drafts the National Resources Mobilization Act [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point if a United Kingdom Navy is in the North Atlantic; then gain +1 Victory Point if a United Kingdom Army is in Canada."
+	},
+	{
+		"UniqueName": "Status_AustraliaFormstheDirectorateofManpower",
+		"Number": "50",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusAustraliaFormstheDirectorateofManpower",
+		"Label": "Australia Forms the Directorate of Manpower [WIP]",
+		"Text": "Whenever you may build an Army, you may instead recruit that Army in Australia."
+	},
+	{
+		"UniqueName": "Status_LordLinlithgowDeclaresIndiatoBeatWar",
+		"Number": "51",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusLordLinlithgowDeclaresIndiatoBeatWar",
+		"Label": "Lord Linlithgow Declares India to Be at War [WIP]",
+		"Text": "Whenever you may build an Army, you may instead recruit that Army in India."
+	},
+	{
+		"UniqueName": "EW_BomberCommand",
+		"Number": "52",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWBomberCommand",
+		"Label": "Bomber Command [WIP]",
+		"Text": "Your choice of Germany or Italy must discard the top 4 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Event_SingaporeFortified",
+		"Number": "53",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventSingaporeFortified",
+		"Label": "Singapore Fortified [WIP]",
+		"Text": "Recruit an Army in Southeast Asia and then a Navy in the South China Sea."
+	},
+	{
+		"UniqueName": "EW_MaltaSubmarines",
+		"Number": "54",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWMaltaSubmarines",
+		"Label": "Malta Submarines [WIP]",
+		"Text": "Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean."
+	},
+	{
+		"UniqueName": "Event_KingPeterEnthronedinYugoslavia",
+		"Number": "55",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventKingPeterEnthronedinYugoslavia",
+		"Label": "King Peter Enthroned in Yugoslavia [WIP]",
+		"Text": "Eliminate an Axis Army in the Balkans; then recruit an Army in the Balkans."
+	},
+	{
+		"UniqueName": "Status_Resistance",
+		"Number": "56",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusResistance",
+		"Label": "Resistance [WIP]",
+		"Text": "During your Play step, instead of playing a card from hand, discard 2 cards from your hand to battle in Western Europe or Italy."
+	},
+	{
+		"UniqueName": "Response_ASWTactics",
+		"Number": "57",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseASWTactics",
+		"Label": "ASW Tactics [WIP]",
+		"Text": "Use immediately after an Axis player plays an EW card. Ignore the game text of that EW card."
+	},
+	{
+		"UniqueName": "Response_DefensivePosture",
+		"Number": "58",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseDefensivePosture",
+		"Label": "Defensive Posture [WIP]",
+		"Text": "Use when your supplied Army is about to be removed. Do not remove that Army this turn."
+	},
+	{
+		"UniqueName": "Response_Destroyers",
+		"Number": "59",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseDestroyers",
+		"Label": "Destroyers [WIP]",
+		"Text": "Use when a supplied United States or United Kingdom Navy is about to be removed. Do not remove that Navy this turn."
+	},
+	{
+		"UniqueName": "Event_IncreasedCommonwealthSupport",
+		"Number": "60",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventIncreasedCommonwealthSupport",
+		"Label": "Increased Commonwealth Support [WIP]",
+		"Text": "Recruit a United Kingdom Army in India, Australia, or Canada."
+	},
+	{
+		"UniqueName": "Response_EnigmaCodeCracked",
+		"Number": "61",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseEnigmaCodeCracked",
+		"Label": "Enigma Code Cracked [WIP]",
+		"Text": "Use immediately after Germany uses a Status card's game text. Discard the Status card just after is has been used."
+	},
+	{
+		"UniqueName": "Status_TheRoyalNavy",
+		"Number": "62",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusTheRoyalNavy",
+		"Label": "The Royal Navy [WIP]",
+		"Text": "Use once per turn when you battle a sea space. Discard 2 cards from your hand to battle the same or a different sea space."
+	},
+	{
+		"UniqueName": "Response_LoyaltotheCrown",
+		"Number": "63",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseLoyaltotheCrown",
+		"Label": "Loyal to the Crown [WIP]",
+		"Text": "Use immediately after an Axis Army is built in India, Australia, or Canada. Eliminate the Army just built."
+	},
+	{
+		"UniqueName": "Response_Rationing",
+		"Number": "64",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseRationing",
+		"Label": "Rationing [WIP]",
+		"Text": "Use during your Play step after playing a card. Instead of placing that card in your discard pile, shuffle it into your draw deck."
+	},
+	{
+		"UniqueName": "Event_GeneralSmutsStrengthensTiestoUK",
+		"Number": "65",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventGeneralSmutsStrengthensTiestoUK",
+		"Label": "General Smuts Strengthens Ties to UK [WIP]",
+		"Text": "Recruit an Army in Africa and a Navy in the Southern Ocean or the Bay of Bengal."
+	},
+	{
+		"UniqueName": "Response_RAF",
+		"Number": "66",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseRAF",
+		"Label": "RAF [WIP]",
+		"Text": "Use when your piece in or adjacent to the United Kingdom is about to be removed. Do not remove that piece this turn."
+	},
+	{
+		"UniqueName": "EW_SubmarinesSupportPacificIslands",
+		"Number": "67",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWSubmarinesSupportPacificIslands",
+		"Label": "Submarines Support Pacific Islands [WIP]",
+		"Text": "For each Japanese Navy in or adjacent to the East Pacific, gain +2 Victory Points and the United States must discard the top 2 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Response_ChinaOffensive",
+		"Number": "68",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseChinaOffensive",
+		"Label": "China Offensive [WIP]",
+		"Text": "Use when you battle in China or an adjacent land space. Build an Army in the space battled: then battle in China or an adjacent land space."
+	},
+	{
+		"UniqueName": "Response_DestroyerTransport",
+		"Number": "69",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseDestroyerTransport",
+		"Label": "Destroyer Transport [WIP]",
+		"Text": "Use when you battle a sea space. Build 1 or 2 Armies adjacent to the space just battled."
+	},
+	{
+		"UniqueName": "EW_IndianOceanPatrols",
+		"Number": "70",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWIndianOceanPatrols",
+		"Label": "Indian Ocean Patrols [WIP]",
+		"Text": "For each Japanese Navy in or adjacent to the Bay of Bengal, gain +2 Victory Points and the United Kingdom must discard the top 2 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Response_Truk",
+		"Number": "71",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseTruk",
+		"Label": "Truk [WIP]",
+		"Text": "Use anytime during your turn. All Japanese pieces in or adjacent to the Central Pacific are in supply for the rest of this turn."
+	},
+	{
+		"UniqueName": "EW_ImperialDesigns",
+		"Number": "72",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWImperialDesigns",
+		"Label": "Imperial Designs [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point if a Japanese Army is in Iwo Jima or the Philippines. (Only +1 Victory Point can be earned.)"
+	},
+	{
+		"UniqueName": "Response_KwantungArmy",
+		"Number": "73",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseKwantungArmy",
+		"Label": "Kwantung Army [WIP]",
+		"Text": "Use when a supplied Japanese Army is about to be removed from China, Szechuan, Mongolia, or Vladivostok. Do not remove that Army this turn."
+	},
+	{
+		"UniqueName": "Status_UnimpededMerchantShipping",
+		"Number": "74",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusUnimpededMerchantShipping",
+		"Label": "Unimpeded Merchant Shipping [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point if the Allies do not have an Army in Hawaii."
+	},
+	{
+		"UniqueName": "Response_BanzaiCharge",
+		"Number": "75",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseBanzaiCharge",
+		"Label": "Banzai Charge [WIP]",
+		"Text": "Use when you battle a land space. Battle in the same or an adjacent land space to the one just battled."
+	},
+	{
+		"UniqueName": "Status_ForwardBases",
+		"Number": "76",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusForwardBases",
+		"Label": "Forward Bases [WIP]",
+		"Text": "During your Victory step, gain +2 Victory Points if a Japanese Army is in Hawaii, Pacific Northwest, or New Zealand. (Only +2 Victory Point can be earned.)"
+	},
+	{
+		"UniqueName": "Response_Kamikaze",
+		"Number": "77",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseKamikaze",
+		"Label": "Kamikaze [WIP]",
+		"Text": "Use immediately after an Allied Navy is built adjacent to a Japanese piece. Eliminate the Navy just built."
+	},
+	{
+		"UniqueName": "Status_GreaterEastAsiaCoProsperitySphere",
+		"Number": "78",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusGreaterEastAsiaCoProsperitySphere",
+		"Label": "Greater East Asia Co Prosperity Sphere [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point for each Japanese Army in Indonesia, New Guinea, or Southeast Asia."
+	},
+	{
+		"UniqueName": "Response_FallofSingapore",
+		"Number": "79",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseFallofSingapore",
+		"Label": "Fall of Singapore [WIP]",
+		"Text": "Use when you battle in Southeast Asia. Battle the South China Sea; then recruit an Army in Southeast Asia."
+	},
+	{
+		"UniqueName": "Response_SurpriseAttack",
+		"Number": "80",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseSurpriseAttack",
+		"Label": "Surprise Attack [WIP]",
+		"Text": "Use when you battle a sea space. Battle a sea space; then battle a land space."
+	},
+	{
+		"UniqueName": "Response_MobileForce",
+		"Number": "81",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseMobileForce",
+		"Label": "Mobile Force [WIP]",
+		"Text": "Use at the beginning of your turn. Recruit a Navy in or adjacent to the North Pacific."
+	},
+	{
+		"UniqueName": "Response_BattleshipRepair",
+		"Number": "82",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseBattleshipRepair",
+		"Label": "Battleship Repair [WIP]",
+		"Text": "Use when your supplied Navy is about to be removed. Do not remove that Navy this turn."
+	},
+	{
+		"UniqueName": "Response_SpecialNavalLandingForces",
+		"Number": "83",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseSpecialNavalLandingForces",
+		"Label": "Special Naval Landing Forces [WIP]",
+		"Text": "Use when you build a Navy. Build two Armies adjacent to the space where you built the Navy."
+	},
+	{
+		"UniqueName": "Event_MaoTsetung",
+		"Number": "84",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventMaoTsetung",
+		"Label": "Mao Tse-tung [WIP]",
+		"Text": "Eliminate an Axis Army in China or Szechuan."
+	},
+	{
+		"UniqueName": "Event_Tito'sPartisans",
+		"Number": "85",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventTito'sPartisans",
+		"Label": "Tito's Partisans [WIP]",
+		"Text": "Eliminate an Axis Army in the Balkans; Then recruit a Soviet or United Kingdom Army in the Balkans."
+	},
+	{
+		"UniqueName": "Event_GeneralWinter",
+		"Number": "86",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventGeneralWinter",
+		"Label": "General Winter  [WIP]",
+		"Text": "Eliminate 1 or 2 Axis Armies in or adjacent to Moscow."
+	},
+	{
+		"UniqueName": "Event_GermanSovietTreatyofFriendshipCooperationandDemarcation",
+		"Number": "87",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventGermanSovietTreatyofFriendshipCooperationandDemarcation",
+		"Label": "German-Soviet Treaty of Friendship, Cooperation, and Demarcation [WIP]",
+		"Text": "Recruit an Army in Russia and an Army in Eastern Europe."
+	},
+	{
+		"UniqueName": "Event_TransSiberianRailroad",
+		"Number": "88",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventTransSiberianRailroad",
+		"Label": "Trans-Siberian Railroad [WIP]",
+		"Text": "One at a time, once per Army, you may eliminate each SovietArmy on the board and then build that Army."
+	},
+	{
+		"UniqueName": "Response_DefenseoftheMotherland",
+		"Number": "90",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseDefenseoftheMotherland",
+		"Label": "Vasilevsky Takes Command in the Far East [WIP]",
+		"Text": "Use at the beginning of your turn. Recruit an Army in or adjacent to Moscow; then eliminate an Axis Army in Moscow."
+	},
+	{
+		"UniqueName": "Response_Stalingrad",
+		"Number": "91",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseStalingrad",
+		"Label": "Stalingrad",
+		"Text": "Use when your Army in Ukraine is about to be removed. Do not remove that Army this turn."
+	},
+	{
+		"UniqueName": "Response_Leningrad",
+		"Number": "92",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseLeningrad",
+		"Label": "Stalingrad [WIP]",
+		"Text": "Use when your Army in Russia is about to be removed. Do not remove that Army this turn."
+	},
+	{
+		"UniqueName": "Response_Rasputitsa",
+		"Number": "93",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseRasputitsa",
+		"Label": "Leningrad [WIP]",
+		"Text": "Use immediately after an Axis Army is built in or adjacent to Moscow. Eliminate the Army just built."
+	},
+	{
+		"UniqueName": "Response_Moscow",
+		"Number": "94",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseMoscow",
+		"Label": "Rasputitsa [WIP]",
+		"Text": "Use when your Army in Moscow is about to be removed. Do not remove that Army this turn."
+	},
+	{
+		"UniqueName": "Status_Shvernik'sEvacuationCouncil",
+		"Number": "95",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusShvernik'sEvacuationCouncil",
+		"Label": "Moscow [WIP]",
+		"Text": "Soviet Armies are never out of supply. Armies must still be built adjacent to another supplied piece, or in your Home space."
+	},
+	{
+		"UniqueName": "Status_FrontalAssault",
+		"Number": "96",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusFrontalAssault",
+		"Label": "Shvernik's Evacuation Council [WIP]",
+		"Text": "Use once per turn when you battle a land space. Discard 2 cards from your hand to battle in the same or adjacent land space to the one battled."
+	},
+	{
+		"UniqueName": "Status_WomenConscripts",
+		"Number": "97",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusWomenConscripts",
+		"Label": "Frontal Assault [WIP]",
+		"Text": "Use when you play a Build Army card for your Play step. Place that Build Army card on the top of your draw deck instead of discarding it."
+	},
+	{
+		"UniqueName": "Status_StavkaFormsArtilleryCorps",
+		"Number": "98",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusStavkaFormsArtilleryCorps",
+		"Label": "Women Conscripts [WIP]",
+		"Text": "Use once per turn when you battle a land space. Discard a card from hand to battle the same space."
+	},
+	{
+		"UniqueName": "Status_Guards",
+		"Number": "99",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusGuards",
+		"Label": "Stavka Forms Artillery Corps [WIP]",
+		"Text": "During your Play step, instead of playing a card from hand, discard 2 cards from your hand to play a Build Army card from your discard pile."
+	},
+	{
+		"UniqueName": "Status_ScorchedEarth",
+		"Number": "100",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusScorchedEarth",
+		"Label": "Guards [WIP]",
+		"Text": "Ukraine is not a Supply space for the Axis."
+	},
+	{
+		"UniqueName": "Event_Plunder",
+		"Number": "101",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventPlunder",
+		"Label": "Scorched Earth [WIP]",
+		"Text": "Gain +1 Victory Point for each Italian Army or Navy outside Italy."
+	},
+	{
+		"UniqueName": "Event_ItalyAttacksCommunists",
+		"Number": "102",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventItalyAttacksCommunists",
+		"Label": "Plunder [WIP]",
+		"Text": "Build an Army in Ukraine and an Army in Russia."
+	},
+	{
+		"UniqueName": "EW_DecimaFlottigliaMASFrogmen",
+		"Number": "103",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWDecimaFlottigliaMASFrogmen",
+		"Label": "Italy Attacks Communists [WIP]",
+		"Text": "The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean. Gain +1 Victory Point."
+	},
+	{
+		"UniqueName": "Event_GermanAidinGreece",
+		"Number": "104",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventGermanAidinGreece",
+		"Label": "Decima Flottiglia MAS (Frogmen) [WIP]",
+		"Text": "Eliminate an Allied Army in the Balkans; then recruit a German Army in the Balkans."
+	},
+	{
+		"UniqueName": "Status_ImperoItaliano",
+		"Number": "105",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusImperoItaliano",
+		"Label": "German Aid in Greece [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point for each Axis Army in North Africa, Africa, or Middle East."
+	},
+	{
+		"UniqueName": "Status_AntiCommunistSentiment",
+		"Number": "106",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusAntiCommunistSentiment",
+		"Label": "Impero Italiano [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point for each Italian Army in Russia or Ukraine."
+	},
+	{
+		"UniqueName": "Status_Bravado",
+		"Number": "107",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusBravado",
+		"Label": "Anti-Communist Sentiment [WIP]",
+		"Text": "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to battle a land space."
+	},
+	{
+		"UniqueName": "Status_BalkanResources",
+		"Number": "108",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusBalkanResources",
+		"Label": "Bravado [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point if an Italian Army is in the Balkans."
+	},
+	{
+		"UniqueName": "Event_DivisionAzul",
+		"Number": "109",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventDivisionAzul",
+		"Label": "Balkan Resources [WIP]",
+		"Text": "Discard a random Soviet Response card from the table. You may not inspect the Response card discarded."
+	},
+	{
+		"UniqueName": "Response_GermanReinforcementsCounterattack",
+		"Number": "110",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseGermanReinforcementsCounterattack",
+		"Label": "Division Azul [WIP]",
+		"Text": "Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space."
+	},
+	{
+		"UniqueName": "Response_SkilledPilots",
+		"Number": "111",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseSkilledPilots",
+		"Label": "German Reinforcements Counterattack [WIP]",
+		"Text": "When you are the target of an EW card, reduce the number of cards you must discard by 5 (minimum 0)"
+	},
+	{
+		"UniqueName": "Response_RomanianReinforcements",
+		"Number": "112",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseRomanianReinforcements",
+		"Label": "Skilled Pilots [WIP]",
+		"Text": "Use immediately after a supplied German Army is removed. Recruit an Italian Army in that space."
+	},
+	{
+		"UniqueName": "Event_AfrikaKorps",
+		"Number": "113",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventAfrikaKorps",
+		"Label": "Romanian Reinforcements [WIP]",
+		"Text": "Recruit a German Army in North Africa and then a German Navy in the Mediterranean."
+	},
+	{
+		"UniqueName": "EW_RegiaMarinaClosesShippingLanes",
+		"Number": "114",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWRegiaMarinaClosesShippingLanes",
+		"Label": "Afrika Korps [WIP]",
+		"Text": "For each Italian Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 1 card of its draw deck."
+	},
+	{
+		"UniqueName": "Response_MonteCassino",
+		"Number": "115",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "ResponseMonteCassino",
+		"Label": "Regia Marina Closes Shipping Lanes [WIP]",
+		"Text": "Use when an Axis Army in Italy is about to be removed. Do not remove that Army this turn."
+	},
+	{
+		"UniqueName": "Event_ItalianEastAfrica",
+		"Number": "116",
+		"Type": "RESPONSE",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventItalianEastAfrica",
+		"Label": "Monte Cassino [WIP]",
+		"Text": "Build an Army in North Africa and then a Navy in the Bay of Bengal."
+	},
+	{
+		"UniqueName": "Status_MareNostrum",
+		"Number": "117",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusMareNostrum",
+		"Label": "Italian East Africa [WIP]",
+		"Text": "During your Victory step, gain +1 Victory Point for each Italian Navy on the board."
+	},
+	{
+		"UniqueName": "Status_AmphibiousLandings",
+		"Number": "118",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusAmphibiousLandings",
+		"Label": "Mare Nostrum [WIP]",
+		"Text": "Use once per turn when you battle a land space. If the space battled is adjacent to a supplied United States Navy, discard the top 1 card of your draw deck to build an Army in the space battled."
+	},
+	{
+		"UniqueName": "Status_FlyingFortresses",
+		"Number": "119",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusFlyingFortresses",
+		"Label": "Amphibious Landings [WIP]",
+		"Text": "Use when you play an EW card. Add 2 to the number of cards the Axis country must discard."
+	},
+	{
+		"UniqueName": "Event_OperationMagic",
+		"Number": "120",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventOperationMagic",
+		"Label": "Flying Fortresses [WIP]",
+		"Text": "Discard a random Japanese Response card from the table. You may not inspect the Response card discarded."
+	},
+	{
+		"UniqueName": "Event_Guadalcanal",
+		"Number": "121",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventGuadalcanal",
+		"Label": "Operation Magic [WIP]",
+		"Text": "Recruit an Army in New Zealand; then. build a Navy adjacent to New Zealand."
+	},
+	{
+		"UniqueName": "EW_B29Superfortress",
+		"Number": "122",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWB29Superfortress",
+		"Label": "Guadalcanal [WIP]",
+		"Text": "If a United States Army is within 3 spaces of Germany, Germany must discard the top 5 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Event_LendLease",
+		"Number": "123",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventLendLease",
+		"Label": "B-29 Superfortress [WIP]",
+		"Text": "Your choice of the United Kingdom or the Soviet Union may play a card and then draw a card."
+	},
+	{
+		"UniqueName": "EW_B26Marauder",
+		"Number": "124",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWB26Marauder",
+		"Label": "Lend Lease [WIP]",
+		"Text": "If a United States Army is within 3 spaces of an Axis Home space, that country must discard the top 4 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Status_Radar",
+		"Number": "125",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusRadar",
+		"Label": "B-26 Marauder [WIP]",
+		"Text": "Use once per turn, when your supplied Navy is battled. Discard the top 2 cards of your draw deck and do not remove that Navy."
+	},
+	{
+		"UniqueName": "Status_RosietheRiveter",
+		"Number": "126",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusRosietheRiveter",
+		"Label": "Radar [WIP]",
+		"Text": "Use once per turn at the beginning of your Discard step. Take 1 or 2 cards from your hand and place them on the bottom of your draw deck."
+	},
+	{
+		"UniqueName": "Event_FlexibleResources",
+		"Number": "127",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventFlexibleResources",
+		"Label": "Rosie the Riveter [WIP]",
+		"Text": "Play a card of your choice from your discard pile."
+	},
+	{
+		"UniqueName": "Status_AircraftCarriers",
+		"Number": "128",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusAircraftCarriers",
+		"Label": "Flexible Resources [WIP]",
+		"Text": "Use once per turn when you battle à sea space. Discard the top 1 card of your draw deck to build a Navy in the space battled."
+	},
+	{
+		"UniqueName": "Status_SuperiorShipyards",
+		"Number": "129",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusSuperiorShipyards",
+		"Label": "Aircraft Carriers [WIP]",
+		"Text": "Use once per turn when you build a Navy. Discard the top 1 card of your draw deck to build an additional Navy."
+	},
+	{
+		"UniqueName": "Status_WartimeProduction",
+		"Number": "130",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusWartimeProduction",
+		"Label": "Superior Shipyards [WIP]",
+		"Text": "Use once per turn when you build an Army. Discard the top 1 card of your draw deck to build an additional Army."
+	},
+	{
+		"UniqueName": "Event_TheaterShift",
+		"Number": "131",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventTheaterShift",
+		"Label": "Wartime Production [WIP]",
+		"Text": "One at a time, once per piece, you may eliminate each United States Army and Navy on the board and then build that piece."
+	},
+	{
+		"UniqueName": "EW_FirestormBombing",
+		"Number": "132",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWFirestormBombing",
+		"Label": "Theater Shift [WIP]",
+		"Text": "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of in draw deck"
+	},
+	{
+		"UniqueName": "Event_MurmanskConvoy",
+		"Number": "133",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventMurmanskConvoy",
+		"Label": "Firestorm Bombing [WIP]",
+		"Text": "Recruit a Soviet Army in Russia; then the Soviet Union may build an Army."
+	},
+	{
+		"UniqueName": "Event_ArsenalofDemocracy",
+		"Number": "134",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventArsenalofDemocracy",
+		"Label": "Murmansk Convoy [WIP]",
+		"Text": "The United Kingdom may build an Army and a Navy in the order of its choice."
+	},
+	{
+		"UniqueName": "EW_SBDDauntless",
+		"Number": "135",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWSBDDauntless",
+		"Label": "Arsenal of Democracy [WIP]",
+		"Text": "If a United States Navy is within 2 spaces of Japan, Japan must discard the top 4 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Event_FleetDeployedtoPearlHarbor",
+		"Number": "136",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventFleetDeployedtoPearlHarbor",
+		"Label": "SBD Dauntless [WIP]",
+		"Text": "Recruit an Army in Hawaii; then build a Navy adjacent to Hawaii."
+	},
+	{
+		"UniqueName": "EW_B24Liberator",
+		"Number": "137",
+		"Type": "EVENT",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EWB24Liberator",
+		"Label": "Fleet Deployed to Pearl Harbor [WIP]",
+		"Text": "If a United States Army is within 2 spaces of Italy, Italy must discard the top 4 cards of its draw deck."
+	},
+	{
+		"UniqueName": "Event_PattonAdvances",
+		"Number": "138",
+		"Type": "EW",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "EventPattonAdvances",
+		"Label": "B-24 Liberator [WIP]",
+		"Text": "Build an Army in Western Europe: then battle in Germany or Italy."
+	}
+]

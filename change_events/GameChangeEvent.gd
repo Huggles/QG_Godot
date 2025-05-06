@@ -14,6 +14,10 @@ var has_source_card:int:
 var source_card_state:CardState:
 	get: return CardState.for_id(source_card_id)
 
+var blocked:bool
+
+signal finished
+
 func _init(_triggering_faction:Enum.Faction) -> void:
 	self.triggering_faction = _triggering_faction
 	pass
@@ -24,6 +28,7 @@ func apply_change():
 	EventBusLocal.game_change_event_occurred.emit(self)		
 	EventBusLocal.recalculate_straights.emit()
 	EventBusLocal.recalculate_supply.emit()	
+	self.finished.emit()
 	
 func _apply_change_event():
 	pass

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cxp1fbs41rbk7"]
 
-[ext_resource type="Script" uid="uid://cnb5rvi76yc0x" path="res://scenes/userinterface/Messaging/InputMessageLabel.gd" id="1_t7e4m"]
+[ext_resource type="Script" uid="uid://dljgjhokuumk6" path="res://scripts/C#/UI/InputMessageLabel.cs" id="1_noeoe"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_noeoe"]
 bg_color = Color(1, 1, 1, 0.784314)
@@ -56,4 +56,4 @@ bbcode_enabled = true
 text = "[color=red] ABC [/color]
 
 "
-script = ExtResource("1_t7e4m")
+script = ExtResource("1_noeoe")

@@ -1,18 +1,18 @@
 class_name CardPlayHandler extends Object
 
-var started_change_events:Array[GameChangeEvent]
+
+#Dictionay of NextSteps
+var available_next_steps_per_faction:Dictionary = {}
+
+var change_events:Array[GameChangeEvent]
 var succesful_change_events:Array[GameChangeEvent]
 var last_activating_team:Enum.FactionTeam
 
-var origin_card_id:int = -1
+var card_id:int
+var card_state:CardState:
+	get: return CardState.for_id(card_id)
 
-signal chain_finished
-
-static var instance:CardPlayHandler:
-	get:
-		if GameManager.game_state.card_play_handler == null:
-			GameManager.game_state.card_play_handler = CardPlayHandler.new() 
-		return GameManager.game_state.card_play_handler
+signal card_play_finished
 
 var request_order:Array:
 	get:
@@ -21,87 +21,35 @@ var request_order:Array:
 		order.append_array(StaticGameData.factions_for_team(last_activating_team))         
 		return order
 
-func _init() -> void:
-	enable()
-
-func enable():
-	EventBusLocal.game_change_event_before.connect(handle_change_event)
-	EventBusLocal.game_change_event_after.connect(request_card_activation) 
-
-func disable():
-	EventBusLocal.game_change_event_before.disconnect(handle_change_event)
-	EventBusLocal.game_change_event_after.disconnect(request_card_activation)
-
 func handle_change_event(_gce_id):
 	succesful_change_events.push_back( GameChangeEvent.for_id(_gce_id))
 	
-func request_card_play():
+func request_card():
+	self._calculate_next_steps()
+
 	GameManager.player_states[0].input_manager.set_play_card_input_active()
 	GameManager.game_flow.current_faction_deck_state.debug_hand()    
 	var _activation_option:CardActivationOption = await EventBusLocal.card_selected
 	if _activation_option.card_id > -1:
-		var _card_state:CardState = CardState.for_id(_activation_option.card_id)    
-		if _card_state.can_play_card():
-			origin_card_id = _card_state.id
+		self.card_id = _activation_option.card_id		
+		if card_state.can_play_card():
 			InputMessageLabel.hide_node()
 			PlayerActionLabel.hide_node()
-			DeckState.for_faction(_card_state.faction).play_card(_card_state.id)        
-			await chain_finished
-			handle_next_action()
+			
+			if _activation_option.is_before:
+				card_state.card_execution_class.activate_before(GameChangeEvent.for_id(_activation_option.change_event_id))
+			else:
+				card_state.card_execution_class.activate_card(GameChangeEvent.for_id(_activation_option.change_event_id))
+			handle_card_play()
 	else:
 		EventBusLocal.card_play_handler_completed.emit(self)
 
-func handle_next_action():
-	while CardState.for_id(origin_card_id).card_execution_class.has_next_action():
-		CardState.for_id(origin_card_id).card_execution_class.play_next_action()
-		await chain_finished
-	EventBusLocal.card_play_handler_completed.emit(self)
+func handle_card_play():
+	DeckState.for_faction(card_state.faction).play_card(card_state.id)
+	while card_state.card_execution_class.has_next_action():
+		await card_state.card_execution_class.play_next_action()
 		
-
-func request_card_activation(_gce_id:int):
-	var _gce:GameChangeEvent = GameChangeEvent.for_id(_gce_id)
-	last_activating_team = StaticGameData.faction_team_for_faction(_gce.triggering_faction)
-	if _gce.is_trigger:
-		for _faction in request_order:            
-			var _activated_card:bool = await _request_card_activation_for_faction(_faction)
-			if _activated_card == true: 
-				return
-		if origin_card_id != null && origin_card_id > -1:
-			chain_finished.emit()
-		else:
-			EventBusLocal.card_play_handler_completed.emit(self)
-
-func _request_card_activation_for_faction( _faction:Enum.Faction) -> bool:
-	DebugUtilities.print_peer(str("Requesting status card to"  + Enum.Faction.keys()[_faction]))
-	var _activation_options:Array[CardActivationOption] = DeckState.for_faction(_faction).activatable_cards()
-	if _activation_options.size() > 0:		
-		GameManager.my_input_manager.set_activate_action_input_active(_faction)
-		var _activation_option:CardActivationOption = await EventBusLocal.card_selected
-		InputMessageLabel.hide_node()
-		PlayerActionLabel.hide_node()
-		if _activation_option.card_id > -1:
-			GameManager.game_flow.current_faction_deck_state.activate_card(_activation_option)
-			return true
-		else:
-			return false
-	else:
-		DebugUtilities.print_peer(str("Player does not have activatable card"))
-		await GameManager.create_timer(200)
-	return false
-
-func _handle()->bool:
-	for _faction:Enum.Faction in self.request_order:
-		var _activatable_cards:Array[CardActivationOption] = DeckState.for_faction(_faction).activatable_card_ids()	
-		if _activatable_cards.size() > 0:
-			for _gce:GameChangeEvent in GameManager.game_state:
-				pass
-				#await request_card_activation(_faction, _gce)
-		else:
-			DebugUtilities.print_peer(str("Player does not have playable status card"))
-	
-	await GameManager.create_timer(200) 
-	return true
-
+	EventBusLocal.card_play_handler_completed.emit(self)
 
 func try_play_card(_card_id:int):
 	var _card_state:CardState = CardState.for_id(_card_id)
@@ -110,23 +58,37 @@ func try_play_card(_card_id:int):
 		InputMessageLabel.hide_node()
 		DeckState.for_faction(_card_state.faction).play_card(_card_id)        
 	pass
-
-static var _change_event_counter:int = 0
-
-func execute_change_event(_change_event:GameChangeEvent, _is_trigger:bool = true):	
-	#Enrich
-	print(str("ChangeEventHandler ", _change_event.trace_text()))
-	_change_event.id = _change_event_counter;
-	_change_event_counter += 1;	
-	_change_event.is_trigger = _is_trigger
-	DebugUtilities.print_peer(str("pushed gce to back with id: ", _change_event.id))
-	GameManager.game_state.game_change_events.push_back(_change_event)
-
-
-	#execute
-	EventBusLocal.game_change_event_before.emit(_change_event.id)	
-	_change_event.apply_change()
-	await GameManager.create_timer(200)
-	EventBusLocal.game_change_event_after.emit(_change_event.id)
-
 	
+func _execute_card():
+	pass
+
+
+func _calculate_next_steps() -> void:
+	for _faction:Enum.Faction in Enum.Faction.values():
+		var _next_steps:Array[NextStep] = self._calculate_next_steps_for_faction(_faction)
+	
+
+func _calculate_next_steps_for_faction(_faction:Enum.Faction) -> Array[NextStep]:
+	var _next_steps:Array[NextStep] = []
+	var _index = 0;
+
+	for _card_state:CardState in DeckState.for_faction(GameManager.game_flow.current_faction).hand_card_states:
+		var _next_step:NextStep
+		if _card_state.can_play_card():
+			_next_step = NextStep.new(str(_index, " - ", _card_state.card_data.name), _index, _faction)			
+		else:
+			_next_step = NextStep.new(str("[color=red]",_index, " - ", _card_state.card_data.name, "[/color]"), _index, _faction)			
+		_index +=1
+	return _next_steps
+
+class NextStep:
+	enum Type { PlayCard }
+
+	var label:String
+	var index:int
+	var faction:Enum.Faction
+
+	func _init(_label:String, _index:int, _faction:Enum.Faction) -> void:
+		self.label = _label
+		self.index = _index
+		self.faction = _faction

@@ -17,7 +17,7 @@ func _ready() -> void:
 		FactionsContainer.instance = self
 		EventBusLocal.player_joined.connect(_on_player_joined)				
 		EventBusLocal.player_left.connect(_on_player_left)
-		row_scene = CHANGE_EVENT_ROW_SCENE_RESOURCE.instantiate()
+		row_scene = CHANGE_EVENT_ROW_SCENE_RESOURCE.instantiate() 
 		_init_child_elements();
 	else: 
 		assert(false, "Can only have 1 input PlayersContainer")

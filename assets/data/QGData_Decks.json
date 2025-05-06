@@ -1,153 +1,156 @@
 [
 	{
-		"faction" : "GERMANY",
-		"cards": [
+		"FactionIndex" : 0,
+		"Cards": [
 			{
-				"card_name" : "BuildArmy",
-				"number" : 2
+				"CardName" : "BuildArmy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "BuildNavy",
-				"number" : 2
+				"CardName" : "BuildNavy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "LandBattle",
-				"number" : 2
+				"CardName" : "LandBattle",
+				"Number" : 2
 			},
 			{
-				"card_name" : "Event_BroadFront",
-				"number" : 1
+				"CardName" : "Event_BroadFront",
+				"Number" : 1
 			}, 
 			{
-				"card_name" : "SeaBattle",
-				"number" : 2
+				"CardName" : "SeaBattle",
+				"Number" : 2
 			},
 			{
-				"card_name" : "Event_MilitaryDictatorshipsintheBalkans",
-				"number" : 1
+				"CardName" : "Event_MilitaryDictatorshipsintheBalkans",
+				"Number" : 1
 			},
 			{
-				"card_name" : "Status_Blitzkrieg",
-				"number" : 1				
+				"CardName" : "Status_Blitzkrieg",
+				"Number" : 1				
 			},
 			{
-				"card_name" : "Status_SyntheticFuel",
-				"number" : 1				
+				"CardName" : "Status_SyntheticFuel",
+				"Number" : 1				
 			},
 			{
-				"card_name" : "Status_BiasForAction",
-				"number" : 1				
+				"CardName" : "Status_BiasForAction",
+				"Number" : 1				
 			},
 			{
-				"card_name" : "Status_DiveBombers",
-				"number" : 1
-			}
-			
+				"CardName" : "Status_DiveBombers",
+				"Number" : 1
+			}			
 		]
 	},
 	{
-		"faction" : "UNITED_KINGDOM",
-		"cards": [
+		"FactionIndex" : 1,
+		"Cards": [
 			{
-				"card_name" : "BuildArmy",
-				"number" : 2
+				"CardName" : "BuildArmy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "BuildNavy",
-				"number" : 2
+				"CardName" : "BuildNavy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "LandBattle",
-				"number" : 2
+				"CardName" : "LandBattle",
+				"Number" : 2
 			},
 			{
-				"card_name" : "SeaBattle",
-				"number" : 2
+				"CardName" : "SeaBattle",
+				"Number" : 2
 			}		
-		],
+		]
 	},
 	{
-		"faction" : "JAPAN",
-		"cards": [
+		"FactionIndex" : 2,
+		"Cards": [
 			{
-				"card_name" : "BuildArmy",
-				"number" : 2
+				"CardName" : "BuildArmy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "BuildNavy",
-				"number" : 2
+				"CardName" : "BuildNavy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "LandBattle",
-				"number" : 2
+				"CardName" : "LandBattle",
+				"Number" : 2
 			},
 			{
-				"card_name" : "SeaBattle",
-				"number" : 2
+				"CardName" : "SeaBattle",
+				"Number" : 2
 			}		
-		],
+		]
 	},
 	{
-		"faction" : "SOVIET",
-		"cards": [
+		"FactionIndex" : 3,
+		"Cards": [
 			{
-				"card_name" : "BuildArmy",
-				"number" : 2
+				"CardName" : "BuildArmy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "BuildNavy",
-				"number" : 2
+				"CardName" : "BuildNavy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "LandBattle",
-				"number" : 2
+				"CardName" : "LandBattle",
+				"Number" : 2
 			},
 			{
-				"card_name" : "SeaBattle",
-				"number" : 2
-			}		
-		],
+				"CardName" : "SeaBattle",
+				"Number" : 2
+			},		
+			{
+				"CardName" : "Response_Stalingrad",
+				"Number" : 1
+			}
+		]
 	},
 	{
-		"faction" : "ITALY",
-		"cards": [
+		"FactionIndex" : 4,
+		"Cards": [
 			{
-				"card_name" : "BuildArmy",
-				"number" : 2
+				"CardName" : "BuildArmy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "BuildNavy",
-				"number" : 2
+				"CardName" : "BuildNavy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "LandBattle",
-				"number" : 2
+				"CardName" : "LandBattle",
+				"Number" : 2
 			},
 			{
-				"card_name" : "SeaBattle",
-				"number" : 2
+				"CardName" : "SeaBattle",
+				"Number" : 2
 			}		
-		],
+		]
 	},
 	{
-		"faction" : "UNITED_STATES",
-		"cards": [
+		"FactionIndex" : 5,
+		"Cards": [
 			{
-				"card_name" : "BuildArmy",
-				"number" : 2
+				"CardName" : "BuildArmy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "BuildNavy",
-				"number" : 2
+				"CardName" : "BuildNavy",
+				"Number" : 2
 			},
 			{
-				"card_name" : "LandBattle",
-				"number" : 2
+				"CardName" : "LandBattle",
+				"Number" : 2
 			},
 			{
-				"card_name" : "SeaBattle",
-				"number" : 2
+				"CardName" : "SeaBattle",
+				"Number" : 2
 			}	
-		],
+		]
 	}
 ]

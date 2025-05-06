@@ -36,12 +36,6 @@ func get_card_logic_class()->CardLogicBase:
 		DebugUtilities.print_peer_err(str("Could not find card logic class for: ", card_data.clabel))
 		return null
 	
-func activate_card(_game_change_event:GameChangeEvent)->void:
-	DebugUtilities.print_peer("activate_cards")
-	card_execution_class.activate_card(_game_change_event)
-	pass	
-
-	
 static func for_id(_card_id:int) -> CardState:	
 	return GameManager.game_state.card_states_by_id.get(_card_id)
 	

@@ -35,31 +35,50 @@ var response_card_states:Array[CardState]:
 var status_card_ids:Array[int]
 var status_card_states:Array[CardState]: 
 	get: return CardState.for_ids(status_card_ids)
-	
-func activatable_status_cards()->Array[CardActivationOption]:
-	var _activatable_options:Array[CardActivationOption] = [] 
-	for _status_card_state in status_card_states:		
-		for _gce in GameManager.game_state.card_play_handler.succesful_change_events:
-			if _status_card_state.card_execution_class.can_activate_action(_gce): 
-				var _card_activation_option = CardActivationOption.new(_status_card_state.id, "status")
-				_card_activation_option.change_event_id = _gce.id
-				_activatable_options.push_back(_card_activation_option)		
-	return _activatable_options
 
-func activatable_response_cards()->Array[CardActivationOption]:
-	var _activatable_options:Array[CardActivationOption] = [] 
-	for _response_card_state in response_card_states:		
-		for _gce in GameManager.game_state.card_play_handler.succesful_change_events:
-			if _response_card_state.card_execution_class.can_activate_action(_gce): 
-				var _card_activation_option = CardActivationOption.new(_response_card_state.id, "response")
-				_card_activation_option.change_event = _gce.id
-				_activatable_options.push_back(_card_activation_option)				
-	return _activatable_options
+#####################
+# Activatable Cards #
+#####################
 
-func activatable_cards()->Array[CardActivationOption]:
-	var _ac = activatable_status_cards()
-	_ac.append_array(activatable_response_cards())
+func activatable_cards_for_gce(_gce:GameChangeEvent, _before:bool=false) -> Array[CardActivationOption]:
+	var _ac = _activatable_cards_for_gce_in_cards(status_card_states, _gce, _before)
+	_ac.append_array(_activatable_cards_for_gce_in_cards(response_card_states, _gce, _before))
 	return _ac
+
+func activatable_cards(before:bool=false)->Array[CardActivationOption]:
+	var _ac = _activatable_status_cards(before)
+	_ac.append_array(_activatable_response_cards(before))
+	return _ac
+
+func _activatable_status_cards(_before:bool=false)->Array[CardActivationOption]:
+	var _activatable_options:Array[CardActivationOption] = [] 
+	for _gce in GameManager.game_state.card_play_handler.change_events:
+		var _card_activation_options:Array[CardActivationOption] = _activatable_cards_for_gce_in_cards(status_card_states, _gce, _before)
+		_activatable_options.append_array(_card_activation_options)			
+	return _activatable_options
+
+func _activatable_response_cards(_before:bool=false)->Array[CardActivationOption]:
+	var _activatable_options:Array[CardActivationOption] = [] 
+	for _gce in GameManager.game_state.card_play_handler.change_events:
+		var _card_activation_options:Array[CardActivationOption] = _activatable_cards_for_gce_in_cards(response_card_states, _gce, _before)
+		_activatable_options.append_array(_card_activation_options)			
+	return _activatable_options
+
+
+
+func _activatable_cards_for_gce_in_cards(_cards:Array[CardState], _gce:GameChangeEvent, _before:bool=false) -> Array[CardActivationOption]:
+	var _activatable_options:Array[CardActivationOption] = [] 
+	for _card in _cards:		
+		if _card.card_execution_class.can_activate_action(_gce) if _before == false else _card.card_execution_class.can_activate_before(_gce):
+			var _card_activation_option = CardActivationOption.new(_card.id, "response", _before)
+			_card_activation_option.change_event_id = _gce.id				
+			_card_activation_option.is_before = _before		
+			_activatable_options.append(_card_activation_option)
+	return _activatable_options
+
+#####################
+# Constructor #
+#####################
 
 func _init(_faction_state:FactionState) -> void:
 	self.faction_state = _faction_state;
@@ -114,40 +133,47 @@ func play_card(_card_id) -> void:
 
 func activate_card(_activation_option:CardActivationOption):
 	if status_card_ids.has(_activation_option.card_id):
-		activate_status_card(_activation_option.card_id, _activation_option.change_event_id)
+		activate_status_card(_activation_option)
 	elif response_card_ids.has(_activation_option.card_id):
-		activate_response_card(_activation_option.card_id, _activation_option.change_event_id)
+		activate_response_card(_activation_option)
 
-func activate_status_card(_card_id:int, _change_event_id:int) -> void:
-	if !status_card_ids.has(_card_id):
+func activate_status_card(_activation_option:CardActivationOption) -> void:
+	if !status_card_ids.has(_activation_option.card_id):
 		return
-	var _card_state:CardState = CardState.for_id(_card_id)	
-	_card_state.activate_card(GameChangeEvent.for_id(_change_event_id))
+	var _card_state:CardState = CardState.for_id(_activation_option.card_id)	
+	if _activation_option.is_before:
+		_card_state.card_execution_class.activate_before(GameChangeEvent.for_id(_activation_option.change_event_id))
+	else:
+		_card_state.card_execution_class.activate_card(GameChangeEvent.for_id(_activation_option.change_event_id))
 	pass
 
-func activate_response_card(_card_id:int, _change_event_id:int) -> void:
-	if !response_card_ids.has(_card_id):
+func activate_response_card(_activation_option:CardActivationOption) -> void:
+	if !response_card_ids.has(_activation_option.card_id):
 		return
-	var _card_state:CardState = CardState.for_id(_card_id)	
-	_card_state.activate_card(GameChangeEvent.for_id(_change_event_id))
+	var _card_state:CardState = CardState.for_id(_activation_option.card_id)	
+	if _activation_option.is_before:
+		_card_state.card_execution_class.activate_before(GameChangeEvent.for_id(_activation_option.change_event_id))
+	else:
+		_card_state.card_execution_class.activate_card(GameChangeEvent.for_id(_activation_option.change_event_id))
 	pass
 	
 
-func play_card_from_deck(_card_id) -> void:
+func play_card_from_deck(_card_id) -> CardState:
 	if deck_card_ids.has(_card_id):
-		var _card_state:CardState = CardState.for_id(_card_id)
-		_card_state.play_card()
+		var _card_state:CardState = CardState.for_id(_card_id)		
 		var _deck_index = deck_card_ids.find(_card_id)
 		deck_card_ids.pop_at(_deck_index)
 		discarded_card_ids.push_back(_card_id)
+		return _card_state
+	return null
 
-func play_card_from_discard(_card_id) -> void:
+func play_card_from_discard(_card_id) -> CardState:
 	if discarded_card_ids.has(_card_id):
 		var _card_state:CardState = CardState.for_id(_card_id)
-		_card_state.play_card()
-	
+		return _card_state
+	return null
 
-func play_card_from_hand(_card_id) -> void:
+func play_card_from_hand(_card_id) -> CardState:
 	if hand_card_ids.has(_card_id):		
 		var _card_state:CardState = CardState.for_id(_card_id)
 		if !self.hand_card_ids.has(_card_id):		
@@ -155,11 +181,12 @@ func play_card_from_hand(_card_id) -> void:
 			return
 		if !_card_state.can_play_card():
 			DebugUtilities.print_peer_err(str("Card not play card: ", _card_state.card_data.clabel ) )		
-			return
-		_card_state.play_card()
+			return		
 		var _hand_index = hand_card_ids.find(_card_id)
 		hand_card_ids.pop_at(_hand_index)
 		discarded_card_ids.push_back(_card_id)
+		return _card_state
+	return null;
 	
 func play_card_by_name(_card_name) -> void:
 	for _card_state in CardState.for_ids(all_card_ids):
@@ -196,7 +223,7 @@ func debug_status_cards() -> void:
 
 func debug_activatable_status_cards() -> void:
 	DebugUtilities.print_peer( str("Faction ", faction_label ," has following activatable status cards: ") )		
-	var _activatable_response_options:Array[CardActivationOption] = activatable_status_cards()
+	var _activatable_response_options:Array[CardActivationOption] = _activatable_status_cards()
 	var _counter = 0;
 	for _activation_option in _activatable_response_options:
 		for _gce in _activation_option.change_events:
@@ -205,7 +232,7 @@ func debug_activatable_status_cards() -> void:
 
 func debug_activatable_response_cards() -> void:
 	DebugUtilities.print_peer( str("Faction ", faction_label ," has following activatable response cards: ") )		
-	var _activatable_response_options:Array[CardActivationOption] = activatable_response_cards()
+	var _activatable_response_options:Array[CardActivationOption] = _activatable_response_cards()
 	var _counter = 0;
 	for _activation_option in _activatable_response_options:
 		for _gce in _activation_option.change_events:
