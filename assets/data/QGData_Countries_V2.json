@@ -1,3727 +1,3566 @@
 [
-	{
-	  "UniqueName": "AFRICA",
-	  "UniqueNameCamelCase": "Africa",
-	  "Label": "Africa",
-	  "Number": 1,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_AFRICA",
-	  "Neighbor2": "SOUTH_ATLANTIC",
-	  "Neighbor3": "SOUTHERN_OCEAN",
-	  "Neighbor4": "INDIAN_OCEAN",
-	  "Neighbor5": "BAY_OF_BENGAL",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2835.53,
-		"YPosition": 1872.60,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 10,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "AUSTRALIA",
-	  "UniqueNameCamelCase": "Australia",
-	  "Label": "Australia",
-	  "Number": 2,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "INDIAN_OCEAN",
-	  "Neighbor2": "SOUTH_CHINA_SEA",
-	  "Neighbor3": "SOUTH_PACIFIC",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6223.12,
-		"YPosition": 2356.88,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "BALKANS",
-	  "UniqueNameCamelCase": "Balkans",
-	  "Label": "Balkans",
-	  "Number": 3,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "EASTERN_EUROPE",
-	  "Neighbor2": "GERMANY",
-	  "Neighbor3": "ITALY",
-	  "Neighbor4": "MEDITERRANEAN_SEA",
-	  "Neighbor5": "UKRAINE",
-	  "Neighbor6": "BLACK_SEA",
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3155.94,
-		"YPosition": 412.16,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": -20
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "BALTIC_SEA",
-	  "UniqueNameCamelCase": "BalticSea",
-	  "Label": "Baltic Sea",
-	  "Number": 4,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SCANDINAVIA",
-	  "Neighbor2": "RUSSIA",
-	  "Neighbor3": "NORTH_SEA",
-	  "Neighbor4": "GERMANY",
-	  "Neighbor5": "EASTERN_EUROPE",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3114.12,
-		"YPosition": -561.08,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 60
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 3,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -10,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "BAY_OF_BENGAL",
-	  "UniqueNameCamelCase": "BayOfBengal",
-	  "Label": "Bay Of Bengal",
-	  "Number": 5,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "MADAGASCAR",
-	  "Neighbor2": "AFRICA",
-	  "Neighbor3": "NORTH_AFRICA",
-	  "Neighbor4": "MIDDLE_EAST",
-	  "Neighbor5": "INDIA",
-	  "Neighbor6": "SOUTH_EAST_ASIA",
-	  "Neighbor7": "INDONESIA",
-	  "Neighbor8": "MEDITERRANEAN_SEA",
-	  "Neighbor9": "INDIAN_OCEAN",
-	  "Neighbor10": "SOUTH_CHINA_SEA",
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 4537.24,
-		"YPosition": 1586.79,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "BLACK_SEA",
-	  "UniqueNameCamelCase": "BlackSea",
-	  "Label": "Black Sea",
-	  "Number": 6,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "UKRAINE",
-	  "Neighbor2": "BALKANS",
-	  "Neighbor3": "MIDDLE_EAST",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3591.44,
-		"YPosition": 390.61,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "CANADA",
-	  "UniqueNameCamelCase": "Canada",
-	  "Label": "Canada",
-	  "Number": 7,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "US_EAST",
-	  "Neighbor2": "NORTH_ATLANTIC",
-	  "Neighbor3": "PACIFIC_NORTH_WEST",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1024.64,
-		"YPosition": -431.07,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": -1,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -15,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "CASPIAN_SEA",
-	  "UniqueNameCamelCase": "CaspianSea",
-	  "Label": "Caspian Sea",
-	  "Number": 8,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "UKRAINE",
-	  "Neighbor2": "KAZAKHSTAN",
-	  "Neighbor3": "MIDDLE_EAST",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 4090.57,
-		"YPosition": 385.55,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "CENTRAL_PACIFIC",
-	  "UniqueNameCamelCase": "CentralPacific",
-	  "Label": "Central Pacific",
-	  "Number": 9,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "IWO_JIMA",
-	  "Neighbor2": "HAWAII",
-	  "Neighbor3": "PHILIPPINES",
-	  "Neighbor4": "NEW_GUINEA",
-	  "Neighbor5": "SEA_OF_JAPAN",
-	  "Neighbor6": "NORTH_PACIFIC",
-	  "Neighbor7": "EAST_PACIFIC",
-	  "Neighbor8": "SOUTH_PACIFIC",
-	  "Neighbor9": "SOUTH_CHINA_SEA",
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6775.06,
-		"YPosition": 1277.03,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "CHINA",
-	  "UniqueNameCamelCase": "China",
-	  "Label": "China",
-	  "Number": 10,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "VLADIVOSTOK",
-	  "Neighbor2": "MONGOLIA",
-	  "Neighbor3": "SZECHUAN",
-	  "Neighbor4": "SOUTH_EAST_ASIA",
-	  "Neighbor5": "SEA_OF_JAPAN",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 5808.25,
-		"YPosition": 487.30,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "EASTERN_EUROPE",
-	  "UniqueNameCamelCase": "EasternEurope",
-	  "Label": "Eastern Europe",
-	  "Number": 11,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "BALTIC_SEA",
-	  "Neighbor2": "GERMANY",
-	  "Neighbor3": "BALKANS",
-	  "Neighbor4": "UKRAINE",
-	  "Neighbor5": "RUSSIA",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3187.35,
-		"YPosition": -193.13,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": 50,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 2,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -7,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "EAST_PACIFIC",
-	  "UniqueNameCamelCase": "EastPacific",
-	  "Label": "East Pacific",
-	  "Number": 12,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "PACIFIC_NORTH_WEST",
-	  "Neighbor2": "US_WEST",
-	  "Neighbor3": "LATIN_AMERICA",
-	  "Neighbor4": "SOUTH_EAST_PACIFIC",
-	  "Neighbor5": "NORTH_PACIFIC",
-	  "Neighbor6": "CENTRAL_PACIFIC",
-	  "Neighbor7": "SOUTH_PACIFIC",
-	  "Neighbor8": "HAWAII",
-	  "Neighbor9": "NEW_ZEALAND",
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 7578.50,
-		"YPosition": 1266.22,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "GERMANY",
-	  "UniqueNameCamelCase": "Germany",
-	  "Label": "Germany",
-	  "Number": 13,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "WESTERN_EUROPE",
-	  "Neighbor2": "ITALY",
-	  "Neighbor3": "BALKANS",
-	  "Neighbor4": "EASTERN_EUROPE",
-	  "Neighbor5": "BALTIC_SEA",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2929.84,
-		"YPosition": -13.47,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 2,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -2,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "HAWAII",
-	  "UniqueNameCamelCase": "Hawaii",
-	  "Label": "Hawaii",
-	  "Number": 14,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_PACIFIC",
-	  "Neighbor2": "CENTRAL_PACIFIC",
-	  "Neighbor3": "EAST_PACIFIC",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 7319.65,
-		"YPosition": 844.62,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "ICELAND",
-	  "UniqueNameCamelCase": "Iceland",
-	  "Label": "Iceland",
-	  "Number": 15,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_ATLANTIC",
-	  "Neighbor2": "NORTH_SEA",
-	  "Neighbor3": null,
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2040.91,
-		"YPosition": -776.29,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 2,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -3,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "INDIA",
-	  "UniqueNameCamelCase": "India",
-	  "Label": "India",
-	  "Number": 16,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "MIDDLE_EAST",
-	  "Neighbor2": "SZECHUAN",
-	  "Neighbor3": "SOUTH_EAST_ASIA",
-	  "Neighbor4": "BAY_OF_BENGAL",
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 4825.42,
-		"YPosition": 1142.59,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2,
-		"YPosition": 5,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "INDIAN_OCEAN",
-	  "UniqueNameCamelCase": "IndianOcean",
-	  "Label": "Indian Ocean",
-	  "Number": 17,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "AFRICA",
-	  "Neighbor2": "MADAGASCAR",
-	  "Neighbor3": "INDONESIA",
-	  "Neighbor4": "AUSTRALIA",
-	  "Neighbor5": "SOUTHERN_OCEAN",
-	  "Neighbor6": "BAY_OF_BENGAL",
-	  "Neighbor7": "SOUTH_CHINA_SEA",
-	  "Neighbor8": "SOUTH_PACIFIC",
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 4434.61,
-		"YPosition": 2569.66,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "INDONESIA",
-	  "UniqueNameCamelCase": "Indonesia",
-	  "Label": "Indonesia",
-	  "Number": 18,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "BAY_OF_BENGAL",
-	  "Neighbor2": "SOUTH_CHINA_SEA",
-	  "Neighbor3": "INDIAN_OCEAN",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 5655.43,
-		"YPosition": 1733.76,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "ITALY",
-	  "UniqueNameCamelCase": "Italy",
-	  "Label": "Italy",
-	  "Number": 19,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "WESTERN_EUROPE",
-	  "Neighbor2": "GERMANY",
-	  "Neighbor3": "MEDITERRANEAN_SEA",
-	  "Neighbor4": "BALKANS",
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2885.47,
-		"YPosition": 507.81,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -1,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "IWO_JIMA",
-	  "UniqueNameCamelCase": "IwoJima",
-	  "Label": "Iwo Jima",
-	  "Number": 20,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SEA_OF_JAPAN",
-	  "Neighbor2": "NORTH_PACIFIC",
-	  "Neighbor3": "CENTRAL_PACIFIC",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6665.67,
-		"YPosition": 791.70,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 2,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -2,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "JAPAN",
-	  "UniqueNameCamelCase": "Japan",
-	  "Label": "Japan",
-	  "Number": 21,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SEA_OF_JAPAN",
-	  "Neighbor2": null,
-	  "Neighbor3": null,
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6420.15,
-		"YPosition": 401.37,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "KAZAKHSTAN",
-	  "UniqueNameCamelCase": "Kazakhstan",
-	  "Label": "Kazakhstan",
-	  "Number": 22,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "MOSCOW",
-	  "Neighbor2": "SIBERIA",
-	  "Neighbor3": "MONGOLIA",
-	  "Neighbor4": "SZECHUAN",
-	  "Neighbor5": "MIDDLE_EAST",
-	  "Neighbor6": "CASPIAN_SEA",
-	  "Neighbor7": "UKRAINE",
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 4477.76,
-		"YPosition": 230.82,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "LATIN_AMERICA",
-	  "UniqueNameCamelCase": "LatinAmerica",
-	  "Label": "Latin America",
-	  "Number": 23,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": true,
-		"IconInversed": false,
-		"ControlledCountry1": "NORTH_ATLANTIC",
-		"ControlledCountry2": "SOUTH_EAST_PACIFIC",
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1.2,
-		  "XPosition": -13,
-		  "YPosition": 30,
-		  "ZPosition": 0,
-		  "x_rotation": 0,
-		  "y_rotation": 0,
-		  "z_rotation": 25
-		}
-	  },
-	  "Neighbor1": "SOUTH_EAST_PACIFIC",
-	  "Neighbor2": "US_EAST",
-	  "Neighbor3": "US_WEST",
-	  "Neighbor4": "EAST_PACIFIC",
-	  "Neighbor5": "NORTH_ATLANTIC",
-	  "Neighbor6": "SOUTH_ATLANTIC",
-	  "Neighbor7": "SOUTHERN_OCEAN",
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1063.17,
-		"YPosition": 1673.42,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "MADAGASCAR",
-	  "UniqueNameCamelCase": "Madagascar",
-	  "Label": "Madagascar",
-	  "Number": 24,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "BAY_OF_BENGAL",
-	  "Neighbor2": "INDIAN_OCEAN",
-	  "Neighbor3": null,
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3661.42,
-		"YPosition": 2341.78,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "MEDITERRANEAN_SEA",
-	  "UniqueNameCamelCase": "MediterraneanSea",
-	  "Label": "Mediterranean Sea",
-	  "Number": 25,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_SEA",
-	  "Neighbor2": "NORTH_AFRICA",
-	  "Neighbor3": "WESTERN_EUROPE",
-	  "Neighbor4": "ITALY",
-	  "Neighbor5": "MIDDLE_EAST",
-	  "Neighbor6": "BALKANS",
-	  "Neighbor7": "BAY_OF_BENGAL",
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2914.97,
-		"YPosition": 683.61,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": -150,
-		"YPosition": 0,
-		"ZPosition": -20
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": 2,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "MIDDLE_EAST",
-	  "UniqueNameCamelCase": "MiddleEast",
-	  "Label": "Middle East",
-	  "Number": 26,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": true,
-		"IconInversed": true,
-		"ControlledCountry1": "MEDITERRANEAN_SEA",
-		"ControlledCountry2": "BAY_OF_BENGAL",
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1.5,
-		  "XPosition": -20,
-		  "YPosition": 0,
-		  "ZPosition": 0,
-		  "x_rotation": 0,
-		  "y_rotation": 0,
-		  "z_rotation": -40
-		}
-	  },
-	  "Neighbor1": "UKRAINE",
-	  "Neighbor2": "BLACK_SEA",
-	  "Neighbor3": "CASPIAN_SEA",
-	  "Neighbor4": "KAZAKHSTAN",
-	  "Neighbor5": "INDIA",
-	  "Neighbor6": "BAY_OF_BENGAL",
-	  "Neighbor7": "NORTH_AFRICA",
-	  "Neighbor8": "MEDITERRANEAN_SEA",
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3999.93,
-		"YPosition": 960,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": -50,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "MONGOLIA",
-	  "UniqueNameCamelCase": "Mongolia",
-	  "Label": "Mongolia",
-	  "Number": 27,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "KAZAKHSTAN",
-	  "Neighbor2": "SIBERIA",
-	  "Neighbor3": "VLADIVOSTOK",
-	  "Neighbor4": "CHINA",
-	  "Neighbor5": "SZECHUAN",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 5608.91,
-		"YPosition": -63.87,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "MOSCOW",
-	  "UniqueNameCamelCase": "Moscow",
-	  "Label": "Moscow",
-	  "Number": 28,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "RUSSIA",
-	  "Neighbor2": "UKRAINE",
-	  "Neighbor3": "SIBERIA",
-	  "Neighbor4": "KAZAKHSTAN",
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 4018.45,
-		"YPosition": -271.28,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "NEW_GUINEA",
-	  "UniqueNameCamelCase": "NewGuinea",
-	  "Label": "New Guinea",
-	  "Number": 29,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SOUTH_CHINA_SEA",
-	  "Neighbor2": "CENTRAL_PACIFIC",
-	  "Neighbor3": "SOUTH_PACIFIC",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6537.77,
-		"YPosition": 1753.25,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -2,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "NEW_ZEALAND",
-	  "UniqueNameCamelCase": "NewZealand",
-	  "Label": "New Zealand",
-	  "Number": 30,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SOUTH_PACIFIC",
-	  "Neighbor2": "EAST_PACIFIC",
-	  "Neighbor3": null,
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6967.72,
-		"YPosition": 2829.13,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "NORTH_AFRICA",
-	  "UniqueNameCamelCase": "NorthAfrica",
-	  "Label": "North Africa",
-	  "Number": 31,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": true,
-		"IconInversed": false,
-		"ControlledCountry1": "NORTH_SEA",
-		"ControlledCountry2": "MEDITERRANEAN_SEA",
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1.5,
-		  "XPosition": -30,
-		  "YPosition": 17,
-		  "ZPosition": 0,
-		  "x_rotation": 0,
-		  "y_rotation": 0,
-		  "z_rotation": 0
-		}
-	  },
-	  "Neighbor1": "AFRICA",
-	  "Neighbor2": "MEDITERRANEAN_SEA",
-	  "Neighbor3": "NORTH_SEA",
-	  "Neighbor4": "MIDDLE_EAST",
-	  "Neighbor5": "BAY_OF_BENGAL",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3008.58,
-		"YPosition": 1341.46,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": -150
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 10,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "NORTH_ATLANTIC",
-	  "UniqueNameCamelCase": "NorthAtlantic",
-	  "Label": "North Atlantic",
-	  "Number": 32,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "CANADA",
-	  "Neighbor2": "US_EAST",
-	  "Neighbor3": "LATIN_AMERICA",
-	  "Neighbor4": "SOUTH_ATLANTIC",
-	  "Neighbor5": "NORTH_SEA",
-	  "Neighbor6": "ICELAND",
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1326.32,
-		"YPosition": 56.64,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -15,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -15,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -20,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "NORTH_PACIFIC",
-	  "UniqueNameCamelCase": "NorthPacific",
-	  "Label": "North Pacific",
-	  "Number": 33,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "VLADIVOSTOK",
-	  "Neighbor2": "PACIFIC_NORTH_WEST",
-	  "Neighbor3": "IWO_JIMA",
-	  "Neighbor4": "HAWAII",
-	  "Neighbor5": "SEA_OF_JAPAN",
-	  "Neighbor6": "CENTRAL_PACIFIC",
-	  "Neighbor7": "EAST_PACIFIC",
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 7165.98,
-		"YPosition": -81.73,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 10,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "NORTH_SEA",
-	  "UniqueNameCamelCase": "NorthSea",
-	  "Label": "North Sea",
-	  "Number": 34,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_ATLANTIC",
-	  "Neighbor2": "SOUTH_ATLANTIC",
-	  "Neighbor3": "UNITED_KINGDOM",
-	  "Neighbor4": "ICELAND",
-	  "Neighbor5": "SCANDINAVIA",
-	  "Neighbor6": "BALTIC_SEA",
-	  "Neighbor7": "WESTERN_EUROPE",
-	  "Neighbor8": "MEDITERRANEAN_SEA",
-	  "Neighbor9": "NORTH_AFRICA",
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2214.11,
-		"YPosition": 18.68,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": -1,
-		"YPosition": 0,
-		"ZPosition": 100
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "PACIFIC_NORTH_WEST",
-	  "UniqueNameCamelCase": "PacificNorthWest",
-	  "Label": "Pacific North West",
-	  "Number": 35,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "US_WEST",
-	  "Neighbor2": "CANADA",
-	  "Neighbor3": "EAST_PACIFIC",
-	  "Neighbor4": "NORTH_PACIFIC",
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 7695.12,
-		"YPosition": -591.18,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 15,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "PHILIPPINES",
-	  "UniqueNameCamelCase": "Philippines",
-	  "Label": "Philippines",
-	  "Number": 36,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SEA_OF_JAPAN",
-	  "Neighbor2": "SOUTH_CHINA_SEA",
-	  "Neighbor3": "CENTRAL_PACIFIC",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6126.66,
-		"YPosition": 1260.11,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 3,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -3,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -3,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "RUSSIA",
-	  "UniqueNameCamelCase": "Russia",
-	  "Label": "Russia",
-	  "Number": 37,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SCANDINAVIA",
-	  "Neighbor2": "BALTIC_SEA",
-	  "Neighbor3": "EASTERN_EUROPE",
-	  "Neighbor4": "UKRAINE",
-	  "Neighbor5": "MOSCOW",
-	  "Neighbor6": "SIBERIA",
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3828.71,
-		"YPosition": -512.16,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": -1,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 2,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -8,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -3,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SCANDINAVIA",
-	  "UniqueNameCamelCase": "Scandinavia",
-	  "Label": "Scandinavia",
-	  "Number": 38,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": true,
-		"IconInversed": true,
-		"ControlledCountry1": "NORTH_SEA",
-		"ControlledCountry2": "BALTIC_SEA",
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -7,
-		  "YPosition": -5,
-		  "ZPosition": 0,
-		  "x_rotation": 0,
-		  "y_rotation": 0,
-		  "z_rotation": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_SEA",
-	  "Neighbor2": "BALTIC_SEA",
-	  "Neighbor3": "RUSSIA",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3039.85,
-		"YPosition": -656.44,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": -50,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SEA_OF_JAPAN",
-	  "UniqueNameCamelCase": "SeaOfJapan",
-	  "Label": "Sea Of Japan",
-	  "Number": 39,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "VLADIVOSTOK",
-	  "Neighbor2": "CHINA",
-	  "Neighbor3": "PHILIPPINES",
-	  "Neighbor4": "IWO_JIMA",
-	  "Neighbor5": "NORTH_PACIFIC",
-	  "Neighbor6": "CENTRAL_PACIFIC",
-	  "Neighbor7": "SOUTH_CHINA_SEA",
-	  "Neighbor8": "JAPAN",
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6310.71,
-		"YPosition": 261.84,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 300
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -20,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -20,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -25,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SIBERIA",
-	  "UniqueNameCamelCase": "Siberia",
-	  "Label": "Siberia",
-	  "Number": 40,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "RUSSIA",
-	  "Neighbor2": "MOSCOW",
-	  "Neighbor3": "KAZAKHSTAN",
-	  "Neighbor4": "MONGOLIA",
-	  "Neighbor5": "VLADIVOSTOK",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 5212.03,
-		"YPosition": -453.15,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SOUTH_ATLANTIC",
-	  "UniqueNameCamelCase": "SouthAtlantic",
-	  "Label": "South Atlantic",
-	  "Number": 41,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_ATLANTIC",
-	  "Neighbor2": "LATIN_AMERICA",
-	  "Neighbor3": "NORTH_SEA",
-	  "Neighbor4": "SOUTHERN_OCEAN",
-	  "Neighbor5": "AFRICA",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1964.43,
-		"YPosition": 1650.21,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 50
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -10,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SOUTH_CHINA_SEA",
-	  "UniqueNameCamelCase": "SouthChinaSea",
-	  "Label": "South China Sea",
-	  "Number": 42,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SOUTH_EAST_ASIA",
-	  "Neighbor2": "PHILIPPINES",
-	  "Neighbor3": "INDONESIA",
-	  "Neighbor4": "NEW_GUINEA",
-	  "Neighbor5": "AUSTRALIA",
-	  "Neighbor6": "BAY_OF_BENGAL",
-	  "Neighbor7": "INDIAN_OCEAN",
-	  "Neighbor8": "SEA_OF_JAPAN",
-	  "Neighbor9": "CENTRAL_PACIFIC",
-	  "Neighbor10": "SOUTH_PACIFIC",
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 5954.14,
-		"YPosition": 1616.83,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 50,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SOUTH_EAST_ASIA",
-	  "UniqueNameCamelCase": "SouthEastAsia",
-	  "Label": "South East Asia",
-	  "Number": 43,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": true,
-		"IconInversed": true,
-		"ControlledCountry1": "BAY_OF_BENGAL",
-		"ControlledCountry2": "SOUTH_CHINA_SEA",
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1.3,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0,
-		  "x_rotation": 0,
-		  "y_rotation": 0,
-		  "z_rotation": 0
-		}
-	  },
-	  "Neighbor1": "INDIA",
-	  "Neighbor2": "SZECHUAN",
-	  "Neighbor3": "CHINA",
-	  "Neighbor4": "SOUTH_CHINA_SEA",
-	  "Neighbor5": "BAY_OF_BENGAL",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 5483.23,
-		"YPosition": 1238.67,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SOUTH_EAST_PACIFIC",
-	  "UniqueNameCamelCase": "SouthEastPacific",
-	  "Label": "South East Pacific",
-	  "Number": 44,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "LATIN_AMERICA",
-	  "Neighbor2": "SOUTHERN_OCEAN",
-	  "Neighbor3": "EAST_PACIFIC",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 613.71,
-		"YPosition": 2005.18,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SOUTHERN_OCEAN",
-	  "UniqueNameCamelCase": "SouthernOcean",
-	  "Label": "Southern Ocean",
-	  "Number": 45,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "LATIN_AMERICA",
-	  "Neighbor2": "SOUTH_EAST_PACIFIC",
-	  "Neighbor3": "SOUTH_ATLANTIC",
-	  "Neighbor4": "AFRICA",
-	  "Neighbor5": "INDIAN_OCEAN",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 1983.09,
-		"YPosition": 2846.43,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SOUTH_PACIFIC",
-	  "UniqueNameCamelCase": "SouthPacific",
-	  "Label": "South Pacific",
-	  "Number": 46,
-	  "Type": 1,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NEW_GUINEA",
-	  "Neighbor2": "NEW_ZEALAND",
-	  "Neighbor3": "AUSTRALIA",
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6482.28,
-		"YPosition": 2496.29,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 200
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -20,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": -20,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -25,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "SZECHUAN",
-	  "UniqueNameCamelCase": "Szechuan",
-	  "Label": "Szechuan",
-	  "Number": 47,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "KAZAKHSTAN",
-	  "Neighbor2": "MONGOLIA",
-	  "Neighbor3": "CHINA",
-	  "Neighbor4": "SOUTH_EAST_ASIA",
-	  "Neighbor5": "INDIA",
-	  "Neighbor6": "MIDDLE_EAST",
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 5096.82,
-		"YPosition": 562.88,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "UKRAINE",
-	  "UniqueNameCamelCase": "Ukraine",
-	  "Label": "Ukraine",
-	  "Number": 48,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "EASTERN_EUROPE",
-	  "Neighbor2": "BALKANS",
-	  "Neighbor3": "RUSSIA",
-	  "Neighbor4": "MOSCOW",
-	  "Neighbor5": "CASPIAN_SEA",
-	  "Neighbor6": "BLACK_SEA",
-	  "Neighbor7": "MIDDLE_EAST",
-	  "Neighbor8": "KAZAKHSTAN",
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 3610.56,
-		"YPosition": 190.43,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 2,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 5,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "UNITED_KINGDOM",
-	  "UniqueNameCamelCase": "UnitedKingdom",
-	  "Label": "United Kingdom",
-	  "Number": 49,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_SEA",
-	  "Neighbor2": null,
-	  "Neighbor3": null,
-	  "Neighbor4": null,
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2229.17,
-		"YPosition": -315.63,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "US_EAST",
-	  "UniqueNameCamelCase": "USEast",
-	  "Label": "US East",
-	  "Number": 50,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "CANADA",
-	  "Neighbor2": "NORTH_ATLANTIC",
-	  "Neighbor3": "US_WEST",
-	  "Neighbor4": "LATIN_AMERICA",
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 782.12,
-		"YPosition": 240.21,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -15,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -10,
-		  "YPosition": -5,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "US_WEST",
-	  "UniqueNameCamelCase": "USWest",
-	  "Label": "US West",
-	  "Number": 51,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "PACIFIC_NORTH_WEST",
-	  "Neighbor2": "LATIN_AMERICA",
-	  "Neighbor3": "US_EAST",
-	  "Neighbor4": "EAST_PACIFIC",
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 8009.21,
-		"YPosition": 299.91,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 10,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 5,
-		  "YPosition": -10,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "VLADIVOSTOK",
-	  "UniqueNameCamelCase": "Vladivostok",
-	  "Label": "Vladivostok",
-	  "Number": 52,
-	  "Type": 0,
-	  "IsSupply": "false",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "SIBERIA",
-	  "Neighbor2": "MONGOLIA",
-	  "Neighbor3": "CHINA",
-	  "Neighbor4": "SEA_OF_JAPAN",
-	  "Neighbor5": null,
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 6539.05,
-		"YPosition": -417.41,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 0,
-		"YPosition": 0,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 10,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": 10,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 15,
-		  "ZPosition": 0
-		}
-	  }
-	},
-	{
-	  "UniqueName": "WESTERN_EUROPE",
-	  "UniqueNameCamelCase": "WesternEurope",
-	  "Label": "Western Europe",
-	  "Number": 53,
-	  "Type": 0,
-	  "IsSupply": "true",
-	  "StraightData": {
-		"DataClass": "StraightData",
-		"IsStraight": false,
-		"IconInversed": false,
-		"ControlledCountry1": null,
-		"ControlledCountry2": null,
-		"StraightTransform": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": 0,
-		  "ZPosition": 0
-		}
-	  },
-	  "Neighbor1": "NORTH_SEA",
-	  "Neighbor2": "MEDITERRANEAN_SEA",
-	  "Neighbor3": "GERMANY",
-	  "Neighbor4": "ITALY",
-	  "Neighbor5": "BALKANS",
-	  "Neighbor6": null,
-	  "Neighbor7": null,
-	  "Neighbor8": null,
-	  "Neighbor9": null,
-	  "Neighbor10": null,
-	  "WorldTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 1,
-		"XPosition": 2467.17,
-		"YPosition": 176.37,
-		"ZPosition": 0.00
-	  },
-	  "SupplyStarTransformData": {
-		"DataClass": "TransformData",
-		"Scale": 0.8,
-		"XPosition": 2,
-		"YPosition": -2,
-		"ZPosition": 0
-	  },
-	  "UnitTransformData": {
-		"DataClass": "UnitTransformData",
-		"Position1": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 3,
-		  "YPosition": -3,
-		  "ZPosition": 0
-		},
-		"Position2": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": -5,
-		  "YPosition": -10,
-		  "ZPosition": 0
-		},
-		"Position3": {
-		  "DataClass": "TransformData",
-		  "Scale": 1,
-		  "XPosition": 0,
-		  "YPosition": -10,
-		  "ZPosition": 0
-		}
-	  }
-	}
-  ]
+    {
+        "UniqueName": "AFRICA",
+        "UniqueNameCamelCase": "Africa",
+        "Label": "Africa",
+        "Number": 1,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2835.53,
+            "YPosition": 1872.6,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 15,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 15,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 10,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_AFRICA",
+            "SOUTH_ATLANTIC",
+            "SOUTHERN_OCEAN",
+            "INDIAN_OCEAN",
+            "BAY_OF_BENGAL"
+        ]
+    },
+    {
+        "UniqueName": "AUSTRALIA",
+        "UniqueNameCamelCase": "Australia",
+        "Label": "Australia",
+        "Number": 2,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6223.12,
+            "YPosition": 2356.88,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "INDIAN_OCEAN",
+            "SOUTH_CHINA_SEA",
+            "SOUTH_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "BALKANS",
+        "UniqueNameCamelCase": "Balkans",
+        "Label": "Balkans",
+        "Number": 3,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3155.94,
+            "YPosition": 412.16,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": -20
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "EASTERN_EUROPE",
+            "GERMANY",
+            "ITALY",
+            "MEDITERRANEAN_SEA",
+            "UKRAINE",
+            "BLACK_SEA"
+        ]
+    },
+    {
+        "UniqueName": "BALTIC_SEA",
+        "UniqueNameCamelCase": "BalticSea",
+        "Label": "Baltic Sea",
+        "Number": 4,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3114.12,
+            "YPosition": -561.08,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 60
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 3,
+                "YPosition": -2,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -10,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SCANDINAVIA",
+            "RUSSIA",
+            "NORTH_SEA",
+            "GERMANY",
+            "EASTERN_EUROPE"
+        ]
+    },
+    {
+        "UniqueName": "BAY_OF_BENGAL",
+        "UniqueNameCamelCase": "BayOfBengal",
+        "Label": "Bay Of Bengal",
+        "Number": 5,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 4537.24,
+            "YPosition": 1586.79,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "MADAGASCAR",
+            "AFRICA",
+            "NORTH_AFRICA",
+            "MIDDLE_EAST",
+            "INDIA",
+            "SOUTH_EAST_ASIA",
+            "INDONESIA",
+            "MEDITERRANEAN_SEA",
+            "INDIAN_OCEAN",
+            "SOUTH_CHINA_SEA"
+        ]
+    },
+    {
+        "UniqueName": "BLACK_SEA",
+        "UniqueNameCamelCase": "BlackSea",
+        "Label": "Black Sea",
+        "Number": 6,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3591.44,
+            "YPosition": 390.61,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -2,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "UKRAINE",
+            "BALKANS",
+            "MIDDLE_EAST"
+        ]
+    },
+    {
+        "UniqueName": "CANADA",
+        "UniqueNameCamelCase": "Canada",
+        "Label": "Canada",
+        "Number": 7,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1024.64,
+            "YPosition": -431.07,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": -1,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -15,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "US_EAST",
+            "NORTH_ATLANTIC",
+            "PACIFIC_NORTH_WEST"
+        ]
+    },
+    {
+        "UniqueName": "CASPIAN_SEA",
+        "UniqueNameCamelCase": "CaspianSea",
+        "Label": "Caspian Sea",
+        "Number": 8,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 4090.57,
+            "YPosition": 385.55,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "UKRAINE",
+            "KAZAKHSTAN",
+            "MIDDLE_EAST"
+        ]
+    },
+    {
+        "UniqueName": "CENTRAL_PACIFIC",
+        "UniqueNameCamelCase": "CentralPacific",
+        "Label": "Central Pacific",
+        "Number": 9,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6775.06,
+            "YPosition": 1277.03,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "IWO_JIMA",
+            "HAWAII",
+            "PHILIPPINES",
+            "NEW_GUINEA",
+            "SEA_OF_JAPAN",
+            "NORTH_PACIFIC",
+            "EAST_PACIFIC",
+            "SOUTH_PACIFIC",
+            "SOUTH_CHINA_SEA"
+        ]
+    },
+    {
+        "UniqueName": "CHINA",
+        "UniqueNameCamelCase": "China",
+        "Label": "China",
+        "Number": 10,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 5808.25,
+            "YPosition": 487.3,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "VLADIVOSTOK",
+            "MONGOLIA",
+            "SZECHUAN",
+            "SOUTH_EAST_ASIA",
+            "SEA_OF_JAPAN"
+        ]
+    },
+    {
+        "UniqueName": "EASTERN_EUROPE",
+        "UniqueNameCamelCase": "EasternEurope",
+        "Label": "Eastern Europe",
+        "Number": 11,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3187.35,
+            "YPosition": -193.13,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": 50,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -2,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 2,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -7,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "BALTIC_SEA",
+            "GERMANY",
+            "BALKANS",
+            "UKRAINE",
+            "RUSSIA"
+        ]
+    },
+    {
+        "UniqueName": "EAST_PACIFIC",
+        "UniqueNameCamelCase": "EastPacific",
+        "Label": "East Pacific",
+        "Number": 12,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 7578.5,
+            "YPosition": 1266.22,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "PACIFIC_NORTH_WEST",
+            "US_WEST",
+            "LATIN_AMERICA",
+            "SOUTH_EAST_PACIFIC",
+            "NORTH_PACIFIC",
+            "CENTRAL_PACIFIC",
+            "SOUTH_PACIFIC",
+            "HAWAII",
+            "NEW_ZEALAND"
+        ]
+    },
+    {
+        "UniqueName": "GERMANY",
+        "UniqueNameCamelCase": "Germany",
+        "Label": "Germany",
+        "Number": 13,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2929.84,
+            "YPosition": -13.47,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 2,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -2,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "WESTERN_EUROPE",
+            "ITALY",
+            "BALKANS",
+            "EASTERN_EUROPE",
+            "BALTIC_SEA"
+        ]
+    },
+    {
+        "UniqueName": "HAWAII",
+        "UniqueNameCamelCase": "Hawaii",
+        "Label": "Hawaii",
+        "Number": 14,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 7319.65,
+            "YPosition": 844.62,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -2,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_PACIFIC",
+            "CENTRAL_PACIFIC",
+            "EAST_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "ICELAND",
+        "UniqueNameCamelCase": "Iceland",
+        "Label": "Iceland",
+        "Number": 15,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2040.91,
+            "YPosition": -776.29,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 2,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -3,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -2,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_ATLANTIC",
+            "NORTH_SEA"
+        ]
+    },
+    {
+        "UniqueName": "INDIA",
+        "UniqueNameCamelCase": "India",
+        "Label": "India",
+        "Number": 16,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 4825.42,
+            "YPosition": 1142.59,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2,
+            "YPosition": 5,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "MIDDLE_EAST",
+            "SZECHUAN",
+            "SOUTH_EAST_ASIA",
+            "BAY_OF_BENGAL"
+        ]
+    },
+    {
+        "UniqueName": "INDIAN_OCEAN",
+        "UniqueNameCamelCase": "IndianOcean",
+        "Label": "Indian Ocean",
+        "Number": 17,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 4434.61,
+            "YPosition": 2569.66,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "AFRICA",
+            "MADAGASCAR",
+            "INDONESIA",
+            "AUSTRALIA",
+            "SOUTHERN_OCEAN",
+            "BAY_OF_BENGAL",
+            "SOUTH_CHINA_SEA",
+            "SOUTH_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "INDONESIA",
+        "UniqueNameCamelCase": "Indonesia",
+        "Label": "Indonesia",
+        "Number": 18,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 5655.43,
+            "YPosition": 1733.76,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "BAY_OF_BENGAL",
+            "SOUTH_CHINA_SEA",
+            "INDIAN_OCEAN"
+        ]
+    },
+    {
+        "UniqueName": "ITALY",
+        "UniqueNameCamelCase": "Italy",
+        "Label": "Italy",
+        "Number": 19,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2885.47,
+            "YPosition": 507.81,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -1,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "WESTERN_EUROPE",
+            "GERMANY",
+            "MEDITERRANEAN_SEA",
+            "BALKANS"
+        ]
+    },
+    {
+        "UniqueName": "IWO_JIMA",
+        "UniqueNameCamelCase": "IwoJima",
+        "Label": "Iwo Jima",
+        "Number": 20,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6665.67,
+            "YPosition": 791.7,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 2,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -2,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -2,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SEA_OF_JAPAN",
+            "NORTH_PACIFIC",
+            "CENTRAL_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "JAPAN",
+        "UniqueNameCamelCase": "Japan",
+        "Label": "Japan",
+        "Number": 21,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6420.15,
+            "YPosition": 401.37,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SEA_OF_JAPAN"
+        ]
+    },
+    {
+        "UniqueName": "KAZAKHSTAN",
+        "UniqueNameCamelCase": "Kazakhstan",
+        "Label": "Kazakhstan",
+        "Number": 22,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 4477.76,
+            "YPosition": 230.82,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "MOSCOW",
+            "SIBERIA",
+            "MONGOLIA",
+            "SZECHUAN",
+            "MIDDLE_EAST",
+            "CASPIAN_SEA",
+            "UKRAINE"
+        ]
+    },
+    {
+        "UniqueName": "LATIN_AMERICA",
+        "UniqueNameCamelCase": "LatinAmerica",
+        "Label": "Latin America",
+        "Number": 23,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": true,
+            "IconInversed": false,
+            "ControlledCountry1": "NORTH_ATLANTIC",
+            "ControlledCountry2": "SOUTH_EAST_PACIFIC",
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1.2,
+                "XPosition": -13,
+                "YPosition": 30,
+                "ZPosition": 0,
+                "x_rotation": 0,
+                "y_rotation": 0,
+                "z_rotation": 25
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1063.17,
+            "YPosition": 1673.42,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SOUTH_EAST_PACIFIC",
+            "US_EAST",
+            "US_WEST",
+            "EAST_PACIFIC",
+            "NORTH_ATLANTIC",
+            "SOUTH_ATLANTIC",
+            "SOUTHERN_OCEAN"
+        ]
+    },
+    {
+        "UniqueName": "MADAGASCAR",
+        "UniqueNameCamelCase": "Madagascar",
+        "Label": "Madagascar",
+        "Number": 24,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3661.42,
+            "YPosition": 2341.78,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "BAY_OF_BENGAL",
+            "INDIAN_OCEAN"
+        ]
+    },
+    {
+        "UniqueName": "MEDITERRANEAN_SEA",
+        "UniqueNameCamelCase": "MediterraneanSea",
+        "Label": "Mediterranean Sea",
+        "Number": 25,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2914.97,
+            "YPosition": 683.61,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": -150,
+            "YPosition": 0,
+            "ZPosition": -20
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": 2,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": -2,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_SEA",
+            "NORTH_AFRICA",
+            "WESTERN_EUROPE",
+            "ITALY",
+            "MIDDLE_EAST",
+            "BALKANS",
+            "BAY_OF_BENGAL"
+        ]
+    },
+    {
+        "UniqueName": "MIDDLE_EAST",
+        "UniqueNameCamelCase": "MiddleEast",
+        "Label": "Middle East",
+        "Number": 26,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": true,
+            "IconInversed": true,
+            "ControlledCountry1": "MEDITERRANEAN_SEA",
+            "ControlledCountry2": "BAY_OF_BENGAL",
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1.5,
+                "XPosition": -20,
+                "YPosition": 0,
+                "ZPosition": 0,
+                "x_rotation": 0,
+                "y_rotation": 0,
+                "z_rotation": -40
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3999.93,
+            "YPosition": 960,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": -50,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "UKRAINE",
+            "BLACK_SEA",
+            "CASPIAN_SEA",
+            "KAZAKHSTAN",
+            "INDIA",
+            "BAY_OF_BENGAL",
+            "NORTH_AFRICA",
+            "MEDITERRANEAN_SEA"
+        ]
+    },
+    {
+        "UniqueName": "MONGOLIA",
+        "UniqueNameCamelCase": "Mongolia",
+        "Label": "Mongolia",
+        "Number": 27,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 5608.91,
+            "YPosition": -63.87,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "KAZAKHSTAN",
+            "SIBERIA",
+            "VLADIVOSTOK",
+            "CHINA",
+            "SZECHUAN"
+        ]
+    },
+    {
+        "UniqueName": "MOSCOW",
+        "UniqueNameCamelCase": "Moscow",
+        "Label": "Moscow",
+        "Number": 28,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 4018.45,
+            "YPosition": -271.28,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "RUSSIA",
+            "UKRAINE",
+            "SIBERIA",
+            "KAZAKHSTAN"
+        ]
+    },
+    {
+        "UniqueName": "NEW_GUINEA",
+        "UniqueNameCamelCase": "NewGuinea",
+        "Label": "New Guinea",
+        "Number": 29,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6537.77,
+            "YPosition": 1753.25,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -2,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SOUTH_CHINA_SEA",
+            "CENTRAL_PACIFIC",
+            "SOUTH_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "NEW_ZEALAND",
+        "UniqueNameCamelCase": "NewZealand",
+        "Label": "New Zealand",
+        "Number": 30,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6967.72,
+            "YPosition": 2829.13,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SOUTH_PACIFIC",
+            "EAST_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "NORTH_AFRICA",
+        "UniqueNameCamelCase": "NorthAfrica",
+        "Label": "North Africa",
+        "Number": 31,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": true,
+            "IconInversed": false,
+            "ControlledCountry1": "NORTH_SEA",
+            "ControlledCountry2": "MEDITERRANEAN_SEA",
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1.5,
+                "XPosition": -30,
+                "YPosition": 17,
+                "ZPosition": 0,
+                "x_rotation": 0,
+                "y_rotation": 0,
+                "z_rotation": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3008.58,
+            "YPosition": 1341.46,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": -150
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 15,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 15,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 10,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "AFRICA",
+            "MEDITERRANEAN_SEA",
+            "NORTH_SEA",
+            "MIDDLE_EAST",
+            "BAY_OF_BENGAL"
+        ]
+    },
+    {
+        "UniqueName": "NORTH_ATLANTIC",
+        "UniqueNameCamelCase": "NorthAtlantic",
+        "Label": "North Atlantic",
+        "Number": 32,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1326.32,
+            "YPosition": 56.64,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -15,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -15,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -20,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "CANADA",
+            "US_EAST",
+            "LATIN_AMERICA",
+            "SOUTH_ATLANTIC",
+            "NORTH_SEA",
+            "ICELAND"
+        ]
+    },
+    {
+        "UniqueName": "NORTH_PACIFIC",
+        "UniqueNameCamelCase": "NorthPacific",
+        "Label": "North Pacific",
+        "Number": 33,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 7165.98,
+            "YPosition": -81.73,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 15,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 15,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 10,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "VLADIVOSTOK",
+            "PACIFIC_NORTH_WEST",
+            "IWO_JIMA",
+            "HAWAII",
+            "SEA_OF_JAPAN",
+            "CENTRAL_PACIFIC",
+            "EAST_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "NORTH_SEA",
+        "UniqueNameCamelCase": "NorthSea",
+        "Label": "North Sea",
+        "Number": 34,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2214.11,
+            "YPosition": 18.68,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": -1,
+            "YPosition": 0,
+            "ZPosition": 100
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_ATLANTIC",
+            "SOUTH_ATLANTIC",
+            "UNITED_KINGDOM",
+            "ICELAND",
+            "SCANDINAVIA",
+            "BALTIC_SEA",
+            "WESTERN_EUROPE",
+            "MEDITERRANEAN_SEA",
+            "NORTH_AFRICA"
+        ]
+    },
+    {
+        "UniqueName": "PACIFIC_NORTH_WEST",
+        "UniqueNameCamelCase": "PacificNorthWest",
+        "Label": "Pacific North West",
+        "Number": 35,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 7695.12,
+            "YPosition": -591.18,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 15,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "US_WEST",
+            "CANADA",
+            "EAST_PACIFIC",
+            "NORTH_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "PHILIPPINES",
+        "UniqueNameCamelCase": "Philippines",
+        "Label": "Philippines",
+        "Number": 36,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6126.66,
+            "YPosition": 1260.11,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 3,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -3,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -3,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SEA_OF_JAPAN",
+            "SOUTH_CHINA_SEA",
+            "CENTRAL_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "RUSSIA",
+        "UniqueNameCamelCase": "Russia",
+        "Label": "Russia",
+        "Number": 37,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3828.71,
+            "YPosition": -512.16,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": -1,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 2,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -8,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -3,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SCANDINAVIA",
+            "BALTIC_SEA",
+            "EASTERN_EUROPE",
+            "UKRAINE",
+            "MOSCOW",
+            "SIBERIA"
+        ]
+    },
+    {
+        "UniqueName": "SCANDINAVIA",
+        "UniqueNameCamelCase": "Scandinavia",
+        "Label": "Scandinavia",
+        "Number": 38,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": true,
+            "IconInversed": true,
+            "ControlledCountry1": "NORTH_SEA",
+            "ControlledCountry2": "BALTIC_SEA",
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -7,
+                "YPosition": -5,
+                "ZPosition": 0,
+                "x_rotation": 0,
+                "y_rotation": 0,
+                "z_rotation": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3039.85,
+            "YPosition": -656.44,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": -50,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_SEA",
+            "BALTIC_SEA",
+            "RUSSIA"
+        ]
+    },
+    {
+        "UniqueName": "SEA_OF_JAPAN",
+        "UniqueNameCamelCase": "SeaOfJapan",
+        "Label": "Sea Of Japan",
+        "Number": 39,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6310.71,
+            "YPosition": 261.84,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 300
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -20,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -20,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -25,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "VLADIVOSTOK",
+            "CHINA",
+            "PHILIPPINES",
+            "IWO_JIMA",
+            "NORTH_PACIFIC",
+            "CENTRAL_PACIFIC",
+            "SOUTH_CHINA_SEA",
+            "JAPAN"
+        ]
+    },
+    {
+        "UniqueName": "SIBERIA",
+        "UniqueNameCamelCase": "Siberia",
+        "Label": "Siberia",
+        "Number": 40,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 5212.03,
+            "YPosition": -453.15,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "RUSSIA",
+            "MOSCOW",
+            "KAZAKHSTAN",
+            "MONGOLIA",
+            "VLADIVOSTOK"
+        ]
+    },
+    {
+        "UniqueName": "SOUTH_ATLANTIC",
+        "UniqueNameCamelCase": "SouthAtlantic",
+        "Label": "South Atlantic",
+        "Number": 41,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1964.43,
+            "YPosition": 1650.21,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 50
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -10,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_ATLANTIC",
+            "LATIN_AMERICA",
+            "NORTH_SEA",
+            "SOUTHERN_OCEAN",
+            "AFRICA"
+        ]
+    },
+    {
+        "UniqueName": "SOUTH_CHINA_SEA",
+        "UniqueNameCamelCase": "SouthChinaSea",
+        "Label": "South China Sea",
+        "Number": 42,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 5954.14,
+            "YPosition": 1616.83,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 50,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SOUTH_EAST_ASIA",
+            "PHILIPPINES",
+            "INDONESIA",
+            "NEW_GUINEA",
+            "AUSTRALIA",
+            "BAY_OF_BENGAL",
+            "INDIAN_OCEAN",
+            "SEA_OF_JAPAN",
+            "CENTRAL_PACIFIC",
+            "SOUTH_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "SOUTH_EAST_ASIA",
+        "UniqueNameCamelCase": "SouthEastAsia",
+        "Label": "South East Asia",
+        "Number": 43,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": true,
+            "IconInversed": true,
+            "ControlledCountry1": "BAY_OF_BENGAL",
+            "ControlledCountry2": "SOUTH_CHINA_SEA",
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1.3,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0,
+                "x_rotation": 0,
+                "y_rotation": 0,
+                "z_rotation": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 5483.23,
+            "YPosition": 1238.67,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "INDIA",
+            "SZECHUAN",
+            "CHINA",
+            "SOUTH_CHINA_SEA",
+            "BAY_OF_BENGAL"
+        ]
+    },
+    {
+        "UniqueName": "SOUTH_EAST_PACIFIC",
+        "UniqueNameCamelCase": "SouthEastPacific",
+        "Label": "South East Pacific",
+        "Number": 44,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 613.71,
+            "YPosition": 2005.18,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "LATIN_AMERICA",
+            "SOUTHERN_OCEAN",
+            "EAST_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "SOUTHERN_OCEAN",
+        "UniqueNameCamelCase": "SouthernOcean",
+        "Label": "Southern Ocean",
+        "Number": 45,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 1983.09,
+            "YPosition": 2846.43,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "LATIN_AMERICA",
+            "SOUTH_EAST_PACIFIC",
+            "SOUTH_ATLANTIC",
+            "AFRICA",
+            "INDIAN_OCEAN"
+        ]
+    },
+    {
+        "UniqueName": "SOUTH_PACIFIC",
+        "UniqueNameCamelCase": "SouthPacific",
+        "Label": "South Pacific",
+        "Number": 46,
+        "Type": 1,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6482.28,
+            "YPosition": 2496.29,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 200
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -20,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": -20,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -25,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NEW_GUINEA",
+            "NEW_ZEALAND",
+            "AUSTRALIA"
+        ]
+    },
+    {
+        "UniqueName": "SZECHUAN",
+        "UniqueNameCamelCase": "Szechuan",
+        "Label": "Szechuan",
+        "Number": 47,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 5096.82,
+            "YPosition": 562.88,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "KAZAKHSTAN",
+            "MONGOLIA",
+            "CHINA",
+            "SOUTH_EAST_ASIA",
+            "INDIA",
+            "MIDDLE_EAST"
+        ]
+    },
+    {
+        "UniqueName": "UKRAINE",
+        "UniqueNameCamelCase": "Ukraine",
+        "Label": "Ukraine",
+        "Number": 48,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 3610.56,
+            "YPosition": 190.43,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 2,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 5,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "EASTERN_EUROPE",
+            "BALKANS",
+            "RUSSIA",
+            "MOSCOW",
+            "CASPIAN_SEA",
+            "BLACK_SEA",
+            "MIDDLE_EAST",
+            "KAZAKHSTAN"
+        ]
+    },
+    {
+        "UniqueName": "UNITED_KINGDOM",
+        "UniqueNameCamelCase": "UnitedKingdom",
+        "Label": "United Kingdom",
+        "Number": 49,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2229.17,
+            "YPosition": -315.63,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_SEA"
+        ]
+    },
+    {
+        "UniqueName": "US_EAST",
+        "UniqueNameCamelCase": "USEast",
+        "Label": "US East",
+        "Number": 50,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 782.12,
+            "YPosition": 240.21,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -15,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -10,
+                "YPosition": -5,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "CANADA",
+            "NORTH_ATLANTIC",
+            "US_WEST",
+            "LATIN_AMERICA"
+        ]
+    },
+    {
+        "UniqueName": "US_WEST",
+        "UniqueNameCamelCase": "USWest",
+        "Label": "US West",
+        "Number": 51,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 8009.21,
+            "YPosition": 299.91,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": 0,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 10,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 5,
+                "YPosition": -10,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "PACIFIC_NORTH_WEST",
+            "LATIN_AMERICA",
+            "US_EAST",
+            "EAST_PACIFIC"
+        ]
+    },
+    {
+        "UniqueName": "VLADIVOSTOK",
+        "UniqueNameCamelCase": "Vladivostok",
+        "Label": "Vladivostok",
+        "Number": 52,
+        "Type": 0,
+        "IsSupply": "false",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 6539.05,
+            "YPosition": -417.41,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 0,
+            "YPosition": 0,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 10,
+                "YPosition": 15,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": 10,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 15,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "SIBERIA",
+            "MONGOLIA",
+            "CHINA",
+            "SEA_OF_JAPAN"
+        ]
+    },
+    {
+        "UniqueName": "WESTERN_EUROPE",
+        "UniqueNameCamelCase": "WesternEurope",
+        "Label": "Western Europe",
+        "Number": 53,
+        "Type": 0,
+        "IsSupply": "true",
+        "StraightData": {
+            "DataClass": "StraightData",
+            "IsStraight": false,
+            "IconInversed": false,
+            "ControlledCountry1": null,
+            "ControlledCountry2": null,
+            "StraightTransform": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": 0,
+                "ZPosition": 0
+            }
+        },
+        "WorldTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 1,
+            "XPosition": 2467.17,
+            "YPosition": 176.37,
+            "ZPosition": 0.0
+        },
+        "SupplyStarTransformData": {
+            "DataClass": "TransformData",
+            "Scale": 0.8,
+            "XPosition": 2,
+            "YPosition": -2,
+            "ZPosition": 0
+        },
+        "UnitTransformData": {
+            "DataClass": "UnitTransformData",
+            "Position1": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 3,
+                "YPosition": -3,
+                "ZPosition": 0
+            },
+            "Position2": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": -5,
+                "YPosition": -10,
+                "ZPosition": 0
+            },
+            "Position3": {
+                "DataClass": "TransformData",
+                "Scale": 1,
+                "XPosition": 0,
+                "YPosition": -10,
+                "ZPosition": 0
+            }
+        },
+        "Neighbors": [
+            "NORTH_SEA",
+            "MEDITERRANEAN_SEA",
+            "GERMANY",
+            "ITALY",
+            "BALKANS"
+        ]
+    }
+]

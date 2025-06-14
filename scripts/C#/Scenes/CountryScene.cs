@@ -18,7 +18,6 @@ public partial class CountryScene : Node3D
     public Sprite3D StraightSpriteNode => GetNode<Sprite3D>("StraightSprite3D");
 
     public bool clickable;
-    public Callable clickCallback;
 
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
@@ -135,17 +134,15 @@ public partial class CountryScene : Node3D
         }
     }
 
-    public void SetClickable(Callable callback)
+    public void SetClickable()
     {
         clickable = true;
-        clickCallback = callback;
         ClickableSpriteNode.Enable();
     }
 
     public void SetUnclickable()
     {
         clickable = false;
-        clickCallback = new Callable();
         ClickableSpriteNode.Disable();
     }
 
@@ -179,7 +176,7 @@ public partial class CountryScene : Node3D
 
         if (clickable)
         {
-            clickCallback.Call(this);
+            EventBus.Emit(EventBus.SignalName.CountryClicked, this.CountryState.Id);
         }
     }
 }

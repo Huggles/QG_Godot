@@ -6,19 +6,20 @@ public partial class PlayerActionLabel : RichTextLabel
 {
     private static List<MessageQueueItem> messageQueue = new List<MessageQueueItem>();
     private static MessageQueueItem currentShowingMessage;
-    private static PlayerActionLabel instance;
+    private static PlayerActionLabel Instance;
 
     private Panel ContainerPanel => GetNode<Panel>("%ContainerPanel");
 
     public override void _Ready()
     {
-        if(instance != null)
-            throw new NotSupportedException("Only 1 Player Action Label should be initia");
-        instance = this;
+        if (Instance != null)
+            throw new NotSupportedException("Only 1 Player Action Label should be initiated");
+        Instance = this;
         BbcodeEnabled = true;
         HideNode();
 
         ShowNextMessage();
+        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PlayerActionLabel");
     }
 
     public static void ShowText(string text, Faction faction = (Faction)(-1)){
@@ -27,13 +28,13 @@ public partial class PlayerActionLabel : RichTextLabel
     }
     public static void ShowText(string text, int duration, Faction faction = (Faction)(-1)){
         messageQueue.Add(new MessageQueueItem(text, faction, duration));
-        if(instance != null) {
-            instance.ShowNextMessage();
+        if(Instance != null) {
+            Instance.ShowNextMessage();
         }
     }
     public static void HideCurrentText(){
-        if(instance != null){
-            instance.HideNode();
+        if(Instance != null){
+            Instance.HideNode();
         }
     }
 
@@ -74,7 +75,7 @@ public partial class PlayerActionLabel : RichTextLabel
             }
             else
             {
-                FactionState factionState = GameSession.Instance.GameState.FactionStateForEnum(faction);
+                FactionState factionState = GameSession.FactionStates[faction];
                 FactionData factionData = factionState.FactionData;
                 var stylebox = ContainerPanel.GetThemeStylebox("panel") as StyleBoxFlat;
                 if (stylebox != null)

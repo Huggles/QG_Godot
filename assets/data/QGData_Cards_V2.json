@@ -6,7 +6,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "BuildArmy",
-		"Label": null,
+		"Label": "Build Army",
 		"Text": null
 	},
 	{
@@ -16,7 +16,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "BuildNavy",
-		"Label": null,
+		"Label": "Build Navy",
 		"Text": null
 	},
 	{
@@ -26,7 +26,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "LandBattle",
-		"Label": null,
+		"Label": "Land Battle",
 		"Text": null
 	},
 	{
@@ -36,7 +36,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "SeaBattle",
-		"Label": null,
+		"Label": "Sea Battle",
 		"Text": null
 	},
 	{

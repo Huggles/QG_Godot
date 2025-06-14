@@ -60,3 +60,6 @@ texture = ExtResource("7_trmnm")
 unique_name_in_owner = true
 pixel_size = 0.005
 texture = ExtResource("7_trmnm")
+
+[connection signal="MouseEnterOpaque" from="ClickableSprite3D" to="." method="_OnClickableSprite3DMouseEnterOpaque"]
+[connection signal="MouseLeftClickOpaque" from="ClickableSprite3D" to="." method="_OnClickableSprite3DMouseLeftClickOpaque"]

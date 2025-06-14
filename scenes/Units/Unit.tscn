@@ -1,39 +1,36 @@
-[gd_scene load_steps=7 format=3 uid="uid://btx0cwjn67mo2"]
+[gd_scene load_steps=6 format=3 uid="uid://btx0cwjn67mo2"]
 
 [ext_resource type="Script" uid="uid://buwmfq5vmxxi8" path="res://scripts/C#/Scenes/UnitScene.cs" id="1_8vg5g"]
+[ext_resource type="Texture2D" uid="uid://npkiwkvdtsso" path="res://assets/textures/Units/QGArmy.png" id="2_8vg5g"]
 [ext_resource type="Texture2D" uid="uid://cqehtwpiof1rd" path="res://assets/textures/Other/SupplyIcon.png" id="3_ided0"]
 [ext_resource type="PackedScene" uid="uid://p05f75g6qm2o" path="res://scenes/clickable_sprite_3d.tscn" id="3_v5sho"]
-[ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="4_iecer"]
 [ext_resource type="Texture2D" uid="uid://nid6j0fylhjs" path="res://assets/textures/Other/target.png" id="5_1bc45"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_v5fg3"]
-resource_local_to_scene = true
-render_priority = 0
-shader = ExtResource("4_iecer")
-shader_parameter/selectable_texture = ExtResource("5_1bc45")
-shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
 
 [node name="Unit" type="Node3D"]
 script = ExtResource("1_8vg5g")
 
 [node name="UnitSprite3D" type="Sprite3D" parent="."]
 unique_name_in_owner = true
-sorting_offset = 10.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.2)
 pixel_size = 0.02
+render_priority = 1
+texture = ExtResource("2_8vg5g")
 
 [node name="ClickableSprite3D" parent="." instance=ExtResource("3_v5sho")]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0257773, 0.0256805, -0.00489998)
-material_override = SubResource("ShaderMaterial_v5fg3")
-pixel_size = 0.015
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.026, 0.026, 0.1)
+material_override = null
+pixel_size = 0.0
 texture = ExtResource("5_1bc45")
 
 [node name="OutOfSupplyIcon" type="Sprite3D" parent="."]
 unique_name_in_owner = true
+render_priority = 1
 texture = ExtResource("3_ided0")
 
 [node name="DebugLabel3D" type="Label3D" parent="."]
 unique_name_in_owner = true
+visible = false
 pixel_size = 0.05
 billboard = 1
 render_priority = 2

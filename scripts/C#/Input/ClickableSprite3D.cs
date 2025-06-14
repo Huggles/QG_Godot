@@ -55,8 +55,6 @@ public partial class ClickableSprite3D : Sprite3D
         SetGlowColor(selectableColor);
         Disable();
         SetCollisionShape();
-
-        OnTextureChanged();
     }
 
     public void Enable()
@@ -73,11 +71,11 @@ public partial class ClickableSprite3D : Sprite3D
 
     private void OnTextureChanged()
     {
-        if (Texture != null)
+        if (_clickableTexture != null)
         {
-            MaterialOverride?.Set("shader_parameter/selectable_texture", Texture);
+            MaterialOverride?.Set("shader_parameter/selectable_texture", _clickableTexture);
 
-            image = Texture.GetImage();
+            image = _clickableTexture.GetImage();
             if (image != null && image.IsCompressed())
                 image.Decompress();
 
@@ -87,14 +85,14 @@ public partial class ClickableSprite3D : Sprite3D
 
     private void SetCollisionShape()
     {
-        if (collisionShape != null && Texture != null)
+        if (collisionShape != null && _clickableTexture != null)
         {
             var shape = collisionShape.Shape as BoxShape3D;
             if (shape != null)
             {
                 shape.Size = new Vector3(
-                    Texture.GetWidth() * PixelSize,
-                    Texture.GetHeight() * PixelSize,
+                    _clickableTexture.GetWidth() * PixelSize,
+                    _clickableTexture.GetHeight() * PixelSize,
                     shape.Size.Z
                 );
             }
@@ -107,8 +105,8 @@ public partial class ClickableSprite3D : Sprite3D
 
         Vector3 pixelPosition = (inputPosition - GlobalPosition) / PixelSize;
 
-        float textureLocalX = pixelPosition.X + (Texture.GetWidth() / 2.0f);
-        float textureLocalY = Texture.GetHeight() - (pixelPosition.Y + (Texture.GetHeight() / 2.0f));
+        float textureLocalX = pixelPosition.X + (_clickableTexture.GetWidth() / 2.0f);
+        float textureLocalY = _clickableTexture.GetHeight() - (pixelPosition.Y + (_clickableTexture.GetHeight() / 2.0f));
 
         if (textureLocalX < 0 || textureLocalY < 0 ||
             textureLocalX >= image.GetSize().X || textureLocalY >= image.GetSize().Y)

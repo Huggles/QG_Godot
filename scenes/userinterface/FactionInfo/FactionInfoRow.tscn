@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bjpmsri3am6gm"]
 
-[ext_resource type="Script" uid="uid://baq6uu0epu2br" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.gd" id="1_sdgdn"]
+[ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
 resource_local_to_scene = true
@@ -43,7 +43,7 @@ offset_bottom = -1030.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_default_cursor_shape = 2
-script = ExtResource("1_sdgdn")
+script = ExtResource("1_osvc4")
 
 [node name="BackgroundPanel" type="Panel" parent="."]
 unique_name_in_owner = true

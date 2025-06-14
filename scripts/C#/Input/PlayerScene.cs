@@ -90,4 +90,11 @@ public partial class PlayerScene : CharacterBody3D
             Name = _playerName;
         }
     }
+
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        GD.Print("Entered tree player");
+    }
+
 }

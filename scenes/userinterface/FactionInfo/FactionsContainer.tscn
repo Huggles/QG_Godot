@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bmfob702ugwps"]
 
-[ext_resource type="Script" uid="uid://bi0vpe7daca3n" path="res://scenes/userinterface/FactionInfo/FactionsContainer.gd" id="1_wuvnv"]
+[ext_resource type="Script" uid="uid://c7gs15duynas5" path="res://scenes/userinterface/FactionInfo/FactionsContainer.cs" id="1_s20bd"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t8s4d"]
 
@@ -11,7 +11,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_wuvnv")
+script = ExtResource("1_s20bd")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1

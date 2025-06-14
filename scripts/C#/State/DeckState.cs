@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public partial class DeckState : StateObject
 {
@@ -35,59 +36,7 @@ public partial class DeckState : StateObject
     public DeckState(FactionState factionState)
     {
         FactionState = factionState;
-    }
-
-    public List<CardActivationOption> ActivatableCardsForGCE(ChangeEvent gce, bool before = false)
-    {
-        var ac = ActivatableCardsForGCEInCards(StatusCardStates, gce, before);
-        ac.AddRange(ActivatableCardsForGCEInCards(ResponseCardStates, gce, before));
-        return ac;
-    }
-
-    public List<CardActivationOption> ActivatableCards(bool before = false)
-    {
-        var ac = ActivatableStatusCards(before);
-        ac.AddRange(ActivatableResponseCards(before));
-        return ac;
-    }
-
-    private List<CardActivationOption> ActivatableStatusCards(bool before = false)
-    {
-        var options = new List<CardActivationOption>();
-        // foreach (var gce in GameState.CardPlayHandler.ChangeEvents)
-        // {
-        //     options.AddRange(ActivatableCardsForGCEInCards(StatusCardStates, gce, before));
-        // }
-        return options;
-    }
-
-    private List<CardActivationOption> ActivatableResponseCards(bool before = false)
-    {
-        var options = new List<CardActivationOption>();
-        // foreach (var gce in GameState.CardPlayHandler.ChangeEvents)
-        // {
-        //     options.AddRange(ActivatableCardsForGCEInCards(ResponseCardStates, gce, before));
-        // }
-        return options;
-    }
-
-    private List<CardActivationOption> ActivatableCardsForGCEInCards(List<CardState> cards, ChangeEvent gce, bool before = false)
-    {
-        var options = new List<CardActivationOption>();
-        foreach (var card in cards)
-        {
-            bool canActivate = before
-                ? card.CardExecutionClass.CanActivateBefore(gce)
-                : card.CardExecutionClass.CanActivateAction(gce);
-
-            if (canActivate)
-            {
-                var option = new CardActivationOption(card.Id, "response");
-                options.Add(option);
-            }
-        }
-        return options;
-    }
+    }   
 
     public int DrawTopCard()
     {
@@ -134,100 +83,7 @@ public partial class DeckState : StateObject
                 response.Add(cardId);
         }
         return response;
-    }
-
-    public void PlayCardAtHandIndex(int index)
-    {
-        if (index >= HandCardIds.Count)
-            return;
-
-        PlayCard(HandCardIds[index]);
-    }
-
-    public void PlayCard(int cardId)
-    {
-        var cardState = CardState.ForId(cardId);
-        if (!cardState.CanPlayCard())
-        {
-            DebugUtilities.PrintPeerError($"Cannot play card: {cardState.CardData.Label}");
-            return;
-        }
-
-        if (HandCardIds.Contains(cardId))
-            PlayCardFromHand(cardId);
-        else if (DiscardedCardIds.Contains(cardId))
-            PlayCardFromDiscard(cardId);
-        else if (DeckCardIds.Contains(cardId))
-            PlayCardFromDeck(cardId);
-    }
-
-    public void ActivateCard(CardActivationOption option)
-    {
-        if (StatusCardIds.Contains(option.CardId))
-            ActivateStatusCard(option);
-        else if (ResponseCardIds.Contains(option.CardId))
-            ActivateResponseCard(option);
-    }
-
-    public void ActivateStatusCard(CardActivationOption option)
-    {
-        if (!StatusCardIds.Contains(option.CardId)) return;
-
-        var card = CardState.ForId(option.CardId);
-        card.CardExecutionClass.ActivateCard(ChangeEvent.ForId(option.ChangeEventId));
-        
-    }
-
-    public void ActivateResponseCard(CardActivationOption option)
-    {
-        if (!ResponseCardIds.Contains(option.CardId)) return;
-
-        var card = CardState.ForId(option.CardId);
-        card.CardExecutionClass.ActivateCard(ChangeEvent.ForId(option.ChangeEventId));
-        
-    }
-
-    public CardState PlayCardFromDeck(int cardId)
-    {
-        if (!DeckCardIds.Contains(cardId)) return null;
-
-        DeckCardIds.Remove(cardId);
-        DiscardedCardIds.Add(cardId);
-        return CardState.ForId(cardId);
-    }
-
-    public CardState PlayCardFromDiscard(int cardId)
-    {
-        return DiscardedCardIds.Contains(cardId) ? CardState.ForId(cardId) : null;
-    }
-
-    public CardState PlayCardFromHand(int cardId)
-    {
-        if (!HandCardIds.Contains(cardId)) return null;
-
-        var card = CardState.ForId(cardId);
-        if (!card.CanPlayCard())
-        {
-            DebugUtilities.PrintPeerError($"Card not playable: {card.CardData.Label}");
-            return null;
-        }
-
-        HandCardIds.Remove(cardId);
-        DiscardedCardIds.Add(cardId);
-        return card;
-    }
-
-    public void PlayCardByName(string cardName)
-    {
-        foreach (var card in CardState.ForIds(AllCardIds))
-        {
-            if (card.CardData.UniqueName == cardName)
-            {
-                PlayCard(card.Id);
-                return;
-            }
-        }
-    }
+    }    
 
     public void DiscardCardAtHandIndex(int index)
     {
@@ -270,6 +126,6 @@ public partial class DeckState : StateObject
 
     public static DeckState ForFaction(Faction faction)
     {
-        return GameSession.Instance.GameState.FactionStateForEnum(faction).DeckState;
+        return GameSession.FactionStates[faction].DeckState;
     }
 }

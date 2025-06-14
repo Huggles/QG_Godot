@@ -46,7 +46,7 @@ public partial class FactionHandDisplay : Control
         {
             CardState card = cards[index];
             var cardSceneInstance = CardScenePacked.Instantiate<CardScene>();
-            cardSceneInstance.Card = card.CardExecutionClass;
+            cardSceneInstance.Card = card.CardLogic;
             cardSceneInstance.Scale = cardScale;
             _cardsContainer.AddChild(cardSceneInstance);
 

@@ -13,22 +13,29 @@ public partial class GameManager : Node
     private static readonly PackedScene UIScene = GD.Load<PackedScene>("res://scenes/userinterface/game_user_interface_base.tscn");
     private static readonly PackedScene PlayerScene = GD.Load<PackedScene>("res://scenes/Player/Player.tscn");
 
-    private Node3D _gameLoadTransitionScreenInstance;
-    private Node3D _playerInstance;
+    private Node3D _gameLoadTransitionScreenInstance;    
 
     [Export]
     public GameSession GameSession;
 
-    private List<PlayerScene> _playerStates = new();
+    private List<PlayerScene> playerStates = new List<PlayerScene>();
 
     public Camera3D MyCamera => GetViewport().GetCamera3D();
-    public InputManager MyInputManager => _playerStates.Count > 0 ? _playerStates[0].InputManager : null;
+    public InputManager MyInputManager => playerStates.Count > 0 ? playerStates[0].InputManager : null;
+    
+    public List<string> UserInterfaceElementsLoaded = new List<string>();
+    public List<string> UserInterfaceElementsToLoad = new List<string>
+    {
+        "PlayerActionLabel",
+        "InputOptionsList"
+    };
+    
 
     public override void _Ready()
     {
         DebugUtilities.PrintPeer("GameManager Ready");
-        Dictionary<string,object> args = DebugUtilities.CommandLineArguments;
-        DebugUtilities.PrintPeer(JsonSerializer.Serialize(args)); 
+        Dictionary<string, object> args = DebugUtilities.CommandLineArguments;
+        DebugUtilities.PrintPeer(JsonSerializer.Serialize(args));
 
         if (args.ContainsKey(LocalMultiplayerGameArg) && (bool)args[LocalMultiplayerGameArg] == true)
         {
@@ -43,17 +50,27 @@ public partial class GameManager : Node
     private void LoadSinglePlayerGame()
     {
         DebugUtilities.PrintPeer("Starting single player game");
-        _playerInstance = PlayerScene.Instantiate<Node3D>();
-        NodeUtilities.Instance.PlayersNode.AddChild(_playerInstance);
-        // _playerStates.Add((PlayerScene)_playerInstance);
-        SetupGameSession();
+        PlayerScene playerInstance = PlayerScene.Instantiate<PlayerScene>();
+        NodeUtilities.Instance.PlayersNode.AddChild(playerInstance);
+        playerStates.Add(playerInstance);
+
+        EventBus.Instance.UserInterfaceLoaded += elementName =>
+        {
+            DebugUtilities.PrintPeer("UserInterfaceLoaded");
+            UserInterfaceElementsLoaded.Add(elementName);
+            if (UserInterfaceElementsLoaded.Count == UserInterfaceElementsToLoad.Count)
+            {
+                SetupGameSession();
+            }
+        };
+        
     }
 
     private void SetupGameSession()
     {
         DebugUtilities.PrintPeer("_setup_game_mode");
         GameSession = new GameSession();
-        GameSession.StartSession();
+        GameSession.StartSession(playerStates);
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority)]

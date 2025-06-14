@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 public partial class CardState : Object
 {
     public int Id { get; set; }
@@ -11,16 +12,15 @@ public partial class CardState : Object
 
     public ChangeEvent TriggeredByChangeEvent { get; set; }
 
-    private CardLogic cardExecutionClass;
-
-    public CardLogic CardExecutionClass
+    private CardLogic cardLogic;
+    public CardLogic CardLogic
     {
         get
         {
-            if (cardExecutionClass == null){
-                cardExecutionClass = GetCardLogicClass();
+            if (cardLogic == null){
+                cardLogic = GetCardLogicClass();
             }
-            return cardExecutionClass;
+            return cardLogic;
         }
     }
 
@@ -32,31 +32,26 @@ public partial class CardState : Object
 
     public bool CanPlayCard()
     {
-        if (CardExecutionClass != null)
-            return CardExecutionClass.CanPlayCard();
+        if (CardLogic != null)
+            return CardLogic.CanPlayCard();
         return false;
     }
 
     public void PlayCard()
     {
         DebugUtilities.PrintPeer("play_card");
-        CardExecutionClass.PlayCard();
+        CardLogic.PlayCard();
     }
 
     private CardLogic GetCardLogicClass()
     {
-        if (DataUtilities.ClassMap.ContainsKey(CardData.ExecutionClass))
-        {
-            var classPath = DataUtilities.ClassMap[CardData.ExecutionClass].Path;
-            var script = GD.Load<Script>(classPath);
-            if (script != null)
-            {
-                CardLogic instance = new CardLogic(this);                
-                return instance;
-            }
+        Type cardType = Type.GetType(CardData.ExecutionClass);
+        if(cardType != null) {            
+            CardLogic cardLogic = (CardLogic)Activator.CreateInstance(cardType);
+            cardLogic.CardState = this;
+            return cardLogic;
         }
-
-        DebugUtilities.PrintPeerError($"Could not find card logic class for: {CardData.Label}");
+        DebugUtilities.PrintPeerError($"Could not find card logic class for: {CardData.ExecutionClass}");
         return null;
     }
 

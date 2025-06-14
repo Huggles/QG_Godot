@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 public partial class GameModeDefault : IGameMode
 {
     const string COUNTRY_DATA_PATH = "res://assets/data/QGData_Countries_V2.json";
     const string FACTIONS_DATA_PATH = "res://assets/data/QGData_Factions_V2.json";
     const string CARDS_DATA_PATH = "res://assets/data/QGData_Cards_V2.json";
-    const string DECKS_DATA_PATH = "res://assets/data/QGData_Decks.json";	
-    
+    const string DECKS_DATA_PATH = "res://assets/data/QGData_Decks.json";
     const string WORLD_SCENE_FILE = "res://scenes/World/WorldScene.tscn";
     
     private GameState gameState = GameSession.Instance.GameState;
@@ -34,11 +34,11 @@ public partial class GameModeDefault : IGameMode
         
     }
 
-    public void LoadDataFiles() {
+    public async Task LoadDataFiles() {
         using var countryDataFile = FileAccess.Open(COUNTRY_DATA_PATH, FileAccess.ModeFlags.Read);
         string countryDataString = countryDataFile.GetAsText();
         List<CountryData> countryDataArray      = JsonSerializer.Deserialize<List<CountryData>>(countryDataString);
-        StaticGameData.CountryDataList = countryDataArray;
+        StaticGameData.CountryDataList = countryDataArray;        
 
         using var factionDataFile = FileAccess.Open(FACTIONS_DATA_PATH, FileAccess.ModeFlags.Read);
         string factionDataString = factionDataFile.GetAsText();
@@ -54,6 +54,10 @@ public partial class GameModeDefault : IGameMode
         string deckDataString = deckDataFile.GetAsText();
         List<DeckData> deckDataArray            = JsonSerializer.Deserialize<List<DeckData>>(deckDataString);
         StaticGameData.DeckDataList = deckDataArray;
+
+        foreach(CountryData countryData in countryDataArray){
+            await countryData.LoadData();
+        }
 
         DebugUtilities.PrintPeer("Data Finished Loading");
     }
@@ -150,11 +154,18 @@ public partial class GameModeDefault : IGameMode
         }
     }
 
-    public void SetupInitialGameState(){
-        foreach(FactionData factionData in StaticGameData.FactionDataList){            
+    public async Task SetupInitialGameState(){
+        DeployUnitChangeEvent deployUnitChangeEvent;
+        foreach (FactionData factionData in StaticGameData.FactionDataList) {
             CountryState homespaceCountryState = CountryState.ForName(factionData.Homespace);
-            DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(factionData.Faction, homespaceCountryState.Id, DeployType.RECRUIT);
-            deployUnitChangeEvent.ApplyChange();
+            deployUnitChangeEvent = new DeployUnitChangeEvent(factionData.Faction, homespaceCountryState.Id, DeployType.RECRUIT);
+            deployUnitChangeEvent.IsTrigger = false;
+            CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
         }
+
+
+        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForName("WESTERN_EUROPE").Id, DeployType.RECRUIT);
+        deployUnitChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
     }
 }

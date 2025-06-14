@@ -1,159 +1,101 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-public partial class CardLogic
+public abstract partial class CardLogic : GodotObject
 {
-    public int PeerId;
     public CardState CardState;
-
     public CardData CardData => CardState.CardData;
-
     public Faction Faction => CardState.Faction;
-
     public FactionData FactionData => StaticGameData.FactionDataMap.ContainsKey(Faction) ? StaticGameData.FactionDataMap[Faction] : null;
 
-    public bool IsPlayed;
-
     public List<int> ActivatedInTurns = new();
-
-    public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
-
-    public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Instance.GameFlow.GameTurn);
-
-    public bool IsPubliclyVisible =>
-        IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
-
     public List<int> CompletedParts = new();
 
-    // public Texture2D CardFrontTexture
-    // {
-    //     get
-    //     {
-    //         switch (CardData.Type)
-    //         {
-    //             case "BUILD_ARMY": return GD.Load<Texture2D>(FactionData.CardFrontBuildArmyTexture);
-    //             case "BUILD_NAVY": return GD.Load<Texture2D>(FactionData.CardFrontBuildNavyTexture);
-    //             case "LAND_BATTLE": return GD.Load<Texture2D>(FactionData.CardFrontLandBattleTexture);
-    //             case "SEA_BATTLE": return GD.Load<Texture2D>(FactionData.CardFrontSeaBattleTexture);
-    //             case "STATUS": return GD.Load<Texture2D>(FactionData.CardFrontStatusTexture);
-    //             case "RESPONSE": return GD.Load<Texture2D>(FactionData.CardFrontResponseTexture);
-    //             case "EVENT": return GD.Load<Texture2D>(FactionData.CardFrontEventTexture);
-    //             case "EW": return GD.Load<Texture2D>(FactionData.CardFrontEwTexture);
-    //             default: return null;
-    //         }
-    //     }
-    // }
+    public bool IsPlayed;
+    public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
+    public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Instance.GameFlow.GameTurn);
+    public bool IsPubliclyVisible => IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
 
-    // public Texture2D CardBackTexture => GD.Load<Texture2D>(FactionData.CardBackTexture);
+    protected int PlayStep = 0;
+    protected int ReactStep = 0;
 
-    public CardLogic(CardState cardState)
+    [Signal] public delegate void CardFinishedEventHandler();
+    [Signal] public delegate void CardStepFinishedEventHandler();
+
+    public virtual List<Action> OnPlaySteps() { return new() { InitialPlayStep }; }
+    public virtual List<Action> OnReactSteps() { return new() { InitialReactStep }; }
+
+    public abstract void InitialPlayStep();
+    public virtual void InitialReactStep() { }
+
+    public int NumberOfPlaySteps
     {
-        CardState = cardState;
+        get { return OnPlaySteps().Count; }
+    }
+    public int NumberOfReactSteps
+    {
+        get { return OnReactSteps().Count; }
     }
 
-    protected int PartCounter = 1;
-
-    public virtual bool CanPlayCard() => CanPlayCard(PartCounter);
-
-    protected virtual bool CanPlayCard(int part) => true;
-
-    public bool CanActivateAction(ChangeEvent changeEvent)
+    public virtual bool CanPlayCard()
     {
-        bool activatable = CanActivateActionImpl(changeEvent) && !IsActivatedThisTurn;
-        DebugUtilities.PrintPeer($"{CardData.Label} is activatable: {activatable} for {changeEvent.SummaryText()}");
-        return activatable;
+        return false;
     }
 
-    protected virtual bool CanActivateActionImpl(ChangeEvent changeEvent) => false;
+    public virtual bool CanReactTo(ChangeEvent changeEvent)
+    {
+        return false;
+    }
 
     public void PlayCard()
     {
-        if (CanPlayCard(PartCounter))
+        if (CanPlayCard())
         {
-            string message = PlayActionGuidance(PartCounter);
+            string message = PlayActionGuidance();
             PlayerActionLabel.ShowText(message, -1, Faction);
-            PlayCardImpl(PartCounter);
+            OnPlaySteps()[PlayStep].Invoke();
+            PlayStep += 1;
         }
         else
         {
-            DebugUtilities.PrintPeerError($"Cannot execute card: {CardData.UniqueName}");
+            DebugUtilities.PrintPeerError($"Cannot play card: {CardData.UniqueName}");
+            Task.Delay(100);
         }
     }
 
-    public void ActivateCard(ChangeEvent changeEvent)
+    public async Task ReactTo(ChangeEvent changeEvent)
     {
-        if (CanActivateAction(changeEvent))
+        if (CanReactTo(changeEvent))
         {
-            EventBus.Emit("StatusCardActivationStarted", CardState.Id);            
-            ActivatedInTurns.Add(GameSession.Instance.GameFlow.GameTurn);
-            string message = ActivateActionGuidance(PartCounter);
-            PlayerActionLabel.ShowText(message, -1, Faction);            
-            ActivateActionImpl(changeEvent, PartCounter);
+            string message = ActivateActionGuidance();
+            PlayerActionLabel.ShowText(message, -1, Faction);
+            OnReactSteps()[PlayStep].Invoke();
+            PlayStep += 1;
         }
         else
         {
             DebugUtilities.PrintPeerError($"Cannot activate card: {CardData.UniqueName}");
+            await Task.Delay(100);
         }
     }
 
-    protected virtual string PlayActionGuidance(int part) =>
+    protected virtual string PlayActionGuidance() =>
         $"Play {GetType().Name}";
 
-    protected virtual string ActivateActionGuidance(int part) =>
+    protected virtual string ActivateActionGuidance() =>
         $"Activate {GetType().Name}";
 
-    protected virtual void PlayCardImpl(int part)
-    {
-        // Override this in derived class
+    public T BuildChangeEvent<T>(T changeEvent) where T : ChangeEvent
+    {        
+        changeEvent.SourceCardId = this.CardState.Id;
+        return changeEvent;
     }
 
-    protected virtual void ActivateActionImpl(ChangeEvent changeEvent, int part)
-    {
-        // Override this in derived class
-    }
 
-    public bool CanActivateBefore(ChangeEvent changeEvent) =>
-        CanActivateBeforeImpl(changeEvent);
+    
 
-    protected virtual bool CanActivateBeforeImpl(ChangeEvent changeEvent) => false;
+    
 
-    public void ActivateBefore(ChangeEvent changeEvent) =>
-        ActivateBeforeImpl(changeEvent);
-
-    protected virtual void ActivateBeforeImpl(ChangeEvent changeEvent)
-    {
-        // Override if needed
-    }
-
-    protected virtual bool HasMultipleActions() => false;
-
-    public bool HasNextAction() => HasNextActionImpl();
-
-    protected virtual bool HasNextActionImpl() => false;
-
-    public void PlayNextAction()
-    {
-        PartCounter += 1;
-        PlayCard();
-    }
-
-    public void ActivateNextAction(ChangeEvent changeEvent)
-    {
-        PartCounter += 1;
-        ActivateCard(changeEvent);
-    }
-
-    public void CardPlayFinished()
-    {
-        GD.Print($"Finished play: {GetType().Name}");
-        EventBus.Emit("CardPlayCompleted", CardState.Id);
-    }
-
-    public void CardActivationFinished()
-    {
-        GD.Print($"Finished activation: {GetType().Name}");
-        CompletedParts.Clear();
-        EventBus.Emit("StatusCardActivationCompleted", CardState.Id);
-    }
 }

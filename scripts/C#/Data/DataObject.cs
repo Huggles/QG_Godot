@@ -4,17 +4,24 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Threading.Tasks;
 
-public partial class DataObject : Object
+public partial class DataObject : IGameData
 {
     public string Stringify()
     {
         return JsonSerializer.Serialize(this);
     }
-    public object GetValue(string key){
-        if(GetType().GetProperty(key) != null){
+    public object GetValue(string key)
+    {
+        if (GetType().GetProperty(key) != null)
+        {
             return GetType().GetProperty(key).GetValue(this);
         }
+        return null;
+    }
+    public virtual Task LoadData()
+    {
         return null;
     }
 
@@ -35,7 +42,7 @@ public partial class DataObject : Object
     // public void FromDictionary(Dictionary<string, object> jsonDictionary) {
     //     FromDictionary(jsonDictionary, GetType(), this);        
     // }
-    
+
     // private void FromDictionary(Dictionary<string, object> jsonDictionary, Type dataObjectType, DataObject dataObject){
     //     foreach (string key in jsonDictionary.Keys){
     //         object value = jsonDictionary[key];

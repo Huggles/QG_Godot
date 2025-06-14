@@ -36,8 +36,8 @@ public partial class UnitState : StateObject
         Type = type;
         Faction = faction;
 
-        //EventBusLocal.SetUnitsClickable += SetClickable;
-        //EventBusLocal.SetAllUnitsUnclickable += SetUnclickable;
+        EventBus.Instance.SetUnitsClickable += SetClickable;
+        EventBus.Instance.SetAllUnitsUnclickable += SetUnclickable;
     }
 
     public void InitNode()
@@ -60,11 +60,7 @@ public partial class UnitState : StateObject
     {
         if (Array.IndexOf(unitIds, Id) >= 0)
         {
-            Node.SetClickable(Callable.From((UnitScene unitScene) =>
-            {
-                SetUnclickable();
-                EventBus.Emit("UnitClicked", Id);                
-            }));
+            Node.SetClickable();
         }
     }
 
@@ -83,19 +79,6 @@ public partial class UnitState : StateObject
     {
         InSupply = false;
         Node.ShowOutOfSupply();
-    }
-
-    public bool CanAttack(Faction againstFaction)
-    {
-        if (!IsDeployedToCountry) return false;
-
-        foreach (var connectedCountry in CountryState.ConnectedCountries(againstFaction))
-        {
-            if (connectedCountry.OccupyingFactions.Contains(againstFaction))
-                return true;
-        }
-
-        return false;
     }
 
     public static UnitState ForId(int unitId)

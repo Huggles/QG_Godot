@@ -10,11 +10,8 @@ public partial class UnitPool : Object
     private static GameState gameState { get { return GameSession.Instance.GameState; } }
 
     public static int GetAvailableUnitForFaction(Faction faction, UnitType unitType)
-    {
-        GD.Print("get_available_unit_for_faction");
-
-        List<UnitState> unitStates = UnitState.ForIds(gameState.FactionStateForEnum(faction).AllUnits);
-
+    {        
+        List<UnitState> unitStates = UnitState.ForIds(GameSession.FactionStates[faction].AllUnits);
         foreach (var unitState in unitStates)
         {
             if (!unitState.IsDeployedToCountry && unitState.Type == unitType)
@@ -43,7 +40,7 @@ public partial class UnitPool : Object
 
     public static bool FactionHasAvailableUnits(Faction faction, UnitType unitType)
     {
-        List<UnitState> unitStates = UnitState.ForIds(gameState.FactionStateForEnum(faction).AllUnits);
+        List<UnitState> unitStates = UnitState.ForIds(GameSession.FactionStates[faction].AllUnits);
 
         var availableUnitStates = unitStates
             .Where(unit => unit.Type == unitType && !unit.IsDeployedToCountry)

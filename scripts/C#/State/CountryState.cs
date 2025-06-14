@@ -10,12 +10,12 @@ public partial class CountryState : StateObject
     public int Id { get; set; }
     public string Name { get; set; }
     public string NameCamelCase { get; set; }
-    public string Label { get; set; }
+public string Label { get; set; }
     public CountryType Type { get; set; }
     public bool IsSupply { get; set; }
 
     public List<string> Neighbors { get; set; }
-    public List<CountryState> NeighborCountryStates { get; set; }
+    public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
 
     public StraightState StraightState;
 
@@ -48,18 +48,25 @@ public partial class CountryState : StateObject
         IsSupply = countryData.IsSupply == "true";
         Neighbors = new List<string>(countryData.Neighbors);
 
-        //EventBusLocal.SetCountriesClickable += SetClickable;
-        //EventBusLocal.SetAllCountriesUnclickable += SetUnclickable;
+        EventBus.Instance.SetCountriesClickable += SetClickable;
+        EventBus.Instance.SetAllCountriesUnclickable += SetUnclickable;
     }
 
     public void InitNeighborCountryStateArray()
     {
         foreach (var neighbor in Neighbors)
         {
-            if (GameSession.Instance.GameState.CountryStateByName.TryGetValue(neighbor, out var neighborState))
+            if (Game.GameState.CountryStateByName.TryGetValue(neighbor, out CountryState neighborState))
+            {
                 NeighborCountryStates.Add(neighborState);
+            }
+
             else
-                GD.PrintErr($"Couldn't find: {neighbor} as neighbor of {Name}");
+            {
+                string exceptionMessage = $"Couldn't find: {neighbor} as neighbor of {Name}";                
+                throw new Exception(exceptionMessage);
+            }
+                
         }
     }
 
@@ -74,11 +81,7 @@ public partial class CountryState : StateObject
     {
         if (countryIds.Contains(Id))
         {
-            Node.SetClickable(
-                Callable.From(
-                    (CountryScene scene) => 
-                        EventBus.Emit("CountryClicked", Id)
-                    ));
+            Node.SetClickable();
         }
     }
 

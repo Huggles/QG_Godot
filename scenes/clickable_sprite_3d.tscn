@@ -10,7 +10,7 @@ margin = 0.0
 size = Vector3(770, 870, 1)
 
 [node name="ClickableSprite3D" type="Sprite3D"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.0123878, 0.00945282, -2.00557)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 layers = 8
 material_override = ExtResource("1_ogh2l")
 pixel_size = 1.0
@@ -30,7 +30,12 @@ script = ExtResource("4_bs33g")
 unique_name_in_owner = true
 shape = SubResource("BoxShape3D_mpjw5")
 
-[connection signal="texture_changed" from="." to="." method="_on_texture_changed"]
-[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]
+[connection signal="texture_changed" from="." to="." method="OnTextureChanged"]
+[connection signal="MouseDoubleClickedOpaqueArea" from="ClickableSpriteArea" to="." method="_OnClickableSpriteAreaMouseDoubleClickedOpaqueArea"]
+[connection signal="MouseEnter" from="ClickableSpriteArea" to="." method="_OnClickableSpriteAreaMouseEnter"]
+[connection signal="MouseEnterOpaque" from="ClickableSpriteArea" to="." method="_OnClickableSpriteAreaMouseEnterOpaque"]
+[connection signal="MouseExit" from="ClickableSpriteArea" to="." method="_OnClickableSpriteAreaMouseExit"]
+[connection signal="MouseExitOpaque" from="ClickableSpriteArea" to="." method="_OnClickableSpriteAreaMouseExitOpaque"]
+[connection signal="MouseSingleClickedOpaqueArea" from="ClickableSpriteArea" to="." method="_OnClickableSpriteAreaMouseSingleClickedOpaqueArea"]
 [connection signal="mouse_entered" from="ClickableSpriteArea" to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="ClickableSpriteArea" to="." method="_on_mouse_exited"]

@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cxp1fbs41rbk7"]
+[gd_scene load_steps=5 format=3 uid="uid://cxp1fbs41rbk7"]
 
-[ext_resource type="Script" uid="uid://dljgjhokuumk6" path="res://scripts/C#/UI/InputMessageLabel.cs" id="1_noeoe"]
+[ext_resource type="Script" uid="uid://1vjjtnmwigru" path="res://scenes/userinterface/Messaging/InputOptionsList.cs" id="1_noeoe"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_noeoe"]
 bg_color = Color(1, 1, 1, 0.784314)
@@ -14,6 +14,10 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_noeoe"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u3r6q"]
 
 [node name="InputMessaging" type="Control"]
 layout_mode = 3
@@ -48,12 +52,21 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="InputMessageLabel" type="RichTextLabel" parent="ContainerPanel/MarginContainer"]
+[node name="OptionsList" type="ItemList" parent="ContainerPanel/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/default_color = Color(0, 0, 0, 1)
-bbcode_enabled = true
-text = "[color=red] ABC [/color]
-
-"
+theme_override_colors/guide_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hovered_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+theme_override_styles/panel = SubResource("StyleBoxEmpty_noeoe")
+theme_override_styles/hovered = SubResource("StyleBoxFlat_u3r6q")
+allow_search = false
+item_count = 4
+item_0/text = "asdasdas"
+item_1/text = "dasdasdasd"
+item_2/text = "asdasdasdas"
+item_3/text = "dasdasdasd"
 script = ExtResource("1_noeoe")

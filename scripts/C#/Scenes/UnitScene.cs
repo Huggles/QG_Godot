@@ -22,7 +22,6 @@ public partial class UnitScene : Node3D
 
     // Clickable
     private bool clickable;
-    private Callable clickCallback;
 
     // Materials
     private ShaderMaterial normalShaderMaterial = GD.Load<ShaderMaterial>("res://assets/materials/unit_shader_material.tres").Duplicate() as ShaderMaterial;
@@ -87,10 +86,9 @@ public partial class UnitScene : Node3D
         UnitSpriteNode.SortingOffset = 50 + (int)FactionData.Faction;
     }
 
-    public void SetClickable(Callable callback)
+    public void SetClickable()
     {
         clickable = true;
-        clickCallback = callback;
         HideOutOfSupply();
         ClickableSpriteNode.Enable();
     }
@@ -144,9 +142,9 @@ public partial class UnitScene : Node3D
 
     private void OnClickableSprite3DMouseLeftClickOpaque(ClickableSprite3D sprite)
     {
-        if (clickable && clickCallback.Delegate != null)
+        if (clickable)
         {
-            clickCallback.Call(this);
+            EventBus.Emit(EventBus.SignalName.UnitClicked, this.UnitState.Id);
         }
     }
 }

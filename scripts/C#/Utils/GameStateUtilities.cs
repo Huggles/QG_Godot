@@ -9,12 +9,12 @@ public static class GameStateUtilities
 
     public static List<int> ActiveUnitsForFaction(Faction faction)
     {
-        return GameState.FactionStateForEnum(faction).ActiveUnitIds;
+        return GameSession.FactionStates[faction].ActiveUnitIds;
     }
 
     public static List<int> SuppliedUnitsForFaction(Faction faction)
     {
-        return GameState.FactionStateForEnum(faction).SuppliedUnitIds;
+        return GameSession.FactionStates[faction].SuppliedUnitIds;
     }
 
     public static List<int> GetSupplyCountryIds(Faction faction)

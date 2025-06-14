@@ -25,6 +25,10 @@ GameManager="*res://scripts/C#/Game/GameManager.cs"
 
 gdscript/warnings/unused_signal=0
 
+[debug_draw_3d]
+
+settings/addon_root_folder="res://addons/debug_draw_3d"
+
 [display]
 
 window/size/viewport_width=1920

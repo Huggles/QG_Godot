@@ -33,8 +33,7 @@ public partial class GameFlow : GodotObject
         get { return GameSession.Instance.GameState;}
     }
 
-    public FactionState CurrentFactionState => gameState.FactionStateForEnum(CurrentFaction);
-
+    public FactionState CurrentFactionState => GameSession.FactionStates[CurrentFaction];
     public DeckState CurrentFactionDeckState => DeckState.ForFaction(CurrentFaction);
 
     public FactionTeam CurrentFactionTeam =>
@@ -42,7 +41,7 @@ public partial class GameFlow : GodotObject
 
     private List<Action> turnStepMethods;
     private IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
-    private Dictionary<Faction, List<object>> victoryPointSummaries = new Dictionary<Faction, List<object>>();
+    public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
     public GameFlow(){
         turnStepMethods = new List<Action> {
@@ -67,7 +66,7 @@ public partial class GameFlow : GodotObject
 
         foreach (Faction faction in Enum.GetValues(typeof(Faction)))
         {
-            victoryPointSummaries[faction] = new List<object>();
+            VictoryPointSummaries[faction] = new List<VPTurnSummary>();
         }
 
         GameStarted = true;
@@ -76,13 +75,13 @@ public partial class GameFlow : GodotObject
 
     public void ProgressGame()
     {
-        GD.Print($"progress_game: {GameTurn}");
+        GD.Print($"ProgressGame: {GameTurn}");
         StartNextStep();
     }
 
     private void StartNextStep()
     {
-        GD.Print("_start_next_step");
+        GD.Print("StartNextStep");
         TurnStep++;
         turnStepMethods[TurnStep - 1]();
         EventBus.Emit("NextStepStarted",TurnStep);
@@ -90,7 +89,7 @@ public partial class GameFlow : GodotObject
 
     private void StartNewTurn()
     {
-        GD.Print("_start_new_turn");
+        GD.Print("StartNewTurn");
         GameTurn += 1;
         TurnStep = 0;
         GD.Print($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
@@ -106,35 +105,37 @@ public partial class GameFlow : GodotObject
 
     private async void PlayCardStep()
     {
-        GD.Print("_play_card_step");
-        // GameManager.GameState.CardPlayHandler.RequestCardPlay();        
-        await EventBus.GetSignalAwaiter("CardPlayHandlerCompleted");
+        GD.Print("PlayCardStep");
+        PlayStepHandlerDefault playStepHandlerDefault = new PlayStepHandlerDefault();
+        playStepHandlerDefault.Start(CurrentFaction);        
+        await ToSignal(playStepHandlerDefault, PlayStepHandlerDefault.SignalName.PlayStepFinished); 
+        
         ProgressGame();
     }
 
     private void SupplyStep()
     {
-        GD.Print("_supply_step");
+        GD.Print("SupplyStep");
         EventBus.Emit("RecalculateSupply", GameTurn);                
         ProgressGame();
     }
 
     private void VictoryPointStep()
     {
-        GD.Print("_victory_point_step");
+        GD.Print("VictoryPointStep");
         vpStepHandler.ProcessVictoryStep(CurrentFaction);
         ProgressGame();
     }
 
     private void DiscardStep()
     {
-        GD.Print("_discard_step");
+        GD.Print("DiscardStep");
         ProgressGame();
     }
 
     private void DrawStep()
     {
-        GD.Print("_draw_step");
+        GD.Print("DrawStep");
         CurrentFactionDeckState.DebugHand();
         CurrentFactionDeckState.DrawCards(7 - CurrentFactionDeckState.HandCardIds.Count);
         CurrentFactionDeckState.DebugHand();

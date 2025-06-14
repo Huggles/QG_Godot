@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public partial class CountryData : DataObject
 {
@@ -10,14 +11,16 @@ public partial class CountryData : DataObject
     public int Number { get; set; }
     public int Type { get; set; }
     public string IsSupply { get; set; }    
-    public List<string> Neighbors { get; private set; } = new List<string>();    
+    public List<string> Neighbors { get; set; }
 
     public StraightData StraightData { get; set; }
     public TransformData WorldTransformData { get; set; }
     public TransformData SupplyStarTransformData { get; set; }
     public UnitTransformData UnitTransformData { get; set; }
 
-    public Texture2D Texture { get; private set; }    
+    public Texture2D Texture { get; private set; }
+
+    public class DataNotFoundException : Exception { public DataNotFoundException(String message) : base(message) { } }
 
     public Vector3 WorldPositionCenterUnscaled
     {
@@ -44,41 +47,13 @@ public partial class CountryData : DataObject
         }
     }
 
-    
-
-    public void Init(Godot.Collections.Dictionary jsonObject)
+    public override async Task LoadData()
     {
-        _SetNeighborCountries(jsonObject);
-
-        var texturePath = $"res://assets/textures/Countries/{NameToCamelCase()}.png";
+        var texturePath = $"res://assets/textures/Countries/{UniqueNameCamelCase}.png";        
         Texture = GD.Load<Texture2D>(texturePath);
         if (Texture == null)
         {
-            GD.PrintErr($"Error loading texture: {texturePath}");
+            throw new DataNotFoundException($"Error loading texture: {texturePath}");            
         }
-    }
-
-    private void _SetNeighborCountries(Godot.Collections.Dictionary jsonObject)
-    {
-        Neighbors.Clear();
-        for (int n = 0; n < 10; n++)
-        {
-            var key = $"neighbor{n + 1}";
-            if (jsonObject.ContainsKey(key))
-            {
-                string value = jsonObject[key].As<string>();
-                if (value != null)
-                {
-                    Neighbors.Add(value.ToString());
-                }
-            }
-        }
-    }
-
-    private string NameToCamelCase()
-    {
-        // Placeholder for name_camel_case conversion logic
-        // Adjust according to your actual naming scheme
-        return UniqueName; // If `Name` is already camelCase
     }
 }

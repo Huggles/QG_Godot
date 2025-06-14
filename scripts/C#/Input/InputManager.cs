@@ -5,6 +5,9 @@ using System.Linq;
 
 public partial class InputManager : Node3D
 {
+    public InputManager Instance;
+
+
     private static readonly Vector3 INITIAL_POSITION = new Vector3(0, 0, 150);
     private const float ZOOM_STEP = 5f;
     private const float CAMERA_SPEED = 0.5f;
@@ -27,55 +30,30 @@ public partial class InputManager : Node3D
     private List<InputEventKey> _currentlyPressedKeyboardButtons = new();
     private List<InputEventKey> _previouslyPressedKeyboardButtons = new();
 
-    private IInputHandler inputHandler;
+    private InputHandlerPlayCard inputHandler;
 
     [Signal]
     public delegate void KeyClickedEventHandler(InputEventKey keyEvent);
 
-    public IInputHandler SetPlayCardInputActive()
-    {
-        inputHandler = new InputHandlerPlayCard();
+    public InputHandlerPlayCard SetPlayCardInputActive(List<CardActivationOption> cardActivationOptions)
+    {        
+        inputHandler = new InputHandlerPlayCard(cardActivationOptions);
         return inputHandler;
     }
 
-    // public InputHandlerActivateCard SetActivateActionInputActive(Enum.Faction faction)
-    // {
-    //     _inputHandler = new InputHandlerActivateCard(faction);
-    //     return (InputHandlerActivateCard)_inputHandler;
-    // }
-
-    // public InputHandlerActivateCard SetActivateBeforeActionInputActive(Enum.Faction faction, GameChangeEvent gce)
-    // {
-    //     _inputHandler = new InputHandlerActivateBeforeCard(faction, gce);
-    //     return (InputHandlerActivateCard)_inputHandler;
-    // }
-
-    // public InputHandlerDiscardCard SetDiscardInputActive()
-    // {
-    //     _inputHandler = new InputHandlerDiscardCard();
-    //     return (InputHandlerDiscardCard)_inputHandler;
-    // }
-
-    // public InputHandlerDebug SetDebugInputActive()
-    // {
-    //     _inputHandler = new InputHandlerDebug();
-    //     return (InputHandlerDebug)_inputHandler;
-    // }
-
-    public void SetNoInputActive()
+    public override void _Ready()
     {
-        inputHandler = null;
+        Instance = this;
     }
+
+    
 
     public override void _EnterTree()
     {
-        // Called before _Ready() in Godot C#
-        // EventBusLocal.SetUnitsClickable += _ => EnableRayTraceCasting();
-        // EventBusLocal.SetCountriesClickable += _ => EnableRayTraceCasting();
-        // EventBusLocal.SetAllUnitsUnclickable += DisableRayTraceCasting;
-        // EventBusLocal.SetAllCountriesUnclickable += DisableRayTraceCasting;
-
-        KeyClicked += HandleKeyClicked;
+        EventBus.Instance.SetUnitsClickable += unitIds => EnableRayTraceCasting();
+        EventBus.Instance.SetCountriesClickable += countryIds => EnableRayTraceCasting();
+        EventBus.Instance.SetAllUnitsUnclickable += DisableRayTraceCasting;
+        EventBus.Instance.SetAllCountriesUnclickable += DisableRayTraceCasting;
         Camera.Position = INITIAL_POSITION;
     }
 
@@ -105,6 +83,9 @@ public partial class InputManager : Node3D
         Vector3 delta = new Vector3(xDelta, yDelta, 0) * Mathf.Clamp(zoomMultiplier, 1, 5);
         Camera.Position += delta;
     }
+
+    
+
 
     public override void _Input(InputEvent e)
     {
@@ -159,11 +140,6 @@ public partial class InputManager : Node3D
                 EmitSignal(SignalName.KeyClicked, keyEvent);
             }
         }
-    }
-
-    private void HandleKeyClicked(InputEventKey keyEvent)
-    {
-        //_inputHandler?.OnKeyClicked(keyEvent);
     }
 
     private void EnableRayTraceCasting()

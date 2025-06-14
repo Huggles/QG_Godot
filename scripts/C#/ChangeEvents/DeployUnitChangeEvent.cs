@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public partial class DeployUnitChangeEvent : ChangeEvent
 {
@@ -18,16 +19,16 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         }
     }
 
-    public DeployUnitChangeEvent(Faction triggeringFaction, int countryId, DeployType deploymentType) 
-        : base(triggeringFaction)
+    public DeployUnitChangeEvent(Faction triggeringFaction, int countryId, DeployType deploymentType) : base(triggeringFaction)
     {
         CountryId = countryId;
         DeploymentType = deploymentType;
     }
 
-    protected override void ApplyChangeEvent()
-    {        
-        GameSession.Instance.GameState.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType);
+    protected override async Task<bool> ExecuteAsync()
+    {
+        GameSession.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType);
+        return true;
     }
 
     public override string TraceText()
@@ -44,4 +45,7 @@ public partial class DeployUnitChangeEvent : ChangeEvent
     {
         return $"Deployed {Enum.GetName(typeof(Faction), TriggeringFaction)} {Enum.GetName(typeof(UnitType), UnitType)} to country: {CountryState.ForId(CountryId).Label}";
     }
+
+    
+
 }
