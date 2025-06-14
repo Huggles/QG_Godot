@@ -29,7 +29,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 1,
             "YPosition": 0,
             "ZPosition": 0
@@ -96,7 +96,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -161,7 +161,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": -20
@@ -229,7 +229,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 60
@@ -296,7 +296,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -368,7 +368,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -433,7 +433,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": -1,
             "YPosition": 0,
             "ZPosition": 0
@@ -498,7 +498,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -563,7 +563,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -634,7 +634,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -701,7 +701,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": 50,
             "YPosition": 0,
             "ZPosition": 0
@@ -768,7 +768,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -839,7 +839,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -906,7 +906,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -971,7 +971,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1035,7 +1035,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 2,
             "YPosition": 5,
             "ZPosition": 0
@@ -1101,7 +1101,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1171,7 +1171,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1236,7 +1236,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1302,7 +1302,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1367,7 +1367,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1430,7 +1430,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1484,7 +1484,7 @@
             "ControlledCountry2": "SOUTH_EAST_PACIFIC",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 1.2,
+                "Scale": 0.2,
                 "XPosition": -13,
                 "YPosition": 30,
                 "ZPosition": 0,
@@ -1502,7 +1502,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 1,
             "YPosition": 0,
             "ZPosition": 0
@@ -1571,7 +1571,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1635,7 +1635,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": -150,
             "YPosition": 0,
             "ZPosition": -20
@@ -1689,7 +1689,7 @@
             "ControlledCountry2": "BAY_OF_BENGAL",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 1.5,
+                "Scale": 0.2,
                 "XPosition": -20,
                 "YPosition": 0,
                 "ZPosition": 0,
@@ -1707,7 +1707,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": -50,
             "YPosition": 0,
             "ZPosition": 0
@@ -1777,7 +1777,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1844,7 +1844,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1910,7 +1910,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1975,7 +1975,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2024,7 +2024,7 @@
             "ControlledCountry2": "MEDITERRANEAN_SEA",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 1.5,
+                "Scale": 0.2,
                 "XPosition": -30,
                 "YPosition": 17,
                 "ZPosition": 0,
@@ -2042,7 +2042,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": -150
@@ -2109,7 +2109,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2177,7 +2177,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2246,7 +2246,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": -1,
             "YPosition": 0,
             "ZPosition": 100
@@ -2317,7 +2317,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 1,
             "YPosition": 0,
             "ZPosition": 0
@@ -2383,7 +2383,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2448,7 +2448,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": -1,
             "YPosition": 0,
             "ZPosition": 0
@@ -2501,7 +2501,7 @@
             "ControlledCountry2": "BALTIC_SEA",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 1,
+                "Scale": 0.2,
                 "XPosition": -7,
                 "YPosition": -5,
                 "ZPosition": 0,
@@ -2519,7 +2519,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": -50,
             "YPosition": 0,
             "ZPosition": 0
@@ -2584,7 +2584,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 300
@@ -2654,7 +2654,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2721,7 +2721,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 50
@@ -2788,7 +2788,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 50,
             "YPosition": 0,
             "ZPosition": 0
@@ -2845,7 +2845,7 @@
             "ControlledCountry2": "SOUTH_CHINA_SEA",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 1.3,
+                "Scale": 0.2,
                 "XPosition": 0,
                 "YPosition": 0,
                 "ZPosition": 0,
@@ -2863,7 +2863,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2930,7 +2930,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2995,7 +2995,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3062,7 +3062,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 200
@@ -3127,7 +3127,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3195,7 +3195,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 2,
             "ZPosition": 0
@@ -3265,7 +3265,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3328,7 +3328,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3394,7 +3394,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3460,7 +3460,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 1,
+            "Scale": 0.2,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3526,7 +3526,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.8,
+            "Scale": 0.2,
             "XPosition": 2,
             "YPosition": -2,
             "ZPosition": 0

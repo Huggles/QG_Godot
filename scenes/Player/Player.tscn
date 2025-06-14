@@ -6,32 +6,33 @@
 [ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://scenes/userinterface/FactionInfo/FactionsContainer.tscn" id="5_xcisb"]
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="7_fxc31"]
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_12hdh"]
-radius = 0.001
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xcisb"]
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody2D"]
 collision_mask = 2
-up_direction = Vector3(0, 0, 1)
 script = ExtResource("1_socpp")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="."]
 unique_name_in_owner = true
-current = true
-near = 0.001
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.81571, 1.39794)
-shape = SubResource("SphereShape3D_12hdh")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 1.81571)
+shape = SubResource("RectangleShape2D_xcisb")
+disabled = true
 
-[node name="InputManager" type="Node3D" parent="."]
+[node name="InputManager" type="Node2D" parent="."]
 unique_name_in_owner = true
 script = ExtResource("2_fxc31")
 
-[node name="PlayerAction" parent="." instance=ExtResource("7_fxc31")]
+[node name="Interface" type="CanvasLayer" parent="."]
 
-[node name="InputMessaging" parent="." instance=ExtResource("4_ved6o")]
+[node name="PlayerAction" parent="Interface" instance=ExtResource("7_fxc31")]
+offset_bottom = -942.0
 
-[node name="FactionsContainer" parent="." instance=ExtResource("5_xcisb")]
+[node name="InputMessaging" parent="Interface" instance=ExtResource("4_ved6o")]
+offset_left = 1494.0
+offset_bottom = -347.0
+
+[node name="FactionsContainer" parent="Interface" instance=ExtResource("5_xcisb")]
+offset_bottom = -1005.0
 mouse_filter = 2
-
-[connection signal="tree_entered" from="." to="." method="_on_tree_entered"]

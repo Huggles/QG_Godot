@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class UnitScene : Node3D
+public partial class UnitScene : Node2D
 {
     // Constants and static references
     private const string ArmySpritePath = "res://assets/textures/Units/QGArmy.png";
@@ -15,10 +15,9 @@ public partial class UnitScene : Node3D
     public UnitState UnitState { get; set; }
 
     // Node Accessors
-    private Sprite3D UnitSpriteNode => GetNode<Sprite3D>("UnitSprite3D");
-    private ClickableSprite3D ClickableSpriteNode => GetNode<ClickableSprite3D>("ClickableSprite3D");
-    private Sprite3D OutOfSupplyNode => GetNode<Sprite3D>("OutOfSupplyIcon");
-    private Label3D DebugLabelNode => GetNode<Label3D>("DebugLabel3D");
+    private Sprite2D UnitSpriteNode => GetNode<Sprite2D>("UnitSprite2D");
+    private Sprite2D TargetSprite => GetNode<Sprite2D>("TargetSprite");
+    private Sprite2D OutOfSupplyNode => GetNode<Sprite2D>("OutOfSupplyIcon");
 
     // Clickable
     private bool clickable;
@@ -64,9 +63,6 @@ public partial class UnitScene : Node3D
     public override void _Ready()
     {
         SetSprite();
-        DebugLabelNode.Visible = false;
-        ClickableSpriteNode.Identifier = $"{UnitState.Faction}{UnitState.Id}";
-
         if (UnitState.CountryId >= 0 && !UnitState.InSupply)
             ShowOutOfSupply();
     }
@@ -83,21 +79,20 @@ public partial class UnitScene : Node3D
         }
 
         UnitSpriteNode.Modulate = FactionData.FactionColor;
-        UnitSpriteNode.SortingOffset = 50 + (int)FactionData.Faction;
     }
 
     public void SetClickable()
     {
         clickable = true;
         HideOutOfSupply();
-        ClickableSpriteNode.Enable();
+        TargetSprite.Show();
     }
 
     public void SetUnclickable()
     {
         clickable = false;
         ShowOutOfSupply();
-        ClickableSpriteNode.Disable();
+        TargetSprite.Hide();
     }
 
     public void ShowOutOfSupply()

@@ -22,28 +22,26 @@ public partial class CountryData : DataObject
 
     public class DataNotFoundException : Exception { public DataNotFoundException(String message) : base(message) { } }
 
-    public Vector3 WorldPositionCenterUnscaled
+    public Vector2 WorldPositionCenterUnscaled
     {
         get
         {
-            return new Vector3(
+            return new Vector2(
                 WorldTransformData.XPosition,
-                -WorldTransformData.YPosition,
-                WorldTransformData.ZPosition
+                WorldTransformData.YPosition
             );
         }
     }
 
-    public Vector3 WorldPositionCenter
+    public Vector2 WorldPositionCenter
     {
         get
         {
-            const float scale = 4f;
-            return new Vector3(
-                (WorldPositionCenterUnscaled.X / 100f) * scale,
-                (WorldPositionCenterUnscaled.Y / 100f) * scale,
-                WorldPositionCenterUnscaled.Z + 1f
-            ) - new Vector3(149, -50, 0);
+            const float scale = 0.5f;
+            return new Vector2(
+                (WorldPositionCenterUnscaled.X) * scale,
+                (WorldPositionCenterUnscaled.Y) * scale
+            );
         }
     }
 

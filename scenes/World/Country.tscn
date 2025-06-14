@@ -1,65 +1,31 @@
-[gd_scene load_steps=9 format=3 uid="uid://l5548wfmcdsi"]
+[gd_scene load_steps=5 format=3 uid="uid://l5548wfmcdsi"]
 
 [ext_resource type="Script" uid="uid://blm76drcs8wms" path="res://scripts/C#/Scenes/CountryScene.cs" id="1_upkmi"]
-[ext_resource type="PackedScene" uid="uid://p05f75g6qm2o" path="res://scenes/clickable_sprite_3d.tscn" id="2_2bigx"]
 [ext_resource type="Texture2D" uid="uid://ceg5tibtem12g" path="res://assets/textures/Other/StraightIcon.png" id="2_llf52"]
-[ext_resource type="Shader" uid="uid://cjp453wkjds7e" path="res://assets/materials/TextureGlowShader.tres" id="3_8bpq5"]
-[ext_resource type="Texture2D" uid="uid://5vd6jd6ljm1j" path="res://assets/textures/Countries/NorthAfrica.png" id="4_in3gy"]
+[ext_resource type="PackedScene" uid="uid://cfav78gd417lf" path="res://scenes/ClickableSprite.tscn" id="5_oqybm"]
 [ext_resource type="Texture2D" uid="uid://c73fkdd7t4mmu" path="res://assets/textures/Other/SupplyStar.png" id="5_twgbx"]
-[ext_resource type="Texture2D" uid="uid://djmosa56yw024" path="res://assets/textures/Other/circle.png" id="7_trmnm"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_y1v86"]
-resource_local_to_scene = true
-render_priority = 0
-shader = ExtResource("3_8bpq5")
-shader_parameter/selectable_texture = ExtResource("4_in3gy")
-shader_parameter/glow_color = Color(0.972549, 0, 0.952941, 1)
-
-[node name="CountryRoot" type="Node3D"]
-rotation_order = 0
+[node name="CountryRoot" type="Node2D"]
 script = ExtResource("1_upkmi")
 
-[node name="UnitContainer" type="Node3D" parent="."]
+[node name="UnitContainer" type="Node2D" parent="."]
 unique_name_in_owner = true
+z_index = 26
 
-[node name="ClickableSprite3D" parent="." instance=ExtResource("2_2bigx")]
+[node name="SupplyStarSprite" type="Sprite2D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.86102e-05, 0.181, -0.00460052)
-rotation_order = 0
-material_override = SubResource("ShaderMaterial_y1v86")
-pixel_size = 0.08
-texture = null
-
-[node name="SupplyStarSprite3D" type="Sprite3D" parent="."]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
 visible = false
-pixel_size = 0.015
+z_index = 24
+position = Vector2(0, 10)
+scale = Vector2(0.2, 0.2)
 texture = ExtResource("5_twgbx")
 
-[node name="StraightSprite3D" type="Sprite3D" parent="."]
+[node name="StraightSprite" type="Sprite2D" parent="."]
 unique_name_in_owner = true
 visible = false
-pixel_size = 0.03
+z_index = 22
 texture = ExtResource("2_llf52")
 
-[node name="DEBUG_UnitPositions" type="Node3D" parent="."]
-visible = false
-
-[node name="DEBUG_UnitPosition_Sprite1" type="Sprite3D" parent="DEBUG_UnitPositions"]
-unique_name_in_owner = true
-pixel_size = 0.005
-texture = ExtResource("7_trmnm")
-
-[node name="DEBUG_UnitPosition_Sprite2" type="Sprite3D" parent="DEBUG_UnitPositions"]
-unique_name_in_owner = true
-pixel_size = 0.005
-texture = ExtResource("7_trmnm")
-
-[node name="DEBUG_UnitPosition_Sprite3" type="Sprite3D" parent="DEBUG_UnitPositions"]
-unique_name_in_owner = true
-pixel_size = 0.005
-texture = ExtResource("7_trmnm")
-
-[connection signal="MouseEnterOpaque" from="ClickableSprite3D" to="." method="_OnClickableSprite3DMouseEnterOpaque"]
-[connection signal="MouseLeftClickOpaque" from="ClickableSprite3D" to="." method="_OnClickableSprite3DMouseLeftClickOpaque"]
+[node name="CountrySprite" parent="." instance=ExtResource("5_oqybm")]
+z_index = 20
+scale = Vector2(1, 1)

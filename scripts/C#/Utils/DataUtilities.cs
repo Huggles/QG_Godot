@@ -10,7 +10,6 @@ public partial class DataUtilities : Object
             if (classMap == null || classMap.Keys.Count == 0) {
                 classMap = new Dictionary<String, ClassItem>();
                 Godot.Collections.Array<Godot.Collections.Dictionary> classList = ProjectSettings.GetGlobalClassList();
-                DebugUtilities.PrintPeer(Json.Stringify(classList));
                 foreach (Godot.Collections.Dictionary classDictionaryItem in classList) {
                     
                     ClassItem classItem = new ClassItem(

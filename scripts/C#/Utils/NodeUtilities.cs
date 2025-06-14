@@ -6,7 +6,7 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
     public Node GameNode;
     public Node PlayersNode;
     public Node UnitsNode;
-    public Node3D WorldNode;
+    public Node2D WorldNode;
     public CanvasLayer UserInterface;
     
     public Node CountriesNode => WorldNode != null ? WorldNode.GetNode("Countries") : null;
@@ -18,7 +18,7 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
         GameNode = GetTree().Root.GetNode("Game");
         PlayersNode = GameNode.GetNode("Players");
         UnitsNode = GameNode.GetNode("Units");
-        WorldNode = GameNode.GetNode<Node3D>("World");
+        WorldNode = GameNode.GetNode<Node2D>("World");
         UserInterface = GameNode.GetNode<CanvasLayer>("UserInterface");
     }
 }

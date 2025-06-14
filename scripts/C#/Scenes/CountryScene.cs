@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class CountryScene : Node3D
+public partial class CountryScene : Node2D
 {
     public CountryState CountryState { get; set; }
 
@@ -12,10 +12,10 @@ public partial class CountryScene : Node3D
     public UnitScene UnitScene2;
     public UnitScene UnitScene3;
 
-    public Node3D UnitContainerNode => GetNode<Node3D>("UnitContainer");
-    public ClickableSprite3D ClickableSpriteNode => GetNode<ClickableSprite3D>("ClickableSprite3D");
-    public Sprite3D SupplyStarSprite => GetNode<Sprite3D>("SupplyStarSprite3D");
-    public Sprite3D StraightSpriteNode => GetNode<Sprite3D>("StraightSprite3D");
+    public Node2D UnitContainerNode => GetNode<Node2D>("UnitContainer");
+    public Sprite2D SupplyStarSprite => GetNode<Sprite2D>("SupplyStarSprite");
+    public Sprite2D StraightSpriteNode => GetNode<Sprite2D>("StraightSprite");
+    public ClickableSprite CountrySprite => GetNode<ClickableSprite>("CountrySprite");
 
     public bool clickable;
 
@@ -34,40 +34,40 @@ public partial class CountryScene : Node3D
         if (StaticCountryData.Texture != null)
             ApplyTexture();
 
-        SetUnclickable();
-
-        ClickableSpriteNode.Identifier = CountryState.Label;
-
+        //SetUnclickable();
         if (CountryState.IsSupply)
             ShowSupplyStar();
         else
             HideSupplyStar();
 
         StraightState.OnReady();
-        SetDebugUnitPosition(false);
+        SetClickable();
+
+        CountrySprite.MouseEnterOpaque += OnMouseEnterSpriteOpaque;
+        CountrySprite.MouseExitOpaque += OnMouseExitSpriteOpaque;
+        CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
     }
 
-    private void SetDebugUnitPosition(bool visible)
+    
+
+
+    private void OnMouseEnterSpriteOpaque()
     {
-        var pos1 = GetNode<Sprite3D>("DEBUG_UnitPositions/DEBUG_UnitPosition_Sprite1");
-        pos1.Position = StaticCountryData.UnitTransformData.Position1.Position;
-        pos1.Modulate = Colors.Green;
-        pos1.Visible = visible;
-
-        var pos2 = GetNode<Sprite3D>("DEBUG_UnitPositions/DEBUG_UnitPosition_Sprite2");
-        pos2.Position = StaticCountryData.UnitTransformData.Position2.Position;
-        pos2.Modulate = Colors.Blue;
-        pos2.Visible = visible;
-
-        var pos3 = GetNode<Sprite3D>("DEBUG_UnitPositions/DEBUG_UnitPosition_Sprite3");
-        pos3.Position = StaticCountryData.UnitTransformData.Position3.Position;
-        pos3.Modulate = Colors.Red;
-        pos3.Visible = visible;
+        CountrySprite.Sprite.Modulate = new Color(255, 255, 255, 255);
     }
+    private void OnMouseExitSpriteOpaque()
+    {
+        CountrySprite.Sprite.Modulate = new Color().Random();        
+    }
+    private void OnMouseLeftClickOpaque()
+    {
+        EventBus.Emit(EventBus.SignalName.CountryClicked, this.CountryState.Id);
+    }
+
 
     private void ApplyTexture()
     {
-        ClickableSpriteNode.ClickableTexture = StaticCountryData.Texture;
+        CountrySprite.SetTexture(StaticCountryData.Texture);
     }
 
     public void AddUnit(UnitScene unitScene)
@@ -85,8 +85,7 @@ public partial class CountryScene : Node3D
         var key = $"Position{position}";
         TransformData transform = (TransformData)transformData.GetValue(key);
 
-        unitScene.Position = new Vector3(transform.XPosition, transform.YPosition, transform.ZPosition);
-        unitScene.Scale = new Vector3(transform.Scale, transform.Scale, transform.Scale);
+        unitScene.Position = new Vector2(transform.XPosition, transform.YPosition);        
     }
 
     private int GetUnitPosition(UnitScene unitScene)
@@ -124,7 +123,7 @@ public partial class CountryScene : Node3D
 
         UnitContainerNode.RemoveChild(unitScene);
         NodeUtilities.Instance.UnitsNode.AddChild(unitScene);
-        unitScene.Position = Vector3.Zero;
+        unitScene.Position = Vector2.Zero;
 
         switch (position)
         {
@@ -137,13 +136,14 @@ public partial class CountryScene : Node3D
     public void SetClickable()
     {
         clickable = true;
-        ClickableSpriteNode.Enable();
+        CountrySprite.Show();        
+        CountrySprite.Modulate = new Color().Random(0.8f); 
     }
 
     public void SetUnclickable()
     {
         clickable = false;
-        ClickableSpriteNode.Disable();
+        CountrySprite.Hide();
     }
 
     private void ShowSupplyStar()
@@ -153,30 +153,13 @@ public partial class CountryScene : Node3D
         if (StaticCountryData.SupplyStarTransformData != null)
         {
             var data = StaticCountryData.SupplyStarTransformData;
-            SupplyStarSprite.Position = new Vector3(data.XPosition, data.YPosition, data.ZPosition);
-            SupplyStarSprite.Scale = new Vector3(data.Scale, data.Scale, data.Scale);
+            SupplyStarSprite.Position = new Vector2(data.XPosition, data.YPosition);
+            SupplyStarSprite.Scale = new Vector2(data.Scale, data.Scale);
         }
     }
 
     private void HideSupplyStar()
     {
         SupplyStarSprite.Visible = false;
-    }
-
-    // Connect this to the signal in the editor or via code
-    private void _OnClickableSprite3DMouseEnterOpaque(ClickableSprite3D sprite)
-    {
-        // Optional: Add logic
-    }
-
-    // Connect this to the signal in the editor or via code
-    private void _OnClickableSprite3DMouseLeftClickOpaque(ClickableSprite3D sprite)
-    {
-        GD.Print("_on_clickable_sprite_3d_mouse_left_click_opaque");
-
-        if (clickable)
-        {
-            EventBus.Emit(EventBus.SignalName.CountryClicked, this.CountryState.Id);
-        }
     }
 }

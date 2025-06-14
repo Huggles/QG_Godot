@@ -22,7 +22,7 @@ public partial class StraightState : StateObject
     public CountryState ControlledCountryState2 =>
         CountryState.ForId(ControlledCountryId2);
 
-    public Sprite3D StraightSpriteNode =>
+    public Sprite2D StraightSpriteNode =>
         ControllingCountryState.Node.StraightSpriteNode;
 
     public StraightState(int controllingCountryId, StraightData staticStraightData)
@@ -65,9 +65,9 @@ public partial class StraightState : StateObject
         sprite.Visible = true;
 
         var t = StaticStraightData.StraightTransform;
-        sprite.Position = new Vector3(t.XPosition, t.YPosition, t.ZPosition);
-        sprite.RotationDegrees = new Vector3(t.XRotation, t.YRotation, t.ZRotation);
-        sprite.Scale = new Vector3(t.Scale, t.Scale, t.Scale);
+        sprite.Position = new Vector2(t.XPosition, t.YPosition);
+        sprite.RotationDegrees = 0;
+        sprite.Scale = new Vector2(t.Scale, t.Scale);
     }
 
     public void HideStraightSprite()

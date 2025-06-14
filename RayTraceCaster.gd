@@ -4,7 +4,7 @@ class_name RayTraceCaster
 const RAY_LENGTH = 5000
 
 var input_manager:InputManager
-var camera:PlayerCamera3D:
+var camera:PlayerCamera2D:
 	get: return input_manager.camera
 var current_raycast_collisions = []		
 var current_raycast_colliders = []

@@ -20,7 +20,7 @@ public partial class GameManager : Node
 
     private List<PlayerScene> playerStates = new List<PlayerScene>();
 
-    public Camera3D MyCamera => GetViewport().GetCamera3D();
+    public Camera2D MyCamera => GetViewport().GetCamera2D();
     public InputManager MyInputManager => playerStates.Count > 0 ? playerStates[0].InputManager : null;
     
     public List<string> UserInterfaceElementsLoaded = new List<string>();

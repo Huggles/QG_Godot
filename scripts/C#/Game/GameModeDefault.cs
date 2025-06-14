@@ -23,8 +23,7 @@ public partial class GameModeDefault : IGameMode
         InstantiateFactionStates();
         InstantiateCountryStates();
         InstantiateUnitStates();
-
-        SpawnWorld();
+        
         SpawnCountries();
         SpawnUnits();
 
@@ -135,13 +134,6 @@ public partial class GameModeDefault : IGameMode
                 gameState.UnitStates.Add(unitState);
             }
         }
-    }
-
-    public void SpawnWorld(){
-        PackedScene worldScenePackage = GD.Load<PackedScene>(WORLD_SCENE_FILE);
-        var worldSceneInstance = worldScenePackage.Instantiate();
-        Node3D worldNode = NodeUtilities.Instance.WorldNode;
-        worldNode.AddChild(worldSceneInstance);        
     }
     public void SpawnCountries(){
         foreach( CountryState countryState in gameState.CountryStates){

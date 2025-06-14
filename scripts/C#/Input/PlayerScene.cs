@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class PlayerScene : CharacterBody3D
+public partial class PlayerScene : CharacterBody2D
 {
     [Export]
     private int _peerId;
@@ -26,19 +26,19 @@ public partial class PlayerScene : CharacterBody3D
         }
     }
     
-    private Camera3D _camera;
+    private Camera2D _camera;
     private Node _rootNode;
     
 
     public override void _Ready()
     {
         _rootNode = GetNode(".");  // Same as $"." in GDScript
-        _camera = GetNode<Camera3D>("Camera3D");
+        _camera = GetNode<Camera2D>("Camera2D");
 
         if (_peerId == Multiplayer.GetUniqueId())
         {
             DebugUtilities.PrintPeer($"Setting camera for player: {Name}");
-            _camera.Current = true;
+            _camera.MakeCurrent();
         }
 
         if (FactionStrings == null || FactionStrings.Count == 0)

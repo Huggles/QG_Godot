@@ -3,32 +3,26 @@
 [ext_resource type="Texture2D" uid="uid://b6rlobc622abu" path="res://assets/textures/Countries/World_Clean.png" id="3_uu1v5"]
 [ext_resource type="Texture2D" uid="uid://ly4yeqnos5w3" path="res://assets/textures/Other/WoodTable.jpg" id="5_50r1o"]
 
-[node name="World" type="Node3D"]
+[node name="World" type="Node2D"]
 
-[node name="Countries" type="Node3D" parent="."]
+[node name="Countries" type="Node2D" parent="."]
 unique_name_in_owner = true
+scale = Vector2(3, 3)
 
-[node name="Background" type="Node3D" parent="."]
+[node name="Background" type="Node2D" parent="."]
+position = Vector2(300, -1520)
+scale = Vector2(4.56, 4.56)
 
-[node name="WorldSprite" type="Sprite3D" parent="Background"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.595, 5, 0)
-layers = 2
-pixel_size = 0.123
-transparent = false
-alpha_cut = 2
+[node name="WorldSprite" type="Sprite2D" parent="Background"]
+z_index = 2
+position = Vector2(1324, 702)
 texture = ExtResource("3_uu1v5")
 
-[node name="TableSprite" type="Sprite3D" parent="Background"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.414, 0, -1)
-layers = 2
-pixel_size = 1.0
-transparent = false
-alpha_cut = 2
+[node name="TableSprite" type="Sprite2D" parent="Background"]
+z_index = 1
+position = Vector2(1332.5, 708.5)
+scale = Vector2(2.115, 1.60918)
 texture = ExtResource("5_50r1o")
 
-[node name="PlayerSpawnPosition" type="Node3D" parent="."]
+[node name="PlayerSpawnPosition" type="Node2D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 3.44997e-10, 0, -1.56362e-10, 1, 0, -1.16415e-10, -3.63798e-12, 1, 0, 0, 150)
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, 941.515, 435.886, 1.55472)

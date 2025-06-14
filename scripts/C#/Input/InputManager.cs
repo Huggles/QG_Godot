@@ -3,22 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class InputManager : Node3D
+public partial class InputManager : Node2D
 {
     public InputManager Instance;
 
 
-    private static readonly Vector3 INITIAL_POSITION = new Vector3(0, 0, 150);
-    private const float ZOOM_STEP = 5f;
-    private const float CAMERA_SPEED = 0.5f;
-    private const float MIN_ZOOM_LEVEL = -10f;
-    private const float MAX_ZOOM_LEVEL = 10f;
-    private static readonly Key[] HAND_CARD_KEYS = {
-        Key.Key0, Key.Key1, Key.Key2, Key.Key3, Key.Key4, Key.Key5, Key.Key6
-    };
-
-    private int _zoomLevel = 0;
-    public Camera3D Camera => GetNode<Camera3D>("%Camera3D"); 
+    private static readonly Vector2 INITIAL_POSITION = new Vector2(0, 0);
+    private const float ZOOM_STEP = 0.05f;
+    private const float CAMERA_SPEED = 10f;
+    private const float MIN_ZOOM_LEVEL = 0.1f;
+    private const float MAX_ZOOM_LEVEL = 2;    
+    private float zoom = 0.2f;
+    public Camera2D Camera => GetNode<Camera2D>("%Camera2D"); 
 
     public Vector2 MousePosition => GetViewport().GetMousePosition();
 
@@ -44,6 +40,7 @@ public partial class InputManager : Node3D
     public override void _Ready()
     {
         Instance = this;
+        ApplyZoom();
     }
 
     
@@ -60,11 +57,6 @@ public partial class InputManager : Node3D
     public override void _Process(double delta)
     {
         KeyboardMovement();
-
-        if (_rayTraceCaster != null)
-        {
-            _rayTraceCaster.CastRays(null);
-        }
     }
 
     private void KeyboardMovement()
@@ -76,11 +68,10 @@ public partial class InputManager : Node3D
         int inputLeft = Input.IsActionPressed("ui_left") ? 1 : 0;
         int inputRight = Input.IsActionPressed("ui_right") ? 1 : 0;
 
-        float zoomMultiplier = 5 - _zoomLevel;
+        float zoomMultiplier = Mathf.Clamp(10 - zoom, 1, 10);
         float xDelta = (-inputLeft + inputRight) * CAMERA_SPEED;
-        float yDelta = (inputUp - inputDown) * CAMERA_SPEED;
-
-        Vector3 delta = new Vector3(xDelta, yDelta, 0) * Mathf.Clamp(zoomMultiplier, 1, 5);
+        float yDelta = (-inputUp + inputDown) * CAMERA_SPEED;
+        Vector2 delta = new Vector2(xDelta, yDelta) * zoomMultiplier;
         Camera.Position += delta;
     }
 
@@ -113,8 +104,6 @@ public partial class InputManager : Node3D
     {
         if (e is InputEventMouseButton)
         {
-            _rayTraceCaster?.CastRays(e);
-
             if (Input.IsActionPressed("game_zoom_in"))
                 ZoomIn();
             if (Input.IsActionPressed("game_zoom_out"))
@@ -154,18 +143,19 @@ public partial class InputManager : Node3D
 
     private void ZoomIn()
     {
-        if (_zoomLevel > MIN_ZOOM_LEVEL)
+        if (zoom < MAX_ZOOM_LEVEL)
         {
-            _zoomLevel--;
+            zoom += ZOOM_STEP;
             ApplyZoom();
         }
+        
     }
 
     private void ZoomOut()
     {
-        if (_zoomLevel < MAX_ZOOM_LEVEL)
+        if (zoom > MIN_ZOOM_LEVEL)
         {
-            _zoomLevel++;
+            zoom -= ZOOM_STEP;
             ApplyZoom();
         }
     }
@@ -174,7 +164,6 @@ public partial class InputManager : Node3D
     {
         if (Camera == null) return;
         var pos = Camera.Position;
-        pos.Z = INITIAL_POSITION.Z + (_zoomLevel * ZOOM_STEP);
-        Camera.Position = pos;
+        Camera.Zoom = new Vector2(zoom, zoom);
     }
 }
