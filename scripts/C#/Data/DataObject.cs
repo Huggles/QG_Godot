@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-public partial class DataObject : IGameData
+public partial class DataObject : GodotObject, IGameData
 {
     public string Stringify()
     {

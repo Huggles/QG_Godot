@@ -17,8 +17,6 @@ public partial class CountryScene : Node2D
     public Sprite2D StraightSpriteNode => GetNode<Sprite2D>("StraightSprite");
     public ClickableSprite CountrySprite => GetNode<ClickableSprite>("CountrySprite");
 
-    public bool clickable;
-
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
     public static CountryScene SpawnCountry(CountryState countryState)
@@ -40,25 +38,13 @@ public partial class CountryScene : Node2D
         else
             HideSupplyStar();
 
+        SetUnclickable();
+        
         StraightState.OnReady();
-        SetClickable();
 
-        CountrySprite.MouseEnterOpaque += OnMouseEnterSpriteOpaque;
-        CountrySprite.MouseExitOpaque += OnMouseExitSpriteOpaque;
         CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
     }
 
-    
-
-
-    private void OnMouseEnterSpriteOpaque()
-    {
-        CountrySprite.Sprite.Modulate = new Color(255, 255, 255, 255);
-    }
-    private void OnMouseExitSpriteOpaque()
-    {
-        CountrySprite.Sprite.Modulate = new Color().Random();        
-    }
     private void OnMouseLeftClickOpaque()
     {
         EventBus.Emit(EventBus.SignalName.CountryClicked, this.CountryState.Id);
@@ -135,15 +121,14 @@ public partial class CountryScene : Node2D
 
     public void SetClickable()
     {
-        clickable = true;
-        CountrySprite.Show();        
-        CountrySprite.Modulate = new Color().Random(0.8f); 
+        CountrySprite.ShowSprite();
+        CountrySprite.SetClickable();
     }
 
     public void SetUnclickable()
     {
-        clickable = false;
-        CountrySprite.Hide();
+        CountrySprite.HideSprite();
+        CountrySprite.SetUnclickable();
     }
 
     private void ShowSupplyStar()

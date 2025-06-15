@@ -26,7 +26,8 @@ public partial class InputOptionsList : ItemList
 		Instance.ContainerPanel.Visible = true;
 		foreach (CardActivationOption option in cardActivationOptions)
 		{
-			Instance.AddItem(option.Label, null, option.Activatable);
+			int index = Instance.AddItem(option.Label, null, option.Activatable);
+			Instance.SetItemDisabled(index, !option.Activatable);
 		}
 	}
 

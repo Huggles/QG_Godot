@@ -12,11 +12,12 @@ public partial class UnitScene : Node2D
     private static readonly PackedScene UnitScenePacked = GD.Load<PackedScene>("res://scenes/Units/Unit.tscn");
 
     // State
+    [Export]
     public UnitState UnitState { get; set; }
 
     // Node Accessors
     private Sprite2D UnitSpriteNode => GetNode<Sprite2D>("UnitSprite2D");
-    private Sprite2D TargetSprite => GetNode<Sprite2D>("TargetSprite");
+    private ClickableSprite TargetSprite => GetNode<ClickableSprite>("TargetSprite");
     private Sprite2D OutOfSupplyNode => GetNode<Sprite2D>("OutOfSupplyIcon");
 
     // Clickable
@@ -63,9 +64,23 @@ public partial class UnitScene : Node2D
     public override void _Ready()
     {
         SetSprite();
+        SetUnclickable();
         if (UnitState.CountryId >= 0 && !UnitState.InSupply)
+        {
             ShowOutOfSupply();
+        }
+        else
+        {
+            HideOutOfSupply();
+        }
+        
+        TargetSprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
     }
+    private void OnMouseLeftClickOpaque()
+    {
+        EventBus.Emit(EventBus.SignalName.UnitClicked, this.UnitState.Id);
+    }
+
 
     private void SetSprite()
     {
@@ -83,16 +98,14 @@ public partial class UnitScene : Node2D
 
     public void SetClickable()
     {
-        clickable = true;
-        HideOutOfSupply();
-        TargetSprite.Show();
+        TargetSprite.ShowSprite();
+        TargetSprite.SetClickable();
     }
 
     public void SetUnclickable()
-    {
-        clickable = false;
-        ShowOutOfSupply();
-        TargetSprite.Hide();
+    {        
+        TargetSprite.HideSprite();
+        TargetSprite.SetUnclickable();
     }
 
     public void ShowOutOfSupply()
@@ -105,6 +118,8 @@ public partial class UnitScene : Node2D
         OutOfSupplyNode.Visible = false;
     }
 
+    
+
     private void OnBeforeUnitDeployedToCountry()
     {
         // Hook, no action needed
@@ -114,17 +129,17 @@ public partial class UnitScene : Node2D
     {
         CountryState.Node.AddUnit(this);
 
-        var tween = GetTree().CreateTween();
-        tween.TweenProperty(UnitSpriteNode, "pixel_size", 0.04, 0.2);
-        tween.TweenProperty(UnitSpriteNode, "pixel_size", 0.02, 0.2);
+        Tween tween = CreateTween();
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.5f, 1.5f), 0.2);
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1, 1), 0.2);
         await ToSignal(tween, "finished");
     }
 
     private async void OnBeforeUnitRemovedFromCountry(int unitId, int countryId)
     {
-        var tween = GetTree().CreateTween();
-        tween.TweenProperty(UnitSpriteNode, "pixel_size", 0.025, 0.2);
-        tween.TweenProperty(UnitSpriteNode, "pixel_size", 0.00, 0.4);
+        Tween tween = CreateTween(); 
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), 0.2);
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(0,0), 0.2);
         await ToSignal(tween, "finished");
 
         CountryState.ForId(countryId).Node.RemoveUnit(this);

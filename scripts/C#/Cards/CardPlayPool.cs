@@ -63,14 +63,19 @@ public partial class CardPlayPool : GodotObject
             await changeEvent.ApplyChange();
         }
         DebugUtilities.PrintPeer("RequestAfterChangeEventReaction");
-        if (!(changeEvent is PlayCardChangeEvent))
+        if (changeEvent is not PlayCardChangeEvent)
         {
-            bool reactionPlayed = await RequestAfterChangeEventReaction();
-            if (reactionPlayed == false)
-            {
-                ClearPool();
-                EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);            
-            }
+            DoNextActions();
+        }
+    }
+
+    public static async void DoNextActions()
+    {
+        bool reactionPlayed = await RequestAfterChangeEventReaction();
+        if (reactionPlayed == false)
+        {
+            ClearPool();
+            EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);            
         }
     }
 
@@ -83,7 +88,7 @@ public partial class CardPlayPool : GodotObject
                 await RequestBlockChangeEvent(LastChangeEvent, faction);
             }
         }
-        return true;        
+        return true;
     }
     
     private async static Task<ChangeEvent> RequestBlockChangeEvent(ChangeEvent changeEvent, Faction faction)

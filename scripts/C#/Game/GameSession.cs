@@ -146,10 +146,10 @@ public partial class GameSession : Node
         CountryState country = CountryState.ForId(unit.CountryId);
 
         
-        //unit.BeforeUnitRemovedFromCountry.Emit(unitId, country.Id);
+        unit.EmitSignal(UnitState.SignalName.BeforeUnitRemovedFromCountry, unitId, country.Id);
         country.Units.Remove(unit.Faction);
         unit.CountryId = -1;
-        //unit.AfterUnitRemovedFromCountry.Emit();
+        unit.EmitSignal(UnitState.SignalName.AfterUnitRemovedFromCountry, unitId, country.Id);
     }
     public static void AttackUnit(int unitId)
     {
@@ -159,10 +159,10 @@ public partial class GameSession : Node
         var unit = UnitStatesById[unitId];
         int countryId = unit.CountryId;
 
-        //unit.BeforeUnitRemovedFromCountry.Emit(unitId, countryId);
+        unit.EmitSignal(UnitState.SignalName.BeforeUnitRemovedFromCountry, unitId, countryId);
         unit.CountryState.Units.Remove(unit.Faction);
         unit.CountryId = -1;
-        //unit.AfterUnitRemovedFromCountry.Emit();
+        unit.EmitSignal(UnitState.SignalName.AfterUnitRemovedFromCountry, unitId, countryId);
     }
     
     public static List<int> BuildableCountriesForFaction(Faction faction)

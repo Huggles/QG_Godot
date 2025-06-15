@@ -146,9 +146,11 @@ public partial class GameModeDefault : IGameMode
         }
     }
 
-    public async Task SetupInitialGameState(){
+    public async Task SetupInitialGameState()
+    {
         DeployUnitChangeEvent deployUnitChangeEvent;
-        foreach (FactionData factionData in StaticGameData.FactionDataList) {
+        foreach (FactionData factionData in StaticGameData.FactionDataList)
+        {
             CountryState homespaceCountryState = CountryState.ForName(factionData.Homespace);
             deployUnitChangeEvent = new DeployUnitChangeEvent(factionData.Faction, homespaceCountryState.Id, DeployType.RECRUIT);
             deployUnitChangeEvent.IsTrigger = false;
@@ -159,5 +161,19 @@ public partial class GameModeDefault : IGameMode
         deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForName("WESTERN_EUROPE").Id, DeployType.RECRUIT);
         deployUnitChangeEvent.IsTrigger = false;
         CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+
+        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.ITALY, CountryState.ForName("MEDITERRANEAN_SEA").Id, DeployType.RECRUIT);
+        deployUnitChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+
+        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForName("NORTH_SEA").Id, DeployType.RECRUIT);
+        deployUnitChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+
+        PlayCardChangeEvent playCardChangeEvent = new PlayCardChangeEvent(Faction.GERMANY, CardState.ForName("StatusBlitzkrieg").Id);
+        playCardChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(playCardChangeEvent);
+
+        CardPlayPool.ClearPool();
     }
 }

@@ -5,19 +5,20 @@ using System.Linq;
 
 public partial class CountryState : StateObject
 {
-    public CountryData StaticCountryData;
+    [Export] public CountryData StaticCountryData;
 
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string NameCamelCase { get; set; }
-public string Label { get; set; }
-    public CountryType Type { get; set; }
-    public bool IsSupply { get; set; }
+    [Export] public int Id { get; set; }
+    [Export] public string Name { get; set; }
+    [Export] public string NameCamelCase { get; set; }
+    [Export] public string Label { get; set; }
+    [Export] public CountryType Type { get; set; }
+    [Export] public bool IsSupply { get; set; }
+    [Export] public StraightState StraightState;
 
     public List<string> Neighbors { get; set; }
     public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
 
-    public StraightState StraightState;
+    
 
     public Dictionary<Faction, int> Units  { get; set; } = new Dictionary<Faction, int>();
 

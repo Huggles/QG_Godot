@@ -29,7 +29,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 1,
             "YPosition": 0,
             "ZPosition": 0
@@ -39,22 +39,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 15,
+                "XPosition": 50,
+                "YPosition": -150,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 15,
+                "XPosition": -50,
+                "YPosition": -150,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": 10,
+                "YPosition": -100,
                 "ZPosition": 0
             }
         },
@@ -96,7 +96,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -106,14 +106,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -121,7 +121,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -161,7 +161,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": -20
@@ -171,15 +171,15 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 5,
+                "XPosition": 50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 5,
+                "XPosition": -50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position3": {
@@ -229,7 +229,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 60
@@ -239,22 +239,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 3,
-                "YPosition": -2,
+                "XPosition": 30,
+                "YPosition": 20,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -10,
+                "XPosition": -50,
+                "YPosition": 100,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -296,7 +296,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -306,14 +306,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -321,7 +321,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -368,7 +368,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -378,14 +378,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -393,7 +393,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -2,
+                "YPosition": 20,
                 "ZPosition": 0
             }
         },
@@ -433,7 +433,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": -1,
             "YPosition": 0,
             "ZPosition": 0
@@ -443,22 +443,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -15,
+                "XPosition": -150,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
-                "YPosition": -5,
+                "XPosition": -100,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -498,7 +498,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -509,7 +509,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": 5,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position2": {
@@ -523,7 +523,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -563,7 +563,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -573,14 +573,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -588,7 +588,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -634,7 +634,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -644,14 +644,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -659,7 +659,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -701,7 +701,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 50,
             "YPosition": 0,
             "ZPosition": 0
@@ -711,22 +711,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -2,
+                "XPosition": 50,
+                "YPosition": 20,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 2,
+                "XPosition": 50,
+                "YPosition": -20,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -7,
+                "YPosition": 70,
                 "ZPosition": 0
             }
         },
@@ -768,7 +768,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -778,7 +778,7 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
+                "XPosition": 100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -792,8 +792,8 @@
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -5,
+                "XPosition": 50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -839,7 +839,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -849,22 +849,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 2,
+                "XPosition": 20,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -2,
-                "YPosition": -5,
+                "XPosition": -20,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -906,7 +906,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -916,7 +916,7 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -931,7 +931,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -2,
+                "YPosition": 20,
                 "ZPosition": 0
             }
         },
@@ -971,7 +971,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -981,14 +981,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 2,
+                "XPosition": 20,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -3,
+                "XPosition": -30,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -996,7 +996,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -2,
+                "YPosition": 20,
                 "ZPosition": 0
             }
         },
@@ -1035,7 +1035,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 2,
             "YPosition": 5,
             "ZPosition": 0
@@ -1045,7 +1045,7 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
+                "XPosition": 100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1059,8 +1059,8 @@
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -5,
+                "XPosition": -50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1101,7 +1101,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1111,14 +1111,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1126,7 +1126,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1171,7 +1171,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1181,14 +1181,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1196,7 +1196,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1236,7 +1236,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1246,22 +1246,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 5,
+                "XPosition": -50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": 5,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -1,
+                "YPosition": 10,
                 "ZPosition": 0
             }
         },
@@ -1302,7 +1302,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1312,14 +1312,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 2,
+                "XPosition": 20,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -2,
+                "XPosition": -20,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1327,7 +1327,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -2,
+                "YPosition": 20,
                 "ZPosition": 0
             }
         },
@@ -1367,7 +1367,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1377,22 +1377,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -5,
+                "XPosition": -50,
+                "YPosition": 50,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 5,
+                "XPosition": 50,
+                "YPosition": -50,
                 "ZPosition": 0
             }
         },
@@ -1430,7 +1430,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1440,14 +1440,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1455,7 +1455,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1502,7 +1502,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 1,
             "YPosition": 0,
             "ZPosition": 0
@@ -1512,7 +1512,7 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
+                "XPosition": 100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1526,8 +1526,8 @@
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -5,
+                "XPosition": 50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1571,7 +1571,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1581,14 +1581,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1596,7 +1596,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1635,7 +1635,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": -150,
             "YPosition": 0,
             "ZPosition": -20
@@ -1645,22 +1645,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
-                "YPosition": 2,
+                "XPosition": -100,
+                "YPosition": -20,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
-                "YPosition": -2,
+                "XPosition": 100,
+                "YPosition": 20,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1707,7 +1707,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": -50,
             "YPosition": 0,
             "ZPosition": 0
@@ -1724,15 +1724,15 @@
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
+                "XPosition": -100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -5,
+                "XPosition": -50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1777,7 +1777,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1787,14 +1787,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1802,7 +1802,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1844,7 +1844,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1854,14 +1854,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1869,7 +1869,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -1910,7 +1910,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1920,14 +1920,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -1935,7 +1935,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -2,
+                "YPosition": 20,
                 "ZPosition": 0
             }
         },
@@ -1975,7 +1975,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -1985,22 +1985,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -5,
+                "XPosition": -50,
+                "YPosition": 50,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -2042,7 +2042,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": -150
@@ -2052,22 +2052,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 15,
+                "XPosition": 50,
+                "YPosition": -150,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 15,
+                "XPosition": -50,
+                "YPosition": -150,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": 10,
+                "YPosition": -100,
                 "ZPosition": 0
             }
         },
@@ -2109,7 +2109,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2119,22 +2119,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -15,
+                "XPosition": 50,
+                "YPosition": 150,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -15,
+                "XPosition": -50,
+                "YPosition": 150,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -20,
+                "YPosition": 200,
                 "ZPosition": 0
             }
         },
@@ -2177,7 +2177,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2187,22 +2187,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 15,
+                "XPosition": 50,
+                "YPosition": -150,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 15,
+                "XPosition": -50,
+                "YPosition": -150,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": 10,
+                "YPosition": -100,
                 "ZPosition": 0
             }
         },
@@ -2246,7 +2246,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": -1,
             "YPosition": 0,
             "ZPosition": 100
@@ -2263,15 +2263,15 @@
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
+                "XPosition": -100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -5,
+                "XPosition": -50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -2317,7 +2317,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 1,
             "YPosition": 0,
             "ZPosition": 0
@@ -2327,22 +2327,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 15,
+                "XPosition": 150,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
-                "YPosition": -5,
+                "XPosition": 100,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -2383,7 +2383,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2393,14 +2393,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 3,
+                "XPosition": 30,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -3,
+                "XPosition": -30,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -2408,7 +2408,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -3,
+                "YPosition": 30,
                 "ZPosition": 0
             }
         },
@@ -2448,7 +2448,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": -1,
             "YPosition": 0,
             "ZPosition": 0
@@ -2458,21 +2458,21 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 2,
-                "YPosition": 5,
+                "XPosition": 20,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -8,
-                "YPosition": 5,
+                "XPosition": -80,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -3,
+                "XPosition": -30,
                 "YPosition": 0,
                 "ZPosition": 0
             }
@@ -2519,7 +2519,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": -50,
             "YPosition": 0,
             "ZPosition": 0
@@ -2536,15 +2536,15 @@
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
+                "XPosition": -100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -5,
+                "XPosition": -50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -2584,7 +2584,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 300
@@ -2594,22 +2594,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -20,
+                "XPosition": 50,
+                "YPosition": 200,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -20,
+                "XPosition": -50,
+                "YPosition": 200,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -25,
+                "YPosition": 250,
                 "ZPosition": 0
             }
         },
@@ -2654,7 +2654,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2664,15 +2664,15 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 5,
+                "XPosition": 50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 5,
+                "XPosition": -50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position3": {
@@ -2721,7 +2721,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 50
@@ -2731,22 +2731,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -5,
+                "XPosition": 50,
+                "YPosition": 50,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -5,
+                "XPosition": -50,
+                "YPosition": 50,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -10,
+                "YPosition": 100,
                 "ZPosition": 0
             }
         },
@@ -2788,7 +2788,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 50,
             "YPosition": 0,
             "ZPosition": 0
@@ -2798,7 +2798,7 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
+                "XPosition": 100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -2812,8 +2812,8 @@
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -5,
+                "XPosition": 50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -2863,7 +2863,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2873,15 +2873,15 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 5,
+                "XPosition": 50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 5,
+                "XPosition": -50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position3": {
@@ -2930,7 +2930,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -2940,14 +2940,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -2955,7 +2955,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -2995,7 +2995,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3005,14 +3005,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -3020,7 +3020,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -3062,7 +3062,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 200
@@ -3073,21 +3073,21 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -20,
+                "YPosition": 200,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
-                "YPosition": -20,
+                "XPosition": -100,
+                "YPosition": 200,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -25,
+                "XPosition": -50,
+                "YPosition": 250,
                 "ZPosition": 0
             }
         },
@@ -3127,7 +3127,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3137,7 +3137,7 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
+                "XPosition": 100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -3151,8 +3151,8 @@
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -5,
+                "XPosition": 50,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -3195,7 +3195,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 2,
             "ZPosition": 0
@@ -3205,15 +3205,15 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": 5,
+                "XPosition": 50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 5,
+                "XPosition": -50,
+                "YPosition": -50,
                 "ZPosition": 0
             },
             "Position3": {
@@ -3265,7 +3265,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3275,14 +3275,14 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
+                "XPosition": -50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -3290,7 +3290,7 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -5,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -3328,7 +3328,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3338,22 +3338,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
+                "XPosition": -100,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -15,
+                "XPosition": -150,
                 "YPosition": 0,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -10,
-                "YPosition": -5,
+                "XPosition": -100,
+                "YPosition": 50,
                 "ZPosition": 0
             }
         },
@@ -3394,7 +3394,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3404,7 +3404,7 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
+                "XPosition": 50,
                 "YPosition": 0,
                 "ZPosition": 0
             },
@@ -3412,14 +3412,14 @@
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": 10,
+                "YPosition": -100,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 5,
-                "YPosition": -10,
+                "XPosition": 50,
+                "YPosition": 100,
                 "ZPosition": 0
             }
         },
@@ -3460,7 +3460,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 0,
             "YPosition": 0,
             "ZPosition": 0
@@ -3470,22 +3470,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 10,
-                "YPosition": 15,
+                "XPosition": 100,
+                "YPosition": -150,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": 10,
+                "XPosition": -50,
+                "YPosition": -100,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": 15,
+                "YPosition": -150,
                 "ZPosition": 0
             }
         },
@@ -3526,7 +3526,7 @@
         },
         "SupplyStarTransformData": {
             "DataClass": "TransformData",
-            "Scale": 0.2,
+            "Scale": 0.1,
             "XPosition": 2,
             "YPosition": -2,
             "ZPosition": 0
@@ -3536,22 +3536,22 @@
             "Position1": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": 3,
-                "YPosition": -3,
+                "XPosition": 30,
+                "YPosition": 30,
                 "ZPosition": 0
             },
             "Position2": {
                 "DataClass": "TransformData",
                 "Scale": 1,
-                "XPosition": -5,
-                "YPosition": -10,
+                "XPosition": -50,
+                "YPosition": 100,
                 "ZPosition": 0
             },
             "Position3": {
                 "DataClass": "TransformData",
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -10,
+                "YPosition": 100,
                 "ZPosition": 0
             }
         },

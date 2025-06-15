@@ -11,18 +11,31 @@ public partial class UnitState : StateObject
     [Signal] public delegate void UnitBecomesClickableEventHandler();
     [Signal] public delegate void UnitBecomesUnclickableEventHandler();
 
-    public int Id { get; set; }
-    public UnitType Type { get; set; }
-    public Faction Faction;
+    [Export] public int Id { get; set; }
+    [Export] public UnitType Type { get; set; }
+    [Export] public Faction Faction;
+    [Export] public CountryState CountryState;
+    [Export] public bool InSupply { get; set; } = false;
 
-    public int CountryId { get; set; } = -1;
+    private int countryId = -1;
+    public int CountryId
+    {
+        get { return countryId; }
+        set
+        {
+            countryId = value;
+            if (countryId >= 0)
+            {
+                this.CountryState = CountryState.ForId(CountryId);
+            }
+
+        }
+    }
+
 
     public bool IsDeployedToCountry => CountryId >= 0;
 
-    public CountryState CountryState =>
-        CountryId >= 0 ? GameSession.Instance.GameState.CountryStateById[CountryId] : null;
 
-    public bool InSupply { get; set; } = false;
 
     public bool IsArmy => Type == UnitType.ARMY;
     public bool IsNavy => Type == UnitType.NAVY;

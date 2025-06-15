@@ -13,6 +13,15 @@ public class AttackState
     public bool HasTargets { get { return HasTargetUnits || HasTargetEmptyCountries; } }
     public bool HasTargetUnits { get { return TargetUnitIds.Count > 0; } }
     public bool HasTargetEmptyCountries { get { return TargetEmptyCountryIds.Count > 0; } }
+    
+    public List<int> TargetsOfType(UnitType unitType)
+    {
+        List<int> targets = TargetUnitIds.Where(unitId => UnitState.ForId(unitId).Type == unitType).ToList();
+        List<int> countries = TargetEmptyCountryIds.Where(countryId => CountryState.ForId(countryId).Type == (unitType == UnitType.ARMY ? CountryType.LAND : CountryType.SEA)).ToList();
+        targets.AddRange(countries);
+        return targets;
+    }
+    
 
     public static AttackState AttackStateForFaction(Faction faction)
     {

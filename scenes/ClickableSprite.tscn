@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfav78gd417lf"]
+[gd_scene load_steps=5 format=3 uid="uid://cfav78gd417lf"]
 
 [ext_resource type="Script" uid="uid://cev56k6km5swc" path="res://scenes/ClickableSprite.cs" id="1_2qho0"]
 [ext_resource type="Texture2D" uid="uid://nid6j0fylhjs" path="res://assets/textures/Other/target.png" id="1_ld73d"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_2qho0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2qho0"]
 resource_local_to_scene = true
@@ -13,6 +15,7 @@ collision_layer = 9
 script = ExtResource("1_2qho0")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+material = SubResource("CanvasItemMaterial_2qho0")
 texture = ExtResource("1_ld73d")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

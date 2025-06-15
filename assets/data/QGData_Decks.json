@@ -15,7 +15,7 @@
 				"Number" : 2
 			},
 			{
-				"CardName" : "Event_BroadFront",
+				"CardName" : "EventBroadFront",
 				"Number" : 1
 			}, 
 			{
@@ -23,23 +23,23 @@
 				"Number" : 2
 			},
 			{
-				"CardName" : "Event_MilitaryDictatorshipsintheBalkans",
+				"CardName" : "EventMilitaryDictatorshipsintheBalkans",
 				"Number" : 1
 			},
 			{
-				"CardName" : "Status_Blitzkrieg",
+				"CardName" : "StatusBlitzkrieg",
 				"Number" : 1				
 			},
 			{
-				"CardName" : "Status_SyntheticFuel",
+				"CardName" : "StatusSyntheticFuel",
 				"Number" : 1				
 			},
 			{
-				"CardName" : "Status_BiasForAction",
+				"CardName" : "StatusBiasForAction",
 				"Number" : 1				
 			},
 			{
-				"CardName" : "Status_DiveBombers",
+				"CardName" : "StatusDiveBombers",
 				"Number" : 1
 			}			
 		]
@@ -106,7 +106,7 @@
 				"Number" : 2
 			},		
 			{
-				"CardName" : "Response_Stalingrad",
+				"CardName" : "ResponseStalingrad",
 				"Number" : 1
 			}
 		]

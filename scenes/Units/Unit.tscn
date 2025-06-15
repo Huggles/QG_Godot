@@ -1,12 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://btx0cwjn67mo2"]
+[gd_scene load_steps=6 format=3 uid="uid://btx0cwjn67mo2"]
 
 [ext_resource type="Script" uid="uid://buwmfq5vmxxi8" path="res://scripts/C#/Scenes/UnitScene.cs" id="1_8vg5g"]
 [ext_resource type="Texture2D" uid="uid://npkiwkvdtsso" path="res://assets/textures/Units/QGArmy.png" id="2_8vg5g"]
 [ext_resource type="Texture2D" uid="uid://cqehtwpiof1rd" path="res://assets/textures/Other/SupplyIcon.png" id="3_ided0"]
+[ext_resource type="PackedScene" uid="uid://cfav78gd417lf" path="res://scenes/ClickableSprite.tscn" id="4_uddu0"]
 [ext_resource type="Texture2D" uid="uid://nid6j0fylhjs" path="res://assets/textures/Other/target.png" id="5_1bc45"]
 
 [node name="Unit" type="Node2D"]
-scale = Vector2(0.1, 0.1)
+scale = Vector2(0.2, 0.2)
 script = ExtResource("1_8vg5g")
 
 [node name="UnitSprite2D" type="Sprite2D" parent="."]
@@ -14,12 +15,14 @@ unique_name_in_owner = true
 z_index = 62
 texture = ExtResource("2_8vg5g")
 
-[node name="TargetSprite" type="Sprite2D" parent="."]
-z_index = 61
-texture = ExtResource("5_1bc45")
-
 [node name="OutOfSupplyIcon" type="Sprite2D" parent="."]
 unique_name_in_owner = true
+visible = false
 z_index = 60
-scale = Vector2(0.7, 0.7)
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("3_ided0")
+
+[node name="TargetSprite" parent="." instance=ExtResource("4_uddu0")]
+z_index = 61
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("5_1bc45")
