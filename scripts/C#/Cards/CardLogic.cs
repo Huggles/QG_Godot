@@ -17,6 +17,8 @@ public abstract partial class CardLogic : GodotObject
     public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
     public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Instance.GameFlow.GameTurn);
     public bool IsPubliclyVisible => IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
+    public bool IsPlayFinished = false;
+    public bool IsActivationFinished = false;
 
     protected int PlayStep = 0;
     protected int ReactStep = 0;
@@ -67,18 +69,10 @@ public abstract partial class CardLogic : GodotObject
 
     public async Task ReactTo(ChangeEvent changeEvent)
     {
-        if (CanReactTo(changeEvent))
-        {
-            string message = ActivateActionGuidance();
-            PlayerActionLabel.ShowText(message, -1, Faction);
-            OnReactSteps()[PlayStep].Invoke();
-            PlayStep += 1;
-        }
-        else
-        {
-            DebugUtilities.PrintPeerError($"Cannot activate card: {CardData.UniqueName}");
-            await Task.Delay(100);
-        }
+        string message = ActivateActionGuidance();
+        PlayerActionLabel.ShowText(message, -1, Faction);
+        OnReactSteps()[ReactStep].Invoke();
+        PlayStep += 1;
     }
 
     protected virtual string PlayActionGuidance() =>

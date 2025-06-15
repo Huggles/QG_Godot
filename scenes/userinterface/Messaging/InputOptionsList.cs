@@ -29,6 +29,9 @@ public partial class InputOptionsList : ItemList
 			int index = Instance.AddItem(option.Label, null, option.Activatable);
 			Instance.SetItemDisabled(index, !option.Activatable);
 		}
+
+		int indexDoNothing = Instance.AddItem("Do nothing", null, true);
+		Instance.SetItemDisabled(indexDoNothing, false);
 	}
 
 	public static void HideList()

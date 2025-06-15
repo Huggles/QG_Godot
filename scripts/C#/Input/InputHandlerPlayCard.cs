@@ -5,12 +5,6 @@ using System.Collections.Generic;
 
 public partial class InputHandlerPlayCard
 {
-    
-
-    private static readonly Key[] HAND_CARD_KEYS = {
-        Key.Key0, Key.Key1, Key.Key2, Key.Key3, Key.Key4, Key.Key5, Key.Key6
-    };
-
     private GameFlow gameFlow => GameSession.Instance.GameFlow;
     private GameState gameState => GameSession.Instance.GameState;
 
@@ -27,10 +21,19 @@ public partial class InputHandlerPlayCard
 
     private void HandleItemSelected(long index, Vector2 atPosition, long mouseButtonIndex)
     {
+        InputOptionsList.Instance.ItemClicked -= HandleItemSelected;
         InputOptionsList.HideList();
         int selectedIndex = (int)index;
-        InputOptionsList.Instance.ItemClicked -= HandleItemSelected;
-        EventBus.Emit("CardSelected", CardActivationOptions[selectedIndex]);
+        if (selectedIndex > CardActivationOptions.Count-1)
+        {
+            EventBus.Emit("CardSelected", null);
+        }
+        else
+        {
+            EventBus.Emit("CardSelected", CardActivationOptions[selectedIndex]);
+        }
+        
+        
         
     }    
 }

@@ -9,6 +9,7 @@ public partial class RemoveUnitChangeEvent : ChangeEvent
     public UnitRemovalReason Reason { get; private set; }
 
     public UnitState UnitState => UnitState.ForId(UnitId);
+    public CountryState CountryState => CountryState.ForId(CountryId);
 
     public RemoveUnitChangeEvent(Faction triggeringFaction, int unitId, UnitRemovalReason removalReason) : base(triggeringFaction)
     {

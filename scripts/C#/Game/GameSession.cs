@@ -203,10 +203,14 @@ public partial class GameSession : Node
         //TODO: determine player scene for faction.
         instance.playerScenes[0].InputManager.SetPlayCardInputActive(CardPlayPool.GetNextActions(faction));
         Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
-
-        CardActivationOption cardActivationOption = results[0].As<CardActivationOption>();        
-        CardState cardState = CardState.ForId(cardActivationOption.CardId);
-        
-        return cardState;
+        if (results == null || results.Length == 0)
+        {
+            return null;
+        }
+        else
+        {
+            CardActivationOption cardActivationOption = results[0].As<CardActivationOption>();
+            return CardState.ForId(cardActivationOption.CardId);
+        }
     }
 }

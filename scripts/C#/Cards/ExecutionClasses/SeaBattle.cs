@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 public partial class SeaBattle : CardLogic
 {
     public AttackState attackState
-    {
+    { 
         get
         {           
             return AttackState.AttackStateForFaction(Faction);

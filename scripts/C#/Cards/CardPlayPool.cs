@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -38,6 +39,11 @@ public partial class CardPlayPool : GodotObject
         ChangeEventsPool[changeEvent.Id] = changeEvent;        
     }
 
+    public static List<T> GetChangeEvents<T>() where T : ChangeEvent
+    {
+        List<ChangeEvent> changeEvents = CardPlayPool.ChangeEventsPool.Values.ToList().Where(changeEvent => changeEvent is T).ToList();
+        return changeEvents.Map(changeEvent => changeEvent as T);
+    }
 
 
     public static async Task DoChangeEvent(ChangeEvent changeEvent)
@@ -121,7 +127,14 @@ public partial class CardPlayPool : GodotObject
         List<CardActivationOption> activationOptions = GetNextActions(faction);
         if (activationOptions != null && activationOptions.Count > 0)
         {
-            return true;
+            CardState cardState = await GameSession.RequestCardPlay(faction);
+            if (cardState != null)
+            {
+                ActivateReactionChangeEvent playCardChangeEvent = new ActivateReactionChangeEvent(Faction.GERMANY, cardState.Id, null);
+                playCardChangeEvent.IsTrigger = true;
+                DoChangeEvent(playCardChangeEvent);
+                return true;
+            }
         }
         return false;
         
