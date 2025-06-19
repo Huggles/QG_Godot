@@ -136,9 +136,9 @@ public partial class GameFlow : GodotObject
     private void DrawStep()
     {
         GD.Print("DrawStep");
-        CurrentFactionDeckState.DebugHand();
+        //CurrentFactionDeckState.DebugHand();
         CurrentFactionDeckState.DrawCards(7 - CurrentFactionDeckState.HandCardIds.Count);
-        CurrentFactionDeckState.DebugHand();
+        //CurrentFactionDeckState.DebugHand();
         ProgressGame();
     }
 }

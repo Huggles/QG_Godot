@@ -8,7 +8,8 @@ public partial class InputManager : Node2D
     public InputManager Instance;
 
 
-    private static readonly Vector2 INITIAL_POSITION = new Vector2(0, 0);
+    private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
+    private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(0.15f,0.15f);
     private const float ZOOM_STEP = 0.05f;
     private const float CAMERA_SPEED = 10f;
     private const float MIN_ZOOM_LEVEL = 0.1f;
@@ -43,7 +44,7 @@ public partial class InputManager : Node2D
         ApplyZoom();
     }
 
-    
+
 
     public override void _EnterTree()
     {
@@ -51,7 +52,9 @@ public partial class InputManager : Node2D
         EventBus.Instance.SetCountriesClickable += countryIds => EnableRayTraceCasting();
         EventBus.Instance.SetAllUnitsUnclickable += DisableRayTraceCasting;
         EventBus.Instance.SetAllCountriesUnclickable += DisableRayTraceCasting;
-        Camera.Position = INITIAL_POSITION;
+        Camera.Position = DEFAULT_POSITION;
+        Camera.Zoom = DEFAULT_ZOOM;
+        zoom = DEFAULT_ZOOM.X;
     }
 
     public override void _Process(double delta)

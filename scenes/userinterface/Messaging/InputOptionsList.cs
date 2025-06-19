@@ -35,7 +35,9 @@ public partial class InputOptionsList : ItemList
 	}
 
 	public static void HideList()
-	{
+	{		
+        Instance.ContainerPanel.MouseFilter = MouseFilterEnum.Pass;
+        Instance.MouseFilter = MouseFilterEnum.Pass;
 		Instance.ContainerPanel.Visible = false;
 	}
 }

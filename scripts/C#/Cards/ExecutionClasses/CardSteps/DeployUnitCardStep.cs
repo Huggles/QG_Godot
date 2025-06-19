@@ -5,7 +5,11 @@ using System.Threading.Tasks;
 
 public partial class DeployUnitCardStep : CardStep
 {
-    
+    public DeployUnitCardStep(CardLogic cardLogic, Action stepLogic) : base(cardLogic, stepLogic)
+    {
+    }
+
+
     public async Task<ChangeEvent> Execute(List<int> countries)
     {
         int selectedCountryId = await new SelectCountryHandler(countries).Handle();

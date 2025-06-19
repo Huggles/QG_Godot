@@ -3,11 +3,9 @@ using System;
 using System.Collections.Generic;
 
 public partial class PlayerActionLabel : RichTextLabel
-{
-    private static List<MessageQueueItem> messageQueue = new List<MessageQueueItem>();
-    private static MessageQueueItem currentShowingMessage;
+{    
     private static PlayerActionLabel Instance;
-
+    
     private Panel ContainerPanel => GetNode<Panel>("%ContainerPanel");
 
     public override void _Ready()
@@ -17,8 +15,6 @@ public partial class PlayerActionLabel : RichTextLabel
         Instance = this;
         BbcodeEnabled = true;
         HideNode();
-
-        ShowNextMessage();
         EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PlayerActionLabel");
     }
 
@@ -26,39 +22,14 @@ public partial class PlayerActionLabel : RichTextLabel
         ShowText(text, -1, faction);
 
     }
-    public static void ShowText(string text, int duration, Faction faction = (Faction)(-1)){
-        messageQueue.Add(new MessageQueueItem(text, faction, duration));
-        if(Instance != null) {
-            Instance.ShowNextMessage();
-        }
-    }
-    public static void HideCurrentText(){
-        if(Instance != null){
-            Instance.HideNode();
-        }
-    }
-
-    public void ShowNextMessage(){
-        if(messageQueue.Count > 0 && currentShowingMessage == null){
-            MessageQueueItem nextMessage = messageQueue[0];
-            currentShowingMessage = nextMessage;
-            ShowTextForDuration(nextMessage.message, nextMessage.duration, nextMessage.faction);
-        }
-    }
-
-    public class MessageQueueItem {
-        public string message;
-        public Faction faction;
-        public int duration;
-        public MessageQueueItem(string message, Faction faction, int duration){
-            this.message = message;
-            this.faction = faction;
-            this.duration = duration;
-        }
+    public static void ShowText(string text, int duration, Faction faction = (Faction)(-1)){        
+        Instance.ShowTextForDuration(text, duration, faction);
     }
 
     public void ShowTextForDuration(string text, int duration = -1, Faction faction = (Faction)(-1))
     {
+        ContainerPanel.MouseFilter = MouseFilterEnum.Stop;
+        this.MouseFilter = MouseFilterEnum.Stop;
         Text = text;
         Visible = true;
         if (ContainerPanel != null)
@@ -98,12 +69,12 @@ public partial class PlayerActionLabel : RichTextLabel
 
     public void HideNode()
     {
-        currentShowingMessage = null;
         Visible = false;
         if (ContainerPanel != null)
         {
             ContainerPanel.Visible = false;
         }
-        ShowNextMessage();
+        ContainerPanel.MouseFilter = MouseFilterEnum.Pass;
+        this.MouseFilter = MouseFilterEnum.Pass;
     }
 }

@@ -18,9 +18,9 @@ public partial class CountryState : StateObject
     public List<string> Neighbors { get; set; }
     public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
 
-    
 
-    public Dictionary<Faction, int> Units  { get; set; } = new Dictionary<Faction, int>();
+
+    public Dictionary<Faction, int> Units { get; set; } = new Dictionary<Faction, int>();
 
     public bool IsLand => Type == CountryType.LAND;
     public bool IsSea => Type == CountryType.SEA;
@@ -64,10 +64,10 @@ public partial class CountryState : StateObject
 
             else
             {
-                string exceptionMessage = $"Couldn't find: {neighbor} as neighbor of {Name}";                
+                string exceptionMessage = $"Couldn't find: {neighbor} as neighbor of {Name}";
                 throw new Exception(exceptionMessage);
             }
-                
+
         }
     }
 
@@ -133,6 +133,9 @@ public partial class CountryState : StateObject
                         !OccupyingFactions.Contains(faction) &&
                         OccupyingTeam != StaticGameData.OpponentFactionTeamForFaction(faction);
 
+        DebugUtilities.PrintPeer(StaticCountryData.UniqueName);
+        canBuild &= NeighborCountryStates.Where(neighborCountryState => neighborCountryState.Units.ContainsKey(faction) && UnitState.ForId(neighborCountryState.Units[faction]).InSupply).ToList().Count > 0;
+
         if (Type == CountryType.SEA)
         {
             var factionTeam = StaticGameData.FactionTeamForFaction(faction);
@@ -161,6 +164,59 @@ public partial class CountryState : StateObject
         return false;
     }
 
+    public bool CanAttack(Faction faction)
+    {
+        return InRangeForAttack(faction) && HasAttackableTarget(faction);
+    }
+
+    public bool HasAdjacentSuppliedUnit(Faction faction)
+    {
+        return ConnectedCountries(faction).Any(connectedCountryState => connectedCountryState.OccupyingFactions.Contains(faction) && UnitState.ForId(connectedCountryState.Units[faction]).InSupply);
+    }
+
+    // public List<BattleTarget> AdjacentBattleTargets(Faction attackingFaction)
+    // {
+    //     List<BattleTarget> targets = new List<BattleTarget>();
+    //     targets.AddRange(AdjacentBattleTargets(attackingFaction, CountryType.LAND));
+    //     targets.AddRange(AdjacentBattleTargets(attackingFaction, CountryType.SEA));
+    //     return targets;
+
+    // }
+    public List<BattleTarget> AdjacentBattleTargets(Faction attackingFaction, CountryType countryType)
+    {
+        List<BattleTarget> targets = new List<BattleTarget>();
+        List<BattleTarget> targetableUnitIds = ConnectedCountries(attackingFaction)
+            .Where(connectedCountryState => connectedCountryState.Type == countryType && connectedCountryState.CanAttack(attackingFaction)).ToList()
+            .SelectMany(countryWithUnits => countryWithUnits.Units.Values).Distinct().ToList()
+            .Map(unitId => new BattleTarget(unitId, TargetType.UNIT));
+        List<BattleTarget> targetableEmptyCountriesIds = ConnectedCountries(attackingFaction)
+        .Where(connectedCountryState => connectedCountryState.Type == countryType && connectedCountryState.CanAttackWhenEmpty(attackingFaction)).ToList().ToCountryIds()
+        .Map(countryId => new BattleTarget(countryId, TargetType.COUNTRY));
+        targets.AddRange(targetableUnitIds);
+        targets.AddRange(targetableEmptyCountriesIds);
+        return targets;
+    }
+    public List<BattleTarget> BattleTargets(Faction attackingFaction)
+    {
+        if (!HasAdjacentSuppliedUnit(attackingFaction) || OccupyingTeam == StaticGameData.FactionTeamForFaction(attackingFaction))
+        {
+            return [];
+        }
+        else if (IsCountryEmpty)
+        {
+            return [new BattleTarget(Id, TargetType.COUNTRY)];
+        }
+        else
+        {
+            return Units.Values.ToList().Map(unitId => new BattleTarget(unitId, TargetType.UNIT));
+        }
+    }
+
+    public bool HasAttackableTarget(Faction faction)
+    {
+        return OccupyingTeam == StaticGameData.OpponentFactionTeamForFaction(faction);
+    }
+
     public bool CanAttackWhenEmpty(Faction faction)
     {
         return InRangeForAttack(faction) && IsCountryEmpty;
@@ -186,4 +242,24 @@ public partial class CountryState : StateObject
         var countryIds = UnitState.ForIds(unitIds).Select(u => u.CountryId);
         return ForIds(countryIds);
     }
+
+    public static CountryState ForEnum(Country country)
+    {
+        DebugUtilities.PrintPeer(ForEnums(new List<Country> { country })[0].Name);
+        return ForEnums(new List<Country> { country })[0];
+    }
+
+    public static List<CountryState> ForEnums(IEnumerable<Country> countries)
+    {
+        return ForIds(countries.ToList().Map(countryEnum => (int)countryEnum));
+    }
+    public static bool operator ==(CountryState countryState, Country country)
+    {
+        return countryState.Id == (int)country;
+    }
+    public static bool operator !=(CountryState countryState, Country country) {
+        return countryState.Id != (int)country;
+    }
+    
+
 }

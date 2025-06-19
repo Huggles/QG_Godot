@@ -2,18 +2,26 @@ using Godot;
 using System;
 using System.Threading.Tasks;
 
-public partial class ActivateReactionChangeEvent : PlayCardChangeEvent
+public partial class ActivateReactionChangeEvent : ChangeEvent
 {
     private ChangeEvent SourceChangeEvent;
+    protected int StepId;
 
-    public ActivateReactionChangeEvent(Faction faction, int cardId, ChangeEvent sourceChangeEvent) : base(faction, cardId)
+
+    public ActivateReactionChangeEvent(Faction faction, int cardId, ChangeEvent sourceChangeEvent) : base(faction)
     {
         this.SourceChangeEvent = sourceChangeEvent;
         this.SourceCardId = cardId;
+        this.StepId = SourceCardState.CardLogic.ReactCardSteps[0].Id;
     }
 
-    protected override async Task<bool> ExecuteAsync(){        
-        await SourceCardState.CardLogic.ReactTo(SourceChangeEvent);        
+    protected override async Task<bool> ExecuteAsync(){                
+        SourceCardState.CardLogic.ActivatedInTurns.Add(GameSession.Instance.GameFlow.GameTurn);
+        SourceCardState.CardLogic.React(StepId);
+        SourceCardState.CardLogic.CardFinished += () =>
+        {
+            DebugUtilities.PrintPeer("CardFinished");
+        };
         return true;
     }
 }

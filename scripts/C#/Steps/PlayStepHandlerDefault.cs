@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 public partial class PlayStepHandlerDefault : GodotObject,IPlayStepHandler
 {
@@ -10,19 +11,20 @@ public partial class PlayStepHandlerDefault : GodotObject,IPlayStepHandler
 
     public void Start(Faction faction){
         this.faction = faction;
-        EventBus.Instance.CardPlayPoolFinished += () =>
+        EventBus.Instance.CardPlayPoolFinished += async() =>
         {
             DebugUtilities.PrintPeer("");
+            await Task.Delay(100);
+            CardPlayPool.ClearPool();
             EmitSignal(SignalName.PlayStepFinished);
         };
 
         RequestCardPlay();
     }
 
-    public async void RequestCardPlay(){
-        CardState cardState = await GameSession.RequestCardPlay(faction);
-        PlayCardChangeEvent playCardChangeEvent = cardState.CardLogic.BuildChangeEvent(new PlayCardChangeEvent(faction, cardState.Id));
-        playCardChangeEvent.IsTrigger = true;
-        CardPlayPool.DoChangeEvent(playCardChangeEvent);
+    public async void RequestCardPlay()
+    {
+        CardPlayPool.RequestActivationOption(faction);
+       
     }
 }

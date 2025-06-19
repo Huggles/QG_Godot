@@ -9,7 +9,7 @@ public partial class GameState : StateObject
 {
     public IGameMode GameMode;
     public Dictionary<Faction, FactionState> FactionStates = new();
-    public List<ChangeEvent> GameChangeEvents = new();    
+    public List<ChangeEvent> GameChangeEvents = new();
     public CardState ActivePlayerCard;
 
     private int _changeEventCounter = 0;
@@ -92,6 +92,8 @@ public partial class GameState : StateObject
         }
     }
 
+
+    public Dictionary<int, CardStep> CardStepsById = new();
    
 
     

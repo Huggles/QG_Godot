@@ -7,16 +7,24 @@ public partial class StatusBlitzkrieg : StatusCardLogic
 {
     public override bool CanReactTo(ChangeEvent changeEvent)
     {
-        return changeEvent is BattleUnitChangeEvent battleUnitChangeEvent && battleUnitChangeEvent.TriggeringFaction == Faction.GERMANY && battleUnitChangeEvent.CountryState.Units.Keys.Count == 0;
+        return base.CanReactTo(changeEvent) &&
+        changeEvent is BattleCountryChangeEvent battleCountryChangeEvent &&
+        battleCountryChangeEvent.TriggeringFaction == Faction &&
+        battleCountryChangeEvent.CountryState.Units.Keys.Count == 0;
     }
-    public async override void InitialReactStep()
-    {
-        List<BattleUnitChangeEvent> changeEvents = CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>();
-        int selectedCountryId = await new SelectCountryHandler(changeEvents.Map(changeEvent => changeEvent.CountryId)).Handle();
 
-        DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-        deployUnitChangeEvent.IsTrigger = true;
-        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-        IsActivationFinished = true;
+    public override List<CardStep> InitializeReactCardSteps()
+    {
+        return new List<CardStep> {
+            new CardStep(this, async() => {
+                List<BattleCountryChangeEvent> changeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Where(changeEvent=>changeEvent.CountryState.Units.Count == 0).ToList();
+                int selectedCountryId = await new SelectCountryHandler(changeEvents.Map(changeEvent => changeEvent.CountryId)).Handle();
+
+                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
+                deployUnitChangeEvent.IsTrigger = true;
+                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                IsActivationFinished = true;
+            })
+        };
     }
 }

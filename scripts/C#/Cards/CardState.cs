@@ -37,10 +37,10 @@ public partial class CardState : Object
         return false;
     }
 
-    public void PlayCard()
+    public void PlayCard(int stepId)
     {
         DebugUtilities.PrintPeer("play_card");
-        CardLogic.PlayCard();
+        CardLogic.PlayCard(stepId);
     }
 
     private CardLogic GetCardLogicClass()

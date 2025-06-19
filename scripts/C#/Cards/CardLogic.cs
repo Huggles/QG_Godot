@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public abstract partial class CardLogic : GodotObject
@@ -11,54 +12,84 @@ public abstract partial class CardLogic : GodotObject
     public FactionData FactionData => StaticGameData.FactionDataMap.ContainsKey(Faction) ? StaticGameData.FactionDataMap[Faction] : null;
 
     public List<int> ActivatedInTurns = new();
-    public List<int> CompletedParts = new();
 
     public bool IsPlayed;
     public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
     public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Instance.GameFlow.GameTurn);
+    public bool IsReaction => CardData.Type == "RESPONSE" || CardData.Type == "STATUS";
     public bool IsPubliclyVisible => IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
 
-    protected int PlayStep = 0;
-    protected int ReactStep = 0;
-
     [Signal] public delegate void CardFinishedEventHandler();
     [Signal] public delegate void CardStepFinishedEventHandler();
-
-    public virtual List<Action> OnPlaySteps() { return new() { InitialPlayStep }; }
-    public virtual List<Action> OnReactSteps() { return new() { InitialReactStep }; }
-
-    public abstract void InitialPlayStep();
-    public virtual void InitialReactStep() { }
-
-    public int NumberOfPlaySteps
-    {
-        get { return OnPlaySteps().Count; }
-    }
-    public int NumberOfReactSteps
-    {
-        get { return OnReactSteps().Count; }
-    }
+    
+    public List<CardStep> PlayCardSteps;
+    public List<CardStep> ReactCardSteps;
+    public abstract List<CardStep> InitializePlayCardSteps();
+    public virtual List<CardStep> InitializeReactCardSteps() { return new(); }    
 
     public virtual bool CanPlayCard()
     {
-        return false;
+        return PlayCardSteps.Where(playStep => !playStep.StepFinished).ToList().Count > 0;
     }
-
     public virtual bool CanReactTo(ChangeEvent changeEvent)
     {
-        return false;
+        return !IsActivatedThisTurn && ReactCardSteps.Where(playStep => !playStep.StepFinished).ToList().Count > 0;
+    }
+    public List<CardStep> ExecutablePlaySteps()
+    {
+        return PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished).ToList();
+    }
+    public List<CardStep> ExecutableReactSteps()
+    {
+        return ReactCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished).ToList();
     }
 
-    public void PlayCard()
+    public CardStep CardStepForId(int id)
+    {
+        CardStep cardStep = PlayCardSteps.Find(step=>step.Id == id);
+        if (cardStep == null) {
+            cardStep = ReactCardSteps.Find(step=>step.Id == id);
+        }
+        return cardStep;
+    }
+
+    public CardLogic()
+    {
+        PlayCardSteps = InitializePlayCardSteps();
+        ReactCardSteps = InitializeReactCardSteps();
+        for (int i = PlayCardSteps.Count - 1; i > 0; i--)
+        {
+            PlayCardSteps[i].IsPlayStep = true;
+            if (PlayCardSteps[i].PrerequisiteCardStep == null)
+            {
+                PlayCardSteps[i].PrerequisiteCardStep = PlayCardSteps[i - 1];
+
+            }
+        }
+        for (int i = ReactCardSteps.Count - 1; i > 0; i--)
+        {
+            ReactCardSteps[i].IsReactStep = true;
+            if (ReactCardSteps[i].PrerequisiteCardStep == null)
+            {
+                ReactCardSteps[i].PrerequisiteCardStep = ReactCardSteps[i - 1];
+            }
+        }
+        EventBus.Instance.CardPlayPoolFinished += () =>
+        {
+            ReactCardSteps.ForEach(reactCardStep => reactCardStep.StepFinished = false);
+        };
+    }
+    
+
+    public void PlayCard(int stepId)
     {
         if (CanPlayCard())
         {
             string message = PlayActionGuidance();
             PlayerActionLabel.ShowText(message, -1, Faction);
-            OnPlaySteps()[PlayStep].Invoke();
-            PlayStep += 1;
+            CardStepForId(stepId).Execute();
         }
         else
         {
@@ -67,29 +98,22 @@ public abstract partial class CardLogic : GodotObject
         }
     }
 
-    public async Task ReactTo(ChangeEvent changeEvent)
+    public async Task React(int stepId)
     {
         string message = ActivateActionGuidance();
         PlayerActionLabel.ShowText(message, -1, Faction);
-        OnReactSteps()[ReactStep].Invoke();
-        PlayStep += 1;
+        CardStepForId(stepId).Execute();        
     }
 
-    protected virtual string PlayActionGuidance() =>
+    public virtual string PlayActionGuidance() =>
         $"Play {GetType().Name}";
 
-    protected virtual string ActivateActionGuidance() =>
+    public virtual string ActivateActionGuidance() =>
         $"Activate {GetType().Name}";
 
     public T BuildChangeEvent<T>(T changeEvent) where T : ChangeEvent
-    {        
+    {
         changeEvent.SourceCardId = this.CardState.Id;
         return changeEvent;
     }
-
-
-    
-
-    
-
 }

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 public partial class PlayerScene : CharacterBody2D
 {
@@ -29,6 +30,9 @@ public partial class PlayerScene : CharacterBody2D
     private Camera2D _camera;
     private Node _rootNode;
     
+    private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
+    private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(6321,1584);
+    
 
     public override void _Ready()
     {
@@ -48,7 +52,7 @@ public partial class PlayerScene : CharacterBody2D
             };
         }
 
-        DebugUtilities.PrintPeer("Adding player");        
+        DebugUtilities.PrintPeer("Adding player");
     }
 
     public override void _PhysicsProcess(double delta)

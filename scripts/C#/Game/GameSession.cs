@@ -177,7 +177,7 @@ public partial class GameSession : Node
                 foreach (var neighbor in country.NeighborCountryStates)
                 {
                     if (neighbor.CanBuild(faction))
-                        response.Add(neighbor.Id);
+                        response.Add(neighbor.Id); 
                 }
             }
         }
@@ -199,7 +199,7 @@ public partial class GameSession : Node
     public static void ActivateStatusCard(string cardId) { }
     public static void ActivateResponseCard(string cardId) { }
 
-    public async static Task<CardState> RequestCardPlay(Faction faction) {
+    public async static Task<CardActivationOption> RequestPlay(Faction faction) {
         //TODO: determine player scene for faction.
         instance.playerScenes[0].InputManager.SetPlayCardInputActive(CardPlayPool.GetNextActions(faction));
         Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
@@ -209,8 +209,7 @@ public partial class GameSession : Node
         }
         else
         {
-            CardActivationOption cardActivationOption = results[0].As<CardActivationOption>();
-            return CardState.ForId(cardActivationOption.CardId);
+            return results[0].As<CardActivationOption>();
         }
     }
 }

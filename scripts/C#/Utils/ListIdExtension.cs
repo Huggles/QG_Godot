@@ -2,6 +2,7 @@ using Godot;
 using Godot.Collections;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public static class ListIdExtension
 {
@@ -22,6 +23,19 @@ public static class ListIdExtension
     public static List<int> ToCountryIds(this List<CountryState> countryStates)
     {
         return countryStates.Map(countryState => countryState.Id);
+    }
+
+    public static List<int> ToUnitIds(this List<CountryState> countryStates)
+    {
+        HashSet<int> unitIds = new HashSet<int>();
+        foreach (CountryState countryState in countryStates)
+        {
+            foreach (int unitId in countryState.Units.Values)
+            {
+                unitIds.Add(unitId);
+            }            
+        }
+        return unitIds.ToList();
     }
 
     public static List<U> Map<T, U>(this List<T> array, Func<T, U> predicate)

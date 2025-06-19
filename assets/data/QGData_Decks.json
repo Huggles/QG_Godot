@@ -83,7 +83,17 @@
 			{
 				"CardName" : "SeaBattle",
 				"Number" : 2
-			}		
+			},
+			{
+				"CardName" : "ResponseChinaOffensive",
+				"Number" : 1
+			},
+			{
+				"CardName" : "ResponseFallOfSingapore",
+				"Number" : 1
+			}
+			
+			
 		]
 	},
 	{

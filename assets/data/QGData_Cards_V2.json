@@ -580,12 +580,12 @@
 		"Text": "During your Victory step, gain +1 Victory Point for each Japanese Army in Indonesia, New Guinea, or Southeast Asia."
 	},
 	{
-		"UniqueName": "ResponseFallofSingapore",
+		"UniqueName": "ResponseFallOfSingapore",
 		"Number": "79",
 		"Type": "RESPONSE",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "ResponseFallofSingapore",
+		"ExecutionClass": "ResponseFallOfSingapore",
 		"Label": "Fall of Singapore [WIP]",
 		"Text": "Use when you battle in Southeast Asia. Battle the South China Sea; then recruit an Army in Southeast Asia."
 	},
