@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 public abstract partial class StatusCardLogic : CardLogic
 {
+    
+
+
     public override List<CardStep> InitializePlayCardSteps()
     {
         return new List<CardStep> {
@@ -13,10 +16,5 @@ public abstract partial class StatusCardLogic : CardLogic
                 deckState.HandCardIds.Remove(CardState.Id); 
             })
         }; 
-    }
-
-    public override bool CanPlayCard()
-    {
-        return true;
     }
 }

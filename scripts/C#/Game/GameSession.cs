@@ -165,31 +165,7 @@ public partial class GameSession : Node
         unit.EmitSignal(UnitState.SignalName.AfterUnitRemovedFromCountry, unitId, countryId);
     }
     
-    public static List<int> BuildableCountriesForFaction(Faction faction)
-    {
-        var response = new List<int>();
-        var suppliedUnitIds = GameStateUtilities.SuppliedUnitsForFaction(faction);
-
-        if (suppliedUnitIds.Count > 0)
-        {
-            foreach (var country in CountryState.ForUnitIds(suppliedUnitIds))
-            {
-                foreach (var neighbor in country.NeighborCountryStates)
-                {
-                    if (neighbor.CanBuild(faction))
-                        response.Add(neighbor.Id); 
-                }
-            }
-        }
-        return response;
-    }
-    public static List<int> BuildableLandCountriesForFaction(Faction faction) {
-        return BuildableCountriesForFaction(faction).Where(id => CountryState.ForId(id).Type == CountryType.LAND).ToList();
-    }   
-    public static List<int> BuildableSeaCountriesForFaction(Faction faction) {
-        return BuildableCountriesForFaction(faction).Where(id => CountryState.ForId(id).Type == CountryType.SEA).ToList();
-    }
-
+    
     public static void EliminateUnit(string unitId) { }
     public static void ScoreVictoryPoints(Faction faction, int vp) => FactionStates[faction].Score += vp;
     public static void HandDiscard(List<string> cardIds) { }

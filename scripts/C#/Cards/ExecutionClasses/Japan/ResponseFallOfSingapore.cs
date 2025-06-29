@@ -5,20 +5,26 @@ using System.Linq;
 
 public partial class ResponseFallOfSingapore : StatusCardLogic
 {
-    public override bool CanReactTo(ChangeEvent changeEvent) 
+    CountryState SouthEastAsia = CountryState.ForEnum(Country.SouthEastAsia);
+    CountryState SouthChinaSea = CountryState.ForEnum(Country.SouthChinaSea);
+
+    protected override List<Condition> CardTriggers()
     {
-        return base.CanReactTo(changeEvent) && changeEvent is BattleCountryChangeEvent battleCountryChangeEvent && battleCountryChangeEvent.TriggeringFaction == Faction && battleCountryChangeEvent.CountryState == Country.SouthEastAsia;
+        return new List<Condition> { Condition.Build(new Condition.FactionBattledCountry(Faction, [SouthEastAsia.Id]), this) };
     }
 
     public override List<CardStep> InitializeReactCardSteps()
     {
         return new List<CardStep> {
+
             new CardStep(this, async() => {
                 BattleTarget target = await new SelectBattleTargetHandler(CountryState.ForEnum(Country.SouthChinaSea).BattleTargets(Faction)).Handle();
                 BattleCountryChangeEvent battleCountryChangeEvent = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(battleCountryChangeEvent);
-            }),
+            })
+            .WithGuidance("Battle in the South China Sea")
+            .WithConditions( () => { return new List<Condition> { new Condition.CountryIsAttackable(CountryState.ForEnum(Country.SouthChinaSea).Id, Faction) }; } ),
             new CardStep(this, async() => {
                 int selectedCountryId = await new SelectCountryHandler(
                         new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id }
@@ -27,9 +33,8 @@ public partial class ResponseFallOfSingapore : StatusCardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
                 IsActivationFinished = true;
-            }).WithConditions(
-                ()=>{ return new List<Condition>{new Condition.CountryIsEmpty(CountryState.ForEnum(Country.SouthEastAsia).Id)}; }
-            )
+            }).WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsBuildable(CountryState.ForEnum(Country.SouthEastAsia).Id, Faction)}; } )
+            .WithGuidance("Recruit an army in South East Asia")
 
         };
     }

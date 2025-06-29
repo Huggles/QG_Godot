@@ -14,13 +14,9 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
         Country.SouthEastAsia,
     });
 
-
-    public override bool CanReactTo(ChangeEvent changeEvent)
+    protected override List<Condition> CardTriggers()
     {
-        return base.CanReactTo(changeEvent) &&
-        changeEvent is BattleCountryChangeEvent battleCountryChangeEvent &&
-        battleCountryChangeEvent.TriggeringFaction == Faction &&
-        targetCountries.Contains(battleCountryChangeEvent.CountryState);
+        return new List<Condition> { Condition.Build(new Condition.FactionBattledCountry(Faction, targetCountries.ToCountryIds()), this) };
     }
 
     public override List<CardStep> InitializeReactCardSteps()
@@ -29,21 +25,20 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
             new CardStep(this, async() => {
                 int selectedCountryId = await new SelectCountryHandler(EligibleAttackedCountries()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
                 IsActivationFinished = true;
             }).WithConditions(
-                ()=>{ return EligibleAttackedCountries().Map(countryId => new Condition.CountryIsEmpty(countryId)).ToList<Condition>(); }
-            ),
+                ()=>{ return EligibleAttackedCountries().Map(countryId => Condition.Build(new Condition.CountryIsEmpty(countryId), this)).ToList<Condition>(); }
+            ).WithGuidance("Build an army in the country just battled"), 
+
             new CardStep(this, async() => {
                 List<int> targets = targetCountries.Where(targetCountry=>targetCountry.CanAttack(Faction)).ToList().ToUnitIds();
                 int selectedCountryId = await new SelectUnitHandler(targets).Handle();
                 BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedCountryId));
-                battleUnitChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(battleUnitChangeEvent);
-            }).WithConditions(
-                ()=>{ return EligibleAttackedCountries().Map(countryId => new Condition.CountryIsAttackable(countryId, Faction)).ToList<Condition>(); }
-            ),
+            }).WithCondition(
+                ()=>{ return Condition.Build(new Condition.CountryIsAttackable(targetCountries.ToCountryIds(),Faction), this); }
+            ).WithGuidance("Attack an army in China or an adjacent country"),
         };
     }
 

@@ -15,7 +15,7 @@ public partial class FactionState : StateObject
 
     private GameState GameState => GameSession.Instance.GameState;
 
-    
+
     public int Score
     {
         get => _score;
@@ -88,5 +88,10 @@ public partial class FactionState : StateObject
                 .Where(id => !GameState.UnitStatesById[id].InSupply)
                 .ToList();
         }
+    }
+
+    public static FactionState ForEnum(Faction factionEnum)
+    {
+        return GameSession.Instance.GameState.FactionStates[factionEnum];
     }
 }

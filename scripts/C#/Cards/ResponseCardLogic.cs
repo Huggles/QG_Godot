@@ -14,9 +14,4 @@ public abstract partial class ResponseCardLogic : CardLogic
             })
         }; 
     }
-
-    public override bool CanPlayCard()
-    {
-        return true;
-    }
 }

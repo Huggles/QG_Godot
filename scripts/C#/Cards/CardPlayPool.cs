@@ -140,6 +140,7 @@ public partial class CardPlayPool : GodotObject
         if (activationOptions != null && activationOptions.Count > 0)
         {
             CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
+            DebugUtilities.PrintPeer("cardActivationOption");
             if (cardActivationOption != null)
             {
                 CardLogic cardLogic = cardActivationOption.CardState.CardLogic;
@@ -150,7 +151,7 @@ public partial class CardPlayPool : GodotObject
                     playCardChangeEvent.IsTrigger = true;
                     DoChangeEvent(playCardChangeEvent);
                 }
-                if (cardLogic.IsPlayed && cardLogic.IsReaction && !cardLogic.IsActivatedThisTurn)
+                else if (cardLogic.IsPlayed && cardLogic.IsReaction && !cardLogic.IsActivatedThisTurn)
                 {
                     ActivateReactionChangeEvent activateReactionChangeEvent = new ActivateReactionChangeEvent(Faction.GERMANY, cardActivationOption.CardId, null);
                     activateReactionChangeEvent.IsTrigger = true;
@@ -158,7 +159,9 @@ public partial class CardPlayPool : GodotObject
                 }
                 else
                 {
-                    ExecuteStep(cardActivationOption.StepId);
+                    CardStep cardStep = CardStep.ForId(cardActivationOption.StepId);
+                    PlayerActionLabel.ShowText(cardStep.CardLogic.ActivateActionGuidance(), -1, cardStep.CardLogic.Faction);
+                    cardStep.Execute();
                 }
                 return true;
             }
@@ -170,22 +173,15 @@ public partial class CardPlayPool : GodotObject
         return false;
         
     }
-    public async static Task ExecuteStep(int stepId)
-    {
-        CardStep cardStep = CardStep.ForId(stepId);
-        PlayerActionLabel.ShowText(cardStep.CardLogic.ActivateActionGuidance(), -1, cardStep.CardLogic.Faction);
-        CardStep.ForId(stepId).Execute();
-    }
 
     public static List<CardActivationOption> GetNextActions(Faction faction)
     {
         List<CardActivationOption> allActivationOptions = new List<CardActivationOption>();
-        if (CardPool.Count == 0)
+        if (CardPool.Count == 0 && GameSession.Instance.GameFlow.TurnStep == TurnStep.PLAY_CARD)
         {
             allActivationOptions.AddRange(PlayableCards(faction)); //Should be empty on start play
         }
-        allActivationOptions.AddRange(ActivatableReactions(faction, false));
-        allActivationOptions.AddRange(PartialCards(faction));
+        allActivationOptions.AddRange(ActivatableReactions(faction, false));     
         return allActivationOptions;
     }
     public static List<CardActivationOption> PlayableCards(Faction faction)
@@ -210,11 +206,11 @@ public partial class CardPlayPool : GodotObject
         List<CardActivationOption> activationOptions = new List<CardActivationOption>();
         foreach (CardState cardState in CardPool.Values.ToList().Where(cardState => cardState.Faction == faction))
         {
-            foreach (CardStep cardStep in cardState.CardLogic.ExecutablePlaySteps())
+            foreach (CardStep cardStep in cardState.CardLogic.ExecutablePlaySteps)
             {
                 activationOptions.Add(new CardActivationOption(cardState.Id, cardStep.Id, cardState.CardData.Label, true));
             }
-            foreach (CardStep cardStep in cardState.CardLogic.ExecutableReactSteps())
+            foreach (CardStep cardStep in cardState.CardLogic.ExecutableReactSteps)
             {
                 activationOptions.Add(new CardActivationOption(cardState.Id, cardStep.Id, cardState.CardData.Label, true));
             }
@@ -223,48 +219,32 @@ public partial class CardPlayPool : GodotObject
     }
     private static List<CardActivationOption> ActivatableReactions(Faction faction, bool isBeforeReaction)
     {
+        DeckState deckState = DeckState.ForFaction(faction);
         List<CardActivationOption> allActivationOptions = new List<CardActivationOption>();
-        List<CardActivationOption> statusActivationOptions = ActivatableStatuses(faction, isBeforeReaction);
-        List<CardActivationOption> responseActivationOptions = ActivatableResponse(faction, isBeforeReaction);
-
+        List<CardActivationOption> statusActivationOptions = ActivatableCards(deckState.StatusCardStates);
+        List<CardActivationOption> responseActivationOptions = ActivatableCards(DeckState.ForFaction(faction).ResponseCardStates);
         allActivationOptions.AddRange(statusActivationOptions);
         allActivationOptions.AddRange(responseActivationOptions);
         return allActivationOptions;
     }
-    private static List<CardActivationOption> ActivatableStatuses(Faction faction, bool isBeforeReaction = false) {
-        DeckState deckState = DeckState.ForFaction(faction);
-        List<CardActivationOption> options = new List<CardActivationOption>();
-        foreach(ChangeEvent changeEvent in ChangeEventsPool.Values)
-        {
-            options.AddRange(ActivatableCardsForChangeEvent(deckState.StatusCardStates, changeEvent, isBeforeReaction));
-        }
-        return options;
-    }
-    private static List<CardActivationOption> ActivatableResponse(Faction faction, bool isBeforeReaction = false) {
-        DeckState deckState = DeckState.ForFaction(faction);
-        List<CardActivationOption> options = new List<CardActivationOption>();
-        foreach(ChangeEvent changeEvent in ChangeEventsPool.Values)
-        {
-            options.AddRange(ActivatableCardsForChangeEvent(deckState.ResponseCardStates, changeEvent, isBeforeReaction));
-        }
-        return options;
-    }
-    private static List<CardActivationOption> ActivatableCardsForChangeEvent(List<CardState> cardStates, ChangeEvent changeEvent, bool isBeforeReaction = false)
+    private static List<CardActivationOption> ActivatableCards(List<CardState> cardStates)
     {
         var options = new List<CardActivationOption>();
         foreach (CardState cardState in cardStates)
         {
-            bool canActivate = isBeforeReaction ? cardState.CardLogic.CanReactTo(changeEvent) : cardState.CardLogic.CanReactTo(changeEvent);
+            bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
             {
-                foreach (CardStep cardStep in cardState.CardLogic.ReactCardSteps)
-                {
-                    if (cardStep.PrerequisiteStepFinished)
-                    {
-                        CardActivationOption option = new CardActivationOption(cardState.Id, cardStep.Id, cardState.CardData.Label, cardState.CardLogic != null ? cardState.CardLogic.CanPlayCard() : false);
-                        options.Add(option);
-                    }                    
-                }
+                CardStep nextStep = cardState.CardLogic.ReactCardSteps[0];                
+                CardActivationOption option = new CardActivationOption(cardState.Id, nextStep.Id, cardState.CardData.Label, cardState.CardLogic != null ? cardState.CardLogic.CanBeActivated() : false);
+                options.Add(option);                
+            }
+            else if (cardState.CardLogic.IsActivatedThisTurn && cardState.CardLogic.ExecutableReactSteps.Count > 0)
+            {
+                CardStep nextStep = cardState.CardLogic.ExecutableReactSteps[0];
+                CardLogic cardLogic = nextStep.CardLogic;
+                CardActivationOption option = new CardActivationOption(cardState.Id, nextStep.Id, cardLogic.CardState.CardData.Label, true);
+                options.Add(option);
             }
         }
         return options;

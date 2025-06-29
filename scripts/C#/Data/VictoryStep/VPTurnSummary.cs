@@ -6,18 +6,18 @@ using System.Linq;
 public partial class VPTurnSummary : StateObject
 {
     public int TurnNumber { get; private set; } = -1;
-    public Dictionary<string, int> ScoresForReason = new();
+    public List<VPEntry> victoryPointEntries = new();
+    public Faction Faction => (Faction)((TurnNumber-1) % Enum.GetNames(typeof(Faction)).Length);
 
-    public int TotalScore => ScoresForReason.Values.Sum();
+    public int TotalScore => victoryPointEntries.Map(vpe => vpe.VictoryPoints).Sum();
 
     public VPTurnSummary(int turnNumber)
     {
-        TurnNumber = turnNumber;
-        ScoresForReason = new Dictionary<string, int>();
+        TurnNumber = turnNumber;        
     }
 
-    public void AddScore(int points, string reason)
+    public void AddScore(VPEntry victoryPointEntry)
     {
-        ScoresForReason[reason] = points;
+        victoryPointEntries.Add(victoryPointEntry);
     }
 }

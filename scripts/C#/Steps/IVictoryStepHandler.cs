@@ -1,7 +1,8 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public interface IVictoryStepHandler
 {
-    void ProcessVictoryStep(Faction faction);
+    Task ProcessVictoryStep(Faction faction);
 }

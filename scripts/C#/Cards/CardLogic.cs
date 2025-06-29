@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
 public abstract partial class CardLogic : GodotObject
@@ -29,28 +30,43 @@ public abstract partial class CardLogic : GodotObject
     public abstract List<CardStep> InitializePlayCardSteps();
     public virtual List<CardStep> InitializeReactCardSteps() { return new(); }    
 
-    public virtual bool CanPlayCard()
+    public bool CanPlayCard()
     {
-        return PlayCardSteps.Where(playStep => !playStep.StepFinished).ToList().Count > 0;
+        return !IsPlayed && !IsPlayFinished && ExecutablePlaySteps.Count > 0;
     }
-    public virtual bool CanReactTo(ChangeEvent changeEvent)
+    
+    public bool CanBeActivated()
     {
-        return !IsActivatedThisTurn && ReactCardSteps.Where(playStep => !playStep.StepFinished).ToList().Count > 0;
+        return !IsActivatedThisTurn && !IsActivationFinished && TriggerConditionsMet;
     }
-    public List<CardStep> ExecutablePlaySteps()
+    private bool TriggerConditionsMet
     {
-        return PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished).ToList();
+        get { return CardTriggers().Count > 0 && CardTriggers().All(condition=>condition.MeetCondition()); }
     }
-    public List<CardStep> ExecutableReactSteps()
+
+    protected virtual List<Condition> CardTriggers()
     {
-        return ReactCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished).ToList();
+        return new();
+    }
+    public List<CardStep> ExecutablePlaySteps
+    {
+        get {
+            return PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished && playCardStep.MeetAllConditions).ToList();
+        }        
+    }
+    public List<CardStep> ExecutableReactSteps
+    {
+        get {
+            return ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.PrerequisiteStepFinished && reactCardStep.MeetAllConditions).ToList();
+        }        
     }
 
     public CardStep CardStepForId(int id)
     {
-        CardStep cardStep = PlayCardSteps.Find(step=>step.Id == id);
-        if (cardStep == null) {
-            cardStep = ReactCardSteps.Find(step=>step.Id == id);
+        CardStep cardStep = PlayCardSteps.Find(step => step.Id == id);
+        if (cardStep == null)
+        {
+            cardStep = ReactCardSteps.Find(step => step.Id == id);
         }
         return cardStep;
     }
@@ -76,7 +92,7 @@ public abstract partial class CardLogic : GodotObject
                 ReactCardSteps[i].PrerequisiteCardStep = ReactCardSteps[i - 1];
             }
         }
-        EventBus.Instance.CardPlayPoolFinished += () =>
+        EventBus.Instance.NewTurnStarted += (turnNumber) => 
         {
             ReactCardSteps.ForEach(reactCardStep => reactCardStep.StepFinished = false);
         };
@@ -85,17 +101,10 @@ public abstract partial class CardLogic : GodotObject
 
     public void PlayCard(int stepId)
     {
-        if (CanPlayCard())
-        {
-            string message = PlayActionGuidance();
-            PlayerActionLabel.ShowText(message, -1, Faction);
-            CardStepForId(stepId).Execute();
-        }
-        else
-        {
-            DebugUtilities.PrintPeerError($"Cannot play card: {CardData.UniqueName}");
-            Task.Delay(100);
-        }
+        DebugUtilities.PrintPeer("PlayCard");
+        string message = PlayActionGuidance();
+        PlayerActionLabel.ShowText(message, -1, Faction);
+        CardStepForId(stepId).Execute();
     }
 
     public async Task React(int stepId)

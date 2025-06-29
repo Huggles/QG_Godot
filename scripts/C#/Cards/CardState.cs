@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 public partial class CardState : Object
 {
@@ -61,16 +62,10 @@ public partial class CardState : Object
         return GameSession.Instance.GameState.CardStatesById.TryGetValue(cardId, out var state) ? state : null;
     }
 
+    // Static helpers
     public static List<CardState> ForIds(List<int> cardIds)
-    {
-        var response = new List<CardState>();
-        foreach (var cardId in cardIds)
-        {
-            var state = ForId(cardId);
-            if (state != null)
-                response.Add(state);
-        }
-        return response;
+    {        
+        return GameSession.Instance.GameState.CardStatesById.Values.ToList().Where(cardState => cardIds.Contains(cardState.Id)).ToList();
     }
 
     public static CardState ForName(string cardName)

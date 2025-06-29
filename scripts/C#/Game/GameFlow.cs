@@ -1,12 +1,14 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public partial class GameFlow : GodotObject
 {
     private bool GameStarted { get; set; } = false;
     public int GameTurn { get; set; } = 0;
-    public int TurnStep { get; set; } = 0;
+    public int TurnStepCounter { get; set; } = 0;
+    public TurnStep TurnStep { get; set; } = 0;
 
     public int Round
     {
@@ -39,19 +41,19 @@ public partial class GameFlow : GodotObject
     public FactionTeam CurrentFactionTeam =>
         (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;
 
-    private List<Action> turnStepMethods;
+    private List<Func<Task>> turnStepMethods;
     private IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
     public GameFlow(){
-        turnStepMethods = new List<Action> {
+        turnStepMethods = new List<Func<Task>> {
             StartTurnStep,
             PlayCardStep,
             SupplyStep,
             VictoryPointStep,
             DiscardStep,
             DrawStep,
-            StartNewTurn
+            StartNewTurn 
         };
     }
 
@@ -82,30 +84,35 @@ public partial class GameFlow : GodotObject
     private void StartNextStep()
     {
         GD.Print("StartNextStep");
-        TurnStep++;
-        turnStepMethods[TurnStep - 1]();
-        EventBus.Emit("NextStepStarted",TurnStep);
+        TurnStepCounter++;
+        turnStepMethods[TurnStepCounter - 1]();
+        EventBus.Emit("NextStepStarted",TurnStepCounter);
     }
 
-    private void StartNewTurn()
+    private async Task StartNewTurn()
     {
         GD.Print("StartNewTurn");
         GameTurn += 1;
-        TurnStep = 0;
+        TurnStepCounter = 0;
         GD.Print($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
-        EventBus.Emit("NewTurnStarted", GameTurn);        
+        EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);        
         StartNextStep();
     }
 
-    private void StartTurnStep()
-    {
+    private async Task StartTurnStep()
+    {        
         GD.Print("_start_turn_step");
+        this.TurnStep = TurnStep.START;
+        StartTurnStepHandler startTurnStepHandler = new StartTurnStepHandler();
+        startTurnStepHandler.Start(CurrentFaction);
+        await ToSignal(startTurnStepHandler, StartTurnStepHandler.SignalName.StartTurnStepFinished); 
         ProgressGame();
     }
 
-    private async void PlayCardStep()
+    private async Task PlayCardStep()
     {
         GD.Print("PlayCardStep");
+        this.TurnStep = TurnStep.PLAY_CARD;
         PlayStepHandlerDefault playStepHandlerDefault = new PlayStepHandlerDefault();
         playStepHandlerDefault.Start(CurrentFaction);        
         await ToSignal(playStepHandlerDefault, PlayStepHandlerDefault.SignalName.PlayStepFinished); 
@@ -113,30 +120,33 @@ public partial class GameFlow : GodotObject
         ProgressGame();
     }
 
-    private void SupplyStep()
+    private async Task SupplyStep()
     {
+        this.TurnStep = TurnStep.SUPPLY;
         GD.Print("SupplyStep");
         EventBus.Emit("RecalculateSupply", GameTurn);                
         ProgressGame();
     }
 
-    private void VictoryPointStep()
+    private async Task VictoryPointStep()
     {
         GD.Print("VictoryPointStep");
-        vpStepHandler.ProcessVictoryStep(CurrentFaction);
+        this.TurnStep = TurnStep.VICTORY_POINT;
+        await vpStepHandler.ProcessVictoryStep(CurrentFaction);
         ProgressGame();
     }
 
-    private void DiscardStep()
+    private async Task DiscardStep()
     {
         GD.Print("DiscardStep");
+        this.TurnStep = TurnStep.DISCARD;
         ProgressGame();
     }
 
-    private void DrawStep()
+    private async Task DrawStep()
     {
         GD.Print("DrawStep");
-        //CurrentFactionDeckState.DebugHand();
+        this.TurnStep = TurnStep.DRAW;
         CurrentFactionDeckState.DrawCards(7 - CurrentFactionDeckState.HandCardIds.Count);
         //CurrentFactionDeckState.DebugHand();
         ProgressGame();

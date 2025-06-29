@@ -67,6 +67,10 @@ public partial class PlayerActionLabel : RichTextLabel
         }        
     }
 
+    public static void HideText()
+    {
+        Instance.HideNode();
+    }
     public void HideNode()
     {
         Visible = false;

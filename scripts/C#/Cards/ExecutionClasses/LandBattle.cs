@@ -13,12 +13,10 @@ public partial class LandBattle : CardLogic
                 List<int> armyUnits = attackState.TargetUnitIds.Where(unitId => UnitState.ForId(unitId).Type == UnitType.ARMY).ToList();
                 List<int> emptyCountries = attackState.TargetEmptyCountryIds.Where(countryId => CountryState.ForId(countryId).Type == CountryType.LAND).ToList();
                 BattleTarget target = await new SelectBattleTargetHandler(emptyCountries, armyUnits).Handle();
-                
-
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(battleCountryChange);
-            })
+            }).WithCondition(()=> Condition.Build(new Condition.FactionHasBattleTarget(Faction, UnitType.ARMY),this))
         }; 
     }
 
@@ -28,18 +26,5 @@ public partial class LandBattle : CardLogic
         {
             return AttackState.AttackStateForFaction(Faction);
         }
-    }
-    
-    public List<CountryState> TargetableCountryStates
-    {
-        get
-        {
-            return GameSession.BuildableCountriesForFaction(Faction).ToCountryStates().FindAll(CountryState => CountryState.IsSea);
-        }
-    }    
-
-    public override bool CanPlayCard()
-    {
-        return base.CanPlayCard() && attackState.TargetsOfType(UnitType.ARMY).Count > 0;
     }
 }

@@ -41,7 +41,20 @@
 			{
 				"CardName" : "StatusDiveBombers",
 				"Number" : 1
-			}			
+			},
+			{
+				"CardName" : "StatusAbundantResources",
+				"Number" : 1
+			},
+			{
+				"CardName" : "StatusAtlanticWall",
+				"Number" : 1
+			},
+			{
+				"CardName" : "StatusVolksturm",
+				"Number" : 1
+			}				
+			
 		]
 	},
 	{

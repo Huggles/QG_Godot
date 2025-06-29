@@ -15,6 +15,8 @@ public partial class BuildNavy : CardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
+            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(TargetableCountryStates.ToCountryIds(), Faction),this))
+            .WithGuidance("Build a navy")
         }; 
     }
     
@@ -22,12 +24,7 @@ public partial class BuildNavy : CardLogic
     {
         get
         {
-            return GameSession.BuildableCountriesForFaction(Faction).ToCountryStates().FindAll(CountryState => CountryState.IsSea);
+            return DeployState.CalculateDeployState(Faction).BuildableCountryStatesForType(CountryType.SEA);
         }
-    }    
-
-    public override bool CanPlayCard()
-    {
-        return base.CanPlayCard() && TargetableCountryStates.Count > 0;
     }
 }

@@ -5,16 +5,17 @@ using System.Linq;
 
 public partial class StatusBlitzkrieg : StatusCardLogic
 {
-    public override bool CanReactTo(ChangeEvent changeEvent)
+    protected override List<Condition> CardTriggers()
     {
-        return base.CanReactTo(changeEvent) &&
-        changeEvent is BattleCountryChangeEvent battleCountryChangeEvent &&
-        battleCountryChangeEvent.TriggeringFaction == Faction &&
-        battleCountryChangeEvent.CountryState.Units.Keys.Count == 0;
+        return new List<Condition> {
+            Condition.Build(new Condition.FactionBattled(Faction), this),
+            Condition.Build(new Condition.CountryIsEmpty(CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Map(changeEvent=> changeEvent.CountryId)),this)
+        };
     }
 
     public override List<CardStep> InitializeReactCardSteps()
     {
+        //TODO
         return new List<CardStep> {
             new CardStep(this, async() => {
                 List<BattleCountryChangeEvent> changeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Where(changeEvent=>changeEvent.CountryState.Units.Count == 0).ToList();
@@ -24,7 +25,7 @@ public partial class StatusBlitzkrieg : StatusCardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
                 IsActivationFinished = true;
-            })
+            }).WithGuidance("Deploy an army in a country where you've battle this turn")
         };
     }
 }

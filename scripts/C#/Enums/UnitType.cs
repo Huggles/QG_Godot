@@ -3,5 +3,7 @@ using System;
 
 public enum UnitType
 {
-    ARMY, NAVY 
+    ARMY,
+    NAVY,
+    ANY
 }

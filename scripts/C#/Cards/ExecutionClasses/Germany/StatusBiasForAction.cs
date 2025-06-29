@@ -4,24 +4,32 @@ using System.Collections.Generic;
 using System.Linq;
 
 public partial class StatusBiasForAction : StatusCardLogic
-{
-    public override bool CanReactTo(ChangeEvent changeEvent) 
-    {
-        return base.CanReactTo(changeEvent) && changeEvent is DeployUnitChangeEvent deployUnitChangeEvent && deployUnitChangeEvent.TriggeringFaction == Faction.GERMANY && BattleTargets.Count > 0;
+{    
+    protected override List<Condition> CardTriggers()
+    {        
+        return new List<Condition> {
+            Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD), this),
+            Condition.Build(new Condition.FactionHasBattleTarget(
+                Faction,
+                UnitType.ARMY,
+                CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Map(changeEvent => changeEvent.CountryId)
+                ), this),
+
+        };
     }
     
     public List<BattleTarget> BattleTargets
     {
         get
-        {            
+        {
             List<BattleTarget> battleTargets = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
                 .Map(changeEvent => changeEvent.CountryId)
                 .SelectMany(countryId => CountryState.ForId(countryId).AdjacentBattleTargets(Faction, CountryType.LAND)).Distinct().ToList();
             return battleTargets;
-        }        
+        }
     }
 
-    public override List<CardStep> InitializeReactCardSteps()
+    public override List<CardStep> InitializeReactCardSteps() 
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
@@ -29,7 +37,7 @@ public partial class StatusBiasForAction : StatusCardLogic
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(battleCountryChange);
-            })
+            }).WithGuidance("Battle a country adjacent to where you've deployed an army this turn")
         };
     }
 }

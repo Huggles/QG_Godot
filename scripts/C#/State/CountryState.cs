@@ -15,6 +15,7 @@ public partial class CountryState : StateObject
     [Export] public bool IsSupply { get; set; }
     [Export] public StraightState StraightState;
 
+    public Country Country { get { return (Country)Id; } }
     public List<string> Neighbors { get; set; }
     public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
 
@@ -129,12 +130,14 @@ public partial class CountryState : StateObject
 
     public bool CanBuild(Faction faction)
     {
+        
         bool canBuild = CanRecruit(faction) &&
                         !OccupyingFactions.Contains(faction) &&
                         OccupyingTeam != StaticGameData.OpponentFactionTeamForFaction(faction);
-
-        DebugUtilities.PrintPeer(StaticCountryData.UniqueName);
-        canBuild &= NeighborCountryStates.Where(neighborCountryState => neighborCountryState.Units.ContainsKey(faction) && UnitState.ForId(neighborCountryState.Units[faction]).InSupply).ToList().Count > 0;
+        if (!(FactionState.ForEnum(faction).FactionData.HomeSpaceCountryState.Id == this.Id))
+        {
+            canBuild &= NeighborCountryStates.Where(neighborCountryState => neighborCountryState.Units.ContainsKey(faction) && UnitState.ForId(neighborCountryState.Units[faction]).InSupply).ToList().Count > 0;
+        }
 
         if (Type == CountryType.SEA)
         {
@@ -148,7 +151,7 @@ public partial class CountryState : StateObject
 
     public bool CanRecruit(Faction faction)
     {
-        return OccupyingTeam == FactionTeam.NONE || !OccupyingFactions.Contains(faction);
+        return OccupyingTeam == FactionTeam.NONE || (OccupyingTeam == StaticGameData.FactionTeamForFaction(faction) && !OccupyingFactions.Contains(faction));
     }
 
     public bool InRangeForAttack(Faction faction)

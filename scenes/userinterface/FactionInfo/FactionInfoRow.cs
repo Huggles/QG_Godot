@@ -98,9 +98,9 @@ public partial class FactionInfoRow : Control
         foreach (VPTurnSummary summary in vpSummaries)
         {
             textRows.Add($"Turn: {summary.TurnNumber}");
-            foreach (var kvp in summary.ScoresForReason)
+            foreach (VPEntry victoryPointEntry in summary.victoryPointEntries)
             {
-                textRows.Add($"{kvp.Value} points for {kvp.Key}");
+                textRows.Add($"{victoryPointEntry.VictoryPoints} points for {victoryPointEntry.Reason}");
             }
         }
 

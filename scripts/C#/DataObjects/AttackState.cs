@@ -8,7 +8,10 @@ public class AttackState
 {
     public Faction Faction;
     public List<int> TargetUnitIds = new List<int>();
+    public List<UnitState> TargetUnitStates => TargetUnitIds.ToUnitStates();
+
     public List<int> TargetEmptyCountryIds = new List<int>(); 
+    public List<CountryState> TargetEmptyCountryStates => TargetEmptyCountryIds.ToCountryStates();
 
     public bool HasTargets { get { return HasTargetUnits || HasTargetEmptyCountries; } }
     public bool HasTargetUnits { get { return TargetUnitIds.Count > 0; } }
@@ -16,8 +19,8 @@ public class AttackState
     
     public List<int> TargetsOfType(UnitType unitType)
     {
-        List<int> targets = TargetUnitIds.Where(unitId => UnitState.ForId(unitId).Type == unitType).ToList();
-        List<int> countries = TargetEmptyCountryIds.Where(countryId => CountryState.ForId(countryId).Type == (unitType == UnitType.ARMY ? CountryType.LAND : CountryType.SEA)).ToList();
+        List<int> targets = TargetUnitStates.Where(unitState => unitState.Type == unitType).ToList().ToUnitIds();
+        List<int> countries = TargetEmptyCountryStates.Where(countryState => countryState.Type == (unitType == UnitType.ARMY ? CountryType.LAND : CountryType.SEA)).ToList().ToCountryIds();
         targets.AddRange(countries);
         return targets;
     }

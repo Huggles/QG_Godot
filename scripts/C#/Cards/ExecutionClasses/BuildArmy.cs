@@ -8,12 +8,14 @@ public partial class BuildArmy : CardLogic
     public override List<CardStep> InitializePlayCardSteps()
     {
         return new List<CardStep> {
-            new DeployUnitCardStep(this, async() => {
+            new CardStep(this, async() => {
                 int selectedCountryId = await new SelectCountryHandler(TargetableCountryStates.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
+            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(TargetableCountryStates.ToCountryIds(), Faction),this))            
+            .WithGuidance("Build an army")
         }; 
     }
 
@@ -21,12 +23,7 @@ public partial class BuildArmy : CardLogic
     {
         get
         {
-            return GameSession.BuildableCountriesForFaction(Faction).ToCountryStates().FindAll(CountryState => CountryState.IsLand);
+            return DeployState.CalculateDeployState(Faction).BuildableCountryStatesForType(CountryType.LAND);
         }
-    }    
-
-    public override bool CanPlayCard()
-    {
-        return base.CanPlayCard() && TargetableCountryStates.Count > 0;
     }
 }

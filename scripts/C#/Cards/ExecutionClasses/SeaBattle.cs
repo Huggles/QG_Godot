@@ -17,6 +17,7 @@ public partial class SeaBattle : CardLogic
                 battleUnitChangeEvent.IsTrigger = true;
                 CardPlayPool.DoChangeEvent(battleUnitChangeEvent);
             })
+            .WithCondition(()=>Condition.Build(new Condition.FactionHasBattleTarget(Faction,UnitType.NAVY), this))            
         }; 
     }
 
@@ -26,18 +27,5 @@ public partial class SeaBattle : CardLogic
         {
             return AttackState.AttackStateForFaction(Faction);
         }
-    }
-    
-    public List<CountryState> TargetableCountryStates
-    {
-        get
-        {
-            return GameSession.BuildableCountriesForFaction(Faction).ToCountryStates().FindAll(CountryState => CountryState.IsSea);
-        }
-    }    
-
-    public override bool CanPlayCard()
-    {
-        return base.CanPlayCard() && attackState.TargetsOfType(UnitType.NAVY).Count > 0;
     }
 }

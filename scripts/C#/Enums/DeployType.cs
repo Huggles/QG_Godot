@@ -3,5 +3,5 @@ using System;
 
 public enum DeployType
 {
-    BUILD, RECRUIT
+    NONE, BUILD, RECRUIT, ANY
 }

@@ -151,6 +151,10 @@ public partial class GameModeDefault : IGameMode
         DeployUnitChangeEvent deployUnitChangeEvent;
         foreach (FactionData factionData in StaticGameData.FactionDataList)
         {
+            if (factionData.Faction == Faction.GERMANY)
+            {
+                continue;
+            }
             CountryState homespaceCountryState = CountryState.ForName(factionData.Homespace);
             deployUnitChangeEvent = new DeployUnitChangeEvent(factionData.Faction, homespaceCountryState.Id, DeployType.RECRUIT);
             deployUnitChangeEvent.IsTrigger = false;
@@ -158,9 +162,9 @@ public partial class GameModeDefault : IGameMode
         }
 
 
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForName("WESTERN_EUROPE").Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+        // deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.GERMANY, CountryState.ForName("WESTERN_EUROPE").Id, DeployType.RECRUIT);
+        // deployUnitChangeEvent.IsTrigger = false;
+        // CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
 
         deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.ITALY, CountryState.ForName("MEDITERRANEAN_SEA").Id, DeployType.RECRUIT);
         deployUnitChangeEvent.IsTrigger = false;
@@ -181,6 +185,14 @@ public partial class GameModeDefault : IGameMode
         deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.JAPAN, CountryState.ForEnum(Country.SeaOfJapan).Id, DeployType.RECRUIT);
         deployUnitChangeEvent.IsTrigger = false;
         CardPlayPool.DoChangeEvent(deployUnitChangeEvent);        
+
+        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.JAPAN, CountryState.ForEnum(Country.SouthChinaSea).Id, DeployType.RECRUIT);
+        deployUnitChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);        
+
+        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.JAPAN, CountryState.ForEnum(Country.Philippines).Id, DeployType.RECRUIT);
+        deployUnitChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);        
         
         deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.SOVIET, CountryState.ForEnum(Country.Szechuan).Id, DeployType.RECRUIT);
         deployUnitChangeEvent.IsTrigger = false;
@@ -196,11 +208,7 @@ public partial class GameModeDefault : IGameMode
 
         deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForEnum(Country.Australia).Id, DeployType.RECRUIT);
         deployUnitChangeEvent.IsTrigger = false;
-        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);        
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForEnum(Country.SouthChinaSea).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);        
+        CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
 
         deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForEnum(Country.China).Id, DeployType.RECRUIT);
         deployUnitChangeEvent.IsTrigger = false;
@@ -223,6 +231,22 @@ public partial class GameModeDefault : IGameMode
         CardPlayPool.DoChangeEvent(playCardChangeEvent);
 
         playCardChangeEvent = new PlayCardChangeEvent(Faction.GERMANY, CardState.ForName("StatusBiasForAction").Id);
+        playCardChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(playCardChangeEvent);
+
+        playCardChangeEvent = new PlayCardChangeEvent(Faction.GERMANY, CardState.ForName("StatusSyntheticFuel").Id);
+        playCardChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(playCardChangeEvent);
+
+        playCardChangeEvent = new PlayCardChangeEvent(Faction.GERMANY, CardState.ForName("StatusAbundantResources").Id);
+        playCardChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(playCardChangeEvent);
+
+        playCardChangeEvent = new PlayCardChangeEvent(Faction.GERMANY, CardState.ForName("StatusAtlanticWall").Id);
+        playCardChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(playCardChangeEvent);
+
+        playCardChangeEvent = new PlayCardChangeEvent(Faction.GERMANY, CardState.ForName("StatusVolksturm").Id);
         playCardChangeEvent.IsTrigger = false;
         CardPlayPool.DoChangeEvent(playCardChangeEvent);
 
