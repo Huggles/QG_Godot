@@ -1,3 +1,11 @@
-public class StatusFreeFrance : StatusCardLogic
+using System;
+using System.Collections.Generic;
+using Godot;
+
+public partial class StatusFreeFrance : StatusCardLogic
 {
+public override List<CardStep> InitializePlayCardSteps()
+    {
+        return new List<CardStep> {}; 
+    }
 }

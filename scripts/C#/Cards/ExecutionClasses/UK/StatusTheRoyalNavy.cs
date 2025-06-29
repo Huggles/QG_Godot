@@ -1,3 +1,11 @@
-public class StatusTheRoyalNavy : StatusCardLogic
+using System;
+using System.Collections.Generic;
+using Godot;
+
+public partial class StatusTheRoyalNavy : StatusCardLogic
 {
+public override List<CardStep> InitializePlayCardSteps()
+    {
+        return new List<CardStep> {}; 
+    }
 }

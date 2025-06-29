@@ -1,3 +1,11 @@
-public class EventFleetDeployedtoPearlHarbor : EWCardLogic
+using System;
+using System.Collections.Generic;
+using Godot;
+
+public partial class EventFleetDeployedtoPearlHarbor : EWCardLogic
 {
+public override List<CardStep> InitializePlayCardSteps()
+    {
+        return new List<CardStep> {}; 
+    }
 }

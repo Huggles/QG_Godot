@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class FactionData : DataObject
 {
@@ -35,10 +36,33 @@ public partial class FactionData : DataObject
             return Color.FromString(ColorStringText, new Color(1, 1, 1, 1));
         }
     }
-    
-    public CountryState HomeSpaceCountryState {
-        get {
+
+    public CountryState HomeSpaceCountryState
+    {
+        get
+        {
             return CountryState.ForName(Homespace);
         }
+    }
+
+    public String FactionAdjactiveLabel
+    {
+        get
+        {
+            return new Dictionary<Faction, String>
+            {
+                { Faction.GERMANY, "German"},
+                { Faction.UNITED_KINGDOM, "United Kingdom"},
+                { Faction.JAPAN, "Japanese"},
+                { Faction.SOVIET, "Soviet"},
+                { Faction.ITALY, "Italian"},
+                { Faction.UNITED_STATES, "United States"}
+            }[Faction];
+        }
+    }
+    public class CountryLabels
+    {
+        public string Label;
+        public string
     }
 }

@@ -1,3 +1,11 @@
-public class StatusLordLinlithgowDeclaresIndiatoBeatWar : StatusCardLogic
+using System;
+using System.Collections.Generic;
+using Godot;
+
+public partial class StatusLordLinlithgowDeclaresIndiatoBeatWar : StatusCardLogic
 {
+public override List<CardStep> InitializePlayCardSteps()
+    {
+        return new List<CardStep> {}; 
+    }
 }

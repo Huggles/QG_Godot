@@ -1,6 +1,7 @@
 using Godot;
 using System;
 
-public partial class EventCardLogic : Node
+public abstract partial class EventCardLogic : CardLogic
 {
+    
 }

@@ -1,3 +1,11 @@
-public class EWRegiaMarinaClosesShippingLanes : EventCardLogic
+using System;
+using System.Collections.Generic;
+using Godot;
+
+public partial class EWRegiaMarinaClosesShippingLanes : EventCardLogic
 {
+public override List<CardStep> InitializePlayCardSteps()
+    {
+        return new List<CardStep> {}; 
+    }
 }

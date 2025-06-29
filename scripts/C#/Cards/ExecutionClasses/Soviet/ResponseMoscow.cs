@@ -1,3 +1,11 @@
-public class ResponseMoscow : ResponseCardLogic
+using System;
+using System.Collections.Generic;
+using Godot;
+
+public partial class ResponseMoscow : ResponseCardLogic
 {
+public override List<CardStep> InitializePlayCardSteps()
+    {
+        return new List<CardStep> {}; 
+    }
 }

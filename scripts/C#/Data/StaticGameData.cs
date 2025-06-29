@@ -6,7 +6,7 @@ using System.Text.Json;
 
 public static partial class StaticGameData
 {
-    
+
     public static List<FactionData> FactionDataList { get; set; } = new();
     public static List<CardData> CardDataList { get; set; } = new();
     public static List<DeckData> DeckDataList { get; set; } = new();
@@ -16,7 +16,7 @@ public static partial class StaticGameData
     public static Dictionary<Faction, FactionData> FactionDataMap
     {
         get
-    {
+        {
             if (_factionDataMap == null || _factionDataMap.Count != FactionDataList.Count)
             {
                 _factionDataMap = new();
@@ -65,10 +65,11 @@ public static partial class StaticGameData
             if (_countriesByName == null || _countriesByName.Count == 0)
             {
                 _countriesByName = new();
-                foreach (CountryData countryData in CountryDataList) {
+                foreach (CountryData countryData in CountryDataList)
+                {
                     _countriesByName[countryData.UniqueName] = countryData;
                 }
-                    
+
             }
             return _countriesByName;
         }
@@ -82,7 +83,8 @@ public static partial class StaticGameData
             if (_countriesById == null || _countriesById.Count == 0)
             {
                 _countriesById = new();
-                foreach (CountryData countryData in CountryDataList) {
+                foreach (CountryData countryData in CountryDataList)
+                {
                     _countriesById[countryData.Number] = countryData;
                 }
             }
@@ -182,4 +184,5 @@ public static partial class StaticGameData
         };
     }
 
+   
 }
