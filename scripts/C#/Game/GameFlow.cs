@@ -42,7 +42,7 @@ public partial class GameFlow : GodotObject
         (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;
 
     private List<Func<Task>> turnStepMethods;
-    private IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
+    public IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
     public GameFlow(){

@@ -10,6 +10,10 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
     {
         this.countryIds = countryIds;
     }
+    public SelectCountryHandler(List<Country> countryIds)
+    {
+        this.countryIds = countryIds.Map(countryEnum => (int)countryEnum);
+    }
 
     public async Task<int> Handle()
     {

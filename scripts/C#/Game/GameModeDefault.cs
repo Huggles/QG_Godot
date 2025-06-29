@@ -85,8 +85,13 @@ public partial class GameModeDefault : IGameMode
                 // for each instance in the count
                 for (int i = 0; i < deckCardData.Number; i++)
                 {
-                    var cardData  = StaticGameData.CardDataByName[deckCardData.CardName];
-                    var cardState = new CardState(cardData);
+
+                    CardData cardData  = StaticGameData.CardDataByName[deckCardData.CardName];
+                     Type cardType = Type.GetType(cardData.ExecutionClass);
+                    if(cardType == null) {            
+                        throw new Exception($"ExecutionClass not found for {cardData.UniqueName}, {cardData.ExecutionClass}");
+                    }
+                    CardState cardState = new CardState(cardData);
 
                     cardState.Id      = cardCounter;
                     cardState.Faction = factionState.Faction;
@@ -255,6 +260,10 @@ public partial class GameModeDefault : IGameMode
         CardPlayPool.DoChangeEvent(playCardChangeEvent);
 
         playCardChangeEvent = new PlayCardChangeEvent(Faction.JAPAN, CardState.ForName("ResponseFallOfSingapore").Id);
+        playCardChangeEvent.IsTrigger = false;
+        CardPlayPool.DoChangeEvent(playCardChangeEvent);
+
+        playCardChangeEvent = new PlayCardChangeEvent(Faction.ITALY, CardState.ForName("ResponseSkilledPilots").Id);
         playCardChangeEvent.IsTrigger = false;
         CardPlayPool.DoChangeEvent(playCardChangeEvent);
 

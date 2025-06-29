@@ -60,9 +60,4 @@ public partial class FactionData : DataObject
             }[Faction];
         }
     }
-    public class CountryLabels
-    {
-        public string Label;
-        public string
-    }
 }

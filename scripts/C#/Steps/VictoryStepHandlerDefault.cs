@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 public partial class VictoryStepHandlerDefault : IVictoryStepHandler
@@ -11,10 +12,21 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     private Faction Faction;
     private FactionState FactionState => GameSession.FactionStates[Faction];
 
+    public VictoryStepHandlerDefault()
+    {
+        EventBus.Instance.NewTurnStarted += HandleNewRound;
+    }
+    
+    public void HandleNewRound(int roundNumber)
+    {
+        vpTurnSummary = new VPTurnSummary(gameFlow.Round);
+        Faction = gameFlow.CurrentFaction;
+    }
+
     public async Task ProcessVictoryStep(Faction faction)
     {
         Faction = faction;
-        vpTurnSummary = new VPTurnSummary(GameSession.Instance.GameFlow.Round);
+
         await ScoreSupplyCountryVPs();
         await HandleStatusCardVictoryPoints();
 
@@ -48,7 +60,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
                 vpTurnSummary.AddScore(statusVictoryPoints.AddVictoryPoints());
                 await ShowVictoryPointEntry(vPEntry);
             }
-        }        
+        }
     }
 
     private async Task ShowVictoryPointEntry(VPEntry vPEntry)
@@ -56,6 +68,15 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
         PlayerActionLabel.ShowText(vPEntry.Reason, Faction);
         await Task.Delay(2000);
         PlayerActionLabel.HideText();
-        await Task.Delay(100); 
+        await Task.Delay(100);
     }
+
+    public async Task ScorePoints(VPEntry vPEntry)
+    {
+        vpTurnSummary.AddScore(vPEntry);
+        await ShowVictoryPointEntry(vPEntry);        
+    }
+
+    
+
 }

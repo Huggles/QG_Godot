@@ -4,8 +4,8 @@ using Godot;
 
 public partial class EventItalyAttacksCommunists : EventCardLogic
 {
-public override List<CardStep> InitializePlayCardSteps()
-    {
-        return new List<CardStep> {}; 
-    }
+    public override List<CardStep> InitializePlayCardSteps()
+        {
+            return new List<CardStep> {}; 
+        }
 }

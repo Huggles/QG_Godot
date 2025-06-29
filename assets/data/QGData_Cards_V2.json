@@ -40,12 +40,12 @@
 		"Text": null
 	},
 	{
-		"UniqueName": "EventMilitaryDictatorshipsintheBalkans",
+		"UniqueName": "EventMilitaryDictatorshipsInTheBalkans",
 		"Number": "25",
 		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "EventMilitaryDictatorshipsintheBalkans",
+		"ExecutionClass": "EventMilitaryDictatorshipsInTheBalkans",
 		"Label": "Military Dictatorships in the Balkans",
 		"Text": "Recruit an Italian Army in the Balkans: then eliminate an Allied Army in Ukraine."
 	},
@@ -170,12 +170,12 @@
 		"Text": "Conduct up to 3 battles, each in a space that was occupied by a Soviet Army adjacent to a German Army at the beginning of the turn."
 	},
 	{
-		"UniqueName": "EventGunsandButter",
+		"UniqueName": "EventGunsAndButter",
 		"Number": "38",
 		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "EventGunsandButter",
+		"ExecutionClass": "EventGunsAndButter",
 		"Label": "Guns and Butter",
 		"Text": "This card can be used to: build an Army; build a Navy; land battle; or sea battle."
 	},
@@ -510,12 +510,12 @@
 		"Text": "Use anytime during your turn. All Japanese pieces in or adjacent to the Central Pacific are in supply for the rest of this turn."
 	},
 	{
-		"UniqueName": "EWImperialDesigns",
+		"UniqueName": "StatusImperialDesigns",
 		"Number": "72",
 		"Type": "Status",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "EWImperialDesigns",
+		"ExecutionClass": "StatusImperialDesigns",
 		"Label": "Imperial Designs",
 		"Text": "During your Victory step, gain +1 Victory Point if a Japanese Army is in Iwo Jima or the Philippines. (Only +1 Victory Point can be earned.)"
 	},
@@ -640,12 +640,12 @@
 		"Text": "Eliminate an Axis Army in China or Szechuan."
 	},
 	{
-		"UniqueName": "EventTito'sPartisans",
+		"UniqueName": "EventTitosPartisans",
 		"Number": "85",
 		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "EventTito'sPartisans",
+		"ExecutionClass": "EventTitosPartisans",
 		"Label": "Tito's Partisans",
 		"Text": "Eliminate an Axis Army in the Balkans; Then recruit a Soviet or United Kingdom Army in the Balkans."
 	},
@@ -706,7 +706,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseLeningrad",
-		"Label": "Stalingrad",
+		"Label": "Leningrad",
 		"Text": "Use when your Army in Russia is about to be removed. Do not remove that Army this turn."
 	},
 	{
@@ -716,7 +716,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseRasputitsa",
-		"Label": "Leningrad",
+		"Label": "Rasputitsa",
 		"Text": "Use immediately after an Axis Army is built in or adjacent to Moscow. Eliminate the Army just built."
 	},
 	{
@@ -726,17 +726,17 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseMoscow",
-		"Label": "Rasputitsa",
+		"Label": "Moscow",
 		"Text": "Use when your Army in Moscow is about to be removed. Do not remove that Army this turn."
 	},
 	{
-		"UniqueName": "StatusShvernik'sEvacuationCouncil",
+		"UniqueName": "StatusShverniksEvacuationCouncil",
 		"Number": "95",
 		"Type": "RESPONSE",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "StatusShvernik'sEvacuationCouncil",
-		"Label": "Moscow",
+		"ExecutionClass": "StatusShverniksEvacuationCouncil",
+		"Label": "Shvernik's Evacuation Council",
 		"Text": "Soviet Armies are never out of supply. Armies must still be built adjacent to another supplied piece, or in your Home space."
 	},
 	{
@@ -746,7 +746,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusFrontalAssault",
-		"Label": "Shvernik's Evacuation Council",
+		"Label": "Frontal Assault",
 		"Text": "Use once per turn when you battle a land space. Discard 2 cards from your hand to battle in the same or adjacent land space to the one battled."
 	},
 	{
@@ -756,7 +756,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusWomenConscripts",
-		"Label": "Frontal Assault",
+		"Label": "Women Conscripts",
 		"Text": "Use when you play a Build Army card for your Play step. Place that Build Army card on the top of your draw deck instead of discarding it."
 	},
 	{
@@ -766,7 +766,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusStavkaFormsArtilleryCorps",
-		"Label": "Women Conscripts",
+		"Label": "Stavka Forms Artillery Corps",
 		"Text": "Use once per turn when you battle a land space. Discard a card from hand to battle the same space."
 	},
 	{
@@ -776,7 +776,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusGuards",
-		"Label": "Stavka Forms Artillery Corps",
+		"Label": "Guards",
 		"Text": "During your Play step, instead of playing a card from hand, discard 2 cards from your hand to play a Build Army card from your discard pile."
 	},
 	{
@@ -806,7 +806,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventItalyAttacksCommunists",
-		"Label": "Plunder",
+		"Label": "Italy Attacks Communists",
 		"Text": "Build an Army in Ukraine and an Army in Russia."
 	},
 	{
@@ -816,7 +816,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWDecimaFlottigliaMASFrogmen",
-		"Label": "Italy Attacks Communists",
+		"Label": "Decima Flottiglia MAS (Frogmen)",
 		"Text": "The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean. Gain +1 Victory Point."
 	},
 	{
@@ -826,7 +826,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventGermanAidinGreece",
-		"Label": "Decima Flottiglia MAS (Frogmen)",
+		"Label": "German Aid in Greece",
 		"Text": "Eliminate an Allied Army in the Balkans; then recruit a German Army in the Balkans."
 	},
 	{
@@ -836,7 +836,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusImperoItaliano",
-		"Label": "German Aid in Greece",
+		"Label": "Impero Italiano",
 		"Text": "During your Victory step, gain +1 Victory Point for each Axis Army in North Africa, Africa, or Middle East."
 	},
 	{
@@ -846,7 +846,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusAntiCommunistSentiment",
-		"Label": "Impero Italiano",
+		"Label": "Anti-Communist Sentiment",
 		"Text": "During your Victory step, gain +1 Victory Point for each Italian Army in Russia or Ukraine."
 	},
 	{
@@ -856,7 +856,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusBravado",
-		"Label": "Anti-Communist Sentiment",
+		"Label": "Bravado",
 		"Text": "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to battle a land space."
 	},
 	{
@@ -866,7 +866,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusBalkanResources",
-		"Label": "Bravado",
+		"Label": "Balkan Resources",
 		"Text": "During your Victory step, gain +1 Victory Point if an Italian Army is in the Balkans."
 	},
 	{
@@ -876,7 +876,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventDivisionAzul",
-		"Label": "Balkan Resources",
+		"Label": "Division Azul",
 		"Text": "Discard a random Soviet Response card from the table. You may not inspect the Response card discarded."
 	},
 	{
@@ -886,7 +886,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseGermanReinforcementsCounterattack",
-		"Label": "Division Azul",
+		"Label": "German Reinforcement sCounterattack",
 		"Text": "Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space."
 	},
 	{
@@ -896,7 +896,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseSkilledPilots",
-		"Label": "German Reinforcements Counterattack",
+		"Label": "Skilled Pilots",
 		"Text": "When you are the target of an EW card, reduce the number of cards you must discard by 5 (minimum 0)"
 	},
 	{
@@ -906,7 +906,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseRomanianReinforcements",
-		"Label": "Skilled Pilots",
+		"Label": "Romanian Reinforcements",
 		"Text": "Use immediately after a supplied German Army is removed. Recruit an Italian Army in that space."
 	},
 	{
@@ -916,7 +916,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventAfrikaKorps",
-		"Label": "Romanian Reinforcements",
+		"Label": "Afrika Korps",
 		"Text": "Recruit a German Army in North Africa and then a German Navy in the Mediterranean."
 	},
 	{
@@ -926,7 +926,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWRegiaMarinaClosesShippingLanes",
-		"Label": "Afrika Korps",
+		"Label": "Regia Marina Closes Shipping Lane",
 		"Text": "For each Italian Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 1 card of its draw deck."
 	},
 	{
@@ -936,7 +936,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseMonteCassino",
-		"Label": "Regia Marina Closes Shipping Lanes",
+		"Label": "Monte Cassino",
 		"Text": "Use when an Axis Army in Italy is about to be removed. Do not remove that Army this turn."
 	},
 	{
@@ -946,7 +946,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventItalianEastAfrica",
-		"Label": "Monte Cassino",
+		"Label": "Italian East Afric",
 		"Text": "Build an Army in North Africa and then a Navy in the Bay of Bengal."
 	},
 	{
@@ -956,7 +956,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusMareNostrum",
-		"Label": "Italian East Africa",
+		"Label": "Mare Nostrum",
 		"Text": "During your Victory step, gain +1 Victory Point for each Italian Navy on the board."
 	},
 	{
@@ -966,7 +966,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusAmphibiousLandings",
-		"Label": "Mare Nostrum",
+		"Label": "Amphibious Landings",
 		"Text": "Use once per turn when you battle a land space. If the space battled is adjacent to a supplied United States Navy, discard the top 1 card of your draw deck to build an Army in the space battled."
 	},
 	{
@@ -976,7 +976,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusFlyingFortresses",
-		"Label": "Amphibious Landings",
+		"Label": "Flying Fortresse",
 		"Text": "Use when you play an EW card. Add 2 to the number of cards the Axis country must discard."
 	},
 	{
@@ -986,7 +986,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventOperationMagic",
-		"Label": "Flying Fortresses",
+		"Label": "Operation Magic",
 		"Text": "Discard a random Japanese Response card from the table. You may not inspect the Response card discarded."
 	},
 	{
@@ -996,7 +996,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventGuadalcanal",
-		"Label": "Operation Magic",
+		"Label": "Guadalcanal",
 		"Text": "Recruit an Army in New Zealand; then. build a Navy adjacent to New Zealand."
 	},
 	{
@@ -1006,7 +1006,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWB29Superfortress",
-		"Label": "Guadalcanal",
+		"Label": "B-29 Superfortress",
 		"Text": "If a United States Army is within 3 spaces of Germany, Germany must discard the top 5 cards of its draw deck."
 	},
 	{
@@ -1016,7 +1016,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventLendLease",
-		"Label": "B-29 Superfortress",
+		"Label": "Lend Lease",
 		"Text": "Your choice of the United Kingdom or the Soviet Union may play a card and then draw a card."
 	},
 	{
@@ -1026,7 +1026,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWB26Marauder",
-		"Label": "Lend Lease",
+		"Label": "B-26 Marauder",
 		"Text": "If a United States Army is within 3 spaces of an Axis Home space, that country must discard the top 4 cards of its draw deck."
 	},
 	{
@@ -1036,7 +1036,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusRadar",
-		"Label": "B-26 Marauder",
+		"Label": "Radar",
 		"Text": "Use once per turn, when your supplied Navy is battled. Discard the top 2 cards of your draw deck and do not remove that Navy."
 	},
 	{
@@ -1046,7 +1046,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusRosietheRiveter",
-		"Label": "Radar",
+		"Label": "Rosie the Riveter",
 		"Text": "Use once per turn at the beginning of your Discard step. Take 1 or 2 cards from your hand and place them on the bottom of your draw deck."
 	},
 	{
@@ -1056,7 +1056,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventFlexibleResources",
-		"Label": "Rosie the Riveter",
+		"Label": "Flexible Resources",
 		"Text": "Play a card of your choice from your discard pile."
 	},
 	{
@@ -1066,7 +1066,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusAircraftCarriers",
-		"Label": "Flexible Resources",
+		"Label": "Aircraft Carriers",
 		"Text": "Use once per turn when you battle à sea space. Discard the top 1 card of your draw deck to build a Navy in the space battled."
 	},
 	{
@@ -1076,7 +1076,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusSuperiorShipyards",
-		"Label": "Aircraft Carriers",
+		"Label": "Superior Shipyards",
 		"Text": "Use once per turn when you build a Navy. Discard the top 1 card of your draw deck to build an additional Navy."
 	},
 	{
@@ -1086,7 +1086,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusWartimeProduction",
-		"Label": "Superior Shipyards",
+		"Label": "Wartime Production",
 		"Text": "Use once per turn when you build an Army. Discard the top 1 card of your draw deck to build an additional Army."
 	},
 	{
@@ -1096,7 +1096,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventTheaterShift",
-		"Label": "Wartime Production",
+		"Label": "Theater Shift",
 		"Text": "One at a time, once per piece, you may eliminate each United States Army and Navy on the board and then build that piece."
 	},
 	{
@@ -1106,7 +1106,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWFirestormBombing",
-		"Label": "Theater Shift",
+		"Label": "Firestorm Bombing",
 		"Text": "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of in draw deck"
 	},
 	{
@@ -1116,7 +1116,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventMurmanskConvoy",
-		"Label": "Firestorm Bombing",
+		"Label": "Murmansk Convoy",
 		"Text": "Recruit a Soviet Army in Russia; then the Soviet Union may build an Army."
 	},
 	{
@@ -1126,7 +1126,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventArsenalofDemocracy",
-		"Label": "Murmansk Convoy",
+		"Label": "Arsenal of Democracy",
 		"Text": "The United Kingdom may build an Army and a Navy in the order of its choice."
 	},
 	{
@@ -1136,7 +1136,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWSBDDauntless",
-		"Label": "Arsenal of Democracy",
+		"Label": "SBD Dauntless",
 		"Text": "If a United States Navy is within 2 spaces of Japan, Japan must discard the top 4 cards of its draw deck."
 	},
 	{
@@ -1146,7 +1146,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventFleetDeployedtoPearlHarbor",
-		"Label": "SBD Dauntless",
+		"Label": "Fleet Deployed to Pearl Harbor",
 		"Text": "Recruit an Army in Hawaii; then build a Navy adjacent to Hawaii."
 	},
 	{
@@ -1156,7 +1156,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWB24Liberator",
-		"Label": "Fleet Deployed to Pearl Harbor",
+		"Label": "B-24 Liberator",
 		"Text": "If a United States Army is within 2 spaces of Italy, Italy must discard the top 4 cards of its draw deck."
 	},
 	{
@@ -1166,7 +1166,7 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventPattonAdvances",
-		"Label": "B-24 Liberator",
+		"Label": "Patton Advances",
 		"Text": "Build an Army in Western Europe: then battle in Germany or Italy."
 	},
 	{

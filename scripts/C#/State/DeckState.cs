@@ -54,6 +54,27 @@ public partial class DeckState : StateObject
         return topCardId;
     }
 
+    public List<int> DiscardTopCards(int number)
+    {
+        int overdraw = Math.Max(number - DeckCardIds.Count, 0);
+        if (overdraw < 0)
+        {
+            DebugUtilities.PrintPeerError($"Deck is empty for: {FactionLabel}");
+        }
+        int actualDraw = number - overdraw;
+        
+        List<int> discardedCardIds = new List<int>();
+        for (int i = 0; i < actualDraw; i++)
+        {
+            int topCardId = DeckCardIds[0];
+            discardedCardIds.Add(topCardId);
+            DeckCardIds.RemoveAt(0);
+            
+        }   
+        DiscardedCardIds.AddRange(discardedCardIds);
+        return discardedCardIds;     
+    }
+
     public bool HasCardForName(string cardName)
     {
         return DeckCardStates.Any(card => card.CardData.UniqueName == cardName);

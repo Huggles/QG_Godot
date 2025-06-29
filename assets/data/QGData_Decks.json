@@ -2,178 +2,172 @@
 	{
 		"FactionIndex" : 0,
 		"Cards": [
-			{
-				"CardName" : "BuildArmy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "BuildNavy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "LandBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "EventBroadFront",
-				"Number" : 1
-			}, 
-			{
-				"CardName" : "SeaBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "EventMilitaryDictatorshipsintheBalkans",
-				"Number" : 1
-			},
-			{
-				"CardName" : "StatusBlitzkrieg",
-				"Number" : 1				
-			},
-			{
-				"CardName" : "StatusSyntheticFuel",
-				"Number" : 1				
-			},
-			{
-				"CardName" : "StatusBiasForAction",
-				"Number" : 1				
-			},
-			{
-				"CardName" : "StatusDiveBombers",
-				"Number" : 1
-			},
-			{
-				"CardName" : "StatusAbundantResources",
-				"Number" : 1
-			},
-			{
-				"CardName" : "StatusAtlanticWall",
-				"Number" : 1
-			},
-			{
-				"CardName" : "StatusVolksturm",
-				"Number" : 1
-			}				
-			
+			{"CardName":"BuildArmy","Number":2},
+			{"CardName":"BuildNavy","Number":2},
+			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"SeaBattle","Number":2},
+			{"CardName":"StatusBlitzkrieg","Number":1},
+			{"CardName":"StatusSyntheticFuel","Number":1},
+			{"CardName":"StatusBiasForAction","Number":1},
+			{"CardName":"StatusDiveBombers","Number":1},
+			{"CardName":"StatusAbundantResources","Number":1},
+			{"CardName":"StatusAtlanticWall","Number":1},
+			{"CardName":"StatusConscription","Number":1},
+			{"CardName":"StatusSuperiorPlanning","Number":1},
+			{"CardName":"StatusJetFighters","Number":1},
+			{"CardName":"StatusWolfPacks","Number":1},
+			{"CardName":"StatusVolksturm","Number":1},
+			{"CardName":"EventPlunder","Number":1},
+			{"CardName":"EventTheAutobahn","Number":1},
+			{"CardName":"EventForcedConscription","Number":1},
+			{"CardName":"EventGunsAndButter","Number":1},
+			{"CardName":"EventBroadFront","Number":1},
+			{"CardName":"EventMilitaryDictatorshipsInTheBalkans","Number":1},
+			{"CardName":"EWSubmarinesRaidMurmanskConvoy","Number":1},
+			{"CardName":"EWSubmarinesoftheMonsoonGroup","Number":1},
+			{"CardName":"EWSubmarinesEnforceBlockade","Number":1},
+			{"CardName":"EWSubmarinesLeadtheBattleoftheAtlantic","Number":1},
+			{"CardName":"EWSubmarinesPreyonUnprotectedShipping","Number":1},
+			{"CardName":"EWSubmarinesSupportPacificIslands","Number":1}
+
 		]
 	},
 	{
 		"FactionIndex" : 1,
 		"Cards": [
-			{
-				"CardName" : "BuildArmy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "BuildNavy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "LandBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "SeaBattle",
-				"Number" : 2
-			}		
+			{"CardName":"EWBomberCommand","Number":1},
+			{"CardName":"BuildArmy","Number":2},
+			{"CardName":"BuildNavy","Number":2},
+			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"SeaBattle","Number":2},
+			{"CardName":"EventGeneralSmutsStrengthensTiestoUK","Number":1},
+			{"CardName":"EventIncreasedCommonwealthSupport","Number":1},
+			{"CardName":"EventKingPeterEnthronedinYugoslavia","Number":1},
+			{"CardName":"EventLedoAndBurmaRoads","Number":1},
+			{"CardName":"EventSingaporeFortified","Number":1},
+			{"CardName":"EWMaltaSubmarines","Number":1},
+			{"CardName":"ResponseASWTactics","Number":1},
+			{"CardName":"ResponseDefensivePosture","Number":1},
+			{"CardName":"ResponseDestroyers","Number":1},
+			{"CardName":"ResponseEnigmaCodeCracked","Number":1},
+			{"CardName":"ResponseLoyaltotheCrown","Number":1},
+			{"CardName":"ResponseRAF","Number":1},
+			{"CardName":"ResponseRationing","Number":1},
+			{"CardName":"StatusAustraliaFormstheDirectorateofManpower","Number":1},
+			{"CardName":"StatusFreeFrance","Number":1},
+			{"CardName":"StatusLordLinlithgowDeclaresIndiatoBeatWar","Number":1},
+			{"CardName":"StatusMackenzieKingDraftstheNationalResourcesMobilizationAct","Number":1},
+			{"CardName":"StatusResistance","Number":1},
+			{"CardName":"StatusTheRoyalNavy","Number":1}
 		]
 	},
 	{
 		"FactionIndex" : 2,
 		"Cards": [
-			{
-				"CardName" : "BuildArmy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "BuildNavy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "LandBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "SeaBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "ResponseChinaOffensive",
-				"Number" : 1
-			},
-			{
-				"CardName" : "ResponseFallOfSingapore",
-				"Number" : 1
-			}
-			
-			
+			{"CardName":"BuildArmy","Number":2},
+			{"CardName":"BuildNavy","Number":2},
+			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"SeaBattle","Number":2},
+			{"CardName":"EWIndianOceanPatrols","Number":1},
+			{"CardName":"EWSubmarinesSupportPacificIslands","Number":1},
+			{"CardName":"ResponseBanzaiCharge","Number":1},
+			{"CardName":"ResponseBattleshipRepair","Number":1},
+			{"CardName":"ResponseChinaOffensive","Number":1},
+			{"CardName":"ResponseDestroyerTransport","Number":1},
+			{"CardName":"ResponseFallOfSingapore","Number":1},
+			{"CardName":"ResponseKamikaze","Number":1},
+			{"CardName":"ResponseKwantungArmy","Number":1},
+			{"CardName":"ResponseMobileForce","Number":1},
+			{"CardName":"ResponseSpecialNavalLandingForces","Number":1},
+			{"CardName":"ResponseSurpriseAttack","Number":1},
+			{"CardName":"ResponseTruk","Number":1},
+			{"CardName":"StatusForwardBases","Number":1},
+			{"CardName":"StatusGreaterEastAsiaCoProsperitySphere","Number":1},
+			{"CardName":"StatusImperialDesigns","Number":1},
+			{"CardName":"StatusUnimpededMerchantShipping","Number":1}	
 		]
 	},
 	{
 		"FactionIndex" : 3,
 		"Cards": [
-			{
-				"CardName" : "BuildArmy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "BuildNavy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "LandBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "SeaBattle",
-				"Number" : 2
-			},		
-			{
-				"CardName" : "ResponseStalingrad",
-				"Number" : 1
-			}
+			{"CardName":"BuildArmy","Number":2},
+			{"CardName":"BuildNavy","Number":2},
+			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"SeaBattle","Number":2},
+			{"Number":1, "CardName":"EventGeneralWinter"},
+			{"Number":1, "CardName":"EventGermanSovietTreatyofFriendshipCooperationandDemarcation"},
+			{"Number":1, "CardName":"EventMaoTsetung"},
+			{"Number":1, "CardName":"EventTitosPartisans"},
+			{"Number":1, "CardName":"EventTransSiberianRailroad"},
+			{"Number":1, "CardName":"EventVasilevskyTakesCommandInTheFarEast"},
+			{"Number":1, "CardName":"ResponseDefenseoftheMotherland"},
+			{"Number":1, "CardName":"ResponseLeningrad"},
+			{"Number":1, "CardName":"ResponseMoscow"},
+			{"Number":1, "CardName":"ResponseRasputitsa"},
+			{"Number":1, "CardName":"ResponseStalingrad"},
+			{"Number":1, "CardName":"StatusFrontalAssault"},
+			{"Number":1, "CardName":"StatusGuards"},
+			{"Number":1, "CardName":"StatusScorchedEarth"},
+			{"Number":1, "CardName":"StatusShverniksEvacuationCouncil"},
+			{"Number":1, "CardName":"StatusStavkaFormsArtilleryCorps"},
+			{"Number":1, "CardName":"StatusWomenConscripts"}			
 		]
 	},
 	{
 		"FactionIndex" : 4,
 		"Cards": [
-			{
-				"CardName" : "BuildArmy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "BuildNavy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "LandBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "SeaBattle",
-				"Number" : 2
-			}		
+			{"CardName":"BuildArmy","Number":2},
+			{"CardName":"BuildNavy","Number":2},
+			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"SeaBattle","Number":2},
+			{"Number":1, "CardName":"EventAfrikaKorps"},
+			{"Number":1, "CardName":"EventDivisionAzul"},
+			{"Number":1, "CardName":"EventGermanAidinGreece"},
+			{"Number":1, "CardName":"EventItalianEastAfrica"},
+			{"Number":1, "CardName":"EventItalyAttacksCommunists"},
+			{"Number":1, "CardName":"EventPlunder"},
+			{"Number":1, "CardName":"EWDecimaFlottigliaMASFrogmen"},
+			{"Number":1, "CardName":"EWRegiaMarinaClosesShippingLanes"},
+			{"Number":1, "CardName":"ResponseGermanReinforcementsCounterattack"},
+			{"Number":1, "CardName":"ResponseMonteCassino"},
+			{"Number":1, "CardName":"ResponseRomanianReinforcements"},
+			{"Number":1, "CardName":"ResponseSkilledPilots"},
+			{"Number":1, "CardName":"StatusAntiCommunistSentiment"},
+			{"Number":1, "CardName":"StatusBalkanResources"},
+			{"Number":1, "CardName":"StatusBravado"},
+			{"Number":1, "CardName":"StatusImperoItaliano"},
+			{"Number":1, "CardName":"StatusMareNostrum"}
 		]
 	},
 	{
 		"FactionIndex" : 5,
 		"Cards": [
-			{
-				"CardName" : "BuildArmy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "BuildNavy",
-				"Number" : 2
-			},
-			{
-				"CardName" : "LandBattle",
-				"Number" : 2
-			},
-			{
-				"CardName" : "SeaBattle",
-				"Number" : 2
-			}	
+			{"CardName":"BuildArmy","Number":2},
+			{"CardName":"BuildNavy","Number":2},
+			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"SeaBattle","Number":2},
+			{"Number":1, "CardName":"EventArsenalofDemocracy"},
+			{"Number":1, "CardName":"EventFleetDeployedtoPearlHarbor"},
+			{"Number":1, "CardName":"EventFlexibleResources"},
+			{"Number":1, "CardName":"EventGuadalcanal"},
+			{"Number":1, "CardName":"EventLendLease"},
+			{"Number":1, "CardName":"EventMurmanskConvoy"},
+			{"Number":1, "CardName":"EventOperationMagic"},
+			{"Number":1, "CardName":"EventPattonAdvances"},
+			{"Number":1, "CardName":"EventTheaterShift"},
+			{"Number":1, "CardName":"EWB24Liberator"},
+			{"Number":1, "CardName":"EWB26Marauder"},
+			{"Number":1, "CardName":"EWB29Superfortress"},
+			{"Number":1, "CardName":"EWFirestormBombing"},
+			{"Number":1, "CardName":"EWSBDDauntless"},
+			{"Number":1, "CardName":"StatusAircraftCarriers"},
+			{"Number":1, "CardName":"StatusAmericanVolunteerGroupExpands"},
+			{"Number":1, "CardName":"StatusAmphibiousLandings"},
+			{"Number":1, "CardName":"StatusFlyingFortresses"},
+			{"Number":1, "CardName":"StatusRadar"},
+			{"Number":1, "CardName":"StatusRosietheRiveter"},
+			{"Number":1, "CardName":"StatusSuperiorShipyards"},
+			{"Number":1, "CardName":"StatusWartimeProduction"}
 		]
 	}
 ]

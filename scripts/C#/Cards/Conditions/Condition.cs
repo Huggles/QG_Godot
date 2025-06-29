@@ -56,6 +56,17 @@ public abstract class Condition
             this.CountryIds = countryIds;
             this.Faction = faction;
         }
+        public CountryIsBuildable(Country country, Faction faction)
+        {
+            this.CountryIds = [(int)country];
+            this.Faction = faction;
+        }
+        public CountryIsBuildable(List<Country> countries, Faction faction)
+        {
+            this.CountryIds = countries.Map(country => (int)country);
+            this.Faction = faction;
+        }
+
 
         public override bool MeetCondition()
         {
@@ -74,6 +85,16 @@ public abstract class Condition
         public CountryIsRecruitable(List<int> countryIds, Faction faction)
         {
             this.CountryIds = countryIds;
+            this.Faction = faction;
+        }
+        public CountryIsRecruitable(Country country, Faction faction)
+        {
+            this.CountryIds = [(int)country];
+            this.Faction = faction;
+        }
+        public CountryIsRecruitable(List<Country> countries, Faction faction)
+        {
+            this.CountryIds = countries.Map(country => (int)country);
             this.Faction = faction;
         }
 
@@ -163,11 +184,11 @@ public abstract class Condition
         {
             this.Faction = faction;
         }
-        
+
 
         public override bool MeetCondition()
         {
-            return CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction);            
+            return CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction);
         }
     }
     public class FactionBattledCountry : FactionBattled
@@ -182,7 +203,7 @@ public abstract class Condition
             bool MeetCondition = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction && CountryIds.Contains(changeEvent.CountryId));
             DebugUtilities.PrintPeer($"{Faction} battled in countries {MeetCondition}: {String.Join(",", CountryStates.Map(cs => cs.Name))}");
             return MeetCondition;
-        }        
+        }
     }
     public class FactionTeamBattled : Condition
     {
@@ -193,7 +214,7 @@ public abstract class Condition
         public override bool MeetCondition()
         {
             return CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.TriggeringFaction) == this.FactionTeam);
-        }        
+        }
     }
     public class FactionTeamBattledCountry : FactionTeamBattled
     {
@@ -204,7 +225,7 @@ public abstract class Condition
         public override bool MeetCondition()
         {
             return CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.TriggeringFaction) == this.FactionTeam);
-        }        
+        }
     }
 
     public class FactionDeployed : Condition
@@ -225,7 +246,7 @@ public abstract class Condition
             {
                 return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction && changeEvent.DeploymentType == this.DeployType);
             }
-            
+
         }
     }
     public class FactionDeployedCountry : FactionDeployed
@@ -270,7 +291,7 @@ public abstract class Condition
             if (CountryIds != null && CountryIds.Count > 0)
             {
                 CountryType targetCountryType = this.unitType == UnitType.ARMY ? CountryType.LAND : CountryType.SEA;
-                return CountryStates.Any(countryState => countryState.AdjacentBattleTargets(Faction,targetCountryType).Count > 0);               
+                return CountryStates.Any(countryState => countryState.AdjacentBattleTargets(Faction, targetCountryType).Count > 0);
             }
             else
             {
@@ -299,7 +320,7 @@ public abstract class Condition
         }
         public override bool MeetCondition()
         {
-            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => changeEvent.UnitState.Faction == Faction && this.CountryIds.Contains(changeEvent.CountryId));            
+            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => changeEvent.UnitState.Faction == Faction && this.CountryIds.Contains(changeEvent.CountryId));
         }
     }
     public class FactionTeamUnitIsAttacked : Condition
@@ -310,7 +331,7 @@ public abstract class Condition
         }
         public override bool MeetCondition()
         {
-            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.UnitState.Faction) == this.FactionTeam);            
+            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.UnitState.Faction) == this.FactionTeam);
         }
     }
     public class FactionTeamUnitInCountryIsAttacked : FactionTeamUnitIsAttacked
@@ -321,7 +342,7 @@ public abstract class Condition
         }
         public override bool MeetCondition()
         {
-            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.UnitState.Faction) == this.FactionTeam);            
+            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.UnitState.Faction) == this.FactionTeam);
         }
     }
 
@@ -351,6 +372,20 @@ public abstract class Condition
         public override bool MeetCondition()
         {
             return GameSession.Instance.GameFlow.TurnStep == this.TurnStep;
+        }
+    }
+
+    public class CustomCondition : Condition
+    {
+        Func<bool> Condition;
+        public CustomCondition(Func<bool> condition)
+        {
+            this.Condition = condition;
+        }
+
+        public override bool MeetCondition()
+        {
+            return Condition.Invoke();
         }
     }
 }

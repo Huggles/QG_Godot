@@ -7,23 +7,66 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 public partial class CardPlayPool : GodotObject
-{       
+{   
+    public static List<CardState> CardPool = new();
+    public static Dictionary<int, CardState> CardPoolMap
+    {
+        get
+        {
+            Dictionary<int, CardState> response = new();
+            foreach (CardState cardState in CardPool)
+            {
+                response.Add(cardState.Id, cardState);
+            }
+            return response;
+        }
+    }
 
-    public static Dictionary<int, CardState> CardPool = new Dictionary<int, CardState>();
-    public static Dictionary<int, ChangeEvent> ChangeEventsPool = new Dictionary<int, ChangeEvent>();
+    public static List<ChangeEvent> ChangeEventsPool = new();
+    public static Dictionary<int, ChangeEvent> ChangeEventsPoolMap
+    {
+        get
+        {
+            Dictionary<int, ChangeEvent> response = new();
+            foreach (ChangeEvent changeEvent in ChangeEventsPool)
+            {
+                response.Add(changeEvent.Id, changeEvent);
+            }
+            return response;
+        }
+    }
 
     public static ChangeEvent LastChangeEvent;
-    public static Faction LastChangeEventByFaction;
+    public static Faction LastChangeEventByFaction
+    {
+        get { return LastChangeEvent.TriggeringFaction; }
+    }
     public static FactionTeam LastChangeEventByTeam
     {
         get { return StaticGameData.OpponentFactionTeamForFaction(LastChangeEventByFaction); }
     }
+
+    public static ChangeEvent LastNoneNewCardChangeEvent
+    {
+        get
+        {
+            for (int i = ChangeEventsPool.Count-1; i >= 0; i--)
+            {
+                ChangeEvent changeEvent = ChangeEventsPool[i];
+                if (changeEvent is not PlayCardChangeEvent && changeEvent is not ActivateReactionChangeEvent)
+                return changeEvent;
+            }
+            return null;
+        }
+    }
+    
+
     public static List<Faction> RequestOrder
     {
         get
         {
             return LastChangeEventByTeam == FactionTeam.AXIS
-                ? new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES, Faction.GERMANY, Faction.JAPAN, Faction.ITALY } 
+                ? new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES, Faction.GERMANY, Faction.JAPAN, Faction.ITALY }
                 : new List<Faction> { Faction.GERMANY, Faction.JAPAN, Faction.ITALY, Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
         }
     }
@@ -43,7 +86,7 @@ public partial class CardPlayPool : GodotObject
 
     public static List<T> GetChangeEvents<T>() where T : ChangeEvent
     {
-        List<ChangeEvent> changeEvents = CardPlayPool.ChangeEventsPool.Values.ToList().Where(changeEvent => changeEvent is T).ToList();
+        List<ChangeEvent> changeEvents = CardPlayPool.ChangeEventsPool.Where(changeEvent => changeEvent is T).ToList();
         return changeEvents.Map(changeEvent => changeEvent as T);
     }
 
@@ -51,11 +94,11 @@ public partial class CardPlayPool : GodotObject
     public static async Task DoChangeEvent(ChangeEvent changeEvent)
     {
         int sourceCardId = changeEvent.SourceCardId;
-        if (sourceCardId != null && sourceCardId > -1 && !CardPool.ContainsKey(sourceCardId))
+        if (sourceCardId != null && sourceCardId > -1 && !CardPoolMap.ContainsKey(sourceCardId))
         {
-            CardPool.Add(changeEvent.SourceCardId, changeEvent.SourceCardState);
+            CardPool.Add(changeEvent.SourceCardState);
         }
-        ChangeEventsPool.Add(changeEvent.Id, changeEvent);
+        ChangeEventsPool.Add(changeEvent);
         LastChangeEvent = changeEvent;
 
         await RequestBlockChangeEvent();
@@ -63,7 +106,6 @@ public partial class CardPlayPool : GodotObject
         if (changeEvent.IsBlocked == false)
         {
             LastChangeEvent = changeEvent;
-            LastChangeEventByFaction = changeEvent.TriggeringFaction;
             changeEvent.ChangeEventApplied += (int changeEventId) =>
             {
                 DebugUtilities.PrintPeer("CardPlayPool.Applied");
@@ -204,7 +246,7 @@ public partial class CardPlayPool : GodotObject
     public static List<CardActivationOption> PartialCards(Faction faction)
     {
         List<CardActivationOption> activationOptions = new List<CardActivationOption>();
-        foreach (CardState cardState in CardPool.Values.ToList().Where(cardState => cardState.Faction == faction))
+        foreach (CardState cardState in CardPool.Where(cardState => cardState.Faction == faction))
         {
             foreach (CardStep cardStep in cardState.CardLogic.ExecutablePlaySteps)
             {
