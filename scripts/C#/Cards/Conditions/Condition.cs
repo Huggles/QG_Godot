@@ -201,7 +201,6 @@ public abstract class Condition
         public override bool MeetCondition()
         {
             bool MeetCondition = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction && CountryIds.Contains(changeEvent.CountryId));
-            DebugUtilities.PrintPeer($"{Faction} battled in countries {MeetCondition}: {String.Join(",", CountryStates.Map(cs => cs.Name))}");
             return MeetCondition;
         }
     }
@@ -346,6 +345,13 @@ public abstract class Condition
         }
     }
 
+    public class IsBlockRequest : Condition
+    {        
+        public override bool MeetCondition()
+        {
+            return true;
+        }
+    }
 
     public class CardInPlay : Condition
     {

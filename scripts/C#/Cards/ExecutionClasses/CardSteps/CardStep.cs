@@ -108,7 +108,7 @@ public partial class CardStep : GodotObject
         get { return PrerequisiteCardStep != null ? PrerequisiteCardStep.StepFinished : true; }
     }
 
-    public async void Execute()
+    public async Task Execute()
     {
         StepFinished = true;
         bool CanExecuteStep = MeetAllConditions;        
@@ -136,7 +136,7 @@ public partial class CardStep : GodotObject
             {
                 DebugUtilities.PrintPeer("INVOKING");
                 PlayerActionLabel.ShowText(ActionGuidance, -1, TriggeringFaction);
-                StepLogic.Invoke();
+                await StepLogic.Invoke();
             }
             catch (Exception e)
             {

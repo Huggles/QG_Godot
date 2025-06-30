@@ -10,6 +10,7 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
+            Condition.Build(new Condition.IsBlockRequest(), this),
             Condition.Build(new Condition.CustomCondition(()=>{
                 if(CardPlayPool.LastNoneNewCardChangeEvent is DiscardCardsChangeEvent discardCardsChangeEvent){
                     bool isEW = discardCardsChangeEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE;
@@ -30,7 +31,9 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
                     int newNumberOfCards = Math.Max(discardCardsChangeEvent.NumberOfCards - this.NumberOfCardsReduction, 0);
                     discardCardsChangeEvent.NumberOfCards = newNumberOfCards;
                     PlayerActionLabel.ShowText($"Reduced the number of cards to discard by {NumberOfCardsReduction}", Faction);
+                    DebugUtilities.PrintPeer("Showing");
                     await Task.Delay(2000);
+                    DebugUtilities.PrintPeer("Showing123");
                 }else {
                     throw new Exception("Reaction should be to a discard change event");
                 }

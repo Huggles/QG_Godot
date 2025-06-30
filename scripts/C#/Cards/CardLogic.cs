@@ -21,6 +21,7 @@ public abstract partial class CardLogic : GodotObject
     public bool IsPubliclyVisible => IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
+    public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);
 
     [Signal] public delegate void CardFinishedEventHandler();
     [Signal] public delegate void CardStepFinishedEventHandler();

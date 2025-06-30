@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 public partial class CardPlayPool : GodotObject
-{   
+{
     public static List<CardState> CardPool = new();
     public static Dictionary<int, CardState> CardPoolMap
     {
@@ -50,17 +50,15 @@ public partial class CardPlayPool : GodotObject
     {
         get
         {
-            for (int i = ChangeEventsPool.Count-1; i >= 0; i--)
+            for (int i = ChangeEventsPool.Count - 1; i >= 0; i--)
             {
                 ChangeEvent changeEvent = ChangeEventsPool[i];
                 if (changeEvent is not PlayCardChangeEvent && changeEvent is not ActivateReactionChangeEvent)
-                return changeEvent;
+                    return changeEvent;
             }
             return null;
         }
     }
-    
-
     public static List<Faction> RequestOrder
     {
         get
@@ -77,11 +75,13 @@ public partial class CardPlayPool : GodotObject
         ChangeEventsPool.Clear();
         LastChangeEvent = null;
     }
-    public static void AddCard(CardState cardState){
+    public static void AddCard(CardState cardState)
+    {
         CardPool[cardState.Id] = cardState;
     }
-    public static void AddChangeEvent(ChangeEvent changeEvent){
-        ChangeEventsPool[changeEvent.Id] = changeEvent;        
+    public static void AddChangeEvent(ChangeEvent changeEvent)
+    {
+        ChangeEventsPool[changeEvent.Id] = changeEvent;
     }
 
     public static List<T> GetChangeEvents<T>() where T : ChangeEvent
@@ -89,19 +89,27 @@ public partial class CardPlayPool : GodotObject
         List<ChangeEvent> changeEvents = CardPlayPool.ChangeEventsPool.Where(changeEvent => changeEvent is T).ToList();
         return changeEvents.Map(changeEvent => changeEvent as T);
     }
-
-
     public static async Task DoChangeEvent(ChangeEvent changeEvent)
     {
         int sourceCardId = changeEvent.SourceCardId;
-        if (sourceCardId != null && sourceCardId > -1 && !CardPoolMap.ContainsKey(sourceCardId))
+        if (sourceCardId > -1 && !CardPoolMap.ContainsKey(sourceCardId))
         {
             CardPool.Add(changeEvent.SourceCardState);
         }
         ChangeEventsPool.Add(changeEvent);
         LastChangeEvent = changeEvent;
 
-        await RequestBlockChangeEvent();
+        if (changeEvent.IsTrigger)
+        {
+            foreach (Faction faction in RequestOrder)
+            {
+                CardActivationOption cardActivationOption = await GameSession.RequestBlock(faction);
+                if (cardActivationOption != null)
+                {
+                    await DoActivationOption(cardActivationOption);
+                }
+            }
+        }
 
         if (changeEvent.IsBlocked == false)
         {
@@ -126,7 +134,6 @@ public partial class CardPlayPool : GodotObject
             }
         }
     }
-
     public static async void DoNextActions()
     {
         bool reactionPlayed = await RequestAfterChangeEventReaction();
@@ -135,25 +142,18 @@ public partial class CardPlayPool : GodotObject
             DebugUtilities.PrintPeer("No Reaction Was played");
             await Task.Delay(500);
             ClearPool();
-            EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);            
+            EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);
         }
     }
 
-    private async static Task<bool> RequestBlockChangeEvent()
+    public async static Task<List<CardActivationOption>> BlockChangeEvents(Faction faction)
     {
-        if (LastChangeEvent.IsTrigger)
+        if (LastChangeEvent?.TriggeringFaction == faction)
         {
-            foreach (Faction faction in GameSession.FactionStates.Keys)
-            {
-                await RequestBlockChangeEvent(LastChangeEvent, faction);
-            }
+            return []; //Cant block yourself
         }
-        return true;
-    }
-    
-    private async static Task<ChangeEvent> RequestBlockChangeEvent(ChangeEvent changeEvent, Faction faction)
-    {
         List<CardActivationOption> cardActivationOptions = CardPlayPool.ActivatableReactions(faction, true);
+        cardActivationOptions = cardActivationOptions.Where(cao => cao.CardState.CardLogic.IsBlockReaction).ToList();
         if (cardActivationOptions != null && cardActivationOptions.Count > 0)
         {
             DebugUtilities.PrintPeer($"{faction} does have reaction options {cardActivationOptions.Count}");
@@ -164,7 +164,33 @@ public partial class CardPlayPool : GodotObject
             DebugUtilities.PrintPeer($"{faction} does not block change events !!BEFORE!!");
             await Task.Delay(10);
         }
-        return null;
+        return cardActivationOptions;
+    }
+
+    public async static Task DoActivationOption(CardActivationOption cardActivationOption){
+        if (cardActivationOption != null)
+        {
+            CardLogic cardLogic = cardActivationOption.CardState.CardLogic;
+
+            if (!cardLogic.IsPlayed)
+            {
+                PlayCardChangeEvent playCardChangeEvent = new PlayCardChangeEvent(cardActivationOption.CardState.Faction, cardActivationOption.CardId);
+                playCardChangeEvent.IsTrigger = true;
+                await DoChangeEvent(playCardChangeEvent);
+            }
+            else if (cardLogic.IsPlayed && cardLogic.IsReaction && !cardLogic.IsActivatedThisTurn)
+            {
+                ActivateReactionChangeEvent activateReactionChangeEvent = new ActivateReactionChangeEvent(cardActivationOption.CardState.Faction, cardActivationOption.CardId, null);
+                activateReactionChangeEvent.IsTrigger = true;
+                await DoChangeEvent(activateReactionChangeEvent);
+            }
+            else
+            {
+                CardStep cardStep = CardStep.ForId(cardActivationOption.StepId);
+                PlayerActionLabel.ShowText(cardStep.CardLogic.ActivateActionGuidance(), -1, cardStep.CardLogic.Faction);
+                await cardStep.Execute();
+            }
+        }
     }
 
     private async static Task<bool> RequestAfterChangeEventReaction()
@@ -177,44 +203,27 @@ public partial class CardPlayPool : GodotObject
         return false;
     }
     public async static Task<bool> RequestActivationOption(Faction faction)
-    {        
+    {
         List<CardActivationOption> activationOptions = GetNextActions(faction);
         if (activationOptions != null && activationOptions.Count > 0)
         {
             CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
-            DebugUtilities.PrintPeer("cardActivationOption");
-            if (cardActivationOption != null)
+            if (cardActivationOption == null)
             {
-                CardLogic cardLogic = cardActivationOption.CardState.CardLogic;
-
-                if (!cardLogic.IsPlayed)
-                {
-                    PlayCardChangeEvent playCardChangeEvent = new PlayCardChangeEvent(Faction.GERMANY, cardActivationOption.CardId);
-                    playCardChangeEvent.IsTrigger = true;
-                    DoChangeEvent(playCardChangeEvent);
-                }
-                else if (cardLogic.IsPlayed && cardLogic.IsReaction && !cardLogic.IsActivatedThisTurn)
-                {
-                    ActivateReactionChangeEvent activateReactionChangeEvent = new ActivateReactionChangeEvent(Faction.GERMANY, cardActivationOption.CardId, null);
-                    activateReactionChangeEvent.IsTrigger = true;
-                    DoChangeEvent(activateReactionChangeEvent);
-                }
-                else
-                {
-                    CardStep cardStep = CardStep.ForId(cardActivationOption.StepId);
-                    PlayerActionLabel.ShowText(cardStep.CardLogic.ActivateActionGuidance(), -1, cardStep.CardLogic.Faction);
-                    cardStep.Execute();
-                }
-                return true;
+                return false;
             }
+            DebugUtilities.PrintPeer("cardActivationOption");            
+            DoActivationOption(cardActivationOption);
+            return true;
         }
         else
         {
             DebugUtilities.PrintPeer($"{faction} does have activation options");
         }
         return false;
-        
+
     }
+   
 
     public static List<CardActivationOption> GetNextActions(Faction faction)
     {
@@ -223,7 +232,7 @@ public partial class CardPlayPool : GodotObject
         {
             allActivationOptions.AddRange(PlayableCards(faction)); //Should be empty on start play
         }
-        allActivationOptions.AddRange(ActivatableReactions(faction, false));     
+        allActivationOptions.AddRange(ActivatableReactions(faction, false));
         return allActivationOptions;
     }
     public static List<CardActivationOption> PlayableCards(Faction faction)
@@ -239,22 +248,6 @@ public partial class CardPlayPool : GodotObject
                     activationOptions.Add(new CardActivationOption(cardState.Id, cardStep.Id, cardState.CardData.Label, cardState.CardLogic != null ? cardState.CardLogic.CanPlayCard() : false));
                 }
 
-            }            
-        }
-        return activationOptions;
-    }
-    public static List<CardActivationOption> PartialCards(Faction faction)
-    {
-        List<CardActivationOption> activationOptions = new List<CardActivationOption>();
-        foreach (CardState cardState in CardPool.Where(cardState => cardState.Faction == faction))
-        {
-            foreach (CardStep cardStep in cardState.CardLogic.ExecutablePlaySteps)
-            {
-                activationOptions.Add(new CardActivationOption(cardState.Id, cardStep.Id, cardState.CardData.Label, true));
-            }
-            foreach (CardStep cardStep in cardState.CardLogic.ExecutableReactSteps)
-            {
-                activationOptions.Add(new CardActivationOption(cardState.Id, cardStep.Id, cardState.CardData.Label, true));
             }
         }
         return activationOptions;
@@ -277,9 +270,9 @@ public partial class CardPlayPool : GodotObject
             bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
             {
-                CardStep nextStep = cardState.CardLogic.ReactCardSteps[0];                
+                CardStep nextStep = cardState.CardLogic.ReactCardSteps[0];
                 CardActivationOption option = new CardActivationOption(cardState.Id, nextStep.Id, cardState.CardData.Label, cardState.CardLogic != null ? cardState.CardLogic.CanBeActivated() : false);
-                options.Add(option);                
+                options.Add(option);
             }
             else if (cardState.CardLogic.IsActivatedThisTurn && cardState.CardLogic.ExecutableReactSteps.Count > 0)
             {
@@ -290,5 +283,5 @@ public partial class CardPlayPool : GodotObject
             }
         }
         return options;
-    }    
+    }   
 }

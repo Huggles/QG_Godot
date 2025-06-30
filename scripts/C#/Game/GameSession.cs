@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 public partial class GameSession : Node
 {
     private static GameSession instance;
-    public static GameSession Instance {
-        get {
-            if (instance == null) {
+    public static GameSession Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
                 throw new System.ArgumentNullException("GameSession Not Initialized");
             }
             return instance;
@@ -22,11 +25,13 @@ public partial class GameSession : Node
     [Export] public GameState GameState;
     [Export] public GameFlow GameFlow;
 
-    public GameSession(){
-        instance = this;        
+    public GameSession()
+    {
+        instance = this;
     }
 
-    public void StartSession(List<PlayerScene> playerScenes){
+    public void StartSession(List<PlayerScene> playerScenes)
+    {
         DebugUtilities.PrintPeer("Start Session");
         this.playerScenes = playerScenes;
 
@@ -44,12 +49,14 @@ public partial class GameSession : Node
 
 
 
-    private void RegisterGameEvents(){
+    private void RegisterGameEvents()
+    {
         EventBus.Instance.RecalculateSupply += RecalculateSupply;
         EventBus.Instance.RecalculateStraights += RecalculateStraights;
     }
-    private void OnGameStarted(){
-        
+    private void OnGameStarted()
+    {
+
     }
 
     /**
@@ -65,9 +72,10 @@ public partial class GameSession : Node
 
     public static void RecalculateSupply()
     {
-        foreach (Faction faction in Enum.GetValues(typeof(Faction))) {
+        foreach (Faction faction in Enum.GetValues(typeof(Faction)))
+        {
             RecalculateSupplyForFaction(faction);
-        }            
+        }
     }
     private static void RecalculateSupplyForFaction(Faction faction)
     {
@@ -77,19 +85,27 @@ public partial class GameSession : Node
         IEnumerable<UnitState> armies = activeUnits.Where(u => u.Type == UnitType.ARMY);
         IEnumerable<UnitState> navies = activeUnits.Where(u => u.Type == UnitType.NAVY);
 
-        foreach (UnitState unit in armies) {
+        foreach (UnitState unit in armies)
+        {
             bool isSupplied = RecalculateSupplyForUnit(pathFindingService, unit.Id);
-            if(isSupplied){
+            if (isSupplied)
+            {
                 unit.SetInSupply();
-            }else {
+            }
+            else
+            {
                 unit.SetOutOfSupply();
             }
         }
-        foreach (UnitState unit in navies) {
+        foreach (UnitState unit in navies)
+        {
             bool isSupplied = RecalculateSupplyForUnit(pathFindingService, unit.Id);
-            if(isSupplied){
+            if (isSupplied)
+            {
                 unit.SetInSupply();
-            }else {
+            }
+            else
+            {
                 unit.SetOutOfSupply();
             }
         }
@@ -117,11 +133,12 @@ public partial class GameSession : Node
     }
     public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType)
     {
-        if (countryId == -1) {
+        if (countryId == -1)
+        {
             DebugUtilities.PrintPeerError("Tried to deploy to null country: " + countryId);
             return;
         }
-            
+
 
         int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
         var unit = UnitState.ForId(unitId);
@@ -129,8 +146,8 @@ public partial class GameSession : Node
         bool deployable = deployType != DeployType.BUILD || country.CanBuild(faction);
 
         if (!country.IsCountryFull && deployable)
-        { 
-            
+        {
+
             unit.EmitSignal("BeforeUnitDeployedToCountry");
             country.Units[unit.Faction] = unit.Id;
             unit.CountryId = countryId;
@@ -145,7 +162,7 @@ public partial class GameSession : Node
         UnitState unit = UnitState.ForId(unitId);
         CountryState country = CountryState.ForId(unit.CountryId);
 
-        
+
         unit.EmitSignal(UnitState.SignalName.BeforeUnitRemovedFromCountry, unitId, country.Id);
         country.Units.Remove(unit.Faction);
         unit.CountryId = -1;
@@ -164,8 +181,8 @@ public partial class GameSession : Node
         unit.CountryId = -1;
         unit.EmitSignal(UnitState.SignalName.AfterUnitRemovedFromCountry, unitId, countryId);
     }
-    
-    
+
+
     public static void EliminateUnit(string unitId) { }
     public static void ScoreVictoryPoints(Faction faction, int vp) => FactionStates[faction].Score += vp;
     public static void HandDiscard(List<string> cardIds) { }
@@ -175,9 +192,11 @@ public partial class GameSession : Node
     public static void ActivateStatusCard(string cardId) { }
     public static void ActivateResponseCard(string cardId) { }
 
-    public async static Task<CardActivationOption> RequestPlay(Faction faction) {
+    public async static Task<CardActivationOption> RequestPlay(Faction faction)
+    {
         //TODO: determine player scene for faction.
-        instance.playerScenes[0].InputManager.SetPlayCardInputActive(CardPlayPool.GetNextActions(faction));
+        List<CardActivationOption> activationOptions = CardPlayPool.GetNextActions(faction);
+        instance.playerScenes[0].InputManager.SetPlayCardInputActive(activationOptions);
         Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
         if (results == null || results.Length == 0)
         {
@@ -187,5 +206,28 @@ public partial class GameSession : Node
         {
             return results[0].As<CardActivationOption>();
         }
+    }
+    public async static Task<CardActivationOption> RequestBlock(Faction faction)
+    {
+        //TODO: determine player scene for faction.
+        List<CardActivationOption> blockOptions = await CardPlayPool.BlockChangeEvents(faction);
+        if (blockOptions == null || blockOptions.Count == 0)
+        {
+            return null;
+        }
+        else
+        {
+            instance.playerScenes[0].InputManager.SetPlayCardInputActive(blockOptions);
+            Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
+            if (results == null || results.Length == 0)
+            {
+                return null;
+            }
+            else
+            {
+                return results[0].As<CardActivationOption>();
+            }
+        }
+
     }
 }
