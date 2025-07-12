@@ -23,8 +23,15 @@ public abstract class Condition
 
     Faction Faction;
     FactionTeam FactionTeam;
+
+    Faction TargetFaction;
+    FactionTeam TargetFactionTeam;
+
+
     TurnStep TurnStep;
     DeployType DeployType;
+    UnitType UnitType;
+    CountryType CountryType;
 
     public Condition() { }
 
@@ -184,46 +191,34 @@ public abstract class Condition
         {
             this.Faction = faction;
         }
-
-
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction);
-        }
-    }
-    public class FactionBattledCountry : FactionBattled
-    {
-        public FactionBattledCountry(Faction faction, List<int> countryIds) : base(faction)
-        {
-            this.CountryIds = countryIds;
-        }
-
-        public override bool MeetCondition()
-        {
-            bool MeetCondition = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction && CountryIds.Contains(changeEvent.CountryId));
-            return MeetCondition;
-        }
-    }
-    public class FactionTeamBattled : Condition
-    {
-        public FactionTeamBattled(FactionTeam factionTeam)
+        public FactionBattled(FactionTeam factionTeam)
         {
             this.FactionTeam = factionTeam;
         }
         public override bool MeetCondition()
         {
-            return CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.TriggeringFaction) == this.FactionTeam);
-        }
-    }
-    public class FactionTeamBattledCountry : FactionTeamBattled
-    {
-        public FactionTeamBattledCountry(FactionTeam factionTeam, List<int> countryIds) : base(factionTeam)
-        {
-            this.CountryIds = countryIds;
-        }
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.TriggeringFaction) == this.FactionTeam);
+            List<BattleCountryChangeEvent> battleCountryChangeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>();
+            if (Faction != Faction.NONE)
+            {
+                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => changeEvent.TriggeringFaction == Faction).ToList();
+            }
+            else
+            {
+                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.TriggeringFaction) == this.FactionTeam).ToList();
+            }
+
+            if (TargetFaction != Faction.NONE)
+            {
+                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => changeEvent is BattleUnitChangeEvent battleUnitChangeEvent && battleUnitChangeEvent.UnitState.Faction == TargetFaction).ToList();
+            }
+            if (TargetFactionTeam != FactionTeam.NONE)
+            {
+                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => changeEvent is BattleUnitChangeEvent battleUnitChangeEvent && battleUnitChangeEvent.UnitState.FactionTeam == TargetFactionTeam).ToList();
+            }
+
+            List<CountryState> countryStates = battleCountryChangeEvents.Map(ce => ce.CountryState).ToList();
+            filterCountryStates(countryStates);           
+            return countryStates.Count > 0;
         }
     }
 
@@ -237,39 +232,19 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            if (this.DeployType == DeployType.ANY)
+            List<DeployUnitChangeEvent> deployUnitChangeEvents = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>();
+            deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.TriggeringFaction == this.Faction).ToList();
+            deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.DeploymentType == this.DeployType).ToList();
+            if (this.UnitType != UnitType.ANY)
             {
-                return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction);
+                deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.UnitType == this.UnitType).ToList();
             }
-            else
-            {
-                return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction && changeEvent.DeploymentType == this.DeployType);
-            }
-
+            List<CountryState> countryStates = deployUnitChangeEvents.Map(ce => ce.CountryState).ToList();
+            filterCountryStates(countryStates);
+            
+            return countryStates.Count > 0;
         }
-    }
-    public class FactionDeployedCountry : FactionDeployed
-    {
-        public FactionDeployedCountry(Faction faction, DeployType deployType, List<int> countryIds) : base(faction, deployType)
-        {
-            this.CountryIds = countryIds;
-        }
-
-        public override bool MeetCondition()
-        {
-            if (this.DeployType == DeployType.ANY)
-            {
-                return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Any(changeEvent => changeEvent.TriggeringFaction == Faction && CountryIds.Contains(changeEvent.CountryId));
-            }
-            else
-            {
-                return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Any(
-                    changeEvent => changeEvent.TriggeringFaction == Faction &&
-                    CountryIds.Contains(changeEvent.CountryId) &&
-                    changeEvent.DeploymentType == this.DeployType);
-            }
-        }
-    }
+    }   
 
     public class FactionHasBattleTarget : Condition
     {
@@ -346,7 +321,7 @@ public abstract class Condition
     }
 
     public class IsBlockRequest : Condition
-    {        
+    {
         public override bool MeetCondition()
         {
             return true;
@@ -392,6 +367,69 @@ public abstract class Condition
         public override bool MeetCondition()
         {
             return Condition.Invoke();
+        }
+    }
+
+    public Condition WithCountries(List<int> countryIds)
+    {
+        this.CountryIds = countryIds;
+        return this;
+    }
+    public Condition WithCountries(List<Country> countries)
+    {
+        this.CountryIds = countries.Map(c => (int)c);
+        return this;
+    }
+    public Condition WithCountries(List<CountryState> countryStates)
+    {
+        this.CountryIds = countryStates.Map(countryStates => countryStates.Id);
+        return this;
+    }
+    public Condition WithUnits(List<int> unitIds)
+    {
+        this.UnitIds = unitIds;
+        return this;
+    }
+    public Condition WithUnits(List<Country> units)
+    {
+        this.UnitIds = units.Map(c => (int)c);
+        return this;
+    }
+    public Condition WithUnits(List<CountryState> unitStates)
+    {
+        this.UnitIds = unitStates.Map(countryStates => countryStates.Id);
+        return this;
+    }
+    public Condition WithUnitType(UnitType unitType)
+    {
+        this.UnitType = unitType;
+        return this;
+    }
+    public Condition WithCountryType(CountryType countryType)
+    {
+        this.CountryType = countryType;
+        return this;
+    }
+    public Condition WithTargetFaction(Faction faction)
+    {
+        this.TargetFaction = faction;
+        return this;
+    }
+    public Condition WithTargetFactionTeam(FactionTeam factionTeam)
+    {
+        this.TargetFactionTeam = factionTeam;
+        return this;
+    }
+
+    private void filterCountryStates(List<CountryState> countryStates)
+    {
+        if (CountryType != CountryType.NONE)
+        {
+            countryStates = countryStates.Where(countryState => countryState.Type == CountryType).ToList();
+        }
+        if (CountryIds?.Count > 0)
+        {
+            countryStates = countryStates.Where(countryState => CountryIds.Contains(countryState.Id)).ToList();
         }
     }
 }

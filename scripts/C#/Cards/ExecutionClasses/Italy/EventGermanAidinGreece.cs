@@ -13,7 +13,7 @@ public partial class EventGermanAidinGreece : EWCardLogic
                 int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryHasEnemyUnit((int)targetCountries[0], Faction),this))
             .WithGuidance($"Eliminate an army in {CountryState.ForEnum(targetCountries[0]).Label}"),
@@ -21,7 +21,7 @@ public partial class EventGermanAidinGreece : EWCardLogic
                 int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(targetCountries[1], Faction),this))
             .WithGuidance($"Build an army in {CountryState.ForEnum(targetCountries[0]).Label}"),

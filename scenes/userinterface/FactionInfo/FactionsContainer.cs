@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class FactionsContainer : Control
+public partial class FactionsContainer : Control, LoadableUI
 {
     public static FactionsContainer Instance;
 
@@ -11,16 +11,22 @@ public partial class FactionsContainer : Control
     private Dictionary<Faction, FactionInfoRow> factionInfoNodes = new();
     private PackedScene rowScene;
 
-    private static readonly string ChangeEventRowScenePath = "res://scenes/userinterface/FactionInfo/FactionInfoRow.tscn";
+    private static readonly string FactionInfoRowScenePath = "res://scenes/userinterface/FactionInfo/FactionInfoRow.tscn";
 
     public override void _Ready()
     {
-        Instance = this;
+        Instance = this;    
+        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionsContainer");    
+    }
+
+    public void LoadUI()
+    {
         EventBus.Instance.PlayerJoined += OnPlayerJoined;
         EventBus.Instance.PlayerLeft += OnPlayerLeft;
-        rowScene = GD.Load<PackedScene>(ChangeEventRowScenePath);
+        rowScene = GD.Load<PackedScene>(FactionInfoRowScenePath);
         InitChildElements();
     }
+    
 
     private void InitChildElements()
     {
@@ -32,7 +38,7 @@ public partial class FactionsContainer : Control
 
         factionInfoNodes.Clear();
 
-        foreach (Faction faction in Enum.GetValues(typeof(Faction)))
+        foreach (Faction faction in StaticGameData.PlayableFactions)
         {
             FactionInfoRow rowInstance = rowScene.Instantiate<FactionInfoRow>();
             rowInstance.Faction = faction;

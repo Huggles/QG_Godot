@@ -12,7 +12,7 @@ public partial class GameFlow : GodotObject
 
     public int Round
     {
-        get => ((GameTurn - 1) / Enum.GetNames(typeof(Faction)).Length) + 1;
+        get => ((GameTurn - 1) / StaticGameData.PlayableFactions.Count) + 1;
     }
 
     public Faction CurrentFaction
@@ -21,8 +21,8 @@ public partial class GameFlow : GodotObject
         {
             if (GameTurn > 0)
             {
-                int factionInt = (GameTurn - 1) % Enum.GetNames(typeof(Faction)).Length;
-                return (Faction)factionInt;
+                int factionInt = (GameTurn - 1) % StaticGameData.PlayableFactions.Count;
+                return StaticGameData.PlayableFactions[factionInt];
             }
             else
             {
@@ -66,13 +66,14 @@ public partial class GameFlow : GodotObject
 
         EventBus.Emit("RecalculateSupply");
 
-        foreach (Faction faction in Enum.GetValues(typeof(Faction)))
+        foreach (Faction faction in StaticGameData.PlayableFactions)
         {
             VictoryPointSummaries[faction] = new List<VPTurnSummary>();
         }
 
         GameStarted = true;
-        StartNewTurn();
+        
+        _ = StartNewTurn();
     }
 
     public void ProgressGame()
@@ -96,6 +97,7 @@ public partial class GameFlow : GodotObject
         TurnStepCounter = 0;
         GD.Print($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
         EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);        
+        await Task.Delay(100);
         StartNextStep();
     }
 
@@ -124,8 +126,9 @@ public partial class GameFlow : GodotObject
     {
         this.TurnStep = TurnStep.SUPPLY;
         GD.Print("SupplyStep");
-        EventBus.Emit("RecalculateSupply", GameTurn);                
-        ProgressGame();
+        EventBus.Emit("RecalculateSupply", GameTurn);
+        await Task.Delay(100);
+        ProgressGame();        
     }
 
     private async Task VictoryPointStep()
@@ -140,6 +143,7 @@ public partial class GameFlow : GodotObject
     {
         GD.Print("DiscardStep");
         this.TurnStep = TurnStep.DISCARD;
+        await Task.Delay(100);
         ProgressGame();
     }
 
@@ -149,6 +153,7 @@ public partial class GameFlow : GodotObject
         this.TurnStep = TurnStep.DRAW;
         CurrentFactionDeckState.DrawCards(7 - CurrentFactionDeckState.HandCardIds.Count);
         //CurrentFactionDeckState.DebugHand();
+        await Task.Delay(100);
         ProgressGame();
     }
 }

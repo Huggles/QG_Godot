@@ -16,10 +16,10 @@ public static class ListIdExtension
     }
 
     public static List<int> ToUnitIds(this List<UnitState> unitStates)
-    {        
+    {
         return unitStates.Map(unitState => unitState.Id);
     }
-    
+
     public static List<int> ToCountryIds(this List<CountryState> countryStates)
     {
         return countryStates.Map(countryState => countryState.Id);
@@ -33,7 +33,7 @@ public static class ListIdExtension
             foreach (int unitId in countryState.Units.Values)
             {
                 unitIds.Add(unitId);
-            }            
+            }
         }
         return unitIds.ToList();
     }

@@ -45,13 +45,14 @@ public partial class CountryData : DataObject
         }
     }
 
-    public override async Task LoadData()
+    public override void LoadData()
     {
-        var texturePath = $"res://assets/textures/Countries/{UniqueNameCamelCase}.png";        
+        var texturePath = $"res://assets/textures/Countries/{UniqueNameCamelCase}.png";
         Texture = GD.Load<Texture2D>(texturePath);
         if (Texture == null)
         {
-            throw new DataNotFoundException($"Error loading texture: {texturePath}");            
+            throw new DataNotFoundException($"Error loading texture: {texturePath}");
         }
+        
     }
 }

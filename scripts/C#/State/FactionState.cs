@@ -70,7 +70,7 @@ public partial class FactionState : StateObject
         }
     }
 
-    public List<int> SuppliedUnitIds
+public List<int> SuppliedUnitIds
     {
         get
         {

@@ -3,6 +3,6 @@ using System;
 
 public enum FactionTeam
 {
-    AXIS, ALLIES, NONE
+    NONE, AXIS, ALLIES, ALL
 }
 

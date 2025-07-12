@@ -40,7 +40,7 @@ public partial class StatusSyntheticFuel : StatusCardLogic
                 int countryId = await new SelectCountryHandler(DeployTargets.ToCountryIds()).Handle();                
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
             }).WithGuidance("Deploy an army adjacent to where you've deployed an army this turn") 
         };
     }

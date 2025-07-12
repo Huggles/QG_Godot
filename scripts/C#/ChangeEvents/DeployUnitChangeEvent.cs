@@ -9,6 +9,7 @@ public partial class DeployUnitChangeEvent : ChangeEvent
     public DeployType DeploymentType { get; set; }
 
     public UnitState UnitState => UnitState.ForId(UnitId);
+    public CountryState CountryState => CountryState.ForId(CountryId);
 
     public UnitType UnitType
     {
@@ -28,6 +29,7 @@ public partial class DeployUnitChangeEvent : ChangeEvent
     protected override async Task<bool> ExecuteAsync()
     {
         GameSession.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType);
+        await Task.CompletedTask;
         return true;
     }
 

@@ -2,18 +2,24 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class InputOptionsList : ItemList
+public partial class InputOptionsList : ItemList, LoadableUI
 {
 	public static InputOptionsList Instance;
 	private Panel ContainerPanel => GetNode<Panel>("%ContainerPanel");
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		Instance = this;
-		ItemSelected += HandleItemSelected;
-		Clear();
+		Instance = this;		
 		EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "InputOptionsList");
 	}
+
+	public void LoadUI()
+	{
+		ItemSelected += HandleItemSelected;
+		Clear();
+	}
+
+	
 
 	private void HandleItemSelected(long index)
 	{

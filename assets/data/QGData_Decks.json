@@ -1,6 +1,6 @@
 [
 	{
-		"FactionIndex" : 0,
+		"FactionIndex" : 1,
 		"Cards": [
 			{"CardName":"BuildArmy","Number":2},
 			{"CardName":"BuildNavy","Number":2},
@@ -33,7 +33,7 @@
 		]
 	},
 	{
-		"FactionIndex" : 1,
+		"FactionIndex" : 2,
 		"Cards": [
 			{"CardName":"EWBomberCommand","Number":1},
 			{"CardName":"BuildArmy","Number":2},
@@ -62,7 +62,7 @@
 		]
 	},
 	{
-		"FactionIndex" : 2,
+		"FactionIndex" : 3,
 		"Cards": [
 			{"CardName":"BuildArmy","Number":2},
 			{"CardName":"BuildNavy","Number":2},
@@ -88,7 +88,7 @@
 		]
 	},
 	{
-		"FactionIndex" : 3,
+		"FactionIndex" : 4,
 		"Cards": [
 			{"CardName":"BuildArmy","Number":2},
 			{"CardName":"BuildNavy","Number":2},
@@ -114,7 +114,7 @@
 		]
 	},
 	{
-		"FactionIndex" : 4,
+		"FactionIndex" : 5,
 		"Cards": [
 			{"CardName":"BuildArmy","Number":2},
 			{"CardName":"BuildNavy","Number":2},
@@ -140,7 +140,7 @@
 		]
 	},
 	{
-		"FactionIndex" : 5,
+		"FactionIndex" : 6,
 		"Cards": [
 			{"CardName":"BuildArmy","Number":2},
 			{"CardName":"BuildNavy","Number":2},

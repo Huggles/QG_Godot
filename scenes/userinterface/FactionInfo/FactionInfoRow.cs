@@ -5,8 +5,7 @@ using System.Linq;
 
 public partial class FactionInfoRow : Control
 {
-    [Export]
-    public Faction Faction;
+    [Export] public Faction Faction;
 
     private FactionState FactionState => gameState.FactionStates[Faction]; 
 
@@ -22,6 +21,14 @@ public partial class FactionInfoRow : Control
     private bool isMouseOver = false;
 
     public override void _Ready()
+    {
+        EventBus.Instance.GameSessionStarted += () => { this.LoadUI(); };
+    }
+
+    /**
+    * Different LoadUI than LoadableUI
+    */
+    public void LoadUI()
     {
         // Set background color
         Color factionColor = FactionState.FactionData.FactionColor;

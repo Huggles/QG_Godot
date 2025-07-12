@@ -4,5 +4,5 @@ using System.Threading.Tasks;
 
 public interface IGameData
 {
-    Task LoadData();
+    void LoadData();
 }

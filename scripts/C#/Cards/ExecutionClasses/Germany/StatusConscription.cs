@@ -24,7 +24,7 @@ public partial class StatusConscription : StatusCardLogic
                 int selectedCountryId = await new SelectCountryHandler(BuildableLandCountries()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(BuildableLandCountries(), Faction),this))            
             .WithGuidance("Build an army")

@@ -19,6 +19,7 @@ public partial class PlayCardChangeEvent : ChangeEvent
         {
             DebugUtilities.PrintPeer("CardFinished");
         };
+        await Task.CompletedTask;
         return true;
     }
 }

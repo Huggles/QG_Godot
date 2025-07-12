@@ -15,6 +15,7 @@ public partial class BattleCountryChangeEvent : ChangeEvent
 
     protected async override Task<bool> ExecuteAsync()
     {
+        await Task.CompletedTask;
         return true;
     }
 

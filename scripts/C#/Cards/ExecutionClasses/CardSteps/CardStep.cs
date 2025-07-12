@@ -28,7 +28,7 @@ public partial class CardStep : GodotObject
     }
 
     public CardLogic CardLogic;    
-    protected Action StepLogic;
+    protected Func<Task> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
     protected Func<Condition> GetConditionMethod;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
@@ -58,7 +58,7 @@ public partial class CardStep : GodotObject
 
     public string ActionGuidance;
 
-    public CardStep(CardLogic cardLogic, Action stepLogic)
+    public CardStep(CardLogic cardLogic, Func<Task> stepLogic)
     {
         this.CardLogic = cardLogic;
         this.StepLogic = stepLogic;
@@ -79,7 +79,7 @@ public partial class CardStep : GodotObject
         return this;
     }
 
-    public CardStep WithStepLogic(Action stepLogic)
+    public CardStep WithStepLogic(Func<Task> stepLogic)
     {
         this.StepLogic = stepLogic;
         return this;
@@ -120,7 +120,7 @@ public partial class CardStep : GodotObject
             await Task.Delay(2000);
             if (NextCardStep != null)
             {
-                NextCardStep.Execute();
+                await NextCardStep.Execute();
             }
             else
             {
@@ -137,6 +137,7 @@ public partial class CardStep : GodotObject
                 DebugUtilities.PrintPeer("INVOKING");
                 PlayerActionLabel.ShowText(ActionGuidance, -1, TriggeringFaction);
                 await StepLogic.Invoke();
+                DebugUtilities.PrintPeer("FINISHED INVOKING");
             }
             catch (Exception e)
             {

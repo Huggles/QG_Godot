@@ -106,7 +106,9 @@ public partial class CardPlayPool : GodotObject
                 CardActivationOption cardActivationOption = await GameSession.RequestBlock(faction);
                 if (cardActivationOption != null)
                 {
+                    DebugUtilities.PrintPeer($"AWAITING BLOCK FROM {FactionState.ForEnum(faction).FactionLabel} for {changeEvent?.GetType().Name}");
                     await DoActivationOption(cardActivationOption);
+                    DebugUtilities.PrintPeer($"BLOCKED AWAWITED {changeEvent?.GetType().Name}");
                 }
             }
         }
@@ -116,21 +118,22 @@ public partial class CardPlayPool : GodotObject
             LastChangeEvent = changeEvent;
             changeEvent.ChangeEventApplied += (int changeEventId) =>
             {
-                DebugUtilities.PrintPeer("CardPlayPool.Applied");
+                ChangeEvent ce = ChangeEvent.ForId(changeEventId);                
+                DebugUtilities.PrintPeer($"CardPlayPool.Applied {ce?.GetType().Name}");
             };
             await changeEvent.ApplyChange();
         }
 
         if (changeEvent.IsTrigger)
         {
-            if (changeEvent is not PlayCardChangeEvent && changeEvent is not ActivateReactionChangeEvent)
+            if (changeEvent is PlayCardChangeEvent || changeEvent is ActivateReactionChangeEvent)
             {
-                DebugUtilities.PrintPeer("RequestAfterChangeEventReaction");
-                DoNextActions();
+                DebugUtilities.PrintPeer($"New Card was played, do not check for new actions");
             }
             else
             {
-                DebugUtilities.PrintPeer("New Card played");
+                DebugUtilities.PrintPeer($"RequestAfterChangeEventReaction  {changeEvent?.GetType().Name}");
+                DoNextActions();
             }
         }
     }
@@ -182,13 +185,17 @@ public partial class CardPlayPool : GodotObject
             {
                 ActivateReactionChangeEvent activateReactionChangeEvent = new ActivateReactionChangeEvent(cardActivationOption.CardState.Faction, cardActivationOption.CardId, null);
                 activateReactionChangeEvent.IsTrigger = true;
+                DebugUtilities.PrintPeer("ActivateReactionChangeEvent1");
                 await DoChangeEvent(activateReactionChangeEvent);
+                DebugUtilities.PrintPeer("ActivateReactionChangeEvent2");
             }
             else
             {
                 CardStep cardStep = CardStep.ForId(cardActivationOption.StepId);
                 PlayerActionLabel.ShowText(cardStep.CardLogic.ActivateActionGuidance(), -1, cardStep.CardLogic.Faction);
+                DebugUtilities.PrintPeer("EXECUTING");
                 await cardStep.Execute();
+                DebugUtilities.PrintPeer("FINISHED EXECUTING");
             }
         }
     }
@@ -213,7 +220,7 @@ public partial class CardPlayPool : GodotObject
                 return false;
             }
             DebugUtilities.PrintPeer("cardActivationOption");            
-            DoActivationOption(cardActivationOption);
+            _ = DoActivationOption(cardActivationOption);
             return true;
         }
         else

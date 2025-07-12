@@ -17,7 +17,7 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
 
     protected override async Task<bool> ExecuteAsync(){                
         SourceCardState.CardLogic.ActivatedInTurns.Add(GameSession.Instance.GameFlow.GameTurn);
-        SourceCardState.CardLogic.React(StepId);
+        await SourceCardState.CardLogic.React(StepId);
         SourceCardState.CardLogic.CardFinished += () =>
         {
             DebugUtilities.PrintPeer("CardFinished");

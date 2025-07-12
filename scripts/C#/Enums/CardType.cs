@@ -2,7 +2,8 @@ using Godot;
 using System;
 
 public enum CardType
-{ 
+{     
+    NONE,
     BUILD_ARMY, 
     BUILD_NAVY, 
     LAND_BATTLE, 
@@ -10,6 +11,5 @@ public enum CardType
     EVENT, 
     RESPONSE, 
     STATUS, 
-    ECONOMIC_WARFARE,
-    NONE
+    ECONOMIC_WARFARE
 }

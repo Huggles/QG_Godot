@@ -7,6 +7,7 @@ using System.Text.Json;
 public static partial class StaticGameData
 {
 
+    public static List<Faction> PlayableFactions = [Faction.GERMANY, Faction.UNITED_KINGDOM, Faction.JAPAN, Faction.SOVIET, Faction.ITALY, Faction.UNITED_STATES];
     public static List<FactionData> FactionDataList { get; set; } = new();
     public static List<CardData> CardDataList { get; set; } = new();
     public static List<DeckData> DeckDataList { get; set; } = new();
@@ -144,6 +145,7 @@ public static partial class StaticGameData
         DebugUtilities.PrintPeer($"Loaded {CountryDataList.Count} countries");
     }
 
+    
     public static FactionTeam FactionTeamForFaction(Faction faction)
     {
         return faction switch
@@ -153,7 +155,6 @@ public static partial class StaticGameData
             _ => FactionTeam.NONE
         };
     }
-
     public static FactionTeam OpponentFactionTeamForFaction(Faction faction)
     {
         return faction switch
@@ -163,7 +164,6 @@ public static partial class StaticGameData
             _ => FactionTeam.NONE
         };
     }
-
     public static List<Faction> FactionsForTeam(FactionTeam team)
     {
         return team switch
@@ -173,7 +173,6 @@ public static partial class StaticGameData
             _ => new()
         };
     }
-
     public static List<Faction> OpponentFactionsForTeam(FactionTeam team)
     {
         return team switch

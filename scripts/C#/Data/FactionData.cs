@@ -60,4 +60,48 @@ public partial class FactionData : DataObject
             }[Faction];
         }
     }
+
+
+    public Dictionary<CardType, Texture2D> CardFrontTextures = new Dictionary<CardType, Texture2D>();
+    private Dictionary<Faction, List<CardType>> excludeCards = new Dictionary<Faction, List<CardType>>
+    {
+        { Faction.GERMANY, [CardType.RESPONSE]},
+        { Faction.UNITED_KINGDOM, []},
+        { Faction.JAPAN, [CardType.EVENT]},
+        { Faction.SOVIET, [CardType.ECONOMIC_WARFARE]},
+        { Faction.ITALY, []},
+        { Faction.UNITED_STATES, [CardType.RESPONSE]}
+    };
+    private string CardTexturePath = "res://assets/factions/{0}/cards/{1}_{2}.png";
+
+    public void LoadTextures()
+    {
+        
+        string factionName = Faction.ToString().ToLower();
+        string factionNameCapitalized = factionName.Capitalize().Replace(" ","_");
+        foreach (CardType cardType in Enum.GetValues(typeof(CardType))) {
+            if (excludeCards[Faction].Contains(cardType))
+            {
+                continue;
+            }
+            string texturePath;
+            if (cardType == CardType.NONE)
+            {
+                texturePath = String.Format(CardTexturePath, factionName, factionNameCapitalized, "CardBack");
+            }
+            else
+            {
+                texturePath = String.Format(CardTexturePath, factionName, factionNameCapitalized, cardType.ToString().Capitalize().Replace(" ",""));
+            }
+            DebugUtilities.PrintPeer(texturePath);
+            Texture2D texture2D = GD.Load<Texture2D>(texturePath);
+            CardFrontTextures.Add(cardType, texture2D);
+        }
+    }
+
+
+
+
+    
+    
 }

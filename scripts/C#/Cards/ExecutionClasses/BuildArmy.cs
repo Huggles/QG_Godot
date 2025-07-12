@@ -12,7 +12,7 @@ public partial class BuildArmy : CardLogic
                 int selectedCountryId = await new SelectCountryHandler(TargetableCountryStates.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(TargetableCountryStates.ToCountryIds(), Faction),this))            
             .WithGuidance("Build an army")

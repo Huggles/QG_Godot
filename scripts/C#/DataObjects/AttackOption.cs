@@ -26,7 +26,11 @@ public partial class AttackOption : GodotObject
             {
                 foreach (int targetUnitId in countryState.Units.Values)
                 {
-                    attackOption.AttackableUnits.Add(targetUnitId);
+                    UnitState targetUnitState = UnitState.ForId(targetUnitId);
+                    if (targetUnitState.ImmuneForTurn == false)
+                    {
+                        attackOption.AttackableUnits.Add(targetUnitId);
+                    }
                 }
             }
             if (countryState.OccupyingTeam == FactionTeam.NONE)

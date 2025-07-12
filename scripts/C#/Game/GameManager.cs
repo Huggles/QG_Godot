@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -27,7 +28,9 @@ public partial class GameManager : Node
     public List<string> UserInterfaceElementsToLoad = new List<string>
     {
         "PlayerActionLabel",
-        "InputOptionsList"
+        "InputOptionsList",
+        "FactionHandDisplay",
+        "FactionsContainer"
     };
     
 
@@ -55,14 +58,29 @@ public partial class GameManager : Node
         playerStates.Add(playerInstance);
 
         EventBus.Instance.UserInterfaceLoaded += elementName =>
-        {
+        {             
             DebugUtilities.PrintPeer("UserInterfaceLoaded");
             UserInterfaceElementsLoaded.Add(elementName);
-            if (UserInterfaceElementsLoaded.Count == UserInterfaceElementsToLoad.Count)
+            bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
+            if (areEqual)
             {
+                LoadUI();
+
+                DebugUtilities.PrintPeer("SetupGameSession");
                 SetupGameSession();
             }
-        };
+        };        
+    }
+
+    private void LoadUI()
+    {
+        foreach (string loadedUiElement in UserInterfaceElementsLoaded)
+        {
+            Type type = Type.GetType(loadedUiElement);
+            FieldInfo field = type.GetField("Instance", BindingFlags.Public | BindingFlags.Static);
+            LoadableUI loadableUI = field.GetValue(null) as LoadableUI;
+            loadableUI.LoadUI();
+        }
         
     }
 
@@ -84,14 +102,6 @@ public partial class GameManager : Node
         }
 
         // _ShowUI();
-    }
-
-    private void ShowUI()
-    {
-        DebugUtilities.PrintPeer("Show UI");
-        var uiInstance = UIScene.Instantiate<Control>();
-        uiInstance.GetNode("FactionHandDisplay").Set("faction", "GERMANY");
-        NodeUtilities.Instance.UserInterface.AddChild(uiInstance);
     }
 
     public async Task CreateTimer(float milliseconds)

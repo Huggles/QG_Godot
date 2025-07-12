@@ -30,10 +30,8 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
                 if(CardPlayPool.LastNoneNewCardChangeEvent is DiscardCardsChangeEvent discardCardsChangeEvent){
                     int newNumberOfCards = Math.Max(discardCardsChangeEvent.NumberOfCards - this.NumberOfCardsReduction, 0);
                     discardCardsChangeEvent.NumberOfCards = newNumberOfCards;
-                    PlayerActionLabel.ShowText($"Reduced the number of cards to discard by {NumberOfCardsReduction}", Faction);
-                    DebugUtilities.PrintPeer("Showing");
-                    await Task.Delay(2000);
-                    DebugUtilities.PrintPeer("Showing123");
+                    PlayerActionLabel.ShowText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);
+                    await Task.Delay(2000);                    
                 }else {
                     throw new Exception("Reaction should be to a discard change event");
                 }

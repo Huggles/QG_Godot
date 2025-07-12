@@ -21,7 +21,7 @@ public partial class StatusVolksturm : StatusCardLogic
                 int selectedCountryId = await new SelectCountryHandler(new List<int>{(int)Country.Germany}).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithGuidance("Recruit an army in Germany (in addition to your playstep)")
         };

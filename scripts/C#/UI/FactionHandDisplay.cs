@@ -1,20 +1,29 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-public partial class FactionHandDisplay : Control
+public partial class FactionHandDisplay : Control, LoadableUI
 {
     private static readonly PackedScene CardScenePacked = GD.Load<PackedScene>("res://scenes/cards/CardScene.tscn");
-
-    [Export]
-    public Faction Faction;
+    public static FactionHandDisplay Instance;
 
     private Control _cardsContainer;
 
     public override void _Ready()
     {
+        Instance = this;
+        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionHandDisplay");        
+    }
+
+    public void LoadUI()
+    {
         _cardsContainer = GetNode<Control>("CardsContainerPanel");
-        InitHand();
+        
+        EventBus.Instance.NewTurnStarted += (int turnCounter) =>
+        {
+            InitHand(GameSession.Instance.GameFlow.CurrentFaction);
+        };
     }
 
     public void ShowNode(bool visible)
@@ -22,13 +31,12 @@ public partial class FactionHandDisplay : Control
         _cardsContainer.Visible = visible;
     }
 
-    private void InitHand()
+    private void InitHand(Faction faction)
     {
-        //Fix to use deckstates
-        // if (StaticGameData.Deck.TryGetValue(Faction, out DeckState deckState))
-        // {
-        //     InitCards(deckState.HandCardStates);
-        // }
+        if (faction != Faction.NONE && faction != Faction.ALL)
+        {
+            InitCards(DeckState.ForFaction(faction).HandCardStates);        
+        }
     }
 
     private void InitCards(List<CardState> cards)
@@ -42,11 +50,9 @@ public partial class FactionHandDisplay : Control
         float totalRotationSize = (cards.Count - 1) * rotationStepSize;
         float totalSizeX = (cards.Count - 1) * cardStepSize;
 
-        for (int index = 0; index < cards.Count; index++)
-        {
-            CardState card = cards[index];
+        foreach (var (cardState, index) in cards.Select((cardState, index)=> (cardState, index))) {
             var cardSceneInstance = CardScenePacked.Instantiate<CardScene>();
-            cardSceneInstance.Card = card.CardLogic;
+            cardSceneInstance.CardId = cardState.Id;
             cardSceneInstance.Scale = cardScale;
             _cardsContainer.AddChild(cardSceneInstance);
 

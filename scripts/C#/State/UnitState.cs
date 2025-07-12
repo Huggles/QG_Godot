@@ -14,8 +14,10 @@ public partial class UnitState : StateObject
     [Export] public int Id { get; set; }
     [Export] public UnitType Type { get; set; }
     [Export] public Faction Faction;
+    
     [Export] public CountryState CountryState;
     [Export] public bool InSupply { get; set; } = false;
+    [Export] public bool ImmuneForTurn { get; set; } = false;
 
     private int countryId = -1;
     public int CountryId
@@ -31,17 +33,14 @@ public partial class UnitState : StateObject
 
         }
     }
-
-
     public bool IsDeployedToCountry => CountryId >= 0;
-
-
 
     public bool IsArmy => Type == UnitType.ARMY;
     public bool IsNavy => Type == UnitType.NAVY;
 
     public UnitScene Node { get; set; }
     public Callable ClickableCallback { get; set; }
+    public FactionTeam FactionTeam { get { return StaticGameData.FactionTeamForFaction(Faction); } }
 
     public UnitState(UnitType type, Faction faction)
     {
@@ -51,6 +50,7 @@ public partial class UnitState : StateObject
 
         EventBus.Instance.SetUnitsClickable += SetClickable;
         EventBus.Instance.SetAllUnitsUnclickable += SetUnclickable;
+        EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; };
     }
 
     public void InitNode()

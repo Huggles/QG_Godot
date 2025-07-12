@@ -38,7 +38,7 @@ public partial class StatusDiveBombers : StatusCardLogic
                 BattleTarget target = await new SelectBattleTargetHandler(battleTargets).Handle();
                 BattleCountryChangeEvent battleCountryChangeEvent = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(battleCountryChangeEvent);
+                _ = CardPlayPool.DoChangeEvent(battleCountryChangeEvent);
             })
             .WithGuidance("Battle the same or an adjacent country where you've battle this turn")
             .WithCondition(()=>{

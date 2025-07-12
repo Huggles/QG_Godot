@@ -1,10 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://c5j7tqqs2m4kt"]
+[gd_scene load_steps=7 format=3 uid="uid://c5j7tqqs2m4kt"]
 
 [ext_resource type="Script" uid="uid://dacq1cixft1mg" path="res://scripts/C#/UI/CardScene.cs" id="1_cjw5f"]
 [ext_resource type="Texture2D" uid="uid://xaadulsvjork" path="res://assets/factions/germany/cards/Germany_Status.png" id="2_roi11"]
 [ext_resource type="Texture2D" uid="uid://ckybf8nnxvdr4" path="res://assets/textures/Other/TextBox1.png" id="3_8a174"]
-[ext_resource type="PackedScene" uid="uid://bpeoi7oc011hk" path="res://scenes/userinterface/drag_handler.tscn" id="4_nujck"]
-[ext_resource type="Script" uid="uid://bhpwk3mcnk0hw" path="res://scripts/C#/Input/Drag/DragHandler.cs" id="5_mqccx"]
+[ext_resource type="StyleBox" uid="uid://iry13465ja03" path="res://scenes/cards/CardButtonStyleHovered.tres" id="4_cjw5f"]
+[ext_resource type="StyleBox" uid="uid://cnup2rgfcnbqk" path="res://scenes/cards/CardButtonStyleNormal.tres" id="5_mqccx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pe5wv"]
 corner_radius_top_left = 25
@@ -12,13 +12,7 @@ corner_radius_top_right = 25
 corner_radius_bottom_right = 25
 corner_radius_bottom_left = 25
 
-[sub_resource type="LabelSettings" id="LabelSettings_jh6c5"]
-font_size = 35
-font_color = Color(0, 0, 0, 1)
-outline_size = 4
-outline_color = Color(0, 0, 0, 1)
-
-[node name="Control" type="Control"]
+[node name="Root" type="Control"]
 clip_contents = true
 custom_minimum_size = Vector2(250, 350)
 layout_mode = 3
@@ -29,8 +23,8 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -960.0
 offset_top = -540.0
-offset_right = -460.0
-offset_bottom = 160.0
+offset_right = -710.0
+offset_bottom = -190.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(250, 350)
@@ -38,58 +32,100 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1_cjw5f")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="."]
+custom_minimum_size = Vector2(250, 350)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+ratio = 0.714
+stretch_mode = 1
+
+[node name="Panel" type="Panel" parent="AspectRatioContainer"]
 clip_children = 2
 clip_contents = true
-layout_mode = 0
-offset_right = 500.0
-offset_bottom = 700.0
+custom_minimum_size = Vector2(250, 350)
+layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pe5wv")
 
-[node name="CardTexture" type="TextureRect" parent="Panel"]
-layout_mode = 2
-offset_right = 500.0
-offset_bottom = 700.0
+[node name="CardTexture" type="TextureRect" parent="AspectRatioContainer/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("2_roi11")
 expand_mode = 4
 
-[node name="TextContainerNode" type="AspectRatioContainer" parent="Panel"]
-layout_mode = 2
-offset_top = 450.0
-offset_right = 500.0
-offset_bottom = 700.0
-size_flags_vertical = 8
+[node name="TextBackgroundBox" type="VBoxContainer" parent="AspectRatioContainer/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
 
-[node name="TextBoxTexture" type="TextureRect" parent="Panel/TextContainerNode"]
-custom_minimum_size = Vector2(500, 250)
+[node name="TextBoxTexture" type="TextureRect" parent="AspectRatioContainer/Panel/TextBackgroundBox"]
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 texture = ExtResource("3_8a174")
-expand_mode = 1
+expand_mode = 5
+stretch_mode = 6
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel/TextContainerNode/TextBoxTexture"]
+[node name="TextContainer" type="VBoxContainer" parent="AspectRatioContainer/Panel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 140)
 layout_mode = 1
-offset_right = 500.0
-offset_bottom = 250.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
 
-[node name="Title" type="Label" parent="Panel/TextContainerNode/TextBoxTexture/VBoxContainer"]
-custom_minimum_size = Vector2(500, 50)
+[node name="VBoxContainer" type="VBoxContainer" parent="AspectRatioContainer/Panel/TextContainer"]
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 40
-text = "Test Title
-"
-label_settings = SubResource("LabelSettings_jh6c5")
-autowrap_mode = 2
 
-[node name="Text" type="RichTextLabel" parent="Panel/TextContainerNode/TextBoxTexture/VBoxContainer"]
+[node name="Title" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme_override_colors/default_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/normal_font_size = 25
+theme_override_font_sizes/bold_italics_font_size = 0
+theme_override_font_sizes/normal_font_size = 24
+bbcode_enabled = true
 text = "Test Text
 "
 fit_content = true
+autowrap_mode = 2
 
-[node name="DragHandler" parent="Panel" instance=ExtResource("4_nujck")]
+[node name="Text" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 16
+text = "Test Text
+"
+fit_content = true
+autowrap_mode = 2
+
+[node name="CardButton" type="Button" parent="AspectRatioContainer/Panel"]
+unique_name_in_owner = true
 layout_mode = 1
-script = ExtResource("5_mqccx")
-PreviewScale = Vector2(1, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/focus = ExtResource("5_mqccx")
+theme_override_styles/disabled = ExtResource("5_mqccx")
+theme_override_styles/hover = ExtResource("4_cjw5f")
+theme_override_styles/normal = ExtResource("5_mqccx")

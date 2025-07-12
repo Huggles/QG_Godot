@@ -20,7 +20,6 @@ public partial class CountryState : StateObject
     public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
 
 
-
     public Dictionary<Faction, int> Units { get; set; } = new Dictionary<Faction, int>();
 
     public bool IsLand => Type == CountryType.LAND;
@@ -141,7 +140,7 @@ public partial class CountryState : StateObject
 
         if (Type == CountryType.SEA)
         {
-            var factionTeam = StaticGameData.FactionTeamForFaction(faction);
+            FactionTeam factionTeam = StaticGameData.FactionTeamForFaction(faction);
             canBuild &= NeighborCountryStates.Any(n =>
                 n.Type == CountryType.LAND && n.OccupyingTeam == factionTeam);
         }
@@ -190,7 +189,7 @@ public partial class CountryState : StateObject
         List<BattleTarget> targets = new List<BattleTarget>();
         List<BattleTarget> targetableUnitIds = ConnectedCountries(attackingFaction)
             .Where(connectedCountryState => connectedCountryState.Type == countryType && connectedCountryState.CanAttack(attackingFaction)).ToList()
-            .SelectMany(countryWithUnits => countryWithUnits.Units.Values).Distinct().ToList()
+            .SelectMany(countryWithUnits => countryWithUnits.Units.Values.Where(unitId=>!UnitState.ForId(unitId).ImmuneForTurn)).Distinct().ToList()
             .Map(unitId => new BattleTarget(unitId, TargetType.UNIT));
         List<BattleTarget> targetableEmptyCountriesIds = ConnectedCountries(attackingFaction)
         .Where(connectedCountryState => connectedCountryState.Type == countryType && connectedCountryState.CanAttackWhenEmpty(attackingFaction)).ToList().ToCountryIds()
@@ -263,6 +262,25 @@ public partial class CountryState : StateObject
     public static bool operator !=(CountryState countryState, Country country) {
         return countryState.Id != (int)country;
     }
-    
 
+    public override bool Equals(object obj)
+    {
+        if (obj is Country countryEnum)
+        {
+            return Id == (int)countryEnum;
+        }
+        else if (obj is CountryState countryState)
+        {
+            return Id == countryState.Id;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Id, Name);
+    }
 }

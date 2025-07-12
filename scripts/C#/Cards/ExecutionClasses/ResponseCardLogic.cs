@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public abstract partial class ResponseCardLogic : CardLogic
 {
@@ -10,7 +11,8 @@ public abstract partial class ResponseCardLogic : CardLogic
             new CardStep(this, async() => {
                 DeckState deckState = DeckState.ForFaction(Faction);
                 deckState.ResponseCardIds.Add(CardState.Id);
-                deckState.HandCardIds.Remove(CardState.Id); 
+                deckState.HandCardIds.Remove(CardState.Id);
+                await Task.CompletedTask;
             })
         }; 
     }

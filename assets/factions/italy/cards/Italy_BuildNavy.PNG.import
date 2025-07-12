@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://beanub8bx7b1f"
-path="res://.godot/imported/United_Kingdom_EnconomicWarfare.png-2f81897dc3b0d5df4db5de13ab9e63c3.ctex"
+uid="uid://brnacvlg2kboy"
+path="res://.godot/imported/Italy_BuildNavy.PNG-6048a8d22b74a26a30986125f80a4c5f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/united_kingdom/cards/United_Kingdom_EnconomicWarfare.png"
-dest_files=["res://.godot/imported/United_Kingdom_EnconomicWarfare.png-2f81897dc3b0d5df4db5de13ab9e63c3.ctex"]
+source_file="res://assets/factions/italy/cards/Italy_BuildNavy.PNG"
+dest_files=["res://.godot/imported/Italy_BuildNavy.PNG-6048a8d22b74a26a30986125f80a4c5f.ctex"]
 
 [params]
 

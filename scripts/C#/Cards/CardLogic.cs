@@ -105,14 +105,15 @@ public abstract partial class CardLogic : GodotObject
         DebugUtilities.PrintPeer("PlayCard");
         string message = PlayActionGuidance();
         PlayerActionLabel.ShowText(message, -1, Faction);
-        CardStepForId(stepId).Execute();
+        _ = CardStepForId(stepId).Execute();
     }
 
     public async Task React(int stepId)
     {
         string message = ActivateActionGuidance();
         PlayerActionLabel.ShowText(message, -1, Faction);
-        CardStepForId(stepId).Execute();        
+        DebugUtilities.PrintPeer("React");
+        await CardStepForId(stepId).Execute();        
     }
 
     public virtual string PlayActionGuidance() =>

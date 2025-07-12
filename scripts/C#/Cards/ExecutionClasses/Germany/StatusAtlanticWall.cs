@@ -25,7 +25,7 @@ public partial class StatusAtlanticWall : StatusCardLogic
                 int countryId = await new SelectCountryHandler(DeployState.CalculateDeployState(Faction).BuildableCountries).Handle();                
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
             }).WithGuidance("Deploy an army")
             
         };

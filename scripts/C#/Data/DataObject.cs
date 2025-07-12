@@ -20,10 +20,8 @@ public partial class DataObject : GodotObject, IGameData
         }
         return null;
     }
-    public virtual Task LoadData()
-    {
-        return null;
-    }
+
+    public virtual void LoadData() { }
 
     // public static T ParseString<T>(string jsonString) where T : DataObject
     // {

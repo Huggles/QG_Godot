@@ -2,49 +2,68 @@ using Godot;
 using System;
 
 public partial class CardScene : Control
-{    
-    public CardLogic Card;
+{
+    public int CardId = -1;
+    public CardState CardState => CardState.ForId(CardId);
+    public FactionState FactionState => FactionState.ForEnum(CardState.Faction);
 
-    private AspectRatioContainer _textContainerNode;
-    private Label _titleNode;
-    private RichTextLabel _textNode;
-    private TextureRect _cardTextureNode;
+    private VBoxContainer textBackgroundContainerNode;
+    private VBoxContainer textContainerNode;
+    private RichTextLabel titleNode;
+    private RichTextLabel textNode;
+    private TextureRect cardTextureNode;
+    private Button cardButton;
 
     public override void _Ready()
     {
-        _textContainerNode = GetNode<AspectRatioContainer>("Panel/TextContainerNode");
-        _titleNode = GetNode<Label>("Panel/TextContainerNode/TextBoxTexture/VBoxContainer/Title");
-        _textNode = GetNode<RichTextLabel>("Panel/TextContainerNode/TextBoxTexture/VBoxContainer/Text");
-        _cardTextureNode = GetNode<TextureRect>("Panel/CardTexture");
+
+        textBackgroundContainerNode = GetNode<VBoxContainer>("%TextBackgroundBox");
+        textContainerNode = GetNode<VBoxContainer>("%TextContainer");
+        titleNode = GetNode<RichTextLabel>("%Title");
+        textNode = GetNode<RichTextLabel>("%Text");
+        cardTextureNode = GetNode<TextureRect>("%CardTexture");
+
+        cardButton = GetNode<Button>("%CardButton");
+        cardButton.Pressed += CardButton_Pressed;
 
         BuildCard();
     }
 
+    private void CardButton_Pressed()
+    {
+        DebugUtilities.PrintPeer(CardId);
+    }
+
+
     private void BuildCard()
     {
-        if (Card != null)
+        if (CardId > -1)
         {
-            Name = $"{Card.Faction}-{Card.CardData.UniqueName}";
-
-            // if (Card.IsPubliclyVisible)
-            // {
-            //     _cardTextureNode.Texture = Card.CardFrontTexture;
-            //     if (!string.IsNullOrEmpty(Card.CardData.Text))
-            //     {
-            //         _textContainerNode.Visible = true;
-            //         _titleNode.Text = Card.CardData.Clabel;
-            //         _textNode.Text = Card.CardData.Text;
-            //     }
-            //     else
-            //     {
-            //         _textContainerNode.Visible = false;
-            //     }
-            // }
-            // else
-            // {
-            //     _cardTextureNode.Texture = Card.CardBackTexture;
-            //     _textContainerNode.Visible = false;
-            // }
+            Name = $"{CardState.Faction}-{CardState.CardData.UniqueName}";
+            cardTextureNode.Texture = FactionState.FactionData.CardFrontTextures[CardState.CardData.CardType];
+            if (!string.IsNullOrEmpty(CardState.CardData.Text))
+            {
+                textContainerNode.Visible = true;
+                textBackgroundContainerNode.Visible = true;
+                titleNode.Text = CardState.CardData.Label;
+                textNode.Text = CardState.CardData.Text;
+            }
+            else
+            {
+                textContainerNode.Visible = false;
+                textBackgroundContainerNode.Visible = false;
+            }
         }
+        else
+        {
+            titleNode.Text = "Card Not Found";
+            textNode.Text = $"Card Id = {CardId}";
+            SetClickable(false);
+        }
+    }
+
+    public void SetClickable(bool clickable)
+    {
+        cardButton.Disabled = !clickable;
     }
 }

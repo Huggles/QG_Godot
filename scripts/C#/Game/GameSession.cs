@@ -56,7 +56,7 @@ public partial class GameSession : Node
     }
     private void OnGameStarted()
     {
-
+        EventBus.Emit(EventBus.SignalName.GameSessionStarted);
     }
 
     /**
@@ -72,7 +72,7 @@ public partial class GameSession : Node
 
     public static void RecalculateSupply()
     {
-        foreach (Faction faction in Enum.GetValues(typeof(Faction)))
+        foreach (Faction faction in StaticGameData.PlayableFactions)
         {
             RecalculateSupplyForFaction(faction);
         }

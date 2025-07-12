@@ -19,7 +19,7 @@ public partial class StartTurnStepHandler : GodotObject,IStartTurnStepHandler
     {        
         await Task.Delay(100);
         CardPlayPool.ClearPool();
-        EmitSignal(SignalName.StartTurnStepFinished);
+        EmitSignal(SignalName.StartTurnStepFinished); 
     }
 
     public async void RequestCardPlay()

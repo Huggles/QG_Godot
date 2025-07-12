@@ -11,27 +11,28 @@ public partial class ClickableSprite : Area2D
 	[Export]
 	private Texture2D texture;
 
-	private Image decompressedImage;
-	private Image image
+	private Image _Image;
+	public Image Image
 	{
 		get
 		{
-			if (decompressedImage == null)
+			if (_Image == null)
 			{
-				decompressedImage = texture.GetImage();
-				if (decompressedImage != null && decompressedImage.IsCompressed())
+				_Image = texture.GetImage();
+				if (_Image != null && Image.IsCompressed())
 				{
-					decompressedImage.Decompress();
-				}				
+					_Image.Decompress();
+				}
 			}
-			return decompressedImage;
+			return _Image;
 		}
-		set;
 	}
-	private bool mouseOverOpaque;
+	
 
-	public static Color HOVER_COLOR = new Color(0.5f,1,0.5f,.8f);
+
+	public static Color HOVER_COLOR = new Color(0.5f, 1, 0.5f, .8f);
     public static Color SELECTABLE_COLOR = new Color(1,1,1,.8f);
+	public bool mouseOverOpaque = false;
 
 	[Signal] public delegate void MouseLeftClickOnOpaqueEventHandler();
 	[Signal] public delegate void MouseRightClickOnOpaqueEventHandler();
@@ -167,7 +168,7 @@ public partial class ClickableSprite : Area2D
 			var rect = new Rect2(-shape.Size / 2, shape.Size);
 			Vector2 localPos = ToLocal(mousePos);
 			localPos += (rect.Size / 2);
-			Color color = image.GetPixel((int)localPos.X, (int)localPos.Y);
+			Color color = Image.GetPixel((int)localPos.X, (int)localPos.Y);
 			if (color.A > 0)
 			{
 				if (mouseOverOpaque == false)
@@ -203,15 +204,11 @@ public partial class ClickableSprite : Area2D
 	public void SetTexture(Texture2D texture)
 	{
 		this.texture = texture;
-		this.image = texture.GetImage();
-		if (this.image != null && this.image.IsCompressed())
-			this.image.Decompress();
 		Sprite.Texture = texture;
 
 		Vector2 textureSize = Sprite.Texture.GetSize();
 		RectangleShape2D rectShape = new RectangleShape2D();
 		rectShape.Size = textureSize;
-
 		CollisionShape.Shape = rectShape;
 	}
 }

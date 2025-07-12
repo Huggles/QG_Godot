@@ -2,23 +2,26 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class PlayerActionLabel : RichTextLabel
+public partial class PlayerActionLabel : RichTextLabel, LoadableUI
 {    
-    private static PlayerActionLabel Instance;
+    public static PlayerActionLabel Instance;
     
     private Panel ContainerPanel => GetNode<Panel>("%ContainerPanel");
 
     public override void _Ready()
-    {
-        if (Instance != null)
-            throw new NotSupportedException("Only 1 Player Action Label should be initiated");
+    {        
         Instance = this;
-        BbcodeEnabled = true;
-        HideNode();
-        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PlayerActionLabel");
+        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PlayerActionLabel");        
     }
 
-    public static void ShowText(string text, Faction faction = (Faction)(-1)){
+    public void LoadUI()
+    {
+        BbcodeEnabled = true;
+        HideNode();        
+    }
+
+    public static void ShowText(string text, Faction faction = (Faction)(-1))
+    {
         ShowText(text, -1, faction);
 
     }

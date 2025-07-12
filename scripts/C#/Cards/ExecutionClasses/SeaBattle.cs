@@ -15,7 +15,7 @@ public partial class SeaBattle : CardLogic
 
                 BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedUnitId));
                 battleUnitChangeEvent.IsTrigger = true;
-                CardPlayPool.DoChangeEvent(battleUnitChangeEvent);
+                _ = CardPlayPool.DoChangeEvent(battleUnitChangeEvent);
             })
             .WithCondition(()=>Condition.Build(new Condition.FactionHasBattleTarget(Faction,UnitType.NAVY), this))            
         }; 
