@@ -209,6 +209,7 @@ public partial class CardPlayPool : GodotObject
         }
         return false;
     }
+    
     public async static Task<bool> RequestActivationOption(Faction faction)
     {
         List<CardActivationOption> activationOptions = GetNextActions(faction);
@@ -219,7 +220,7 @@ public partial class CardPlayPool : GodotObject
             {
                 return false;
             }
-            DebugUtilities.PrintPeer("cardActivationOption");            
+            DebugUtilities.PrintPeer("cardActivationOption");
             _ = DoActivationOption(cardActivationOption);
             return true;
         }
@@ -228,9 +229,7 @@ public partial class CardPlayPool : GodotObject
             DebugUtilities.PrintPeer($"{faction} does have activation options");
         }
         return false;
-
-    }
-   
+    }   
 
     public static List<CardActivationOption> GetNextActions(Faction faction)
     {

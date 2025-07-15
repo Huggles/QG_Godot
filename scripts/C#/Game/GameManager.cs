@@ -30,7 +30,8 @@ public partial class GameManager : Node
         "PlayerActionLabel",
         "InputOptionsList",
         "FactionHandDisplay",
-        "FactionsContainer"
+        "FactionsContainer",
+        "PresentationModal"
     };
     
 
@@ -64,6 +65,7 @@ public partial class GameManager : Node
             bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
             if (areEqual)
             {
+                DebugUtilities.PrintPeer("LoadUI");
                 LoadUI();
 
                 DebugUtilities.PrintPeer("SetupGameSession");

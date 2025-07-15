@@ -1,2 +1,0 @@
-extends PlayerAction
-class_name PA_PlayCard

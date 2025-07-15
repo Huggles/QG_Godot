@@ -74,12 +74,23 @@ public partial class FactionData : DataObject
     };
     private string CardTexturePath = "res://assets/factions/{0}/cards/{1}_{2}.png";
 
+    public static readonly Texture2D GERMANY_FLAG_TEXTURE =         GD.Load<Texture2D>("res://assets/factions/germany/Germany_Flag.png");
+    public static readonly Texture2D UNITED_KINGDOM_FLAG_TEXTURE =  GD.Load<Texture2D>("res://assets/factions/united_kingdom/UK_Flag.png");
+    public static readonly Texture2D JAPAN_FLAG_TEXTURE =           GD.Load<Texture2D>("res://assets/factions/japan/Japan_Flag.png");
+    public static readonly Texture2D SOVIET_FLAG_TEXTURE =          GD.Load<Texture2D>("res://assets/factions/soviet/Soviet_Flag.png");
+    public static readonly Texture2D ITALY_FLAG_TEXTURE =           GD.Load<Texture2D>("res://assets/factions/italy/Italy_Flag.png");
+    public static readonly Texture2D UNITED_STATES_FLAG_TEXTURE =   GD.Load<Texture2D>("res://assets/factions/united_states/US_Flag.png");
+    
     public void LoadTextures()
     {
-        
+        LoadCardTextures();
+    }
+    private void LoadCardTextures()
+    {
         string factionName = Faction.ToString().ToLower();
-        string factionNameCapitalized = factionName.Capitalize().Replace(" ","_");
-        foreach (CardType cardType in Enum.GetValues(typeof(CardType))) {
+        string factionNameCapitalized = factionName.Capitalize().Replace(" ", "_");
+        foreach (CardType cardType in Enum.GetValues(typeof(CardType)))
+        {
             if (excludeCards[Faction].Contains(cardType))
             {
                 continue;
@@ -91,13 +102,15 @@ public partial class FactionData : DataObject
             }
             else
             {
-                texturePath = String.Format(CardTexturePath, factionName, factionNameCapitalized, cardType.ToString().Capitalize().Replace(" ",""));
+                texturePath = String.Format(CardTexturePath, factionName, factionNameCapitalized, cardType.ToString().Capitalize().Replace(" ", ""));
             }
             DebugUtilities.PrintPeer(texturePath);
             Texture2D texture2D = GD.Load<Texture2D>(texturePath);
             CardFrontTextures.Add(cardType, texture2D);
         }
     }
+    
+    
 
 
 

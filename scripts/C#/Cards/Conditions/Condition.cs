@@ -217,7 +217,7 @@ public abstract class Condition
             }
 
             List<CountryState> countryStates = battleCountryChangeEvents.Map(ce => ce.CountryState).ToList();
-            filterCountryStates(countryStates);           
+            filterCountryStates(ref countryStates);           
             return countryStates.Count > 0;
         }
     }
@@ -240,7 +240,7 @@ public abstract class Condition
                 deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.UnitType == this.UnitType).ToList();
             }
             List<CountryState> countryStates = deployUnitChangeEvents.Map(ce => ce.CountryState).ToList();
-            filterCountryStates(countryStates);
+            filterCountryStates(ref countryStates);
             
             return countryStates.Count > 0;
         }
@@ -421,7 +421,7 @@ public abstract class Condition
         return this;
     }
 
-    private void filterCountryStates(List<CountryState> countryStates)
+    private void filterCountryStates(ref List<CountryState> countryStates)
     {
         if (CountryType != CountryType.NONE)
         {

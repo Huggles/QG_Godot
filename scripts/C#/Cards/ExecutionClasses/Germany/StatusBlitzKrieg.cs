@@ -18,14 +18,15 @@ public partial class StatusBlitzkrieg : StatusCardLogic
         //TODO
         return new List<CardStep> {
             new CardStep(this, async() => {
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(1), false);
+                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards", 2000);          
                 List<BattleCountryChangeEvent> changeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Where(changeEvent=>changeEvent.CountryState.Units.Count == 0).ToList();
                 int selectedCountryId = await new SelectCountryHandler(changeEvents.Map(changeEvent => changeEvent.CountryId)).Handle();
 
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-                IsActivationFinished = true;
-            }).WithGuidance("Deploy an army in a country where you've battle this turn")
+                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
+            }).WithGuidance("Deploy an army in a country where you've battle this turn") 
         };
     }
 }

@@ -2,6 +2,7 @@
 	{
 		"FactionIndex" : 1,
 		"Cards": [
+			{"CardName":"StatusOccupationOfCzechoslovakia","Number":1},
 			{"CardName":"BuildArmy","Number":2},
 			{"CardName":"BuildNavy","Number":2},
 			{"CardName":"LandBattle","Number":2},			

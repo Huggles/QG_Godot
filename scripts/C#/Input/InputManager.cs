@@ -5,9 +5,7 @@ using System.Linq;
 
 public partial class InputManager : Node2D
 {
-    public InputManager Instance;
-
-
+    public static InputManager Instance;
     private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
     private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(0.15f,0.15f);
     private const float ZOOM_STEP = 0.05f;
@@ -44,8 +42,6 @@ public partial class InputManager : Node2D
         ApplyZoom();
     }
 
-
-
     public override void _EnterTree()
     {
         EventBus.Instance.SetUnitsClickable += unitIds => EnableRayTraceCasting();
@@ -76,14 +72,6 @@ public partial class InputManager : Node2D
         float yDelta = (-inputUp + inputDown) * CAMERA_SPEED;
         Vector2 delta = new Vector2(xDelta, yDelta) * zoomMultiplier;
         Camera.Position += delta;
-    }
-
-    
-
-
-    public override void _Input(InputEvent e)
-    {
-        HandleInput(e);
     }
 
     public override void _UnhandledInput(InputEvent e)
@@ -117,7 +105,7 @@ public partial class InputManager : Node2D
     private void HandleKeyboardInput(InputEventKey keyEvent)
     {
         _previouslyPressedKeyboardButtons = new(_currentlyPressedKeyboardButtons);
-        _currentlyPressedKeyboardButtons.Clear();
+        _currentlyPressedKeyboardButtons.Clear();        
 
         if (keyEvent.IsPressed())
         {

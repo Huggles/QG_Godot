@@ -68,7 +68,7 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void GameChangeEventAfterEventHandler();
 
     [Signal] public delegate void NewTurnStartedEventHandler(int turnNumber);
-    [Signal] public delegate void NextStepStartedEventHandler();
+    [Signal] public delegate void NextStepStartedEventHandler(int turnStep);
 
     [Signal] public delegate void FactionScoredPointsEventHandler(Faction faction, int points);
 

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 
 public partial class InputHandlerPlayCard
@@ -15,25 +16,17 @@ public partial class InputHandlerPlayCard
         CardActivationOptions = cardActivationOptions;
         Faction currentFaction = gameFlow.CurrentFaction;
         PlayerActionLabel.ShowText("Choose a card", currentFaction);
-        InputOptionsList.ShowOptions(cardActivationOptions);
-        InputOptionsList.Instance.ItemClicked += HandleItemSelected;
+
+        FactionHandDisplay.Instance.Show(cardActivationOptions);
+        FactionHandDisplay.Instance.CardSelected += HandleItemSelected;
     }
 
-    private void HandleItemSelected(long index, Vector2 atPosition, long mouseButtonIndex)
+    private void HandleItemSelected(int cardId)
     {
-        InputOptionsList.Instance.ItemClicked -= HandleItemSelected;
+        FactionHandDisplay.Instance.CardSelected -= HandleItemSelected;
+        FactionHandDisplay.Instance.Hide();
         InputOptionsList.HideList();
-        int selectedIndex = (int)index;
-        if (selectedIndex > CardActivationOptions.Count-1)
-        {
-            EventBus.Emit("CardSelected", null);
-        }
-        else
-        {
-            EventBus.Emit("CardSelected", CardActivationOptions[selectedIndex]);
-        }
-        
-        
-        
+        CardActivationOption selectedCardActivationOption = CardActivationOptions.Find(cao => cao.CardId == cardId);        
+        EventBus.Emit("CardSelected", selectedCardActivationOption);
     }    
 }

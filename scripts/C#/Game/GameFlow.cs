@@ -31,8 +31,9 @@ public partial class GameFlow : GodotObject
         }
     }
 
-    private GameState gameState { 
-        get { return GameSession.Instance.GameState;}
+    private GameState gameState
+    {
+        get { return GameSession.Instance.GameState; }
     }
 
     public FactionState CurrentFactionState => GameSession.FactionStates[CurrentFaction];
@@ -41,19 +42,20 @@ public partial class GameFlow : GodotObject
     public FactionTeam CurrentFactionTeam =>
         (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;
 
-    private List<Func<Task>> turnStepMethods;
+    private List<GameTurnStep> gameTurnSteps;
     public IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
-    public GameFlow(){
-        turnStepMethods = new List<Func<Task>> {
-            StartTurnStep,
-            PlayCardStep,
-            SupplyStep,
-            VictoryPointStep,
-            DiscardStep,
-            DrawStep,
-            StartNewTurn 
+    public GameFlow()
+    {
+        gameTurnSteps = new List<GameTurnStep> {
+            new GameTurnStep(TurnStep.START, StartTurnStep),
+            new GameTurnStep(TurnStep.PLAY_CARD, PlayCardStep),
+            new GameTurnStep(TurnStep.SUPPLY, SupplyStep),
+            new GameTurnStep(TurnStep.VICTORY_POINT, VictoryPointStep),
+            new GameTurnStep(TurnStep.DISCARD, DiscardStep),
+            new GameTurnStep(TurnStep.DRAW, DrawStep),
+            new GameTurnStep(TurnStep.END, StartNewTurn)
         };
     }
 
@@ -72,7 +74,7 @@ public partial class GameFlow : GodotObject
         }
 
         GameStarted = true;
-        
+
         _ = StartNewTurn();
     }
 
@@ -86,8 +88,9 @@ public partial class GameFlow : GodotObject
     {
         GD.Print("StartNextStep");
         TurnStepCounter++;
-        turnStepMethods[TurnStepCounter - 1]();
-        EventBus.Emit("NextStepStarted",TurnStepCounter);
+        GameTurnStep gameTurnStep = gameTurnSteps[TurnStepCounter - 1];
+        gameTurnStep.Handler();
+        EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
     }
 
     private async Task StartNewTurn()
@@ -96,18 +99,18 @@ public partial class GameFlow : GodotObject
         GameTurn += 1;
         TurnStepCounter = 0;
         GD.Print($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
-        EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);        
-        await Task.Delay(100);
+        EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
+        await Task.Delay(100);        
         StartNextStep();
     }
 
     private async Task StartTurnStep()
-    {        
+    {
         GD.Print("_start_turn_step");
         this.TurnStep = TurnStep.START;
         StartTurnStepHandler startTurnStepHandler = new StartTurnStepHandler();
         startTurnStepHandler.Start(CurrentFaction);
-        await ToSignal(startTurnStepHandler, StartTurnStepHandler.SignalName.StartTurnStepFinished); 
+        await ToSignal(startTurnStepHandler, StartTurnStepHandler.SignalName.StartTurnStepFinished);
         ProgressGame();
     }
 
@@ -116,9 +119,9 @@ public partial class GameFlow : GodotObject
         GD.Print("PlayCardStep");
         this.TurnStep = TurnStep.PLAY_CARD;
         PlayStepHandlerDefault playStepHandlerDefault = new PlayStepHandlerDefault();
-        playStepHandlerDefault.Start(CurrentFaction);        
-        await ToSignal(playStepHandlerDefault, PlayStepHandlerDefault.SignalName.PlayStepFinished); 
-        
+        playStepHandlerDefault.Start(CurrentFaction);
+        await ToSignal(playStepHandlerDefault, PlayStepHandlerDefault.SignalName.PlayStepFinished);
+
         ProgressGame();
     }
 
@@ -128,7 +131,7 @@ public partial class GameFlow : GodotObject
         GD.Print("SupplyStep");
         EventBus.Emit("RecalculateSupply", GameTurn);
         await Task.Delay(100);
-        ProgressGame();        
+        ProgressGame();
     }
 
     private async Task VictoryPointStep()
@@ -155,5 +158,17 @@ public partial class GameFlow : GodotObject
         //CurrentFactionDeckState.DebugHand();
         await Task.Delay(100);
         ProgressGame();
+    }
+
+    public class GameTurnStep
+    {
+        public TurnStep TurnStep;
+        public Func<Task> Handler;        
+
+        public GameTurnStep(TurnStep turnStep, Func<Task> handler)
+        {
+            TurnStep = turnStep;
+            Handler = handler;
+        }
     }
 }

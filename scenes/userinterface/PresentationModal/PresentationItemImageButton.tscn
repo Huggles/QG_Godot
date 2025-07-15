@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3 uid="uid://dxe3xyvphtwr6"]
+
+[ext_resource type="Script" uid="uid://bpary75rf8gj6" path="res://scenes/userinterface/PresentationModal/PresentationItemImageButtonControl.cs" id="1_sl86k"]
+[ext_resource type="Texture2D" uid="uid://df4kij520sc21" path="res://assets/factions/united_states/US_Flag.png" id="1_vsoub"]
+[ext_resource type="StyleBox" uid="uid://dmulmhugod2s6" path="res://scenes/cards/NormalButtonStyle_Hover.tres" id="2_sl86k"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0d4vp"]
+
+[node name="PresentationItem" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1620.0
+offset_bottom = -930.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sl86k")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 150)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_vsoub")
+expand_mode = 2
+
+[node name="Button" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 150)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_styles/hover = ExtResource("2_sl86k")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_0d4vp")

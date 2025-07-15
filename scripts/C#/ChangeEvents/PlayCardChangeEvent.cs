@@ -19,6 +19,10 @@ public partial class PlayCardChangeEvent : ChangeEvent
         {
             DebugUtilities.PrintPeer("CardFinished");
         };
+        DeckState deckState = DeckState.ForFaction(SourceCardState.Faction);
+        deckState.DiscardCard(SourceCardState.Id); 
+
+
         await Task.CompletedTask;
         return true;
     }

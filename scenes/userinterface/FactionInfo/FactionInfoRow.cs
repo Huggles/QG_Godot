@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 public partial class FactionInfoRow : Control
@@ -14,8 +15,9 @@ public partial class FactionInfoRow : Control
 
     private Panel BackgroundPanel => GetNode<Panel>("%BackgroundPanel");
     private Label ScoreLabel => GetNode<Label>("%ScoreLabel");
-    private Label DetailPanel => GetNode<Label>("%DetailPanel");
+    private Panel DetailPanel => GetNode<Panel>("%DetailPanel");
     private RichTextLabel TurnSummariesRichText => GetNode<RichTextLabel>("%TurnSummariesRichText");
+    private Button FactionInfoButton => GetNode<Button>("FactionInfoButton");
 
     private Timer hoverTimer;
     private bool isMouseOver = false;
@@ -38,6 +40,10 @@ public partial class FactionInfoRow : Control
         styleBox.BgColor = factionColor;
         BackgroundPanel.AddThemeStyleboxOverride("panel", styleBox);
 
+        StyleBoxFlat styleBoxDetails = (StyleBoxFlat)DetailPanel.GetThemeStylebox("panel").Duplicate();
+        styleBoxDetails.BgColor = factionColor;
+        DetailPanel.AddThemeStyleboxOverride("panel", styleBoxDetails);
+
         ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 
         SetScore(FactionState.Score);
@@ -53,11 +59,13 @@ public partial class FactionInfoRow : Control
 
         EventBus.Instance.VpDetailsPanelOpened += (faction) =>
         {
-            if (Faction == faction)
+            if (Faction != (Faction)faction)
             {
                 DetailPanel.Visible = false;
             }
         };
+
+        FactionInfoButton.Pressed += () => { ToggleDetails(); };
     }
 
     private void SetScore(int score)
@@ -66,24 +74,6 @@ public partial class FactionInfoRow : Control
         var tween = GetTree().CreateTween();
         tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 72, 0.2);
         tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 36, 0.2);
-    }
-
-    private void OnMouseEntered()
-    {
-        isMouseOver = true;
-    }
-
-    private void OnMouseExited()
-    {
-        isMouseOver = false;
-    }
-
-    public override void _GuiInput(InputEvent @event)
-    {
-        if (isMouseOver && @event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.IsReleased())
-        {
-            ToggleDetails();
-        }
     }
 
     private void ToggleDetails()

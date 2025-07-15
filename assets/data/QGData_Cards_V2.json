@@ -1218,5 +1218,17 @@
 		"ExecutionClass": "EventLedoAndBurmaRoads",
 		"Label": "Ledo and Burma Roads",
 		"Text": "Build an Army in Southeast Asia; then battle in China or Szechuan"
+	},
+	{
+		"UniqueName": "StatusOccupationOfCzechoslovakia",
+		"Number": "144",
+		"Type": "STATUS",
+		"Implemented": "0",
+		"Testing": "0",
+		"ExecutionClass": "StatusOccupationOfCzechoslovakia",
+		"Label": "Occupation Of Czechoslovakia",
+		"Text": "During your Victory step, gain +1 Victory Point if you did not perform a land battle or eliminated a unit. "
 	}
+
+	
 ]

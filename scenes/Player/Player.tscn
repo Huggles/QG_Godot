@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cqotfa6hcbdg1"]
+[gd_scene load_steps=9 format=3 uid="uid://cqotfa6hcbdg1"]
 
 [ext_resource type="Script" uid="uid://c8lyp2o4iq088" path="res://scripts/C#/Input/PlayerScene.cs" id="1_socpp"]
 [ext_resource type="Script" uid="uid://buus0001hcimh" path="res://scripts/C#/Input/InputManager.cs" id="2_fxc31"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://scenes/userinterface/FactionInfo/FactionsContainer.tscn" id="5_xcisb"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="6_socpp"]
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="7_fxc31"]
+[ext_resource type="PackedScene" uid="uid://dfqs0a11viijb" path="res://scenes/userinterface/PresentationModal/PresentationModal.tscn" id="7_puxyr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xcisb"]
 
@@ -27,15 +28,19 @@ script = ExtResource("2_fxc31")
 
 [node name="Interface" type="CanvasLayer" parent="."]
 
-[node name="PlayerAction" parent="Interface" instance=ExtResource("7_fxc31")]
-offset_bottom = -942.0
-
 [node name="InputMessaging" parent="Interface" instance=ExtResource("4_ved6o")]
+visible = false
 offset_left = 1494.0
 offset_bottom = -347.0
+
+[node name="FactionHandDisplay" parent="Interface" instance=ExtResource("6_socpp")]
+
+[node name="PresentationModal" parent="Interface" instance=ExtResource("7_puxyr")]
+z_index = 100
+
+[node name="PlayerAction" parent="Interface" instance=ExtResource("7_fxc31")]
+offset_bottom = -942.0
 
 [node name="FactionsContainer" parent="Interface" instance=ExtResource("5_xcisb")]
 offset_bottom = -1005.0
 mouse_filter = 2
-
-[node name="FactionHandDisplay" parent="Interface" instance=ExtResource("6_socpp")]
