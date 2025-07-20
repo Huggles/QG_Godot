@@ -117,6 +117,10 @@ public partial class FactionData : DataObject
             }
             DebugUtilities.PrintPeer(texturePath);
             Texture2D texture2D = GD.Load<Texture2D>(texturePath);
+            if (texture2D == null)
+            {
+                throw new Exception("Texture could not be loaded: " + texturePath);
+            }
             CardFrontTextures.Add(cardType, texture2D);
         }
     }
