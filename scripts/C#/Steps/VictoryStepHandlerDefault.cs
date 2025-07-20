@@ -32,7 +32,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
 
         FactionState.Score += vpTurnSummary.TotalScore;
         gameFlow.VictoryPointSummaries[Faction].Add(vpTurnSummary);
-        EventBus.Emit(EventBus.SignalName.FactionScoredPoints, (int)Faction, vpTurnSummary.TotalScore);
+        EventBus.Emit(EventBus.SignalName.FactionScoredPoints, (int)Faction, FactionState.Score);
 
         DebugUtilities.PrintPeer(vpTurnSummary);
     }

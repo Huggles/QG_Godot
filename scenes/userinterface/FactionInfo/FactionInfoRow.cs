@@ -17,7 +17,10 @@ public partial class FactionInfoRow : Control
     private Label ScoreLabel => GetNode<Label>("%ScoreLabel");
     private Panel DetailPanel => GetNode<Panel>("%DetailPanel");
     private RichTextLabel TurnSummariesRichText => GetNode<RichTextLabel>("%TurnSummariesRichText");
-    private Button FactionInfoButton => GetNode<Button>("FactionInfoButton");
+    private Button FactionInfoButton => GetNode<Button>("%FactionInfoButton");
+    private Button DeckButton => GetNode<Button>("%DeckButton");
+    private Button PlayedCardsButton => GetNode<Button>("%PlayedCardsButton");
+    private TextureRect FactionFlagNode => GetNode<TextureRect>("%FactionFlag");    
 
     private Timer hoverTimer;
     private bool isMouseOver = false;
@@ -33,8 +36,12 @@ public partial class FactionInfoRow : Control
     public void LoadUI()
     {
         // Set background color
-        Color factionColor = FactionState.FactionData.FactionColor;
+        Color factionColor = FactionState.FactionData.FactionColor;        
         BackgroundPanel.SelfModulate = Colors.White;
+
+        Texture2D factionFlag = FactionState.FactionData.FlagTexture;
+        FactionFlagNode.Texture = factionFlag;
+
 
         StyleBoxFlat styleBox = (StyleBoxFlat)BackgroundPanel.GetThemeStylebox("panel").Duplicate();
         styleBox.BgColor = factionColor;
@@ -61,8 +68,21 @@ public partial class FactionInfoRow : Control
         {
             if (Faction != (Faction)faction)
             {
-                DetailPanel.Visible = false;
+                DetailPanel.Visible = false; 
             }
+        };
+
+        DeckButton.Pressed += () =>
+        {
+            List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DeckCardIds, false);
+            PresentationModal.Instance.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Draw Deck", false);
+        };
+        PlayedCardsButton.Pressed += () =>
+        {
+            DeckState deckState = DeckState.ForFaction(Faction);
+            List<int> playedCardIds = [.. deckState.StatusCardIds, .. deckState.ResponseCardIds];
+            List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(playedCardIds, false);            
+            PresentationModal.Instance.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Played Cards", false);
         };
 
         FactionInfoButton.Pressed += () => { ToggleDetails(); };

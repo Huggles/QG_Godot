@@ -75,18 +75,6 @@ theme_override_styles/normal = ExtResource("4_54hqk")
 text = "Skip
 "
 
-[node name="DeckButton" type="Button" parent="HBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 50)
-layout_mode = 2
-focus_mode = 0
-mouse_force_pass_scroll_events = false
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 28
-theme_override_styles/hover = ExtResource("3_ff84v")
-theme_override_styles/normal = ExtResource("4_54hqk")
-text = "Deck (Cheat)"
-
 [node name="DiscardedDeckButton" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 50)
@@ -102,6 +90,7 @@ text = "Discarded
 
 [node name="TestButton" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
 focus_mode = 0

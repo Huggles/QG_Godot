@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Godot;
 
@@ -11,7 +12,12 @@ public partial class EWBomberCommand : EWCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                DiscardCardsChangeEvent discardCardsChangeEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.ITALY, 4));
+
+                Variant[] response = await PresentationModal.Instance.ShowModal(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.ITALY]), "Select a faction");                
+                Faction selectedFaction = (Faction)response[0].As<int>();
+                await PresentationModal.Instance.HideModal();
+
+                DiscardCardsChangeEvent discardCardsChangeEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, selectedFaction, 4));
                 discardCardsChangeEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(discardCardsChangeEvent);                
             })

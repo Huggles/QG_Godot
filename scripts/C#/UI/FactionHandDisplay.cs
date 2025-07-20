@@ -36,7 +36,6 @@ public partial class FactionHandDisplay : Control, LoadableUI
         CardPreviewContainer = GetNode<Panel>("%CardPreviewContainer");
         CardPreview = GetNode<CardScene>("%CardPreview");
         SkipButton = GetNode<Button>("%SkipButton");
-        DeckButton = GetNode<Button>("%DeckButton");
         DiscardedDeckButton = GetNode<Button>("%DiscardedDeckButton");
         TestButton = GetNode<Button>("%TestButton");
 
@@ -48,29 +47,15 @@ public partial class FactionHandDisplay : Control, LoadableUI
                 Show(GameSession.Instance.GameFlow.CurrentFaction);
             }
         };
-        SkipButton.Pressed += () => { OnCardSelected(-1); };
-        DeckButton.Pressed += () =>
-        {
-            List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DeckCardIds, false);
-            PresentationModal.Instance.ShowModal(presentationItems, "Your Draw Deck", false);
-        };
+        SkipButton.Pressed += () => { OnCardSelected(-1); };       
         DiscardedDeckButton.Pressed += () =>
         {
             List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DiscardedCardIds, false);            
             PresentationModal.Instance.ShowModal(presentationItems, "Your Discarded Cards");
         };
         TestButton.Pressed += () =>
-        {
-            List<PresentationItem> presentationItems = new List<PresentationItem>
-            {
-                new PresentationItemImageButton(0, FactionData.GERMANY_FLAG_TEXTURE, true),
-                new PresentationItemImageButton(0, FactionData.UNITED_KINGDOM_FLAG_TEXTURE, true),
-                new PresentationItemImageButton(0, FactionData.JAPAN_FLAG_TEXTURE, true),
-                new PresentationItemImageButton(0, FactionData.SOVIET_FLAG_TEXTURE, true),
-                new PresentationItemImageButton(0, FactionData.ITALY_FLAG_TEXTURE, true),
-                new PresentationItemImageButton(0, FactionData.UNITED_STATES_FLAG_TEXTURE, true)
-            };
-            PresentationModal.Instance.ShowModal(presentationItems, "Select a faction");
+        {            
+            PresentationModal.Instance.ShowModal(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
         };
     }
 

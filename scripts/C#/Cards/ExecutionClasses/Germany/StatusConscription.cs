@@ -20,6 +20,8 @@ public partial class StatusConscription : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(2), false);
+                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards", 2000);
                 
                 int selectedCountryId = await new SelectCountryHandler(BuildableLandCountries()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));

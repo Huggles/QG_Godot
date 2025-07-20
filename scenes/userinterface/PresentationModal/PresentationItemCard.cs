@@ -33,6 +33,9 @@ public partial class PresentationItemCard : PresentationItem
         CardSceneInstance.ShowCard(cardId);
         CardSceneInstance.SetClickable(Selectable);
         CardSceneInstance.TriggersEmphasis(false);
+        CardSceneInstance.Size = CardSize;
+        CardSceneInstance.CustomMinimumSize = CardSize;
+        CardSceneInstance.Selected += (cardId) => { EmitSignal(SignalName.ItemClicked, Identifier); };       
     }
 
     public static List<PresentationItem> FromCardIds(List<int> cardIds, bool selectable)

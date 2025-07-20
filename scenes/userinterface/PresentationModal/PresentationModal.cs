@@ -20,7 +20,8 @@ public partial class PresentationModal : Control, LoadableUI
     public List<Control> PresentationItemControls = new List<Control>();
 
 
-    [Signal] public delegate void FinishedEventHandler();
+    [Signal] public delegate void OnShowEventHandler();
+    [Signal] public delegate void OnHideEventHandler();
     [Signal] public delegate void ItemSelectedEventHandler(int identifier);
 
 
@@ -75,6 +76,7 @@ public partial class PresentationModal : Control, LoadableUI
         PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, 1);
         propertyTweener1.Finished += async () =>
         {
+            EmitSignal(SignalName.OnShow);
             await Task.Delay((int)duration);
             tween1.Dispose();
 
@@ -83,10 +85,18 @@ public partial class PresentationModal : Control, LoadableUI
                 HideModal();
             }
         };
-        return ToSignal(this, SignalName.Finished);
+        if (duration > 0)
+        {
+            return ToSignal(this, SignalName.OnHide);
+        }
+        else
+        {
+            return ToSignal(this, SignalName.OnShow);
+        }
+        
     }
 
-    public void HideModal()
+    public SignalAwaiter HideModal()
     {
         InputManager.Instance.KeyClicked -= HandleKeyboardInput;
         var tween2 = GetTree().CreateTween();
@@ -101,14 +111,16 @@ public partial class PresentationModal : Control, LoadableUI
                 presentationItem.ItemClicked -= HandleItemClicked;
             }
             foreach (Control presentationItemControl in PresentationItemControls)
+            {
+                if (presentationItemControl.GetParent() != null)
                 {
-                    if (presentationItemControl.GetParent() != null)
-                    {                        
-                        presentationItemControl.GetParent().RemoveChild(presentationItemControl);
-                    }
-                }            
-            EmitSignal(SignalName.Finished);
+                    presentationItemControl.GetParent().RemoveChild(presentationItemControl);
+                }
+            }
+            PresentationItemControls.Clear();
+            EmitSignal(SignalName.OnHide);
         };
+        return ToSignal(this, SignalName.OnHide);
     }
 
     public void ShowExitButton(Action callback)
@@ -133,11 +145,11 @@ public partial class PresentationModal : Control, LoadableUI
                 presentationItem.LoadControl();
                 presentationItem.ItemClicked += HandleItemClicked;
             }
+            Vector2 gridSize = new Vector2(0, presentationItems.Count > GridCardContainer.Columns ? PresentationItemControls[0].Size.Y * 2 : PresentationItemControls[0].Size.Y);
+            CardScrollContainer.CustomMinimumSize = gridSize;
+            CardScrollContainer.Size = gridSize;
+            CardScrollContainer.ScrollVertical = 0;
         }
-
-        Vector2 gridSize = new Vector2(0, presentationItems.Count > GridCardContainer.Columns ? PresentationItemControls[0].Size.Y * 2 : PresentationItemControls[0].Size.Y);
-        CardScrollContainer.CustomMinimumSize = gridSize;
-        CardScrollContainer.Size = gridSize;
     }
     private void HandleItemClicked(int identifier) {        
         EmitSignal(SignalName.ItemSelected, identifier);
@@ -150,6 +162,4 @@ public partial class PresentationModal : Control, LoadableUI
             HideModal();
         }
     }
-
-    
 }

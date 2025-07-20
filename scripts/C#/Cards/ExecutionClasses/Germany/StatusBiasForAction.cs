@@ -33,6 +33,9 @@ public partial class StatusBiasForAction : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(1), false);
+                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards", 2000);
+                
                 BattleTarget battleTarget = await new SelectBattleTargetHandler(BattleTargets).Handle();
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;

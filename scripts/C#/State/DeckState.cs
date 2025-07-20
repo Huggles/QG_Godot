@@ -116,9 +116,22 @@ public partial class DeckState : StateObject
 
     public void DiscardCard(int cardId)
     {
-        if (!HandCardIds.Contains(cardId)) return;
-
-        HandCardIds.Remove(cardId);
+        if (HandCardIds.Contains(cardId))
+        {
+            HandCardIds.Remove(cardId);
+        }
+        else if (DeckCardIds.Contains(cardId))
+        {
+            DeckCardIds.Remove(cardId);
+        }
+        else if (StatusCardIds.Contains(cardId))
+        {
+            StatusCardIds.Remove(cardId);
+        }
+        else if (ResponseCardIds.Contains(cardId))
+        {
+            ResponseCardIds.Remove(cardId);
+        }
         DiscardedCardIds.Add(cardId);
     }
 

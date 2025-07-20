@@ -45,6 +45,8 @@ public partial class FactionData : DataObject
         }
     }
 
+    public Texture2D FlagTexture => FactionFlags[Faction];
+
     public String FactionAdjactiveLabel
     {
         get
@@ -80,6 +82,15 @@ public partial class FactionData : DataObject
     public static readonly Texture2D SOVIET_FLAG_TEXTURE =          GD.Load<Texture2D>("res://assets/factions/soviet/Soviet_Flag.png");
     public static readonly Texture2D ITALY_FLAG_TEXTURE =           GD.Load<Texture2D>("res://assets/factions/italy/Italy_Flag.png");
     public static readonly Texture2D UNITED_STATES_FLAG_TEXTURE =   GD.Load<Texture2D>("res://assets/factions/united_states/US_Flag.png");
+    public static Dictionary<Faction, Texture2D> FactionFlags = new Dictionary<Faction, Texture2D>
+    {
+            { Faction.GERMANY,         GERMANY_FLAG_TEXTURE },
+            { Faction.UNITED_KINGDOM,  UNITED_KINGDOM_FLAG_TEXTURE },
+            { Faction.JAPAN,           JAPAN_FLAG_TEXTURE },
+            { Faction.SOVIET,          SOVIET_FLAG_TEXTURE },
+            { Faction.ITALY,           ITALY_FLAG_TEXTURE },
+            { Faction.UNITED_STATES,   UNITED_STATES_FLAG_TEXTURE }
+    };
     
     public void LoadTextures()
     {
