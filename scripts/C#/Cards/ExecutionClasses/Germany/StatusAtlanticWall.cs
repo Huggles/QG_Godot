@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Threading.Tasks;
 
 public partial class StatusAtlanticWall : StatusCardLogic
 {
@@ -21,7 +22,8 @@ public partial class StatusAtlanticWall : StatusCardLogic
             new CardStep(this, async() => {
                 DiscardCardsChangeEvent discardCardsChangeEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.ITALY, 4));
                 discardCardsChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardCardsChangeEvent);                
+                await Task.CompletedTask;
+                return discardCardsChangeEvent;  
             })
         };
     }

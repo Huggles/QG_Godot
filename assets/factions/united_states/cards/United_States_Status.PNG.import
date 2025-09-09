@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfadj41su87rj"
-path="res://.godot/imported/United_States_Status.PNG-611f3a9dfc16faf7c64b9b9261e9e800.ctex"
+uid="uid://deb20w1bdkn46"
+path="res://.godot/imported/United_States_Status.png-789047627beb1d1bbf2b87dcaaae0ff6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/united_states/cards/United_States_Status.PNG"
-dest_files=["res://.godot/imported/United_States_Status.PNG-611f3a9dfc16faf7c64b9b9261e9e800.ctex"]
+source_file="res://assets/factions/united_states/cards/United_States_Status.png"
+dest_files=["res://.godot/imported/United_States_Status.png-789047627beb1d1bbf2b87dcaaae0ff6.ctex"]
 
 [params]
 

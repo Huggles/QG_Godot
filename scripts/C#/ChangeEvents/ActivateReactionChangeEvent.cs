@@ -16,12 +16,7 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
     }
 
     protected override async Task<bool> ExecuteAsync(){                
-        SourceCardState.CardLogic.ActivatedInTurns.Add(GameSession.Instance.GameFlow.GameTurn);
-        await SourceCardState.CardLogic.React(StepId);
-        SourceCardState.CardLogic.CardFinished += () =>
-        {
-            DebugUtilities.PrintPeer("CardFinished");
-        };
+        SourceCardState.CardLogic.ActivatedInTurns.Add(GameSession.Instance.GameFlow.GameTurn);        
         return true;
     }
 }

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwruv1c5yfj8v"
-path="res://.godot/imported/Italy_Response.PNG-854bef19e2e00de346cb354fe86600ca.ctex"
+uid="uid://bjdtsqdvhe7ta"
+path="res://.godot/imported/Italy_Response.png-24ba9d7123e4ce3861081702772f4a94.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_Response.PNG"
-dest_files=["res://.godot/imported/Italy_Response.PNG-854bef19e2e00de346cb354fe86600ca.ctex"]
+source_file="res://assets/factions/italy/cards/Italy_Response.png"
+dest_files=["res://.godot/imported/Italy_Response.png-24ba9d7123e4ce3861081702772f4a94.ctex"]
 
 [params]
 

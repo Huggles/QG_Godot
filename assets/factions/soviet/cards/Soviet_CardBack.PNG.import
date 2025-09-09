@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://plpn4qrcojkd"
-path="res://.godot/imported/Soviet_CardBack.PNG-6637bf036bb600c5c2fc8c093cb53c7a.ctex"
+uid="uid://ddlak316g2xsk"
+path="res://.godot/imported/Soviet_CardBack.png-56ea8822d90d7e261e15d05d82c5655c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/soviet/cards/Soviet_CardBack.PNG"
-dest_files=["res://.godot/imported/Soviet_CardBack.PNG-6637bf036bb600c5c2fc8c093cb53c7a.ctex"]
+source_file="res://assets/factions/soviet/cards/Soviet_CardBack.png"
+dest_files=["res://.godot/imported/Soviet_CardBack.png-56ea8822d90d7e261e15d05d82c5655c.ctex"]
 
 [params]
 

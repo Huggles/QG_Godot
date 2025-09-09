@@ -12,7 +12,8 @@ public abstract partial class StatusCardLogic : CardLogic
                 DeckState deckState = DeckState.ForFaction(Faction);
                 deckState.StatusCardIds.Add(CardState.Id);
                 deckState.HandCardIds.Remove(CardState.Id);
-                await Task.Delay(100);
+                await Task.CompletedTask;
+                return null;
             }) 
         }; 
     }

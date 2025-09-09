@@ -13,7 +13,8 @@ public partial class EventPlunder : EventCardLogic
                 FactionState factionState = FactionState.ForEnum(Faction);
                 int score = factionState.ActiveUnitIds.ToUnitStates().ToList().Count(unitState => unitState.CountryState.Country != Country.Italy);
                 IVictoryStepHandler iVPStepHandler = GameSession.Instance.GameFlow.vpStepHandler;
-                await iVPStepHandler.ScorePoints(new VPEntry(score,$"{score} VPs for {factionState.FactionData.FactionAdjactiveLabel} armies and navies outside italy."));                
+                await iVPStepHandler.ScorePoints(new VPEntry(score,$"{score} VPs for {factionState.FactionData.FactionAdjactiveLabel} armies and navies outside italy."));
+                return null;
             })
         }; 
     }

@@ -19,7 +19,7 @@ public partial class EWBomberCommand : EWCardLogic
 
                 DiscardCardsChangeEvent discardCardsChangeEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, selectedFaction, 4));
                 discardCardsChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardCardsChangeEvent);                
+                return discardCardsChangeEvent;      
             })
         };
     }

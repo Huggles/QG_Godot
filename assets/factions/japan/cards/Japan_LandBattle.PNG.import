@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cyuy5hcva6p6a"
-path="res://.godot/imported/Japan_LandBattle.PNG-b5958376a89fad8e8f6a0aebed4e31da.ctex"
+uid="uid://c5pxtkr333abf"
+path="res://.godot/imported/Japan_LandBattle.png-1bbc2dc0c086ac3b2dcfa76e7be07adf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/japan/cards/Japan_LandBattle.PNG"
-dest_files=["res://.godot/imported/Japan_LandBattle.PNG-b5958376a89fad8e8f6a0aebed4e31da.ctex"]
+source_file="res://assets/factions/japan/cards/Japan_LandBattle.png"
+dest_files=["res://.godot/imported/Japan_LandBattle.png-1bbc2dc0c086ac3b2dcfa76e7be07adf.ctex"]
 
 [params]
 

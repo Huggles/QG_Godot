@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c71ml6w20jtde"
-path="res://.godot/imported/Japan_EconomicWarfare.PNG-22598dad8ebd6cbe3b7eeb876b1b478c.ctex"
+uid="uid://on5rk8rslaef"
+path="res://.godot/imported/Japan_EconomicWarfare.png-6890d66f6b08b1e0f84287be7115789c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/japan/cards/Japan_EconomicWarfare.PNG"
-dest_files=["res://.godot/imported/Japan_EconomicWarfare.PNG-22598dad8ebd6cbe3b7eeb876b1b478c.ctex"]
+source_file="res://assets/factions/japan/cards/Japan_EconomicWarfare.png"
+dest_files=["res://.godot/imported/Japan_EconomicWarfare.png-6890d66f6b08b1e0f84287be7115789c.ctex"]
 
 [params]
 

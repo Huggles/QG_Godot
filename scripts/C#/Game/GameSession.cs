@@ -19,6 +19,8 @@ public partial class GameSession : Node
         }
     }
 
+    public static bool IsStarted = false;
+
     private List<PlayerScene> playerScenes { get; set; }
 
     public IGameMode GameMode;
@@ -30,18 +32,19 @@ public partial class GameSession : Node
         instance = this;
     }
 
-    public void StartSession(List<PlayerScene> playerScenes)
+    public async Task StartSession(List<PlayerScene> playerScenes)
     {
         DebugUtilities.PrintPeer("Start Session");
         this.playerScenes = playerScenes;
 
         GameState = new GameState();
         GameMode = new GameModeDefault();
-        GameMode.Init();
+        GameFlow = new GameFlow();
+        await GameMode.Init();
 
         RegisterGameEvents();
 
-        GameFlow = new GameFlow();
+        
         GameFlow.StartGame();
 
         OnGameStarted();
@@ -56,6 +59,7 @@ public partial class GameSession : Node
     }
     private void OnGameStarted()
     {
+        IsStarted = true;
         EventBus.Emit(EventBus.SignalName.GameSessionStarted);
     }
 

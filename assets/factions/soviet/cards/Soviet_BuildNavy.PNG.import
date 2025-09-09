@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c74xhij3u26bt"
-path="res://.godot/imported/Soviet_BuildNavy.PNG-f79cc34c00caae050d93cf97c898bd57.ctex"
+uid="uid://bwdvgapf51t4n"
+path="res://.godot/imported/Soviet_BuildNavy.png-27581d9b8ad8b86366968f5d782a730c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/soviet/cards/Soviet_BuildNavy.PNG"
-dest_files=["res://.godot/imported/Soviet_BuildNavy.PNG-f79cc34c00caae050d93cf97c898bd57.ctex"]
+source_file="res://assets/factions/soviet/cards/Soviet_BuildNavy.png"
+dest_files=["res://.godot/imported/Soviet_BuildNavy.png-27581d9b8ad8b86366968f5d782a730c.ctex"]
 
 [params]
 

@@ -52,7 +52,7 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void CardPlayPoolFinishedEventHandler();
     [Signal] public delegate void CardPlayStartedEventHandler();
     [Signal] public delegate void CardPlayCompletedEventHandler();
-    [Signal] public delegate void CardStepFinishedEventHandler();
+    [Signal] public delegate void CardStepFinishedEventHandler(int cardStepId);
 
     [Signal] public delegate void CardPlayHandlerCompletedEventHandler();
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://de72jlyle4uht"
-path="res://.godot/imported/Italy_BuildArmy.PNG-fa328a37b575c8702b24d612eaf6fa7f.ctex"
+uid="uid://cx7mygddj7t6"
+path="res://.godot/imported/Italy_BuildArmy.png-e75f3ac25df773bd7c4c3acd85abefee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_BuildArmy.PNG"
-dest_files=["res://.godot/imported/Italy_BuildArmy.PNG-fa328a37b575c8702b24d612eaf6fa7f.ctex"]
+source_file="res://assets/factions/italy/cards/Italy_BuildArmy.png"
+dest_files=["res://.godot/imported/Italy_BuildArmy.png-e75f3ac25df773bd7c4c3acd85abefee.ctex"]
 
 [params]
 

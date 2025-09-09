@@ -13,6 +13,7 @@ public abstract partial class ResponseCardLogic : CardLogic
                 deckState.ResponseCardIds.Add(CardState.Id);
                 deckState.HandCardIds.Remove(CardState.Id);
                 await Task.CompletedTask;
+                return null;
             })
         }; 
     }

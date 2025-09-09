@@ -31,7 +31,8 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
                     int newNumberOfCards = Math.Max(discardCardsChangeEvent.NumberOfCards - this.NumberOfCardsReduction, 0);
                     discardCardsChangeEvent.NumberOfCards = newNumberOfCards;
                     PlayerActionLabel.ShowText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);
-                    await Task.Delay(2000);                    
+                    await Task.Delay(2000);
+                    return null;          
                 }else {
                     throw new Exception("Reaction should be to a discard change event");
                 }

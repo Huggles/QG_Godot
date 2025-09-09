@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c70k51ub2a52u"
-path="res://.godot/imported/Italy_EconomicWarfare.PNG-9efeff1997569fb90bb0418749c2f85f.ctex"
+uid="uid://cgw4n8ettt27b"
+path="res://.godot/imported/Italy_EconomicWarfare.png-192b996d40f1c578ca504bd2d6468526.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_EconomicWarfare.PNG"
-dest_files=["res://.godot/imported/Italy_EconomicWarfare.PNG-9efeff1997569fb90bb0418749c2f85f.ctex"]
+source_file="res://assets/factions/italy/cards/Italy_EconomicWarfare.png"
+dest_files=["res://.godot/imported/Italy_EconomicWarfare.png-192b996d40f1c578ca504bd2d6468526.ctex"]
 
 [params]
 

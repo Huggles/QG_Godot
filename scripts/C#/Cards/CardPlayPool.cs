@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
@@ -39,7 +40,7 @@ public partial class CardPlayPool : GodotObject
     public static ChangeEvent LastChangeEvent;
     public static Faction LastChangeEventByFaction
     {
-        get { return LastChangeEvent.TriggeringFaction; }
+        get { return LastChangeEvent != null ? LastChangeEvent.TriggeringFaction : Faction.GERMANY; }
     }
     public static FactionTeam LastChangeEventByTeam
     {
@@ -89,6 +90,48 @@ public partial class CardPlayPool : GodotObject
         List<ChangeEvent> changeEvents = CardPlayPool.ChangeEventsPool.Where(changeEvent => changeEvent is T).ToList();
         return changeEvents.Map(changeEvent => changeEvent as T);
     }
+
+
+    public async static Task DoActivationOption(CardActivationOption cardActivationOption) {
+        if (cardActivationOption != null)
+        {
+            CardLogic cardLogic = cardActivationOption.CardState.CardLogic;
+            CardStep cardStep = CardStep.ForId(cardActivationOption.StepId);
+            ChangeEvent cardIntroductionChangeEvent = null;
+
+            if (!cardLogic.IsPlayed)
+            {
+                cardIntroductionChangeEvent = new PlayCardChangeEvent(cardActivationOption.CardState.Faction, cardActivationOption.CardId);
+                cardIntroductionChangeEvent.IsTrigger = true;
+                await DoChangeEvent(cardIntroductionChangeEvent);
+            }
+            else if (cardLogic.IsPlayed && cardLogic.IsReaction && !cardLogic.IsActivatedThisTurn)
+            {
+                cardIntroductionChangeEvent = new ActivateReactionChangeEvent(cardActivationOption.CardState.Faction, cardActivationOption.CardId, null);
+                cardIntroductionChangeEvent.IsTrigger = true;
+                await DoChangeEvent(cardIntroductionChangeEvent);
+            }
+            if (cardIntroductionChangeEvent == null || (cardIntroductionChangeEvent != null && !cardIntroductionChangeEvent.IsBlocked))
+            {
+                ChangeEvent stepResultChangeEvent = null;
+                if (cardIntroductionChangeEvent is PlayCardChangeEvent)
+                {
+                    stepResultChangeEvent = await cardActivationOption.CardState.CardLogic.PlayCard(cardStep.Id);                    
+                }
+                else if (cardIntroductionChangeEvent is ActivateReactionChangeEvent && GameSession.IsStarted)
+                {
+                    stepResultChangeEvent = await cardActivationOption.CardState.CardLogic.React(cardStep.Id);                    
+                }
+                DebugUtilities.PrintPeer("FINISHED EXECUTING CARD STEP -> Requesting Reaction");
+                if (stepResultChangeEvent != null)
+                {
+                    await DoChangeEvent(stepResultChangeEvent);
+                }
+                
+            }
+        }
+    }
+
     public static async Task DoChangeEvent(ChangeEvent changeEvent)
     {
         int sourceCardId = changeEvent.SourceCardId;
@@ -118,35 +161,67 @@ public partial class CardPlayPool : GodotObject
             LastChangeEvent = changeEvent;
             changeEvent.ChangeEventApplied += (int changeEventId) =>
             {
-                ChangeEvent ce = ChangeEvent.ForId(changeEventId);                
+                ChangeEvent ce = ChangeEvent.ForId(changeEventId);
                 DebugUtilities.PrintPeer($"CardPlayPool.Applied {ce?.GetType().Name}");
             };
             await changeEvent.ApplyChange();
         }
-
-        if (changeEvent.IsTrigger)
+        if (changeEvent is PlayCardChangeEvent || changeEvent is ActivateReactionChangeEvent)
         {
-            if (changeEvent is PlayCardChangeEvent || changeEvent is ActivateReactionChangeEvent)
-            {
-                DebugUtilities.PrintPeer($"New Card was played, do not check for new actions");
-            }
-            else
-            {
-                DebugUtilities.PrintPeer($"RequestAfterChangeEventReaction  {changeEvent?.GetType().Name}");
-                DoNextActions();
-            }
+            DebugUtilities.PrintPeer($"New Card was played, do not check for new actions");
+            return;
         }
+        else
+        {
+
+        }
+        DoNextActions();
     }
     public static async void DoNextActions()
     {
-        bool reactionPlayed = await RequestAfterChangeEventReaction();
-        if (reactionPlayed == false)
+        if (GameSession.IsStarted)
         {
-            DebugUtilities.PrintPeer("No Reaction Was played");
-            await Task.Delay(500);
-            ClearPool();
-            EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);
+            CardActivationOption cardActivationOption = await RequestCardActivationOptions();
+            if (cardActivationOption == null)
+            {
+                DebugUtilities.PrintPeer("No Reaction Was played");
+                ClearPool();
+                EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);
+            }
         }
+        
+    } 
+    
+    public async static Task<CardActivationOption> RequestCardActivationOptions()
+    {
+        foreach (Faction faction in RequestOrder)
+        {
+            CardActivationOption cardActivationOption = await RequestCardActivationOptions(faction);
+            if (cardActivationOption != null)
+            {
+                return cardActivationOption;
+            }
+        }
+        return null;
+    }
+
+    public async static Task<CardActivationOption> RequestCardActivationOptions(Faction faction)
+    {
+        List<CardActivationOption> activationOptions = GetNextActions(faction);
+        if (activationOptions != null && activationOptions.Count > 0)
+        {
+            CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
+            if (cardActivationOption != null)
+            {
+                await DoActivationOption(cardActivationOption);
+                return cardActivationOption;
+            }
+        }
+        else
+        {
+            DebugUtilities.PrintPeer($"{faction} does have activation options");
+        }
+        return null;
     }
 
     public async static Task<List<CardActivationOption>> BlockChangeEvents(Faction faction)
@@ -169,67 +244,6 @@ public partial class CardPlayPool : GodotObject
         }
         return cardActivationOptions;
     }
-
-    public async static Task DoActivationOption(CardActivationOption cardActivationOption){
-        if (cardActivationOption != null)
-        {
-            CardLogic cardLogic = cardActivationOption.CardState.CardLogic;
-
-            if (!cardLogic.IsPlayed)
-            {
-                PlayCardChangeEvent playCardChangeEvent = new PlayCardChangeEvent(cardActivationOption.CardState.Faction, cardActivationOption.CardId);
-                playCardChangeEvent.IsTrigger = true;
-                await DoChangeEvent(playCardChangeEvent);
-            }
-            else if (cardLogic.IsPlayed && cardLogic.IsReaction && !cardLogic.IsActivatedThisTurn)
-            {
-                ActivateReactionChangeEvent activateReactionChangeEvent = new ActivateReactionChangeEvent(cardActivationOption.CardState.Faction, cardActivationOption.CardId, null);
-                activateReactionChangeEvent.IsTrigger = true;
-                DebugUtilities.PrintPeer("ActivateReactionChangeEvent1");
-                await DoChangeEvent(activateReactionChangeEvent);
-                DebugUtilities.PrintPeer("ActivateReactionChangeEvent2");
-            }
-            else
-            {
-                CardStep cardStep = CardStep.ForId(cardActivationOption.StepId);
-                PlayerActionLabel.ShowText(cardStep.CardLogic.ActivateActionGuidance(), -1, cardStep.CardLogic.Faction);
-                DebugUtilities.PrintPeer("EXECUTING");
-                await cardStep.Execute();
-                DebugUtilities.PrintPeer("FINISHED EXECUTING");
-            }
-        }
-    }
-
-    private async static Task<bool> RequestAfterChangeEventReaction()
-    {
-        foreach (Faction faction in RequestOrder)
-        {
-            bool reactionPlayed = await RequestActivationOption(faction);
-            if (reactionPlayed) return true;
-        }
-        return false;
-    }
-    
-    public async static Task<bool> RequestActivationOption(Faction faction)
-    {
-        List<CardActivationOption> activationOptions = GetNextActions(faction);
-        if (activationOptions != null && activationOptions.Count > 0)
-        {
-            CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
-            if (cardActivationOption == null)
-            {
-                return false;
-            }
-            DebugUtilities.PrintPeer("cardActivationOption");
-            _ = DoActivationOption(cardActivationOption);
-            return true;
-        }
-        else
-        {
-            DebugUtilities.PrintPeer($"{faction} does have activation options");
-        }
-        return false;
-    }   
 
     public static List<CardActivationOption> GetNextActions(Faction faction)
     {

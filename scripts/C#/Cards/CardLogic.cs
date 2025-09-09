@@ -22,9 +22,26 @@ public abstract partial class CardLogic : GodotObject
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
     public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);
+    public int NextStepId
+    {
+        get
+        {
+            if (!IsPlayed)
+            {
+                return ExecutablePlaySteps[0].Id;
+            }
+            else if (IsReaction)
+            {
+                return ExecutableReactSteps[0].Id;
+            }
+            else
+            {
+                return -1;
+            }            
+        }
+    }
 
     [Signal] public delegate void CardFinishedEventHandler();
-    [Signal] public delegate void CardStepFinishedEventHandler();
     
     public List<CardStep> PlayCardSteps;
     public List<CardStep> ReactCardSteps;
@@ -82,7 +99,6 @@ public abstract partial class CardLogic : GodotObject
             if (PlayCardSteps[i].PrerequisiteCardStep == null)
             {
                 PlayCardSteps[i].PrerequisiteCardStep = PlayCardSteps[i - 1];
-
             }
         }
         for (int i = ReactCardSteps.Count - 1; i > 0; i--)
@@ -97,23 +113,22 @@ public abstract partial class CardLogic : GodotObject
         {
             ReactCardSteps.ForEach(reactCardStep => reactCardStep.StepFinished = false);
         };
-    }
-    
+    }    
 
-    public void PlayCard(int stepId)
+    public async Task<ChangeEvent> PlayCard(int stepId)
     {
         DebugUtilities.PrintPeer("PlayCard");
         string message = PlayActionGuidance();
         PlayerActionLabel.ShowText(message, -1, Faction);
-        _ = CardStepForId(stepId).Execute();
+        return await CardStepForId(stepId).Execute();
     }
 
-    public async Task React(int stepId)
+    public async Task<ChangeEvent> React(int stepId)
     {
-        string message = ActivateActionGuidance();
-        PlayerActionLabel.ShowText(message, -1, Faction);
         DebugUtilities.PrintPeer("React");
-        await CardStepForId(stepId).Execute();        
+        string message = ActivateActionGuidance();
+        PlayerActionLabel.ShowText(message, -1, Faction);        
+        return await CardStepForId(stepId).Execute();        
     }
 
     public virtual string PlayActionGuidance() =>

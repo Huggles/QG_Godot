@@ -13,7 +13,7 @@ public partial class BuildNavy : CardLogic
                 int selectedCountryId = await new SelectCountryHandler(TargetableCountryStates.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(TargetableCountryStates.ToCountryIds(), Faction),this))
             .WithGuidance("Build a navy")

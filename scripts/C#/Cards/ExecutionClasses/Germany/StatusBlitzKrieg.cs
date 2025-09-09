@@ -25,7 +25,7 @@ public partial class StatusBlitzkrieg : StatusCardLogic
 
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
+                return deployUnitChangeEvent;                
             }).WithGuidance("Deploy an army in a country where you've battle this turn") 
         };
     }

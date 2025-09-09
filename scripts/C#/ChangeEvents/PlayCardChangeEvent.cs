@@ -13,16 +13,9 @@ public partial class PlayCardChangeEvent : ChangeEvent
     }
 
     protected override async Task<bool> ExecuteAsync(){
-        SourceCardState.CardLogic.IsPlayed = true;
-        SourceCardState.CardLogic.PlayCard(StepId);
-        SourceCardState.CardLogic.CardFinished += () =>
-        {
-            DebugUtilities.PrintPeer("CardFinished");
-        };
+        SourceCardState.CardLogic.IsPlayed = true;                
         DeckState deckState = DeckState.ForFaction(SourceCardState.Faction);
         deckState.DiscardCard(SourceCardState.Id); 
-
-
         await Task.CompletedTask;
         return true;
     }

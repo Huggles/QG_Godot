@@ -1,7 +1,8 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public interface IGameMode
 {
-    void Init();
+    Task Init();
 }

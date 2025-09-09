@@ -82,7 +82,7 @@ public partial class PresentationModal : Control, LoadableUI
 
             if (duration > 0)
             {
-                HideModal();
+                _ = HideModal();
             }
         };
         if (duration > 0)

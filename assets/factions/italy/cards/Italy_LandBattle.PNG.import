@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmgthf3v64xee"
-path="res://.godot/imported/Italy_LandBattle.PNG-f8ed4f65266ab8f691ac1dbff058a854.ctex"
+uid="uid://4p5r16npbrpu"
+path="res://.godot/imported/Italy_LandBattle.png-3a030f54f8d633ecd07fbfad9a0ee440.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_LandBattle.PNG"
-dest_files=["res://.godot/imported/Italy_LandBattle.PNG-f8ed4f65266ab8f691ac1dbff058a854.ctex"]
+source_file="res://assets/factions/italy/cards/Italy_LandBattle.png"
+dest_files=["res://.godot/imported/Italy_LandBattle.png-3a030f54f8d633ecd07fbfad9a0ee440.ctex"]
 
 [params]
 

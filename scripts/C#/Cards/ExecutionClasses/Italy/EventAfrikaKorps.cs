@@ -15,7 +15,7 @@ public partial class EventAfrikaKorps : ResponseCardLogic
                 int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
-                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable((int)targetCountries[0], Faction),this))
             .WithGuidance($"Recruit a {FactionState.ForEnum(targetFaction).FactionData.FactionAdjactiveLabel} army in {CountryState.ForEnum(targetCountries[0]).Label}"),
@@ -23,7 +23,7 @@ public partial class EventAfrikaKorps : ResponseCardLogic
                 int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
-                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable(targetCountries[1], Faction),this))
             .WithGuidance($"Recruit a {FactionState.ForEnum(targetFaction).FactionData.FactionAdjactiveLabel} navy in {CountryState.ForEnum(targetCountries[1]).Label}"),

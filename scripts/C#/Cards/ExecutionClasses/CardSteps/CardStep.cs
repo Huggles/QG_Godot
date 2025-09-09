@@ -28,7 +28,7 @@ public partial class CardStep : GodotObject
     }
 
     public CardLogic CardLogic;    
-    protected Func<Task> StepLogic;
+    protected Func<Task<ChangeEvent>> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
     protected Func<Condition> GetConditionMethod;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
@@ -58,7 +58,7 @@ public partial class CardStep : GodotObject
 
     public string ActionGuidance;
 
-    public CardStep(CardLogic cardLogic, Func<Task> stepLogic)
+    public CardStep(CardLogic cardLogic, Func<Task<ChangeEvent>> stepLogic)
     {
         this.CardLogic = cardLogic;
         this.StepLogic = stepLogic;
@@ -79,7 +79,7 @@ public partial class CardStep : GodotObject
         return this;
     }
 
-    public CardStep WithStepLogic(Func<Task> stepLogic)
+    public CardStep WithStepLogic(Func<Task<ChangeEvent>> stepLogic)
     {
         this.StepLogic = stepLogic;
         return this;
@@ -108,10 +108,10 @@ public partial class CardStep : GodotObject
         get { return PrerequisiteCardStep != null ? PrerequisiteCardStep.StepFinished : true; }
     }
 
-    public async Task Execute()
+    public async Task<ChangeEvent> Execute()
     {
         StepFinished = true;
-        bool CanExecuteStep = MeetAllConditions;        
+        bool CanExecuteStep = MeetAllConditions;
         if (!CanExecuteStep)
         {
             //Should skip step
@@ -125,27 +125,22 @@ public partial class CardStep : GodotObject
             else
             {
                 DebugUtilities.PrintPeer("NO MORE STEPS LEFT");
-                CardPlayPool.DoNextActions();
             }
-
-            return;
         }
         else
         {
             try
             {
-                DebugUtilities.PrintPeer("INVOKING");
+                DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName}");
                 PlayerActionLabel.ShowText(ActionGuidance, -1, TriggeringFaction);
-                await StepLogic.Invoke();
-                DebugUtilities.PrintPeer("FINISHED INVOKING");
+                return await StepLogic.Invoke();
             }
             catch (Exception e)
             {
                 DebugUtilities.PrintPeer(e.Message);
             }
         }
-        
-        
+        return null;
     }
 
     public T BuildChangeEvent<T>(T changeEvent) where T : ChangeEvent

@@ -12,10 +12,26 @@ public partial class CardActivationOption : ActivationOption
     {
         get { return CardState.ForId(CardId); }
     }
-    public ChangeEvent ChangeEvent {
+    public ChangeEvent ChangeEvent
+    {
         get { return ChangeEvent.ForId(ChangeEventId); }
     }
 
+    public CardActivationOption(int cardId, bool activatable = false) : base(cardId, null)
+    {
+        CardId = cardId;
+        Activatable = activatable;
+        Label =  CardState.CardData.Label;
+        StepId = CardState.CardLogic.NextStepId;
+    }
+
+    public CardActivationOption(int cardId, string label, bool activatable = false) : base(cardId, label)
+    {
+        CardId = cardId;
+        Activatable = activatable;
+        Label = label;
+        StepId = CardState.CardLogic.NextStepId;
+    }
     public CardActivationOption(int cardId, int stepId, string label, bool activatable = false) : base(cardId, label)
     {
         CardId = cardId;

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c82sdb00h5woo"
-path="res://.godot/imported/United_States_BuildArmy.png-1fb6e4c308b4318d4defbc49716d4814.ctex"
+uid="uid://ntsmjlx0hvcj"
+path="res://.godot/imported/Japan_BuildArmy.png-84a1b3fcf2dc6d1cc94851523be69185.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/united_states/cards/United_States_BuildArmy.png"
-dest_files=["res://.godot/imported/United_States_BuildArmy.png-1fb6e4c308b4318d4defbc49716d4814.ctex"]
+source_file="res://assets/factions/japan/cards/Japan_BuildArmy.png"
+dest_files=["res://.godot/imported/Japan_BuildArmy.png-84a1b3fcf2dc6d1cc94851523be69185.ctex"]
 
 [params]
 

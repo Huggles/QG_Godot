@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://msj834pcw68j"
-path="res://.godot/imported/United_States_CardBack.PNG-deb400c0806f58a094577807a051a451.ctex"
+uid="uid://qcjhx3idg310"
+path="res://.godot/imported/United_States_CardBack.png-915d1a845fef982acf4a81ad2ef99634.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/united_states/cards/United_States_CardBack.PNG"
-dest_files=["res://.godot/imported/United_States_CardBack.PNG-deb400c0806f58a094577807a051a451.ctex"]
+source_file="res://assets/factions/united_states/cards/United_States_CardBack.png"
+dest_files=["res://.godot/imported/United_States_CardBack.png-915d1a845fef982acf4a81ad2ef99634.ctex"]
 
 [params]
 

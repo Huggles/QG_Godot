@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://daqx570h0ludn"
-path="res://.godot/imported/Soviet_Response.PNG-a31adec8c0007ffbbfddf23f145edbc3.ctex"
+uid="uid://br8evssu010b7"
+path="res://.godot/imported/Soviet_Response.png-d68653a924ffa27e2bc2260522bccffe.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/soviet/cards/Soviet_Response.PNG"
-dest_files=["res://.godot/imported/Soviet_Response.PNG-a31adec8c0007ffbbfddf23f145edbc3.ctex"]
+source_file="res://assets/factions/soviet/cards/Soviet_Response.png"
+dest_files=["res://.godot/imported/Soviet_Response.png-d68653a924ffa27e2bc2260522bccffe.ctex"]
 
 [params]
 

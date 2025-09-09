@@ -18,17 +18,15 @@ public partial class PlayStepHandlerDefault : GodotObject,IPlayStepHandler
     public async void CardPoolFinished()
     {
         DebugUtilities.PrintPeer("");
-        await Task.Delay(100);
         CardPlayPool.ClearPool();
         EmitSignal(SignalName.PlayStepFinished);
     }
 
     public async void RequestCardPlay()
     {
-        bool cardPlayed = await CardPlayPool.RequestActivationOption(faction);
-        if (cardPlayed == false)
+        CardActivationOption cardActivationOption = await CardPlayPool.RequestCardActivationOptions(faction);
+        if (cardActivationOption == null)
         {
-            await Task.Delay(100);
             CardPlayPool.ClearPool();
             CardPoolFinished();
         }

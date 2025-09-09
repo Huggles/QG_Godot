@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdsug6h0ki580"
-path="res://.godot/imported/Japan_BuildNavy.PNG-3f5b022ff29ff39f853b0bce57ff46a0.ctex"
+uid="uid://d32spt1oj6c22"
+path="res://.godot/imported/Japan_BuildNavy.png-ba9f3bcbe56545c8ccc13727c1879c69.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/japan/cards/Japan_BuildNavy.PNG"
-dest_files=["res://.godot/imported/Japan_BuildNavy.PNG-3f5b022ff29ff39f853b0bce57ff46a0.ctex"]
+source_file="res://assets/factions/japan/cards/Japan_BuildNavy.png"
+dest_files=["res://.godot/imported/Japan_BuildNavy.png-ba9f3bcbe56545c8ccc13727c1879c69.ctex"]
 
 [params]
 

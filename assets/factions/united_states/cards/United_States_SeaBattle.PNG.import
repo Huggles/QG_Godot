@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5xx0ibeo8f3w"
-path="res://.godot/imported/United_States_SeaBattle.PNG-637404273f9b747a9a97aeb8e8692c8f.ctex"
+uid="uid://cnpqaungridx5"
+path="res://.godot/imported/United_States_SeaBattle.png-9649d4328b6675374ae344a0d3187a0f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/united_states/cards/United_States_SeaBattle.PNG"
-dest_files=["res://.godot/imported/United_States_SeaBattle.PNG-637404273f9b747a9a97aeb8e8692c8f.ctex"]
+source_file="res://assets/factions/united_states/cards/United_States_SeaBattle.png"
+dest_files=["res://.godot/imported/United_States_SeaBattle.png-9649d4328b6675374ae344a0d3187a0f.ctex"]
 
 [params]
 

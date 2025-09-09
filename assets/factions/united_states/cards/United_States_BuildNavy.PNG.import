@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6dm6e51ig64b"
-path="res://.godot/imported/United_States_BuildNavy.PNG-d7f383abe7d25aef863d291778060fed.ctex"
+uid="uid://cdrxr8gxh2dek"
+path="res://.godot/imported/United_States_BuildNavy.png-69b180d39e47c5c6af34a3411aa77f68.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/united_states/cards/United_States_BuildNavy.PNG"
-dest_files=["res://.godot/imported/United_States_BuildNavy.PNG-d7f383abe7d25aef863d291778060fed.ctex"]
+source_file="res://assets/factions/united_states/cards/United_States_BuildNavy.png"
+dest_files=["res://.godot/imported/United_States_BuildNavy.png-69b180d39e47c5c6af34a3411aa77f68.ctex"]
 
 [params]
 

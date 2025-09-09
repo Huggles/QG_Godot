@@ -15,7 +15,7 @@ public partial class LandBattle : CardLogic
                 BattleTarget target = await new SelectBattleTargetHandler(emptyCountries, armyUnits).Handle();
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
-                _ = CardPlayPool.DoChangeEvent(battleCountryChange);
+                return battleCountryChange;
             }).WithCondition(()=> Condition.Build(new Condition.FactionHasBattleTarget(Faction, UnitType.ARMY),this))
         }; 
     }

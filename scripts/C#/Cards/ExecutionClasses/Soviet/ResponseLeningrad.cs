@@ -27,9 +27,10 @@ public partial class ResponseLeningrad : ResponseCardLogic
             new CardStep(this, async ()=>{
                 if(CardPlayPool.LastNoneNewCardChangeEvent is BattleUnitChangeEvent battleUnitChangeEvent){
                     battleUnitChangeEvent.IsBlocked = true;
-                    battleUnitChangeEvent.UnitState.ImmuneForTurn = true;                    
+                    battleUnitChangeEvent.UnitState.ImmuneForTurn = true;
                     PlayerActionLabel.ShowText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the land battle on his army in {CountryState.ForId(targetCountries[0])}", Faction);
-                    await Task.Delay(2000);                    
+                    await Task.Delay(2000);
+                    return null;
                 }else {
                     throw new Exception("Reaction should be to a discard change event");
                 }

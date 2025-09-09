@@ -30,7 +30,7 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
                 int selectedCountryId = await new SelectCountryHandler(DeployableCountryIds).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                _ = CardPlayPool.DoChangeEvent(deployUnitChangeEvent);                
+                return deployUnitChangeEvent;                
             }).WithGuidance("Build a navy")
         };
     }

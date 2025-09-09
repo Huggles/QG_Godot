@@ -38,12 +38,6 @@ public partial class CardState : Object
         return false;
     }
 
-    public void PlayCard(int stepId)
-    {
-        DebugUtilities.PrintPeer("play_card");
-        CardLogic.PlayCard(stepId);
-    }
-
     private CardLogic GetCardLogicClass()
     {
         Type cardType = Type.GetType(CardData.ExecutionClass);

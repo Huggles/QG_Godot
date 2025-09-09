@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://db3oki3gy4fsu"
-path="res://.godot/imported/Italy_CardBack.PNG-639aa87bf8a8150d526971a5f1ccda44.ctex"
+uid="uid://c4av2q6j5grct"
+path="res://.godot/imported/Italy_CardBack.png-85a1fff89b2f0af589741e116b9e3daf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_CardBack.PNG"
-dest_files=["res://.godot/imported/Italy_CardBack.PNG-639aa87bf8a8150d526971a5f1ccda44.ctex"]
+source_file="res://assets/factions/italy/cards/Italy_CardBack.png"
+dest_files=["res://.godot/imported/Italy_CardBack.png-85a1fff89b2f0af589741e116b9e3daf.ctex"]
 
 [params]
 

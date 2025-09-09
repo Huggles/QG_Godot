@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6onho1ol56wg"
-path="res://.godot/imported/Soviet_Status.PNG-de7d93ae070fec04fca7f8bf62ee2aab.ctex"
+uid="uid://dkqhw81pf7bgl"
+path="res://.godot/imported/Soviet_Status.png-7ed91a094dc28c088ba465917f433d3c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/soviet/cards/Soviet_Status.PNG"
-dest_files=["res://.godot/imported/Soviet_Status.PNG-de7d93ae070fec04fca7f8bf62ee2aab.ctex"]
+source_file="res://assets/factions/soviet/cards/Soviet_Status.png"
+dest_files=["res://.godot/imported/Soviet_Status.png-7ed91a094dc28c088ba465917f433d3c.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4fiyqswxedgc"
-path="res://.godot/imported/Japan_Response.PNG-3736256febd949c534e15ebaf7396185.ctex"
+uid="uid://dxhggcn518kef"
+path="res://.godot/imported/Japan_Response.png-057834dedf1579f56872279d021957c8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/japan/cards/Japan_Response.PNG"
-dest_files=["res://.godot/imported/Japan_Response.PNG-3736256febd949c534e15ebaf7396185.ctex"]
+source_file="res://assets/factions/japan/cards/Japan_Response.png"
+dest_files=["res://.godot/imported/Japan_Response.png-057834dedf1579f56872279d021957c8.ctex"]
 
 [params]
 

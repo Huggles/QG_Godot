@@ -17,20 +17,17 @@ public partial class StartTurnStepHandler : GodotObject,IStartTurnStepHandler
 
     public async void CardPoolFinished()
     {        
-        await Task.Delay(100);
         CardPlayPool.ClearPool();
         EmitSignal(SignalName.StartTurnStepFinished); 
     }
 
     public async void RequestCardPlay()
     {
-        bool cardPlayed = await CardPlayPool.RequestActivationOption(faction);
-        if (cardPlayed == false)
+        CardActivationOption cardActivationOption = await CardPlayPool.RequestCardActivationOptions(faction); 
+        if (cardActivationOption == null)
         {
-            await Task.Delay(100);
             CardPlayPool.ClearPool();
             CardPoolFinished();
         }
-
     }
 }
