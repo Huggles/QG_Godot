@@ -120,7 +120,7 @@ public partial class CardStep : GodotObject
             await Task.Delay(2000);
             if (NextCardStep != null)
             {
-                await NextCardStep.Execute();
+                return await NextCardStep.Execute();
             }
             else
             {

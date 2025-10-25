@@ -42,10 +42,11 @@ public partial class GameFlow : GodotObject
     public FactionTeam CurrentFactionTeam =>
         (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;
 
-    private List<GameTurnStep> gameTurnSteps;
-    public IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
+    
+    
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
+    private List<GameTurnStep> gameTurnSteps;
     public GameFlow()
     {
         gameTurnSteps = new List<GameTurnStep> {
@@ -58,6 +59,10 @@ public partial class GameFlow : GodotObject
             new GameTurnStep(TurnStep.END, StartNewTurn)
         };
     }
+
+    public StartTurnStepHandler startTurnStepHandler;
+    public PlayStepHandlerDefault playStepHandlerDefault;
+    public IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
 
     public void StartGame()
     {
@@ -108,9 +113,14 @@ public partial class GameFlow : GodotObject
     {
         GD.Print("_start_turn_step");
         this.TurnStep = TurnStep.START;
-        StartTurnStepHandler startTurnStepHandler = new StartTurnStepHandler();
-        startTurnStepHandler.Start(CurrentFaction);
-        await ToSignal(startTurnStepHandler, StartTurnStepHandler.SignalName.StartTurnStepFinished);
+        startTurnStepHandler = new StartTurnStepHandler();
+        startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;
+        startTurnStepHandler.Start(CurrentFaction);        
+    }
+
+    private void StartTurnStepFinishedHandler()
+    {
+        startTurnStepHandler.StartTurnStepFinished -= StartTurnStepFinishedHandler;
         ProgressGame();
     }
 
@@ -118,10 +128,13 @@ public partial class GameFlow : GodotObject
     {
         GD.Print("PlayCardStep");
         this.TurnStep = TurnStep.PLAY_CARD;
-        PlayStepHandlerDefault playStepHandlerDefault = new PlayStepHandlerDefault();
+        playStepHandlerDefault = new PlayStepHandlerDefault();
+        playStepHandlerDefault.PlayStepFinished += PlayCardStepFinishedHandler;
         playStepHandlerDefault.Start(CurrentFaction);
-        await ToSignal(playStepHandlerDefault, PlayStepHandlerDefault.SignalName.PlayStepFinished);
-
+    }
+    private void PlayCardStepFinishedHandler()
+    {
+        playStepHandlerDefault.PlayStepFinished -= PlayCardStepFinishedHandler;
         ProgressGame();
     }
 

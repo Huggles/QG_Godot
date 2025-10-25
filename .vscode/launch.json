@@ -8,7 +8,7 @@
             "name": "Play",
             "type": "coreclr",
             "request": "launch",
-            "program": "C:/Users/Hugo/Desktop/Utilities/Godot/Godot_v4.4.1-stable_mono_win64",
+            "program": "C:/Users/Hugo/Desktop/Utils/Godot_v4.5-stable_mono_win64/Godot_v4.5-stable_mono_win64.exe",
             "preLaunchTask": "build",
             "args": [],
             "cwd": "${workspaceFolder}",

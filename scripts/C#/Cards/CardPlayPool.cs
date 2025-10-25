@@ -219,7 +219,7 @@ public partial class CardPlayPool : GodotObject
         }
         else
         {
-            DebugUtilities.PrintPeer($"{faction} does have activation options");
+            DebugUtilities.PrintPeer($"{faction} does not have activation options");
         }
         return null;
     }
@@ -290,6 +290,11 @@ public partial class CardPlayPool : GodotObject
             bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
             {
+                if (cardState.CardLogic.ReactCardSteps.Count == 0)
+                {
+                    throw new NotImplementedException($"{cardState.CardData.UniqueName} does not have REACT logic implemented: {cardState.CardLogic.GetClass()}");
+                    
+                }
                 CardStep nextStep = cardState.CardLogic.ReactCardSteps[0];
                 CardActivationOption option = new CardActivationOption(cardState.Id, nextStep.Id, cardState.CardData.Label, cardState.CardLogic != null ? cardState.CardLogic.CanBeActivated() : false);
                 options.Add(option);

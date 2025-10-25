@@ -3,21 +3,23 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://br8evssu010b7"
-path="res://.godot/imported/Soviet_Response.png-d68653a924ffa27e2bc2260522bccffe.ctex"
+path="res://.godot/imported/Soviet_Response.PNG-a31adec8c0007ffbbfddf23f145edbc3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/factions/soviet/cards/Soviet_Response.png"
-dest_files=["res://.godot/imported/Soviet_Response.png-d68653a924ffa27e2bc2260522bccffe.ctex"]
+source_file="res://assets/factions/soviet/cards/Soviet_Response.PNG"
+dest_files=["res://.godot/imported/Soviet_Response.PNG-a31adec8c0007ffbbfddf23f145edbc3.ctex"]
 
 [params]
 
 compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
@@ -25,6 +27,10 @@ mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false
