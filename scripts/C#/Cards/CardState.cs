@@ -31,6 +31,7 @@ public partial class CardState : Object
         CardData = cardData;
     }
     
+
     public bool CanPlayCard()
     {
         if (CardLogic != null)
@@ -69,5 +70,5 @@ public partial class CardState : Object
     public static List<CardState> ForNames(List<string> cardNames)
     {
         return cardNames.Map(c => GameSession.Instance.GameState.CardStatesByName.TryGetValue(c, out var state) ? state : null);
-    } 
+    }
 }
