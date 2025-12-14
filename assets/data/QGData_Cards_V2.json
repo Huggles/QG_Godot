@@ -7,7 +7,13 @@
 		"Testing": "0",
 		"ExecutionClass": "BuildArmy",
 		"Label": "Build Army",
-		"Text": null
+		"Text": null,
+		"PlayCondition" : {
+			"type": "PREFAB_CANBUILD",
+			"params" : {
+				"unitType" : "Army"
+			}
+		}
 	},
 	{
 		"UniqueName": "BuildNavy",
