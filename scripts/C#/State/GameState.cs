@@ -7,9 +7,10 @@ using System.Linq;
 
 public partial class GameState : StateObject
 {
+    public static GameQueue<GameAnimation> AnimationQueue = new GameQueue<GameAnimation>();
     public IGameMode GameMode;
-    public Dictionary<Faction, FactionState> FactionStates = new();
-    public List<ChangeEvent> GameChangeEvents = new();
+    public Dictionary<Faction, FactionState> FactionStates = [];
+    public List<ChangeEvent> GameChangeEvents = [];
     public CardState ActivePlayerCard;
 
     private int _changeEventCounter = 0;

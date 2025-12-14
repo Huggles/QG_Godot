@@ -30,6 +30,7 @@ public partial class CardState : Object
     {
         CardData = cardData;
     }
+    
 
     public bool CanPlayCard()
     {
@@ -65,5 +66,9 @@ public partial class CardState : Object
     public static CardState ForName(string cardName)
     {
         return GameSession.Instance.GameState.CardStatesByName.TryGetValue(cardName, out var state) ? state : null;
+    }
+    public static List<CardState> ForNames(List<string> cardNames)
+    {
+        return cardNames.Map(c => GameSession.Instance.GameState.CardStatesByName.TryGetValue(c, out var state) ? state : null);
     }
 }

@@ -23,6 +23,10 @@ public partial class DebugUtilities : Node
     }
     
     public static void PrintPeer(Object o){
+        if(o == null)
+        {
+            o = "null";
+        }
         GD.Print("("+ FormattedDateTime +")"+" Server: " + o.ToString());
     }
 

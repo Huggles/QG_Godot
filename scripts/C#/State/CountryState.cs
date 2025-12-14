@@ -224,6 +224,9 @@ public partial class CountryState : StateObject
         return InRangeForAttack(faction) && IsCountryEmpty;
     }
 
+
+    public static List<CountryState> AllCountryStates => GameSession.Instance.GameState.CountryStateById.Values.ToList();
+
     public static CountryState ForId(int id)
     {
         return GameSession.Instance.GameState.CountryStateById[id];
@@ -237,6 +240,10 @@ public partial class CountryState : StateObject
     public static CountryState ForName(string name)
     {
         return GameSession.Instance.GameState.CountryStateByName[name];
+    }
+    public static List<CountryState> ForNames(List<string> names)
+    {
+        return names.Map(n => GameSession.Instance.GameState.CountryStateByName[n]);
     }
 
     public static List<CountryState> ForUnitIds(IEnumerable<int> unitIds)
