@@ -6,8 +6,6 @@ using System.Linq;
 public partial class CountryState : StateObject
 {
     [Export] public CountryData StaticCountryData;
-
-    [Export] public int Id { get; set; }
     [Export] public string Name { get; set; }
     [Export] public string NameCamelCase { get; set; }
     [Export] public string Label { get; set; }
@@ -51,6 +49,15 @@ public partial class CountryState : StateObject
 
         EventBus.Instance.SetCountriesClickable += SetClickable;
         EventBus.Instance.SetAllCountriesUnclickable += SetUnclickable;
+
+        this.Tags.TagAdded += (Tag t) =>
+        {
+            if(t is Tag.Clickable) Node.SetClickable();
+        };
+        this.Tags.TagRemoved += (Tag t) =>
+        {
+            if(t is Tag.Clickable) Node.SetUnclickable();
+        };
     }
 
     public void InitNeighborCountryStateArray()

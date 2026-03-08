@@ -10,8 +10,7 @@ public partial class UnitState : StateObject
     [Signal] public delegate void AfterUnitRemovedFromCountryEventHandler();
     [Signal] public delegate void UnitBecomesClickableEventHandler();
     [Signal] public delegate void UnitBecomesUnclickableEventHandler();
-
-    [Export] public int Id { get; set; }
+    
     [Export] public UnitType Type { get; set; }
     [Export] public Faction Faction;
     
@@ -43,7 +42,7 @@ public partial class UnitState : StateObject
     public FactionTeam FactionTeam { get { return StaticGameData.FactionTeamForFaction(Faction); } }
 
     public UnitState(UnitType type, Faction faction)
-    {
+    {        
         Id = UnitPool.GetUniqueUnitId();
         Type = type;
         Faction = faction;
@@ -51,6 +50,17 @@ public partial class UnitState : StateObject
         EventBus.Instance.SetUnitsClickable += SetClickable;
         EventBus.Instance.SetAllUnitsUnclickable += SetUnclickable;
         EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; };
+
+        Tags.TagAdded += (Tag t) =>
+        {
+            DebugUtilities.PrintPeer("TAG ADDED");
+            DebugUtilities.PrintPeer(t);
+            if(t is Tag.Clickable) Node.SetClickable();
+        };
+        Tags.TagRemoved += (Tag t) =>
+        {
+            if(t is Tag.Clickable) Node.SetUnclickable();
+        };
     }
 
     public void InitNode()

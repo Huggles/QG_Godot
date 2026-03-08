@@ -7,8 +7,6 @@ public partial class StraightState : StateObject
     private static readonly Texture2D StraightIconInverse = GD.Load<Texture2D>("res://assets/textures/Other/StraightIconInverse.png");
 
     public StraightData StaticStraightData;
-
-    public int Id { get; set; }
     public int ControllingCountryId { get; set; }
 
     public CountryState ControllingCountryState =>

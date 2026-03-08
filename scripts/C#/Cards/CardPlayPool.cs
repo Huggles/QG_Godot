@@ -10,65 +10,19 @@ using System.Threading.Tasks;
 public partial class CardPlayPool : GodotObject
 {
     public static List<CardState> CardPool = new();
-    public static Dictionary<int, CardState> CardPoolMap
-    {
-        get
-        {
-            Dictionary<int, CardState> response = new();
-            foreach (CardState cardState in CardPool)
-            {
-                response.Add(cardState.Id, cardState);
-            }
-            return response;
-        }
-    }
-
     public static List<ChangeEvent> ChangeEventsPool = new();
-    public static Dictionary<int, ChangeEvent> ChangeEventsPoolMap
-    {
-        get
-        {
-            Dictionary<int, ChangeEvent> response = new();
-            foreach (ChangeEvent changeEvent in ChangeEventsPool)
-            {
-                response.Add(changeEvent.Id, changeEvent);
-            }
-            return response;
-        }
-    }
-
     public static ChangeEvent LastChangeEvent;
-    public static Faction LastChangeEventByFaction
-    {
-        get { return LastChangeEvent != null ? LastChangeEvent.TriggeringFaction : Faction.GERMANY; }
-    }
-    public static FactionTeam LastChangeEventByTeam
-    {
-        get { return StaticGameData.OpponentFactionTeamForFaction(LastChangeEventByFaction); }
-    }
 
-    public static ChangeEvent LastNoneNewCardChangeEvent
-    {
-        get
-        {
-            for (int i = ChangeEventsPool.Count - 1; i >= 0; i--)
-            {
-                ChangeEvent changeEvent = ChangeEventsPool[i];
-                if (changeEvent is not PlayCardChangeEvent && changeEvent is not ActivateReactionChangeEvent)
-                    return changeEvent;
-            }
-            return null;
-        }
-    }
-    public static List<Faction> RequestOrder
-    {
-        get
-        {
-            return LastChangeEventByTeam == FactionTeam.AXIS
-                ? new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES, Faction.GERMANY, Faction.JAPAN, Faction.ITALY }
-                : new List<Faction> { Faction.GERMANY, Faction.JAPAN, Faction.ITALY, Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
-        }
-    }
+    public static Dictionary<int, CardState> CardPoolMap => CardPool.ToDictionary(c => c.Id, c => c);    
+    public static Dictionary<int, ChangeEvent> ChangeEventsPoolMap => ChangeEventsPool.ToDictionary(c => c.Id, c => c);
+    
+    public static Faction LastChangeEventByFaction => LastChangeEvent != null ? LastChangeEvent.TriggeringFaction : Faction.GERMANY;
+    public static FactionTeam LastChangeEventByTeam => StaticGameData.OpponentFactionTeamForFaction(LastChangeEventByFaction);
+    public static ChangeEvent LastNoneNewCardChangeEvent => ChangeEventsPool.LastOrDefault(c => c is not PlayCardChangeEvent && c is not ActivateReactionChangeEvent);
+
+    public static List<Faction> RequestOrder => LastChangeEventByTeam == FactionTeam.AXIS ? AlliesFirstOrder : AxisFirstOrder;
+    public static List<Faction> AxisFirstOrder => new List<Faction> { Faction.GERMANY, Faction.JAPAN, Faction.ITALY, Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
+    public static List<Faction> AlliesFirstOrder => new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES, Faction.GERMANY, Faction.JAPAN, Faction.ITALY };
 
     public static void ClearPool()
     {
@@ -126,8 +80,7 @@ public partial class CardPlayPool : GodotObject
                 if (stepResultChangeEvent != null)
                 {
                     await DoChangeEvent(stepResultChangeEvent);
-                }
-                
+                }                
             }
         }
     }

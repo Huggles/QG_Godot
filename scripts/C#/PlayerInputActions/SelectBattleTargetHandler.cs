@@ -31,8 +31,13 @@ public partial class SelectBattleTargetHandler : GodotObject, IGameEventHandler<
 
     public async Task<BattleTarget> Handle()
     {
-        EventBus.Emit(EventBus.SignalName.SetUnitsClickable, unitIds.ToArray());
-        EventBus.Emit(EventBus.SignalName.SetCountriesClickable, countryIds.ToArray());
+        // EventBus.Emit(EventBus.SignalName.SetUnitsClickable, unitIds.ToArray());
+        // EventBus.Emit(EventBus.SignalName.SetCountriesClickable, countryIds.ToArray());
+        UnitState.ForIds(unitIds).ForEach(us => {
+            us.Tags.Add(Tag.Clickable);
+        });
+        CountryState.ForIds(countryIds).ForEach(cs => cs.Tags.Add(Tag.Clickable));        
+        
         EventBus.Instance.CountryClicked += OnCountrySelected;
         EventBus.Instance.UnitClicked += OnUnitSelected;
 
