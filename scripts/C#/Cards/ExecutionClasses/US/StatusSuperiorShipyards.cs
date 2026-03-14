@@ -17,7 +17,7 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
     {
         get
         {
-            return DeployState.CalculateDeployState(Faction).BuildableCountryStatesForType(CountryType.SEA).Map(cs => cs.Id);
+            return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.SEA).Select(cs => cs.Id).ToList();
         }
     }
 

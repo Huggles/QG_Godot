@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class StatusAmphibiousLandings : StatusCardLogic
@@ -16,7 +17,7 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
     {
         get
         {
-            return DeployState.CalculateDeployState(Faction).BuildableCountryStatesForType(CountryType.LAND).Map(cs => cs.Id);
+            return GameStateCalculator.GetCachedForFaction(Faction).BuildableCountryStates.Where(cs => cs.Type == CountryType.LAND).Select(cs => cs.Id).ToList();
         }
     }
 

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public partial class BuildNavy : CardLogic
@@ -24,7 +25,7 @@ public partial class BuildNavy : CardLogic
     {
         get
         {
-            return DeployState.CalculateDeployState(Faction).BuildableCountryStatesForType(CountryType.SEA);
+            return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.SEA).ToList();
         }
     }
 }

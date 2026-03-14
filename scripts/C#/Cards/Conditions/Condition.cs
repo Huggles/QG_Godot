@@ -269,7 +269,7 @@ public abstract class Condition
             }
             else
             {
-                GameStateCalculator calculator = GameStateCalculator.CalculateAllForFaction(Faction);
+                GameStateCalculator calculator = GameStateCalculator.GetCachedForFaction(Faction);
                 return calculator.TargetsOfType(unitType).Count > 0;
             }
         }

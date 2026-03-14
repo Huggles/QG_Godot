@@ -6,6 +6,9 @@ using System.Linq;
 
 public class GameStateCalculator
 {
+    // Cache of last calculated state per faction
+    private static Dictionary<Faction, GameStateCalculator> _cachedCalculators = new Dictionary<Faction, GameStateCalculator>();
+    
     public Faction Faction;
     
     // Attack state
@@ -184,7 +187,20 @@ public class GameStateCalculator
         CalculatePlayableCardsForFaction(faction, calculator);
         CalculateInSupplyForFaction(faction, calculator);
         CalculateStraightControlForFaction(faction, calculator);
+        
+        // Cache the result
+        _cachedCalculators[faction] = calculator;
         return calculator;
+    }
+    
+    public static GameStateCalculator GetCachedForFaction(Faction faction)
+    {
+        if (_cachedCalculators.TryGetValue(faction, out var calculator))
+        {
+            return calculator;
+        }
+        // If no cache exists, calculate and cache it
+        return CalculateAllForFaction(faction);
     }
 
     public static Dictionary<Faction, GameStateCalculator> CalculateAll()

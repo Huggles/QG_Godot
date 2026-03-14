@@ -7,7 +7,7 @@ public partial class StatusConscription : StatusCardLogic
 {
     public List<int> BuildableLandCountries()
     {
-        return DeployState.CalculateDeployState(Faction).BuildableCountryStatesForType(CountryType.LAND).ToCountryIds();
+        return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.LAND).Select(cs => cs.Id).ToList();
     }    
     protected override List<Condition> CardTriggers()
     {

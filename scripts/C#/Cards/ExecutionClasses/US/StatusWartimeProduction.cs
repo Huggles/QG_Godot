@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class StatusWartimeProduction : StatusCardLogic
@@ -16,7 +17,7 @@ public partial class StatusWartimeProduction : StatusCardLogic
     {
         get
         {
-            return DeployState.CalculateDeployState(Faction).BuildableCountryStatesForType(CountryType.LAND).Map(cs => cs.Id);
+            return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.LAND).Select(cs => cs.Id).ToList();
         }
     }
 
