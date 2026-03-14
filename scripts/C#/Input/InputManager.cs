@@ -44,10 +44,6 @@ public partial class InputManager : Node2D
 
     public override void _EnterTree()
     {
-        EventBus.Instance.SetUnitsClickable += unitIds => EnableRayTraceCasting();
-        EventBus.Instance.SetCountriesClickable += countryIds => EnableRayTraceCasting();
-        EventBus.Instance.SetAllUnitsUnclickable += DisableRayTraceCasting;
-        EventBus.Instance.SetAllCountriesUnclickable += DisableRayTraceCasting;
         Camera.Position = DEFAULT_POSITION;
         Camera.Zoom = DEFAULT_ZOOM;
         zoom = DEFAULT_ZOOM.X;
@@ -122,12 +118,12 @@ public partial class InputManager : Node2D
         }
     }
 
-    private void EnableRayTraceCasting()
+    public void EnableRayTraceCasting()
     {
         _rayTraceCaster ??= new RayTraceCaster(this);
     }
 
-    private void DisableRayTraceCasting()
+    public void DisableRayTraceCasting()
     {
         _rayTraceCaster = null;
     }

@@ -37,8 +37,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
     public async Task<bool> ApplyChange()
     {
         await ExecuteAsync();
-        EventBus.Emit(EventBus.SignalName.RecalculateStraights);
-        EventBus.Emit(EventBus.SignalName.RecalculateSupply);
+        GameStateCalculator.CalculateAll();
         EmitSignal(SignalName.ChangeEventApplied, Id);
         return true;
     }

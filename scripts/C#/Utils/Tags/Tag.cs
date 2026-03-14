@@ -11,9 +11,15 @@ public enum Tag
     Buildable,
     Recruitable, 
 
+    //Straight Tags
+    AxisControlled,
+    AlliesControlled,
+
     //Card Tags    
     Playable,
 
+    //Unit Tags
+    InSupply,
 
     //UI Tags
     Clickable,

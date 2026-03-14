@@ -10,7 +10,8 @@ public partial class SeaBattle : CardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                List<int> armyUnits = attackState.TargetUnitIds.Where(unitId => UnitState.ForId(unitId).Type == UnitType.NAVY).ToList();
+                GameStateCalculator calculator = GameStateCalculator.CalculateAllForFaction(Faction);
+                List<int> armyUnits = calculator.TargetUnitIds.Where(unitId => UnitState.ForId(unitId).Type == UnitType.NAVY).ToList();
                 int selectedUnitId = await new SelectUnitHandler(armyUnits).Handle();
 
                 BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedUnitId));
@@ -19,13 +20,5 @@ public partial class SeaBattle : CardLogic
             })
             .WithCondition(()=>Condition.Build(new Condition.FactionHasBattleTarget(Faction,UnitType.NAVY), this))            
         }; 
-    }
-
-    public AttackState attackState
-    {
-        get
-        {
-            return AttackState.AttackStateForFaction(Faction);
-        }
     }
 }

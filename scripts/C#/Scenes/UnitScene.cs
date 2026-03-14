@@ -58,6 +58,10 @@ public partial class UnitScene : Node2D
         unitState.AfterUnitDeployedToCountry += unitSceneInstance.OnAfterUnitDeployedToCountry;
         unitState.AfterUnitRemovedFromCountry += unitSceneInstance.OnAfterUnitRemovedFromCountry;
 
+        // Subscribe to tag events for visual updates
+        unitState.Tags.TagAdded += unitSceneInstance.OnTagAdded;
+        unitState.Tags.TagRemoved += unitSceneInstance.OnTagRemoved;
+
         return unitSceneInstance;
     }
 
@@ -116,6 +120,30 @@ public partial class UnitScene : Node2D
     public void HideOutOfSupply()
     {
         OutOfSupplyNode.Visible = false;
+    }
+
+    private void OnTagAdded(Tag tag, Faction faction)
+    {
+        if (tag == Tag.Clickable)
+        {
+            SetClickable();
+        }
+        else if (tag == Tag.InSupply)
+        {
+            HideOutOfSupply();
+        }
+    }
+
+    private void OnTagRemoved(Tag tag, Faction faction)
+    {
+        if (tag == Tag.Clickable)
+        {
+            SetUnclickable();
+        }
+        else if (tag == Tag.InSupply)
+        {
+            ShowOutOfSupply();
+        }
     }
 
     

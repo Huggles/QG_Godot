@@ -34,7 +34,8 @@ public partial class SelectBattleTargetHandler : GodotObject, IGameEventHandler<
         UnitState.ForIds(unitIds).ForEach(us => {
             us.Tags.AddForAll(Tag.Clickable);
         });
-        CountryState.ForIds(countryIds).ForEach(cs => cs.Tags.AddForAll(Tag.Clickable));        
+        CountryState.ForIds(countryIds).ForEach(cs => cs.Tags.AddForAll(Tag.Clickable));
+        InputManager.Instance.EnableRayTraceCasting();
         
         EventBus.Instance.CountryClicked += OnCountrySelected;
         EventBus.Instance.UnitClicked += OnUnitSelected;
@@ -43,9 +44,9 @@ public partial class SelectBattleTargetHandler : GodotObject, IGameEventHandler<
         EventBus.Instance.CountryClicked -= OnCountrySelected;
         EventBus.Instance.UnitClicked -= OnUnitSelected;
 
-        EventBus.Emit(EventBus.SignalName.SetAllUnitsUnclickable);
-        EventBus.Emit(EventBus.SignalName.SetAllCountriesUnclickable);
-
+        UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
+        CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
+        InputManager.Instance.DisableRayTraceCasting();
 
         int targetId = results[0].As<int>();
         TargetType type = results[1].As<TargetType>();

@@ -47,20 +47,7 @@ public partial class UnitState : StateObject
         Type = type;
         Faction = faction;
 
-        EventBus.Instance.SetUnitsClickable += SetClickable;
-        EventBus.Instance.SetAllUnitsUnclickable += SetUnclickable;
         EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; };
-
-        Tags.TagAdded += (Tag t, Faction f) =>
-        {
-            DebugUtilities.PrintPeer("TAG ADDED");
-            DebugUtilities.PrintPeer(t);
-            if(t is Tag.Clickable) Node.SetClickable();
-        };
-        Tags.TagRemoved += (Tag t, Faction f) =>
-        {
-            if(t is Tag.Clickable) Node.SetUnclickable();
-        };
     }
 
     public void InitNode()
@@ -79,29 +66,14 @@ public partial class UnitState : StateObject
         GD.Print(debugStr);
     }
 
-    public void SetClickable(int[] unitIds)
-    {
-        if (Array.IndexOf(unitIds, Id) >= 0)
-        {
-            Node.SetClickable();
-        }
-    }
-
-    public void SetUnclickable()
-    {
-        Node.SetUnclickable();
-    }
-
     public void SetInSupply()
     {
         InSupply = true;
-        Node.HideOutOfSupply();
     }
 
     public void SetOutOfSupply()
     {
         InSupply = false;
-        Node.ShowOutOfSupply();
     }
 
     public static UnitState ForId(int unitId)

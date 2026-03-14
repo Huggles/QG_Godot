@@ -71,7 +71,7 @@ public partial class GameFlow : GodotObject
             faction.DeckState.DrawCards(7);
         }
 
-        EventBus.Emit("RecalculateSupply");
+        GameStateCalculator.CalculateAll();
 
         foreach (Faction faction in StaticGameData.PlayableFactions)
         {
@@ -142,7 +142,7 @@ public partial class GameFlow : GodotObject
     {
         this.TurnStep = TurnStep.SUPPLY;
         GD.Print("SupplyStep");
-        EventBus.Emit("RecalculateSupply", GameTurn);
+        GameStateCalculator.CalculateAll();
         await Task.Delay(100);
         ProgressGame();
     }

@@ -33,6 +33,21 @@ public partial class StraightState : StateObject
             ControlledCountryId1 = staticStraightData.ControlledCountry1Id;
             ControlledCountryId2 = staticStraightData.ControlledCountry2Id;
         }
+
+        // Subscribe to tag events for visual updates
+        Tags.TagAdded += (Tag t, Faction f) =>
+        {
+            if (t == Tag.AxisControlled)
+                ChangeColorTeam(FactionTeam.AXIS);
+            else if (t == Tag.AlliesControlled)
+                ChangeColorTeam(FactionTeam.ALLIES);
+        };
+        
+        Tags.TagRemoved += (Tag t, Faction f) =>
+        {
+            if (t == Tag.AxisControlled || t == Tag.AlliesControlled)
+                ChangeColorTeam(FactionTeam.NONE);
+        };
     }
 
     public void OnReady()
@@ -42,11 +57,7 @@ public partial class StraightState : StateObject
         else
             HideStraightSprite();
 
-        RecalculateControlledBy();
-    }
-
-    public void RecalculateControlledBy()
-    {
+        // Initial color will be set by tag system
         ChangeColorTeam(ControllingCountryState.OccupyingTeam);
     }
 

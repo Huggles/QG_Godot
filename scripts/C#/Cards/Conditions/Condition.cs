@@ -269,8 +269,8 @@ public abstract class Condition
             }
             else
             {
-                AttackState attackState = AttackState.AttackStateForFaction(Faction);
-                return attackState.TargetsOfType(unitType).Count > 0;
+                GameStateCalculator calculator = GameStateCalculator.CalculateAllForFaction(Faction);
+                return calculator.TargetsOfType(unitType).Count > 0;
             }
         }
     }

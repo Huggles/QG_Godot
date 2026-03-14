@@ -35,12 +35,6 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void CountryClickedEventHandler(int countryClicked);
     [Signal] public delegate void UnitClickedEventHandler(int unitClicked);
 
-    [Signal] public delegate void SetCountriesClickableEventHandler(int[] countryIds);
-    [Signal] public delegate void SetAllCountriesUnclickableEventHandler();
-
-    [Signal] public delegate void SetUnitsClickableEventHandler(int[] unitIds);
-    [Signal] public delegate void SetAllUnitsUnclickableEventHandler();
-
     [Signal] public delegate void GameChangeEventOccurredEventHandler();
 
     [Signal] public delegate void CardSelectedEventHandler();
@@ -71,9 +65,6 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void NextStepStartedEventHandler(int turnStep);
 
     [Signal] public delegate void FactionScoredPointsEventHandler(Faction faction, int points);
-
-    [Signal] public delegate void RecalculateSupplyEventHandler();
-    [Signal] public delegate void RecalculateStraightsEventHandler();
 
     [Signal] public delegate void VpDetailsPanelOpenedEventHandler(Faction faction);
 }

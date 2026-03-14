@@ -13,9 +13,11 @@ public partial class SelectUnitHandler : IGameEventHandler<int>
 
     public async Task<int> Handle()
     {
-        EventBus.Emit(EventBus.SignalName.SetUnitsClickable, unitIds.ToArray());
+        UnitState.ForIds(unitIds).AddTag(Tag.Clickable, Faction.ALL);
+        InputManager.Instance.EnableRayTraceCasting();
         int unitId = (await EventBus.GetSignalAwaiter(EventBus.SignalName.UnitClicked))[0].As<int>();
-        EventBus.Emit(EventBus.SignalName.SetAllUnitsUnclickable);
+        UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
+        InputManager.Instance.DisableRayTraceCasting();
         DebugUtilities.PrintPeerError($"Unit Clicked: {UnitState.ForId(unitId).CountryState.StaticCountryData.UniqueNameCamelCase} {UnitState.ForId(unitId).Faction}");
         return unitId;
     }

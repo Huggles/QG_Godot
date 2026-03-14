@@ -42,21 +42,11 @@ public partial class GameSession : Node
         GameFlow = new GameFlow();
         await GameMode.Init();
 
-        RegisterGameEvents();
-
-        
         GameFlow.StartGame();
 
         OnGameStarted();
     }
 
-
-
-    private void RegisterGameEvents()
-    {
-        EventBus.Instance.RecalculateSupply += RecalculateSupply;
-        EventBus.Instance.RecalculateStraights += RecalculateStraights;
-    }
     private void OnGameStarted()
     {
         IsStarted = true;
@@ -74,67 +64,6 @@ public partial class GameSession : Node
 
     public static Dictionary<int, UnitState> UnitStatesById => instance.GameState.UnitStatesById;
 
-    public static void RecalculateSupply()
-    {
-        foreach (Faction faction in StaticGameData.PlayableFactions)
-        {
-            RecalculateSupplyForFaction(faction);
-        }
-    }
-    private static void RecalculateSupplyForFaction(Faction faction)
-    {
-        var factionState = FactionStates[faction];
-        var pathFindingService = new PathFindingService(new PathFindingNodeDefault(), faction);
-        List<UnitState> activeUnits = UnitState.ForIds(factionState.ActiveUnitIds);
-        IEnumerable<UnitState> armies = activeUnits.Where(u => u.Type == UnitType.ARMY);
-        IEnumerable<UnitState> navies = activeUnits.Where(u => u.Type == UnitType.NAVY);
-
-        foreach (UnitState unit in armies)
-        {
-            bool isSupplied = RecalculateSupplyForUnit(pathFindingService, unit.Id);
-            if (isSupplied)
-            {
-                unit.SetInSupply();
-            }
-            else
-            {
-                unit.SetOutOfSupply();
-            }
-        }
-        foreach (UnitState unit in navies)
-        {
-            bool isSupplied = RecalculateSupplyForUnit(pathFindingService, unit.Id);
-            if (isSupplied)
-            {
-                unit.SetInSupply();
-            }
-            else
-            {
-                unit.SetOutOfSupply();
-            }
-        }
-    }
-    private static bool RecalculateSupplyForUnit(PathFindingService pathFinding, int unitId)
-    {
-        var unit = UnitState.ForId(unitId);
-        foreach (var supplyId in GameStateUtilities.GetSupplyCountryIds(unit.Faction))
-        {
-            if (pathFinding.CalculatePath(unit.CountryId, supplyId))
-            {
-                if (unit.IsNavy)
-                    return unit.CountryState.HasHarbor(unit.Faction);
-                return true;
-            }
-        }
-
-        DebugUtilities.PrintPeer($"Unit is now out of supply in {unit.CountryState.Label} ({unit.Faction})");
-        return false;
-    }
-    public static void RecalculateStraights()
-    {
-        foreach (StraightState straightState in StraightStates)
-            straightState.RecalculateControlledBy();
-    }
     public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType)
     {
         if (countryId == -1)

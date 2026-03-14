@@ -47,9 +47,6 @@ public partial class CountryState : StateObject
         IsSupply = countryData.IsSupply == "true";
         Neighbors = new List<string>(countryData.Neighbors);
 
-        EventBus.Instance.SetCountriesClickable += SetClickable;
-        EventBus.Instance.SetAllCountriesUnclickable += SetUnclickable;
-
         this.Tags.TagAdded += (Tag t, Faction f) =>
         {
             if(t is Tag.Clickable) Node.SetClickable();
@@ -85,18 +82,6 @@ public partial class CountryState : StateObject
         Node.Position = StaticCountryData.WorldPositionCenter;
     }
 
-    public void SetClickable(int[] countryIds)
-    {
-        if (countryIds.Contains(Id))
-        {
-            Node.SetClickable();
-        }
-    }
-
-    public void SetUnclickable()
-    {
-        Node.SetUnclickable();
-    }
 
     public List<int> ConnectedCountryIds(Faction faction)
     {
