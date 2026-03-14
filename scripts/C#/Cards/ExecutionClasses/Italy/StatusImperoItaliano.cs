@@ -15,6 +15,6 @@ public partial class StatusImperoItaliano : StatusCardLogic, IStatusVictoryPoint
 
     protected override List<Condition> CardTriggers()
     {
-        return new List<Condition> { Condition.Build(new Condition.IsGameFlowStep(TurnStep.VICTORY_POINT), this) };
+        return new List<Condition> { Condition.Build(new Condition.IsVictoryPointStep(), this) };
     }
 }

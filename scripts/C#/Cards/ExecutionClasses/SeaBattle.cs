@@ -18,7 +18,7 @@ public partial class SeaBattle : CardLogic
                 battleUnitChangeEvent.IsTrigger = true;
                 return battleUnitChangeEvent;
             })
-            .WithCondition(()=>Condition.Build(new Condition.FactionHasBattleTarget(Faction,UnitType.NAVY), this))            
+            .WithCondition(()=>Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))            
         }; 
     }
 }

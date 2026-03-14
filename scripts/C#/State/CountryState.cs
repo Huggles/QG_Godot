@@ -47,6 +47,12 @@ public partial class CountryState : StateObject
         IsSupply = countryData.IsSupply == "true";
         Neighbors = new List<string>(countryData.Neighbors);
 
+        // Set country type tag (faction-independent, so use Faction.ALL)
+        if (Type == CountryType.LAND)
+            this.Tags.AddForAll(Tag.LandCountry);
+        else
+            this.Tags.AddForAll(Tag.SeaCountry);
+
         this.Tags.TagAdded += (Tag t, Faction f) =>
         {
             if(t is Tag.Clickable) Node.SetClickable();
@@ -254,6 +260,47 @@ public partial class CountryState : StateObject
     {
         return ForIds(countries.ToList().Map(countryEnum => (int)countryEnum));
     }
+    
+    /// <summary>
+    /// Returns all countries that have the specified tag for the given faction.
+    /// Also matches tags set with Faction.ALL (general tags).
+    /// </summary>
+    public static List<CountryState> WithTag(Tag tag, Faction faction)
+    {
+        return AllCountryStates.Where(cs => cs.Tags.Has(tag, faction)).ToList();
+    }
+    
+    /// <summary>
+    /// Returns all countries that have ALL of the specified tags for the given faction.
+    /// Automatically handles mixed queries: faction-specific tags (e.g., Tag.Buildable) 
+    /// and general tags (e.g., Tag.LandCountry set with Faction.ALL).
+    /// Example: WithTags(new[] { Tag.Buildable, Tag.LandCountry }, Faction.Germany)
+    /// finds countries buildable by Germany that are also land countries.
+    /// </summary>
+    public static List<CountryState> WithTags(Tag[] tags, Faction faction)
+    {
+        return AllCountryStates.Where(cs => tags.All(tag => cs.Tags.Has(tag, faction))).ToList();
+    }
+    
+    // Common query helpers
+    public static List<CountryState> BuildableLand(Faction faction) => 
+        WithTags(new[] { Tag.Buildable, Tag.LandCountry }, faction);
+    
+    public static List<CountryState> BuildableSea(Faction faction) => 
+        WithTags(new[] { Tag.Buildable, Tag.SeaCountry }, faction);
+    
+    public static List<CountryState> RecruitableLand(Faction faction) => 
+        WithTags(new[] { Tag.Recruitable, Tag.LandCountry }, faction);
+    
+    public static List<CountryState> RecruitableSea(Faction faction) => 
+        WithTags(new[] { Tag.Recruitable, Tag.SeaCountry }, faction);
+    
+    public static List<CountryState> AttackableLand(Faction faction) => 
+        WithTags(new[] { Tag.Attackable, Tag.LandCountry }, faction);
+    
+    public static List<CountryState> AttackableSea(Faction faction) => 
+        WithTags(new[] { Tag.Attackable, Tag.SeaCountry }, faction);
+    
     public static bool operator ==(CountryState countryState, Country country)
     {
         return countryState.Id == (int)country;

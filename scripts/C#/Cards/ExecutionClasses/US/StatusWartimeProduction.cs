@@ -8,8 +8,8 @@ public partial class StatusWartimeProduction : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD).WithUnitType(UnitType.ARMY), this),
-            Condition.Build(new Condition.CustomCondition(() => DeployableCountryIds.Count > 0), this)
+            Condition.Build(new Condition.HasDeployedArmy(Faction), this),
+            Condition.Build(new Condition.HasBuildableLand(Faction), this)
         };
     }
     
@@ -17,7 +17,7 @@ public partial class StatusWartimeProduction : StatusCardLogic
     {
         get
         {
-            return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.LAND).Select(cs => cs.Id).ToList();
+            return CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
         }
     }
 

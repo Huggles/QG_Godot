@@ -24,7 +24,7 @@ public partial class ResponseFallOfSingapore : StatusCardLogic
                 return battleCountryChangeEvent;
             })
             .WithGuidance("Battle in the South China Sea")
-            .WithConditions( () => { return new List<Condition> { new Condition.CountryIsAttackable(CountryState.ForEnum(Country.SouthChinaSea).Id, Faction) }; } ),
+            .WithConditions( () => { return new List<Condition> { new Condition.CountryIsAttackable([CountryState.ForEnum(Country.SouthChinaSea).Id], Faction) }; } ),
             new CardStep(this, async() => {
                 int selectedCountryId = await new SelectCountryHandler(
                         new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id }
@@ -32,7 +32,7 @@ public partial class ResponseFallOfSingapore : StatusCardLogic
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
-            }).WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsBuildable(CountryState.ForEnum(Country.SouthEastAsia).Id, Faction)}; } )
+            }).WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsBuildable([CountryState.ForEnum(Country.SouthEastAsia).Id], Faction)}; } )
             .WithGuidance("Recruit an army in South East Asia")
 
         };

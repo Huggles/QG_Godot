@@ -23,7 +23,7 @@ public partial class EventGermanAidinGreece : EWCardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
-            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(targetCountries[1], Faction),this))
+            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable([(int)targetCountries[1]], Faction),this))
             .WithGuidance($"Build an army in {CountryState.ForEnum(targetCountries[0]).Label}"),
         };
         

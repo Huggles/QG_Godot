@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class UnitState : StateObject
 {
@@ -15,7 +16,8 @@ public partial class UnitState : StateObject
     [Export] public Faction Faction;
     
     [Export] public CountryState CountryState;
-    [Export] public bool InSupply { get; set; } = false;
+    // InSupply is computed from tags - tag is the source of truth
+    public bool InSupply => Tags.Has(Tag.InSupply, Faction);
     [Export] public bool ImmuneForTurn { get; set; } = false;
 
     private int countryId = -1;
@@ -66,16 +68,6 @@ public partial class UnitState : StateObject
         GD.Print(debugStr);
     }
 
-    public void SetInSupply()
-    {
-        InSupply = true;
-    }
-
-    public void SetOutOfSupply()
-    {
-        InSupply = false;
-    }
-
     public static UnitState ForId(int unitId)
     {
         return GameSession.Instance.GameState.UnitStatesById[unitId];
@@ -90,4 +82,17 @@ public partial class UnitState : StateObject
         }
         return result;
     }
+    
+    // Helper methods for tag-based queries
+    public static List<UnitState> AllUnitStates => 
+        GameSession.Instance.GameState.UnitStatesById.Values.ToList();
+    
+    public static List<UnitState> WithTag(Tag tag, Faction faction) =>
+        AllUnitStates.Where(us => us.Tags.Has(tag, faction)).ToList();
+    
+    public static List<UnitState> AttackableArmies(Faction faction) =>
+        AllUnitStates.Where(us => us.Tags.Has(Tag.Attackable, faction) && us.Type == UnitType.ARMY).ToList();
+    
+    public static List<UnitState> AttackableNavies(Faction faction) =>
+        AllUnitStates.Where(us => us.Tags.Has(Tag.Attackable, faction) && us.Type == UnitType.NAVY).ToList();
 }

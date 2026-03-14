@@ -112,6 +112,8 @@ public partial class CardStep : GodotObject
     {
         StepFinished = true;
         bool CanExecuteStep = MeetAllConditions;
+        ChangeEvent result = null;
+        
         if (!CanExecuteStep)
         {
             //Should skip step
@@ -120,7 +122,7 @@ public partial class CardStep : GodotObject
             await Task.Delay(2000);
             if (NextCardStep != null)
             {
-                return await NextCardStep.Execute();
+                result = await NextCardStep.Execute();
             }
             else
             {
@@ -133,14 +135,20 @@ public partial class CardStep : GodotObject
             {
                 DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName}");
                 PlayerActionLabel.ShowText(ActionGuidance, -1, TriggeringFaction);
-                return await StepLogic.Invoke();
+                result = await StepLogic.Invoke();
             }
             catch (Exception e)
             {
                 DebugUtilities.PrintPeer(e.Message);
             }
         }
-        return null;
+        
+        // Recalculate game state after step completes
+        // Note: ChangeEvent.ApplyChange() also recalculates, but this ensures tags are fresh
+        // for any immediate condition checks or UI updates
+        GameStateCalculator.CalculateAll();
+        
+        return result;
     }
 
     public T BuildChangeEvent<T>(T changeEvent) where T : ChangeEvent

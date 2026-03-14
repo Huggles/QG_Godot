@@ -8,8 +8,8 @@ public partial class StatusVolksturm : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.IsGameFlowStep(TurnStep.START), this),
-            Condition.Build(new Condition.CountryIsRecruitable((int)Country.Germany, Faction), this)
+            Condition.Build(new Condition.IsStartStep(), this),
+            Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Germany], Faction), this)
         };
     }
 

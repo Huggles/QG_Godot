@@ -52,84 +52,39 @@ public abstract class Condition
 
     public class CountryIsBuildable : Condition
     {
-        public CountryIsBuildable(int countryId, Faction faction)
-        {
-            this.CountryIds = [countryId];
-            this.Faction = faction;
-        }
-
         public CountryIsBuildable(List<int> countryIds, Faction faction)
         {
             this.CountryIds = countryIds;
             this.Faction = faction;
         }
-        public CountryIsBuildable(Country country, Faction faction)
-        {
-            this.CountryIds = [(int)country];
-            this.Faction = faction;
-        }
-        public CountryIsBuildable(List<Country> countries, Faction faction)
-        {
-            this.CountryIds = countries.Map(country => (int)country);
-            this.Faction = faction;
-        }
 
-
-        public override bool MeetCondition()
-        {
-            return CountryStates.Any(countryState => countryState.CanBuild(Faction));
-        }
+        public override bool MeetCondition() => 
+            CountryStates.Any(cs => cs.Tags.Has(Tag.Buildable, Faction));
     }
 
     public class CountryIsRecruitable : Condition
     {
-        public CountryIsRecruitable(int countryId, Faction faction)
-        {
-            this.CountryIds = [countryId];
-            this.Faction = faction;
-        }
-
         public CountryIsRecruitable(List<int> countryIds, Faction faction)
         {
             this.CountryIds = countryIds;
             this.Faction = faction;
         }
-        public CountryIsRecruitable(Country country, Faction faction)
-        {
-            this.CountryIds = [(int)country];
-            this.Faction = faction;
-        }
-        public CountryIsRecruitable(List<Country> countries, Faction faction)
-        {
-            this.CountryIds = countries.Map(country => (int)country);
-            this.Faction = faction;
-        }
 
-        public override bool MeetCondition()
-        {
-            return CountryStates.Any(countryState => countryState.CanRecruit(Faction));
-        }
+        public override bool MeetCondition() => 
+            CountryStates.Any(cs => cs.Tags.Has(Tag.Recruitable, Faction));
     }
 
 
     public class CountryIsAttackable : Condition
     {
-        public CountryIsAttackable(int countryId, Faction faction)
-        {
-            this.CountryIds = [countryId];
-            this.Faction = faction;
-        }
-
         public CountryIsAttackable(List<int> countryIds, Faction faction)
         {
             this.CountryIds = countryIds;
             this.Faction = faction;
         }
 
-        public override bool MeetCondition()
-        {
-            return CountryStates.Any(countryState => countryState.CanAttack(Faction) || countryState.CanAttackWhenEmpty(Faction));
-        }
+        public override bool MeetCondition() => 
+            CountryStates.Any(cs => cs.Tags.Has(Tag.Attackable, Faction));
     }
     public class CountryIsEmpty : Condition
     {
@@ -145,7 +100,7 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            return CountryStates.Any(countryState => countryState.Units.Count == 0);
+            return CountryStates.Any(countryState => countryState.Tags.HasForAny(Tag.Empty));
         }
     }
     public class CountryHasEnemyUnit : Condition
@@ -164,7 +119,7 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            return CountryStates.Any(countryState => countryState.OccupyingTeam == StaticGameData.OpponentFactionTeamForFaction(Faction));
+            return CountryStates.Any(countryState => countryState.Tags.Has(Tag.EnemyControlled, Faction));
         }
     }
     public class CountryHasAttackableNeighbor : Condition
@@ -181,7 +136,8 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            return CountryStates.Any(countryState => countryState.Units.Count == 0);
+            return CountryStates.Any(countryState => 
+                countryState.NeighborCountryStates.Any(neighbor => neighbor.Tags.HasForAny(Tag.Attackable)));
         }
     }
 
@@ -264,13 +220,17 @@ public abstract class Condition
         {
             if (CountryIds != null && CountryIds.Count > 0)
             {
-                CountryType targetCountryType = this.unitType == UnitType.ARMY ? CountryType.LAND : CountryType.SEA;
-                return CountryStates.Any(countryState => countryState.AdjacentBattleTargets(Faction, targetCountryType).Count > 0);
+                return CountryStates.Any(countryState => countryState.Tags.Has(Tag.Attackable, Faction));
             }
             else
             {
-                GameStateCalculator calculator = GameStateCalculator.GetCachedForFaction(Faction);
-                return calculator.TargetsOfType(unitType).Count > 0;
+                // Check if any units have attackable tag for this faction
+                var allUnits = GameSession.Instance.GameState.UnitStatesById.Values;
+                bool hasAttackableUnits = allUnits.Any(us => us.Tags.Has(Tag.Attackable, Faction) && (unitType == UnitType.ANY || us.Type == unitType));
+                // Check if any countries have attackable tag for this faction
+                bool hasAttackableCountries = CountryState.AllCountryStates.Any(cs => cs.Tags.Has(Tag.Attackable, Faction) && 
+                    (unitType == UnitType.ANY || (unitType == UnitType.ARMY && cs.Type == CountryType.LAND) || (unitType == UnitType.NAVY && cs.Type == CountryType.SEA)));
+                return hasAttackableUnits || hasAttackableCountries;
             }
         }
     }
@@ -354,6 +314,123 @@ public abstract class Condition
         {
             return GameSession.Instance.GameFlow.TurnStep == this.TurnStep;
         }
+    }
+
+    // Helper conditions for common board state queries
+    public class HasBuildableLand : Condition
+    {
+        public HasBuildableLand(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.BuildableLand(Faction).Any();
+    }
+
+    public class HasBuildableSea : Condition
+    {
+        public HasBuildableSea(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.BuildableSea(Faction).Any();
+    }
+
+    public class HasRecruitableLand : Condition
+    {
+        public HasRecruitableLand(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.RecruitableLand(Faction).Any();
+    }
+
+    public class HasRecruitableSea : Condition
+    {
+        public HasRecruitableSea(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.RecruitableSea(Faction).Any();
+    }
+
+    public class HasAttackableLand : Condition
+    {
+        public HasAttackableLand(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.AttackableLand(Faction).Any();
+    }
+
+    public class HasAttackableSea : Condition
+    {
+        public HasAttackableSea(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.AttackableSea(Faction).Any();
+    }
+
+    public class HasLandBattleTarget : Condition
+    {
+        public HasLandBattleTarget(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => 
+            UnitState.AttackableArmies(Faction).Any() || CountryState.AttackableLand(Faction).Any();
+    }
+
+    public class HasSeaBattleTarget : Condition
+    {
+        public HasSeaBattleTarget(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => 
+            UnitState.AttackableNavies(Faction).Any() || CountryState.AttackableSea(Faction).Any();
+    }
+
+    public class HasDeployedArmy : Condition
+    {
+        public HasDeployedArmy(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition()
+        {
+            return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
+                .Any(ce => ce.TriggeringFaction == Faction && 
+                           ce.DeploymentType == DeployType.BUILD && 
+                           ce.UnitType == UnitType.ARMY);
+        }
+    }
+
+    public class HasDeployedNavy : Condition
+    {
+        public HasDeployedNavy(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition()
+        {
+            return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
+                .Any(ce => ce.TriggeringFaction == Faction && 
+                           ce.DeploymentType == DeployType.BUILD && 
+                           ce.UnitType == UnitType.NAVY);
+        }
+    }
+
+    public class HasBattledOnLand : Condition
+    {
+        public HasBattledOnLand(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition()
+        {
+            var battleEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
+                .Where(ce => ce.TriggeringFaction == Faction).ToList();
+            var countryStates = battleEvents.Map(ce => ce.CountryState).ToList();
+            return countryStates.Any(cs => cs.Type == CountryType.LAND);
+        }
+    }
+
+    public class HasBattledAtSea : Condition
+    {
+        public HasBattledAtSea(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition()
+        {
+            var battleEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
+                .Where(ce => ce.TriggeringFaction == Faction).ToList();
+            var countryStates = battleEvents.Map(ce => ce.CountryState).ToList();
+            return countryStates.Any(cs => cs.Type == CountryType.SEA);
+        }
+    }
+
+    public class IsVictoryPointStep : Condition
+    {
+        public override bool MeetCondition() => 
+            GameSession.Instance.GameFlow.TurnStep == TurnStep.VICTORY_POINT;
+    }
+
+    public class IsPlayCardStep : Condition
+    {
+        public override bool MeetCondition() => 
+            GameSession.Instance.GameFlow.TurnStep == TurnStep.PLAY_CARD;
+    }
+
+    public class IsStartStep : Condition
+    {
+        public override bool MeetCondition() => 
+            GameSession.Instance.GameFlow.TurnStep == TurnStep.START;
     }
 
     public class CustomCondition : Condition

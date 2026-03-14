@@ -8,8 +8,8 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionBattled(Faction).WithCountryType(CountryType.LAND), this),
-            Condition.Build(new Condition.CustomCondition(() => DeployableCountryIds.Count > 0), this)
+            Condition.Build(new Condition.HasBattledOnLand(Faction), this),
+            Condition.Build(new Condition.HasBuildableLand(Faction), this)
         };
     }
     
@@ -17,7 +17,7 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
     {
         get
         {
-            return GameStateCalculator.GetCachedForFaction(Faction).BuildableCountryStates.Where(cs => cs.Type == CountryType.LAND).Select(cs => cs.Id).ToList();
+            return CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
         }
     }
 

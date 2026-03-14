@@ -8,8 +8,8 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD).WithUnitType(UnitType.NAVY), this),            
-            Condition.Build(new Condition.CustomCondition(() => DeployableCountryIds.Count > 0), this)
+            Condition.Build(new Condition.HasDeployedNavy(Faction), this),
+            Condition.Build(new Condition.HasBuildableSea(Faction), this)
         };
     }
     
@@ -17,7 +17,7 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
     {
         get
         {
-            return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.SEA).Select(cs => cs.Id).ToList();
+            return CountryState.BuildableSea(Faction).Select(cs => cs.Id).ToList();
         }
     }
 

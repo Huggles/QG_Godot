@@ -11,21 +11,14 @@ public partial class BuildNavy : CardLogic
     {
         return new List<CardStep> {
             new DeployUnitCardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler(TargetableCountryStates.ToCountryIds()).Handle();
+                var targetableCountries = CountryState.BuildableSea(Faction);
+                int selectedCountryId = await new SelectCountryHandler(targetableCountries.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
-            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(TargetableCountryStates.ToCountryIds(), Faction),this))
+            .WithCondition(()=> Condition.Build(new Condition.HasBuildableSea(Faction), this))
             .WithGuidance("Build a navy")
         }; 
-    }
-    
-    public List<CountryState> TargetableCountryStates
-    {
-        get
-        {
-            return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.SEA).ToList();
-        }
     }
 }

@@ -9,7 +9,9 @@ public enum Tag
     AlliedControlled,
     Empty,
     Buildable,
-    Recruitable, 
+    Recruitable,
+    LandCountry,
+    SeaCountry,
 
     //Straight Tags
     AxisControlled,

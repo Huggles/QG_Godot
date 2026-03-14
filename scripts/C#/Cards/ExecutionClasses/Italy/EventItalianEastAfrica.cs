@@ -15,7 +15,7 @@ public partial class EventItalianEastAfrica : ResponseCardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
-            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(targetCountries[0], Faction),this))
+            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable([(int)targetCountries[0]], Faction),this))
             .WithGuidance($"Build an army in {CountryState.ForEnum(targetCountries[0]).Label}"),
             new CardStep(this, async() => {
                 int selectedCountryId = await new SelectCountryHandler([targetCountries[1]]).Handle();
@@ -23,7 +23,7 @@ public partial class EventItalianEastAfrica : ResponseCardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
-            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(targetCountries[1], Faction),this))
+            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable([(int)targetCountries[1]], Faction),this))
             .WithGuidance($"Build a navy in {CountryState.ForEnum(targetCountries[1]).Label}"),
         };
         

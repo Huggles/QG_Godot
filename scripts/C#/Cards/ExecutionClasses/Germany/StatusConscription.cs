@@ -7,12 +7,12 @@ public partial class StatusConscription : StatusCardLogic
 {
     public List<int> BuildableLandCountries()
     {
-        return CountryState.AllCountryStates.Where(cs => cs.Tags.Has(Tag.Buildable, Faction) && cs.Type == CountryType.LAND).Select(cs => cs.Id).ToList();
+        return CountryState.BuildableLand(Faction).ToCountryIds();
     }    
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.IsGameFlowStep(TurnStep.PLAY_CARD), this)
+            Condition.Build(new Condition.IsPlayCardStep(), this)
         };
     }
 

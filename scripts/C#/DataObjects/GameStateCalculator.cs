@@ -181,11 +181,14 @@ public class GameStateCalculator
     public static GameStateCalculator CalculateAllForFaction(Faction faction)
     {
         GameStateCalculator calculator = new GameStateCalculator { Faction = faction };
+        
+        // Calculate supply first - it's needed by buildable/attackable checks
+        CalculateInSupplyForFaction(faction, calculator);
+        
         CalculateAttackableForFaction(faction, calculator);
         CalculateBuildableCountriesForFaction(faction, calculator);
         CalculateRecruitableCountriesForFaction(faction, calculator);
         CalculatePlayableCardsForFaction(faction, calculator);
-        CalculateInSupplyForFaction(faction, calculator);
         CalculateStraightControlForFaction(faction, calculator);
         
         // Cache the result
