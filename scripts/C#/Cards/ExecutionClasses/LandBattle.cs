@@ -10,9 +10,8 @@ public partial class LandBattle : CardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                GameStateCalculator calculator = GameStateCalculator.CalculateAllForFaction(Faction);
-                List<int> armyUnits = calculator.TargetUnitIds.Where(unitId => UnitState.ForId(unitId).Type == UnitType.ARMY).ToList();
-                List<int> emptyCountries = calculator.TargetEmptyCountryIds.Where(countryId => CountryState.ForId(countryId).Type == CountryType.LAND).ToList();
+                List<int> armyUnits = UnitState.AttackableArmyIds(Faction);
+                List<int> emptyCountries = CountryState.AttackableLandIds(Faction);
                 BattleTarget target = await new SelectBattleTargetHandler(emptyCountries, armyUnits).Handle();
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;

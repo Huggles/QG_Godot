@@ -95,4 +95,11 @@ public partial class UnitState : StateObject
     
     public static List<UnitState> AttackableNavies(Faction faction) =>
         AllUnitStates.Where(us => us.Tags.Has(Tag.Attackable, faction) && us.Type == UnitType.NAVY).ToList();
+
+    // ID helpers
+    public static List<int> AttackableArmyIds(Faction faction) =>
+        AttackableArmies(faction).Select(u => u.Id).ToList();
+    
+    public static List<int> AttackableNavyIds(Faction faction) =>
+        AttackableNavies(faction).Select(u => u.Id).ToList();
 }

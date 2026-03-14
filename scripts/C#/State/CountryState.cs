@@ -300,6 +300,25 @@ public partial class CountryState : StateObject
     
     public static List<CountryState> AttackableSea(Faction faction) => 
         WithTags(new[] { Tag.Attackable, Tag.SeaCountry }, faction);
+
+    // ID helpers
+    public static List<int> BuildableLandIds(Faction faction) => 
+        BuildableLand(faction).Select(c => c.Id).ToList();
+    
+    public static List<int> BuildableSeaIds(Faction faction) => 
+        BuildableSea(faction).Select(c => c.Id).ToList();
+    
+    public static List<int> RecruitableLandIds(Faction faction) => 
+        RecruitableLand(faction).Select(c => c.Id).ToList();
+    
+    public static List<int> RecruitableSeaIds(Faction faction) => 
+        RecruitableSea(faction).Select(c => c.Id).ToList();
+    
+    public static List<int> AttackableLandIds(Faction faction) => 
+        AttackableLand(faction).Select(c => c.Id).ToList();
+    
+    public static List<int> AttackableSeaIds(Faction faction) => 
+        AttackableSea(faction).Select(c => c.Id).ToList();
     
     public static bool operator ==(CountryState countryState, Country country)
     {

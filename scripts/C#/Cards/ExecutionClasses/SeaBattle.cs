@@ -10,13 +10,12 @@ public partial class SeaBattle : CardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                GameStateCalculator calculator = GameStateCalculator.CalculateAllForFaction(Faction);
-                List<int> armyUnits = calculator.TargetUnitIds.Where(unitId => UnitState.ForId(unitId).Type == UnitType.NAVY).ToList();
-                int selectedUnitId = await new SelectUnitHandler(armyUnits).Handle();
-
-                BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedUnitId));
-                battleUnitChangeEvent.IsTrigger = true;
-                return battleUnitChangeEvent;
+                List<int> navyUnits = UnitState.AttackableNavyIds(Faction);
+                List<int> emptyCountries = CountryState.AttackableSeaIds(Faction);
+                BattleTarget target = await new SelectBattleTargetHandler(emptyCountries, navyUnits).Handle();
+                BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+                battleCountryChange.IsTrigger = true;
+                return battleCountryChange;
             })
             .WithCondition(()=>Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))            
         }; 
