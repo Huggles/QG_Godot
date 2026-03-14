@@ -63,6 +63,7 @@ public partial class GameFlow : GodotObject
     public StartTurnStepHandler startTurnStepHandler;
     public PlayStepHandlerDefault playStepHandlerDefault;
     public IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
+    public IDiscardStepHandler discardStepHandler;
 
     public void StartGame()
     {
@@ -159,7 +160,14 @@ public partial class GameFlow : GodotObject
     {
         GD.Print("DiscardStep");
         this.TurnStep = TurnStep.DISCARD;
-        await Task.Delay(100);
+        discardStepHandler = new DiscardStepHandlerDefault();
+        discardStepHandler.DiscardStepFinished += DiscardStepFinishedHandler;
+        discardStepHandler.Start(CurrentFaction);
+    }
+
+    private void DiscardStepFinishedHandler()
+    {
+        discardStepHandler.DiscardStepFinished -= DiscardStepFinishedHandler;
         ProgressGame();
     }
 

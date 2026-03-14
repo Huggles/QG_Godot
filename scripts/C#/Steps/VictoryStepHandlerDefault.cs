@@ -66,7 +66,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     private async Task ShowVictoryPointEntry(VPEntry vPEntry)
     {
         PlayerActionLabel.ShowText(vPEntry.Reason, Faction);
-        await Task.Delay(2000);
+        await Task.Delay(500);
         PlayerActionLabel.HideText();
         await Task.Delay(100);
     }

@@ -13,8 +13,14 @@ public partial class PresentationModal : Control, LoadableUI
 
     public bool RequireSelection;
     public Button ExitButton;
+    public Button ConfirmButton;
 
-
+    // Multi-select support
+    private bool multiSelectMode = false;
+    private int minimumSelections = 0;
+    private List<int> selectedIdentifiers = new List<int>();
+    private Action<List<int>> confirmCallback;
+    private Action skipCallback;
     
     public List<PresentationItem> PresentationItems = new List<PresentationItem>();
     public List<Control> PresentationItemControls = new List<Control>();
@@ -38,10 +44,19 @@ public partial class PresentationModal : Control, LoadableUI
         GridCardContainer = GetNode<GridContainer>("%GridCardContainer");
         ExitButton = GetNode<Button>("%ExitButton");
         CardScrollContainer = GetNode<ScrollContainer>("%CardScrollContainer");
+        
+        // Try to get ConfirmButton if it exists in the scene
+        if (HasNode("%ConfirmButton"))
+        {
+            ConfirmButton = GetNode<Button>("%ConfirmButton");
+            ConfirmButton.Pressed += HandleConfirmPressed;
+        }
 
         Visible = false;
         Modulate = new Color(1, 1, 1, 0);
         ExitButton.Visible = false;
+        if (ConfirmButton != null)
+            ConfirmButton.Visible = false;
     }
 
     public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title)
@@ -73,7 +88,7 @@ public partial class PresentationModal : Control, LoadableUI
         Visible = true;
 
         var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, 1);
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, 0.2);
         propertyTweener1.Finished += async () =>
         {
             EmitSignal(SignalName.OnShow);
@@ -96,33 +111,6 @@ public partial class PresentationModal : Control, LoadableUI
         
     }
 
-    public SignalAwaiter HideModal()
-    {
-        InputManager.Instance.KeyClicked -= HandleKeyboardInput;
-        var tween2 = GetTree().CreateTween();
-        PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, 1);
-        propertyTweener2.Finished += () =>
-        {
-            tween2.Dispose();
-            Visible = false;
-            ExitButton.Visible = false;
-            foreach (PresentationItem presentationItem in PresentationItems)
-            {
-                presentationItem.ItemClicked -= HandleItemClicked;
-            }
-            foreach (Control presentationItemControl in PresentationItemControls)
-            {
-                if (presentationItemControl.GetParent() != null)
-                {
-                    presentationItemControl.GetParent().RemoveChild(presentationItemControl);
-                }
-            }
-            PresentationItemControls.Clear();
-            EmitSignal(SignalName.OnHide);
-        };
-        return ToSignal(this, SignalName.OnHide);
-    }
-
     public void ShowExitButton(Action callback)
     {
         ExitButton.Visible = true;
@@ -136,6 +124,11 @@ public partial class PresentationModal : Control, LoadableUI
     {
         if (presentationItems != null && presentationItems.Count > 0)
         {
+            PresentationItems = presentationItems;
+            
+            // Set columns to match number of items for single-row display
+            GridCardContainer.Columns = presentationItems.Count;
+            
             foreach (PresentationItem presentationItem in presentationItems)
             {
                 Control control = presentationItem.InitializeControl();
@@ -143,9 +136,22 @@ public partial class PresentationModal : Control, LoadableUI
 
                 PresentationItemControls.Add(control);
                 presentationItem.LoadControl();
-                presentationItem.ItemClicked += HandleItemClicked;
+                
+                // Connect to appropriate handler based on mode
+                if (multiSelectMode)
+                {
+                    presentationItem.ItemClicked += HandleItemClickedMultiSelect;
+                    // Initialize all cards as unselected (darker)
+                    control.Modulate = new Color(0.5f, 0.5f, 0.5f);
+                }
+                else
+                {
+                    presentationItem.ItemClicked += HandleItemClicked;
+                }
             }
-            Vector2 gridSize = new Vector2(0, presentationItems.Count > GridCardContainer.Columns ? PresentationItemControls[0].Size.Y * 2 : PresentationItemControls[0].Size.Y);
+            
+            // Set grid size to fit one row of cards
+            Vector2 gridSize = new Vector2(0, PresentationItemControls[0].Size.Y);
             CardScrollContainer.CustomMinimumSize = gridSize;
             CardScrollContainer.Size = gridSize;
             CardScrollContainer.ScrollVertical = 0;
@@ -161,5 +167,128 @@ public partial class PresentationModal : Control, LoadableUI
         {
             HideModal();
         }
+    }
+
+    // Multi-select functionality
+    public void ShowModalMultiSelect(List<PresentationItem> presentationItems, string title, int minimumSelections, Action<List<int>> onConfirm, Action onSkip)
+    {
+        this.multiSelectMode = true;
+        this.minimumSelections = minimumSelections;
+        this.confirmCallback = onConfirm;
+        this.skipCallback = onSkip;
+        this.selectedIdentifiers.Clear();
+
+        HandlePresentationItems(presentationItems);
+        TitleText.Text = title;
+        Visible = true;
+
+        // Show buttons
+        if (ConfirmButton != null)
+        {
+            ConfirmButton.Visible = true;
+            UpdateConfirmButton();
+        }
+        
+        if (minimumSelections == 0 && skipCallback != null)
+        {
+            ShowExitButton(() => 
+            { 
+                skipCallback?.Invoke();
+            });
+        }
+
+        var tween1 = GetTree().CreateTween();
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, 0.2);
+        propertyTweener1.Finished += () =>
+        {
+            EmitSignal(SignalName.OnShow);
+            tween1.Dispose();
+        };
+    }
+
+    private void HandleItemClickedMultiSelect(int identifier)
+    {
+        if (selectedIdentifiers.Contains(identifier))
+        {
+            selectedIdentifiers.Remove(identifier);
+            UpdateItemVisual(identifier, false);
+        }
+        else
+        {
+            selectedIdentifiers.Add(identifier);
+            UpdateItemVisual(identifier, true);
+        }
+        
+        UpdateConfirmButton();
+    }
+
+    private void UpdateItemVisual(int identifier, bool selected)
+    {
+        PresentationItem item = PresentationItems.Find(p => p.Identifier == identifier);
+        if (item?.Control != null)
+        {
+            // Visual feedback for selection
+            item.Control.Modulate = selected ? new Color(1, 1, 1) : new Color(0.5f, 0.5f, 0.5f);
+        }
+    }
+
+    private void UpdateConfirmButton()
+    {
+        if (ConfirmButton != null)
+        {
+            bool canConfirm = selectedIdentifiers.Count >= minimumSelections;
+            ConfirmButton.Disabled = !canConfirm;
+            ConfirmButton.Text = minimumSelections > 0 
+                ? $"Confirm ({selectedIdentifiers.Count}/{minimumSelections})"
+                : $"Discard {selectedIdentifiers.Count} Card(s)";
+        }
+    }
+
+    private void HandleConfirmPressed()
+    {
+        if (multiSelectMode && selectedIdentifiers.Count >= minimumSelections)
+        {
+            confirmCallback?.Invoke(new List<int>(selectedIdentifiers));
+        }
+    }
+
+    public SignalAwaiter HideModal()
+    {
+        InputManager.Instance.KeyClicked -= HandleKeyboardInput;
+        
+        // Reset multi-select state
+        multiSelectMode = false;
+        minimumSelections = 0;
+        selectedIdentifiers.Clear();
+        confirmCallback = null;
+        skipCallback = null;
+
+        var tween2 = GetTree().CreateTween();
+        PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, 0.2);
+        propertyTweener2.Finished += () =>
+        {
+            tween2.Dispose();
+            Visible = false;
+            ExitButton.Visible = false;
+            if (ConfirmButton != null)
+                ConfirmButton.Visible = false;
+                
+            foreach (PresentationItem presentationItem in PresentationItems)
+            {
+                presentationItem.ItemClicked -= HandleItemClicked;
+                presentationItem.ItemClicked -= HandleItemClickedMultiSelect;
+            }
+            foreach (Control presentationItemControl in PresentationItemControls)
+            {
+                if (presentationItemControl.GetParent() != null)
+                {
+                    presentationItemControl.GetParent().RemoveChild(presentationItemControl);
+                }
+            }
+            PresentationItemControls.Clear();
+            PresentationItems.Clear();
+            EmitSignal(SignalName.OnHide);
+        };
+        return ToSignal(this, SignalName.OnHide);
     }
 }

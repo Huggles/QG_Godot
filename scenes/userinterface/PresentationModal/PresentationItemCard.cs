@@ -35,11 +35,11 @@ public partial class PresentationItemCard : PresentationItem
     }
     public override void LoadControl()
     {
+        CardSceneInstance.Size = CardSize;
+        CardSceneInstance.CustomMinimumSize = CardSize;
         CardSceneInstance.ShowCard(cardId);
         CardSceneInstance.SetClickable(Selectable);
         CardSceneInstance.TriggersEmphasis(false);
-        CardSceneInstance.Size = CardSize;
-        CardSceneInstance.CustomMinimumSize = CardSize;
         CardSceneInstance.Selected += (cardId) => { EmitSignal(SignalName.ItemClicked, Identifier); };       
     }
 
