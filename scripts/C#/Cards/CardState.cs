@@ -3,13 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-public partial class CardState : Object
+public partial class CardState : Object, ITaggable
 {
     public int Id { get; set; }
     public CardData CardData { get; set; }
     public Faction Faction { get; set; }
 
     public string CardName => CardData != null ? CardData.Label : string.Empty;
+
+    private readonly TagContainer _tags = new();
+    public TagContainer Tags => _tags;
 
     public ChangeEvent TriggeredByChangeEvent { get; set; }
 
