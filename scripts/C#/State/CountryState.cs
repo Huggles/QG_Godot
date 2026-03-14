@@ -50,11 +50,11 @@ public partial class CountryState : StateObject
         EventBus.Instance.SetCountriesClickable += SetClickable;
         EventBus.Instance.SetAllCountriesUnclickable += SetUnclickable;
 
-        this.Tags.TagAdded += (Tag t) =>
+        this.Tags.TagAdded += (Tag t, Faction f) =>
         {
             if(t is Tag.Clickable) Node.SetClickable();
         };
-        this.Tags.TagRemoved += (Tag t) =>
+        this.Tags.TagRemoved += (Tag t, Faction f) =>
         {
             if(t is Tag.Clickable) Node.SetUnclickable();
         };

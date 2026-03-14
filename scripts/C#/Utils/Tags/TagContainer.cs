@@ -8,8 +8,8 @@ public partial class TagContainer : Node
     // Maps each tag to the set of factions it applies to
     private readonly Dictionary<Tag, HashSet<Faction>> _tags = new();
 
-    public event Action<Tag, Faction>? TagAdded;
-    public event Action<Tag, Faction>? TagRemoved;
+    public event Action<Tag, Faction> TagAdded;
+    public event Action<Tag, Faction> TagRemoved;
 
     /// <summary>
     /// Adds a tag for a specific faction.

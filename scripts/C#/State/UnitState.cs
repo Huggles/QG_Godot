@@ -51,13 +51,13 @@ public partial class UnitState : StateObject
         EventBus.Instance.SetAllUnitsUnclickable += SetUnclickable;
         EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; };
 
-        Tags.TagAdded += (Tag t) =>
+        Tags.TagAdded += (Tag t, Faction f) =>
         {
             DebugUtilities.PrintPeer("TAG ADDED");
             DebugUtilities.PrintPeer(t);
             if(t is Tag.Clickable) Node.SetClickable();
         };
-        Tags.TagRemoved += (Tag t) =>
+        Tags.TagRemoved += (Tag t, Faction f) =>
         {
             if(t is Tag.Clickable) Node.SetUnclickable();
         };
