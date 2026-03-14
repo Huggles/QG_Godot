@@ -20,6 +20,11 @@ public partial class PresentationItemCard : PresentationItem
         this.cardId = cardId;
     }
 
+    public PresentationItemCard(int identifier, int cardId, bool selectable) : base(identifier, selectable)
+    {
+        this.cardId = cardId;
+    }
+
     public override Control InitializeControl()
     {
         CardScene cardSceneInstance = CardScene.CardScenePackedPath.Instantiate<CardScene>();

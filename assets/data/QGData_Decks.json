@@ -2,6 +2,7 @@
 	{
 		"FactionIndex" : 1,
 		"Cards": [
+			{"CardName":"EventGunsAndButter","Number":1},
 			{"CardName":"StatusOccupationOfCzechoslovakia","Number":1},
 			{"CardName":"BuildArmy","Number":2},
 			{"CardName":"BuildNavy","Number":2},
@@ -20,8 +21,7 @@
 			{"CardName":"StatusVolksturm","Number":1},
 			{"CardName":"EventPlunder","Number":1},
 			{"CardName":"EventTheAutobahn","Number":1},
-			{"CardName":"EventForcedConscription","Number":1},
-			{"CardName":"EventGunsAndButter","Number":1},
+			{"CardName":"EventForcedConscription","Number":1},			
 			{"CardName":"EventBroadFront","Number":1},
 			{"CardName":"EventMilitaryDictatorshipsInTheBalkans","Number":1},
 			{"CardName":"EWSubmarinesRaidMurmanskConvoy","Number":1},

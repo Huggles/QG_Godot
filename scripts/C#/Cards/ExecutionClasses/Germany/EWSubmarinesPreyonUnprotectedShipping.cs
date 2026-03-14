@@ -1,11 +1,35 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class EWSubmarinesPreyonUnprotectedShipping : EWCardLogic
 {
-public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> InitializePlayCardSteps()
     {
-        return new List<CardStep> {}; 
+        return new List<CardStep>
+        {
+            new CardStep(this, async() => {
+                // Check if Allied Navy in North Sea
+                CountryState northSea = CountryState.ForEnum(Country.NorthSea);
+                bool alliedNavyInNorthSea = northSea.Units.Values.Any(unitId => 
+                {
+                    UnitState unit = UnitState.ForId(unitId);
+                    return unit.Type == UnitType.NAVY && unit.FactionTeam == FactionTeam.ALLIES;
+                });
+                
+                int discardCount = alliedNavyInNorthSea ? 2 : 5;
+                
+                // UK discards cards
+                DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, discardCount));
+                discardEvent.IsTrigger = true;
+                
+                // Score 1 VP
+                IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                await vpHandler.ScorePoints(new VPEntry(1, "1 VP for Submarines Prey on Unprotected Shipping."));
+                
+                return discardEvent;
+            })
+        }; 
     }
 }
