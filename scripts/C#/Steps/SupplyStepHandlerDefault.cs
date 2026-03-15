@@ -21,24 +21,18 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
         // Recalculate supply for all units
         GameStateCalculator.CalculateAll();
         
-        // Find all units that are out of supply
-        List<UnitState> outOfSupplyUnits = new List<UnitState>();
-        
-        foreach (var unitState in GameSession.Instance.GameState.UnitStatesById.Values)
-        {
-            // Only check units that are on the board (have a country)
-            if (unitState.CountryId >= 0 && !unitState.InSupply)
-            {
-                outOfSupplyUnits.Add(unitState);
-            }
-        }
+        // Get active units for this faction and filter for those out of supply
+        List<int> activeUnitIds = GameStateUtilities.ActiveUnitsForFaction(this.faction);
+        List<UnitState> outOfSupplyUnits = UnitState.ForIds(activeUnitIds)
+            .Where(unit => !unit.InSupply)
+            .ToList();
 
         // Remove out-of-supply units
         if (outOfSupplyUnits.Count > 0)
         {
             string message = $"{outOfSupplyUnits.Count} unit(s) removed due to lack of supply";
-            PlayerActionLabel.ShowText(message, Faction.NONE);
-            GD.Print($"Removing {outOfSupplyUnits.Count} out-of-supply units");
+            PlayerActionLabel.ShowText(message, this.faction);
+            GD.Print($"Removing {outOfSupplyUnits.Count} out-of-supply units for {this.faction}");
             
             // Create removal events for each out-of-supply unit
             foreach (var unit in outOfSupplyUnits)

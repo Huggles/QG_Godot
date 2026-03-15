@@ -100,7 +100,8 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            return CountryStates.Any(countryState => countryState.Tags.HasForAny(Tag.Empty));
+            // Check if any of the specified countries are empty (no units)
+            return CountryStates.Any(countryState => countryState.IsCountryEmpty);
         }
     }
     public class CountryHasEnemyUnit : Condition

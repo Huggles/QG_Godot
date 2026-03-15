@@ -55,7 +55,25 @@ public abstract partial class CardLogic : GodotObject
     
     public bool CanBeActivated()
     {
-        return !IsActivatedThisTurn && !IsActivationFinished && TriggerConditionsMet;
+        // Status and Response cards must be played before they can be activated
+        if (IsReaction && !IsPlayed)
+        {
+            return false;
+        }
+        
+        bool canActivate = !IsActivatedThisTurn && !IsActivationFinished && TriggerConditionsMet;
+        if (CardData.Type == "STATUS" || CardData.Type == "RESPONSE")
+        {
+            DebugUtilities.PrintPeer($"CanBeActivated {CardData.UniqueName}: IsPlayed={IsPlayed}, IsActivatedThisTurn={IsActivatedThisTurn}, IsActivationFinished={IsActivationFinished}, TriggerConditionsMet={TriggerConditionsMet}, Result={canActivate}");
+            if (CardTriggers().Count > 0)
+            {
+                foreach (var trigger in CardTriggers())
+                {
+                    DebugUtilities.PrintPeer($"  Trigger {trigger.GetType().Name}: {trigger.MeetCondition()}");
+                }
+            }
+        }
+        return canActivate;
     }
     private bool TriggerConditionsMet
     {
