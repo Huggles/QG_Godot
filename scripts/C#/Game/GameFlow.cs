@@ -64,6 +64,8 @@ public partial class GameFlow : GodotObject
     public PlayStepHandlerDefault playStepHandlerDefault;
     public IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
     public IDiscardStepHandler discardStepHandler;
+    public IDrawStepHandler drawStepHandler;
+    public ISupplyStepHandler supplyStepHandler;
 
     public void StartGame()
     {
@@ -143,8 +145,14 @@ public partial class GameFlow : GodotObject
     {
         this.TurnStep = TurnStep.SUPPLY;
         GD.Print("SupplyStep");
-        GameStateCalculator.CalculateAll();
-        await Task.Delay(100);
+        supplyStepHandler = new SupplyStepHandlerDefault();
+        supplyStepHandler.SupplyStepFinished += SupplyStepFinishedHandler;
+        supplyStepHandler.Start(CurrentFaction);
+    }
+
+    private void SupplyStepFinishedHandler()
+    {
+        supplyStepHandler.SupplyStepFinished -= SupplyStepFinishedHandler;
         ProgressGame();
     }
 
@@ -175,9 +183,14 @@ public partial class GameFlow : GodotObject
     {
         GD.Print("DrawStep");
         this.TurnStep = TurnStep.DRAW;
-        CurrentFactionDeckState.DrawCards(7 - CurrentFactionDeckState.HandCardIds.Count);
-        //CurrentFactionDeckState.DebugHand();
-        await Task.Delay(100);
+        drawStepHandler = new DrawStepHandlerDefault();
+        drawStepHandler.DrawStepFinished += DrawStepFinishedHandler;
+        drawStepHandler.Start(CurrentFaction);
+    }
+
+    private void DrawStepFinishedHandler()
+    {
+        drawStepHandler.DrawStepFinished -= DrawStepFinishedHandler;
         ProgressGame();
     }
 
