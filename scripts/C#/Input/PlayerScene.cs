@@ -1,30 +1,51 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
+using System.Linq;
 
 public partial class PlayerScene : CharacterBody2D
 {
     [Export]
-    private int _peerId;
+    private int _peerId = 1;
     [Export]
-    private string _playerName;
-    [Export]
-    public Godot.Collections.Array FactionStrings;
-
+    private string _playerName = "Player";
+    
+    /// <summary>
+    /// The factions this player controls in the game
+    /// Set by PlayerFactionRegistry during game setup
+    /// </summary>
+    private List<Faction> _controlledFactions = new List<Faction>();
+    
     public InputManager InputManager => GetNode("%InputManager") as InputManager; 
 
-    private List<FactionData> factions;
-    public List<FactionData> Factions
+    /// <summary>
+    /// Get the factions controlled by this player
+    /// </summary>
+    public List<Faction> ControlledFactions => new List<Faction>(_controlledFactions);
+    
+    /// <summary>
+    /// Set the factions controlled by this player
+    /// </summary>
+    public void SetControlledFactions(List<Faction> factions)
     {
-        get
-        {
-            if (factions == null || factions.Count == 0 || factions.Count != FactionStrings.Count)
-            {
-                factions = new List<FactionData>(); 
-            }
-            return factions;
-        }
+        _controlledFactions = new List<Faction>(factions);
+        DebugUtilities.PrintPeer($"PlayerScene ({PlayerName}, Peer {PeerId}): Controls {string.Join(", ", factions)}");
+    }
+    
+    /// <summary>
+    /// Check if this player controls a specific faction
+    /// </summary>
+    public bool ControlsFaction(Faction faction)
+    {
+        return _controlledFactions.Contains(faction);
+    }
+    
+    /// <summary>
+    /// Check if this player controls any faction in a team
+    /// </summary>
+    public bool ControlsTeam(FactionTeam team)
+    {
+        return _controlledFactions.Any(f => StaticGameData.FactionTeamForFaction(f) == team);
     }
     
     private Camera2D _camera;
@@ -39,20 +60,14 @@ public partial class PlayerScene : CharacterBody2D
         _rootNode = GetNode(".");  // Same as $"." in GDScript
         _camera = GetNode<Camera2D>("Camera2D");
 
+        // Set camera active for local player
         if (_peerId == Multiplayer.GetUniqueId())
         {
-            DebugUtilities.PrintPeer($"Setting camera for player: {Name}");
+            DebugUtilities.PrintPeer($"Setting camera for player: {PlayerName} (Peer {_peerId})");
             _camera.MakeCurrent();
         }
 
-        if (FactionStrings == null || FactionStrings.Count == 0)
-        {
-            FactionStrings = new Godot.Collections.Array {
-                "GERMANY", "UNITED_KINGDOM", "JAPAN", "SOVIET", "ITALY", "UNITED_STATES"
-            };
-        }
-
-        DebugUtilities.PrintPeer("Adding player");
+        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName} (Peer {_peerId})");
     }
 
     public override void _PhysicsProcess(double delta)

@@ -17,6 +17,27 @@
           "showReuseMessage": true,
           "clear": false
         }
+      },
+      {
+        "label": "Launch Two Instances (Multiplayer)",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}/quick_launch.ps1"
+        ],
+        "problemMatcher": [],
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false,
+          "clear": true
+        },
+        "dependsOn": "build"
       }
     ]
   }

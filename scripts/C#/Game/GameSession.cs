@@ -127,9 +127,19 @@ public partial class GameSession : Node
 
     public async static Task<CardActivationOption> RequestPlay(Faction faction)
     {
-        //TODO: determine player scene for faction.
+        // Get the player who controls this faction
+        PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
+        if (controllingPlayer == null)
+        {
+            DebugUtilities.PrintPeerError($"RequestPlay: No player found controlling {faction}");
+            return null;
+        }
+
         List<CardActivationOption> activationOptions = CardPlayPool.GetNextActions(faction);
-        instance.playerScenes[0].InputManager.SetPlayCardInputActive(activationOptions);
+        
+        // Route input to the correct player's InputManager
+        controllingPlayer.InputManager.SetPlayCardInputActive(activationOptions);
+        
         Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
         if (results == null || results.Length == 0)
         {
@@ -142,7 +152,14 @@ public partial class GameSession : Node
     }
     public async static Task<CardActivationOption> RequestBlock(Faction faction)
     {
-        //TODO: determine player scene for faction.
+        // Get the player who controls this faction
+        PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
+        if (controllingPlayer == null)
+        {
+            DebugUtilities.PrintPeerError($"RequestBlock: No player found controlling {faction}");
+            return null;
+        }
+
         List<CardActivationOption> blockOptions = await CardPlayPool.BlockChangeEvents(faction);
         if (blockOptions == null || blockOptions.Count == 0)
         {
@@ -150,7 +167,9 @@ public partial class GameSession : Node
         }
         else
         {
-            instance.playerScenes[0].InputManager.SetPlayCardInputActive(blockOptions);
+            // Route input to the correct player's InputManager
+            controllingPlayer.InputManager.SetPlayCardInputActive(blockOptions);
+            
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
             if (results == null || results.Length == 0)
             {

@@ -1,0 +1,8 @@
+// Copy this into your VSCode keybindings.json
+// To open: Ctrl+Shift+P -> "Preferences: Open Keyboard Shortcuts (JSON)"
+
+{
+    "key": "f6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Launch Two Instances (Multiplayer)"
+}

@@ -38,15 +38,58 @@ public partial class GameManager : Node
     public override void _Ready()
     {
         DebugUtilities.PrintPeer("GameManager Ready");
-        Dictionary<string, object> args = DebugUtilities.CommandLineArguments;
-        DebugUtilities.PrintPeer(JsonSerializer.Serialize(args));
-
-        if (args.ContainsKey(LocalMultiplayerGameArg) && (bool)args[LocalMultiplayerGameArg] == true)
+        
+        // Check if we're in the lobby scene - if so, don't start the game yet
+        string currentScene = GetTree().CurrentScene?.SceneFilePath ?? "";
+        if (currentScene.Contains("MultiplayerLobby"))
         {
-            DebugUtilities.PrintPeerError("Multiplayer not supported yet");
+            DebugUtilities.PrintPeer("In lobby scene - waiting for game start");
+            return;
+        }
+        
+        // If we're in the Game scene, start the game
+        if (currentScene.Contains("Game.tscn"))
+        {
+            DebugUtilities.PrintPeer("In game scene - initializing game");
+            InitializeGame();
+        }
+    }
+
+    /// <summary>
+    /// Called when starting the actual game (after lobby)
+    /// </summary>
+    public void InitializeGame()
+    {
+        DebugUtilities.PrintPeer("Initializing game from multiplayer");
+        
+        // Initialize NodeUtilities to find Game scene nodes
+        NodeUtilities.Instance.InitializeGameNodes();
+        
+        // Determine multiplayer mode based on connected peers
+        var peerIds = Multiplayer.GetPeers();
+        int totalPlayers = peerIds.Length + 1; // +1 for ourselves
+        
+        DebugUtilities.PrintPeer($"Total players: {totalPlayers}");
+        
+        if (totalPlayers == 1)
+        {
+            // Single player
+            LoadSinglePlayerGame();
+        }
+        else if (totalPlayers == 2)
+        {
+            // 2-player teams
+            LoadTwoPlayerTeamsGame();
+        }
+        else if (totalPlayers >= 6)
+        {
+            // 6-player
+            LoadSixPlayerGame();
         }
         else
         {
+            // Default to single player for now
+            DebugUtilities.PrintPeerError($"Unsupported player count: {totalPlayers}. Defaulting to single player.");
             LoadSinglePlayerGame();
         }
     }
@@ -54,9 +97,20 @@ public partial class GameManager : Node
     private void LoadSinglePlayerGame()
     {
         DebugUtilities.PrintPeer("Starting single player game");
+        
+        // Create and register player
         PlayerScene playerInstance = PlayerScene.Instantiate<PlayerScene>();
+        playerInstance.PeerId = 1;
+        playerInstance.PlayerName = "Player 1";
         NodeUtilities.Instance.PlayersNode.AddChild(playerInstance);
         playerStates.Add(playerInstance);
+        
+        // Register player in registry
+        PlayerFactionRegistry.RegisterPlayer(playerInstance);
+        
+        // Assign all factions to single player
+        PlayerFactionRegistry.AssignFactionsToPlayer(1, StaticGameData.PlayableFactions);
+        PlayerFactionRegistry.PrintStatus();
 
         EventBus.Instance.UserInterfaceLoaded += elementName =>
         {             
@@ -72,6 +126,121 @@ public partial class GameManager : Node
                 SetupGameSession();
             }
         };        
+    }
+
+    private void LoadMultiplayerGame(MultiplayerMode mode)
+    {
+        DebugUtilities.PrintPeer($"Starting multiplayer game: {mode}");
+        
+        switch (mode)
+        {
+            case MultiplayerMode.TWO_PLAYER_TEAMS:
+                LoadTwoPlayerTeamsGame();
+                break;
+                
+            case MultiplayerMode.SIX_PLAYER:
+                LoadSixPlayerGame();
+                break;
+                
+            default:
+                DebugUtilities.PrintPeerError($"Unsupported multiplayer mode: {mode}");
+                LoadSinglePlayerGame();
+                break;
+        }
+    }
+
+    private void LoadTwoPlayerTeamsGame()
+    {
+        DebugUtilities.PrintPeer("Loading 2-player teams game (AXIS vs ALLIES)");
+        
+        // Get connected peers
+        int myPeerId = Multiplayer.GetUniqueId();
+        var peerIds = new List<int>(Multiplayer.GetPeers()) { myPeerId };
+        peerIds.Sort(); // Ensure consistent ordering
+        
+        DebugUtilities.PrintPeer($"Creating players for peer IDs: {string.Join(", ", peerIds)}");
+        
+        // Create player 1 (AXIS) - first peer ID
+        PlayerScene player1 = PlayerScene.Instantiate<PlayerScene>();
+        player1.PeerId = peerIds[0];
+        player1.PlayerName = $"Player {peerIds[0]} (AXIS)";
+        NodeUtilities.Instance.PlayersNode.AddChild(player1);
+        playerStates.Add(player1);
+        PlayerFactionRegistry.RegisterPlayer(player1);
+        
+        // Create player 2 (ALLIES) - second peer ID
+        PlayerScene player2 = PlayerScene.Instantiate<PlayerScene>();
+        player2.PeerId = peerIds[1];
+        player2.PlayerName = $"Player {peerIds[1]} (ALLIES)";
+        NodeUtilities.Instance.PlayersNode.AddChild(player2);
+        playerStates.Add(player2);
+        PlayerFactionRegistry.RegisterPlayer(player2);
+        
+        // Step 2: Assign factions to players
+        List<Faction> axisFactions = new List<Faction> { Faction.GERMANY, Faction.JAPAN, Faction.ITALY };
+        List<Faction> alliesFactions = new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
+        
+        PlayerFactionRegistry.AssignFactionsToPlayer(peerIds[0], axisFactions);
+        PlayerFactionRegistry.AssignFactionsToPlayer(peerIds[1], alliesFactions);
+        PlayerFactionRegistry.PrintStatus();
+        
+        EventBus.Instance.UserInterfaceLoaded += elementName =>
+        {             
+            DebugUtilities.PrintPeer("UserInterfaceLoaded");
+            UserInterfaceElementsLoaded.Add(elementName);
+            bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
+            if (areEqual)
+            {
+                DebugUtilities.PrintPeer("LoadUI");
+                LoadUI();
+
+                DebugUtilities.PrintPeer("SetupGameSession");
+                SetupGameSession();
+            }
+        };
+    }
+
+    private void LoadSixPlayerGame()
+    {
+        DebugUtilities.PrintPeer("Loading 6-player game");
+        
+        // Step 1: Create and register all players
+        int peerId = 1;
+        foreach (Faction faction in StaticGameData.PlayableFactions)
+        {
+            PlayerScene player = PlayerScene.Instantiate<PlayerScene>();
+            player.PeerId = peerId;
+            player.PlayerName = $"{faction} Player";
+            NodeUtilities.Instance.PlayersNode.AddChild(player);
+            playerStates.Add(player);
+            PlayerFactionRegistry.RegisterPlayer(player);
+            
+            peerId++;
+        }
+        
+        // Step 2: Assign one faction to each player
+        peerId = 1;
+        foreach (Faction faction in StaticGameData.PlayableFactions)
+        {
+            PlayerFactionRegistry.AssignFactionsToPlayer(peerId, new List<Faction> { faction });
+            peerId++;
+        }
+        PlayerFactionRegistry.PrintStatus();
+        
+        EventBus.Instance.UserInterfaceLoaded += elementName =>
+        {             
+            DebugUtilities.PrintPeer("UserInterfaceLoaded");
+            UserInterfaceElementsLoaded.Add(elementName);
+            bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
+            if (areEqual)
+            {
+                DebugUtilities.PrintPeer("LoadUI");
+                LoadUI();
+
+                DebugUtilities.PrintPeer("SetupGameSession");
+                SetupGameSession();
+            }
+        };
     }
 
     private void LoadUI()
@@ -90,7 +259,7 @@ public partial class GameManager : Node
     {
         DebugUtilities.PrintPeer("_setup_game_mode");
         GameSession = new GameSession();
-        GameSession.StartSession(playerStates);
+        _ = GameSession.StartSession(playerStates);
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority)]

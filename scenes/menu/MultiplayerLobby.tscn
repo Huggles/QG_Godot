@@ -1,16 +1,16 @@
 [gd_scene load_steps=3 format=3 uid="uid://djinib8j6dupy"]
 
-[ext_resource type="Script" uid="uid://bt3og0kfho0tq" path="res://scripts/Menu/MultiplayerLobby.gd" id="1_k3llq"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/MultiplayerLobby.cs" id="1_lobby"]
 [ext_resource type="Texture2D" uid="uid://bac4xdyyb4tvc" path="res://assets/textures/Other/Menu_Background.jpg" id="2_e7qq4"]
 
-[node name="Control" type="Control"]
+[node name="MultiplayerLobby" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_k3llq")
+script = ExtResource("1_lobby")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -23,11 +23,107 @@ grow_vertical = 2
 texture = ExtResource("2_e7qq4")
 expand_mode = 1
 
-[node name="ItemList" type="ItemList" parent="CanvasLayer"]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -250.0
-offset_right = 250.0
-offset_bottom = 100.0
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 32
+text = "Quartermaster General - Multiplayer Lobby"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 18
+text = "Waiting to host or join..."
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ConnectionPanel" type="PanelContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="IpLabel" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Server IP Address:"
+
+[node name="IpAddressInput" type="LineEdit" parent="CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+placeholder_text = "127.0.0.1"
+
+[node name="ButtonsHBox" type="HBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HostButton" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer/ButtonsHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Host Game"
+
+[node name="JoinButton" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer/ButtonsHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Join Game"
+
+[node name="HSeparator2" type="HSeparator" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="PlayersPanel" type="PanelContainer" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PlayersLabel" type="Label" parent="CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Connected Players:"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerListContainer" type="VBoxContainer" parent="CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+
+[node name="HSeparator3" type="HSeparator" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StartGameButton" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Start Game"
