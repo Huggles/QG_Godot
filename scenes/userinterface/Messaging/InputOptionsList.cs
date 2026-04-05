@@ -6,16 +6,41 @@ public partial class InputOptionsList : ItemList, LoadableUI
 {
 	public static InputOptionsList Instance;
 	private Panel ContainerPanel => GetNode<Panel>("%ContainerPanel");
+	private bool isSubscribed = false;
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		Instance = this;		
+		Instance = this;
+		
+		// Hide by default until LoadUI is called
+		if (ContainerPanel != null)
+		{
+			ContainerPanel.Visible = false;
+		}
+		
 		EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "InputOptionsList");
+	}
+
+	public override void _ExitTree()
+	{
+		// Unsubscribe from events
+		if (isSubscribed)
+		{
+			ItemSelected -= HandleItemSelected;
+			isSubscribed = false;
+		}
 	}
 
 	public void LoadUI()
 	{
+		// Unsubscribe first to prevent duplicate connections
+		if (isSubscribed)
+		{
+			ItemSelected -= HandleItemSelected;
+		}
 		ItemSelected += HandleItemSelected;
+		isSubscribed = true;
 		Clear();
 	}
 

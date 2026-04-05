@@ -127,3 +127,11 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Start Game"
+
+[node name="DebugSoloButton" type="Button" parent="CanvasLayer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+text = "🔧 Play Solo (Debug)"
+tooltip_text = "Start a single-player debug game controlling all factions"

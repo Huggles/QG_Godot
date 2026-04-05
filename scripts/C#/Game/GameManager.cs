@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -20,13 +21,14 @@ public partial class GameManager : Node
     public GameSession GameSession;
 
     private List<PlayerScene> playerStates = new List<PlayerScene>();
+    private Dictionary<int, List<Faction>> _pendingPlayerFactionAssignments;
+    private bool _gameInitialized = false;
 
     public Camera2D MyCamera => GetViewport().GetCamera2D();
     public InputManager MyInputManager => playerStates.Count > 0 ? playerStates[0].InputManager : null;
     
     public List<string> UserInterfaceElementsLoaded = new List<string>();
-    public List<string> UserInterfaceElementsToLoad = new List<string>
-    {
+    public List<string> UserInterfaceElementsToLoad = new List<string> {
         "PlayerActionLabel",
         "InputOptionsList",
         "FactionHandDisplay",
@@ -39,208 +41,196 @@ public partial class GameManager : Node
     {
         DebugUtilities.PrintPeer("GameManager Ready");
         
-        // Check if we're in the lobby scene - if so, don't start the game yet
-        string currentScene = GetTree().CurrentScene?.SceneFilePath ?? "";
-        if (currentScene.Contains("MultiplayerLobby"))
-        {
-            DebugUtilities.PrintPeer("In lobby scene - waiting for game start");
-            return;
-        }
+        // Listen for scene changes
+        GetTree().NodeAdded += OnNodeAdded;
         
-        // If we're in the Game scene, start the game
+        // Check if we're already in the Game scene (e.g., if started directly)
+        CheckAndInitializeGame();
+    }
+
+    public override void _ExitTree()
+    {
+        GetTree().NodeAdded -= OnNodeAdded;
+    }
+
+    private void OnNodeAdded(Node node)
+    {
+        // When the Game scene root is added, check for pending player-faction assignments
+        if (node.Name == "Game" && node.SceneFilePath == "res://scenes/Game.tscn")
+        {
+            DebugUtilities.PrintPeer("Game scene detected");
+            
+            if (_pendingPlayerFactionAssignments != null)
+            {
+                DebugUtilities.PrintPeer("Found pending faction assignments - initializing game");
+                // Use CallDeferred to ensure all nodes are ready
+                CallDeferred(nameof(InitializeGameWithPending));
+            }
+            else
+            {
+                DebugUtilities.PrintPeer("No pending assignments - waiting for manual InitializeGame call");
+            }
+        }
+    }
+    
+    private void InitializeGameWithPending()
+    {
+        if (_pendingPlayerFactionAssignments != null)
+        {
+            InitializeGame(_pendingPlayerFactionAssignments);
+        }
+    }
+
+    private void CheckAndInitializeGame()
+    {
+        string currentScene = GetTree().CurrentScene?.SceneFilePath ?? "";
+        DebugUtilities.PrintPeer($"Current scene: {currentScene}");
+        
         if (currentScene.Contains("Game.tscn"))
         {
-            DebugUtilities.PrintPeer("In game scene - initializing game");
-            InitializeGame();
+            DebugUtilities.PrintPeer("In game scene - checking for pending initialization");
+            if (_pendingPlayerFactionAssignments != null)
+            {
+                InitializeGame(_pendingPlayerFactionAssignments);
+            }
         }
+        else if (currentScene.Contains("MultiplayerLobby"))
+        {
+            DebugUtilities.PrintPeer("In lobby scene - waiting for game start");
+        }
+    }
+
+    /// <summary>
+    /// Sets the player-faction assignments that will be used when the game scene loads
+    /// </summary>
+    public void SetPendingPlayerFactionAssignments(Dictionary<int, List<Faction>> assignments)
+    {
+        _pendingPlayerFactionAssignments = assignments;
+        DebugUtilities.PrintPeer($"Stored pending faction assignments for {assignments.Count} player(s)");
     }
 
     /// <summary>
     /// Called when starting the actual game (after lobby)
     /// </summary>
-    public void InitializeGame()
+    /// <param name="playerFactionAssignments">Dictionary mapping peer IDs to their assigned factions</param>
+    public void InitializeGame(Dictionary<int, List<Faction>> playerFactionAssignments)
     {
-        DebugUtilities.PrintPeer("Initializing game from multiplayer");
+        DebugUtilities.PrintPeer("Initializing game");
+        
+        // Clear pending assignments since we're using them now
+        _pendingPlayerFactionAssignments = null;
         
         // Initialize NodeUtilities to find Game scene nodes
         NodeUtilities.Instance.InitializeGameNodes();
         
-        // Determine multiplayer mode based on connected peers
-        var peerIds = Multiplayer.GetPeers();
-        int totalPlayers = peerIds.Length + 1; // +1 for ourselves
-        
-        DebugUtilities.PrintPeer($"Total players: {totalPlayers}");
-        
-        if (totalPlayers == 1)
-        {
-            // Single player
-            LoadSinglePlayerGame();
-        }
-        else if (totalPlayers == 2)
-        {
-            // 2-player teams
-            LoadTwoPlayerTeamsGame();
-        }
-        else if (totalPlayers >= 6)
-        {
-            // 6-player
-            LoadSixPlayerGame();
-        }
-        else
-        {
-            // Default to single player for now
-            DebugUtilities.PrintPeerError($"Unsupported player count: {totalPlayers}. Defaulting to single player.");
-            LoadSinglePlayerGame();
-        }
+        LoadGame(playerFactionAssignments);
     }
 
-    private void LoadSinglePlayerGame()
+    /// <summary>
+    /// Loads the game with the specified player-to-faction assignments.
+    /// </summary>
+    /// <param name="playerFactionAssignments">Dictionary mapping peer IDs to their assigned factions</param>
+    private void LoadGame(Dictionary<int, List<Faction>> playerFactionAssignments)
     {
-        DebugUtilities.PrintPeer("Starting single player game");
+        DebugUtilities.PrintPeer($"Loading game with {playerFactionAssignments.Count} player(s)");
         
-        // Create and register player
-        PlayerScene playerInstance = PlayerScene.Instantiate<PlayerScene>();
-        playerInstance.PeerId = 1;
-        playerInstance.PlayerName = "Player 1";
-        NodeUtilities.Instance.PlayersNode.AddChild(playerInstance);
-        playerStates.Add(playerInstance);
-        
-        // Register player in registry
-        PlayerFactionRegistry.RegisterPlayer(playerInstance);
-        
-        // Assign all factions to single player
-        PlayerFactionRegistry.AssignFactionsToPlayer(1, StaticGameData.PlayableFactions);
-        PlayerFactionRegistry.PrintStatus();
-
-        EventBus.Instance.UserInterfaceLoaded += elementName =>
-        {             
-            DebugUtilities.PrintPeer("UserInterfaceLoaded");
-            UserInterfaceElementsLoaded.Add(elementName);
-            bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
-            if (areEqual)
-            {
-                DebugUtilities.PrintPeer("LoadUI");
-                LoadUI();
-
-                DebugUtilities.PrintPeer("SetupGameSession");
-                SetupGameSession();
-            }
-        };        
-    }
-
-    private void LoadMultiplayerGame(MultiplayerMode mode)
-    {
-        DebugUtilities.PrintPeer($"Starting multiplayer game: {mode}");
-        
-        switch (mode)
+        if (NodeUtilities.Instance.PlayersNode == null)
         {
-            case MultiplayerMode.TWO_PLAYER_TEAMS:
-                LoadTwoPlayerTeamsGame();
-                break;
-                
-            case MultiplayerMode.SIX_PLAYER:
-                LoadSixPlayerGame();
-                break;
-                
-            default:
-                DebugUtilities.PrintPeerError($"Unsupported multiplayer mode: {mode}");
-                LoadSinglePlayerGame();
-                break;
+            DebugUtilities.PrintPeerError("PlayersNode is null! Cannot add players.");
+            return;
         }
-    }
-
-    private void LoadTwoPlayerTeamsGame()
-    {
-        DebugUtilities.PrintPeer("Loading 2-player teams game (AXIS vs ALLIES)");
         
-        // Get connected peers
-        int myPeerId = Multiplayer.GetUniqueId();
-        var peerIds = new List<int>(Multiplayer.GetPeers()) { myPeerId };
-        peerIds.Sort(); // Ensure consistent ordering
+        // Clear any stale UI loaded state from previous runs
+        UserInterfaceElementsLoaded.Clear();
+        _gameInitialized = false;
         
-        DebugUtilities.PrintPeer($"Creating players for peer IDs: {string.Join(", ", peerIds)}");
+        // Step 1: Set up UI loading event handler BEFORE creating players
+        // (UI elements emit events when Player scene is added to tree)
+        DebugUtilities.PrintPeer("Setting up UserInterfaceLoaded event handler");
+        EventBus.Instance.UserInterfaceLoaded += OnUserInterfaceElementLoaded;
+        DebugUtilities.PrintPeer("Event handler registered");
         
-        // Create player 1 (AXIS) - first peer ID
-        PlayerScene player1 = PlayerScene.Instantiate<PlayerScene>();
-        player1.PeerId = peerIds[0];
-        player1.PlayerName = $"Player {peerIds[0]} (AXIS)";
-        NodeUtilities.Instance.PlayersNode.AddChild(player1);
-        playerStates.Add(player1);
-        PlayerFactionRegistry.RegisterPlayer(player1);
-        
-        // Create player 2 (ALLIES) - second peer ID
-        PlayerScene player2 = PlayerScene.Instantiate<PlayerScene>();
-        player2.PeerId = peerIds[1];
-        player2.PlayerName = $"Player {peerIds[1]} (ALLIES)";
-        NodeUtilities.Instance.PlayersNode.AddChild(player2);
-        playerStates.Add(player2);
-        PlayerFactionRegistry.RegisterPlayer(player2);
-        
-        // Step 2: Assign factions to players
-        List<Faction> axisFactions = new List<Faction> { Faction.GERMANY, Faction.JAPAN, Faction.ITALY };
-        List<Faction> alliesFactions = new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
-        
-        PlayerFactionRegistry.AssignFactionsToPlayer(peerIds[0], axisFactions);
-        PlayerFactionRegistry.AssignFactionsToPlayer(peerIds[1], alliesFactions);
-        PlayerFactionRegistry.PrintStatus();
-        
-        EventBus.Instance.UserInterfaceLoaded += elementName =>
-        {             
-            DebugUtilities.PrintPeer("UserInterfaceLoaded");
-            UserInterfaceElementsLoaded.Add(elementName);
-            bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
-            if (areEqual)
-            {
-                DebugUtilities.PrintPeer("LoadUI");
-                LoadUI();
-
-                DebugUtilities.PrintPeer("SetupGameSession");
-                SetupGameSession();
-            }
-        };
-    }
-
-    private void LoadSixPlayerGame()
-    {
-        DebugUtilities.PrintPeer("Loading 6-player game");
-        
-        // Step 1: Create and register all players
-        int peerId = 1;
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        // Step 2: Create and register all players
+        foreach (var entry in playerFactionAssignments)
         {
+            int peerId = entry.Key;
+            List<Faction> factions = entry.Value;
+            
+            string factionNames = string.Join(", ", factions);
+            DebugUtilities.PrintPeer($"Creating player for peer {peerId} with factions: {factionNames}");
+            
             PlayerScene player = PlayerScene.Instantiate<PlayerScene>();
             player.PeerId = peerId;
-            player.PlayerName = $"{faction} Player";
+            player.PlayerName = factions.Count == 1 
+                ? $"{factions[0]} Player" 
+                : $"Player {peerId}";
+            
             NodeUtilities.Instance.PlayersNode.AddChild(player);
             playerStates.Add(player);
             PlayerFactionRegistry.RegisterPlayer(player);
             
-            peerId++;
+            DebugUtilities.PrintPeer($"Player {peerId} added to scene tree");
         }
         
-        // Step 2: Assign one faction to each player
-        peerId = 1;
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        // Step 3: Assign factions to players
+        foreach (var entry in playerFactionAssignments)
         {
-            PlayerFactionRegistry.AssignFactionsToPlayer(peerId, new List<Faction> { faction });
-            peerId++;
+            int peerId = entry.Key;
+            List<Faction> factions = entry.Value;
+            
+            DebugUtilities.PrintPeer($"Assigning {factions.Count} faction(s) to peer {peerId}");
+            PlayerFactionRegistry.AssignFactionsToPlayer(peerId, factions);
         }
+        
         PlayerFactionRegistry.PrintStatus();
         
-        EventBus.Instance.UserInterfaceLoaded += elementName =>
-        {             
-            DebugUtilities.PrintPeer("UserInterfaceLoaded");
+        // Step 4: Check if all UI elements have loaded
+        // (Some may have already emitted during player creation)
+        CallDeferred(nameof(CheckIfAllUIElementsLoaded));
+    }
+    
+    private void OnUserInterfaceElementLoaded(string elementName)
+    {
+        DebugUtilities.PrintPeer($"UserInterfaceLoaded: {elementName}");
+        
+        if (!UserInterfaceElementsLoaded.Contains(elementName))
+        {
             UserInterfaceElementsLoaded.Add(elementName);
-            bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
-            if (areEqual)
-            {
-                DebugUtilities.PrintPeer("LoadUI");
-                LoadUI();
+        }
+        
+        CheckIfAllUIElementsLoaded();
+    }
+    
+    private void CheckIfAllUIElementsLoaded()
+    {
+        // Prevent multiple initializations
+        if (_gameInitialized)
+        {
+            return;
+        }
 
-                DebugUtilities.PrintPeer("SetupGameSession");
-                SetupGameSession();
-            }
-        };
+        bool areEqual = new HashSet<string>(UserInterfaceElementsLoaded).SetEquals(UserInterfaceElementsToLoad);
+        
+        if (areEqual)
+        {
+            _gameInitialized = true;
+            
+            DebugUtilities.PrintPeer("All UI elements loaded - starting game");
+            
+            // Disconnect the event to prevent duplicate calls
+            EventBus.Instance.UserInterfaceLoaded -= OnUserInterfaceElementLoaded;
+            
+            DebugUtilities.PrintPeer("LoadUI");
+            LoadUI();
+
+            DebugUtilities.PrintPeer("SetupGameSession");
+            SetupGameSession();
+        }
+        else
+        {
+            var missing = UserInterfaceElementsToLoad.Except(UserInterfaceElementsLoaded).ToList();
+            DebugUtilities.PrintPeer($"Waiting for {missing.Count} UI elements: {string.Join(", ", missing)}");
+        }
     }
 
     private void LoadUI()

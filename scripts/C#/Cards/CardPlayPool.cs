@@ -48,6 +48,37 @@ public partial class CardPlayPool : GodotObject
         return changeEvents.Map(changeEvent => changeEvent as T);
     }
 
+    /// <summary>
+    /// Executes only the first CardStep of a card (which moves it to status/response area) without full activation.
+    /// Automatically clears the pool after execution.
+    /// </summary>
+    public static async Task AddCardToPlayAreaWithoutActivating(string cardName)
+    {
+        CardState cardState = CardState.ForName(cardName);
+        if (cardState == null)
+        {
+            DebugUtilities.PrintPeerError($"Card not found: {cardName}");
+            return;
+        }
+        
+        // Get the first play card step which contains the logic to add to status/response area
+        List<CardStep> playSteps = cardState.CardLogic.InitializePlayCardSteps();
+        if (playSteps.Count > 0)
+        {
+            CardStep firstStep = playSteps[0];
+            // Execute just this step's logic (adds to status area, removes from hand/deck)
+            await firstStep.Execute();
+            DebugUtilities.PrintPeer($"Added {cardName} to play area without activation");
+        }
+        else
+        {
+            DebugUtilities.PrintPeerError($"Card {cardName} has no play steps");
+        }
+        
+        // Clear pool after each call to maintain clean state
+        ClearPool();
+    }
+
 
     public async static Task DoActivationOption(CardActivationOption cardActivationOption) {
         if (cardActivationOption != null)
@@ -193,6 +224,12 @@ public partial class CardPlayPool : GodotObject
     /// </summary>
     private static async Task RequestAfterReactions()
     {
+        DebugUtilities.PrintPeer($"RequestAfterReactions called with {ChangeEventsPool.Count} events in pool");
+        foreach (var ev in ChangeEventsPool)
+        {
+            DebugUtilities.PrintPeer($"  Event: {ev.GetType().Name}");
+        }
+        
         bool anyReactionPlayed = true;
         
         // Keep requesting reactions until no one plays anything
@@ -229,9 +266,12 @@ public partial class CardPlayPool : GodotObject
     /// </summary>
     private static List<CardActivationOption> GetAfterReactionOptions(Faction faction)
     {
+        DebugUtilities.PrintPeer($"GetAfterReactionOptions for {faction}: Checking with {ChangeEventsPool.Count} events in pool");
         List<CardActivationOption> allOptions = GetNextActions(faction);
         // Filter out block reactions - we only want after-reactions here
-        return allOptions.Where(option => !option.CardState.CardLogic.IsBlockReaction).ToList();
+        List<CardActivationOption> afterReactions = allOptions.Where(option => !option.CardState.CardLogic.IsBlockReaction).ToList();
+        DebugUtilities.PrintPeer($"  Found {allOptions.Count} total options, {afterReactions.Count} after-reactions");
+        return afterReactions;
     }
     
     /// <summary>
@@ -345,9 +385,13 @@ public partial class CardPlayPool : GodotObject
         DeckState deckState = DeckState.ForFaction(faction);
         List<CardActivationOption> allActivationOptions = new List<CardActivationOption>();
         
+        DebugUtilities.PrintPeer($"ActivatableReactions for {faction}: Checking {deckState.StatusCardStates.Count} status cards and {deckState.ResponseCardStates.Count} response cards");
+        
         // Get activatable status and response cards
         List<CardActivationOption> statusActivationOptions = ActivatableCards(deckState.StatusCardStates);
         List<CardActivationOption> responseActivationOptions = ActivatableCards(deckState.ResponseCardStates);
+        
+        DebugUtilities.PrintPeer($"  Found {statusActivationOptions.Count} activatable status cards and {responseActivationOptions.Count} activatable response cards");
         
         allActivationOptions.AddRange(statusActivationOptions);
         allActivationOptions.AddRange(responseActivationOptions);

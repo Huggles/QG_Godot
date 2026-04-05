@@ -60,6 +60,21 @@ public partial class PlayerScene : CharacterBody2D
         _rootNode = GetNode(".");  // Same as $"." in GDScript
         _camera = GetNode<Camera2D>("Camera2D");
 
+        // Set multiplayer authorities now that we're in the tree
+        SetMultiplayerAuthority(1);
+        
+        var serverSync = GetNodeOrNull<MultiplayerSynchronizer>("ServerSynchronizer");
+        if (serverSync != null)
+        {
+            serverSync.SetMultiplayerAuthority(1);
+        }
+        
+        var playerSync = GetNodeOrNull<MultiplayerSynchronizer>("PlayerSynchronizer");
+        if (playerSync != null)
+        {
+            playerSync.SetMultiplayerAuthority(_peerId);
+        }
+
         // Set camera active for local player
         if (_peerId == Multiplayer.GetUniqueId())
         {
@@ -94,9 +109,24 @@ public partial class PlayerScene : CharacterBody2D
         set
         {
             _peerId = value;
-            SetMultiplayerAuthority(1);
-            GetNode<MultiplayerSynchronizer>("ServerSynchronizer").SetMultiplayerAuthority(1);
-            GetNode<MultiplayerSynchronizer>("PlayerSynchronizer").SetMultiplayerAuthority(value);
+            
+            // Only set authorities if the node is in the scene tree
+            if (IsInsideTree())
+            {
+                SetMultiplayerAuthority(1);
+                
+                var serverSync = GetNodeOrNull<MultiplayerSynchronizer>("ServerSynchronizer");
+                if (serverSync != null)
+                {
+                    serverSync.SetMultiplayerAuthority(1);
+                }
+                
+                var playerSync = GetNodeOrNull<MultiplayerSynchronizer>("PlayerSynchronizer");
+                if (playerSync != null)
+                {
+                    playerSync.SetMultiplayerAuthority(value);
+                }
+            }
         }
     }
 

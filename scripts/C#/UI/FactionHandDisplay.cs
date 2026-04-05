@@ -21,13 +21,31 @@ public partial class FactionHandDisplay : Control, LoadableUI
 
     [Signal] public delegate void CardSelectedEventHandler(int cardId);
 
+    // Event handlers for cleanup
+    private EventBus.NextStepStartedEventHandler onNextStepStarted;
+    private Action onSkipButtonPressed;
+    private Action onDiscardedDeckButtonPressed;
+    private Action onTestButtonPressed;
+
     
 
 
     public override void _Ready()
     {
+        DebugUtilities.PrintPeer("FactionHandDisplay _Ready called");
         Instance = this;
+        
+        // Hide by default until LoadUI is called
+        Hide();
+        
+        DebugUtilities.PrintPeer("FactionHandDisplay about to emit UserInterfaceLoaded");
         EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionHandDisplay");
+        DebugUtilities.PrintPeer("FactionHandDisplay emitted UserInterfaceLoaded");
+    }
+
+    public override void _ExitTree()
+    {
+        UnsubscribeFromEvents();
     }
 
     public void LoadUI()
@@ -40,23 +58,45 @@ public partial class FactionHandDisplay : Control, LoadableUI
         TestButton = GetNode<Button>("%TestButton");
 
         Hide();
-        EventBus.Instance.NextStepStarted += (int turnStep) =>
+
+        // Unsubscribe first to prevent duplicate connections
+        UnsubscribeFromEvents();
+
+        // Subscribe to events
+        onNextStepStarted = (int turnStep) =>
         {
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
             if ((TurnStep)turnStep == TurnStep.PLAY_CARD)
             {
                 Show(GameSession.Instance.GameFlow.CurrentFaction);
             }
         };
-        SkipButton.Pressed += () => { OnCardSelected(-1); };       
-        DiscardedDeckButton.Pressed += () =>
+        EventBus.Instance.NextStepStarted += onNextStepStarted;
+
+        onSkipButtonPressed = () => 
+        { 
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            OnCardSelected(-1); 
+        };
+        SkipButton.Pressed += onSkipButtonPressed;
+
+        onDiscardedDeckButtonPressed = () =>
         {
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
             List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DiscardedCardIds, false);            
             PresentationModal.Instance.ShowModal(presentationItems, "Your Discarded Cards");
         };
-        TestButton.Pressed += () =>
-        {            
+        DiscardedDeckButton.Pressed += onDiscardedDeckButtonPressed;
+
+        onTestButtonPressed = () =>
+        {
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
             PresentationModal.Instance.ShowModal(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
         };
+        TestButton.Pressed += onTestButtonPressed;
     }
 
     public void Show(Faction faction)
@@ -91,8 +131,13 @@ public partial class FactionHandDisplay : Control, LoadableUI
     public new void Hide()
     {
         Visible = false;
-        CardsContainer.MouseFilter = MouseFilterEnum.Ignore;
-        DeleteCurrentCards();
+        
+        // Only access CardsContainer if it's been initialized (in LoadUI)
+        if (CardsContainer != null)
+        {
+            CardsContainer.MouseFilter = MouseFilterEnum.Ignore;
+            DeleteCurrentCards();
+        }
     }
 
     private void InitCards(List<int> cardIds)
@@ -154,5 +199,30 @@ public partial class FactionHandDisplay : Control, LoadableUI
     {
         CardPreview.Visible = false;
         CardPreview.MouseFilter = MouseFilterEnum.Ignore;
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        // Unsubscribe from EventBus events
+        if (EventBus.Instance != null && onNextStepStarted != null)
+        {
+            EventBus.Instance.NextStepStarted -= onNextStepStarted;
+        }
+
+        // Unsubscribe from button events
+        if (IsInstanceValid(SkipButton) && onSkipButtonPressed != null)
+        {
+            SkipButton.Pressed -= onSkipButtonPressed;
+        }
+
+        if (IsInstanceValid(DiscardedDeckButton) && onDiscardedDeckButtonPressed != null)
+        {
+            DiscardedDeckButton.Pressed -= onDiscardedDeckButtonPressed;
+        }
+
+        if (IsInstanceValid(TestButton) && onTestButtonPressed != null)
+        {
+            TestButton.Pressed -= onTestButtonPressed;
+        }
     }
 }

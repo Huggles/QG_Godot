@@ -25,9 +25,31 @@ public partial class FactionInfoRow : Control
     private Timer hoverTimer;
     private bool isMouseOver = false;
 
+    // Store event handlers for cleanup
+    private EventBus.FactionScoredPointsEventHandler onFactionScoredPoints;
+    private EventBus.VpDetailsPanelOpenedEventHandler onVpDetailsPanelOpened;
+    private Action onDeckButtonPressed;
+    private Action onPlayedCardsButtonPressed;
+    private Action onFactionInfoButtonPressed;
+
     public override void _Ready()
     {
-        EventBus.Instance.GameSessionStarted += () => { this.LoadUI(); };
+        EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
+    }
+
+    public override void _ExitTree()
+    {
+        if (EventBus.Instance != null)
+        {
+            EventBus.Instance.GameSessionStarted -= OnGameSessionStarted;
+        }
+        
+        UnsubscribeFromEvents();
+    }
+
+    private void OnGameSessionStarted()
+    {
+        this.LoadUI();
     }
 
     /**
@@ -35,6 +57,15 @@ public partial class FactionInfoRow : Control
     */
     public void LoadUI()
     {
+        // Check if the node is still valid and in the scene tree
+        if (!IsInstanceValid(this) || !IsInsideTree())
+        {
+            return;
+        }
+
+        // Unsubscribe from existing events before subscribing again
+        UnsubscribeFromEvents();
+
         // Set background color
         Color factionColor = FactionState.FactionData.FactionColor;        
         BackgroundPanel.SelfModulate = Colors.White;
@@ -55,37 +86,57 @@ public partial class FactionInfoRow : Control
 
         SetScore(FactionState.Score);
 
-        EventBus.Instance.FactionScoredPoints += (faction, newScore) =>
+        // Store event handlers for proper cleanup
+        onFactionScoredPoints = (faction, newScore) =>
         {
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
             if (Faction == faction)
             {
                 SetScore(newScore);
                 LoadVPDetails();
             }
         };
+        EventBus.Instance.FactionScoredPoints += onFactionScoredPoints;
 
-        EventBus.Instance.VpDetailsPanelOpened += (faction) =>
+        onVpDetailsPanelOpened = (faction) =>
         {
-            if (Faction != (Faction)faction)
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
+            if (Faction != faction)
             {
                 DetailPanel.Visible = false; 
             }
         };
+        EventBus.Instance.VpDetailsPanelOpened += onVpDetailsPanelOpened;
 
-        DeckButton.Pressed += () =>
+        onDeckButtonPressed = () =>
         {
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
             List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DeckCardIds, false);
             PresentationModal.Instance.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Draw Deck", false);
         };
-        PlayedCardsButton.Pressed += () =>
+        DeckButton.Pressed += onDeckButtonPressed;
+        
+        onPlayedCardsButtonPressed = () =>
         {
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
             DeckState deckState = DeckState.ForFaction(Faction);
             List<int> playedCardIds = [.. deckState.StatusCardIds, .. deckState.ResponseCardIds];
             List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(playedCardIds, false);            
             PresentationModal.Instance.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Played Cards", false);
         };
+        PlayedCardsButton.Pressed += onPlayedCardsButtonPressed;
 
-        FactionInfoButton.Pressed += () => { ToggleDetails(); };
+        onFactionInfoButtonPressed = () => 
+        { 
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            
+            ToggleDetails(); 
+        };
+        FactionInfoButton.Pressed += onFactionInfoButtonPressed;
     }
 
     private void SetScore(int score)
@@ -122,5 +173,38 @@ public partial class FactionInfoRow : Control
         }
 
         TurnSummariesRichText.Text = string.Join("\n", textRows);
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        // Unsubscribe from EventBus events
+        if (EventBus.Instance != null)
+        {
+            if (onFactionScoredPoints != null)
+            {
+                EventBus.Instance.FactionScoredPoints -= onFactionScoredPoints;
+            }
+            
+            if (onVpDetailsPanelOpened != null)
+            {
+                EventBus.Instance.VpDetailsPanelOpened -= onVpDetailsPanelOpened;
+            }
+        }
+
+        // Unsubscribe from button events
+        if (IsInstanceValid(DeckButton) && onDeckButtonPressed != null)
+        {
+            DeckButton.Pressed -= onDeckButtonPressed;
+        }
+        
+        if (IsInstanceValid(PlayedCardsButton) && onPlayedCardsButtonPressed != null)
+        {
+            PlayedCardsButton.Pressed -= onPlayedCardsButtonPressed;
+        }
+        
+        if (IsInstanceValid(FactionInfoButton) && onFactionInfoButtonPressed != null)
+        {
+            FactionInfoButton.Pressed -= onFactionInfoButtonPressed;
+        }
     }
 }

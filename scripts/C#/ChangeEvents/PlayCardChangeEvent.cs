@@ -15,7 +15,14 @@ public partial class PlayCardChangeEvent : ChangeEvent
     protected override async Task<bool> ExecuteAsync(){
         SourceCardState.CardLogic.IsPlayed = true;                
         DeckState deckState = DeckState.ForFaction(SourceCardState.Faction);
-        deckState.DiscardCard(SourceCardState.Id); 
+        
+        // Only discard event cards - Status and Response cards are moved to their respective lists
+        // by their own PlayCardSteps logic (StatusCardLogic/ResponseCardLogic)
+        if (!SourceCardState.CardLogic.IsReaction)
+        {
+            deckState.DiscardCard(SourceCardState.Id);
+        }
+        
         await Task.CompletedTask;
         return true;
     }

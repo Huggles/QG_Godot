@@ -234,20 +234,20 @@ public partial class GameModeDefault : IGameMode
         await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
 
         
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusBlitzkrieg").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusDiveBombers").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusBiasForAction").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusSyntheticFuel").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusAbundantResources").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusAtlanticWall").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusVolksturm").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("StatusBlitzkrieg").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("ResponseChinaOffensive").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("ResponseFallOfSingapore").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("ResponseSkilledPilots").Id));
-        await CardPlayPool.DoActivationOption(new CardActivationOption(CardState.ForName("ResponseLeningrad").Id));
+        // Add status cards to play area for debugging WITHOUT activating them
+        // Uses CardPlayPool to execute only the first CardStep (which moves card to status area)
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusBlitzkrieg");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusDiveBombers");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusBiasForAction");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusSyntheticFuel");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusAbundantResources");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusAtlanticWall");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusVolksturm");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseChinaOffensive");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseFallOfSingapore");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseSkilledPilots");
+        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseLeningrad");
 
-        CardPlayPool.ClearPool();
         await Task.Delay(100);
     }
 }

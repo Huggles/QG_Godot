@@ -25,6 +25,10 @@ public partial class PresentationModal : Control, LoadableUI
     public List<PresentationItem> PresentationItems = new List<PresentationItem>();
     public List<Control> PresentationItemControls = new List<Control>();
 
+    // Event handlers for cleanup
+    private Action onConfirmButtonPressed;
+    private Action onExitButtonPressed;
+    private InputManager.KeyClickedEventHandler onKeyClicked;
 
     [Signal] public delegate void OnShowEventHandler();
     [Signal] public delegate void OnHideEventHandler();
@@ -34,7 +38,16 @@ public partial class PresentationModal : Control, LoadableUI
     public override void _Ready()
     {
         Instance = this;
+        
+        // Hide by default until LoadUI is called
+        Hide();
+        
         EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PresentationModal");
+    }
+
+    public override void _ExitTree()
+    {
+        UnsubscribeFromEvents();
     }
 
     public void LoadUI()
@@ -45,11 +58,15 @@ public partial class PresentationModal : Control, LoadableUI
         ExitButton = GetNode<Button>("%ExitButton");
         CardScrollContainer = GetNode<ScrollContainer>("%CardScrollContainer");
         
+        // Unsubscribe first to prevent duplicate connections
+        UnsubscribeFromEvents();
+        
         // Try to get ConfirmButton if it exists in the scene
         if (HasNode("%ConfirmButton"))
         {
             ConfirmButton = GetNode<Button>("%ConfirmButton");
-            ConfirmButton.Pressed += HandleConfirmPressed;
+            onConfirmButtonPressed = HandleConfirmPressed;
+            ConfirmButton.Pressed += onConfirmButtonPressed;
         }
 
         Visible = false;
@@ -75,7 +92,14 @@ public partial class PresentationModal : Control, LoadableUI
         if (!RequireSelection)
         {
             ShowExitButton(exitCallback != null ? exitCallback : () => { this.HideModal(); });
-            InputManager.Instance.KeyClicked += HandleKeyboardInput;
+            
+            // Unsubscribe first to prevent duplicate connections
+            if (onKeyClicked != null)
+            {
+                InputManager.Instance.KeyClicked -= onKeyClicked;
+            }
+            onKeyClicked = HandleKeyboardInput;
+            InputManager.Instance.KeyClicked += onKeyClicked;
         }        
         ShowModal(presentationItems, title, -1);        
         return ToSignal(this, SignalName.ItemSelected);
@@ -114,10 +138,18 @@ public partial class PresentationModal : Control, LoadableUI
     public void ShowExitButton(Action callback)
     {
         ExitButton.Visible = true;
-        ExitButton.Pressed += () =>
+        
+        // Unsubscribe previous handler if exists
+        if (onExitButtonPressed != null)
+        {
+            ExitButton.Pressed -= onExitButtonPressed;
+        }
+        
+        onExitButtonPressed = () =>
         {
             callback.Invoke();
         };
+        ExitButton.Pressed += onExitButtonPressed;
     }
 
     private void HandlePresentationItems(List<PresentationItem> presentationItems)
@@ -254,7 +286,11 @@ public partial class PresentationModal : Control, LoadableUI
 
     public SignalAwaiter HideModal()
     {
-        InputManager.Instance.KeyClicked -= HandleKeyboardInput;
+        if (onKeyClicked != null)
+        {
+            InputManager.Instance.KeyClicked -= onKeyClicked;
+            onKeyClicked = null;
+        }
         
         // Reset multi-select state
         multiSelectMode = false;
@@ -290,5 +326,25 @@ public partial class PresentationModal : Control, LoadableUI
             EmitSignal(SignalName.OnHide);
         };
         return ToSignal(this, SignalName.OnHide);
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        // Unsubscribe from button events
+        if (IsInstanceValid(ConfirmButton) && onConfirmButtonPressed != null)
+        {
+            ConfirmButton.Pressed -= onConfirmButtonPressed;
+        }
+        
+        if (IsInstanceValid(ExitButton) && onExitButtonPressed != null)
+        {
+            ExitButton.Pressed -= onExitButtonPressed;
+        }
+        
+        // Unsubscribe from InputManager events
+        if (InputManager.Instance != null && onKeyClicked != null)
+        {
+            InputManager.Instance.KeyClicked -= onKeyClicked;
+        }
     }
 }

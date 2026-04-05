@@ -15,7 +15,11 @@ public partial class FactionsContainer : Control, LoadableUI
 
     public override void _Ready()
     {
-        Instance = this;    
+        Instance = this;
+        
+        // Hide by default until LoadUI is called
+        Hide();
+        
         EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionsContainer");    
     }
 
@@ -25,6 +29,9 @@ public partial class FactionsContainer : Control, LoadableUI
         EventBus.Instance.PlayerLeft += OnPlayerLeft;
         rowScene = GD.Load<PackedScene>(FactionInfoRowScenePath);
         InitChildElements();
+        
+        // Show faction info during gameplay
+        Show();
     }
     
 

@@ -16,6 +16,7 @@ public partial class MultiplayerLobby : Control
     private Button _hostButton;
     private Button _joinButton;
     private Button _startGameButton;
+    private Button _debugSoloButton;
     private Label _statusLabel;
     private LineEdit _ipAddressInput;
     
@@ -32,6 +33,7 @@ public partial class MultiplayerLobby : Control
         _hostButton = GetNode<Button>("%HostButton");
         _joinButton = GetNode<Button>("%JoinButton");
         _startGameButton = GetNode<Button>("%StartGameButton");
+        _debugSoloButton = GetNode<Button>("%DebugSoloButton");
         _statusLabel = GetNode<Label>("%StatusLabel");
         _ipAddressInput = GetNode<LineEdit>("%IpAddressInput");
         
@@ -43,6 +45,7 @@ public partial class MultiplayerLobby : Control
         _hostButton.Pressed += OnHostButtonPressed;
         _joinButton.Pressed += OnJoinButtonPressed;
         _startGameButton.Pressed += OnStartGameButtonPressed;
+        _debugSoloButton.Pressed += OnDebugSoloButtonPressed;
         
         // Connect multiplayer signals
         Multiplayer.PeerConnected += OnPeerConnected;
@@ -136,13 +139,93 @@ public partial class MultiplayerLobby : Control
         Rpc(nameof(StartGame));
     }
 
+    private void OnDebugSoloButtonPressed()
+    {
+        DebugUtilities.PrintPeer("Starting debug solo game...");
+        
+        // Create single player assignment (all factions to player 1)
+        var playerFactionAssignments = new Dictionary<int, List<Faction>>
+        {
+            { 1, new List<Faction>(StaticGameData.PlayableFactions) }
+        };
+        
+        // Get GameManager and set pending assignments
+        var gameManager = GetNode<GameManager>("/root/GameManager");
+        gameManager.SetPendingPlayerFactionAssignments(playerFactionAssignments);
+        
+        // Load the main game scene
+        GetTree().ChangeSceneToFile("res://scenes/Game.tscn");
+    }
+
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
     private void StartGame()
     {
         DebugUtilities.PrintPeer($"Starting game for peer {Multiplayer.GetUniqueId()}");
         
+        // Determine player-faction assignments based on player count
+        int totalPlayers = _playerLabels.Count;
+        DebugUtilities.PrintPeer($"Total players in lobby: {totalPlayers}");
+        
+        Dictionary<int, List<Faction>> playerFactionAssignments = CreatePlayerFactionAssignments(totalPlayers);
+        
+        // Get GameManager and set pending assignments
+        var gameManager = GetNode<GameManager>("/root/GameManager");
+        gameManager.SetPendingPlayerFactionAssignments(playerFactionAssignments);
+        
         // Load the main game scene
         GetTree().ChangeSceneToFile("res://scenes/Game.tscn");
+    }
+    
+    /// <summary>
+    /// Creates player-faction assignments based on player count
+    /// </summary>
+    private Dictionary<int, List<Faction>> CreatePlayerFactionAssignments(int playerCount)
+    {
+        var assignments = new Dictionary<int, List<Faction>>();
+        
+        if (playerCount == 2)
+        {
+            // 2-player: Player 1 (host) gets AXIS, Player 2 gets ALLIES
+            var allPeerIds = new List<int>(_playerLabels.Keys);
+            allPeerIds.Sort();
+            
+            int player1Id = allPeerIds[0]; // Host
+            int player2Id = allPeerIds[1]; // Other player
+            
+            List<Faction> axisFactions = new List<Faction> { Faction.GERMANY, Faction.JAPAN, Faction.ITALY };
+            List<Faction> alliesFactions = new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
+            
+            assignments[player1Id] = axisFactions;
+            assignments[player2Id] = alliesFactions;
+            
+            DebugUtilities.PrintPeer($"Player {player1Id} (Host) assigned AXIS");
+            DebugUtilities.PrintPeer($"Player {player2Id} assigned ALLIES");
+        }
+        else if (playerCount >= 6)
+        {
+            // 6-player: Each player gets one faction
+            var allPeerIds = new List<int>(_playerLabels.Keys);
+            allPeerIds.Sort();
+            
+            int factionIndex = 0;
+            foreach (var peerId in allPeerIds)
+            {
+                if (factionIndex < StaticGameData.PlayableFactions.Count)
+                {
+                    assignments[peerId] = new List<Faction> { StaticGameData.PlayableFactions[factionIndex] };
+                    DebugUtilities.PrintPeer($"Player {peerId} assigned {StaticGameData.PlayableFactions[factionIndex]}");
+                    factionIndex++;
+                }
+            }
+        }
+        else
+        {
+            // Unsupported player count
+            DebugUtilities.PrintPeerError($"Unsupported player count: {playerCount}. Multiplayer requires 2 or 6 players.");
+            // Return empty assignments - this will cause an error, which is appropriate for unsupported configs
+        }
+        
+        return assignments;
     }
 
     // ==================== MULTIPLAYER CALLBACKS ====================
