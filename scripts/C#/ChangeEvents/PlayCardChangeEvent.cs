@@ -13,7 +13,9 @@ public partial class PlayCardChangeEvent : ChangeEvent
     }
 
     protected override async Task<bool> ExecuteAsync(){
-        SourceCardState.CardLogic.IsPlayed = true;                
+        DebugUtilities.PrintPeer($"PlayCardChangeEvent.ExecuteAsync for card {SourceCardState.CardName} (id={SourceCardId})");
+        DebugUtilities.PrintPeer($"  IsPlayed before move: {SourceCardState.CardLogic.IsPlayed}");
+        
         DeckState deckState = DeckState.ForFaction(SourceCardState.Faction);
         
         // Only discard event cards - Status and Response cards are moved to their respective lists
@@ -22,6 +24,12 @@ public partial class PlayCardChangeEvent : ChangeEvent
         {
             deckState.DiscardCard(SourceCardState.Id);
         }
+        else
+        {
+            DebugUtilities.PrintPeer($"  Card is a reaction card, not discarding (will be moved by card step)");
+        }
+        
+        DebugUtilities.PrintPeer($"  IsPlayed after move: {SourceCardState.CardLogic.IsPlayed}");
         
         await Task.CompletedTask;
         return true;

@@ -13,6 +13,8 @@ public partial class FactionsContainer : Control, LoadableUI
 
     private static readonly string FactionInfoRowScenePath = "res://scenes/userinterface/FactionInfo/FactionInfoRow.tscn";
 
+    private EventBus.FactionsAssignedEventHandler _onFactionsAssigned;
+
     public override void _Ready()
     {
         Instance = this;
@@ -23,10 +25,34 @@ public partial class FactionsContainer : Control, LoadableUI
         EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionsContainer");    
     }
 
+    public override void _ExitTree()
+    {
+        // Unsubscribe from events
+        if (EventBus.Instance != null)
+        {
+            EventBus.Instance.PlayerJoined -= OnPlayerJoined;
+            EventBus.Instance.PlayerLeft -= OnPlayerLeft;
+            
+            if (_onFactionsAssigned != null)
+            {
+                EventBus.Instance.FactionsAssigned -= _onFactionsAssigned;
+            }
+        }
+    }
+
     public void LoadUI()
     {
         EventBus.Instance.PlayerJoined += OnPlayerJoined;
         EventBus.Instance.PlayerLeft += OnPlayerLeft;
+        
+        // Subscribe to faction assignment event
+        _onFactionsAssigned = () =>
+        {
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+            InitChildElements();
+        };
+        EventBus.Instance.FactionsAssigned += _onFactionsAssigned;
+        
         rowScene = GD.Load<PackedScene>(FactionInfoRowScenePath);
         InitChildElements();
         
@@ -45,7 +71,16 @@ public partial class FactionsContainer : Control, LoadableUI
 
         factionInfoNodes.Clear();
 
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        // Only show factions controlled by the local player
+        List<Faction> playerFactions = PlayerFactionRegistry.GetLocalPlayerFactions();
+        
+        // If no factions assigned yet, don't show any rows
+        if (playerFactions.Count == 0)
+        {
+            return;
+        }
+
+        foreach (Faction faction in playerFactions)
         {
             FactionInfoRow rowInstance = rowScene.Instantiate<FactionInfoRow>();
             rowInstance.Faction = faction;

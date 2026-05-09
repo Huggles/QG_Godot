@@ -14,7 +14,29 @@ public abstract partial class CardLogic : GodotObject
 
     public List<int> ActivatedInTurns = new();
 
-    public bool IsPlayed;
+    // IsPlayed is computed based on the card's location in DeckState
+    public bool IsPlayed
+    {
+        get
+        {
+            DeckState deckState = DeckState.ForFaction(Faction);
+            
+            if (CardData.Type == "STATUS")
+            {
+                return deckState.StatusCardIds.Contains(CardState.Id);
+            }
+            else if (CardData.Type == "RESPONSE")
+            {
+                return deckState.ResponseCardIds.Contains(CardState.Id);
+            }
+            else
+            {
+                // Event cards are played if they're in the discard pile or currently in the card pool
+                return deckState.DiscardedCardIds.Contains(CardState.Id) || CardPlayPool.CardPoolMap.ContainsKey(CardState.Id);
+            }
+        }
+    }
+    
     public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
     public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Instance.GameFlow.GameTurn);
     public bool IsReaction => CardData.Type == "RESPONSE" || CardData.Type == "STATUS";

@@ -1,0 +1,89 @@
+{
+  "unitDeployments": [
+    {
+      "faction": "ITALY",
+      "countryName": "MEDITERRANEAN_SEA",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "UNITED_KINGDOM",
+      "countryName": "NORTH_SEA",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "SOVIET",
+      "countryName": "RUSSIA",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "SOVIET",
+      "countryName": "EASTERN_EUROPE",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "JAPAN",
+      "countryName": "SeaOfJapan",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "JAPAN",
+      "countryName": "SouthChinaSea",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "JAPAN",
+      "countryName": "Philippines",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "SOVIET",
+      "countryName": "Szechuan",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "SOVIET",
+      "countryName": "Kazakhstan",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "SOVIET",
+      "countryName": "SouthEastAsia",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "UNITED_KINGDOM",
+      "countryName": "Australia",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "UNITED_KINGDOM",
+      "countryName": "China",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "UNITED_STATES",
+      "countryName": "China",
+      "deployType": "RECRUIT"
+    },
+    {
+      "faction": "UNITED_STATES",
+      "countryName": "Vladivostok",
+      "deployType": "RECRUIT"
+    }
+  ],
+  "debugStatusCards": [
+    "StatusBlitzkrieg",
+    "StatusDiveBombers",
+    "StatusBiasForAction",
+    "StatusSyntheticFuel",
+    "StatusAbundantResources",
+    "StatusAtlanticWall",
+    "StatusVolksturm",
+    "ResponseChinaOffensive",
+    "ResponseFallOfSingapore",
+    "ResponseSkilledPilots",
+    "ResponseLeningrad"
+  ],
+  "deployHomespaceUnits": true,
+  "skipFactions": ["GERMANY"]
+}

@@ -31,6 +31,7 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void PlayerLeftEventHandler();
     [Signal] public delegate void GameSessionStartedEventHandler();
 
+    [Signal] public delegate void FactionsAssignedEventHandler();
 
     [Signal] public delegate void CountryClickedEventHandler(int countryClicked);
     [Signal] public delegate void UnitClickedEventHandler(int unitClicked);

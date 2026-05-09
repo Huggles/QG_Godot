@@ -11,6 +11,7 @@ public partial class GameModeDefault : IGameMode
     const string FACTIONS_DATA_PATH = "res://assets/data/QGData_Factions_V2.json";
     const string CARDS_DATA_PATH = "res://assets/data/QGData_Cards_V2.json";
     const string DECKS_DATA_PATH = "res://assets/data/QGData_Decks.json";
+    const string INITIAL_GAME_STATE_DATA_PATH = "res://assets/data/QGData_InitialGameState.json";
     const string WORLD_SCENE_FILE = "res://scenes/World/WorldScene.tscn";
     
     private GameState gameState = GameSession.Instance.GameState;
@@ -159,94 +160,77 @@ public partial class GameModeDefault : IGameMode
 
     public async Task SetupInitialGameState()
     {
-        DeployUnitChangeEvent deployUnitChangeEvent;
-        foreach (FactionData factionData in StaticGameData.FactionDataList)
+        // Load initial game state configuration from JSON
+        using var initialStateDataFile = FileAccess.Open(INITIAL_GAME_STATE_DATA_PATH, FileAccess.ModeFlags.Read);
+        string initialStateDataString = initialStateDataFile.GetAsText();
+        InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
+
+        // Deploy homespace units for all factions (except those in skipFactions list)
+        if (initialStateData.DeployHomespaceUnits)
         {
-            if (factionData.Faction == Faction.GERMANY)
+            foreach (FactionData factionData in StaticGameData.FactionDataList)
             {
+                // Skip factions in the skip list
+                if (initialStateData.SkipFactions.Contains(factionData.Faction.ToString()))
+                {
+                    continue;
+                }
+
+                CountryState homespaceCountryState = CountryState.ForName(factionData.Homespace);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(
+                    factionData.Faction, 
+                    homespaceCountryState.Id, 
+                    DeployType.RECRUIT
+                );
+                deployUnitChangeEvent.IsTrigger = false;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+            }
+        }
+
+        // Deploy units from configuration
+        foreach (UnitDeploymentData deployment in initialStateData.UnitDeployments)
+        {
+            // Parse faction enum
+            if (!Enum.TryParse<Faction>(deployment.Faction, out Faction faction))
+            {
+                DebugUtilities.PrintPeer($"Warning: Invalid faction '{deployment.Faction}' in initial game state config");
                 continue;
             }
-            CountryState homespaceCountryState = CountryState.ForName(factionData.Homespace);
-            deployUnitChangeEvent = new DeployUnitChangeEvent(factionData.Faction, homespaceCountryState.Id, DeployType.RECRUIT);
+
+            // Get country state - try by name first, then by enum if that fails
+            CountryState countryState = CountryState.ForName(deployment.CountryName);
+            if (countryState == null && Enum.TryParse<Country>(deployment.CountryName, out Country country))
+            {
+                countryState = CountryState.ForEnum(country);
+            }
+
+            if (countryState == null)
+            {
+                DebugUtilities.PrintPeer($"Warning: Country '{deployment.CountryName}' not found in initial game state config");
+                continue;
+            }
+
+            // Parse deploy type
+            if (!Enum.TryParse<DeployType>(deployment.DeployType, out DeployType deployType))
+            {
+                DebugUtilities.PrintPeer($"Warning: Invalid deploy type '{deployment.DeployType}' in initial game state config");
+                continue;
+            }
+
+            DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(
+                faction, 
+                countryState.Id, 
+                deployType
+            );
             deployUnitChangeEvent.IsTrigger = false;
             await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
         }
 
-
-        // deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.GERMANY, CountryState.ForName("WESTERN_EUROPE").Id, DeployType.RECRUIT);
-        // deployUnitChangeEvent.IsTrigger = false;
-        // CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.ITALY, CountryState.ForName("MEDITERRANEAN_SEA").Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForName("NORTH_SEA").Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.SOVIET, CountryState.ForName("RUSSIA").Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.SOVIET, CountryState.ForName("EASTERN_EUROPE").Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.JAPAN, CountryState.ForEnum(Country.SeaOfJapan).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.JAPAN, CountryState.ForEnum(Country.SouthChinaSea).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.JAPAN, CountryState.ForEnum(Country.Philippines).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.SOVIET, CountryState.ForEnum(Country.Szechuan).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.SOVIET, CountryState.ForEnum(Country.Kazakhstan).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.SOVIET, CountryState.ForEnum(Country.SouthEastAsia).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForEnum(Country.Australia).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_KINGDOM, CountryState.ForEnum(Country.China).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_STATES, CountryState.ForEnum(Country.China).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.UNITED_STATES, CountryState.ForEnum(Country.Vladivostok).Id, DeployType.RECRUIT);
-        deployUnitChangeEvent.IsTrigger = false;
-        await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-
-        
-        // Add status cards to play area for debugging WITHOUT activating them
-        // Uses CardPlayPool to execute only the first CardStep (which moves card to status area)
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusBlitzkrieg");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusDiveBombers");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusBiasForAction");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusSyntheticFuel");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusAbundantResources");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusAtlanticWall");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("StatusVolksturm");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseChinaOffensive");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseFallOfSingapore");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseSkilledPilots");
-        await CardPlayPool.AddCardToPlayAreaWithoutActivating("ResponseLeningrad");
+        // Add debug status cards to play area WITHOUT activating them
+        foreach (string cardName in initialStateData.DebugStatusCards)
+        {
+            await CardPlayPool.AddCardToPlayAreaWithoutActivating(cardName);
+        }
 
         await Task.Delay(100);
     }

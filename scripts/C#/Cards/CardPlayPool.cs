@@ -408,6 +408,7 @@ public partial class CardPlayPool : GodotObject
         var options = new List<CardActivationOption>();
         foreach (CardState cardState in cardStates)
         {
+            DebugUtilities.PrintPeer($"Checking card: {cardState.CardName}, CardState.Id={cardState.Id}, IsPlayed={cardState.CardLogic.IsPlayed}, CardLogic instance={cardState.CardLogic.GetInstanceId()}");
             bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
             {

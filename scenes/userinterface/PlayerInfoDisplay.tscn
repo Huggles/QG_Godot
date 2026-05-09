@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqm8r5yh3vk2p"]
+
+[ext_resource type="Script" path="res://scripts/C#/UI/PlayerInfoDisplay.cs" id="1_playerinfo"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_playerinfo"]
+bg_color = Color(0.1, 0.1, 0.1, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.4, 0.4, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="PlayerInfoDisplay" type="PanelContainer"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 90.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_playerinfo")
+script = ExtResource("1_playerinfo")
+
+[node name="Container" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="RoleLabel" type="Label" parent="Container"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+text = "Host"
+horizontal_alignment = 1
+
+[node name="FactionsLabel" type="Label" parent="Container"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Playing: Germany, Italy"
+horizontal_alignment = 1
+autowrap_mode = 2

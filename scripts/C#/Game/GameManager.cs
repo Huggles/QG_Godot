@@ -33,7 +33,8 @@ public partial class GameManager : Node
         "InputOptionsList",
         "FactionHandDisplay",
         "FactionsContainer",
-        "PresentationModal"
+        "PresentationModal",
+        "PlayerInfoDisplay"
     };
     
 
@@ -183,6 +184,9 @@ public partial class GameManager : Node
         }
         
         PlayerFactionRegistry.PrintStatus();
+        
+        // Notify UI that factions have been assigned
+        EventBus.Emit(EventBus.SignalName.FactionsAssigned);
         
         // Step 4: Check if all UI elements have loaded
         // (Some may have already emitted during player creation)

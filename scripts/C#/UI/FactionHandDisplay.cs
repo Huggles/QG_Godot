@@ -124,7 +124,13 @@ public partial class FactionHandDisplay : Control, LoadableUI
     private void ResetVisibility()
     {
         Visible = true;
-        CardsContainer.MouseFilter = MouseFilterEnum.Stop;
+        
+        // Only access CardsContainer if it's been initialized (in LoadUI)
+        if (CardsContainer != null)
+        {
+            CardsContainer.MouseFilter = MouseFilterEnum.Stop;
+        }
+        
         HideCardEmphasis();
     }
 
@@ -142,6 +148,12 @@ public partial class FactionHandDisplay : Control, LoadableUI
 
     private void InitCards(List<int> cardIds)
     {
+        // Only initialize cards if LoadUI has been called
+        if (CardsContainer == null)
+        {
+            return;
+        }
+        
         DeleteCurrentCards();
 
         const int cardStepSize = 100;
@@ -184,7 +196,11 @@ public partial class FactionHandDisplay : Control, LoadableUI
     {
         foreach (CardScene cardScene in CardScenes)
         {
-            CardsContainer.RemoveChild(cardScene);
+            // Only remove from CardsContainer if it's been initialized
+            if (CardsContainer != null)
+            {
+                CardsContainer.RemoveChild(cardScene);
+            }
             cardScene.Selected -= OnCardSelected;
             cardScene.QueueFree(); // Ensure memory is cleaned up
         }
@@ -193,12 +209,20 @@ public partial class FactionHandDisplay : Control, LoadableUI
 
     public void ShowCardEmphasis(int cardId)
     {
-        CardPreview.ShowCard(cardId);
+        // Only access CardPreview if it's been initialized (in LoadUI)
+        if (CardPreview != null)
+        {
+            CardPreview.ShowCard(cardId);
+        }
     }
     public void HideCardEmphasis()
     {
-        CardPreview.Visible = false;
-        CardPreview.MouseFilter = MouseFilterEnum.Ignore;
+        // Only access CardPreview if it's been initialized (in LoadUI)
+        if (CardPreview != null)
+        {
+            CardPreview.Visible = false;
+            CardPreview.MouseFilter = MouseFilterEnum.Ignore;
+        }
     }
 
     private void UnsubscribeFromEvents()
