@@ -11,7 +11,7 @@ public partial class GameModeDefault : IGameMode
     const string FACTIONS_DATA_PATH = "res://assets/data/QGData_Factions_V2.json";
     const string CARDS_DATA_PATH = "res://assets/data/QGData_Cards_V2.json";
     const string DECKS_DATA_PATH = "res://assets/data/QGData_Decks.json";
-    const string INITIAL_GAME_STATE_DATA_PATH = "res://assets/data/QGData_InitialGameState.json";
+    const string INITIAL_GAME_STATE_DATA_PATH = "res://assets/data/Scenario_Debug.json";
     const string WORLD_SCENE_FILE = "res://scenes/World/WorldScene.tscn";
     
     private GameState gameState = GameSession.Instance.GameState;
@@ -161,35 +161,26 @@ public partial class GameModeDefault : IGameMode
     public async Task SetupInitialGameState()
     {
         // Load initial game state configuration from JSON
+        DebugUtilities.PrintPeer($"SetupInitialGameState");
+        
         using var initialStateDataFile = FileAccess.Open(INITIAL_GAME_STATE_DATA_PATH, FileAccess.ModeFlags.Read);
         string initialStateDataString = initialStateDataFile.GetAsText();
         InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
 
-        // Deploy homespace units for all factions (except those in skipFactions list)
-        if (initialStateData.DeployHomespaceUnits)
-        {
-            foreach (FactionData factionData in StaticGameData.FactionDataList)
-            {
-                // Skip factions in the skip list
-                if (initialStateData.SkipFactions.Contains(factionData.Faction.ToString()))
-                {
-                    continue;
-                }
+        await DeployUnits(initialStateData);
+        await PlaceCards(initialStateData);
+        ApplyStartingFaction(initialStateData);
+        
+        DebugUtilities.PrintPeer($"FINISHED SetupInitialGameState");
 
-                CountryState homespaceCountryState = CountryState.ForName(factionData.Homespace);
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(
-                    factionData.Faction, 
-                    homespaceCountryState.Id, 
-                    DeployType.RECRUIT
-                );
-                deployUnitChangeEvent.IsTrigger = false;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-            }
-        }
-
-        // Deploy units from configuration
+        await Task.Delay(100);
+    }
+    private async Task DeployUnits(InitialGameStateData initialStateData)
+    {
+        DebugUtilities.PrintPeer($"Doing Unit Deployments");
         foreach (UnitDeploymentData deployment in initialStateData.UnitDeployments)
         {
+            DebugUtilities.PrintPeer($"Deploying unit for {deployment.Faction} in {deployment.CountryName}");
             // Parse faction enum
             if (!Enum.TryParse<Faction>(deployment.Faction, out Faction faction))
             {
@@ -197,41 +188,48 @@ public partial class GameModeDefault : IGameMode
                 continue;
             }
 
-            // Get country state - try by name first, then by enum if that fails
+            // Get country state by UniqueName
             CountryState countryState = CountryState.ForName(deployment.CountryName);
-            if (countryState == null && Enum.TryParse<Country>(deployment.CountryName, out Country country))
-            {
-                countryState = CountryState.ForEnum(country);
-            }
-
             if (countryState == null)
             {
-                DebugUtilities.PrintPeer($"Warning: Country '{deployment.CountryName}' not found in initial game state config");
-                continue;
-            }
-
-            // Parse deploy type
-            if (!Enum.TryParse<DeployType>(deployment.DeployType, out DeployType deployType))
-            {
-                DebugUtilities.PrintPeer($"Warning: Invalid deploy type '{deployment.DeployType}' in initial game state config");
-                continue;
-            }
-
+                throw new Exception($"Country '{deployment.CountryName}' not found in initial game state config. Ensure countryName matches the UniqueName field in QGData_Countries_V2.json.");
+            }            
             DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(
                 faction, 
                 countryState.Id, 
-                deployType
+                DeployType.RECRUIT
             );
             deployUnitChangeEvent.IsTrigger = false;
+            DebugUtilities.PrintPeer($"DoChangeEvent");
             await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
         }
+    }
+    private void ApplyStartingFaction(InitialGameStateData initialStateData)
+    {
+        if (string.IsNullOrEmpty(initialStateData.StartingFaction)) return;
 
-        // Add debug status cards to play area WITHOUT activating them
-        foreach (string cardName in initialStateData.DebugStatusCards)
+        if (!Enum.TryParse<Faction>(initialStateData.StartingFaction, out Faction startingFaction))
         {
-            await CardPlayPool.AddCardToPlayAreaWithoutActivating(cardName);
+            throw new Exception($"Invalid startingFaction '{initialStateData.StartingFaction}' in scenario config.");
         }
 
-        await Task.Delay(100);
+        int factionIndex = StaticGameData.PlayableFactions.IndexOf(startingFaction);
+        if (factionIndex < 0)
+        {
+            throw new Exception($"startingFaction '{initialStateData.StartingFaction}' is not in PlayableFactions.");
+        }
+
+        // GameTurn = factionIndex + 1 puts CurrentFaction at the desired faction on the first StartNewTurn increment
+        GameSession.Instance.GameFlow.GameTurn = factionIndex;
+        DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})");
+    }
+    private async Task PlaceCards(InitialGameStateData initialStateData)
+    {
+        DebugUtilities.PrintPeer($"Placing initial cards");
+        // Add initial cards to play area WITHOUT activating them
+        foreach (InitialCardEntry card in initialStateData.InitialCards)
+        {
+            await CardPlayPool.AddCardToPlayAreaWithoutActivating(card.Number);
+        }
     }
 }

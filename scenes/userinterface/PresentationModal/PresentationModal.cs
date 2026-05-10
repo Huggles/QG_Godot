@@ -154,12 +154,14 @@ public partial class PresentationModal : Control, LoadableUI
 
     private void HandlePresentationItems(List<PresentationItem> presentationItems)
     {
+        int maxColumns = 7;
         if (presentationItems != null && presentationItems.Count > 0)
         {
             PresentationItems = presentationItems;
             
-            // Set columns to match number of items for single-row display
-            GridCardContainer.Columns = presentationItems.Count;
+            // Set columns to at most 7 per row
+            GridCardContainer.Columns = Math.Min(presentationItems.Count, maxColumns);            
+            int rows = (int)Math.Ceiling((double)presentationItems.Count / maxColumns);
             
             foreach (PresentationItem presentationItem in presentationItems)
             {
@@ -183,7 +185,7 @@ public partial class PresentationModal : Control, LoadableUI
             }
             
             // Set grid size to fit one row of cards
-            Vector2 gridSize = new Vector2(0, PresentationItemControls[0].Size.Y);
+            Vector2 gridSize = new Vector2(0, PresentationItemControls[0].Size.Y * Mathf.Clamp(rows, 1, 2.1f));
             CardScrollContainer.CustomMinimumSize = gridSize;
             CardScrollContainer.Size = gridSize;
             CardScrollContainer.ScrollVertical = 0;

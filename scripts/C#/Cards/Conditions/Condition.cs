@@ -84,7 +84,9 @@ public abstract class Condition
         }
 
         public override bool MeetCondition() => 
-            CountryStates.Any(cs => cs.Tags.Has(Tag.Attackable, Faction));
+            CountryStates.Any(cs =>
+                cs.Tags.Has(Tag.Attackable, Faction) ||
+                cs.Units.Values.Any(unitId => UnitState.ForId(unitId).Tags.Has(Tag.Attackable, Faction)));
     }
     public class CountryIsEmpty : Condition
     {

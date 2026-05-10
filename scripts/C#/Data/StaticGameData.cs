@@ -43,6 +43,22 @@ public static partial class StaticGameData
         }
     }
 
+    private static Dictionary<int, CardData> _cardDataByNumber;
+    public static Dictionary<int, CardData> CardDataByNumber
+    {
+        get
+        {
+            if (_cardDataByNumber == null || _cardDataByNumber.Count == 0)
+            {
+                _cardDataByNumber = new();
+                foreach (var cd in CardDataList)
+                    if (int.TryParse(cd.Number, out int num))
+                        _cardDataByNumber[num] = cd;
+            }
+            return _cardDataByNumber;
+        }
+    }
+
     private static Dictionary<Faction, DeckData> _deckDataMap;
     public static Dictionary<Faction, DeckData> DeckDataMap
     {

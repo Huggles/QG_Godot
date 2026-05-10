@@ -114,6 +114,26 @@ public partial class DeckState : StateObject
         DiscardCard(HandCardIds[index]);
     }
 
+    public void PlayCard(int cardId)
+    {
+        if (!HandCardIds.Contains(cardId) && !DeckCardIds.Contains(cardId)){
+            DebugUtilities.PrintPeerError($"Cannot play card that is not in hand or deck: {cardId}");
+            return;
+        }
+        HandCardIds.Remove(cardId);            
+        DeckCardIds.Remove(cardId);            
+
+        CardState cardState = CardState.ForId(cardId);
+        
+        // Only discard event cards - Status and Response cards are moved to their respective lists
+        // by their own PlayCardSteps logic (StatusCardLogic/ResponseCardLogic)
+        if (!cardState.CardLogic.IsReaction)
+        {
+            DiscardCard(cardId);
+        }
+    }
+
+
     public void DiscardCard(int cardId)
     {
         if (HandCardIds.Contains(cardId))

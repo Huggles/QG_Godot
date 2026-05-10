@@ -1,0 +1,38 @@
+{
+  "unitDeployments": [
+    { "faction": "GERMANY",       "countryName": "GERMANY" },
+    { "faction": "UNITED_KINGDOM", "countryName": "UNITED_KINGDOM" },
+    { "faction": "JAPAN",          "countryName": "JAPAN" },
+    { "faction": "SOVIET",         "countryName": "MOSCOW" },
+    { "faction": "ITALY",          "countryName": "ITALY" },
+    { "faction": "UNITED_STATES",  "countryName": "US_EAST" },
+    { "faction": "ITALY",          "countryName": "MEDITERRANEAN_SEA" },
+    { "faction": "UNITED_KINGDOM", "countryName": "NORTH_SEA" },
+    { "faction": "SOVIET",         "countryName": "RUSSIA" },
+    { "faction": "SOVIET",         "countryName": "EASTERN_EUROPE" },
+    { "faction": "JAPAN",          "countryName": "SEA_OF_JAPAN" },
+    { "faction": "JAPAN",          "countryName": "SOUTH_CHINA_SEA" },
+    { "faction": "JAPAN",          "countryName": "PHILIPPINES" },
+    { "faction": "SOVIET",         "countryName": "SZECHUAN" },
+    { "faction": "SOVIET",         "countryName": "KAZAKHSTAN" },
+    { "faction": "SOVIET",         "countryName": "SOUTH_EAST_ASIA" },
+    { "faction": "UNITED_KINGDOM", "countryName": "AUSTRALIA" },
+    { "faction": "UNITED_KINGDOM", "countryName": "CHINA" },
+    { "faction": "UNITED_STATES",  "countryName": "CHINA" },
+    { "faction": "UNITED_STATES",  "countryName": "VLADIVOSTOK" }
+  ],
+  "startingFaction": "JAPAN",
+  "initialCards": [
+    { "number": 28, "name": "StatusBlitzkrieg" },
+    { "number": 26, "name": "StatusDiveBombers" },
+    { "number": 29, "name": "StatusBiasForAction" },
+    { "number": 32, "name": "StatusSyntheticFuel" },
+    { "number": 31, "name": "StatusAbundantResources" },
+    { "number": 34, "name": "StatusAtlanticWall" },
+    { "number": 35, "name": "StatusVolksturm" },
+    { "number": 68, "name": "ResponseChinaOffensive" },
+    { "number": 79, "name": "ResponseFallOfSingapore" },
+    { "number": 111, "name": "ResponseSkilledPilots" },
+    { "number": 92, "name": "ResponseLeningrad" }
+  ]
+}

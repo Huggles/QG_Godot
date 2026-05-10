@@ -52,6 +52,17 @@ public partial class CardPlayPool : GodotObject
     /// Executes only the first CardStep of a card (which moves it to status/response area) without full activation.
     /// Automatically clears the pool after execution.
     /// </summary>
+    public static async Task AddCardToPlayAreaWithoutActivating(int cardNumber)
+    {
+        CardState cardState = CardState.ForNumber(cardNumber);
+        if (cardState == null)
+        {
+            DebugUtilities.PrintPeerError($"Card number {cardNumber} not found");
+            return;
+        }
+        await AddCardToPlayAreaWithoutActivating(cardState);
+    }
+
     public static async Task AddCardToPlayAreaWithoutActivating(string cardName)
     {
         CardState cardState = CardState.ForName(cardName);
@@ -61,21 +72,35 @@ public partial class CardPlayPool : GodotObject
             return;
         }
         
-        // Get the first play card step which contains the logic to add to status/response area
-        List<CardStep> playSteps = cardState.CardLogic.InitializePlayCardSteps();
-        if (playSteps.Count > 0)
+        await AddCardToPlayAreaWithoutActivating(cardState);
+    }
+
+    private static async Task AddCardToPlayAreaWithoutActivating(CardState cardState)
+    {
+        List<CardStep> playSteps = cardState.CardLogic.PlayCardSteps;
+        if (playSteps.Count == 0)
         {
-            CardStep firstStep = playSteps[0];
-            // Execute just this step's logic (adds to status area, removes from hand/deck)
-            await firstStep.Execute();
-            DebugUtilities.PrintPeer($"Added {cardName} to play area without activation");
+            DebugUtilities.PrintPeerError($"Card {cardState.CardData.UniqueName} has no play steps");
+            ClearPool();
+            return;
         }
-        else
+
+        // Mirror DoActivationOption but with IsTrigger=false so no reactions are checked
+        var playCardChangeEvent = new PlayCardChangeEvent(cardState.Faction, cardState.Id);
+        playCardChangeEvent.IsTrigger = false;
+        await DoChangeEvent(playCardChangeEvent);
+
+        // Execute the first play step (moves card to status/response area)
+        ChangeEvent stepResult = await cardState.CardLogic.PlayCard(playSteps[0].Id);
+
+        // Apply the step result without triggering reactions
+        if (stepResult != null)
         {
-            DebugUtilities.PrintPeerError($"Card {cardName} has no play steps");
+            stepResult.IsTrigger = false;
+            await DoChangeEvent(stepResult);
         }
-        
-        // Clear pool after each call to maintain clean state
+
+        DebugUtilities.PrintPeer($"Added {cardState.CardData.UniqueName} to play area without activation");
         ClearPool();
     }
 
@@ -115,6 +140,11 @@ public partial class CardPlayPool : GodotObject
                 else if (cardIntroductionChangeEvent is ActivateReactionChangeEvent && GameSession.IsStarted)
                 {
                     stepResultChangeEvent = await cardActivationOption.CardState.CardLogic.React(cardStep.Id);                    
+                }
+                else if (cardIntroductionChangeEvent == null && cardLogic.IsActivatedThisTurn && GameSession.IsStarted)
+                {
+                    // Continuation step for an already-activated reaction card (step 2+)
+                    stepResultChangeEvent = await cardActivationOption.CardState.CardLogic.React(cardStep.Id);
                 }
                 
                 // Step 3: Process the step result (this will handle blocks, apply, and after-reactions)

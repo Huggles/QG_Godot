@@ -18,7 +18,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
     {
         return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).WithCountries(targetCountries.ToCountryIds()), this) };
     }
-
+ 
     public override List<CardStep> InitializeReactCardSteps()
     {
         return new List<CardStep> {
@@ -36,7 +36,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
                 BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedCountryId));
                 return battleUnitChangeEvent;
             }).WithCondition(
-                ()=>{ return Condition.Build(new Condition.CountryIsAttackable(targetCountries.ToCountryIds(),Faction), this); }
+                ()=>{ return Condition.Build(new Condition.CountryIsAttackable(targetCountries.ToCountryIds(), Faction), this); }
             ).WithGuidance("Attack an army in China or an adjacent country"),
         };
     }

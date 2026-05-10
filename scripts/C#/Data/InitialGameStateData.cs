@@ -6,14 +6,21 @@ public class InitialGameStateData
     [JsonPropertyName("unitDeployments")]
     public List<UnitDeploymentData> UnitDeployments { get; set; } = new List<UnitDeploymentData>();
 
-    [JsonPropertyName("debugStatusCards")]
-    public List<string> DebugStatusCards { get; set; } = new List<string>();
+    [JsonPropertyName("initialCards")]
+    public List<InitialCardEntry> InitialCards { get; set; } = new List<InitialCardEntry>();
 
-    [JsonPropertyName("deployHomespaceUnits")]
-    public bool DeployHomespaceUnits { get; set; } = true;
+    [JsonPropertyName("startingFaction")]
+    public string StartingFaction { get; set; } = null;
+}
 
-    [JsonPropertyName("skipFactions")]
-    public List<string> SkipFactions { get; set; } = new List<string>();
+public class InitialCardEntry
+{
+    [JsonPropertyName("number")]
+    public int Number { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+
 }
 
 public class UnitDeploymentData
@@ -24,6 +31,4 @@ public class UnitDeploymentData
     [JsonPropertyName("countryName")]
     public string CountryName { get; set; }
 
-    [JsonPropertyName("deployType")]
-    public string DeployType { get; set; }
 }

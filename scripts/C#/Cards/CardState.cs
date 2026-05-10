@@ -70,6 +70,12 @@ public partial class CardState : Object, ITaggable
     {
         return GameSession.Instance.GameState.CardStatesByName.TryGetValue(cardName, out var state) ? state : null;
     }
+    public static CardState ForNumber(int cardNumber)
+    {
+        if (!StaticGameData.CardDataByNumber.TryGetValue(cardNumber, out CardData cardData))
+            return null;
+        return ForName(cardData.UniqueName);
+    }
     public static List<CardState> ForNames(List<string> cardNames)
     {
         return cardNames.Map(c => GameSession.Instance.GameState.CardStatesByName.TryGetValue(c, out var state) ? state : null);
