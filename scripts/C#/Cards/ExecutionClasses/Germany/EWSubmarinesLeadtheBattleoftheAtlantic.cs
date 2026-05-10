@@ -16,15 +16,10 @@ public partial class EWSubmarinesLeadtheBattleoftheAtlantic : EWCardLogic
                     .ToList();
                 
                 int count = germanNavies.Count;
+
+                IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German Navies on the board."));
                 
-                // Score VP
-                if (count > 0)
-                {
-                    IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
-                    await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German Navies on the board."));
-                }
-                
-                // UK discards 2 cards per navy
                 DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count * 2));
                 discardEvent.IsTrigger = true;
                 return discardEvent;

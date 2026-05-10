@@ -19,15 +19,10 @@ public partial class EWSubmarinesEnforceBlockade : EWCardLogic
                     .ToList();
                 
                 int count = germanArmies.Count;
+
+                IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German Armies adjacent to North Sea."));
                 
-                // Score VP
-                if (count > 0)
-                {
-                    IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
-                    await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German Armies adjacent to North Sea."));
-                }
-                
-                // UK discards 2 cards per army
                 DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count * 2));
                 discardEvent.IsTrigger = true;
                 return discardEvent;

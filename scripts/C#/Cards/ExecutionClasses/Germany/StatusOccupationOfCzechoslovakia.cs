@@ -8,7 +8,7 @@ public partial class StatusOccupationOfCzechoslovakia : StatusCardLogic, IStatus
     public virtual VPEntry AddVictoryPoints()
     {
         bool factionAttacked = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Where(ce => ce.TriggeringFaction == Faction).ToList().Count > 0;
-        int score = factionAttacked ? 1 : 0;
+        int score = factionAttacked ? 0 : 1;
         return new VPEntry(score, $"{score} victory points for not conducting a battle or eliminating a unit");
     }
 

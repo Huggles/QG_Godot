@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public partial class DiscardCardsChangeEvent : ChangeEvent
@@ -17,11 +19,29 @@ public partial class DiscardCardsChangeEvent : ChangeEvent
     }
 
     protected override async Task<bool> ExecuteAsync()
-    {        
+    {
+        ApplyDiscardModifiers();
+
         DeckState deckState = DeckState.ForFaction(TargetFaction); 
         deckState.DiscardTopCards(NumberOfCards);
         PlayerActionLabel.ShowText($"{triggeringFactionState.FactionData.Label} makes {targetFactionState.FactionData.Label} discard {NumberOfCards} cards", TriggeringFaction);
         await Task.Delay(2000);
         return true;
+    }
+
+    private void ApplyDiscardModifiers()
+    {
+        var allStatusCardLogics = GameSession.Instance.GameState.FactionStates.Values
+            .SelectMany(fs => DeckState.ForFaction(fs.FactionData.Faction).StatusCardStates)
+            .Where(cs => cs.CardLogic.IsPlayed)
+            .Select(cs => cs.CardLogic)
+            .OfType<IDiscardModifier>();
+
+        foreach (var modifier in allStatusCardLogics)
+        {
+            int delta = modifier.ModifyDiscard(this);
+            if (delta != 0)
+                NumberOfCards = Math.Max(NumberOfCards + delta, 0);
+        }
     }
 }

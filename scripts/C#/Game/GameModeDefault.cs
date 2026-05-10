@@ -231,5 +231,17 @@ public partial class GameModeDefault : IGameMode
         {
             await CardPlayPool.AddCardToPlayAreaWithoutActivating(card.Number);
         }
+
+        // Move specified cards to the top of each faction's hand
+        foreach (InitialHandCardEntry handCard in initialStateData.InitialHandCards)
+        {
+            Faction faction = System.Enum.Parse<Faction>(handCard.Faction);
+            DeckState deck = DeckState.ForFaction(faction);
+            int cardId = deck.DrawCardByName(handCard.Name);
+            if (cardId == -1)
+                DebugUtilities.PrintPeerError($"InitialHandCard not found in deck: {handCard.Name} for {handCard.Faction}");
+            else
+                DebugUtilities.PrintPeer($"Moved {handCard.Name} to {handCard.Faction} hand");
+        }
     }
 }

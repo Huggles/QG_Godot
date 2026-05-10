@@ -21,8 +21,9 @@
     { "faction": "UNITED_STATES",  "countryName": "CHINA" },
     { "faction": "UNITED_STATES",  "countryName": "VLADIVOSTOK" }
   ],
-  "startingFaction": "JAPAN",
+  "startingFaction": "GERMANY",
   "initialCards": [
+    { "number": 27, "name": "StatusWolfPacks" },
     { "number": 28, "name": "StatusBlitzkrieg" },
     { "number": 26, "name": "StatusDiveBombers" },
     { "number": 29, "name": "StatusBiasForAction" },
@@ -34,5 +35,8 @@
     { "number": 79, "name": "ResponseFallOfSingapore" },
     { "number": 111, "name": "ResponseSkilledPilots" },
     { "number": 92, "name": "ResponseLeningrad" }
+  ],
+  "initialHandCards": [
+    { "faction": "GERMANY", "name": "EWSubmarinesRaidMurmanskConvoy" }
   ]
 }

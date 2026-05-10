@@ -21,19 +21,12 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
                 
                 int count = germanUnits.Count;
                 
-                if (count > 0)
-                {
-                    // Score VP
-                    IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
-                    await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German units in or adjacent to Scandinavia."));
-                    
-                    // Soviet discards 2 cards per unit
-                    DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.SOVIET, count * 2));
-                    discardEvent.IsTrigger = true;
-                    return discardEvent;
-                }
-                
-                return null;
+                IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German units in or adjacent to Scandinavia."));
+
+                DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.SOVIET, count * 2));
+                discardEvent.IsTrigger = true;
+                return discardEvent;
             })
         }; 
     }

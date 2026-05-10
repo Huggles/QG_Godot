@@ -9,6 +9,9 @@ public class InitialGameStateData
     [JsonPropertyName("initialCards")]
     public List<InitialCardEntry> InitialCards { get; set; } = new List<InitialCardEntry>();
 
+    [JsonPropertyName("initialHandCards")]
+    public List<InitialHandCardEntry> InitialHandCards { get; set; } = new List<InitialHandCardEntry>();
+
     [JsonPropertyName("startingFaction")]
     public string StartingFaction { get; set; } = null;
 }
@@ -21,6 +24,15 @@ public class InitialCardEntry
     [JsonPropertyName("name")]
     public string Name { get; set; }
 
+}
+
+public class InitialHandCardEntry
+{
+    [JsonPropertyName("faction")]
+    public string Faction { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 }
 
 public class UnitDeploymentData
