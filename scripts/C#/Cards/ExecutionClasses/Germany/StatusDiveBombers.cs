@@ -36,7 +36,7 @@ public partial class StatusDiveBombers : StatusCardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(1), false);
-                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards", 2000);
+                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards");
                 BattleTarget target = await new SelectBattleTargetHandler(battleTargets).Handle();
                 BattleCountryChangeEvent battleCountryChangeEvent = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChangeEvent.IsTrigger = true;

@@ -79,12 +79,12 @@ public partial class ClickableSprite : Area2D
 	public void SpriteAlphaWaveAnimation()
     {
         var tween1 = GetTree().CreateTween();        
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(Sprite, "modulate:a", 0.3, GameSettings.AnimationDuration * 10);
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(Sprite, "modulate:a", 0.3, GameSettings.AnimationDurationSeconds * 10);
         propertyTweener1.Finished += () =>
         {
 			tween1.Dispose();
 			var tween2 = GetTree().CreateTween();
-            PropertyTweener propertyTweener2 = tween2.TweenProperty(Sprite, "modulate:a", 0.8, GameSettings.AnimationDuration * 10);
+            PropertyTweener propertyTweener2 = tween2.TweenProperty(Sprite, "modulate:a", 0.8, GameSettings.AnimationDurationSeconds * 10);
             propertyTweener2.Finished += () =>
             {
 				tween2.Dispose();

@@ -101,30 +101,7 @@ public partial class GameSession : Node
         unit.CountryId = -1;
         unit.EmitSignal(UnitState.SignalName.AfterUnitRemovedFromCountry, unitId, country.Id);
     }
-    public static void AttackUnit(int unitId)
-    {
-        if (unitId == -1)
-            return;
-
-        var unit = UnitStatesById[unitId];
-        int countryId = unit.CountryId;
-
-        unit.EmitSignal(UnitState.SignalName.BeforeUnitRemovedFromCountry, unitId, countryId);
-        unit.CountryState.Units.Remove(unit.Faction);
-        unit.CountryId = -1;
-        unit.EmitSignal(UnitState.SignalName.AfterUnitRemovedFromCountry, unitId, countryId);
-    }
-
-
-    public static void EliminateUnit(string unitId) { }
-    public static void ScoreVictoryPoints(Faction faction, int vp) => FactionStates[faction].Score += vp;
-    public static void HandDiscard(List<string> cardIds) { }
-    public static void ForceDiscard(string cardId) { }
-    public static void ForceDrawDeckDiscard(string faction, int numberOfCards) { }
-    public static void PlayCard(string cardId) { }
-    public static void ActivateStatusCard(string cardId) { }
-    public static void ActivateResponseCard(string cardId) { }
-
+    
     public async static Task<CardActivationOption> RequestPlay(Faction faction)
     {
         // Get the player who controls this faction

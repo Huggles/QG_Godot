@@ -6,7 +6,7 @@
         "ForEach-Object": true
     },
     "workbench.colorCustomizations": {
-        "debugConsole.warningForeground": "#800",
+        "debugConsole.warningForeground": "#afa584",
         "debugConsole.errorForeground": "#d00",
         "debugConsole.sourceForeground": "#0c0",
         "debugConsole.infoForeground": "#fdfdfd"

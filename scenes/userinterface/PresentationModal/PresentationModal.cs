@@ -75,12 +75,6 @@ public partial class PresentationModal : Control, LoadableUI
         if (ConfirmButton != null)
             ConfirmButton.Visible = false;
     }
-
-    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title)
-    {
-        return ShowModal(presentationItems, title, false);
-    }
-
     public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, bool requireSelection)
     {
         RequireSelection = requireSelection;
@@ -101,38 +95,48 @@ public partial class PresentationModal : Control, LoadableUI
             onKeyClicked = HandleKeyboardInput;
             InputManager.Instance.KeyClicked += onKeyClicked;
         }        
-        ShowModal(presentationItems, title, -1);        
+        ShowModalPersistent(presentationItems, title);        
         return ToSignal(this, SignalName.ItemSelected);
     }
 
-    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, float duration)
+    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title)
     {
         HandlePresentationItems(presentationItems);
         TitleText.Text = title;
         Visible = true;
 
         var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDuration);
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
         propertyTweener1.Finished += async () =>
         {
+            DebugUtilities.PrintPeer("PresentationModal shown", DebugVerbosity.INFO);
             EmitSignal(SignalName.OnShow);
-            await Task.Delay((int)duration);
+            await Task.Delay(GameSettings.PauseDuration);
             tween1.Dispose();
 
-            if (duration > 0)
+            if (GameSettings.AnimationDurationSeconds > 0)
             {
                 _ = HideModal();
             }
         };
-        if (duration > 0)
-        {
-            return ToSignal(this, SignalName.OnHide);
-        }
-        else
-        {
-            return ToSignal(this, SignalName.OnShow);
-        }
+        return ToSignal(this, SignalName.OnHide);        
+    }
+
+    public SignalAwaiter ShowModalPersistent(List<PresentationItem> presentationItems, string title)
+    {
+        HandlePresentationItems(presentationItems);
+        TitleText.Text = title;
+        Visible = true;
+
+        var tween1 = GetTree().CreateTween();
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
         
+        propertyTweener1.Finished += async () =>
+        {   
+            tween1.Dispose();
+            EmitSignal(SignalName.OnShow);
+        };
+        return ToSignal(this, SignalName.OnShow);        
     }
 
     public void ShowExitButton(Action callback)
@@ -232,9 +236,10 @@ public partial class PresentationModal : Control, LoadableUI
         }
 
         var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDuration);
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
         propertyTweener1.Finished += () =>
         {
+            DebugUtilities.PrintPeer("PresentationModal shown", DebugVerbosity.INFO);
             EmitSignal(SignalName.OnShow);
             tween1.Dispose();
         };
@@ -302,7 +307,7 @@ public partial class PresentationModal : Control, LoadableUI
         skipCallback = null;
 
         var tween2 = GetTree().CreateTween();
-        PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, GameSettings.AnimationDuration);
+        PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, GameSettings.AnimationDurationSeconds);
         propertyTweener2.Finished += () =>
         {
             tween2.Dispose();

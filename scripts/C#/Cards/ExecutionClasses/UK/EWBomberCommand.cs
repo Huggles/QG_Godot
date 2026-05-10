@@ -13,7 +13,7 @@ public partial class EWBomberCommand : EWCardLogic
         {
             new CardStep(this, async() => {
 
-                Variant[] response = await PresentationModal.Instance.ShowModal(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.ITALY]), "Select a faction");                
+                Variant[] response = await PresentationModal.Instance.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.ITALY]), "Select a faction");                
                 Faction selectedFaction = (Faction)response[0].As<int>();
                 await PresentationModal.Instance.HideModal();
 

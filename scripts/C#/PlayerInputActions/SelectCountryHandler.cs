@@ -22,7 +22,7 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
         int countryId = (await EventBus.GetSignalAwaiter(EventBus.SignalName.CountryClicked))[0].As<int>();
         CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
         InputManager.Instance.DisableRayTraceCasting();
-        DebugUtilities.PrintPeerError($"Country Clicked: {CountryState.ForId(countryId).StaticCountryData.UniqueNameCamelCase}");
+        DebugUtilities.PrintPeer($"Country Clicked: {CountryState.ForId(countryId).StaticCountryData.UniqueNameCamelCase}");
         return countryId;
     }
 }

@@ -1,1 +1,1 @@
-public enum GameSpeed { Slow, Normal, Fast }
+public enum GameSpeed { Slow, Normal, Fast, VeryFast }

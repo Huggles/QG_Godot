@@ -148,14 +148,22 @@ public partial class PlayerScene : CharacterBody2D
 
     public void FadeLoadingScreen()
     {
-        var loadingCover = GetNodeOrNull<Control>("LoadingCover");        
+        DebugUtilities.PrintPeer("FadeLoadingScreen", DebugVerbosity.INFO);
+        var loadingCover = GetNodeOrNull("%LoadingCover");        
         if (loadingCover != null)
         {
-            var tween = CreateTween();
-            tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.AnimationDurationSeconds)
+            var tween = GetTree().CreateTween();   
+            PropertyTweener propertyTweener1 = tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.AnimationDurationSeconds)
                  .SetTrans(Tween.TransitionType.Sine)
                  .SetEase(Tween.EaseType.InOut);
+            propertyTweener1.Finished += () => {
+                DebugUtilities.PrintPeer("Removing loading cover", DebugVerbosity.INFO);
+                loadingCover.GetParent().RemoveChild(loadingCover);
+            };
+        } else {
+            DebugUtilities.PrintPeerError("LoadingCover not found on PlayerScene");
         }
+        
     }
 
 }

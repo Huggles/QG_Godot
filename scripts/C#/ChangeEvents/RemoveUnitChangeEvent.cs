@@ -17,8 +17,7 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
 
     protected override async Task<bool> ExecuteAsync()
     {
-        GameSession.RemoveUnitFromCountry(UnitId);
-        await Task.CompletedTask;
+        GameSession.RemoveUnitFromCountry(UnitId);     
         return true;
     }
 

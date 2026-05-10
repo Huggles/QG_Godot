@@ -94,7 +94,6 @@ public partial class GameFlow : GodotObject
 
     public void ProgressGame()
     {
-        DebugUtilities.PrintPeerError("ProgressGame");
         DebugUtilities.PrintPeer($"ProgressGame: {GameTurn}", DebugVerbosity.INFO);
         StartNextStep();
     }

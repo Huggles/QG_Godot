@@ -158,16 +158,16 @@ public partial class UnitScene : Node2D
         CountryState.Node.AddUnit(this);
 
         Tween tween = CreateTween();
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.5f, 1.5f), GameSettings.AnimationDuration);
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1, 1), GameSettings.AnimationDuration);
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.5f, 1.5f), GameSettings.AnimationDurationSeconds);
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1, 1), GameSettings.AnimationDurationSeconds);
         await ToSignal(tween, "finished");
     }
 
     private async void OnBeforeUnitRemovedFromCountry(int unitId, int countryId)
     {
         Tween tween = CreateTween(); 
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), GameSettings.AnimationDuration);
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(0,0), GameSettings.AnimationDuration);
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), GameSettings.AnimationDurationSeconds);
+        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(0,0), GameSettings.AnimationDurationSeconds);
         await ToSignal(tween, "finished");
 
         CountryState.ForId(countryId).Node.RemoveUnit(this);

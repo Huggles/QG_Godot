@@ -86,7 +86,7 @@ public partial class FactionHandDisplay : Control, LoadableUI
             if (!IsInstanceValid(this) || !IsInsideTree()) return;
             
             List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DiscardedCardIds, false);            
-            PresentationModal.Instance.ShowModal(presentationItems, "Your Discarded Cards");
+            PresentationModal.Instance.ShowModalPersistent(presentationItems, "Your Discarded Cards");
         };
         DiscardedDeckButton.Pressed += onDiscardedDeckButtonPressed;
 
@@ -94,7 +94,7 @@ public partial class FactionHandDisplay : Control, LoadableUI
         {
             if (!IsInstanceValid(this) || !IsInsideTree()) return;
             
-            PresentationModal.Instance.ShowModal(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
+            PresentationModal.Instance.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
         };
         TestButton.Pressed += onTestButtonPressed;
     }
