@@ -16,7 +16,9 @@ public partial class LandBattle : CardLogic
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
                 return battleCountryChange;
-            }).WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
+            })
+            .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
+            .WithGuidance("Select a army or empty land country to attack")
         }; 
     }
 }

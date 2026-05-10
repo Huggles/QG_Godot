@@ -2,6 +2,7 @@
     "godotTools.editorPath.godot4": "c:\\Users\\Hugo\\Desktop\\Utils\\Godot_v4.5-stable_mono_win64\\Godot_v4.5-stable_mono_win64.exe",
     "chat.tools.terminal.autoApprove": {
         "dotnet build": true,
-        "Move-Item": true
+        "Move-Item": true,
+        "ForEach-Object": true
     }
 }

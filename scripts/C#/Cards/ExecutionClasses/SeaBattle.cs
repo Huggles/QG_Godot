@@ -18,6 +18,7 @@ public partial class SeaBattle : CardLogic
                 return battleCountryChange;
             })
             .WithCondition(()=>Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))            
+            .WithGuidance("Select a navy or empty sea country to attack")
         }; 
     }
 }

@@ -10,7 +10,7 @@ public partial class BuildNavy : CardLogic
     public override List<CardStep> InitializePlayCardSteps()
     {
         return new List<CardStep> {
-            new DeployUnitCardStep(this, async() => {
+            new CardStep(this, async() => {
                 var targetableCountries = CountryState.BuildableSea(Faction);
                 int selectedCountryId = await new SelectCountryHandler(targetableCountries.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
