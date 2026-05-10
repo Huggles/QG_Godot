@@ -27,8 +27,7 @@ public partial class CardScene : Control
     [Signal] public delegate void SelectedEventHandler(int cardId);
 
     public override void _Ready()
-    {
-        Debug.Print("CardScene_Ready");
+    {        
         textBackgroundContainerNode = GetNode<VBoxContainer>("%TextBackgroundBox");
         textContainerNode = GetNode<VBoxContainer>("%TextContainer");
         textInnerContainerNode = GetNode<VBoxContainer>("%TextInnerContainer");

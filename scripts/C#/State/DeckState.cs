@@ -90,7 +90,7 @@ public partial class DeckState : StateObject
         DeckCardIds.RemoveAt(index);
         HandCardIds.Add(cardId);
 
-        DebugUtilities.PrintPeerError($"Drew Card by name ({FactionLabel}): {CardState.ForId(cardId).CardData.Label}");
+        DebugUtilities.PrintPeer($"Drew Card by name ({FactionLabel}): {CardState.ForId(cardId).CardData.Label}");
         return cardId;
     }
 

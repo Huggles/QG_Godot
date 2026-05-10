@@ -4,5 +4,11 @@
         "dotnet build": true,
         "Move-Item": true,
         "ForEach-Object": true
+    },
+    "workbench.colorCustomizations": {
+        "debugConsole.warningForeground": "#800",
+        "debugConsole.errorForeground": "#d00",
+        "debugConsole.sourceForeground": "#0c0",
+        "debugConsole.infoForeground": "#fdfdfd"
     }
 }

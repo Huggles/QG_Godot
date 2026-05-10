@@ -18,7 +18,7 @@ public partial class DebugUtilities : Node
         GameSettings.Instance != null ? GameSettings.Debug : DebugVerbosity.FINEST;
 
     public static void PrintPeerError(String message){
-        GD.PrintErr("("+ FormattedDateTime +")"+" Server: " + message);
+        GD.PrintRich($"[color=red]({FormattedDateTime}) [ERROR]: {message}[/color]");
     }
 
     /// <summary>Prints when the current debug level is >= the specified level. Defaults to FINEST.</summary>
@@ -36,7 +36,7 @@ public partial class DebugUtilities : Node
 
     public static void PrintPeer(String message, DebugVerbosity level = DebugVerbosity.FINEST){
         if (CurrentVerbosity >= level){
-            GD.Print($"({FormattedDateTime}) [{level}]: {message}");
+            GD.PrintRich($"[color={(level == DebugVerbosity.INFO ? "green" : "white")}]({FormattedDateTime}) [{level}]: {message}");
         }
     }
     
