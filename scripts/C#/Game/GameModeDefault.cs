@@ -19,7 +19,7 @@ public partial class GameModeDefault : IGameMode
     public GameModeDefault(){}
 
     public async Task Init(){
-        DebugUtilities.PrintPeer("Init Game Mode");
+        DebugUtilities.PrintPeer("Init Game Mode", DebugVerbosity.INFO);
         LoadDataFiles();
         InstantiateFactionStates();
         InstantiateCountryStates();
@@ -30,7 +30,7 @@ public partial class GameModeDefault : IGameMode
 
         await SetupInitialGameState();
 
-        DebugUtilities.PrintPeer("Game Mode Finished Initializing");
+        DebugUtilities.PrintPeer("Game Mode Finished Initializing", DebugVerbosity.INFO);
         
     }
 
@@ -65,7 +65,7 @@ public partial class GameModeDefault : IGameMode
             countryData.LoadData();
         }
 
-        DebugUtilities.PrintPeer("Data Finished Loading");
+        DebugUtilities.PrintPeer("Data Finished Loading", DebugVerbosity.INFO);
     }
 
     public void InstantiateFactionStates(){
@@ -184,7 +184,7 @@ public partial class GameModeDefault : IGameMode
             // Parse faction enum
             if (!Enum.TryParse<Faction>(deployment.Faction, out Faction faction))
             {
-                DebugUtilities.PrintPeer($"Warning: Invalid faction '{deployment.Faction}' in initial game state config");
+                DebugUtilities.PrintPeer($"Warning: Invalid faction '{deployment.Faction}' in initial game state config", DebugVerbosity.INFO);
                 continue;
             }
 
@@ -221,7 +221,7 @@ public partial class GameModeDefault : IGameMode
 
         // GameTurn = factionIndex + 1 puts CurrentFaction at the desired faction on the first StartNewTurn increment
         GameSession.Instance.GameFlow.GameTurn = factionIndex;
-        DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})");
+        DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})", DebugVerbosity.INFO);
     }
     private async Task PlaceCards(InitialGameStateData initialStateData)
     {

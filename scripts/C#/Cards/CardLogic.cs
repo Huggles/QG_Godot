@@ -157,7 +157,6 @@ public abstract partial class CardLogic : GodotObject
 
     public async Task<ChangeEvent> PlayCard(int stepId)
     {
-        DebugUtilities.PrintPeer("PlayCard");
         string message = PlayActionGuidance();
         PlayerActionLabel.ShowText(message, -1, Faction);
         return await CardStepForId(stepId).Execute();
@@ -165,7 +164,6 @@ public abstract partial class CardLogic : GodotObject
 
     public async Task<ChangeEvent> React(int stepId)
     {
-        DebugUtilities.PrintPeer("React");
         string message = ActivateActionGuidance();
         PlayerActionLabel.ShowText(message, -1, Faction);        
         return await CardStepForId(stepId).Execute();        

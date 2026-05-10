@@ -34,7 +34,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
         gameFlow.VictoryPointSummaries[Faction].Add(vpTurnSummary);
         EventBus.Emit(EventBus.SignalName.FactionScoredPoints, (int)Faction, FactionState.Score);
 
-        DebugUtilities.PrintPeer(vpTurnSummary);
+        DebugUtilities.PrintPeer(vpTurnSummary, DebugVerbosity.INFO);
     }
 
     public async Task ScoreSupplyCountryVPs()

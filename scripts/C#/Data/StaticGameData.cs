@@ -143,17 +143,17 @@ public static partial class StaticGameData
         foreach (var row in factionRows)
             FactionDataList.Add(new FactionData());
 
-        DebugUtilities.PrintPeer($"Loaded {FactionDataList.Count} factions");
+        DebugUtilities.PrintPeer($"Loaded {FactionDataList.Count} factions", DebugVerbosity.INFO);
 
         foreach (var row in cardRows)
             CardDataList.Add(new CardData());
 
-        DebugUtilities.PrintPeer($"Loaded {CardDataList.Count} cards");
+        DebugUtilities.PrintPeer($"Loaded {CardDataList.Count} cards", DebugVerbosity.INFO);
 
         foreach (var row in deckRows)
             DeckDataList.Add(new DeckData());
 
-        DebugUtilities.PrintPeer($"Loaded {DeckDataList.Count} decks");
+        DebugUtilities.PrintPeer($"Loaded {DeckDataList.Count} decks", DebugVerbosity.INFO);
 
         foreach (var row in countryRows)
             CountryDataList.Add(new CountryData());

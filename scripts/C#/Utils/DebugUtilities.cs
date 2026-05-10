@@ -22,20 +22,25 @@ public partial class DebugUtilities : Node
     }
 
     /// <summary>Prints when the current debug level is >= the specified level. Defaults to FINEST.</summary>
-    public static void PrintPeer(String message, DebugVerbosity level = DebugVerbosity.FINEST){
-        if (CurrentVerbosity >= level)
-            GD.Print("("+ FormattedDateTime +")"+" Server: " + message);
-    }
-    
+    /// 
     public static void PrintPeer(Object o, DebugVerbosity level = DebugVerbosity.FINEST){
-        if (CurrentVerbosity < level) return;
+        if (CurrentVerbosity < level) {
+            return;
+        }
         if(o == null)
         {
             o = "null";
         }
-        GD.Print("("+ FormattedDateTime +")"+" Server: " + o.ToString());
+        PrintPeer(o.ToString(), level);
     }
 
+    public static void PrintPeer(String message, DebugVerbosity level = DebugVerbosity.FINEST){
+        if (CurrentVerbosity >= level){
+            GD.Print($"({FormattedDateTime}) [{level}]: {message}");
+        }
+    }
+    
+    
     private static Dictionary<String, Object> ParseCommandLineArguments()
     {
         Dictionary<String, Object> keyValuePairs = new Dictionary<String, Object>();

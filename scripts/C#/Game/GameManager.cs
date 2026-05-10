@@ -40,7 +40,7 @@ public partial class GameManager : Node
 
     public override void _Ready()
     {
-        DebugUtilities.PrintPeer("GameManager Ready");
+        DebugUtilities.PrintPeer("GameManager Ready", DebugVerbosity.INFO);
         
         // Listen for scene changes
         GetTree().NodeAdded += OnNodeAdded;
@@ -63,13 +63,13 @@ public partial class GameManager : Node
             
             if (_pendingPlayerFactionAssignments != null)
             {
-                DebugUtilities.PrintPeer("Found pending faction assignments - initializing game");
+                DebugUtilities.PrintPeer("Found pending faction assignments - initializing game", DebugVerbosity.INFO);
                 // Use CallDeferred to ensure all nodes are ready
                 CallDeferred(nameof(InitializeGameWithPending));
             }
             else
             {
-                DebugUtilities.PrintPeer("No pending assignments - waiting for manual InitializeGame call");
+                DebugUtilities.PrintPeer("No pending assignments - waiting for manual InitializeGame call", DebugVerbosity.INFO);
             }
         }
     }
@@ -107,7 +107,7 @@ public partial class GameManager : Node
     public void SetPendingPlayerFactionAssignments(Dictionary<int, List<Faction>> assignments)
     {
         _pendingPlayerFactionAssignments = assignments;
-        DebugUtilities.PrintPeer($"Stored pending faction assignments for {assignments.Count} player(s)");
+        DebugUtilities.PrintPeer($"Stored pending faction assignments for {assignments.Count} player(s)", DebugVerbosity.INFO);
     }
 
     /// <summary>
@@ -116,7 +116,7 @@ public partial class GameManager : Node
     /// <param name="playerFactionAssignments">Dictionary mapping peer IDs to their assigned factions</param>
     public void InitializeGame(Dictionary<int, List<Faction>> playerFactionAssignments)
     {
-        DebugUtilities.PrintPeer("Initializing game");
+        DebugUtilities.PrintPeer("Initializing game", DebugVerbosity.INFO);
         
         // Clear pending assignments since we're using them now
         _pendingPlayerFactionAssignments = null;
@@ -133,7 +133,7 @@ public partial class GameManager : Node
     /// <param name="playerFactionAssignments">Dictionary mapping peer IDs to their assigned factions</param>
     private void LoadGame(Dictionary<int, List<Faction>> playerFactionAssignments)
     {
-        DebugUtilities.PrintPeer($"Loading game with {playerFactionAssignments.Count} player(s)");
+        DebugUtilities.PrintPeer($"Loading game with {playerFactionAssignments.Count} player(s)", DebugVerbosity.INFO);
         
         if (NodeUtilities.Instance.PlayersNode == null)
         {
@@ -158,7 +158,7 @@ public partial class GameManager : Node
             List<Faction> factions = entry.Value;
             
             string factionNames = string.Join(", ", factions);
-            DebugUtilities.PrintPeer($"Creating player for peer {peerId} with factions: {factionNames}");
+            DebugUtilities.PrintPeer($"Creating player for peer {peerId} with factions: {factionNames}", DebugVerbosity.INFO);
             
             PlayerScene player = PlayerScene.Instantiate<PlayerScene>();
             player.PeerId = peerId;
@@ -219,7 +219,7 @@ public partial class GameManager : Node
         {
             _gameInitialized = true;
             
-            DebugUtilities.PrintPeer("All UI elements loaded - starting game");
+            DebugUtilities.PrintPeer("All UI elements loaded - starting game", DebugVerbosity.INFO);
             
             // Disconnect the event to prevent duplicate calls
             EventBus.Instance.UserInterfaceLoaded -= OnUserInterfaceElementLoaded;
@@ -260,7 +260,7 @@ public partial class GameManager : Node
     [Rpc(MultiplayerApi.RpcMode.Authority)]
     private void _SwitchLevel()
     {
-        DebugUtilities.PrintPeer("Switch level");
+        DebugUtilities.PrintPeer("Switch level", DebugVerbosity.INFO);
 
         if (_gameLoadTransitionScreenInstance != null)
         {

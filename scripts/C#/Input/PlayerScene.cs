@@ -29,7 +29,7 @@ public partial class PlayerScene : CharacterBody2D
     public void SetControlledFactions(List<Faction> factions)
     {
         _controlledFactions = new List<Faction>(factions);
-        DebugUtilities.PrintPeer($"PlayerScene ({PlayerName}, Peer {PeerId}): Controls {string.Join(", ", factions)}");
+        DebugUtilities.PrintPeer($"PlayerScene ({PlayerName}, Peer {PeerId}): Controls {string.Join(", ", factions)}", DebugVerbosity.INFO);
     }
     
     /// <summary>
@@ -82,7 +82,7 @@ public partial class PlayerScene : CharacterBody2D
             _camera.MakeCurrent();
         }
 
-        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName} (Peer {_peerId})");
+        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName} (Peer {_peerId})", DebugVerbosity.INFO);
     }
 
     public override void _PhysicsProcess(double delta)

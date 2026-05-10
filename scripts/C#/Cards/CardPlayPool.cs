@@ -100,7 +100,7 @@ public partial class CardPlayPool : GodotObject
             await DoChangeEvent(stepResult);
         }
 
-        DebugUtilities.PrintPeer($"Added {cardState.CardData.UniqueName} to play area without activation");
+        DebugUtilities.PrintPeer($"Added {cardState.CardData.UniqueName} to play area without activation", DebugVerbosity.INFO);
         ClearPool();
     }
 
@@ -174,7 +174,7 @@ public partial class CardPlayPool : GodotObject
                 
                 if (!hasAnyActions)
                 {
-                    DebugUtilities.PrintPeer("No more actions available - Play step complete");
+                    DebugUtilities.PrintPeer("No more actions available - Play step complete", DebugVerbosity.INFO);
                     ClearPool();
                     EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);
                 }
@@ -240,10 +240,10 @@ public partial class CardPlayPool : GodotObject
             CardActivationOption cardActivationOption = await GameSession.RequestBlock(faction);
             if (cardActivationOption != null)
             {
-                DebugUtilities.PrintPeer($"BLOCK REACTION from {FactionState.ForEnum(faction).FactionLabel} for {changeEvent?.GetType().Name}");
+                DebugUtilities.PrintPeer($"BLOCK REACTION from {FactionState.ForEnum(faction).FactionLabel} for {changeEvent?.GetType().Name}", DebugVerbosity.INFO);
                 // Recursively process this reaction (which may itself trigger more reactions)
                 await DoActivationOption(cardActivationOption);
-                DebugUtilities.PrintPeer($"BLOCK REACTION FINISHED");
+                DebugUtilities.PrintPeer($"BLOCK REACTION FINISHED", DebugVerbosity.INFO);
             }
         }
     }
@@ -276,7 +276,7 @@ public partial class CardPlayPool : GodotObject
                     CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
                     if (cardActivationOption != null)
                     {
-                        DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
+                        DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}", DebugVerbosity.INFO);
                         // Recursively process this reaction (which may itself trigger blocks and after-reactions)
                         await DoActivationOption(cardActivationOption);
                         anyReactionPlayed = true;
@@ -509,7 +509,7 @@ public partial class CardPlayPool : GodotObject
             CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
             if (cardActivationOption != null)
             {
-                DebugUtilities.PrintPeer($"{FactionState.ForEnum(faction).FactionLabel} is playing a card");
+                DebugUtilities.PrintPeer($"{FactionState.ForEnum(faction).FactionLabel} is playing a card", DebugVerbosity.INFO);
                 await DoActivationOption(cardActivationOption);
                 return cardActivationOption;
             }

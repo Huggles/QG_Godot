@@ -34,7 +34,7 @@ public partial class GameSession : Node
 
     public async Task StartSession(List<PlayerScene> playerScenes)
     {
-        DebugUtilities.PrintPeer("Start Session");
+        DebugUtilities.PrintPeer("Start Session", DebugVerbosity.INFO);
         this.playerScenes = playerScenes;
 
         GameState = new GameState();
