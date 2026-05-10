@@ -94,13 +94,13 @@ public partial class GameFlow : GodotObject
 
     public void ProgressGame()
     {
-        GD.Print($"ProgressGame: {GameTurn}");
+        DebugUtilities.PrintPeer($"ProgressGame: {GameTurn}", DebugVerbosity.INFO);
         StartNextStep();
     }
 
     private void StartNextStep()
     {
-        GD.Print("StartNextStep");
+        DebugUtilities.PrintPeer("StartNextStep");
         TurnStepCounter++;
         GameTurnStep gameTurnStep = gameTurnSteps[TurnStepCounter - 1];
         gameTurnStep.Handler();
@@ -109,10 +109,10 @@ public partial class GameFlow : GodotObject
 
     private async Task StartNewTurn()
     {
-        GD.Print("StartNewTurn");
+        DebugUtilities.PrintPeer("StartNewTurn", DebugVerbosity.INFO);
         GameTurn += 1;
         TurnStepCounter = 0;
-        GD.Print($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
+        DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )", DebugVerbosity.INFO);
         EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
         await Task.Delay(100);        
         StartNextStep();
@@ -120,7 +120,7 @@ public partial class GameFlow : GodotObject
 
     private async Task StartTurnStep()
     {
-        GD.Print("_start_turn_step");
+        DebugUtilities.PrintPeer("_start_turn_step");
         this.TurnStep = TurnStep.START;
         startTurnStepHandler = new StartTurnStepHandler();
         startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;
@@ -135,7 +135,7 @@ public partial class GameFlow : GodotObject
 
     private async Task PlayCardStep()
     {
-        GD.Print("PlayCardStep");
+        DebugUtilities.PrintPeer("PlayCardStep", DebugVerbosity.INFO);
         this.TurnStep = TurnStep.PLAY_CARD;
         playStepHandlerDefault = new PlayStepHandlerDefault();
         playStepHandlerDefault.PlayStepFinished += PlayCardStepFinishedHandler;
@@ -150,7 +150,7 @@ public partial class GameFlow : GodotObject
     private async Task SupplyStep()
     {
         this.TurnStep = TurnStep.SUPPLY;
-        GD.Print("SupplyStep");
+        DebugUtilities.PrintPeer("SupplyStep", DebugVerbosity.INFO);
         supplyStepHandler = new SupplyStepHandlerDefault();
         supplyStepHandler.SupplyStepFinished += SupplyStepFinishedHandler;
         supplyStepHandler.Start(CurrentFaction);
@@ -164,7 +164,7 @@ public partial class GameFlow : GodotObject
 
     private async Task VictoryPointStep()
     {
-        GD.Print("VictoryPointStep");
+        DebugUtilities.PrintPeer("VictoryPointStep", DebugVerbosity.INFO);
         this.TurnStep = TurnStep.VICTORY_POINT;
         await vpStepHandler.ProcessVictoryStep(CurrentFaction);
         ProgressGame();
@@ -172,7 +172,7 @@ public partial class GameFlow : GodotObject
 
     private async Task DiscardStep()
     {
-        GD.Print("DiscardStep");
+        DebugUtilities.PrintPeer("DiscardStep", DebugVerbosity.INFO);
         this.TurnStep = TurnStep.DISCARD;
         discardStepHandler = new DiscardStepHandlerDefault();
         discardStepHandler.DiscardStepFinished += DiscardStepFinishedHandler;
@@ -187,7 +187,7 @@ public partial class GameFlow : GodotObject
 
     private async Task DrawStep()
     {
-        GD.Print("DrawStep");
+        DebugUtilities.PrintPeer("DrawStep", DebugVerbosity.INFO);
         this.TurnStep = TurnStep.DRAW;
         drawStepHandler = new DrawStepHandlerDefault();
         drawStepHandler.DrawStepFinished += DrawStepFinishedHandler;

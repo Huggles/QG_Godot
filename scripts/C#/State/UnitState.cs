@@ -65,7 +65,7 @@ public partial class UnitState : StateObject
         if (CountryState != null)
             debugStr += $" {CountryState.Label}";
 
-        GD.Print(debugStr);
+        DebugUtilities.PrintPeer(debugStr);
     }
 
     public static UnitState ForId(int unitId)

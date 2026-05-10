@@ -38,12 +38,12 @@ public partial class RayTraceHandler : Area3D
 
         if (!mousePreviouslyOverOpaque && mouseCurrentlyOverOpaque)
         {
-            GD.Print($"mouse_enter_opaque: {ClickableSprite.Identifier}");
+            DebugUtilities.PrintPeer($"mouse_enter_opaque: {ClickableSprite.Identifier}");
             EmitSignal(SignalName.MouseEnterOpaque, this);
         }
         else if (mousePreviouslyOverOpaque && !mouseCurrentlyOverOpaque)
         {
-            GD.Print($"mouse_exit_opaque: {ClickableSprite.Identifier}");
+            DebugUtilities.PrintPeer($"mouse_exit_opaque: {ClickableSprite.Identifier}");
             EmitSignal(SignalName.MouseExitOpaque, this);
         }
 

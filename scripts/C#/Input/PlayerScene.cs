@@ -99,7 +99,7 @@ public partial class PlayerScene : CharacterBody2D
     {
         if (what == NotificationPredelete)
         {
-            GD.Print($"Player deleted. Name: {_playerName}");
+            DebugUtilities.PrintPeer($"Player deleted. Name: {_playerName}");
         }
     }
 
@@ -143,7 +143,7 @@ public partial class PlayerScene : CharacterBody2D
     public override void _EnterTree()
     {
         base._EnterTree();
-        GD.Print("Entered tree player");
+        DebugUtilities.PrintPeer("Entered tree player");
     }
 
     public void FadeLoadingScreen()

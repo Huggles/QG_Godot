@@ -14,7 +14,7 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
     public override void _Ready()
     {
         base._Ready();
-        GD.Print("NodeUtilities Ready");
+        DebugUtilities.PrintPeer("NodeUtilities Ready");
         InitializeGameNodes();
     }
 
@@ -29,11 +29,11 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
             UnitsNode = GameNode.GetNode("Units");
             WorldNode = GameNode.GetNode<Node2D>("World");
             UserInterface = GameNode.GetNode<CanvasLayer>("UserInterface");
-            GD.Print("NodeUtilities: Game nodes initialized");
+            DebugUtilities.PrintPeer("NodeUtilities: Game nodes initialized", DebugVerbosity.INFO);
         }
         else
         {
-            GD.Print("NodeUtilities: Game node not found (probably in menu/lobby)");
+            DebugUtilities.PrintPeer("NodeUtilities: Game node not found (probably in menu/lobby)");
         }
     }
 }

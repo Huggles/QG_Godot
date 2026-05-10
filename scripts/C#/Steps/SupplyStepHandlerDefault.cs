@@ -32,7 +32,7 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
         {
             string message = $"{outOfSupplyUnits.Count} unit(s) removed due to lack of supply";
             PlayerActionLabel.ShowText(message, this.faction);
-            GD.Print($"Removing {outOfSupplyUnits.Count} out-of-supply units for {this.faction}");
+            DebugUtilities.PrintPeer($"Removing {outOfSupplyUnits.Count} out-of-supply units for {this.faction}", DebugVerbosity.INFO);
             
             // Create removal events for each out-of-supply unit
             foreach (var unit in outOfSupplyUnits)
@@ -42,7 +42,7 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
                     unit.Id, 
                     UnitRemovalReason.SUPPLY
                 );
-                GD.Print($"  - Removing {unit.Faction} {unit.Type} from {CountryState.ForId(unit.CountryId).Label}");
+                DebugUtilities.PrintPeer($"  - Removing {unit.Faction} {unit.Type} from {CountryState.ForId(unit.CountryId).Label}", DebugVerbosity.INFO);
                 await removeEvent.ApplyChange();
             }
             
