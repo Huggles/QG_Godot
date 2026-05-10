@@ -57,7 +57,7 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
                 ? $"Discarded {selectedCardIds.Count} cards (required: {minimumDiscards})"
                 : $"Discarded {selectedCardIds.Count} cards";
             PlayerActionLabel.ShowText(message, faction);
-            await Task.Delay(1500);
+            await Task.Delay(GameSettings.PauseDuration);
         }
     }
 }

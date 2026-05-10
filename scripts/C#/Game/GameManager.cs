@@ -251,6 +251,7 @@ public partial class GameManager : Node
 
     private void SetupGameSession()
     {
+        
         DebugUtilities.PrintPeer("_setup_game_mode");
         GameSession = new GameSession();
         _ = GameSession.StartSession(playerStates);
@@ -265,8 +266,6 @@ public partial class GameManager : Node
         {
             _gameLoadTransitionScreenInstance.GetParent().RemoveChild(_gameLoadTransitionScreenInstance);
         }
-
-        // _ShowUI();
     }
 
     public async Task CreateTimer(float milliseconds)

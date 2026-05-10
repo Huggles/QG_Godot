@@ -25,7 +25,7 @@ public partial class DiscardCardsChangeEvent : ChangeEvent
         DeckState deckState = DeckState.ForFaction(TargetFaction); 
         deckState.DiscardTopCards(NumberOfCards);
         PlayerActionLabel.ShowText($"{triggeringFactionState.FactionData.Label} makes {targetFactionState.FactionData.Label} discard {NumberOfCards} cards", TriggeringFaction);
-        await Task.Delay(2000);
+        await Task.Delay(GameSettings.PauseDuration);
         return true;
     }
 

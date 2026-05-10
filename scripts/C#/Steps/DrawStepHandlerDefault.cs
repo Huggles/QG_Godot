@@ -35,13 +35,13 @@ public partial class DrawStepHandlerDefault : GodotObject, IDrawStepHandler
                 
                 // Optionally show the cards that were drawn
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(drawnCardIds, false);
-                await PresentationModal.Instance.ShowModal(presentationItems, $"{faction} drew cards", 2000);
+                await PresentationModal.Instance.ShowModal(presentationItems, $"{faction} drew cards", GameSettings.PauseDuration);
             }
         }
         else
         {
             // No cards to draw
-            await Task.Delay(500);
+            await Task.Delay(GameSettings.PauseDuration);
         }
 
         DrawStepFinished?.Invoke();

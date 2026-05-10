@@ -146,4 +146,16 @@ public partial class PlayerScene : CharacterBody2D
         GD.Print("Entered tree player");
     }
 
+    public void FadeLoadingScreen()
+    {
+        var loadingCover = GetNodeOrNull<Control>("LoadingCover");        
+        if (loadingCover != null)
+        {
+            var tween = CreateTween();
+            tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.AnimationDurationSeconds)
+                 .SetTrans(Tween.TransitionType.Sine)
+                 .SetEase(Tween.EaseType.InOut);
+        }
+    }
+
 }

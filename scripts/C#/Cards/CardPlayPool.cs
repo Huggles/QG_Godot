@@ -485,7 +485,7 @@ public partial class CardPlayPool : GodotObject
         if (cardActivationOptions != null && cardActivationOptions.Count > 0)
         {
             DebugUtilities.PrintPeer($"{faction} has {cardActivationOptions.Count} block reaction options");
-            await Task.Delay(500);
+            await Task.Delay(GameSettings.PauseDuration);
         }
         else
         {

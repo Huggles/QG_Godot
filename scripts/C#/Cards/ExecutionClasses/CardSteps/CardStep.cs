@@ -119,7 +119,7 @@ public partial class CardStep : GodotObject
             //Should skip step
             DebugUtilities.PrintPeer("SKIPPING STEP");
             PlayerActionLabel.ShowText("Unable to: " + ActionGuidance, -1, TriggeringFaction);
-            await Task.Delay(2000);
+            await Task.Delay(GameSettings.PauseDuration);
             if (NextCardStep != null)
             {
                 result = await NextCardStep.Execute();

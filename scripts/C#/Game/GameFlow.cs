@@ -83,6 +83,12 @@ public partial class GameFlow : GodotObject
 
         GameStarted = true;
 
+        DebugUtilities.PrintPeer("GameFlow: Starting game");
+        foreach (PlayerScene playerScene in PlayerFactionRegistry.GetAllPlayers())
+        {
+            playerScene.FadeLoadingScreen();
+        }
+
         _ = StartNewTurn();
     }
 

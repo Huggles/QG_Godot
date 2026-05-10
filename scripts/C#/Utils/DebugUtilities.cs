@@ -14,15 +14,21 @@ public partial class DebugUtilities : Node
         }
     }
     
+    private static DebugVerbosity CurrentVerbosity =>
+        GameSettings.Instance != null ? GameSettings.Debug : DebugVerbosity.FINEST;
+
     public static void PrintPeerError(String message){
         GD.PrintErr("("+ FormattedDateTime +")"+" Server: " + message);
     }
 
-    public static void PrintPeer(String message){
-        GD.Print("("+ FormattedDateTime +")"+" Server: " + message);
+    /// <summary>Prints when the current debug level is >= the specified level. Defaults to FINEST.</summary>
+    public static void PrintPeer(String message, DebugVerbosity level = DebugVerbosity.FINEST){
+        if (CurrentVerbosity >= level)
+            GD.Print("("+ FormattedDateTime +")"+" Server: " + message);
     }
     
-    public static void PrintPeer(Object o){
+    public static void PrintPeer(Object o, DebugVerbosity level = DebugVerbosity.FINEST){
+        if (CurrentVerbosity < level) return;
         if(o == null)
         {
             o = "null";

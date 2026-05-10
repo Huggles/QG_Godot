@@ -143,8 +143,8 @@ public partial class FactionInfoRow : Control
     {
         ScoreLabel.Text = score.ToString();
         var tween = GetTree().CreateTween();
-        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 72, 0.2);
-        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 36, 0.2);
+        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 72, GameSettings.AnimationDuration);
+        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 36, GameSettings.AnimationDuration);
     }
 
     private void ToggleDetails()

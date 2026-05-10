@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+GameSettings="*res://scripts/C#/Utils/GameSettings.cs"
 NodeUtilities="*res://scripts/C#/Utils/NodeUtilities.cs"
 DebugUtilities="*res://scripts/C#/Utils/DebugUtilities.cs"
 GameManager="*res://scripts/C#/Game/GameManager.cs"
