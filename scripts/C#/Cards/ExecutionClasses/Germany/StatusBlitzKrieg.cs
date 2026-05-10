@@ -15,7 +15,6 @@ public partial class StatusBlitzkrieg : StatusCardLogic
 
     public override List<CardStep> InitializeReactCardSteps()
     {
-        //TODO
         return new List<CardStep> {
             new CardStep(this, async() => {
                 GameState.AnimationQueue.Enqueue(new

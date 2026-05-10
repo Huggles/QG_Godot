@@ -1,7 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 
 public partial class StatusAtlanticWall : StatusCardLogic
@@ -20,11 +20,14 @@ public partial class StatusAtlanticWall : StatusCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                DiscardCardsChangeEvent discardCardsChangeEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.ITALY, 4));
+                Faction attackingFaction = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
+                    .Last(ce => ce.CountryState.Country == Country.WesternEurope).TriggeringFaction;
+                DiscardCardsChangeEvent discardCardsChangeEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, attackingFaction, 3));
                 discardCardsChangeEvent.IsTrigger = true;
                 await Task.CompletedTask;
                 return discardCardsChangeEvent;  
             })
+            .WithGuidance("The attacker discards 3 cards")
         };
     }
 }
