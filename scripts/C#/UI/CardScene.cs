@@ -50,7 +50,7 @@ public partial class CardScene : Control
         EmitSignal(SignalName.Selected, this.CardId);
     }
     private void CardButton_MouseEntered()
-    {
+    {        
         if (triggersEmphasis)
         {
             FactionHandDisplay.Instance.ShowCardEmphasis(CardId);
@@ -59,6 +59,7 @@ public partial class CardScene : Control
     }
     private void CardButton_MouseExited()
     {
+        DebugUtilities.PrintPeer($"Mouse exited card with ID: {CardId}");
         FactionHandDisplay.Instance.HideCardEmphasis();        
     }
 

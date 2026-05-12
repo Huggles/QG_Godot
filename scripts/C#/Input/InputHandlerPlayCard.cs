@@ -18,11 +18,14 @@ public partial class InputHandlerPlayCard
         PlayerActionLabel.ShowText("Choose a card", currentFaction);
 
         FactionHandDisplay.Instance.Show(cardActivationOptions);
+        
         FactionHandDisplay.Instance.CardSelected += HandleItemSelected;
+        DebugUtilities.PrintPeer("FactionHandDisplay.Instance: " + FactionHandDisplay.Instance, DebugVerbosity.INFO);
     }
 
     private void HandleItemSelected(int cardId)
     {
+        DebugUtilities.PrintPeer($"HandleItemSelected with ID: {cardId}", DebugVerbosity.INFO);
         FactionHandDisplay.Instance.CardSelected -= HandleItemSelected;
         FactionHandDisplay.Instance.Hide();
         InputOptionsList.HideList();

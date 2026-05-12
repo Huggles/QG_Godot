@@ -32,6 +32,7 @@ public partial class InputManager : Node2D
 
     public InputHandlerPlayCard SetPlayCardInputActive(List<CardActivationOption> cardActivationOptions)
     {        
+        DebugUtilities.PrintPeer("Setting play card input active with options: " + string.Join(", ", cardActivationOptions.Select(opt => opt.CardId)), DebugVerbosity.INFO);
         inputHandler = new InputHandlerPlayCard(cardActivationOptions);
         return inputHandler;
     }

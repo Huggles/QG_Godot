@@ -12,7 +12,10 @@ public partial class StatusBiasForAction : StatusCardLogic
             Condition.Build(new Condition.FactionHasBattleTarget(
                 Faction,
                 UnitType.ARMY,
-                CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Map(changeEvent => changeEvent.CountryId)
+                BattleTargets
+                    .Select(bt => bt.Type == TargetType.UNIT ? UnitState.ForId(bt.Id).CountryId : bt.Id)
+                    .Distinct()
+                    .ToList()
                 ), this),
 
         };
@@ -22,10 +25,23 @@ public partial class StatusBiasForAction : StatusCardLogic
     {
         get
         {
-            List<BattleTarget> battleTargets = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
-                .Map(changeEvent => changeEvent.CountryId)
-                .SelectMany(countryId => CountryState.ForId(countryId).AdjacentBattleTargets(Faction, CountryType.LAND)).Distinct().ToList();
-            return battleTargets;
+            List<CountryState> neighBorCountries = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()                
+                .SelectMany(ce => CountryState.ForId(ce.CountryId).NeighborCountryStates).Distinct().ToList();
+                
+            List<BattleTarget> attackableCountries = neighBorCountries                
+                .Where(cs => CountryState.AttackableLand(Faction).Contains(cs))
+                .Select(cs => new BattleTarget(cs.Id, TargetType.COUNTRY))
+                .ToList();
+
+            List<BattleTarget> attackableUnits = neighBorCountries                
+                .SelectMany(cs => {
+                    DebugUtilities.PrintPeer($"Checking attackable units in {cs.Label}, {cs.Units.Values} ", DebugVerbosity.INFO);
+                    List<UnitState> attackableUnits = UnitState.ForIds(cs.Units.Values).Where(us => us.Tags.Has(Tag.Attackable, Faction)).ToList();
+                    return attackableUnits;
+                })
+                .Select(us => new BattleTarget(us.Id, TargetType.UNIT))
+                .ToList();
+            return attackableCountries.Concat(attackableUnits).ToList();
         }
     }
 

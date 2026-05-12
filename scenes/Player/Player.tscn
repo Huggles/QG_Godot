@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cqotfa6hcbdg1"]
+[gd_scene load_steps=11 format=3 uid="uid://cqotfa6hcbdg1"]
 
 [ext_resource type="Script" uid="uid://c8lyp2o4iq088" path="res://scripts/C#/Input/PlayerScene.cs" id="1_socpp"]
 [ext_resource type="Script" uid="uid://buus0001hcimh" path="res://scripts/C#/Input/InputManager.cs" id="2_fxc31"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="7_fxc31"]
 [ext_resource type="PackedScene" uid="uid://dfqs0a11viijb" path="res://scenes/userinterface/PresentationModal/PresentationModal.tscn" id="7_puxyr"]
 [ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="8_playerinfo"]
+[ext_resource type="Script" path="res://scripts/C#/UI/SpeedControl.cs" id="9_speed"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xcisb"]
 
@@ -66,3 +67,8 @@ offset_bottom = -1005.0
 mouse_filter = 2
 
 [node name="PlayerInfoDisplay" parent="Interface" instance=ExtResource("8_playerinfo")]
+
+[node name="SpeedControl" type="PanelContainer" parent="Interface"]
+offset_left = 10.0
+offset_top = 10.0
+script = ExtResource("9_speed")

@@ -189,7 +189,9 @@ public partial class FactionHandDisplay : Control, LoadableUI
 
     private void OnCardSelected(int cardId)
     {
+        DebugUtilities.PrintPeer($"Card selected with ID: {cardId}", DebugVerbosity.INFO);
         EmitSignal(SignalName.CardSelected, cardId);
+        DebugUtilities.PrintPeer("Emitted CardSelected signal with ID: " + cardId, DebugVerbosity.INFO);
     }
 
     private void DeleteCurrentCards()
@@ -208,7 +210,7 @@ public partial class FactionHandDisplay : Control, LoadableUI
     }
 
     public void ShowCardEmphasis(int cardId)
-    {
+    {        
         // Only access CardPreview if it's been initialized (in LoadUI)
         if (CardPreview != null)
         {
