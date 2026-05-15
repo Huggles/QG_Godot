@@ -55,6 +55,29 @@ public partial class MultiplayerLobby : Control
         Multiplayer.ServerDisconnected += OnServerDisconnected;
         
         UpdateStatusLabel("Waiting to host or join...");
+
+        int instanceNumber = GetInstanceNumber();
+        if (GameSettings.IsDebugMultiplayer && instanceNumber == 1)
+        {
+            DebugUtilities.PrintPeer("DebugMultiplayer Instance 1: auto-hosting...");
+            OnHostButtonPressed();
+        }
+        else if (GameSettings.IsDebugMultiplayer && instanceNumber == 2)
+        {
+            DebugUtilities.PrintPeer("DebugMultiplayer Instance 2: auto-joining...");
+            _ipAddressInput.Text = DEFAULT_SERVER_IP;
+            OnJoinButtonPressed();
+        }
+    }
+
+    private static int GetInstanceNumber()
+    {
+        foreach (string arg in OS.GetCmdlineUserArgs())
+        {
+            if (arg.StartsWith("instance=") && int.TryParse(arg.Substring("instance=".Length), out int n))
+                return n;
+        }
+        return 0;
     }
 
     public override void _ExitTree()
@@ -243,7 +266,10 @@ public partial class MultiplayerLobby : Control
         if (_isHost)
         {
             RpcId((int)peerId, nameof(SyncPlayerList), GetPlayerListData());
-        }
+            if (GameSettings.IsDebugMultiplayer) {
+                OnStartGameButtonPressed();
+            }
+        }        
     }
 
     private void OnPeerDisconnected(long peerId)

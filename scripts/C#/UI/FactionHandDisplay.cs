@@ -31,16 +31,12 @@ public partial class FactionHandDisplay : Control, LoadableUI
 
 
     public override void _Ready()
-    {
-        DebugUtilities.PrintPeer("FactionHandDisplay _Ready called");
+    {        
         Instance = this;
         
         // Hide by default until LoadUI is called
         Hide();
-        
-        DebugUtilities.PrintPeer("FactionHandDisplay about to emit UserInterfaceLoaded");
-        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionHandDisplay");
-        DebugUtilities.PrintPeer("FactionHandDisplay emitted UserInterfaceLoaded");
+        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionHandDisplay");        
     }
 
     public override void _ExitTree()
@@ -69,7 +65,7 @@ public partial class FactionHandDisplay : Control, LoadableUI
             
             if ((TurnStep)turnStep == TurnStep.PLAY_CARD)
             {
-                Show(GameSession.Instance.GameFlow.CurrentFaction);
+                Show(GameSession.CurrentFaction);
             }
         };
         EventBus.Instance.NextStepStarted += onNextStepStarted;

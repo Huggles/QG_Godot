@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-public partial class CardState : Object, ITaggable
+public partial class CardState : GodotObject, ITaggable
 {
     public int Id { get; set; }
     public CardData CardData { get; set; }

@@ -15,9 +15,10 @@ public partial class GameManager : Node
     private static readonly PackedScene UIScene = GD.Load<PackedScene>("res://scenes/userinterface/game_user_interface_base.tscn");
     private static readonly PackedScene PlayerScene = GD.Load<PackedScene>("res://scenes/Player/Player.tscn");
 
+    private MultiplayerSpawner multiplayerSpawner = new MultiplayerSpawner();
+
     private Node3D _gameLoadTransitionScreenInstance;    
 
-    [Export]
     public GameSession GameSession;
 
     private List<PlayerScene> playerStates = new List<PlayerScene>();
@@ -89,13 +90,12 @@ public partial class GameManager : Node
         
         if (currentScene.Contains("Game.tscn"))
         {
-            DebugUtilities.PrintPeer("In game scene - checking for pending initialization");
-            if (_pendingPlayerFactionAssignments != null)
-            {
-                InitializeGame(_pendingPlayerFactionAssignments);
-            }
+            DebugUtilities.PrintPeer("In game scene - adding network scene");
+            var networkScene = GD.Load<PackedScene>("res://scenes/network/network.tscn");
+            var networkInstance = networkScene.Instantiate();
+            GetTree().CurrentScene.AddChild(networkInstance);
         }
-        else if (currentScene.Contains("MultiplayerLobby"))
+        if (currentScene.Contains("MultiplayerLobby"))
         {
             DebugUtilities.PrintPeer("In lobby scene - waiting for game start");
         }
@@ -226,9 +226,6 @@ public partial class GameManager : Node
             
             DebugUtilities.PrintPeer("LoadUI");
             LoadUI();
-
-            DebugUtilities.PrintPeer("SetupGameSession");
-            SetupGameSession();
         }
         else
         {
@@ -252,9 +249,6 @@ public partial class GameManager : Node
     private void SetupGameSession()
     {
         
-        DebugUtilities.PrintPeer("_setup_game_mode");
-        GameSession = new GameSession();
-        _ = GameSession.StartSession(playerStates);
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority)]

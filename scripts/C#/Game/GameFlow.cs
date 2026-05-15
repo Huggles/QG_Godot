@@ -1,9 +1,10 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-public partial class GameFlow : GodotObject
+public partial class GameFlow : Node
 {
     private bool GameStarted { get; set; } = false;
     public int GameTurn { get; set; } = 0;
@@ -84,10 +85,11 @@ public partial class GameFlow : GodotObject
         GameStarted = true;
 
         DebugUtilities.PrintPeer("GameFlow: Starting game", DebugVerbosity.INFO);
-        foreach (PlayerScene playerScene in PlayerFactionRegistry.GetAllPlayers())
-        {
-            playerScene.FadeLoadingScreen();
-        }
+        // Only fade the local (host) player's loading screen here.
+        // Client loading screens are faded via GameSession.ReceiveGameStarted RPC.
+        PlayerScene localPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(
+            PlayerFactionRegistry.GetLocalPlayerFactions().FirstOrDefault());
+        localPlayer?.FadeLoadingScreen();
 
         _ = StartNewTurn();
     }

@@ -57,6 +57,7 @@ public partial class FactionInfoRow : Control
     */
     public void LoadUI()
     {
+        DebugUtilities.PrintPeer($"Loading UI for FactionInfoRow: {Faction}", DebugVerbosity.INFO);
         // Check if the node is still valid and in the scene tree
         if (!IsInstanceValid(this) || !IsInsideTree())
         {

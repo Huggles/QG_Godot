@@ -18,7 +18,11 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>Controls how much debug information is printed to the console.</summary>
     public DebugVerbosity DebugLevel { get; private set; } = DebugVerbosity.INFO;
 
+    /// <summary>When true, enables extra logging and tooling for multiplayer debugging.</summary>
+    public bool DebugMultiplayer { get; private set; } = false;
+
     public static DebugVerbosity Debug => Instance.DebugLevel;
+    public static bool IsDebugMultiplayer => Instance.DebugMultiplayer;
 
     /// <summary>Duration in milliseconds for the current presentation speed.</summary>
     public static int Duration => Instance.PresentationSpeed switch
@@ -38,6 +42,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
+    public void SetDebugMultiplayer(bool value)        { DebugMultiplayer  = value; Save(); }
 
     public override void _Ready()
     {
@@ -54,7 +59,9 @@ public partial class GameSettings : SingletonNode<GameSettings>
         {
             PresentationSpeed = (GameSpeed)config.GetValue(Section, "presentation_speed", (int)GameSpeed.Normal).As<int>();
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
+            DebugMultiplayer  = config.GetValue(Section, "debug_multiplayer", false).As<bool>();
         }
+        Save();
     }
 
     private void Save()
@@ -62,6 +69,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         var config = new ConfigFile();
         config.SetValue(Section, "presentation_speed", (int)PresentationSpeed);
         config.SetValue(Section, "debug_level",         (int)DebugLevel);
+        config.SetValue(Section, "debug_multiplayer",   DebugMultiplayer);
         config.Save(ConfigPath);
     }
 }

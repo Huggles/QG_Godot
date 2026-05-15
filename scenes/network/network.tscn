@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://b1ugxolhd6ty0"]
+
+[ext_resource type="Script" uid="uid://b3dag1yw8e8vx" path="res://scenes/network/Network.cs" id="1_ce5ee"]
+[ext_resource type="PackedScene" uid="uid://dplwnh3fcvaru" path="res://scenes/network/session_loader.tscn" id="2_o8pwi"]
+
+[node name="Network" type="Node"]
+script = ExtResource("1_ce5ee")
+
+[node name="Data" type="Node" parent="."]
+
+[node name="SessionLoader" parent="." node_paths=PackedStringArray("_dataNode", "_multiplayerSpawner") instance=ExtResource("2_o8pwi")]
+_dataNode = NodePath("../Data")
+_multiplayerSpawner = NodePath("../MultiplayerSpawner")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://c8dsbqnhs3504")
+spawn_path = NodePath("../Data")

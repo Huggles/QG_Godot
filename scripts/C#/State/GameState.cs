@@ -1,83 +1,87 @@
 using Godot;
+using Godot.Collections;
 using Godot.NativeInterop;
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 
-public partial class GameState : StateObject
-{
-    public static GameQueue<GameAnimation> AnimationQueue = new GameQueue<GameAnimation>();
+public partial class GameState : StateObject, INotifyPropertyChanged
+{   
     public IGameMode GameMode;
-    public Dictionary<Faction, FactionState> FactionStates = [];
-    public List<ChangeEvent> GameChangeEvents = [];
+
+    [Export]
+    public Dictionary<Faction, FactionState> FactionStates = new();
+
+    [Export]
+    public Dictionary<string, int> ABC = new();
+    public Array<ChangeEvent> GameChangeEvents = new();
     public CardState ActivePlayerCard;
 
     private int _changeEventCounter = 0;
 
     [Signal] public delegate void CountryClickedEventHandler();
 
-    public List<CountryState> CountryStates = new();
-    private Dictionary<int, CountryState> _countryStateById = new();
+    [Export]
+    public Array<CountryState> CountryStates = new();
+
     public Dictionary<int, CountryState> CountryStateById
     {
         get
         {
-            if (_countryStateById.Count == 0)
+            if (field.Count == 0)
                 foreach (var cs in CountryStates)
-                    _countryStateById[cs.Id] = cs;
-            return _countryStateById;
+                    field[cs.Id] = cs;
+            return field;
         }
-    }
-
-    private Dictionary<string, CountryState> _countryStateByName = new();
+    }    
     public Dictionary<string, CountryState> CountryStateByName
     {
         get
         {
-            if (_countryStateByName.Count == 0)
+            if (field.Count == 0)
                 foreach (var cs in CountryStates)
-                    _countryStateByName[cs.Name] = cs;
-            return _countryStateByName;
+                    field[cs.Name] = cs;
+            return field;
         }
     }
 
-    public List<StraightState> StraightStates = new();
-    private Dictionary<int, StraightState> _straightStateByControllingCountryId = new();
+    [Export]
+    public Array<StraightState> StraightStates = new();
     public Dictionary<int, StraightState> StraightStateByControllingCountryId
     {
         get
         {
-            if (_straightStateByControllingCountryId.Count == 0)
+            if (field.Count == 0)
                 foreach (var ss in StraightStates)
-                    _straightStateByControllingCountryId[ss.ControllingCountryId] = ss;
-            return _straightStateByControllingCountryId;
+                    field[ss.ControllingCountryId] = ss;
+            return field;
         }
     }
 
-    public List<UnitState> UnitStates = new();
-    private Dictionary<int, UnitState> _unitStatesById = new();
+    [Export]    
+    public Array<UnitState> UnitStates = new();
     public Dictionary<int, UnitState> UnitStatesById
     {
         get
         {
-            if (_unitStatesById.Count == 0)
+            if (field.Count == 0)
                 foreach (var us in UnitStates)
-                    _unitStatesById[us.Id] = us;
-            return _unitStatesById;
+                    field[us.Id] = us;
+            return field;
         }
     }
 
-    public List<CardState> CardStates = new();
-    private Dictionary<int, CardState> _cardStatesById = new();
+    [Export]
+    public Array<CardState> CardStates = new();
     public Dictionary<int, CardState> CardStatesById
     {
         get
-        {
-            if (_cardStatesById.Count == 0)
+        {            
+            if (field.Count == 0)
                 foreach (var cs in CardStates)
-                    _cardStatesById[cs.Id] = cs;
-            return _cardStatesById;
+                    field[cs.Id] = cs;
+            return field;
         }
     }
 
@@ -86,16 +90,26 @@ public partial class GameState : StateObject
     {
         get
         {
-            if (_cardStatesByName.Count == 0)
+            if (field.Count == 0)
                 foreach (var cs in CardStates)
-                    _cardStatesByName[cs.CardData.UniqueName] = cs;
-            return _cardStatesByName;
+                    field[cs.CardData.UniqueName] = cs;
+            return field;
         }
     }
 
 
     public Dictionary<int, CardStep> CardStepsById = new();
-   
 
-    
+    public event PropertyChangedEventHandler PropertyChanged;
+
+
+    public override void _Ready()
+    {
+        DebugUtilities.PrintPeer($"GameState ready: " + this.Name, DebugVerbosity.INFO);
+    }
+
+    public void OnPropertyChanged(string propertyName)
+    {
+        DebugUtilities.PrintPeer(propertyName);
+    }
 }

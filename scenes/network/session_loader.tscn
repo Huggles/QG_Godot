@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://dplwnh3fcvaru"]
+
+[ext_resource type="Script" uid="uid://dwcq0i722so45" path="res://scenes/network/SessionLoader.cs" id="1_kpg2s"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kpg2s"]
+
+[node name="SessionLoader" type="Node"]
+script = ExtResource("1_kpg2s")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_kpg2s")

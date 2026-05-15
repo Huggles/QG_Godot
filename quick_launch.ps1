@@ -40,10 +40,10 @@ if ($godot) {
     Write-Host "Found Godot: $godot" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Starting Instance 1 (Host)..." -ForegroundColor Yellow
-    Start-Process $godot -ArgumentList "--path", (Get-Location)
+    Start-Process $godot -ArgumentList "--path", (Get-Location), "--", "instance=1"
     Start-Sleep -Seconds 2
     Write-Host "Starting Instance 2 (Client)..." -ForegroundColor Yellow
-    Start-Process $godot -ArgumentList "--path", (Get-Location)
+    Start-Process $godot -ArgumentList "--path", (Get-Location), "--", "instance=2"
     Write-Host ""
     Write-Host "Instructions:" -ForegroundColor Cyan
     Write-Host "  Instance 1: Click 'Host Game'" -ForegroundColor White

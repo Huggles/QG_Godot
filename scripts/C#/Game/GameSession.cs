@@ -1,35 +1,41 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 public partial class GameSession : Node
-{
-    private static GameSession instance;
+{    
     public static GameSession Instance
     {
         get
         {
-            if (instance == null)
+            if (field == null)
             {
                 throw new System.ArgumentNullException("GameSession Not Initialized");
             }
-            return instance;
+            return field;
         }
+        private set;
     }
 
     public static bool IsStarted = false;
+
+    // Tracks the current faction on clients (set via RPC; on host computed from GameFlow)
+    private static Faction _clientCurrentFaction;
+    public static Faction CurrentFaction =>
+        Instance?.GameFlow != null ? Instance.GameFlow.CurrentFaction : _clientCurrentFaction;
 
     private List<PlayerScene> playerScenes { get; set; }
 
     public IGameMode GameMode;
     [Export] public GameState GameState;
     [Export] public GameFlow GameFlow;
-
-    public GameSession()
+    
+    public override void _EnterTree()
     {
-        instance = this;
+        base._EnterTree();
+        Instance = this;
     }
 
     public async Task StartSession(List<PlayerScene> playerScenes)
@@ -37,14 +43,16 @@ public partial class GameSession : Node
         DebugUtilities.PrintPeer("Start Session", DebugVerbosity.INFO);
         this.playerScenes = playerScenes;
 
+        
+
         GameState = new GameState();
-        GameMode = new GameModeDefault();
-        GameFlow = new GameFlow();
-        await GameMode.Init();
+        //GameMode = new GameModeDefault();
+        //GameFlow = new GameFlow();
+        //await GameMode.Init();
 
-        GameFlow.StartGame();
+        //GameFlow.StartGame();
 
-        OnGameStarted();
+        //OnGameStarted();
     }
 
     private void OnGameStarted()
@@ -53,16 +61,41 @@ public partial class GameSession : Node
         EventBus.Emit(EventBus.SignalName.GameSessionStarted);
     }
 
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void ReceiveGameStarted()
+    {
+        DebugUtilities.PrintPeer("Client received GameStarted - fading loading screen", DebugVerbosity.INFO);
+        PlayerScene player = PlayerFactionRegistry.GetPlayerSceneForFaction(
+            PlayerFactionRegistry.GetLocalPlayerFactions().FirstOrDefault());
+        player?.FadeLoadingScreen();
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void ReceiveNewTurnStarted(int turnNumber, int currentFactionId)
+    {
+        _clientCurrentFaction = (Faction)currentFactionId;
+        DebugUtilities.PrintPeer($"Client received NewTurnStarted: turn={turnNumber}, faction={_clientCurrentFaction}", DebugVerbosity.INFO);
+        EventBus.Emit(EventBus.SignalName.NewTurnStarted, turnNumber);
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void ReceiveNextStepStarted(int turnStep, int currentFactionId)
+    {
+        _clientCurrentFaction = (Faction)currentFactionId;
+        DebugUtilities.PrintPeer($"Client received NextStepStarted: step={turnStep}, faction={_clientCurrentFaction}", DebugVerbosity.INFO);
+        EventBus.Emit(EventBus.SignalName.NextStepStarted, turnStep);
+    }
+
     /**
     * API
     */
-    public static Dictionary<Faction, FactionState> FactionStates => instance.GameState.FactionStates;
-    public static List<StraightState> StraightStates => instance.GameState.StraightStates;
+    public static Dictionary<Faction, FactionState> FactionStates => Instance.GameState.FactionStates.ToDictionary();
+    public static List<StraightState> StraightStates => Instance.GameState.StraightStates.ToList();
 
-    public static Dictionary<string, CountryState> CountryStatesByName => instance.GameState.CountryStateByName;
-    public static Dictionary<int, CountryState> CountryStatesById => instance.GameState.CountryStateById;
+    public static Dictionary<string, CountryState> CountryStatesByName => Instance.GameState.CountryStateByName.ToDictionary();
+    public static Dictionary<int, CountryState> CountryStatesById => Instance.GameState.CountryStateById.ToDictionary();
 
-    public static Dictionary<int, UnitState> UnitStatesById => instance.GameState.UnitStatesById;
+    public static Dictionary<int, UnitState> UnitStatesById => Instance.GameState.UnitStatesById.ToDictionary();
 
     public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType)
     {

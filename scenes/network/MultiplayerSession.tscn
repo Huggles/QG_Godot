@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8dsbqnhs3504"]
+
+[ext_resource type="Script" uid="uid://r2f4hye3fhes" path="res://scenes/network/MultiplayerSession.cs" id="1_fxsb3"]
+[ext_resource type="Script" uid="uid://r7sfjisi63s2" path="res://scripts/C#/State/GameState.cs" id="2_2awua"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_8db0u"]
+properties/0/path = NodePath("GameState:_countryStateById")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
+[node name="MultiplayerSession" type="Node"]
+script = ExtResource("1_fxsb3")
+
+[node name="GameState" type="Node" parent="."]
+script = ExtResource("2_2awua")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_8db0u")
