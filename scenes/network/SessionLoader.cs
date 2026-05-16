@@ -32,15 +32,10 @@ public partial class SessionLoader : Node
         if (Multiplayer.IsServer())
         {
             Rpc(nameof(Debug));
-
-            
-
-
-
             MultiplayerSession multiplayerSessionInstance = multiplayerSessionScenePacked.Instantiate<MultiplayerSession>();            
             multiplayerSessionInstance.SetMultiplayerAuthority(1); // host is authority  
             _dataNode.AddChild(multiplayerSessionInstance, true);   
-            DebugUtilities.PrintPeer($"MultiplayerSession created and added to scene tree", DebugVerbosity.INFO);
+            multiplayerSessionInstance.Start("Example Configuration");
         }
     }
 

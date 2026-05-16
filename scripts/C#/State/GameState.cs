@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 
-public partial class GameState : StateObject, INotifyPropertyChanged
+public partial class GameState : StateObject
 {   
     public IGameMode GameMode;
 
@@ -99,9 +99,6 @@ public partial class GameState : StateObject, INotifyPropertyChanged
 
 
     public Dictionary<int, CardStep> CardStepsById = new();
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
 
     public override void _Ready()
     {

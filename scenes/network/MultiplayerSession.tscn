@@ -4,9 +4,12 @@
 [ext_resource type="Script" uid="uid://r7sfjisi63s2" path="res://scripts/C#/State/GameState.cs" id="2_2awua"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_8db0u"]
-properties/0/path = NodePath("GameState:_countryStateById")
+properties/0/path = NodePath(".:ConfigurationJson")
 properties/0/spawn = true
-properties/0/replication_mode = 1
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:GameStateJson")
+properties/1/spawn = true
+properties/1/replication_mode = 2
 
 [node name="MultiplayerSession" type="Node"]
 script = ExtResource("1_fxsb3")
