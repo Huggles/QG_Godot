@@ -38,7 +38,7 @@ public abstract partial class CardLogic : GodotObject
     }
     
     public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
-    public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Instance.GameFlow.GameTurn);
+    public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Current.GameFlow.GameTurn);
     public bool IsReaction => CardData.Type == "RESPONSE" || CardData.Type == "STATUS";
     public bool IsPubliclyVisible => IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
     public bool IsPlayFinished = false;

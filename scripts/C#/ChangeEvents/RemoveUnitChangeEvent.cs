@@ -15,9 +15,16 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
         Reason = removalReason;
     }
 
+    public override ChangeEventDto ToDto() => new RemoveUnitChangeEventDto
+    {
+        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
+        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
+        UnitId = UnitId, Reason = Reason
+    };
+
     protected override async Task<bool> ExecuteAsync()
     {
-        GameSession.RemoveUnitFromCountry(UnitId);     
+        GameAPI.RemoveUnitFromCountry(UnitId);     
         return true;
     }
 

@@ -8,6 +8,13 @@ public partial class BattleUnitChangeEvent : RemoveUnitChangeEvent
     {
     }
 
+    public override ChangeEventDto ToDto() => new BattleUnitChangeEventDto
+    {
+        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
+        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
+        UnitId = UnitId
+    };
+
     public override string SummaryText()
     {
         return $"Battled {UnitState.Faction} unit in {CountryState.ForId(CountryId).Label}";

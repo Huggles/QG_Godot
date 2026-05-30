@@ -19,6 +19,23 @@ public partial class GameSession : Node
         private set;
     }
 
+    public static MultiplayerSession Current
+    {
+        get
+        {
+            if (MultiplayerSession.Instance != null)
+            {
+                return MultiplayerSession.Instance;
+            }
+            if (field == null)
+            {
+                throw new System.ArgumentNullException("GameSession Not Initialized");
+            }
+            return field;
+        }
+        private set;
+    }
+
     public static bool IsStarted = false;
 
     // Tracks the current faction on clients (set via RPC; on host computed from GameFlow)
@@ -29,7 +46,7 @@ public partial class GameSession : Node
     private List<PlayerScene> playerScenes { get; set; }
 
     public IGameMode GameMode;
-    [Export] public GameState GameState;
+    public GameState GameState;
     [Export] public GameFlow GameFlow;
     
     public override void _EnterTree()
@@ -89,51 +106,13 @@ public partial class GameSession : Node
     /**
     * API
     */
-    public static Dictionary<Faction, FactionState> FactionStates => Instance.GameState.FactionStates.ToDictionary();
-    public static List<StraightState> StraightStates => Instance.GameState.StraightStates.ToList();
+    public Dictionary<Faction, FactionState> FactionStates => GameState.FactionStates.ToDictionary();
+    public List<StraightState> StraightStates => GameState.StraightStates.ToList();
 
-    public static Dictionary<string, CountryState> CountryStatesByName => Instance.GameState.CountryStateByName.ToDictionary();
-    public static Dictionary<int, CountryState> CountryStatesById => Instance.GameState.CountryStateById.ToDictionary();
+    public Dictionary<string, CountryState> CountryStatesByName => GameState.CountryStateByName.ToDictionary();
+    public Dictionary<int, CountryState> CountryStatesById => GameState.CountryStateById.ToDictionary();
 
-    public static Dictionary<int, UnitState> UnitStatesById => Instance.GameState.UnitStatesById.ToDictionary();
-
-    public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType)
-    {
-        if (countryId == -1)
-        {
-            DebugUtilities.PrintPeerError("Tried to deploy to null country: " + countryId);
-            return;
-        }
-
-
-        int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
-        var unit = UnitState.ForId(unitId);
-        var country = CountryStatesById[countryId];
-        bool deployable = deployType != DeployType.BUILD || country.CanBuild(faction);
-
-        if (!country.IsCountryFull && deployable)
-        {
-
-            unit.EmitSignal("BeforeUnitDeployedToCountry");
-            country.Units[unit.Faction] = unit.Id;
-            unit.CountryId = countryId;
-            unit.EmitSignal("AfterUnitDeployedToCountry");
-        }
-    }
-    public static void RemoveUnitFromCountry(int unitId)
-    {
-        if (unitId == -1)
-            return;
-
-        UnitState unit = UnitState.ForId(unitId);
-        CountryState country = CountryState.ForId(unit.CountryId);
-
-
-        unit.EmitSignal(UnitState.SignalName.BeforeUnitRemovedFromCountry, unitId, country.Id);
-        country.Units.Remove(unit.Faction);
-        unit.CountryId = -1;
-        unit.EmitSignal(UnitState.SignalName.AfterUnitRemovedFromCountry, unitId, country.Id);
-    }
+    public Dictionary<int, UnitState> UnitStatesById => GameState.UnitStatesById.ToDictionary();
     
     public async static Task<CardActivationOption> RequestPlay(Faction faction)
     {

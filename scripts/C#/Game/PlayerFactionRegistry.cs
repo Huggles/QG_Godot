@@ -41,7 +41,7 @@ public static class PlayerFactionRegistry
     /// </summary>
     public static void RegisterPlayer(PlayerScene playerScene)
     {
-        int peerId = playerScene.PeerId;
+        int peerId = playerScene.GetMultiplayerAuthority();
         
         if (_peerIdToPlayerScene.ContainsKey(peerId))
         {

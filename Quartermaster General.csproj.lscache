@@ -58,6 +58,7 @@ TemporaryDependencyNodeTargetIdentifier=net8.0
 scenes/
  ClickableSprite.cs
  network/
+  MultiplayerGameState.cs
   MultiplayerSession.cs
   Network.cs
   SessionLoader.cs

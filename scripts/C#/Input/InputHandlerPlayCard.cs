@@ -6,8 +6,7 @@ using System.Diagnostics;
 
 public partial class InputHandlerPlayCard
 {
-    private GameFlow gameFlow => GameSession.Instance.GameFlow;
-    private GameState gameState => GameSession.Instance.GameState;
+    private GameFlow gameFlow => GameSession.Current.GameFlow;
 
     private List<CardActivationOption> CardActivationOptions;
 

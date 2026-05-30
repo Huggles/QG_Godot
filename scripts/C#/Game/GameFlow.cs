@@ -32,12 +32,12 @@ public partial class GameFlow : Node
         }
     }
 
-    private GameState gameState
+    private MultiplayerGameState gameState
     {
-        get { return GameSession.Instance.GameState; }
+        get { return GameSession.Current.GameState; }
     }
 
-    public FactionState CurrentFactionState => GameSession.FactionStates[CurrentFaction];
+    public FactionState CurrentFactionState => GameSession.Current.GameState.FactionStates[CurrentFaction];
     public DeckState CurrentFactionDeckState => DeckState.ForFaction(CurrentFaction);
 
     public FactionTeam CurrentFactionTeam =>

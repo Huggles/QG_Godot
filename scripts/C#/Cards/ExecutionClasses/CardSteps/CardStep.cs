@@ -9,7 +9,7 @@ public partial class CardStep : GodotObject
     public static int stepIdCounter = 100;
     public static CardStep ForId(int id)
     {
-        return GameSession.Instance.GameState.CardStepsById[id];
+        return GameSession.Current.GameState.CardStepsById[id];
     }
 
     public bool StepFinished = false;
@@ -64,7 +64,7 @@ public partial class CardStep : GodotObject
         this.StepLogic = stepLogic;
         this.Id = stepIdCounter;
         stepIdCounter += 1;
-        GameSession.Instance.GameState.CardStepsById[this.Id] = this;        
+        GameSession.Current.GameState.CardStepsById[this.Id] = this;        
     }    
 
     public CardStep WithId(int id)

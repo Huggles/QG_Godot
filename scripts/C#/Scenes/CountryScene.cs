@@ -3,7 +3,8 @@ using System;
 
 public partial class CountryScene : Node2D
 {
-    public CountryState CountryState { get; set; }
+    public int CountryId { get; set; }
+    private CountryState CountryState => CountryState.ForId(CountryId);
 
     public CountryData StaticCountryData => CountryState.StaticCountryData;
     public StraightState StraightState => CountryState.StraightState;
@@ -19,16 +20,20 @@ public partial class CountryScene : Node2D
 
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
-    public static CountryScene SpawnCountry(CountryState countryState)
+    public static CountryScene SpawnCountry(int countryId)
     {
-        CountryScene countryScene = CountryScenePacked.Instantiate<CountryScene>();                
-        countryScene.CountryState = countryState;
-        countryScene.Name = countryState.Name;
-        return countryScene;
+        CountryScene countrySceneInstance = CountryScenePacked.Instantiate<CountryScene>();                
+        countrySceneInstance.CountryId = countryId;        
+        countrySceneInstance.CountryState.Tags.TagAdded += countrySceneInstance.OnTagAdded;
+        countrySceneInstance.CountryState.Tags.TagRemoved += countrySceneInstance.OnTagRemoved;
+        NodeUtilities.Instance.CountriesNode.AddChild(countrySceneInstance, false);
+        countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionCenter;
+        return countrySceneInstance;
     }
 
     public override void _Ready()
     {
+        Name = CountryState.Name; 
         if (StaticCountryData.Texture != null)
             ApplyTexture();
 
@@ -43,6 +48,22 @@ public partial class CountryScene : Node2D
         StraightState.OnReady();
 
         CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
+    }
+
+    private void OnTagAdded(Tag tag, Faction faction)
+    {
+        if (tag == Tag.Clickable)
+        {
+            SetClickable();
+        }
+    }
+
+    private void OnTagRemoved(Tag tag, Faction faction)
+    {
+        if (tag == Tag.Clickable)
+        {
+            SetUnclickable();
+        }
     }
 
     private void OnMouseLeftClickOpaque()

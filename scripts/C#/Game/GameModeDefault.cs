@@ -14,7 +14,7 @@ public partial class GameModeDefault : IGameMode
     const string INITIAL_GAME_STATE_DATA_PATH = "res://assets/data/Scenario_Debug.json";
     const string WORLD_SCENE_FILE = "res://scenes/World/WorldScene.tscn";
     
-    private GameState gameState = GameSession.Instance.GameState;
+    private MultiplayerGameState gameState = GameSession.Current.GameState;
 
     public GameModeDefault(){}
 
@@ -149,12 +149,12 @@ public partial class GameModeDefault : IGameMode
     }
     public void SpawnCountries(){
         foreach( CountryState countryState in gameState.CountryStates){
-            countryState.InitNode();
+            CountryScene.SpawnCountry(countryState.Id);
         }
     }
     public void SpawnUnits(){
         foreach( UnitState unitState in gameState.UnitStates){
-            unitState.InitNode();
+            UnitScene.SpawnUnit(unitState.Id);
         }
     }
 
@@ -206,7 +206,7 @@ public partial class GameModeDefault : IGameMode
     }
     private void ApplyStartingFaction(InitialGameStateData initialStateData)
     {
-        if (string.IsNullOrEmpty(initialStateData.StartingFaction)) return;
+        if (string.IsNullOrEmpty(initialStateData.StartingFaction)) return; 
 
         if (!Enum.TryParse<Faction>(initialStateData.StartingFaction, out Faction startingFaction))
         {
@@ -220,7 +220,7 @@ public partial class GameModeDefault : IGameMode
         }
 
         // GameTurn = factionIndex + 1 puts CurrentFaction at the desired faction on the first StartNewTurn increment
-        GameSession.Instance.GameFlow.GameTurn = factionIndex;
+        GameSession.Current.GameFlow.GameTurn = factionIndex;
         DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})", DebugVerbosity.INFO);
     }
     private async Task PlaceCards(InitialGameStateData initialStateData)

@@ -20,7 +20,7 @@ public partial class EWSubmarinesEnforceBlockade : EWCardLogic
                 
                 int count = germanArmies.Count;
 
-                IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
                 await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German Armies adjacent to North Sea."));
                 
                 DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count * 2));

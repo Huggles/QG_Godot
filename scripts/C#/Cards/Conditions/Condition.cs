@@ -228,7 +228,7 @@ public abstract class Condition
             else
             {
                 // Check if any units have attackable tag for this faction
-                var allUnits = GameSession.Instance.GameState.UnitStatesById.Values;
+                var allUnits = GameSession.Current.GameState.UnitStatesById.Values;
                 bool hasAttackableUnits = allUnits.Any(us => us.Tags.Has(Tag.Attackable, Faction) && (unitType == UnitType.ANY || us.Type == unitType));
                 // Check if any countries have attackable tag for this faction
                 bool hasAttackableCountries = CountryState.AllCountryStates.Any(cs => cs.Tags.Has(Tag.Attackable, Faction) && 
@@ -315,7 +315,7 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            return GameSession.Instance.GameFlow.TurnStep == this.TurnStep;
+            return GameSession.Current.GameFlow.TurnStep == this.TurnStep;
         }
     }
 
@@ -421,19 +421,19 @@ public abstract class Condition
     public class IsVictoryPointStep : Condition
     {
         public override bool MeetCondition() => 
-            GameSession.Instance.GameFlow.TurnStep == TurnStep.VICTORY_POINT;
+            GameSession.Current.GameFlow.TurnStep == TurnStep.VICTORY_POINT;
     }
 
     public class IsPlayCardStep : Condition
     {
         public override bool MeetCondition() => 
-            GameSession.Instance.GameFlow.TurnStep == TurnStep.PLAY_CARD;
+            GameSession.Current.GameFlow.TurnStep == TurnStep.PLAY_CARD;
     }
 
     public class IsStartStep : Condition
     {
         public override bool MeetCondition() => 
-            GameSession.Instance.GameFlow.TurnStep == TurnStep.START;
+            GameSession.Current.GameFlow.TurnStep == TurnStep.START;
     }
 
     public class CustomCondition : Condition

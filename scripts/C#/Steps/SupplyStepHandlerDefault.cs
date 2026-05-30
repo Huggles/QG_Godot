@@ -22,7 +22,7 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
         GameStateCalculator.CalculateAll();
         
         // Get active units for this faction and filter for those out of supply
-        List<int> activeUnitIds = GameStateUtilities.ActiveUnitsForFaction(this.faction);
+        List<int> activeUnitIds = GameAPI.ActiveUnitsForFaction(this.faction);
         List<UnitState> outOfSupplyUnits = UnitState.ForIds(activeUnitIds)
             .Where(unit => !unit.InSupply)
             .ToList();

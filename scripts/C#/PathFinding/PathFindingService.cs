@@ -10,7 +10,7 @@ public partial class PathFindingService
         _aStar = new AStar2D();
 
         // Add eligible countries as A* nodes
-        foreach (CountryState countryState in GameSession.Instance.GameState.CountryStates)
+        foreach (CountryState countryState in GameSession.Current.GameState.CountryStates)
         {
             if (nodeImplementation.CountryLinksSupplyForFaction(countryState.Id, faction))
             {

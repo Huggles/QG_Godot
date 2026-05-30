@@ -13,7 +13,7 @@ public partial class FactionState : StateObject
 
     public string FactionLabel => Faction.ToString();
 
-    private GameState GameState => GameSession.Instance.GameState;
+    private MultiplayerGameState GameState => GameSession.Current.GameState;
 
 
     public int Score
@@ -70,7 +70,7 @@ public partial class FactionState : StateObject
         }
     }
 
-public List<int> SuppliedUnitIds
+    public List<int> SuppliedUnitIds
     {
         get
         {
@@ -92,6 +92,7 @@ public List<int> SuppliedUnitIds
 
     public static FactionState ForEnum(Faction factionEnum)
     {
-        return GameSession.Instance.GameState.FactionStates[factionEnum];
+        
+        return MultiplayerSession.Instance.GameState.FactionStates[factionEnum];
     }
 }

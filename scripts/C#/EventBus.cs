@@ -59,8 +59,16 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void ResponseCardActivationStartedEventHandler();
     [Signal] public delegate void ResponseCardActivationCompletedEventHandler();
 
+    /// <summary>Emitted whenever any part of GameState changes. senderType is the class name of the
+    /// object that changed (e.g. "Country", "Unit"). propertyName is the changed property.
+    /// An empty senderType means the whole GameState was replaced (client deserialization).
+    /// UI nodes should re-read from MultiplayerSession.GameState and refresh their display.</summary>
+    [Signal] public delegate void GameStateChangedEventHandler(string senderType, string propertyName);
+
     [Signal] public delegate void GameChangeEventBeforeEventHandler();
-    [Signal] public delegate void GameChangeEventAfterEventHandler();
+    /// <summary>changeEventType is the class name of the ChangeEvent that was applied (e.g. "DeployUnitChangeEvent").
+    /// On the client in multiplayer it will be the type synced from the server. UI reads GameState for details.</summary>
+    [Signal] public delegate void GameChangeEventAfterEventHandler(string changeEventType);
 
     [Signal] public delegate void NewTurnStartedEventHandler(int turnNumber);
     [Signal] public delegate void NextStepStartedEventHandler(int turnStep);
@@ -68,4 +76,7 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void FactionScoredPointsEventHandler(Faction faction, int points);
 
     [Signal] public delegate void VpDetailsPanelOpenedEventHandler(Faction faction);
+
+    [Signal] public delegate void UnitDeployedEventHandler(int unitId, int countryId);
+    [Signal] public delegate void UnitRemovedEventHandler(int unitId, int countryId);
 }

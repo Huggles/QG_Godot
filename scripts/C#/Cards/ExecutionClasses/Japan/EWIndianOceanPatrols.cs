@@ -25,7 +25,7 @@ public partial class EWIndianOceanPatrols : EWCardLogic
                 if (count > 0)
                 {
                     // Score 2 VP per navy
-                    IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                    IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
                     await vpHandler.ScorePoints(new VPEntry(count * 2, $"{count * 2} VP for Japanese Navies in or adjacent to Bay of Bengal."));
                     
                     // UK discards 2 cards per navy

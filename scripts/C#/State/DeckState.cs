@@ -180,6 +180,6 @@ public partial class DeckState : StateObject
 
     public static DeckState ForFaction(Faction faction)
     {
-        return GameSession.FactionStates[faction].DeckState;
+        return GameSession.Current.GameState.FactionStates[faction].DeckState;
     }
 }

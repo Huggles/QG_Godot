@@ -6,9 +6,9 @@ using System.Linq;
 public partial class PlayerScene : CharacterBody2D
 {
     [Export]
-    private int _peerId = 1;
-    [Export]
     private string _playerName = "Player";
+
+    public static PlayerScene Current { get; private set; }
     
     /// <summary>
     /// The factions this player controls in the game
@@ -29,7 +29,7 @@ public partial class PlayerScene : CharacterBody2D
     public void SetControlledFactions(List<Faction> factions)
     {
         _controlledFactions = new List<Faction>(factions);
-        DebugUtilities.PrintPeer($"PlayerScene ({PlayerName}, Peer {PeerId}): Controls {string.Join(", ", factions)}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"PlayerScene ({PlayerName}: Controls {string.Join(", ", factions)}", DebugVerbosity.INFO);
     }
     
     /// <summary>
@@ -56,33 +56,17 @@ public partial class PlayerScene : CharacterBody2D
     
 
     public override void _Ready()
-    {
+    {        
+        GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
+
         _rootNode = GetNode(".");  // Same as $"." in GDScript
         _camera = GetNode<Camera2D>("Camera2D");
 
-        // Set multiplayer authorities now that we're in the tree
-        SetMultiplayerAuthority(1);
-        
-        var serverSync = GetNodeOrNull<MultiplayerSynchronizer>("ServerSynchronizer");
-        if (serverSync != null)
+        if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
         {
-            serverSync.SetMultiplayerAuthority(1);
+            Current = this;
         }
-        
-        var playerSync = GetNodeOrNull<MultiplayerSynchronizer>("PlayerSynchronizer");
-        if (playerSync != null)
-        {
-            playerSync.SetMultiplayerAuthority(_peerId);
-        }
-
-        // Set camera active for local player
-        if (_peerId == Multiplayer.GetUniqueId())
-        {
-            DebugUtilities.PrintPeer($"Setting camera for player: {PlayerName} (Peer {_peerId})");
-            _camera.MakeCurrent();
-        }
-
-        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName} (Peer {_peerId})", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName}", DebugVerbosity.INFO);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -100,33 +84,6 @@ public partial class PlayerScene : CharacterBody2D
         if (what == NotificationPredelete)
         {
             DebugUtilities.PrintPeer($"Player deleted. Name: {_playerName}");
-        }
-    }
-
-    public int PeerId
-    {
-        get => _peerId;
-        set
-        {
-            _peerId = value;
-            
-            // Only set authorities if the node is in the scene tree
-            if (IsInsideTree())
-            {
-                SetMultiplayerAuthority(1);
-                
-                var serverSync = GetNodeOrNull<MultiplayerSynchronizer>("ServerSynchronizer");
-                if (serverSync != null)
-                {
-                    serverSync.SetMultiplayerAuthority(1);
-                }
-                
-                var playerSync = GetNodeOrNull<MultiplayerSynchronizer>("PlayerSynchronizer");
-                if (playerSync != null)
-                {
-                    playerSync.SetMultiplayerAuthority(value);
-                }
-            }
         }
     }
 
@@ -158,12 +115,17 @@ public partial class PlayerScene : CharacterBody2D
                  .SetEase(Tween.EaseType.InOut);
             propertyTweener1.Finished += () => {
                 DebugUtilities.PrintPeer("Removing loading cover", DebugVerbosity.INFO);
-                loadingCover.GetParent().RemoveChild(loadingCover);
+                loadingCover?.GetParent()?.RemoveChild(loadingCover);
             };
         } else {
             DebugUtilities.PrintPeerError("LoadingCover not found on PlayerScene");
-        }
-        
+        }        
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public async void DoDebugCall()
+    {
+        DebugUtilities.PrintPeer($"DoDebugCall RPC received on PlayerScene for {PlayerName}", DebugVerbosity.INFO);
     }
 
 }

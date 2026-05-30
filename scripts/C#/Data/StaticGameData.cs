@@ -117,7 +117,7 @@ public static partial class StaticGameData
             if (_unitStatesByFaction == null || _unitStatesByFaction.Count == 0)
             {
                 _unitStatesByFaction = new();
-                foreach (var unit in GameSession.Instance.GameState.UnitStates)
+                foreach (var unit in GameSession.Current.GameState.UnitStates)
                 {
                     var faction = unit.Faction;
                     if (!_unitStatesByFaction.ContainsKey(faction))

@@ -3,25 +3,15 @@ using System;
 
 public partial class StraightState : StateObject
 {
-    private static readonly Texture2D StraightIcon = GD.Load<Texture2D>("res://assets/textures/Other/StraightIcon.png");
-    private static readonly Texture2D StraightIconInverse = GD.Load<Texture2D>("res://assets/textures/Other/StraightIconInverse.png");
-
     public StraightData StaticStraightData;
     public int ControllingCountryId { get; set; }
+    public int ControlledCountryId1 { get; set; }
+    public int ControlledCountryId2 { get; set; }
 
-    public CountryState ControllingCountryState =>
-        CountryState.ForId(ControllingCountryId);
-
-    public int ControlledCountryId1;
-    public CountryState ControlledCountryState1 =>
-        CountryState.ForId(ControlledCountryId1);
-
-    public int ControlledCountryId2;
-    public CountryState ControlledCountryState2 =>
-        CountryState.ForId(ControlledCountryId2);
-
-    public Sprite2D StraightSpriteNode =>
-        ControllingCountryState.Node.StraightSpriteNode;
+    public CountryState ControllingCountryState => CountryState.ForId(ControllingCountryId);
+    public CountryState ControlledCountryState1 => CountryState.ForId(ControlledCountryId1);
+    public CountryState ControlledCountryState2 => CountryState.ForId(ControlledCountryId2);
+    public Sprite2D StraightSpriteNode => ControllingCountryState.CountryScene.StraightSpriteNode;
 
     public StraightState(int controllingCountryId, StraightData staticStraightData)
     {
@@ -70,7 +60,7 @@ public partial class StraightState : StateObject
     {
         var sprite = StraightSpriteNode;
 
-        sprite.Texture = StaticStraightData.IconInversed ? StraightIconInverse : StraightIcon;
+        sprite.Texture = StaticStraightData.IconInversed ? AssetRepository.StraightIconInverse : AssetRepository.StraightIcon;
         sprite.Visible = true;
 
         var t = StaticStraightData.StraightTransform;

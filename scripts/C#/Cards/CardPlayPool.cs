@@ -374,7 +374,7 @@ public partial class CardPlayPool : GodotObject
         List<CardActivationOption> allActivationOptions = new List<CardActivationOption>();
         
         // If no cards in pool yet and we're in play step, allow playing cards from hand
-        if (CardPool.Count == 0 && GameSession.Instance.GameFlow.TurnStep == TurnStep.PLAY_CARD)
+        if (CardPool.Count == 0 && GameSession.Current.GameFlow.TurnStep == TurnStep.PLAY_CARD)
         {
             allActivationOptions.AddRange(PlayableCards(faction));
         }

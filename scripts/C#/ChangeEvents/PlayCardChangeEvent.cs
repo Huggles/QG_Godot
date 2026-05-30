@@ -12,6 +12,12 @@ public partial class PlayCardChangeEvent : ChangeEvent
         this.StepId = SourceCardState.CardLogic.PlayCardSteps[0].Id;
     }
 
+    public override ChangeEventDto ToDto() => new PlayCardChangeEventDto
+    {
+        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
+        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress
+    };
+
     protected override async Task<bool> ExecuteAsync(){
         DebugUtilities.PrintPeer($"PlayCardChangeEvent.ExecuteAsync for card {SourceCardState.CardName} (id={SourceCardId})");
         DebugUtilities.PrintPeer($"  IsPlayed before move: {SourceCardState.CardLogic.IsPlayed}");

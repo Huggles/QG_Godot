@@ -15,8 +15,15 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         this.StepId = SourceCardState.CardLogic.ReactCardSteps[0].Id;
     }
 
+    public override ChangeEventDto ToDto() => new ActivateReactionChangeEventDto
+    {
+        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
+        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
+        SourceChangeEventId = SourceChangeEvent?.Id ?? -1
+    };
+
     protected override async Task<bool> ExecuteAsync(){                
-        SourceCardState.CardLogic.ActivatedInTurns.Add(GameSession.Instance.GameFlow.GameTurn);        
+        SourceCardState.CardLogic.ActivatedInTurns.Add(GameSession.Current.GameFlow.GameTurn);        
         return true;
     }
 }

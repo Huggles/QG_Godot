@@ -13,16 +13,14 @@ public partial class DeployState : Node
 
     public List<int> RecruitableCountries = new List<int>();
     public List<CountryState> RecruitableCountriesStates => RecruitableCountries.ToCountryStates();
-    public List<CountryState> RecruitableCountriesStatesForType(CountryType countryType) => RecruitableCountriesStates.Where(cs=>cs.Type == countryType).ToList();
-
-    
+    public List<CountryState> RecruitableCountriesStatesForType(CountryType countryType) => RecruitableCountriesStates.Where(cs=>cs.Type == countryType).ToList();    
 
     public static DeployState CalculateDeployState(Faction faction)
     {
         DeployState deployState = new DeployState();
-        GameState GameState = GameSession.Instance.GameState;
+        MultiplayerGameState GameState = GameSession.Current.GameState;
         
-        List<int> suppliedUnitIds = GameStateUtilities.SuppliedUnitsForFaction(faction);
+        List<int> suppliedUnitIds = GameAPI.SuppliedUnitsForFaction(faction);
         if (suppliedUnitIds.Count > 0)
         {
             foreach (CountryState countryState in CountryState.ForUnitIds(suppliedUnitIds))

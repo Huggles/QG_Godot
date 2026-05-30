@@ -18,6 +18,13 @@ public partial class DiscardCardsChangeEvent : ChangeEvent
         NumberOfCards = numberOfCards;
     }
 
+    public override ChangeEventDto ToDto() => new DiscardCardsChangeEventDto
+    {
+        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
+        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
+        TargetFaction = TargetFaction, NumberOfCards = NumberOfCards
+    };
+
     protected override async Task<bool> ExecuteAsync()
     {
         ApplyDiscardModifiers();
@@ -31,7 +38,7 @@ public partial class DiscardCardsChangeEvent : ChangeEvent
 
     private void ApplyDiscardModifiers()
     {
-        var allStatusCardLogics = GameSession.Instance.GameState.FactionStates.Values
+        var allStatusCardLogics = GameSession.Current.GameState.FactionStates.Values
             .SelectMany(fs => DeckState.ForFaction(fs.FactionData.Faction).StatusCardStates)
             .Where(cs => cs.CardLogic.IsPlayed)
             .Select(cs => cs.CardLogic)

@@ -3,37 +3,9 @@ using System;
 
 public partial class NodeUtilities : SingletonNode<NodeUtilities>
 {
-    public Node GameNode;
-    public Node PlayersNode;
-    public Node UnitsNode;
-    public Node2D WorldNode;
-    public CanvasLayer UserInterface;
-    
+    public Node GameNode => GetNode("/root/Game/");
+    public Node PlayersNode => GameNode.GetNode("Players");
+    public Node UnitsNode => GameNode.GetNode("Units");
+    public Node2D WorldNode => GameNode.GetNode<Node2D>("World");    
     public Node CountriesNode => WorldNode != null ? WorldNode.GetNode("Countries") : null;
-
-    public override void _Ready()
-    {
-        base._Ready();
-        DebugUtilities.PrintPeer("NodeUtilities Ready");
-        InitializeGameNodes();
-    }
-
-    public void InitializeGameNodes()
-    {
-        // Try to find the Game node - it may not exist if we're in the menu/lobby
-        GameNode = GetTree().Root.GetNodeOrNull("Game");
-        
-        if (GameNode != null)
-        {
-            PlayersNode = GameNode.GetNode("Players");
-            UnitsNode = GameNode.GetNode("Units");
-            WorldNode = GameNode.GetNode<Node2D>("World");
-            UserInterface = GameNode.GetNode<CanvasLayer>("UserInterface");
-            DebugUtilities.PrintPeer("NodeUtilities: Game nodes initialized", DebugVerbosity.INFO);
-        }
-        else
-        {
-            DebugUtilities.PrintPeer("NodeUtilities: Game node not found (probably in menu/lobby)");
-        }
-    }
 }

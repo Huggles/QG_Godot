@@ -33,9 +33,9 @@ public class GameStateCalculator
 
     // Straight state (team-based, not faction-specific)
     public List<int> AxisControlledStraightIds = new List<int>();
-    public List<StraightState> AxisControlledStraightStates => AxisControlledStraightIds.Select(id => GameSession.StraightStates.FirstOrDefault(s => s.Id == id)).ToList();
+    public List<StraightState> AxisControlledStraightStates => AxisControlledStraightIds.Select(id => GameSession.Current.GameState.StraightStates.FirstOrDefault(s => s.Id == id)).ToList();
     public List<int> AlliesControlledStraightIds = new List<int>();
-    public List<StraightState> AlliesControlledStraightStates => AlliesControlledStraightIds.Select(id => GameSession.StraightStates.FirstOrDefault(s => s.Id == id)).ToList();
+    public List<StraightState> AlliesControlledStraightStates => AlliesControlledStraightIds.Select(id => GameSession.Current.GameState.StraightStates.FirstOrDefault(s => s.Id == id)).ToList();
 
     public bool HasTargets { get { return HasTargetUnits || HasTargetEmptyCountries; } }
     public bool HasTargetUnits { get { return TargetUnitIds.Count > 0; } }
@@ -54,7 +54,7 @@ public class GameStateCalculator
     {
         ClearTagsForFaction(faction, Tag.Attackable);
         
-        List<int> suppliedUnitIds = GameStateUtilities.SuppliedUnitsForFaction(faction);
+        List<int> suppliedUnitIds = GameAPI.SuppliedUnitsForFaction(faction);
         foreach (int suppliedUnitId in suppliedUnitIds)
         {
             calculator += AttackOption.CalculateAttackOptions(suppliedUnitId);
@@ -138,7 +138,7 @@ public class GameStateCalculator
     private static bool CalculateSupplyForUnit(PathFindingService pathFinding, int unitId, Faction faction)
     {
         var unit = UnitState.ForId(unitId);
-        foreach (var supplyId in GameStateUtilities.GetSupplyCountryIds(faction))
+        foreach (var supplyId in GameAPI.GetSupplyCountryIds(faction))
         {
             if (pathFinding.CalculatePath(unit.CountryId, supplyId))
             {
@@ -154,14 +154,14 @@ public class GameStateCalculator
     {
         
         // Clear old straight control tags
-        foreach (var straightState in GameSession.StraightStates)
+        foreach (var straightState in GameSession.Current.GameState.StraightStates)
         {
             straightState.Tags.RemoveForAll(Tag.AxisControlled);
             straightState.Tags.RemoveForAll(Tag.AlliesControlled);
         }
         
         // Calculate control for each straight based on controlling country's team
-        foreach (var straightState in GameSession.StraightStates)
+        foreach (var straightState in GameSession.Current.GameState.StraightStates)
         {
             FactionTeam controllingTeam = straightState.ControllingCountryState.OccupyingTeam;
             
@@ -220,15 +220,15 @@ public class GameStateCalculator
 
     private static void ClearTagsForFaction(Faction faction, Tag tag)
     {
-        foreach (var unitState in GameSession.Instance.GameState.UnitStatesById.Values)
+        foreach (var unitState in GameSession.Current.GameState.UnitStatesById.Values)
         {
             unitState.Tags.Remove(tag, faction);
         }
-        foreach (var countryState in GameSession.Instance.GameState.CountryStateById.Values)
+        foreach (var countryState in GameSession.Current.GameState.CountryStateById.Values)
         {
             countryState.Tags.Remove(tag, faction);
         }
-        foreach (var cardState in GameSession.Instance.GameState.CardStatesById.Values)
+        foreach (var cardState in GameSession.Current.GameState.CardStatesById.Values)
         {
             cardState.Tags.Remove(tag, faction);
         }

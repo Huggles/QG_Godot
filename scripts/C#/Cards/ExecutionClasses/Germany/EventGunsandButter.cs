@@ -14,10 +14,10 @@ public partial class EventGunsAndButter : EventCardLogic
                 List<int> availableCardIds = new List<int>();
                 
                 // Get faction-specific action cards
-                int buildArmyId = GameSession.Instance.GameState.CardStates.First(c => c.CardData.UniqueName == "BuildArmy" && c.Faction == Faction).Id;
-                int buildNavyId = GameSession.Instance.GameState.CardStates.First(c => c.CardData.UniqueName == "BuildNavy" && c.Faction == Faction).Id;
-                int landBattleId = GameSession.Instance.GameState.CardStates.First(c => c.CardData.UniqueName == "LandBattle" && c.Faction == Faction).Id;
-                int seaBattleId = GameSession.Instance.GameState.CardStates.First(c => c.CardData.UniqueName == "SeaBattle" && c.Faction == Faction).Id;
+                int buildArmyId = GameSession.Current.GameState.CardStates.First(c => c.CardData.UniqueName == "BuildArmy" && c.Faction == Faction).Id;
+                int buildNavyId = GameSession.Current.GameState.CardStates.First(c => c.CardData.UniqueName == "BuildNavy" && c.Faction == Faction).Id;
+                int landBattleId = GameSession.Current.GameState.CardStates.First(c => c.CardData.UniqueName == "LandBattle" && c.Faction == Faction).Id;
+                int seaBattleId = GameSession.Current.GameState.CardStates.First(c => c.CardData.UniqueName == "SeaBattle" && c.Faction == Faction).Id;
                 
                 if (CountryState.BuildableLand(Faction).Any())
                     availableCardIds.Add(buildArmyId);

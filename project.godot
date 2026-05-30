@@ -22,6 +22,7 @@ NodeUtilities="*res://scripts/C#/Utils/NodeUtilities.cs"
 DebugUtilities="*res://scripts/C#/Utils/DebugUtilities.cs"
 GameManager="*res://scripts/C#/Game/GameManager.cs"
 TagRegistry="*res://scripts/C#/Utils/Tags/TagRegistry.cs"
+NetworkApi="*res://scripts/C#/Utils/NetworkApi.cs"
 
 [debug]
 

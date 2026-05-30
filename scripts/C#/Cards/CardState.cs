@@ -57,27 +57,23 @@ public partial class CardState : GodotObject, ITaggable
     // Static helpers
     public static CardState ForId(int cardId)
     {
-        return GameSession.Instance.GameState.CardStatesById.TryGetValue(cardId, out var state) ? state : null;
+        return GameSession.Current.GameState.CardStatesById.TryGetValue(cardId, out var state) ? state : null;
     }
 
     // Static helpers
     public static List<CardState> ForIds(List<int> cardIds)
     {        
-        return GameSession.Instance.GameState.CardStatesById.Values.ToList().Where(cardState => cardIds.Contains(cardState.Id)).ToList();
+        return GameSession.Current.GameState.CardStatesById.Values.ToList().Where(cardState => cardIds.Contains(cardState.Id)).ToList();
     }
 
     public static CardState ForName(string cardName)
     {
-        return GameSession.Instance.GameState.CardStatesByName.TryGetValue(cardName, out var state) ? state : null;
+        return GameSession.Current.GameState.CardStatesByName.ToList().Find(kv => kv.Key.StartsWith(cardName)).Value;
     }
     public static CardState ForNumber(int cardNumber)
     {
         if (!StaticGameData.CardDataByNumber.TryGetValue(cardNumber, out CardData cardData))
             return null;
         return ForName(cardData.UniqueName);
-    }
-    public static List<CardState> ForNames(List<string> cardNames)
-    {
-        return cardNames.Map(c => GameSession.Instance.GameState.CardStatesByName.TryGetValue(c, out var state) ? state : null);
     }
 }

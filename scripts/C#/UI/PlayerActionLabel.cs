@@ -53,7 +53,7 @@ public partial class PlayerActionLabel : RichTextLabel, LoadableUI
             }
             else
             {
-                FactionState factionState = GameSession.FactionStates[faction];
+                FactionState factionState = FactionState.ForEnum(faction);
                 FactionData factionData = factionState.FactionData;
                 var stylebox = ContainerPanel.GetThemeStylebox("panel") as StyleBoxFlat;
                 if (stylebox != null)

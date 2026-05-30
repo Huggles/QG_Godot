@@ -3,18 +3,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public static class GameStateUtilities
+public partial class GameAPI : Node
 {
-    private static GameState GameState => GameSession.Instance.GameState;
+    private static GameAPI Instance
+    {
+        get
+        {
+            if (field == null)
+            {
+                throw new System.ArgumentNullException("GameAPI Not Initialized");
+            }
+            return field;
+        }
+        set;
+    }
+    
+    public override void _EnterTree()
+    {
+        base._EnterTree();
+        Instance = this;
+        DebugUtilities.PrintPeer($"MultiplayerSession entered tree (IsServer={Multiplayer.IsServer()})", DebugVerbosity.INFO);
+    }
 
+    private static MultiplayerGameState GameState => GameSession.Current.GameState;
+
+
+    /**
+    * Get list of active unit ids for a faction. Note that this is not the same as the list of deployed unit ids, as some deployed units may be destroyed or otherwise inactive.
+    */
     public static List<int> ActiveUnitsForFaction(Faction faction)
     {
-        return GameSession.FactionStates[faction].ActiveUnitIds;
+        return GameSession.Current.GameState.FactionStates[faction].ActiveUnitIds;
     }
 
     public static List<int> SuppliedUnitsForFaction(Faction faction)
     {
-        return GameSession.FactionStates[faction].SuppliedUnitIds;
+        return GameSession.Current.GameState.FactionStates[faction].SuppliedUnitIds;
     }
 
     public static List<int> GetSupplyCountryIds(Faction faction)
@@ -112,5 +136,18 @@ public static class GameStateUtilities
         {
             RequestResponseCardActivationForFaction(changeEvent, faction, callback);
         }
+    }
+
+    /**
+    * Board Management API
+    */
+    public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType)
+    {   
+        CountryState country = GameState.CountryStateById[countryId];
+        country.DeployUnit(faction, unitType, deployType);
+    }
+    public static void RemoveUnitFromCountry(int unitId)
+    {        
+        CountryState.ForId(UnitState.ForId(unitId).CountryId).RemoveUnit(unitId);
     }
 }

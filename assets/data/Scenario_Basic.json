@@ -1,0 +1,10 @@
+{
+  "unitDeployments": [
+    { "faction": "GERMANY",       "countryName": "GERMANY" }
+  ],
+  "startingFaction": "GERMANY",
+  "initialCards": [
+  ],
+  "initialHandCards": [
+  ]
+}

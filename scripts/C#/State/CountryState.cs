@@ -5,7 +5,7 @@ using System.Linq;
 
 public partial class CountryState : StateObject
 {
-    [Export] public CountryData StaticCountryData;
+    [Export] public CountryData StaticCountryData;  
     [Export] public string Name { get; set; }
     [Export] public string NameCamelCase { get; set; }
     [Export] public string Label { get; set; }
@@ -17,7 +17,6 @@ public partial class CountryState : StateObject
     public List<string> Neighbors { get; set; }
     public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
 
-
     public Dictionary<Faction, int> Units { get; set; } = new Dictionary<Faction, int>();
 
     public bool IsLand => Type == CountryType.LAND;
@@ -26,15 +25,13 @@ public partial class CountryState : StateObject
     public bool IsCountryEmpty => Units.Count == 0;
     public bool IsCountryFull => Units.Count == 3;
 
-    public List<Faction> OccupyingFactions =>
-        Units.Keys.ToList();
+    public List<Faction> OccupyingFactions => Units.Keys.ToList();
 
-    public FactionTeam OccupyingTeam =>
-        OccupyingFactions.Count == 0
+    public FactionTeam OccupyingTeam => OccupyingFactions.Count == 0 
             ? FactionTeam.NONE
             : StaticGameData.FactionTeamForFaction(OccupyingFactions[0]);
 
-    public CountryScene Node;
+    public CountryScene CountryScene => NodeUtilities.Instance.CountriesNode.GetChildren().ToList().Find(c => c.Name == Name) as CountryScene ?? throw new Exception($"Couldn't find CountryScene for country: {Name}");
 
     public CountryState(CountryData countryData)
     {
@@ -55,11 +52,11 @@ public partial class CountryState : StateObject
 
         this.Tags.TagAdded += (Tag t, Faction f) =>
         {
-            if(t is Tag.Clickable) Node.SetClickable();
+            if(t is Tag.Clickable) CountryScene.SetClickable();
         };
         this.Tags.TagRemoved += (Tag t, Faction f) =>
         {
-            if(t is Tag.Clickable) Node.SetUnclickable();
+            if(t is Tag.Clickable) CountryScene.SetUnclickable();
         };
     }
 
@@ -67,7 +64,7 @@ public partial class CountryState : StateObject
     {
         foreach (var neighbor in Neighbors)
         {
-            if (Game.GameState.CountryStateByName.TryGetValue(neighbor, out CountryState neighborState))
+            if (MultiplayerSession.Instance.GameState.CountryStateByName.TryGetValue(neighbor, out CountryState neighborState))
             {
                 NeighborCountryStates.Add(neighborState);
             }
@@ -81,14 +78,6 @@ public partial class CountryState : StateObject
         }
     }
 
-    public void InitNode()
-    {
-        Node = CountryScene.SpawnCountry(this);
-        NodeUtilities.Instance.CountriesNode.AddChild(Node, false);
-        Node.Position = StaticCountryData.WorldPositionCenter;
-    }
-
-
     public List<int> ConnectedCountryIds(Faction faction)
     {
         return ConnectedCountries(faction).Select(c => c.Id).ToList();
@@ -100,7 +89,7 @@ public partial class CountryState : StateObject
         {
             if (IsSea && neighbor.IsSea)
             {
-                var straight = GameStateUtilities.StraightStateForNeighbors(Id, neighbor.Id);
+                var straight = GameAPI.StraightStateForNeighbors(Id, neighbor.Id);
                 return straight == null || straight.ControllingCountryState.OccupyingTeam == StaticGameData.FactionTeamForFaction(faction);
             }
             return true;
@@ -115,14 +104,27 @@ public partial class CountryState : StateObject
             connected.IsLand && connected.OccupyingTeam == StaticGameData.FactionTeamForFaction(faction));
     }
 
-    public void DeployUnit()
+    public void DeployUnit(Faction faction, UnitType unitType, DeployType deployType)
     {
-        // Logic to be implemented
+        int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
+        if(unitId == -1) throw new Exception($"No available units of type {unitType} for faction {faction}");
+        var unit = UnitState.ForId(unitId);
+
+        bool deployable = deployType != DeployType.BUILD || CanBuild(faction);
+        if (!IsCountryFull && deployable)
+        {
+            Units[faction] = unit.Id;
+            unit.CountryId = Id;
+        }
+        EventBus.Emit(EventBus.SignalName.UnitDeployed, unit.Id, Id);
+        
     }
 
-    public void RemoveUnit()
+    public void RemoveUnit(int unitId)
     {
-        // Logic to be implemented
+        UnitState unit = UnitState.ForId(unitId);
+        Units.Remove(unit.Faction);
+        unit.CountryId = -1;
     }
 
     public bool CanBuild(Faction faction)
@@ -223,11 +225,11 @@ public partial class CountryState : StateObject
     }
 
 
-    public static List<CountryState> AllCountryStates => GameSession.Instance.GameState.CountryStateById.Values.ToList();
+    public static List<CountryState> AllCountryStates => GameSession.Current.GameState.CountryStateById.Values.ToList();
 
     public static CountryState ForId(int id)
     {
-        return GameSession.Instance.GameState.CountryStateById[id];
+        return GameSession.Current.GameState.CountryStateById[id];
     }
 
     public static List<CountryState> ForIds(IEnumerable<int> ids)
@@ -237,11 +239,11 @@ public partial class CountryState : StateObject
 
     public static CountryState ForName(string name)
     {
-        return GameSession.Instance.GameState.CountryStateByName[name];
+        return GameSession.Current.GameState.CountryStateByName[name];
     }
     public static List<CountryState> ForNames(List<string> names)
     {
-        return names.Map(n => GameSession.Instance.GameState.CountryStateByName[n]);
+        return names.Map(n => GameSession.Current.GameState.CountryStateByName[n]);
     }
 
     public static List<CountryState> ForUnitIds(IEnumerable<int> unitIds)

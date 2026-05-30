@@ -167,9 +167,9 @@ public partial class MultiplayerLobby : Control
         DebugUtilities.PrintPeer("Starting debug solo game...", DebugVerbosity.INFO);
         
         // Create single player assignment (all factions to player 1)
-        var playerFactionAssignments = new Dictionary<int, List<Faction>>
+        var playerFactionAssignments = new List<PlayerFactionAssignment>
         {
-            { 1, new List<Faction>(StaticGameData.PlayableFactions) }
+            new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
         };
         
         // Get GameManager and set pending assignments
@@ -189,7 +189,7 @@ public partial class MultiplayerLobby : Control
         int totalPlayers = _playerLabels.Count;
         DebugUtilities.PrintPeer($"Total players in lobby: {totalPlayers}");
         
-        Dictionary<int, List<Faction>> playerFactionAssignments = CreatePlayerFactionAssignments(totalPlayers);
+        List<PlayerFactionAssignment> playerFactionAssignments = CreatePlayerFactionAssignments(totalPlayers);
         
         // Get GameManager and set pending assignments
         var gameManager = GetNode<GameManager>("/root/GameManager");
@@ -202,9 +202,9 @@ public partial class MultiplayerLobby : Control
     /// <summary>
     /// Creates player-faction assignments based on player count
     /// </summary>
-    private Dictionary<int, List<Faction>> CreatePlayerFactionAssignments(int playerCount)
+    private List<PlayerFactionAssignment> CreatePlayerFactionAssignments(int playerCount)
     {
-        var assignments = new Dictionary<int, List<Faction>>();
+        var assignments = new List<PlayerFactionAssignment>();
         
         if (playerCount == 2)
         {
@@ -218,8 +218,8 @@ public partial class MultiplayerLobby : Control
             List<Faction> axisFactions = new List<Faction> { Faction.GERMANY, Faction.JAPAN, Faction.ITALY };
             List<Faction> alliesFactions = new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
             
-            assignments[player1Id] = axisFactions;
-            assignments[player2Id] = alliesFactions;
+            assignments.Add(new PlayerFactionAssignment(player1Id, axisFactions));
+            assignments.Add(new PlayerFactionAssignment(player2Id, alliesFactions));
             
             DebugUtilities.PrintPeer($"Player {player1Id} (Host) assigned AXIS", DebugVerbosity.INFO);
             DebugUtilities.PrintPeer($"Player {player2Id} assigned ALLIES", DebugVerbosity.INFO);
@@ -235,7 +235,7 @@ public partial class MultiplayerLobby : Control
             {
                 if (factionIndex < StaticGameData.PlayableFactions.Count)
                 {
-                    assignments[peerId] = new List<Faction> { StaticGameData.PlayableFactions[factionIndex] };
+                    assignments.Add(new PlayerFactionAssignment(peerId, new List<Faction> { StaticGameData.PlayableFactions[factionIndex] }));
                     DebugUtilities.PrintPeer($"Player {peerId} assigned {StaticGameData.PlayableFactions[factionIndex]}", DebugVerbosity.INFO);
                     factionIndex++;
                 }

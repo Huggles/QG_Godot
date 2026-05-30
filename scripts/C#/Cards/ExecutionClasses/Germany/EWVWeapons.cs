@@ -17,7 +17,7 @@ public partial class EWVWeapons : EWCardLogic
                 if (germanArmyInWE)
                 {
                     // Score 3 VP
-                    IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                    IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
                     await vpHandler.ScorePoints(new VPEntry(3, "3 VP for German Army in Western Europe."));
                     
                     // UK discards 1 card

@@ -26,9 +26,16 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         DeploymentType = deploymentType;
     }
 
+    public override ChangeEventDto ToDto() => new DeployUnitChangeEventDto
+    {
+        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
+        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
+        CountryId = CountryId, DeploymentType = DeploymentType
+    };
+
     protected override async Task<bool> ExecuteAsync()
     {
-        GameSession.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType);
+        GameAPI.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType);
         await Task.CompletedTask;
         return true;
     }

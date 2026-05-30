@@ -8,9 +8,9 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
 {
     private VPTurnSummary vpTurnSummary;
 
-    private GameFlow gameFlow { get { return GameSession.Instance.GameFlow; } }
+    private GameFlow gameFlow { get { return GameSession.Current.GameFlow; } }
     private Faction Faction;
-    private FactionState FactionState => GameSession.FactionStates[Faction];
+    private FactionState FactionState => GameSession.Current.GameState.FactionStates[Faction];
 
     public VictoryStepHandlerDefault()
     {

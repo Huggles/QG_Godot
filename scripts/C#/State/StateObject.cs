@@ -1,11 +1,10 @@
 using Godot;
 using System;
+using System.Text.Json.Serialization;
 
-public partial class StateObject : Node, ITaggable
+public partial class StateObject : ITaggable
 {
     [Export] public int Id { get; set; }
-    private readonly TagContainer _tags = new();
-    public TagContainer Tags => _tags;
-
-    
+    [JsonIgnore] private readonly TagContainer _tags = new();
+    [JsonIgnore] public TagContainer Tags => _tags;
 }

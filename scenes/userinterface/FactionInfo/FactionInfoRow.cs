@@ -10,8 +10,8 @@ public partial class FactionInfoRow : Control
 
     private FactionState FactionState => gameState.FactionStates[Faction]; 
 
-    private GameFlow gameFlow { get { return GameSession.Instance.GameFlow; } }
-    private GameState gameState { get { return GameSession.Instance.GameState; } }
+    private GameFlow gameFlow { get { return GameSession.Current.GameFlow; } }
+    private MultiplayerGameState gameState { get { return GameSession.Current.GameState; } }
 
     private Panel BackgroundPanel => GetNode<Panel>("%BackgroundPanel");
     private Label ScoreLabel => GetNode<Label>("%ScoreLabel");

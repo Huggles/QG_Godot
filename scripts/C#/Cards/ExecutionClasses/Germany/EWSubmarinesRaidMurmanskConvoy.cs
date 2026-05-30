@@ -21,7 +21,7 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
                 
                 int count = germanUnits.Count;
                 
-                IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
                 await vpHandler.ScorePoints(new VPEntry(count, $"{count} VP for German units in or adjacent to Scandinavia."));
 
                 DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.SOVIET, count * 2));

@@ -25,7 +25,7 @@ public partial class EWSubmarinesPreyonUnprotectedShipping : EWCardLogic
                 discardEvent.IsTrigger = true;
                 
                 // Score 1 VP
-                IVictoryStepHandler vpHandler = GameSession.Instance.GameFlow.vpStepHandler;
+                IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
                 await vpHandler.ScorePoints(new VPEntry(1, "1 VP for Submarines Prey on Unprotected Shipping."));
                 
                 return discardEvent;
