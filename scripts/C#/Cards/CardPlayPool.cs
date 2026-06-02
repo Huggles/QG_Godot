@@ -101,7 +101,7 @@ public partial class CardPlayPool : GodotObject
             await DoChangeEvent(stepResult);
         }
 
-        DebugUtilities.PrintPeer($"Added {cardState.CardData.UniqueName} to play area without activation", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Added {cardState.CardData.UniqueName} to play area without activation");
         ClearPool();
     }
 
@@ -175,7 +175,7 @@ public partial class CardPlayPool : GodotObject
                 
                 if (!hasAnyActions)
                 {
-                    DebugUtilities.PrintPeer("No more actions available - Play step complete", DebugVerbosity.INFO);
+                    DebugUtilities.PrintPeer("No more actions available - Play step complete");
                     ClearPool();
                     EventBus.Emit(EventBus.SignalName.CardPlayPoolFinished);
                 }
@@ -207,7 +207,6 @@ public partial class CardPlayPool : GodotObject
             changeEvent.ChangeEventApplied += (int changeEventId) =>
             {
                 ChangeEvent ce = ChangeEvent.ForId(changeEventId);
-                DebugUtilities.PrintPeer($"CardPlayPool.Applied {ce?.GetType().Name}");
             };
             await changeEvent.ApplyChange();
         }
@@ -241,10 +240,10 @@ public partial class CardPlayPool : GodotObject
             CardActivationOption cardActivationOption = await GameSession.RequestBlock(faction);
             if (cardActivationOption != null)
             {
-                DebugUtilities.PrintPeer($"BLOCK REACTION from {FactionState.ForEnum(faction).FactionLabel} for {changeEvent?.GetType().Name}", DebugVerbosity.INFO);
+                DebugUtilities.PrintPeer($"BLOCK REACTION from {FactionState.ForEnum(faction).FactionLabel} for {changeEvent?.GetType().Name}");
                 // Recursively process this reaction (which may itself trigger more reactions)
                 await DoActivationOption(cardActivationOption);
-                DebugUtilities.PrintPeer($"BLOCK REACTION FINISHED", DebugVerbosity.INFO);
+                DebugUtilities.PrintPeer($"BLOCK REACTION FINISHED");
             }
         }
     }
@@ -277,7 +276,7 @@ public partial class CardPlayPool : GodotObject
                     CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
                     if (cardActivationOption != null)
                     {
-                        DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}", DebugVerbosity.INFO);
+                        DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
                         // Recursively process this reaction (which may itself trigger blocks and after-reactions)
                         await DoActivationOption(cardActivationOption);
                         anyReactionPlayed = true;
@@ -297,11 +296,11 @@ public partial class CardPlayPool : GodotObject
     /// </summary>
     private static List<CardActivationOption> GetAfterReactionOptions(Faction faction)
     {
-        DebugUtilities.PrintPeer($"GetAfterReactionOptions for {faction}: Checking with {ChangeEventsPool.Count} events in pool");
+        //DebugUtilities.PrintPeer($"GetAfterReactionOptions for {faction}: Checking with {ChangeEventsPool.Count} events in pool");
         List<CardActivationOption> allOptions = GetNextActions(faction);
         // Filter out block reactions - we only want after-reactions here
         List<CardActivationOption> afterReactions = allOptions.Where(option => !option.CardState.CardLogic.IsBlockReaction).ToList();
-        DebugUtilities.PrintPeer($"  Found {allOptions.Count} total options, {afterReactions.Count} after-reactions");
+        //DebugUtilities.PrintPeer($"  Found {allOptions.Count} total options, {afterReactions.Count} after-reactions");
         return afterReactions;
     }
     
@@ -374,7 +373,7 @@ public partial class CardPlayPool : GodotObject
         List<CardActivationOption> allActivationOptions = new List<CardActivationOption>();
         
         // If no cards in pool yet and we're in play step, allow playing cards from hand
-        if (CardPool.Count == 0 && GameSession.Current.GameFlow.TurnStep == TurnStep.PLAY_CARD)
+        if (CardPool.Count == 0 && GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD)
         {
             allActivationOptions.AddRange(PlayableCards(faction));
         }
@@ -395,12 +394,7 @@ public partial class CardPlayPool : GodotObject
             {
                 if (cardStep.PrerequisiteStepFinished)
                 {
-                    activationOptions.Add(new CardActivationOption(
-                        cardState.Id, 
-                        cardStep.Id, 
-                        cardState.CardData.Label, 
-                        cardState.CardLogic.CanPlayCard()
-                    ));
+                    activationOptions.Add(new CardActivationOption(cardStep));
                 }
             }
         }
@@ -416,13 +410,13 @@ public partial class CardPlayPool : GodotObject
         DeckState deckState = DeckState.ForFaction(faction);
         List<CardActivationOption> allActivationOptions = new List<CardActivationOption>();
         
-        DebugUtilities.PrintPeer($"ActivatableReactions for {faction}: Checking {deckState.StatusCardStates.Count} status cards and {deckState.ResponseCardStates.Count} response cards");
+        //DebugUtilities.PrintPeer($"ActivatableReactions for {faction}: Checking {deckState.StatusCardStates.Count} status cards and {deckState.ResponseCardStates.Count} response cards");
         
         // Get activatable status and response cards
         List<CardActivationOption> statusActivationOptions = ActivatableCards(deckState.StatusCardStates);
         List<CardActivationOption> responseActivationOptions = ActivatableCards(deckState.ResponseCardStates);
         
-        DebugUtilities.PrintPeer($"  Found {statusActivationOptions.Count} activatable status cards and {responseActivationOptions.Count} activatable response cards");
+        //DebugUtilities.PrintPeer($"  Found {statusActivationOptions.Count} activatable status cards and {responseActivationOptions.Count} activatable response cards");
         
         allActivationOptions.AddRange(statusActivationOptions);
         allActivationOptions.AddRange(responseActivationOptions);
@@ -439,7 +433,7 @@ public partial class CardPlayPool : GodotObject
         var options = new List<CardActivationOption>();
         foreach (CardState cardState in cardStates)
         {
-            DebugUtilities.PrintPeer($"Checking card: {cardState.CardName}, CardState.Id={cardState.Id}, IsPlayed={cardState.CardLogic.IsPlayed}, CardLogic instance={cardState.CardLogic.GetInstanceId()}");
+            //DebugUtilities.PrintPeer($"Checking card: {cardState.CardName}, CardState.Id={cardState.Id}, IsPlayed={cardState.CardLogic.IsPlayed}, CardLogic instance={cardState.CardLogic.GetInstanceId()}");
             bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
             {
@@ -449,14 +443,14 @@ public partial class CardPlayPool : GodotObject
                     
                 }
                 CardStep nextStep = cardState.CardLogic.ReactCardSteps[0];
-                CardActivationOption option = new CardActivationOption(cardState.Id, nextStep.Id, cardState.CardData.Label, cardState.CardLogic != null ? cardState.CardLogic.CanBeActivated() : false);
+                CardActivationOption option = new CardActivationOption(nextStep);
                 options.Add(option);
             }
             else if (cardState.CardLogic.IsActivatedThisTurn && cardState.CardLogic.ExecutableReactSteps.Count > 0)
             {
                 CardStep nextStep = cardState.CardLogic.ExecutableReactSteps[0];
                 CardLogic cardLogic = nextStep.CardLogic;
-                CardActivationOption option = new CardActivationOption(cardState.Id, nextStep.Id, cardLogic.CardState.CardData.Label, true);
+                CardActivationOption option = new CardActivationOption(nextStep);
                 options.Add(option);
             }
         }
@@ -506,11 +500,11 @@ public partial class CardPlayPool : GodotObject
         List<CardActivationOption> activationOptions = GetNextActions(faction);
         
         if (activationOptions != null && activationOptions.Count > 0)
-        {
+        {            
             CardActivationOption cardActivationOption = await GameSession.RequestPlay(faction);
             if (cardActivationOption != null)
             {
-                DebugUtilities.PrintPeer($"{FactionState.ForEnum(faction).FactionLabel} is playing a card", DebugVerbosity.INFO);
+                DebugUtilities.PrintPeer($"{FactionState.ForEnum(faction).FactionLabel} is playing a card");
                 await DoActivationOption(cardActivationOption);
                 return cardActivationOption;
             }

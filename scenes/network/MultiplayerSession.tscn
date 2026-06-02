@@ -1,10 +1,31 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8dsbqnhs3504"]
+[gd_scene load_steps=5 format=3 uid="uid://c8dsbqnhs3504"]
 
 [ext_resource type="Script" uid="uid://r2f4hye3fhes" path="res://scenes/network/MultiplayerSession.cs" id="1_fxsb3"]
 [ext_resource type="Script" uid="uid://cde0nvl8mrot5" path="res://scenes/network/PeerReadinessComponent.cs" id="2_2awua"]
+[ext_resource type="Script" uid="uid://byj4cenhv0p52" path="res://scripts/C#/Game/GameFlow.cs" id="3_jir0j"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_jir0j"]
+properties/0/path = NodePath("GameFlow:GameStarted")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath("GameFlow:GameTurn")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+properties/2/path = NodePath("GameFlow:TurnStepCounter")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+properties/3/path = NodePath("GameFlow:TurnStep")
+properties/3/spawn = true
+properties/3/replication_mode = 2
 
 [node name="MultiplayerSession" type="Node"]
 script = ExtResource("1_fxsb3")
 
 [node name="PeerReadinessComponent" type="Node" parent="."]
 script = ExtResource("2_2awua")
+
+[node name="GameFlow" type="Node" parent="."]
+script = ExtResource("3_jir0j")
+
+[node name="GameFlowMultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_jir0j")

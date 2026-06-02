@@ -4,26 +4,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public partial class DiscardCardsChangeEvent : ChangeEvent
+public partial class ForceDiscardCardsChangeEvent : ChangeEvent
 {
     public int NumberOfCards { get; set; }
-    public Faction TargetFaction { get; set; }
-    FactionState triggeringFactionState => FactionState.ForEnum(TriggeringFaction);
-    FactionState targetFactionState => FactionState.ForEnum(TargetFaction);
 
-    public DiscardCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards) : base(triggeringFaction)
+    public ForceDiscardCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards) : base(triggeringFaction)
     {
         TriggeringFaction = triggeringFaction;
         TargetFaction = targetFaction;
         NumberOfCards = numberOfCards;
     }
 
-    public override ChangeEventDto ToDto() => new DiscardCardsChangeEventDto
+    public override ChangeEventDto ToDto()
     {
-        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
-        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
-        TargetFaction = TargetFaction, NumberOfCards = NumberOfCards
-    };
+        ForceDiscardCardsChangeEventDto dto = ChangeEventDto.Build<ForceDiscardCardsChangeEventDto>(this, Id);
+        dto.NumberOfCards = NumberOfCards;
+        return dto;
+    }
 
     protected override async Task<bool> ExecuteAsync()
     {
@@ -31,14 +28,14 @@ public partial class DiscardCardsChangeEvent : ChangeEvent
 
         DeckState deckState = DeckState.ForFaction(TargetFaction); 
         deckState.DiscardTopCards(NumberOfCards);
-        PlayerActionLabel.ShowText($"{triggeringFactionState.FactionData.Label} makes {targetFactionState.FactionData.Label} discard {NumberOfCards} cards", TriggeringFaction);
+        PlayerActionLabel.ShowText($"{TriggeringFaction} makes {TargetFaction} discard {NumberOfCards} cards", TriggeringFaction);
         await Task.Delay(GameSettings.PauseDuration);
         return true;
     }
 
     private void ApplyDiscardModifiers()
     {
-        var allStatusCardLogics = GameSession.Current.GameState.FactionStates.Values
+        var allStatusCardLogics = GameSession.Current.GameState.FactionStates
             .SelectMany(fs => DeckState.ForFaction(fs.FactionData.Faction).StatusCardStates)
             .Where(cs => cs.CardLogic.IsPlayed)
             .Select(cs => cs.CardLogic)

@@ -20,10 +20,6 @@ public partial class PlayerInfoDisplay : PanelContainer, LoadableUI
         
         // Hide by default until LoadUI is called
         Hide();
-        
-        DebugUtilities.PrintPeer("PlayerInfoDisplay about to emit UserInterfaceLoaded");
-        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PlayerInfoDisplay");
-        DebugUtilities.PrintPeer("PlayerInfoDisplay emitted UserInterfaceLoaded");
     }
 
     public override void _ExitTree()

@@ -2,11 +2,12 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 public partial class DeckState : StateObject
 {
-    public FactionState FactionState { get; private set; }
+    [JsonIgnore] public FactionState FactionState { get; private set; }
 
     public Faction Faction => FactionState.FactionData.Faction;
 
@@ -18,21 +19,19 @@ public partial class DeckState : StateObject
                    .Concat(ResponseCardIds)
                    .Concat(StatusCardIds).ToList();
 
-    public List<int> DeckCardIds = new();
-    public List<CardState> DeckCardStates => CardState.ForIds(DeckCardIds);
+    public List<int> DeckCardIds {get; set;} = new();
+    public List<int> HandCardIds {get; set;} = new();
+    public List<int> DiscardedCardIds {get; set;} = new();
+    public List<int> ResponseCardIds {get; set;} = new();
+    public List<int> StatusCardIds {get; set;} = new();
 
-    public List<int> HandCardIds = new();
-    public List<CardState> HandCardStates => CardState.ForIds(HandCardIds);
+    [JsonIgnore] public List<CardState> DeckCardStates => CardState.ForIds(DeckCardIds);
+    [JsonIgnore] public List<CardState> HandCardStates => CardState.ForIds(HandCardIds);
+    [JsonIgnore] public List<CardState> DiscardedCardStates => CardState.ForIds(DiscardedCardIds);
+    [JsonIgnore] public List<CardState> ResponseCardStates => CardState.ForIds(ResponseCardIds);
+    [JsonIgnore] public List<CardState> StatusCardStates => CardState.ForIds(StatusCardIds);
 
-    public List<int> DiscardedCardIds = new();
-    public List<CardState> DiscardedCardStates => CardState.ForIds(DiscardedCardIds);
-
-    public List<int> ResponseCardIds = new();
-    public List<CardState> ResponseCardStates => CardState.ForIds(ResponseCardIds);
-
-    public List<int> StatusCardIds = new();
-    public List<CardState> StatusCardStates => CardState.ForIds(StatusCardIds);
-
+    
     public DeckState(FactionState factionState)
     {
         FactionState = factionState;
@@ -49,8 +48,6 @@ public partial class DeckState : StateObject
         int topCardId = DeckCardIds[0];
         DeckCardIds.RemoveAt(0);
         HandCardIds.Add(topCardId);
-
-        DebugUtilities.PrintPeer($"Drew Card ({FactionLabel}): {CardState.ForId(topCardId).CardData.UniqueName}");
         return topCardId;
     }
 
@@ -89,8 +86,6 @@ public partial class DeckState : StateObject
         int cardId = DeckCardIds[index];
         DeckCardIds.RemoveAt(index);
         HandCardIds.Add(cardId);
-
-        DebugUtilities.PrintPeer($"Drew Card by name ({FactionLabel}): {CardState.ForId(cardId).CardData.Label}");
         return cardId;
     }
 
@@ -104,7 +99,18 @@ public partial class DeckState : StateObject
                 response.Add(cardId);
         }
         return response;
-    }    
+    }  
+
+    public void DiscardHandCards(List<int> cardIds)
+    {
+        foreach (int cardId in cardIds)
+        {
+            if(HandCardIds.Contains(cardId))
+                DiscardCardAtHandIndex(HandCardIds.IndexOf(cardId));
+            else
+                DebugUtilities.PrintPeerError($"Cannot discard card that is not in hand: {cardId} => {CardState.ForId(cardId).CardData.UniqueName}");            
+        }
+    }
 
     public void DiscardCardAtHandIndex(int index)
     {
@@ -180,6 +186,6 @@ public partial class DeckState : StateObject
 
     public static DeckState ForFaction(Faction faction)
     {
-        return GameSession.Current.GameState.FactionStates[faction].DeckState;
+        return FactionState.ForEnum(faction).DeckState;
     }
 }

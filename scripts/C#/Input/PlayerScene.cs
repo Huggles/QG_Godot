@@ -5,10 +5,20 @@ using System.Linq;
 
 public partial class PlayerScene : CharacterBody2D
 {
-    [Export]
-    private string _playerName = "Player";
+    [Export] private string _playerName = "Player_";
 
     public static PlayerScene Current { get; private set; }
+
+    private Camera2D _camera => GetNode<Camera2D>("Camera2D");
+    private Node _rootNode => GetNode("."); 
+
+    private CanvasLayer _loadingCoverInterface;
+
+    private CanvasLayer _interfaceLayer => GetNodeOrNull<CanvasLayer>("Interface");     
+    private bool _uiLoaded => GetChildren().ToList().Find(c => c.Name == "Interface") != null;
+
+    private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
+    private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(6321,1584);
     
     /// <summary>
     /// The factions this player controls in the game
@@ -29,7 +39,7 @@ public partial class PlayerScene : CharacterBody2D
     public void SetControlledFactions(List<Faction> factions)
     {
         _controlledFactions = new List<Faction>(factions);
-        DebugUtilities.PrintPeer($"PlayerScene ({PlayerName}: Controls {string.Join(", ", factions)}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"PlayerScene ({PlayerName}: Controls {string.Join(", ", factions)}");
     }
     
     /// <summary>
@@ -47,36 +57,19 @@ public partial class PlayerScene : CharacterBody2D
     {
         return _controlledFactions.Any(f => StaticGameData.FactionTeamForFaction(f) == team);
     }
-    
-    private Camera2D _camera;
-    private Node _rootNode;
-    
-    private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
-    private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(6321,1584);
-    
 
     public override void _Ready()
-    {        
-        GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
-
-        _rootNode = GetNode(".");  // Same as $"." in GDScript
-        _camera = GetNode<Camera2D>("Camera2D");
-
+    {   
         if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
         {
             Current = this;
-        }
-        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName}", DebugVerbosity.INFO);
-    }
-
-    public override void _PhysicsProcess(double delta)
-    {
-        HandleInput();
-    }
-
-    private void HandleInput()
-    {
-        // Placeholder for player input logic
+            _loadingCoverInterface = AssetRepository.LoadingCoverInterfaceScenePacked.Instantiate<CanvasLayer>();
+            _loadingCoverInterface.Name = "LoadingCoverInterface";
+            AddChild(_loadingCoverInterface);
+        } 
+        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName}");
+        GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
+        
     }
 
     public override void _Notification(int what)
@@ -105,27 +98,35 @@ public partial class PlayerScene : CharacterBody2D
 
     public void FadeLoadingScreen()
     {
-        DebugUtilities.PrintPeer("FadeLoadingScreen", DebugVerbosity.INFO);
-        var loadingCover = GetNodeOrNull("%LoadingCover");        
-        if (loadingCover != null)
+        if (!_uiLoaded)
         {
-            var tween = GetTree().CreateTween();   
-            PropertyTweener propertyTweener1 = tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.AnimationDurationSeconds)
-                 .SetTrans(Tween.TransitionType.Sine)
-                 .SetEase(Tween.EaseType.InOut);
-            propertyTweener1.Finished += () => {
-                DebugUtilities.PrintPeer("Removing loading cover", DebugVerbosity.INFO);
-                loadingCover?.GetParent()?.RemoveChild(loadingCover);
-            };
-        } else {
-            DebugUtilities.PrintPeerError("LoadingCover not found on PlayerScene");
-        }        
+            LoadUI();     
+            if (_loadingCoverInterface != null)
+            {
+                var loadingCover = _loadingCoverInterface.GetNodeOrNull<Control>("LoadingCover");
+
+                var tween = GetTree().CreateTween();   
+                PropertyTweener propertyTweener1 = tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.AnimationDurationSeconds)
+                    .SetTrans(Tween.TransitionType.Sine)
+                    .SetEase(Tween.EaseType.InOut);
+                propertyTweener1.Finished += () => {
+                    DebugUtilities.PrintPeer("Removing loading cover");
+                    RemoveChild(_loadingCoverInterface);
+                };
+            } else {
+                DebugUtilities.PrintPeerError("LoadingCover not found on PlayerScene");
+            }    
+        }   
     }
 
-    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void DoDebugCall()
-    {
-        DebugUtilities.PrintPeer($"DoDebugCall RPC received on PlayerScene for {PlayerName}", DebugVerbosity.INFO);
+    public void LoadUI()
+    {        
+        CanvasLayer uiLayer = AssetRepository.UserInterfaceScenePacked.Instantiate() as CanvasLayer;
+        uiLayer.Name = "Interface";
+        uiLayer.SetMultiplayerAuthority(GetMultiplayerAuthority());
+        uiLayer.Ready += () => {
+            EventBus.Emit(EventBus.SignalName.UserInterfaceReady);
+        };
+        AddChild(uiLayer);
     }
-
 }

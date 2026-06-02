@@ -12,9 +12,9 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
             Condition.Build(new Condition.CustomCondition(()=>{
-                if(CardPlayPool.LastNoneNewCardChangeEvent is DiscardCardsChangeEvent discardCardsChangeEvent){
-                    bool isEW = discardCardsChangeEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE;
-                    bool targetIsMe = discardCardsChangeEvent.TargetFaction == Faction;
+                if(CardPlayPool.LastNoneNewCardChangeEvent is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
+                    bool isEW = ForceDiscardCardsChangeEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE;
+                    bool targetIsMe = ForceDiscardCardsChangeEvent.TargetFaction == Faction;
                     return isEW && targetIsMe;
                 }
                 return false;
@@ -27,9 +27,9 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async ()=>{
-                if(CardPlayPool.LastNoneNewCardChangeEvent is DiscardCardsChangeEvent discardCardsChangeEvent){
-                    int newNumberOfCards = Math.Max(discardCardsChangeEvent.NumberOfCards - this.NumberOfCardsReduction, 0);
-                    discardCardsChangeEvent.NumberOfCards = newNumberOfCards;
+                if(CardPlayPool.LastNoneNewCardChangeEvent is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
+                    int newNumberOfCards = Math.Max(ForceDiscardCardsChangeEvent.NumberOfCards - this.NumberOfCardsReduction, 0);
+                    ForceDiscardCardsChangeEvent.NumberOfCards = newNumberOfCards;
                     PlayerActionLabel.ShowText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);
                     await Task.Delay(GameSettings.PauseDuration);
                     return null;          

@@ -5,29 +5,22 @@ using System.Threading.Tasks;
 
 public partial class PresentationModal : Control, LoadableUI
 {
-    public static PresentationModal Instance;
-    public RichTextLabel TitleText;
-    public PanelContainer PanelContainer;
-    public GridContainer GridCardContainer;
-    public ScrollContainer CardScrollContainer;
-
-    public bool RequireSelection;
-    public Button ExitButton;
-    public Button ConfirmButton;
+    public static PresentationModal Current;
+    public RichTextLabel TitleText => GetNode<RichTextLabel>("%TitleText");
+    public PanelContainer PanelContainer => GetNode<PanelContainer>("%PanelContainer");
+    public GridContainer GridCardContainer => GetNode<GridContainer>("%GridCardContainer");
+    public ScrollContainer CardScrollContainer => GetNode<ScrollContainer>("%CardScrollContainer");    
+    public Button ExitButton => GetNode<Button>("%ExitButton");
+    public Button ConfirmButton => GetNode<Button>("%ConfirmButton");
 
     // Multi-select support
+    public bool RequireSelection;
     private bool multiSelectMode = false;
     private int minimumSelections = 0;
     private List<int> selectedIdentifiers = new List<int>();
-    private Action<List<int>> confirmCallback;
-    private Action skipCallback;
-    
     public List<PresentationItem> PresentationItems = new List<PresentationItem>();
     public List<Control> PresentationItemControls = new List<Control>();
 
-    // Event handlers for cleanup
-    private Action onConfirmButtonPressed;
-    private Action onExitButtonPressed;
     private InputManager.KeyClickedEventHandler onKeyClicked;
 
     [Signal] public delegate void OnShowEventHandler();
@@ -37,55 +30,39 @@ public partial class PresentationModal : Control, LoadableUI
 
     public override void _Ready()
     {
-        Instance = this;
-        
+        if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
+        {
+            Current = this;
+            
+        } 
         // Hide by default until LoadUI is called
         Hide();
-        
-        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PresentationModal");
+        LoadUI();
     }
-
-    public override void _ExitTree()
-    {
-        UnsubscribeFromEvents();
-    }
-
     public void LoadUI()
-    {
-        TitleText = GetNode<RichTextLabel>("%TitleText");
-        PanelContainer = GetNode<PanelContainer>("%PanelContainer");
-        GridCardContainer = GetNode<GridContainer>("%GridCardContainer");
-        ExitButton = GetNode<Button>("%ExitButton");
-        CardScrollContainer = GetNode<ScrollContainer>("%CardScrollContainer");
-        
-        // Unsubscribe first to prevent duplicate connections
-        UnsubscribeFromEvents();
+    {   
         
         // Try to get ConfirmButton if it exists in the scene
-        if (HasNode("%ConfirmButton"))
+        if (ConfirmButton != null)
         {
-            ConfirmButton = GetNode<Button>("%ConfirmButton");
-            onConfirmButtonPressed = HandleConfirmPressed;
-            ConfirmButton.Pressed += onConfirmButtonPressed;
+            ConfirmButton.Pressed += OnConfirmButtonPressed;
+            ConfirmButton.Visible = false;
         }
-
         Visible = false;
         Modulate = new Color(1, 1, 1, 0);
         ExitButton.Visible = false;
-        if (ConfirmButton != null)
-            ConfirmButton.Visible = false;
+        ExitButton.Pressed += OnExitButtonPressed;
     }
     public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, bool requireSelection)
     {
         RequireSelection = requireSelection;
         return ShowModal(presentationItems, title, null);
     }
-
     public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, Action exitCallback)
     {
         if (!RequireSelection)
         {
-            ShowExitButton(exitCallback != null ? exitCallback : () => { this.HideModal(); });
+            ShowExitButton();
             
             // Unsubscribe first to prevent duplicate connections
             if (onKeyClicked != null)
@@ -98,7 +75,6 @@ public partial class PresentationModal : Control, LoadableUI
         ShowModalPersistent(presentationItems, title);        
         return ToSignal(this, SignalName.ItemSelected);
     }
-
     public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title)
     {
         HandlePresentationItems(presentationItems);
@@ -109,7 +85,7 @@ public partial class PresentationModal : Control, LoadableUI
         PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
         propertyTweener1.Finished += async () =>
         {
-            DebugUtilities.PrintPeer("PresentationModal shown", DebugVerbosity.INFO);
+            DebugUtilities.PrintPeer("PresentationModal shown");
             EmitSignal(SignalName.OnShow);
             await Task.Delay(GameSettings.PauseDuration);
             tween1.Dispose();
@@ -121,7 +97,6 @@ public partial class PresentationModal : Control, LoadableUI
         };
         return ToSignal(this, SignalName.OnHide);        
     }
-
     public SignalAwaiter ShowModalPersistent(List<PresentationItem> presentationItems, string title)
     {
         HandlePresentationItems(presentationItems);
@@ -139,21 +114,9 @@ public partial class PresentationModal : Control, LoadableUI
         return ToSignal(this, SignalName.OnShow);        
     }
 
-    public void ShowExitButton(Action callback)
+    public void ShowExitButton()
     {
-        ExitButton.Visible = true;
-        
-        // Unsubscribe previous handler if exists
-        if (onExitButtonPressed != null)
-        {
-            ExitButton.Pressed -= onExitButtonPressed;
-        }
-        
-        onExitButtonPressed = () =>
-        {
-            callback.Invoke();
-        };
-        ExitButton.Pressed += onExitButtonPressed;
+        ExitButton.Visible = true;        
     }
 
     private void HandlePresentationItems(List<PresentationItem> presentationItems)
@@ -198,7 +161,6 @@ public partial class PresentationModal : Control, LoadableUI
     private void HandleItemClicked(int identifier) {        
         EmitSignal(SignalName.ItemSelected, identifier);
     }
-
     private void HandleKeyboardInput(InputEventKey inputEventKey)
     {
         if (inputEventKey.Keycode == Key.Escape)
@@ -206,14 +168,10 @@ public partial class PresentationModal : Control, LoadableUI
             HideModal();
         }
     }
-
-    // Multi-select functionality
-    public void ShowModalMultiSelect(List<PresentationItem> presentationItems, string title, int minimumSelections, Action<List<int>> onConfirm, Action onSkip)
+    public SignalAwaiter ShowModalMultiSelect(List<PresentationItem> presentationItems, string title, int minimumSelections)
     {
         this.multiSelectMode = true;
         this.minimumSelections = minimumSelections;
-        this.confirmCallback = onConfirm;
-        this.skipCallback = onSkip;
         this.selectedIdentifiers.Clear();
 
         HandlePresentationItems(presentationItems);
@@ -227,24 +185,21 @@ public partial class PresentationModal : Control, LoadableUI
             UpdateConfirmButton();
         }
         
-        if (minimumSelections == 0 && skipCallback != null)
+        if (minimumSelections == 0)
         {
-            ShowExitButton(() => 
-            { 
-                skipCallback?.Invoke();
-            });
+            ShowExitButton();
         }
 
         var tween1 = GetTree().CreateTween();
         PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
         propertyTweener1.Finished += () =>
         {
-            DebugUtilities.PrintPeer("PresentationModal shown", DebugVerbosity.INFO);
+            DebugUtilities.PrintPeer("PresentationModal shown");
             EmitSignal(SignalName.OnShow);
             tween1.Dispose();
         };
+        return ToSignal(this, SignalName.OnHide);
     }
-
     private void HandleItemClickedMultiSelect(int identifier)
     {
         if (selectedIdentifiers.Contains(identifier))
@@ -260,7 +215,6 @@ public partial class PresentationModal : Control, LoadableUI
         
         UpdateConfirmButton();
     }
-
     private void UpdateItemVisual(int identifier, bool selected)
     {
         PresentationItem item = PresentationItems.Find(p => p.Identifier == identifier);
@@ -270,7 +224,6 @@ public partial class PresentationModal : Control, LoadableUI
             item.Control.Modulate = selected ? new Color(1, 1, 1) : new Color(0.5f, 0.5f, 0.5f);
         }
     }
-
     private void UpdateConfirmButton()
     {
         if (ConfirmButton != null)
@@ -282,13 +235,15 @@ public partial class PresentationModal : Control, LoadableUI
                 : $"Discard {selectedIdentifiers.Count} Card(s)";
         }
     }
-
-    private void HandleConfirmPressed()
+    private void OnConfirmButtonPressed()
     {
-        if (multiSelectMode && selectedIdentifiers.Count >= minimumSelections)
-        {
-            confirmCallback?.Invoke(new List<int>(selectedIdentifiers));
-        }
+        _ = HideModal();
+    }
+
+    private void OnExitButtonPressed()
+    {
+        selectedIdentifiers.Clear();
+        _ = HideModal();
     }
 
     public SignalAwaiter HideModal()
@@ -302,9 +257,6 @@ public partial class PresentationModal : Control, LoadableUI
         // Reset multi-select state
         multiSelectMode = false;
         minimumSelections = 0;
-        selectedIdentifiers.Clear();
-        confirmCallback = null;
-        skipCallback = null;
 
         var tween2 = GetTree().CreateTween();
         PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, GameSettings.AnimationDurationSeconds);
@@ -324,34 +276,21 @@ public partial class PresentationModal : Control, LoadableUI
             foreach (Control presentationItemControl in PresentationItemControls)
             {
                 if (presentationItemControl.GetParent() != null)
-                {
+                {                    
                     presentationItemControl.GetParent().RemoveChild(presentationItemControl);
                 }
             }
             PresentationItemControls.Clear();
             PresentationItems.Clear();
-            EmitSignal(SignalName.OnHide);
+            EmitSignal(SignalName.OnHide, new PresentationItemResponse { SelectedItems = new List<int>(selectedIdentifiers) });
+            selectedIdentifiers.Clear();
         };
         return ToSignal(this, SignalName.OnHide);
     }
 
-    private void UnsubscribeFromEvents()
+    public partial class PresentationItemResponse : GodotObject
     {
-        // Unsubscribe from button events
-        if (IsInstanceValid(ConfirmButton) && onConfirmButtonPressed != null)
-        {
-            ConfirmButton.Pressed -= onConfirmButtonPressed;
-        }
-        
-        if (IsInstanceValid(ExitButton) && onExitButtonPressed != null)
-        {
-            ExitButton.Pressed -= onExitButtonPressed;
-        }
-        
-        // Unsubscribe from InputManager events
-        if (InputManager.Instance != null && onKeyClicked != null)
-        {
-            InputManager.Instance.KeyClicked -= onKeyClicked;
-        }
+        public List<int> SelectedItems;
+       
     }
 }

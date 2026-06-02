@@ -5,8 +5,4 @@
     <RootNamespace>QuartermasterGeneral</RootNamespace>
     <LangVersion>14.0</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Metalama.Framework" Version="2026.0.23" />
-    <PackageReference Include="Metalama.Patterns.Observability" Version="2026.0.23" />
-  </ItemGroup>
 </Project>

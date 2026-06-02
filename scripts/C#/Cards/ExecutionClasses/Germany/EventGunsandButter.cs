@@ -33,9 +33,9 @@ public partial class EventGunsAndButter : EventCardLogic
                 
                 // Show modal with card visuals
                 List<PresentationItem> actionOptions = PresentationItemCard.FromCardIds(availableCardIds, true);
-                Variant[] response = await PresentationModal.Instance.ShowModal(actionOptions, "Choose an action");
+                Variant[] response = await PresentationModal.Current.ShowModal(actionOptions, "Choose an action");
                 int selectedCardId = response[0].As<int>();
-                await PresentationModal.Instance.HideModal();
+                await PresentationModal.Current.HideModal();
                 
                 // Execute the chosen action
                 ChangeEvent result = null;

@@ -24,7 +24,7 @@ public partial class EventBus : GodotObject
         return Instance.ToSignal(EventBus.Instance,name);        
     }
 
-    [Signal] public delegate void UserInterfaceLoadedEventHandler(string elementName);
+    [Signal] public delegate void UserInterfaceReadyEventHandler();
 
 
     [Signal] public delegate void PlayerJoinedEventHandler();
@@ -39,6 +39,11 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void GameChangeEventOccurredEventHandler();
 
     [Signal] public delegate void CardSelectedEventHandler();
+
+    [Signal] public delegate void CardsDrawnEventHandler(int faction, int numberOfCards);
+    [Signal] public delegate void CardsDiscardedEventHandler(int faction, int numberOfCards);
+
+    [Signal] public delegate void InputRequestResponseReceivedEventHandler(string jsonDto);
 
     [Signal] public delegate void RequestStatusCardEventHandler();
     [Signal] public delegate void RequestResponseCardEventHandler();
@@ -68,14 +73,12 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void GameChangeEventBeforeEventHandler();
     /// <summary>changeEventType is the class name of the ChangeEvent that was applied (e.g. "DeployUnitChangeEvent").
     /// On the client in multiplayer it will be the type synced from the server. UI reads GameState for details.</summary>
-    [Signal] public delegate void GameChangeEventAfterEventHandler(string changeEventType);
+    [Signal] public delegate void GameChangeEventAfterEventHandler(string changeEventName);
 
     [Signal] public delegate void NewTurnStartedEventHandler(int turnNumber);
     [Signal] public delegate void NextStepStartedEventHandler(int turnStep);
 
     [Signal] public delegate void FactionScoredPointsEventHandler(Faction faction, int points);
-
-    [Signal] public delegate void VpDetailsPanelOpenedEventHandler(Faction faction);
 
     [Signal] public delegate void UnitDeployedEventHandler(int unitId, int countryId);
     [Signal] public delegate void UnitRemovedEventHandler(int unitId, int countryId);

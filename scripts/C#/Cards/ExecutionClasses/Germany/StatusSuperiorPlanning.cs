@@ -25,18 +25,18 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
 
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(topCards, true);
                 var completionSource = new TaskCompletionSource<List<int>>();
-                PresentationModal.Instance.ShowModalMultiSelect(
+                Variant[] response = await PresentationModal.Current.ShowModalMultiSelect(
                     presentationItems,
                     "Reorder the top 4 cards of your deck (select in desired order)",
-                    peekCount,
-                    reorderedIds => {
-                        for (int i = 0; i < peekCount; i++)
-                            deck.DeckCardIds.RemoveAt(0);
-                        deck.DeckCardIds.InsertRange(0, reorderedIds);
-                        completionSource.SetResult(reorderedIds);
-                    },
-                    () => completionSource.SetResult(topCards) // skip: keep original order
+                    peekCount                   
                 );
+                //  reorderedIds => {
+                //         for (int i = 0; i < peekCount; i++)
+                //             deck.DeckCardIds.RemoveAt(0);
+                //         deck.DeckCardIds.InsertRange(0, reorderedIds);
+                //         completionSource.SetResult(reorderedIds);
+                //     },
+                //     () => completionSource.SetResult(topCards) // skip: keep original order
                 await completionSource.Task;
                 return null;
             }).WithGuidance("Examine and reorder the top 4 cards of your draw deck")

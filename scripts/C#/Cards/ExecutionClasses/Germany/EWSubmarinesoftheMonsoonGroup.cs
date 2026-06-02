@@ -10,18 +10,18 @@ public partial class EWSubmarinesoftheMonsoonGroup : EWCardLogic
         {
             new CardStep(this, async() => {
                 // Show modal to select Allied faction
-                Variant[] response = await PresentationModal.Instance.ShowModal(
+                Variant[] response = await PresentationModal.Current.ShowModal(
                     PresentationItemImageButton.ForFactions([Faction.UNITED_KINGDOM, Faction.UNITED_STATES, Faction.SOVIET]), 
                     "Select Allied country");
                 Faction selectedFaction = (Faction)response[0].As<int>();
-                await PresentationModal.Instance.HideModal();
+                await PresentationModal.Current.HideModal();
                 
                 // Selected faction discards 2 cards
-                DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, selectedFaction, 2));
+                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, selectedFaction, 2));
                 discardEvent.IsTrigger = true;
                 
                 // Score 2 VP
-                IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
+                IVictoryStepHandler vpHandler = GameFlow.Instance.vpStepHandler;
                 await vpHandler.ScorePoints(new VPEntry(2, "2 VP for Submarines of the Monsoon Group."));
                 
                 return discardEvent;

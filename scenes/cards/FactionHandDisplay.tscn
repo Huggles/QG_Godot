@@ -70,8 +70,8 @@ layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
-theme_override_styles/hover = ExtResource("3_ff84v")
 theme_override_styles/normal = ExtResource("4_54hqk")
+theme_override_styles/hover = ExtResource("3_ff84v")
 text = "Skip
 "
 
@@ -83,8 +83,8 @@ focus_mode = 0
 mouse_force_pass_scroll_events = false
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
-theme_override_styles/hover = ExtResource("3_ff84v")
 theme_override_styles/normal = ExtResource("4_54hqk")
+theme_override_styles/hover = ExtResource("3_ff84v")
 text = "Discarded
 "
 
@@ -97,7 +97,7 @@ focus_mode = 0
 mouse_force_pass_scroll_events = false
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
-theme_override_styles/hover = ExtResource("3_ff84v")
 theme_override_styles/normal = ExtResource("4_54hqk")
+theme_override_styles/hover = ExtResource("3_ff84v")
 text = "Test
 "

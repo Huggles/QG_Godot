@@ -21,11 +21,11 @@ public partial class EWSubmarinesPreyonUnprotectedShipping : EWCardLogic
                 int discardCount = alliedNavyInNorthSea ? 2 : 5;
                 
                 // UK discards cards
-                DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, discardCount));
+                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, discardCount));
                 discardEvent.IsTrigger = true;
                 
                 // Score 1 VP
-                IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
+                IVictoryStepHandler vpHandler = GameFlow.Instance.vpStepHandler;
                 await vpHandler.ScorePoints(new VPEntry(1, "1 VP for Submarines Prey on Unprotected Shipping."));
                 
                 return discardEvent;

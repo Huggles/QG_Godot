@@ -8,12 +8,12 @@ public partial class BattleUnitChangeEvent : RemoveUnitChangeEvent
     {
     }
 
-    public override ChangeEventDto ToDto() => new BattleUnitChangeEventDto
+    public override ChangeEventDto ToDto()
     {
-        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
-        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
-        UnitId = UnitId
-    };
+        BattleUnitChangeEventDto dto = ChangeEventDto.Build<BattleUnitChangeEventDto>(this, Id);
+        dto.UnitId = UnitId;
+        return dto;
+    }
 
     public override string SummaryText()
     {

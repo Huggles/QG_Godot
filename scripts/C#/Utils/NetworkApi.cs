@@ -59,13 +59,11 @@ public partial class NetworkApi : Node
             List<Faction> factions = assignment.Factions;
             
             string factionNames = string.Join(", ", factions);
-            DebugUtilities.PrintPeer($"Creating player for peer {peerId} with factions: {factionNames}", DebugVerbosity.INFO);
+            DebugUtilities.PrintPeer($"Creating player for peer {peerId} with factions: {factionNames}");
             
             PlayerScene player = AssetRepository.PlayerScenePackged.Instantiate<PlayerScene>();
             player.SetMultiplayerAuthority(peerId);
-            player.PlayerName = factions.Count == 1 
-                ? $"{factions[0]} Player" 
-                : $"Player {peerId}";
+            player.PlayerName = $"Player_{peerId}";
 
             if (Multiplayer.IsServer())
             {
@@ -96,20 +94,69 @@ public partial class NetworkApi : Node
     /// Clients reconstruct the event, apply it locally, then verify the state hash.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void ReceiveChangeEvent(string dtoJson, string expectedHash)
+    public async void ReceiveChangeEvent(string dtoJson)
     {
-        DebugUtilities.PrintPeer($"ReceiveChangeEvent: {dtoJson[..Math.Min(80, dtoJson.Length)]}", DebugVerbosity.INFO);
+        
         ChangeEventDto dto = JsonSerializer.Deserialize<ChangeEventDto>(dtoJson);
         ChangeEvent ev     = ChangeEvent.FromDto(dto);
-        await ev.ApplyChange();
+        DebugUtilities.PrintPeer($"ReceiveChangeEvent ({ev.Id}): {dtoJson}");
+        ev.ChangeEventApplied += (id) => {
+            string actualHash = MultiplayerSession.Instance.GameState.ComputeHash();
+            DebugUtilities.PrintPeer($"{actualHash}");
+            if (actualHash != ev.HashAfterApplication)
+            {
+                DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
+                DebugUtilities.PrintPeerError($"DESYNC DETECTED after applying {dto.GetType().Name}!");
+                DebugUtilities.PrintPeerError($"Hash mismatch after {dto.GetType().Name}: expected {ev.HashAfterApplication}, got {actualHash}. Requesting resync.");            
+                DebugUtilities.PrintPeerError($"EventId: {ev.Id}, LatestAppliedId: {ChangeEvent.LatestAppliedId}");
+                DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
+                DebugUtilities.PrintPeerError($"{JsonSerializer.Serialize(MultiplayerSession.Instance.GameState)}");
+                RpcId(1, nameof(RequestResync));
+                return;
+            }            
+        };
+        ChangeEventQueue.Instance.Enqueue(ev);
+    }
 
-        string actualHash = MultiplayerSession.Instance.GameState.ComputeHash();
-        DebugUtilities.PrintPeer($"{actualHash}", DebugVerbosity.INFO);
-        if (actualHash != expectedHash)
+    public SignalAwaiter SendInputRequest(InputRequest inputRequest)
+    {   
+        DebugUtilities.PrintPeer($"SendInputRequest");
+        string payload = inputRequest.ToJson();
+        DebugUtilities.PrintPeer($"Sent input request: {payload}");
+        Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);        
+        return EventBus.Instance.ToSignal(EventBus.Instance, nameof(EventBus.SignalName.InputRequestResponseReceived));
+    }
+
+    /// <summary>
+    /// Called on all clients by the server after a ChangeEvent is applied.
+    /// Clients reconstruct the event, apply it locally, then verify the state hash.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public async void ReceiveInputRequest(string dtoJson)
+    {
+        DebugUtilities.PrintPeer($"ReceiveInputRequest: {dtoJson}");
+        InputRequest dto = InputRequest.FromJson(dtoJson);
+        await dto.Execute();
+
+        if (dto.IsForCurrentPeer)
         {
-            DebugUtilities.PrintPeerError($"Hash mismatch after {dto.GetType().Name}: expected {expectedHash}, got {actualHash}. Requesting resync.");
-            RpcId(1, nameof(RequestResync));
+            Rpc(nameof(ReceiveInputResponse), dto.ToJson());
         }
+    }
+
+
+    
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    private async void ReceiveInputResponse(string dtoJson)
+    {
+        if(!Multiplayer.IsServer())
+        {
+            PlayerActionLabel.HideText();
+            return;
+        }
+        GameFlow.Instance.CurrentInputRequest = InputRequest.FromJson(dtoJson);            
+        EventBus.Emit(EventBus.SignalName.InputRequestResponseReceived, dtoJson);
     }
 
     /// <summary>Client → server: request a full state snapshot due to hash mismatch.</summary>
@@ -118,16 +165,23 @@ public partial class NetworkApi : Node
     {
         if (!Multiplayer.IsServer()) return;
         int requestingPeer = Multiplayer.GetRemoteSenderId();
-        DebugUtilities.PrintPeer($"Resync requested by peer {requestingPeer}", DebugVerbosity.INFO);
-        string snapshotJson = JsonSerializer.Serialize(MultiplayerSession.Instance.GameState.BuildSnapshot());
-        RpcId(requestingPeer, nameof(ReceiveFullSnapshot), snapshotJson);
+        DebugUtilities.PrintPeer($"Resync requested by peer {requestingPeer}");
+        string dto = JsonSerializer.Serialize(MultiplayerSession.Instance.GameState);
+
+        DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
+        DebugUtilities.PrintPeerError($"DESYNC DETECTED!");
+        DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
+        DebugUtilities.PrintPeerError($"{JsonSerializer.Serialize(MultiplayerSession.Instance.GameState)}");
+        
+        
+        //RpcId(requestingPeer, nameof(ReceiveFullSnapshot), dto);
     }
 
     /// <summary>Server → client: delivers a full state snapshot in response to RequestResync.</summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void ReceiveFullSnapshot(string snapshotJson)
     {
-        DebugUtilities.PrintPeer("ReceiveFullSnapshot: applying resync", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("ReceiveFullSnapshot: applying resync");
         MultiplayerGameStateSnapshot snapshot = JsonSerializer.Deserialize<MultiplayerGameStateSnapshot>(snapshotJson);
         MultiplayerSession.Instance.GameState.ApplySnapshot(snapshot);
     }
@@ -135,7 +189,7 @@ public partial class NetworkApi : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void ReceiveGameStateUpdate(string gameStateJson, string changeEventType)
     {
-        DebugUtilities.PrintPeer($"ReceiveGameStateUpdate: {changeEventType}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"ReceiveGameStateUpdate: {changeEventType}");
         MultiplayerGameStateSnapshot snapshot = JsonSerializer.Deserialize<MultiplayerGameStateSnapshot>(gameStateJson);
         MultiplayerSession.Instance.GameState.ApplySnapshot(snapshot);
         EventBus.Emit(EventBus.SignalName.GameChangeEventAfter, changeEventType);

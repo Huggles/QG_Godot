@@ -42,22 +42,24 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
         if (deckState.HandCardIds.Count == 0)
             return;
 
-        InputHandlerDiscard inputHandler = new InputHandlerDiscard(faction, minimumDiscards, required);
-        List<int> selectedCardIds = await inputHandler.GetSelectedCards();
+        DebugUtilities.PrintPeer($"Requesting discard for {faction} (minimum discards: {minimumDiscards}, required: {required})");
+        InputRequest response = await new InputRequest.HandCardsDiscardRequestHandler(faction).BroadCast(); 
+        DebugUtilities.PrintPeer($"Received discard response for {faction}: {string.Join(", ", response.ResponseCardIds)}");
+        
 
-        // Discard the selected cards
-        foreach (int cardId in selectedCardIds)
+        if (response.ResponseCardIds.Count > 0)
         {
-            deckState.DiscardCard(cardId);
+            // Discard selected cards
+            DiscardHandCardsChangeEvent discardHandCardsChangeEvent = new DiscardHandCardsChangeEvent(faction, faction, response.ResponseCardIds);
+            discardHandCardsChangeEvent.IsTrigger = false;
+            await CardPlayPool.DoChangeEvent(discardHandCardsChangeEvent);
         }
-
-        if (selectedCardIds.Count > 0)
+        else
         {
-            string message = required 
-                ? $"Discarded {selectedCardIds.Count} cards (required: {minimumDiscards})"
-                : $"Discarded {selectedCardIds.Count} cards";
-            PlayerActionLabel.ShowText(message, faction);
+            // No cards to discard
             await Task.Delay(GameSettings.PauseDuration);
         }
+
+        
     }
 }

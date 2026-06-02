@@ -13,13 +13,13 @@ public partial class EWBomberCommand : EWCardLogic
         {
             new CardStep(this, async() => {
 
-                Variant[] response = await PresentationModal.Instance.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.ITALY]), "Select a faction");                
+                Variant[] response = await PresentationModal.Current.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.ITALY]), "Select a faction");                
                 Faction selectedFaction = (Faction)response[0].As<int>();
-                await PresentationModal.Instance.HideModal();
+                await PresentationModal.Current.HideModal();
 
-                DiscardCardsChangeEvent discardCardsChangeEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, selectedFaction, 4));
-                discardCardsChangeEvent.IsTrigger = true;
-                return discardCardsChangeEvent;      
+                ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, selectedFaction, 4));
+                ForceDiscardCardsChangeEvent.IsTrigger = true;
+                return ForceDiscardCardsChangeEvent;      
             })
         };
     }

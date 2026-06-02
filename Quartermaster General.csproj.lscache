@@ -229,7 +229,7 @@ scripts/C#/
   BattleUnitChangeEvent.cs
   ChangeEvent.cs
   DeployUnitChangeEvent.cs
-  DiscardCardsChangeEvent.cs
+  ForceDiscardCardsChangeEvent.cs
   IChangeEvent.cs
   PlayCardChangeEvent.cs
   RemoveUnitChangeEvent.cs

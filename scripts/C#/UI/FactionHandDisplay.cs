@@ -3,18 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class FactionHandDisplay : Control, LoadableUI
+public partial class FactionHandDisplay : Control
 {
 
-    public static FactionHandDisplay Instance;
+    public static FactionHandDisplay Current;
 
-    private Control CardsContainer;
-    private Panel CardPreviewContainer;
-    private CardScene CardPreview;
-    private Button SkipButton;
-    private Button DeckButton;
-    private Button DiscardedDeckButton;
-    private Button TestButton;
+    private Control CardsContainer => GetNode<Panel>("%CardsContainerPanel");
+    private Panel CardPreviewContainer => GetNode<Panel>("%CardPreviewContainer");
+    private CardScene CardPreview => GetNode<CardScene>("%CardPreview");
+    private Button SkipButton => GetNode<Button>("%SkipButton");
+    private Button DeckButton => GetNode<Button>("%DeckButton");
+    private Button DiscardedDeckButton => GetNode<Button>("%DiscardedDeckButton");
+    private Button TestButton => GetNode<Button>("%TestButton");
 
     private List<CardScene> CardScenes = new List<CardScene>();
     private Faction showingFaction;
@@ -22,7 +22,6 @@ public partial class FactionHandDisplay : Control, LoadableUI
     [Signal] public delegate void CardSelectedEventHandler(int cardId);
 
     // Event handlers for cleanup
-    private EventBus.NextStepStartedEventHandler onNextStepStarted;
     private Action onSkipButtonPressed;
     private Action onDiscardedDeckButtonPressed;
     private Action onTestButtonPressed;
@@ -32,43 +31,30 @@ public partial class FactionHandDisplay : Control, LoadableUI
 
     public override void _Ready()
     {        
-        Instance = this;
-        
-        // Hide by default until LoadUI is called
-        Hide();
-        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionHandDisplay");        
-    }
+        if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        {
+            Current = this;
+            LoadUI();          
+        }        
+    }  
+
 
     public override void _ExitTree()
     {
         UnsubscribeFromEvents();
     }
 
-    public void LoadUI()
+    private void LoadUI()
     {
-        CardsContainer = GetNode<Panel>("%CardsContainerPanel");
-        CardPreviewContainer = GetNode<Panel>("%CardPreviewContainer");
-        CardPreview = GetNode<CardScene>("%CardPreview");
-        SkipButton = GetNode<Button>("%SkipButton");
-        DiscardedDeckButton = GetNode<Button>("%DiscardedDeckButton");
-        TestButton = GetNode<Button>("%TestButton");
-
-        Hide();
+        Hide();        
+        EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
+        EventBus.Instance.NextStepStarted += OnNextStepStarted;
+        EventBus.Instance.CardsDrawn += OnCardsDrawn;
+        EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
+        
 
         // Unsubscribe first to prevent duplicate connections
         UnsubscribeFromEvents();
-
-        // Subscribe to events
-        onNextStepStarted = (int turnStep) =>
-        {
-            if (!IsInstanceValid(this) || !IsInsideTree()) return;
-            
-            if ((TurnStep)turnStep == TurnStep.PLAY_CARD)
-            {
-                Show(GameSession.CurrentFaction);
-            }
-        };
-        EventBus.Instance.NextStepStarted += onNextStepStarted;
 
         onSkipButtonPressed = () => 
         { 
@@ -82,7 +68,7 @@ public partial class FactionHandDisplay : Control, LoadableUI
             if (!IsInstanceValid(this) || !IsInsideTree()) return;
             
             List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DiscardedCardIds, false);            
-            PresentationModal.Instance.ShowModalPersistent(presentationItems, "Your Discarded Cards");
+            PresentationModal.Current.ShowModalPersistent(presentationItems, "Your Discarded Cards");
         };
         DiscardedDeckButton.Pressed += onDiscardedDeckButtonPressed;
 
@@ -90,9 +76,61 @@ public partial class FactionHandDisplay : Control, LoadableUI
         {
             if (!IsInstanceValid(this) || !IsInsideTree()) return;
             
-            PresentationModal.Instance.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
+            PresentationModal.Current.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
         };
         TestButton.Pressed += onTestButtonPressed;
+    }
+
+    private void OnCardsDrawn(int faction, int numberOfCards)
+    {
+        if (showingFaction == (Faction)faction)
+        {
+            Show(showingFaction);
+        }
+    }
+
+    private void OnCardsDiscarded(int faction, int numberOfCards)
+    {
+        if (showingFaction == (Faction)faction)
+        {
+            Show(showingFaction);
+        }
+    }
+
+    private void OnGameSessionStarted()
+    {
+        DebugUtilities.PrintPeer($"Game session started, showing hand display for first faction: {PlayerScene.Current.ControlledFactions[0]}");
+        Show(PlayerScene.Current.ControlledFactions[0]);
+    }
+
+
+    private void OnNextStepStarted(int turnStep)
+    {
+        switch((TurnStep)turnStep)
+        {
+            case TurnStep.START:       
+                OnStartTurnStepStarted();
+                break;
+            case TurnStep.PLAY_CARD:            
+                OnPlayCardTurnStepStarted();
+                break;
+            default:
+                Hide();
+                break;
+        };
+    }
+
+    private void OnStartTurnStepStarted()
+    {
+        
+    }
+
+    private void OnPlayCardTurnStepStarted()
+    {        
+        if(PlayerScene.Current.ControlledFactions.Contains(GameFlow.Instance.CurrentFaction))
+        {
+            Show(GameFlow.Instance.CurrentFaction);
+        }
     }
 
     public void Show(Faction faction)
@@ -145,6 +183,8 @@ public partial class FactionHandDisplay : Control, LoadableUI
     private void InitCards(List<int> cardIds)
     {
         // Only initialize cards if LoadUI has been called
+        DebugUtilities.PrintPeer($"Initializing cards {string.Join(", ", cardIds)}");
+        DebugUtilities.PrintPeer($"{CardsContainer}");
         if (CardsContainer == null)
         {
             return;
@@ -185,9 +225,9 @@ public partial class FactionHandDisplay : Control, LoadableUI
 
     private void OnCardSelected(int cardId)
     {
-        DebugUtilities.PrintPeer($"Card selected with ID: {cardId}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Card selected with ID: {cardId}");
         EmitSignal(SignalName.CardSelected, cardId);
-        DebugUtilities.PrintPeer("Emitted CardSelected signal with ID: " + cardId, DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Emitted CardSelected signal with ID: " + cardId);
     }
 
     private void DeleteCurrentCards()
@@ -226,9 +266,9 @@ public partial class FactionHandDisplay : Control, LoadableUI
     private void UnsubscribeFromEvents()
     {
         // Unsubscribe from EventBus events
-        if (EventBus.Instance != null && onNextStepStarted != null)
+        if (EventBus.Instance != null && OnNextStepStarted != null)
         {
-            EventBus.Instance.NextStepStarted -= onNextStepStarted;
+            EventBus.Instance.NextStepStarted -= OnNextStepStarted;
         }
 
         // Unsubscribe from button events

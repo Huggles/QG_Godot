@@ -4,27 +4,20 @@ using System.Threading.Tasks;
 
 public partial class PlayCardChangeEvent : ChangeEvent
 {
-    protected int StepId;
-
     public PlayCardChangeEvent(Faction faction, int cardId) : base(faction)
     {
-        this.SourceCardId = cardId;
-        this.StepId = SourceCardState.CardLogic.PlayCardSteps[0].Id;
+        SourceCardId = cardId;
     }
 
-    public override ChangeEventDto ToDto() => new PlayCardChangeEventDto
+    public override ChangeEventDto ToDto()
     {
-        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
-        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress
-    };
+        PlayCardChangeEventDto dto = ChangeEventDto.Build<PlayCardChangeEventDto>(this, Id);
+        dto.SourceCardId = SourceCardId;
+        return dto;
+    }
 
     protected override async Task<bool> ExecuteAsync(){
-        DebugUtilities.PrintPeer($"PlayCardChangeEvent.ExecuteAsync for card {SourceCardState.CardName} (id={SourceCardId})");
-        DebugUtilities.PrintPeer($"  IsPlayed before move: {SourceCardState.CardLogic.IsPlayed}");
-        DeckState.ForFaction(SourceCardState.Faction).PlayCard(SourceCardState.Id);
-        
-        DebugUtilities.PrintPeer($"  IsPlayed after move: {SourceCardState.CardLogic.IsPlayed}");
-        
+        DeckState.ForFaction(SourceCardState.Faction).PlayCard(SourceCardState.Id);        
         await Task.CompletedTask;
         return true;
     }

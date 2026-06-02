@@ -1,6 +1,11 @@
 {
   "unitDeployments": [
-    { "faction": "GERMANY",       "countryName": "GERMANY" }
+    { "faction": "GERMANY",       "countryName": "GERMANY" },
+    { "faction": "UNITED_KINGDOM",       "countryName": "UNITED_KINGDOM" },
+    { "faction": "JAPAN",       "countryName": "JAPAN" },
+    { "faction": "SOVIET",       "countryName": "MOSCOW" },
+    { "faction": "ITALY",       "countryName": "ITALY" },
+    { "faction": "UNITED_STATES",       "countryName": "US_EAST" }
   ],
   "startingFaction": "GERMANY",
   "initialCards": [

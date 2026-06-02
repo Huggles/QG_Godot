@@ -53,14 +53,14 @@ public partial class CardScene : Control
     {        
         if (triggersEmphasis)
         {
-            FactionHandDisplay.Instance.ShowCardEmphasis(CardId);
+            FactionHandDisplay.Current.ShowCardEmphasis(CardId);
         }
         
     }
     private void CardButton_MouseExited()
     {
         DebugUtilities.PrintPeer($"Mouse exited card with ID: {CardId}");
-        FactionHandDisplay.Instance.HideCardEmphasis();        
+        FactionHandDisplay.Current.HideCardEmphasis();        
     }
 
     public void ShowCard(int cardId)
@@ -70,8 +70,7 @@ public partial class CardScene : Control
 
         CardId = cardId;
         if (CardId > -1)
-        {
-            Name = $"{CardState.Faction}-{CardState.CardData.UniqueName}";
+        {            
             cardTextureNode.Texture = FactionState.FactionData.CardFrontTextures[CardState.CardData.CardType];
             if (!string.IsNullOrEmpty(CardState.CardData.Text))
             {

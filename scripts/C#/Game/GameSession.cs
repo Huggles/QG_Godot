@@ -39,9 +39,7 @@ public partial class GameSession : Node
     public static bool IsStarted = false;
 
     // Tracks the current faction on clients (set via RPC; on host computed from GameFlow)
-    private static Faction _clientCurrentFaction;
-    public static Faction CurrentFaction =>
-        Instance?.GameFlow != null ? Instance.GameFlow.CurrentFaction : _clientCurrentFaction;
+
 
     private List<PlayerScene> playerScenes { get; set; }
 
@@ -57,7 +55,7 @@ public partial class GameSession : Node
 
     public async Task StartSession(List<PlayerScene> playerScenes)
     {
-        DebugUtilities.PrintPeer("Start Session", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Start Session");
         this.playerScenes = playerScenes;
 
         
@@ -76,31 +74,6 @@ public partial class GameSession : Node
     {
         IsStarted = true;
         EventBus.Emit(EventBus.SignalName.GameSessionStarted);
-    }
-
-    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void ReceiveGameStarted()
-    {
-        DebugUtilities.PrintPeer("Client received GameStarted - fading loading screen", DebugVerbosity.INFO);
-        PlayerScene player = PlayerFactionRegistry.GetPlayerSceneForFaction(
-            PlayerFactionRegistry.GetLocalPlayerFactions().FirstOrDefault());
-        player?.FadeLoadingScreen();
-    }
-
-    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void ReceiveNewTurnStarted(int turnNumber, int currentFactionId)
-    {
-        _clientCurrentFaction = (Faction)currentFactionId;
-        DebugUtilities.PrintPeer($"Client received NewTurnStarted: turn={turnNumber}, faction={_clientCurrentFaction}", DebugVerbosity.INFO);
-        EventBus.Emit(EventBus.SignalName.NewTurnStarted, turnNumber);
-    }
-
-    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void ReceiveNextStepStarted(int turnStep, int currentFactionId)
-    {
-        _clientCurrentFaction = (Faction)currentFactionId;
-        DebugUtilities.PrintPeer($"Client received NextStepStarted: step={turnStep}, faction={_clientCurrentFaction}", DebugVerbosity.INFO);
-        EventBus.Emit(EventBus.SignalName.NextStepStarted, turnStep);
     }
 
     /**
@@ -125,19 +98,10 @@ public partial class GameSession : Node
         }
 
         List<CardActivationOption> activationOptions = CardPlayPool.GetNextActions(faction);
-        
-        // Route input to the correct player's InputManager
-        controllingPlayer.InputManager.SetPlayCardInputActive(activationOptions);
-        
-        Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
-        if (results == null || results.Length == 0)
-        {
-            return null;
-        }
-        else
-        {
-            return results[0].As<CardActivationOption>();
-        }
+
+        Variant[] response = await NetworkApi.Instance.SendInputRequest(new InputRequest.HandCardPlayRequestHandler(faction, activationOptions.Select(opt => opt.StepId).ToList()));
+        InputRequest responseDto = InputRequest.FromJson(response[0].AsString()); 
+        return activationOptions.Find(opt => opt.StepId == responseDto.ResponseStepIds[0]);
     }
     public async static Task<CardActivationOption> RequestBlock(Faction faction)
     {
@@ -166,7 +130,7 @@ public partial class GameSession : Node
             }
             else
             {
-                return results[0].As<CardActivationOption>();
+                return new CardActivationOption((int)results[0]);
             }
         }
 

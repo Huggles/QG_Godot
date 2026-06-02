@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 public abstract partial class ChangeEvent : GodotObject, IChangeEvent
@@ -12,7 +13,13 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
     public string ScriptName => GetType().ToString();
 
     public int Id { get; set; } = -1;
-    public Faction TriggeringFaction { get; set; }
+
+    public string HashAfterApplication { get; set; } = null;
+    [JsonIgnore] public static int LatestAppliedId { get; set; } = -1;
+    public Faction TriggeringFaction { get; set; }        
+    public Faction TargetFaction { get; set; }
+    FactionState triggeringFactionState => FactionState.ForEnum(TriggeringFaction);
+    FactionState targetFactionState => FactionState.ForEnum(TargetFaction);
     public bool SuppressGameProgress { get; set; } = false;
     public bool IsTrigger { get; set; } = true;
     public bool IsBlocked { get; set; } = false;
@@ -49,36 +56,34 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             BattleUnitChangeEventDto d       => new BattleUnitChangeEvent(d.TriggeringFaction, d.UnitId),
             PlayCardChangeEventDto d         => new PlayCardChangeEvent(d.TriggeringFaction, d.SourceCardId),
             ActivateReactionChangeEventDto d => new ActivateReactionChangeEvent(d.TriggeringFaction, d.SourceCardId, ForId(d.SourceChangeEventId)),
-            DiscardCardsChangeEventDto d     => new DiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
-            DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
+            ForceDiscardCardsChangeEventDto d     => new ForceDiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
+            DiscardHandCardsChangeEventDto d     => new DiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardIds),
+            DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards, d.ShowDrawnCards),
+            ScorePointsChangeEventDto d      => new ScorePointsChangeEvent(d.VPTurnSummary),
             _ => throw new NotSupportedException($"Unknown ChangeEventDto type: {dto.GetType().Name}")
         };
+        ev.Id                   = dto.Id;
+        ev.HashAfterApplication = dto.HashAfterApplication;
         ev.SourceCardId         = dto.SourceCardId;
         ev.IsTrigger            = dto.IsTrigger;
         ev.SuppressGameProgress = dto.SuppressGameProgress;
+        
         return ev;
     }
 
     public async Task<bool> ApplyChange()
     {
-        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
-        await ExecuteAsync();
+        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);        
+        await ExecuteAsync();        
         GameStateCalculator.CalculateAll();
 
         if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
-        {
-            string dtoJson = JsonSerializer.Serialize(ToDto());
-            DebugUtilities.PrintPeer($"{JsonSerializer.Serialize(MultiplayerSession.Instance.GameState)}", DebugVerbosity.INFO);
-            string hash    = MultiplayerSession.Instance.GameState.ComputeHash();
-
-            DebugUtilities.PrintPeer($"{MultiplayerSession.Instance.GameState.ComputeHash()}", DebugVerbosity.INFO);
-            DebugUtilities.PrintPeer($"{MultiplayerSession.Instance.GameState.ComputeHash()}", DebugVerbosity.INFO);
-
-            NetworkApi.Instance.Rpc(nameof(NetworkApi.ReceiveChangeEvent), dtoJson, hash);
+        {   
+            await BroadCast();
         }
-
-        EmitSignal(SignalName.ChangeEventApplied, Id);
-        EventBus.Emit(EventBus.SignalName.GameChangeEventAfter, ScriptName);
+        LatestAppliedId = Id;
+        EmitSignal(SignalName.ChangeEventApplied, Id);        
+        EventBus.Emit(EventBus.SignalName.GameChangeEventAfter, ScriptName);        
         return true;
     }
 
@@ -88,6 +93,16 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
     public virtual string SummaryText() => ScriptName;
 
     public virtual string DebugText() => ScriptName;
+
+    public async Task BroadCast()
+    {
+        
+        this.HashAfterApplication = MultiplayerSession.Instance.GameState.ComputeHash();   
+        string dtoJson = JsonSerializer.Serialize(ToDto());         
+        DebugUtilities.PrintPeer($"EMITTING ChangeEvent to clients: {ScriptName} (Id: {Id}, Hash: {HashAfterApplication})");            
+        DebugUtilities.PrintPeer($"ChangeEvent DTO JSON: {dtoJson}");
+        NetworkApi.Instance.Rpc(nameof(NetworkApi.ReceiveChangeEvent), dtoJson);
+    }
 
     // Static lookup method
     public static ChangeEvent ForId(int changeEventId)

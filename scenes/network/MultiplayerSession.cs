@@ -16,19 +16,17 @@ public partial class MultiplayerSession : Node
     private PeerReadinessComponent _peerReadinessComponent => GetNode<PeerReadinessComponent>("PeerReadinessComponent");
     
     public MultiplayerGameState GameState { get; private set; } = new();
-    public GameFlow GameFlow { get; private set; }
-    
 
     public override void _EnterTree()
     {
         base._EnterTree();
         Instance = this;
-        DebugUtilities.PrintPeer($"MultiplayerSession entered tree (IsServer={Multiplayer.IsServer()})", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"MultiplayerSession entered tree (IsServer={Multiplayer.IsServer()})");
     }
 
     public override void _Ready()
     {
-        DebugUtilities.PrintPeer($"MultiplayerSession ready on peer {Multiplayer.GetUniqueId()}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"MultiplayerSession ready on peer {Multiplayer.GetUniqueId()}");
         _peerReadinessComponent.RegisterReady();
     }
 
@@ -49,20 +47,22 @@ public partial class MultiplayerSession : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void StartSession(string configuration)
     {
-        DebugUtilities.PrintPeer($"LoadGame called with config: {configuration}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"LoadGame called with config: {configuration}");
         GameModeMultiplayerDefault gameMode = new GameModeMultiplayerDefault();
         await gameMode.Init();
-        DebugUtilities.PrintPeer("Game mode initialization complete, emitting MultiplayerSessionReady", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Game mode initialization complete, emitting MultiplayerSessionReady");
         
 
         if(Multiplayer.IsServer())
-        {
-            GameFlow = new(); //Gameflow needs to be created on the host before InitStartingState since some game mode logic requires a reference to it. Clients will get the reference when the scene is replicated.
+        {            
             await gameMode.InitStartingState();            
-            GameFlow.StartGame();
+            GameFlow.Instance.StartGame();
         }
 
-        NodeUtilities.Instance.PlayersNode.GetChildren().ToList().ForEach(playerScene => (playerScene as PlayerScene).FadeLoadingScreen());
+
+        //NodeUtilities.Instance.PlayersNode.GetChildren().ToList().ForEach(playerScene => (playerScene as PlayerScene).FadeLoadingScreen());
+        PlayerScene.Current.FadeLoadingScreen();
+        EventBus.Emit(EventBus.SignalName.GameSessionStarted);
 
     }
 }

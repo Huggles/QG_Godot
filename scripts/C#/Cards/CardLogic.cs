@@ -38,7 +38,7 @@ public abstract partial class CardLogic : GodotObject
     }
     
     public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
-    public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameSession.Current.GameFlow.GameTurn);
+    public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
     public bool IsReaction => CardData.Type == "RESPONSE" || CardData.Type == "STATUS";
     public bool IsPubliclyVisible => IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
     public bool IsPlayFinished = false;
@@ -106,18 +106,8 @@ public abstract partial class CardLogic : GodotObject
     {
         return new();
     }
-    public List<CardStep> ExecutablePlaySteps
-    {
-        get {
-            return PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished && playCardStep.MeetAllConditions).ToList();
-        }        
-    }
-    public List<CardStep> ExecutableReactSteps
-    {
-        get {
-            return ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.PrerequisiteStepFinished && reactCardStep.MeetAllConditions).ToList();
-        }        
-    }
+    public List<CardStep> ExecutablePlaySteps => PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished && playCardStep.MeetAllConditions).ToList();
+    public List<CardStep> ExecutableReactSteps => ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.PrerequisiteStepFinished && reactCardStep.MeetAllConditions).ToList();
 
     public CardStep CardStepForId(int id)
     {
@@ -130,7 +120,7 @@ public abstract partial class CardLogic : GodotObject
     }
 
     public CardLogic()
-    {
+    {        
         PlayCardSteps = InitializePlayCardSteps();
         ReactCardSteps = InitializeReactCardSteps();
         for (int i = PlayCardSteps.Count - 1; i > 0; i--)

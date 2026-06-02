@@ -1,0 +1,35 @@
+[gd_scene load_steps=8 format=3 uid="uid://dqdvhk2rm85fc"]
+
+[ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="1_bj75k"]
+[ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
+[ext_resource type="PackedScene" uid="uid://dfqs0a11viijb" path="res://scenes/userinterface/PresentationModal/PresentationModal.tscn" id="3_oxwje"]
+[ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="4_dvfjj"]
+[ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://scenes/userinterface/FactionInfo/FactionsContainer.tscn" id="5_8bdsb"]
+[ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="6_x05kf"]
+[ext_resource type="Script" uid="uid://6krq1p1wqi43" path="res://scripts/C#/UI/SpeedControl.cs" id="7_v35kq"]
+
+[node name="Interface" type="CanvasLayer"]
+
+[node name="InputMessaging" parent="." instance=ExtResource("1_bj75k")]
+visible = false
+offset_left = 1494.0
+offset_bottom = -347.0
+
+[node name="FactionHandDisplay" parent="." instance=ExtResource("2_ntnkv")]
+
+[node name="PresentationModal" parent="." instance=ExtResource("3_oxwje")]
+z_index = 100
+
+[node name="PlayerAction" parent="." instance=ExtResource("4_dvfjj")]
+offset_bottom = -942.0
+
+[node name="FactionsContainer" parent="." instance=ExtResource("5_8bdsb")]
+offset_bottom = -1005.0
+mouse_filter = 2
+
+[node name="PlayerInfoDisplay" parent="." instance=ExtResource("6_x05kf")]
+
+[node name="SpeedControl" type="PanelContainer" parent="."]
+offset_left = 10.0
+offset_top = 10.0
+script = ExtResource("7_v35kq")

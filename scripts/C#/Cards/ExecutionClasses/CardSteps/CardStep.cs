@@ -2,22 +2,21 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-public partial class CardStep : GodotObject
+public partial class CardStep
 {
     public static int stepIdCounter = 100;
-    public static CardStep ForId(int id)
-    {
-        return GameSession.Current.GameState.CardStepsById[id];
-    }
+    public static CardStep ForId(int id) => GameSession.Current.GameState.CardStepsById[id];
+    public static List<CardStep> ForIds(List<int> ids) => ids.Select(id => ForId(id)).ToList();
 
-    public bool StepFinished = false;
-    public bool IsPlayStep = false;
-    public bool IsReactStep = false;
-    public int Id = 0;
-    public CardStep PrerequisiteCardStep;
-    public CardStep NextCardStep
+    public bool StepFinished { get; set; } = false;
+    public bool IsPlayStep { get; set; } = false;
+    public bool IsReactStep { get; set; } = false;
+    public int Id { get; set; } = 0;
+    [JsonIgnore] public CardStep PrerequisiteCardStep { get; set; }
+    [JsonIgnore] public CardStep NextCardStep
     {
         get
         {
@@ -27,12 +26,12 @@ public partial class CardStep : GodotObject
         }
     }
 
-    public CardLogic CardLogic;    
+    [JsonIgnore] public CardLogic CardLogic;    
     protected Func<Task<ChangeEvent>> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
     protected Func<Condition> GetConditionMethod;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
-    protected List<Condition> Conditions
+    [JsonIgnore] protected List<Condition> Conditions
     {
         get
         {
@@ -47,7 +46,7 @@ public partial class CardStep : GodotObject
             return null;
         }
     }
-    public bool MeetAllConditions
+    [JsonIgnore] public bool MeetAllConditions
     {
         get
         {
@@ -64,7 +63,7 @@ public partial class CardStep : GodotObject
         this.StepLogic = stepLogic;
         this.Id = stepIdCounter;
         stepIdCounter += 1;
-        GameSession.Current.GameState.CardStepsById[this.Id] = this;        
+        GameSession.Current.GameState.CardSteps.Add(this);
     }    
 
     public CardStep WithId(int id)
@@ -103,7 +102,7 @@ public partial class CardStep : GodotObject
     }
 
 
-    public bool PrerequisiteStepFinished
+    [JsonIgnore] public bool PrerequisiteStepFinished
     {
         get { return PrerequisiteCardStep != null ? PrerequisiteCardStep.StepFinished : true; }
     }

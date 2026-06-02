@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 /// <summary>
@@ -12,14 +13,32 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(BattleUnitChangeEventDto),       "BattleUnit")]
 [JsonDerivedType(typeof(PlayCardChangeEventDto),         "PlayCard")]
 [JsonDerivedType(typeof(ActivateReactionChangeEventDto), "ActivateReaction")]
-[JsonDerivedType(typeof(DiscardCardsChangeEventDto),     "DiscardCards")]
+[JsonDerivedType(typeof(ForceDiscardCardsChangeEventDto),     "DiscardCards")]
 [JsonDerivedType(typeof(DrawCardsChangeEventDto),        "DrawCards")]
+[JsonDerivedType(typeof(ScorePointsChangeEventDto),      "ScorePoints")]
+[JsonDerivedType(typeof(DiscardHandCardsChangeEventDto), "VoluntaryDiscardCards")]
 public abstract class ChangeEventDto
 {
+    public int Id { get; set; }
+    public string HashAfterApplication { get; set; }
     public Faction TriggeringFaction    { get; set; }
     public int     SourceCardId         { get; set; } = -1;
     public bool    IsTrigger            { get; set; } = true;
     public bool    SuppressGameProgress { get; set; } = false;
+    public Faction TargetFaction { get; set; }
+
+    public static T Build<T>(ChangeEvent handler, int Id) where T : ChangeEventDto, new()
+    {
+        T dto = new T();
+        dto.Id = Id;
+        dto.HashAfterApplication = handler.HashAfterApplication;
+        dto.TriggeringFaction = handler.TriggeringFaction;        
+        dto.TargetFaction = handler.TargetFaction;
+        dto.SourceCardId = handler.SourceCardId;
+        dto.IsTrigger = handler.IsTrigger;
+        dto.SuppressGameProgress = handler.SuppressGameProgress;
+        return dto;
+    }
 }
 
 public class DeployUnitChangeEventDto : ChangeEventDto
@@ -52,14 +71,24 @@ public class ActivateReactionChangeEventDto : ChangeEventDto
     public int SourceChangeEventId { get; set; }
 }
 
-public class DiscardCardsChangeEventDto : ChangeEventDto
+public class ForceDiscardCardsChangeEventDto : ChangeEventDto
 {
-    public Faction TargetFaction { get; set; }
     public int     NumberOfCards { get; set; }
 }
 
 public class DrawCardsChangeEventDto : ChangeEventDto
 {
-    public Faction TargetFaction { get; set; }
+    
     public int     NumberOfCards { get; set; }
+    public bool    ShowDrawnCards { get; set; }
+}
+
+public class ScorePointsChangeEventDto : ChangeEventDto
+{
+    public VPTurnSummary VPTurnSummary { get; set; }
+}
+
+public class DiscardHandCardsChangeEventDto : ChangeEventDto
+{
+    public List<int> CardIds { get; set; }
 }

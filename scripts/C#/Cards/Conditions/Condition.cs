@@ -315,7 +315,7 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            return GameSession.Current.GameFlow.TurnStep == this.TurnStep;
+            return GameFlow.Instance.TurnStep == this.TurnStep;
         }
     }
 
@@ -421,19 +421,19 @@ public abstract class Condition
     public class IsVictoryPointStep : Condition
     {
         public override bool MeetCondition() => 
-            GameSession.Current.GameFlow.TurnStep == TurnStep.VICTORY_POINT;
+            GameFlow.Instance.TurnStep == TurnStep.VICTORY_POINT;
     }
 
     public class IsPlayCardStep : Condition
     {
         public override bool MeetCondition() => 
-            GameSession.Current.GameFlow.TurnStep == TurnStep.PLAY_CARD;
+            GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
     }
 
     public class IsStartStep : Condition
     {
         public override bool MeetCondition() => 
-            GameSession.Current.GameFlow.TurnStep == TurnStep.START;
+            GameFlow.Instance.TurnStep == TurnStep.START;
     }
 
     public class CustomCondition : Condition

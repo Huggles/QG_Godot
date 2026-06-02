@@ -14,8 +14,6 @@ public partial class PlayerActionLabel : RichTextLabel, LoadableUI
         
         // Hide by default until LoadUI is called
         Visible = false;
-        
-        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "PlayerActionLabel");        
     }
 
     public void LoadUI()

@@ -42,7 +42,7 @@ public partial class GameManager : Node
 
     public override void _Ready()
     {
-        DebugUtilities.PrintPeer("GameManager Ready", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("GameManager Ready");
         
         // Listen for scene changes
         GetTree().NodeAdded += OnNodeAdded;
@@ -61,7 +61,7 @@ public partial class GameManager : Node
             DebugUtilities.PrintPeer("Game scene detected");
             node.GetNode<PeerReadinessComponent>("PeerReadinessComponent").AllPeersReady += () =>
             {
-                DebugUtilities.PrintPeer("All peers ready in Game scene - initializing game", DebugVerbosity.INFO);
+                DebugUtilities.PrintPeer("All peers ready in Game scene - initializing game");
                 InitializeGame(_pendingPlayerFactionAssignments);                                
             };
             node.Ready += () => node.GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
@@ -74,7 +74,7 @@ public partial class GameManager : Node
     public void SetPendingPlayerFactionAssignments(List<PlayerFactionAssignment> assignments)
     {
         _pendingPlayerFactionAssignments = assignments;
-        DebugUtilities.PrintPeer($"Stored pending faction assignments for {assignments.Count} player(s)", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Stored pending faction assignments for {assignments.Count} player(s)");
     }
 
     /// <summary>
@@ -95,9 +95,9 @@ public partial class GameManager : Node
     /// <param name="playerFactionAssignments">Dictionary mapping peer IDs to their assigned factions</param>
     private async Task LoadGame(List<PlayerFactionAssignment> playerFactionAssignments)
     {
-        DebugUtilities.PrintPeer("Multiplayer session started - waiting for clients to initialize", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Multiplayer session started - waiting for clients to initialize");
         await NetworkApi.Instance.StartMultiplayerSession(JsonSerializer.Serialize(playerFactionAssignments));
-        DebugUtilities.PrintPeer("Multiplayer session initialization complete - waiting for UI elements to load", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Multiplayer session initialization complete - waiting for UI elements to load");
 
         MultiplayerSession.Instance.StartNew(JsonSerializer.Serialize(playerFactionAssignments));
     }

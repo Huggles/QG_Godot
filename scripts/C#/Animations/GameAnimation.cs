@@ -19,7 +19,7 @@ public abstract class GameAnimation : IGameQueueItem
         public async override Task Execute()
         {
             List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(_cardIds, false);
-            await PresentationModal.Instance.ShowModal(presentationItems, _text);       
+            await PresentationModal.Current.ShowModal(presentationItems, _text);       
         }
     }
 }

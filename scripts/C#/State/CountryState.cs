@@ -2,20 +2,21 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 public partial class CountryState : StateObject
 {
-    [Export] public CountryData StaticCountryData;  
-    [Export] public string Name { get; set; }
-    [Export] public string NameCamelCase { get; set; }
-    [Export] public string Label { get; set; }
-    [Export] public CountryType Type { get; set; }
-    [Export] public bool IsSupply { get; set; }
-    [Export] public StraightState StraightState;
+    [JsonIgnore] public CountryData StaticCountryData;  
+    public string Name { get; set; }
+    public string NameCamelCase { get; set; }
+    public string Label { get; set; }
+    public CountryType Type { get; set; }
+    public bool IsSupply { get; set; }
+    public StraightState StraightState;
 
     public Country Country { get { return (Country)Id; } }
     public List<string> Neighbors { get; set; }
-    public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
+    [JsonIgnore] public List<CountryState> NeighborCountryStates { get; set; } = new List<CountryState>();
 
     public Dictionary<Faction, int> Units { get; set; } = new Dictionary<Faction, int>();
 
@@ -31,7 +32,7 @@ public partial class CountryState : StateObject
             ? FactionTeam.NONE
             : StaticGameData.FactionTeamForFaction(OccupyingFactions[0]);
 
-    public CountryScene CountryScene => NodeUtilities.Instance.CountriesNode.GetChildren().ToList().Find(c => c.Name == Name) as CountryScene ?? throw new Exception($"Couldn't find CountryScene for country: {Name}");
+    [JsonIgnore] public CountryScene CountryScene => NodeUtilities.Instance.CountriesNode.GetChildren().ToList().Find(c => c.Name == Name) as CountryScene ?? throw new Exception($"Couldn't find CountryScene for country: {Name}");
 
     public CountryState(CountryData countryData)
     {
@@ -229,7 +230,7 @@ public partial class CountryState : StateObject
 
     public static CountryState ForId(int id)
     {
-        return GameSession.Current.GameState.CountryStateById[id];
+        return GameSession.Current.GameState.CountryStateById.GetValueOrDefault(id) ?? null;
     }
 
     public static List<CountryState> ForIds(IEnumerable<int> ids)
@@ -239,11 +240,11 @@ public partial class CountryState : StateObject
 
     public static CountryState ForName(string name)
     {
-        return GameSession.Current.GameState.CountryStateByName[name];
+        return GameSession.Current.GameState.CountryStateByName.GetValueOrDefault(name) ?? null;
     }
     public static List<CountryState> ForNames(List<string> names)
     {
-        return names.Map(n => GameSession.Current.GameState.CountryStateByName[n]);
+        return names.Map(n => GameSession.Current.GameState.CountryStateByName.GetValueOrDefault(n) ?? null);
     }
 
     public static List<CountryState> ForUnitIds(IEnumerable<int> unitIds)

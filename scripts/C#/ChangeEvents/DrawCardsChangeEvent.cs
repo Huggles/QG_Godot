@@ -1,32 +1,30 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public partial class DrawCardsChangeEvent : ChangeEvent
 {
     public int NumberOfCards { get; set; }
-    public Faction TargetFaction { get; set; }
-    FactionState triggeringFactionState => FactionState.ForEnum(TriggeringFaction);
-    FactionState targetFactionState => FactionState.ForEnum(TargetFaction);
+    public bool ShowDrawnCards { get; set; }
 
-    public DrawCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards) : base(triggeringFaction)
+    public DrawCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards, bool showDrawnCards = true) : base(triggeringFaction)
     {
         TriggeringFaction = triggeringFaction;
         TargetFaction = targetFaction;
         NumberOfCards = numberOfCards;
+        ShowDrawnCards = showDrawnCards;
     }
 
-    public override ChangeEventDto ToDto() => new DrawCardsChangeEventDto
+    public override ChangeEventDto ToDto()
     {
-        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
-        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
-        TargetFaction = TargetFaction, NumberOfCards = NumberOfCards
-    };
+        DrawCardsChangeEventDto dto = ChangeEventDto.Build<DrawCardsChangeEventDto>(this, Id);
+        dto.NumberOfCards = NumberOfCards;
+        dto.ShowDrawnCards = ShowDrawnCards;
+        return dto;
+    }
 
     protected override async Task<bool> ExecuteAsync()
     {
-        DeckState deckState = DeckState.ForFaction(TargetFaction);
-        deckState.DrawCards(NumberOfCards);
-        PlayerActionLabel.ShowText($"{triggeringFactionState.FactionData.Label} gives {targetFactionState.FactionData.Label} {NumberOfCards} card(s)", TriggeringFaction);
-        await Task.Delay(GameSettings.PauseDuration);
+        await GameAPI.DrawCards(TargetFaction, NumberOfCards, ShowDrawnCards);                
         return true;
     }
 }

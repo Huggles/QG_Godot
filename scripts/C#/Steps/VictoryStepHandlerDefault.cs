@@ -8,36 +8,32 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
 {
     private VPTurnSummary vpTurnSummary;
 
-    private GameFlow gameFlow { get { return GameSession.Current.GameFlow; } }
+    private GameFlow gameFlow { get { return GameFlow.Instance; } }
     private Faction Faction;
-    private FactionState FactionState => GameSession.Current.GameState.FactionStates[Faction];
+    private FactionState FactionState => FactionState.ForEnum(Faction);
 
     public VictoryStepHandlerDefault()
     {
-        EventBus.Instance.NewTurnStarted += HandleNewRound;
+        EventBus.Instance.NewTurnStarted += HandleNewTurnStarted;
     }
     
-    public void HandleNewRound(int roundNumber)
-    {
-        vpTurnSummary = new VPTurnSummary(gameFlow.Round);
+    public void HandleNewTurnStarted(int turnNumber)
+    {        
         Faction = gameFlow.CurrentFaction;
+        vpTurnSummary = new VPTurnSummary(turnNumber);
     }
 
     public async Task ProcessVictoryStep(Faction faction)
     {
         Faction = faction;
 
-        await ScoreSupplyCountryVPs();
-        await HandleStatusCardVictoryPoints();
+        ScoreSupplyCountryVPs();
+        HandleStatusCardVictoryPoints();
 
-        FactionState.Score += vpTurnSummary.TotalScore;
-        gameFlow.VictoryPointSummaries[Faction].Add(vpTurnSummary);
-        EventBus.Emit(EventBus.SignalName.FactionScoredPoints, (int)Faction, FactionState.Score);
-
-        DebugUtilities.PrintPeer(vpTurnSummary, DebugVerbosity.INFO);
+        await new ScorePointsChangeEvent(vpTurnSummary).ApplyChange();
     }
 
-    public async Task ScoreSupplyCountryVPs()
+    public void ScoreSupplyCountryVPs()
     {
         foreach (CountryState cs in CountryState.ForIds(FactionState.OccupiedCountryIds))
         {
@@ -45,20 +41,17 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
             {
                 int score = Math.Max(3 - cs.Units.Keys.Count, 1);
                 VPEntry vPEntry = new VPEntry(score, $"{score} VP for supply star on {cs.StaticCountryData.Label}");
-                vpTurnSummary.AddScore(vPEntry);
-                await ShowVictoryPointEntry(vPEntry);
+                vpTurnSummary.AddScore(vPEntry);                
             }
         }
     }
-    public async Task HandleStatusCardVictoryPoints()
+    public void HandleStatusCardVictoryPoints()
     {
         foreach (CardState cardState in DeckState.ForFaction(Faction).StatusCardStates)
         {
             if (cardState.CardLogic.CanBeActivated() && cardState.CardLogic is IStatusVictoryPoints statusVictoryPoints)
-            {
-                VPEntry vPEntry = statusVictoryPoints.AddVictoryPoints();
-                vpTurnSummary.AddScore(statusVictoryPoints.AddVictoryPoints());
-                await ShowVictoryPointEntry(vPEntry);
+            {             
+                vpTurnSummary.AddScore(statusVictoryPoints.AddVictoryPoints());                
             }
         }
     }

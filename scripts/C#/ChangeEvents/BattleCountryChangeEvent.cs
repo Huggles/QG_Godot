@@ -13,12 +13,12 @@ public partial class BattleCountryChangeEvent : ChangeEvent
         CountryId = countryId;
     }
 
-    public override ChangeEventDto ToDto() => new BattleCountryChangeEventDto
+    public override ChangeEventDto ToDto()
     {
-        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
-        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
-        CountryId = CountryId
-    };
+        BattleCountryChangeEventDto dto = ChangeEventDto.Build<BattleCountryChangeEventDto>(this, Id);
+        dto.CountryId = CountryId;
+        return dto;
+    }
 
     protected async override Task<bool> ExecuteAsync()
     {

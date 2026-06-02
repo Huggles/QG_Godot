@@ -40,7 +40,7 @@ public partial class PeerReadinessComponent : Node
     {
         if (!Multiplayer.IsServer()) return;
         int peerId = Multiplayer.GetRemoteSenderId();
-        DebugUtilities.PrintPeer($"[{GetParent()?.Name}] Peer {peerId} ready", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"[{GetParent()?.Name}] Peer {peerId} ready");
         _readyPeers.Add(peerId);
         CheckAllReady();
     }
@@ -50,7 +50,7 @@ public partial class PeerReadinessComponent : Node
         int expected = Multiplayer.GetPeers().Length + 1;
         if (_readyPeers.Count >= expected)
         {
-            DebugUtilities.PrintPeer($"[{GetParent()?.Name}] All peers ready — broadcasting", DebugVerbosity.INFO);            
+            DebugUtilities.PrintPeer($"[{GetParent()?.Name}] All peers ready — broadcasting");            
             EmitSignal(SignalName.AllPeersReady);
         }
     }

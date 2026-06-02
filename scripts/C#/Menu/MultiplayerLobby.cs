@@ -92,7 +92,7 @@ public partial class MultiplayerLobby : Control
 
     private void OnHostButtonPressed()
     {
-        DebugUtilities.PrintPeer("Starting host...", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Starting host...");
         
         var peer = new ENetMultiplayerPeer();
         Error error = peer.CreateServer(DEFAULT_PORT, 6); // Max 6 players (one per faction)
@@ -107,7 +107,7 @@ public partial class MultiplayerLobby : Control
         Multiplayer.MultiplayerPeer = peer;
         _isHost = true;
         
-        DebugUtilities.PrintPeer($"Server started on port {DEFAULT_PORT}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Server started on port {DEFAULT_PORT}");
         UpdateStatusLabel($"Hosting on port {DEFAULT_PORT}");
         
         // Add host to player list
@@ -123,7 +123,7 @@ public partial class MultiplayerLobby : Control
 
     private void OnJoinButtonPressed()
     {
-        DebugUtilities.PrintPeer("Joining server...", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Joining server...");
         
         string ip = _ipAddressInput.Text;
         
@@ -140,7 +140,7 @@ public partial class MultiplayerLobby : Control
         Multiplayer.MultiplayerPeer = peer;
         _isHost = false;
         
-        DebugUtilities.PrintPeer($"Connecting to {ip}:{DEFAULT_PORT}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Connecting to {ip}:{DEFAULT_PORT}");
         UpdateStatusLabel($"Connecting to {ip}:{DEFAULT_PORT}...");
         
         // Disable host/join buttons
@@ -156,7 +156,7 @@ public partial class MultiplayerLobby : Control
             return;
         }
         
-        DebugUtilities.PrintPeer("Host starting game...", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Host starting game...");
         
         // Tell all clients to start the game
         Rpc(nameof(StartGame));
@@ -164,7 +164,7 @@ public partial class MultiplayerLobby : Control
 
     private void OnDebugSoloButtonPressed()
     {
-        DebugUtilities.PrintPeer("Starting debug solo game...", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Starting debug solo game...");
         
         // Create single player assignment (all factions to player 1)
         var playerFactionAssignments = new List<PlayerFactionAssignment>
@@ -183,7 +183,7 @@ public partial class MultiplayerLobby : Control
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
     private void StartGame()
     {
-        DebugUtilities.PrintPeer($"Starting game for peer {Multiplayer.GetUniqueId()}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Starting game for peer {Multiplayer.GetUniqueId()}");
         
         // Determine player-faction assignments based on player count
         int totalPlayers = _playerLabels.Count;
@@ -221,8 +221,8 @@ public partial class MultiplayerLobby : Control
             assignments.Add(new PlayerFactionAssignment(player1Id, axisFactions));
             assignments.Add(new PlayerFactionAssignment(player2Id, alliesFactions));
             
-            DebugUtilities.PrintPeer($"Player {player1Id} (Host) assigned AXIS", DebugVerbosity.INFO);
-            DebugUtilities.PrintPeer($"Player {player2Id} assigned ALLIES", DebugVerbosity.INFO);
+            DebugUtilities.PrintPeer($"Player {player1Id} (Host) assigned AXIS");
+            DebugUtilities.PrintPeer($"Player {player2Id} assigned ALLIES");
         }
         else if (playerCount >= 6)
         {
@@ -236,7 +236,7 @@ public partial class MultiplayerLobby : Control
                 if (factionIndex < StaticGameData.PlayableFactions.Count)
                 {
                     assignments.Add(new PlayerFactionAssignment(peerId, new List<Faction> { StaticGameData.PlayableFactions[factionIndex] }));
-                    DebugUtilities.PrintPeer($"Player {peerId} assigned {StaticGameData.PlayableFactions[factionIndex]}", DebugVerbosity.INFO);
+                    DebugUtilities.PrintPeer($"Player {peerId} assigned {StaticGameData.PlayableFactions[factionIndex]}");
                     factionIndex++;
                 }
             }
@@ -255,11 +255,11 @@ public partial class MultiplayerLobby : Control
 
     private void OnPeerConnected(long peerId)
     {
-        DebugUtilities.PrintPeer($"Peer connected: {peerId}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Peer connected: {peerId}");
         
         // Add player to list
         int playerNumber = _playerLabels.Count + 1;
-        string playerName = peerId == 1 ? "Player 1 (Host)" : $"Player {playerNumber}";
+        string playerName = peerId == 1 ? "Player_1_Host" : $"Player_{playerNumber}_Client";
         AddPlayerToList((int)peerId, playerName);
         
         // If we're the host, sync the current player list to the new peer
@@ -274,13 +274,13 @@ public partial class MultiplayerLobby : Control
 
     private void OnPeerDisconnected(long peerId)
     {
-        DebugUtilities.PrintPeer($"Peer disconnected: {peerId}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer($"Peer disconnected: {peerId}");
         RemovePlayerFromList((int)peerId);
     }
 
     private void OnConnectedToServer()
     {
-        DebugUtilities.PrintPeer("Successfully connected to server", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Successfully connected to server");
         int myPeerId = Multiplayer.GetUniqueId();
         UpdateStatusLabel($"Connected as Player {myPeerId}");
         

@@ -5,7 +5,7 @@ using Godot;
 
 public partial class StatusWolfPacks : StatusCardLogic, IDiscardModifier
 {
-    public int ModifyDiscard(DiscardCardsChangeEvent discardEvent)
+    public int ModifyDiscard(ForceDiscardCardsChangeEvent discardEvent)
     {
         bool isSubmarineEW = discardEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE
             && discardEvent.SourceCardState.Faction == Faction

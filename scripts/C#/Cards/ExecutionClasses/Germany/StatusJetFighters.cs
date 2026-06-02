@@ -4,7 +4,7 @@ using Godot;
 
 public partial class StatusJetFighters : StatusCardLogic, IDiscardModifier
 {
-    public int ModifyDiscard(DiscardCardsChangeEvent discardEvent)
+    public int ModifyDiscard(ForceDiscardCardsChangeEvent discardEvent)
     {
         bool isEW = discardEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE;
         bool targetIsMe = discardEvent.TargetFaction == Faction;

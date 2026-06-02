@@ -38,7 +38,7 @@ public partial class StatusSyntheticFuel : StatusCardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(2), false);
-                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards");
+                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
 
                 int countryId = await new SelectCountryHandler(DeployTargets.ToCountryIds()).Handle();                
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));

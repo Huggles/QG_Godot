@@ -1,10 +1,10 @@
 using Godot;
 using System;
 
-public partial class VPEntry : GodotObject
+public partial class VPEntry
 {
-    public int VictoryPoints;
-    public string Reason;
+    public int VictoryPoints { get; set; }
+    public string Reason { get; set; }
 
     public VPEntry(int victoryPoints, string reason)
     {

@@ -18,7 +18,7 @@ public partial class StatusBlitzkrieg : StatusCardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(1), false);
-                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards");
+                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
                                 
                 List<BattleCountryChangeEvent> changeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Where(changeEvent=>changeEvent.CountryState.Units.Count == 0).ToList();
                 int selectedCountryId = await new SelectCountryHandler(changeEvents.Map(changeEvent => changeEvent.CountryId)).Handle();

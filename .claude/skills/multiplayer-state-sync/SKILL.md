@@ -47,7 +47,7 @@ Each `ChangeEvent` needs a matching DTO class containing only its constructor pa
 [JsonDerivedType(typeof(RemoveUnitChangeEventDto),   "RemoveUnit")]
 [JsonDerivedType(typeof(PlayCardChangeEventDto),     "PlayCard")]
 [JsonDerivedType(typeof(ActivateReactionChangeEventDto), "ActivateReaction")]
-[JsonDerivedType(typeof(DiscardCardsChangeEventDto), "DiscardCards")]
+[JsonDerivedType(typeof(ForceDiscardCardsChangeEventDto), "DiscardCards")]
 // register every ChangeEvent subclass here
 public abstract class ChangeEventDto
 {
@@ -75,7 +75,7 @@ public class ActivateReactionChangeEventDto : ChangeEventDto
     public int SourceChangeEventId { get; set; }
 }
 
-public class DiscardCardsChangeEventDto : ChangeEventDto
+public class ForceDiscardCardsChangeEventDto : ChangeEventDto
 {
     public Faction TargetFaction  { get; set; }
     public int     NumberOfCards  { get; set; }
@@ -100,7 +100,7 @@ public static ChangeEvent FromDto(ChangeEventDto dto)
         ActivateReactionChangeEventDto d => new ActivateReactionChangeEvent(
                                             d.TriggeringFaction, d.SourceCardId,
                                             ChangeEvent.ForId(d.SourceChangeEventId)),
-        DiscardCardsChangeEventDto d => new DiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
+        ForceDiscardCardsChangeEventDto d => new ForceDiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
         _ => throw new NotSupportedException($"Unknown ChangeEventDto type: {dto.GetType().Name}")
     };
     ev.IsTrigger = dto.IsTrigger;
@@ -212,7 +212,7 @@ public void ReceiveFullSnapshot(string snapshotJson)
 {
     MultiplayerGameState snapshot = JsonSerializer.Deserialize<MultiplayerGameState>(snapshotJson);
     GameSession.Current.GameState.ApplySnapshot(snapshot);
-    DebugUtilities.PrintPeer("Resync complete", DebugVerbosity.INFO);
+    DebugUtilities.PrintPeer("Resync complete");
 }
 ```
 

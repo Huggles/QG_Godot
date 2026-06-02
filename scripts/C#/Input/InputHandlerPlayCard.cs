@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 public partial class InputHandlerPlayCard
 {
-    private GameFlow gameFlow => GameSession.Current.GameFlow;
+    private GameFlow gameFlow => GameFlow.Instance;
 
     private List<CardActivationOption> CardActivationOptions;
 
@@ -16,19 +16,18 @@ public partial class InputHandlerPlayCard
         Faction currentFaction = gameFlow.CurrentFaction;
         PlayerActionLabel.ShowText("Choose a card", currentFaction);
 
-        FactionHandDisplay.Instance.Show(cardActivationOptions);
+        FactionHandDisplay.Current.Show(cardActivationOptions);
         
-        FactionHandDisplay.Instance.CardSelected += HandleItemSelected;
-        DebugUtilities.PrintPeer("FactionHandDisplay.Instance: " + FactionHandDisplay.Instance, DebugVerbosity.INFO);
+        FactionHandDisplay.Current.CardSelected += HandleItemSelected;
+        DebugUtilities.PrintPeer("FactionHandDisplay.Current: " + FactionHandDisplay.Current);
     }
 
     private void HandleItemSelected(int cardId)
     {
-        DebugUtilities.PrintPeer($"HandleItemSelected with ID: {cardId}", DebugVerbosity.INFO);
-        FactionHandDisplay.Instance.CardSelected -= HandleItemSelected;
-        FactionHandDisplay.Instance.Hide();
-        InputOptionsList.HideList();
+        DebugUtilities.PrintPeer($"HandleItemSelected with ID: {cardId}");
+        FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
+        FactionHandDisplay.Current.Hide();        
         CardActivationOption selectedCardActivationOption = CardActivationOptions.Find(cao => cao.CardId == cardId);        
-        EventBus.Emit("CardSelected", selectedCardActivationOption);
+        EventBus.Emit("CardSelected", selectedCardActivationOption.StepId);
     }    
 }

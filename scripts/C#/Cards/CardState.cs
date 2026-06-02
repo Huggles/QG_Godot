@@ -3,38 +3,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-public partial class CardState : GodotObject, ITaggable
+using System.Text.Json.Serialization;
+public partial class CardState : StateObject
 {
-    public int Id { get; set; }
-    public CardData CardData { get; set; }
+    [JsonIgnore] public CardData CardData { get; set; }
     public Faction Faction { get; set; }
 
     public string CardName => CardData != null ? CardData.Label : string.Empty;
-
-    private readonly TagContainer _tags = new();
-    public TagContainer Tags => _tags;
-
     public ChangeEvent TriggeredByChangeEvent { get; set; }
 
-    private CardLogic cardLogic;
-    public CardLogic CardLogic
-    {
-        get
-        {
-            if (cardLogic == null){
-                cardLogic = GetCardLogicClass();
-            }
-            return cardLogic;
-        }
-    }
+    [JsonIgnore] public CardLogic CardLogic { get; set; } = null;
 
     // Constructor
     public CardState(CardData cardData)
     {
         CardData = cardData;
+        this.CardLogic = InitiateCardLogicClass();
     }
     
-
     public bool CanPlayCard()
     {
         if (CardLogic != null)
@@ -42,12 +28,12 @@ public partial class CardState : GodotObject, ITaggable
         return false;
     }
 
-    private CardLogic GetCardLogicClass()
+    public CardLogic InitiateCardLogicClass()
     {
         Type cardType = Type.GetType(CardData.ExecutionClass);
         if(cardType != null) {            
             CardLogic cardLogic = (CardLogic)Activator.CreateInstance(cardType);
-            cardLogic.CardState = this;
+            cardLogic.CardState = this;            
             return cardLogic;
         }
         DebugUtilities.PrintPeerError($"Could not find card logic class for: {CardData.ExecutionClass}");
@@ -75,5 +61,10 @@ public partial class CardState : GodotObject, ITaggable
         if (!StaticGameData.CardDataByNumber.TryGetValue(cardNumber, out CardData cardData))
             return null;
         return ForName(cardData.UniqueName);
+    }
+
+    public static CardState ForStep(int stepId)
+    {
+        return GameSession.Current.GameState.CardStepsById[stepId].CardLogic.CardState;
     }
 }

@@ -26,12 +26,13 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         DeploymentType = deploymentType;
     }
 
-    public override ChangeEventDto ToDto() => new DeployUnitChangeEventDto
+    public override ChangeEventDto ToDto()
     {
-        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
-        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
-        CountryId = CountryId, DeploymentType = DeploymentType
-    };
+        DeployUnitChangeEventDto dto = ChangeEventDto.Build<DeployUnitChangeEventDto>(this, Id);
+        dto.CountryId = CountryId;
+        dto.DeploymentType = DeploymentType;
+        return dto;
+    }
 
     protected override async Task<bool> ExecuteAsync()
     {

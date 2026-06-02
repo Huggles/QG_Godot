@@ -35,7 +35,7 @@ public partial class StatusBiasForAction : StatusCardLogic
 
             List<BattleTarget> attackableUnits = neighBorCountries                
                 .SelectMany(cs => {
-                    DebugUtilities.PrintPeer($"Checking attackable units in {cs.Label}, {cs.Units.Values} ", DebugVerbosity.INFO);
+                    DebugUtilities.PrintPeer($"Checking attackable units in {cs.Label}, {cs.Units.Values} ");
                     List<UnitState> attackableUnits = UnitState.ForIds(cs.Units.Values).Where(us => us.Tags.Has(Tag.Attackable, Faction)).ToList();
                     return attackableUnits;
                 })
@@ -50,7 +50,7 @@ public partial class StatusBiasForAction : StatusCardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(1), false);
-                await PresentationModal.Instance.ShowModal(presentationItems, "Discarded cards");
+                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
                 
                 BattleTarget battleTarget = await new SelectBattleTargetHandler(BattleTargets).Handle();
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));

@@ -19,7 +19,7 @@ public partial class GameModeDefault : IGameMode
     public GameModeDefault(){}
 
     public async Task Init(){
-        DebugUtilities.PrintPeer("Init Game Mode", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Init Game Mode");
         LoadDataFiles();
         InstantiateFactionStates();
         InstantiateCountryStates();
@@ -30,7 +30,7 @@ public partial class GameModeDefault : IGameMode
 
         await SetupInitialGameState();
 
-        DebugUtilities.PrintPeer("Game Mode Finished Initializing", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Game Mode Finished Initializing");
         
     }
 
@@ -65,7 +65,7 @@ public partial class GameModeDefault : IGameMode
             countryData.LoadData();
         }
 
-        DebugUtilities.PrintPeer("Data Finished Loading", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("Data Finished Loading");
     }
 
     public void InstantiateFactionStates(){
@@ -73,7 +73,7 @@ public partial class GameModeDefault : IGameMode
         foreach (FactionData factionData in StaticGameData.FactionDataList)
         {
             FactionState factionState = new FactionState(factionData);
-            gameState.FactionStates[factionState.Faction] = factionState;            
+            gameState.FactionStates.Add(factionState);            
         }
 
         int cardCounter = 0;
@@ -184,7 +184,7 @@ public partial class GameModeDefault : IGameMode
             // Parse faction enum
             if (!Enum.TryParse<Faction>(deployment.Faction, out Faction faction))
             {
-                DebugUtilities.PrintPeer($"Warning: Invalid faction '{deployment.Faction}' in initial game state config", DebugVerbosity.INFO);
+                DebugUtilities.PrintPeer($"Warning: Invalid faction '{deployment.Faction}' in initial game state config");
                 continue;
             }
 
@@ -220,8 +220,8 @@ public partial class GameModeDefault : IGameMode
         }
 
         // GameTurn = factionIndex + 1 puts CurrentFaction at the desired faction on the first StartNewTurn increment
-        GameSession.Current.GameFlow.GameTurn = factionIndex;
-        DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})", DebugVerbosity.INFO);
+        GameFlow.Instance.GameTurn = factionIndex;
+        DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})");
     }
     private async Task PlaceCards(InitialGameStateData initialStateData)
     {

@@ -16,13 +16,13 @@ public class MultiplayerGameState
     // Live state — GodotObject instances, NOT serialized directly
     // -------------------------------------------------------------------------
 
-    [JsonIgnore] public List<CountryState>              CountryStates  { get; set; } = new();
-    [JsonIgnore] public List<UnitState>                 UnitStates     { get; set; } = new();
-    [JsonIgnore] public List<CardState>                 CardStates     { get; set; } = new();
-    [JsonIgnore] public List<StraightState>             StraightStates { get; set; } = new();
-    [JsonIgnore] public Dictionary<Faction, FactionState> FactionStates  { get; set; } = new();
-    [JsonIgnore] public List<ChangeEvent>               GameChangeEvents { get; set; } = new();
-    [JsonIgnore] public Dictionary<int, CardStep>       CardStepsById    { get; set; } = new();
+    public List<CountryState>              CountryStates  { get; set; } = new();
+    public List<UnitState>                 UnitStates     { get; set; } = new();
+    public List<CardState>                 CardStates     { get; set; } = new();
+    public List<StraightState>             StraightStates { get; set; } = new();
+    public List<FactionState>              FactionStates  { get; set; } = new();
+    public List<ChangeEvent>               GameChangeEvents { get; set; } = new();
+    public List<CardStep>                  CardSteps    { get; set; } = new();
 
     // -------------------------------------------------------------------------
     // Lookup caches — lazily populated from the lists above
@@ -41,6 +41,12 @@ public class MultiplayerGameState
     [JsonIgnore] public Dictionary<int, StraightState> StraightStateById => StraightStates.ToDictionary(ss => ss.Id);
 
     [JsonIgnore] public Dictionary<int, StraightState> StraightStateByControllingCountryId => StraightStates.ToDictionary(ss => ss.ControllingCountryId);
+
+    [JsonIgnore] public Dictionary<Faction, FactionState> FactionStatesByFaction => FactionStates.ToDictionary(fs => fs.Faction);
+
+    [JsonIgnore] public Dictionary<int, CardStep> CardStepsById => CardSteps.ToDictionary(cs => cs.Id);
+
+
 
     // -------------------------------------------------------------------------
     // Serialization — Pattern B / Pattern A sync
@@ -69,7 +75,7 @@ public class MultiplayerGameState
                 ControllingCountryId = ss.ControllingCountryId
             }).ToList(),
 
-            FactionStates = FactionStates.Values.Select(fs => new FactionStateDto
+            FactionStates = FactionStates.Select(fs => new FactionStateDto
             {
                 Faction = fs.Faction,
                 Score   = fs.Score,
@@ -108,7 +114,7 @@ public class MultiplayerGameState
 
         foreach (var dto in snapshot.FactionStates)
         {
-            var fs    = FactionStates[dto.Faction];
+            var fs    = FactionStatesByFaction[dto.Faction];
             fs.Score  = dto.Score;
             var deck  = fs.DeckState;
             deck.DeckCardIds.Clear();      deck.DeckCardIds.AddRange(dto.Deck.DeckCardIds);
@@ -135,7 +141,7 @@ public class MultiplayerGameState
         foreach (var ss in StraightStates.OrderBy(s => s.Id))
             sb.Append($"S{ss.Id}:{ss.ControllingCountryId}|");
 
-        foreach (var kv in FactionStates.OrderBy(kv => (int)kv.Key))
+        foreach (var kv in FactionStatesByFaction.OrderBy(kv => (int)kv.Key))
         {
             var deck = kv.Value.DeckState;
             sb.Append($"F{(int)kv.Key}:{kv.Value.Score}," +

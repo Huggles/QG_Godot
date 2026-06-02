@@ -10,7 +10,7 @@ public partial class PlayStepHandlerDefault : GodotObject,IPlayStepHandler
     [Signal] public delegate void PlayStepFinishedEventHandler();
 
     public void Start(Faction faction){
-        this.faction = faction;
+    this.faction = faction;
         EventBus.Instance.CardPlayPoolFinished += CardPoolFinished;
         RequestCardPlay();
     }
@@ -23,7 +23,7 @@ public partial class PlayStepHandlerDefault : GodotObject,IPlayStepHandler
     }
 
     public async void RequestCardPlay()
-    {
+    {        
         CardActivationOption cardActivationOption = await CardPlayPool.RequestCardActivationOptions(faction);
         if (cardActivationOption == null)
         {

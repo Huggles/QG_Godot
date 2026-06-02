@@ -15,12 +15,13 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
         Reason = removalReason;
     }
 
-    public override ChangeEventDto ToDto() => new RemoveUnitChangeEventDto
+    public override ChangeEventDto ToDto()
     {
-        TriggeringFaction = TriggeringFaction, SourceCardId = SourceCardId,
-        IsTrigger = IsTrigger, SuppressGameProgress = SuppressGameProgress,
-        UnitId = UnitId, Reason = Reason
-    };
+        RemoveUnitChangeEventDto dto = ChangeEventDto.Build<RemoveUnitChangeEventDto>(this, Id);
+        dto.UnitId = UnitId;
+        dto.Reason = Reason;
+        return dto;
+    }
 
     protected override async Task<bool> ExecuteAsync()
     {

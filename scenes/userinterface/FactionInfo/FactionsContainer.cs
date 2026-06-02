@@ -2,27 +2,29 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class FactionsContainer : Control, LoadableUI
+public partial class FactionsContainer : Control
 {
-    public static FactionsContainer Instance;
+    public static FactionsContainer Current;
 
     private HBoxContainer HorizontalContainer => GetNode<HBoxContainer>("%FactionsHorizontalContainer");
-
-    private Dictionary<Faction, FactionInfoRow> factionInfoNodes = new();
-    private PackedScene rowScene;
-
-    private static readonly string FactionInfoRowScenePath = "res://scenes/userinterface/FactionInfo/FactionInfoRow.tscn";
-
-    private EventBus.FactionsAssignedEventHandler _onFactionsAssigned;
+    private Dictionary<Faction, FactionInfoRow> factionInfoNodes = new();    
 
     public override void _Ready()
-    {
-        Instance = this;
-        
-        // Hide by default until LoadUI is called
-        Hide();
-        
-        EventBus.Emit(EventBus.SignalName.UserInterfaceLoaded, "FactionsContainer");    
+    {   
+        if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        {
+            DebugUtilities.PrintPeer($"Setting up FactionsContainer for local player: {GetMultiplayerAuthority()}");
+            Current = this;
+            EventBus.Instance.PlayerJoined += InitChildElements;
+            EventBus.Instance.PlayerLeft += InitChildElements;
+            EventBus.Instance.FactionsAssigned += InitChildElements;        
+            EventBus.Instance.GameSessionStarted += InitChildElements;
+            EventBus.Instance.UserInterfaceReady += () => {
+                DebugUtilities.PrintPeer("FactionsContainer received UserInterfaceReady signal, initializing child elements");
+                InitChildElements();
+            };
+        }
+        DebugUtilities.PrintPeer($"FactionsContainer ready: {GetMultiplayerAuthority()}");  
     }
 
     public override void _ExitTree()
@@ -30,39 +32,17 @@ public partial class FactionsContainer : Control, LoadableUI
         // Unsubscribe from events
         if (EventBus.Instance != null)
         {
-            EventBus.Instance.PlayerJoined -= OnPlayerJoined;
-            EventBus.Instance.PlayerLeft -= OnPlayerLeft;
-            
-            if (_onFactionsAssigned != null)
-            {
-                EventBus.Instance.FactionsAssigned -= _onFactionsAssigned;
-            }
+            EventBus.Instance.PlayerJoined -= InitChildElements;
+            EventBus.Instance.PlayerLeft -= InitChildElements;
+            EventBus.Instance.FactionsAssigned -= InitChildElements;        
+            EventBus.Instance.GameSessionStarted -= InitChildElements;
         }
-    }
-
-    public void LoadUI()
-    {
-        EventBus.Instance.PlayerJoined += OnPlayerJoined;
-        EventBus.Instance.PlayerLeft += OnPlayerLeft;
-        
-        // Subscribe to faction assignment event
-        _onFactionsAssigned = () =>
-        {
-            if (!IsInstanceValid(this) || !IsInsideTree()) return;
-            InitChildElements();
-        };
-        EventBus.Instance.FactionsAssigned += _onFactionsAssigned;
-        
-        rowScene = GD.Load<PackedScene>(FactionInfoRowScenePath);
-        InitChildElements();
-        
-        // Show faction info during gameplay
-        Show();
     }
     
 
     private void InitChildElements()
     {
+        DebugUtilities.PrintPeer("FactionsContainer initializing child elements");
         foreach (Node child in HorizontalContainer.GetChildren())
         {
             HorizontalContainer.RemoveChild(child);
@@ -72,7 +52,7 @@ public partial class FactionsContainer : Control, LoadableUI
         factionInfoNodes.Clear();
 
         // Only show factions controlled by the local player
-        List<Faction> playerFactions = PlayerFactionRegistry.GetLocalPlayerFactions();
+        List<Faction> playerFactions = StaticGameData.PlayableFactions;
         
         // If no factions assigned yet, don't show any rows
         if (playerFactions.Count == 0)
@@ -82,21 +62,11 @@ public partial class FactionsContainer : Control, LoadableUI
 
         foreach (Faction faction in playerFactions)
         {
-            FactionInfoRow rowInstance = rowScene.Instantiate<FactionInfoRow>();
+            FactionInfoRow rowInstance = AssetRepository.FactionInfoRowScenePacked.Instantiate<FactionInfoRow>();
             rowInstance.Faction = faction;
             HorizontalContainer.AddChild(rowInstance);
             factionInfoNodes[faction] = rowInstance;
         }
-    }
-
-    private void OnPlayerJoined()
-    {
-        InitChildElements();
-    }
-
-    private void OnPlayerLeft()
-    {
-        InitChildElements();
     }
 
     public FactionInfoRow GetFactionInfoNodeForFaction(Faction faction)

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-public partial class SelectCountryHandler : InputRequest, IGameEventHandler<int>
+public partial class SelectCountryHandler : IGameEventHandler<int>
 {
     List<int> countryIds;
     public SelectCountryHandler(List<int> countryIds)
@@ -13,15 +13,6 @@ public partial class SelectCountryHandler : InputRequest, IGameEventHandler<int>
     public SelectCountryHandler(List<Country> countryIds)
     {
         this.countryIds = countryIds.Map(countryEnum => (int)countryEnum);
-    }
-
-    public override void _Ready()
-    {
-        base._Ready();        
-        if(peerId == Multiplayer.GetUniqueId())
-        {
-            
-        }
     }
 
     public async Task<int> Handle()

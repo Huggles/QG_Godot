@@ -7,6 +7,8 @@ public partial class DebugUtilities : Node
 {
     public static Dictionary<String,Object> CommandLineArguments => ParseCommandLineArguments();
 
+    public static string InstancePrefix => PlayerScene.Current != null ? (PlayerScene.Current.GetMultiplayerAuthority() == 1 ? "[SERVER]" : "[CLIENT]") : "[UNKNOWN]";
+
     public static string FormattedDateTime {
         get {
             return Time.GetTimeStringFromSystem();
@@ -18,26 +20,22 @@ public partial class DebugUtilities : Node
         GameSettings.Instance != null ? GameSettings.Debug : DebugVerbosity.FINEST;
 
     public static void PrintPeerError(String message){
-        GD.PrintRich($"[color=red]({FormattedDateTime}) [ERROR]: {message}[/color]");
+        GD.PrintRich($"{InstancePrefix}[color=red]({FormattedDateTime}) [ERROR]: {message}[/color]");
     }
 
     /// <summary>Prints when the current debug level is >= the specified level. Defaults to FINEST.</summary>
     /// 
-    public static void PrintPeer(Object o, DebugVerbosity level = DebugVerbosity.FINEST){
-        if (CurrentVerbosity < level) {
-            return;
-        }
+    public static void PrintPeer(Object o){
         if(o == null)
         {
             o = "null";
         }
-        PrintPeer(o.ToString(), level);
+        PrintPeer(o.ToString());
     }
 
-    public static void PrintPeer(String message, DebugVerbosity level = DebugVerbosity.FINEST){
-        if (CurrentVerbosity >= level){
-            GD.PrintRich($"[color={(level == DebugVerbosity.INFO ? "green" : "white")}]({FormattedDateTime}) [{level}]: {message}");
-        }
+    public static void PrintPeer(String message){
+        GD.PrintRich($"{InstancePrefix}[color={"green"}]({FormattedDateTime})]: {message}[/color]");
+        
     }
     
     

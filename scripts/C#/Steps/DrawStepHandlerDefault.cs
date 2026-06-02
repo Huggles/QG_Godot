@@ -25,18 +25,9 @@ public partial class DrawStepHandlerDefault : GodotObject, IDrawStepHandler
         if (cardsToDraw > 0)
         {
             // Draw cards back to 7
-            List<int> drawnCardIds = deckState.DrawCards(cardsToDraw);
-            
-            // Show visual feedback of drawn cards
-            if (drawnCardIds.Count > 0)
-            {
-                string message = $"Drew {drawnCardIds.Count} card(s)";
-                PlayerActionLabel.ShowText(message, faction);
-                
-                // Optionally show the cards that were drawn
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(drawnCardIds, false);
-                await PresentationModal.Instance.ShowModal(presentationItems, $"{faction} drew cards");
-            }
+            DrawCardsChangeEvent drawCardsChangeEvent = new DrawCardsChangeEvent(Faction.NONE, faction, cardsToDraw);
+            drawCardsChangeEvent.IsTrigger = false;
+            await CardPlayPool.DoChangeEvent(drawCardsChangeEvent);
         }
         else
         {

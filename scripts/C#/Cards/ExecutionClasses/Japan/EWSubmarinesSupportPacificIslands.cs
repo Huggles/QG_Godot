@@ -25,11 +25,11 @@ public partial class EWSubmarinesSupportPacificIslands : EWCardLogic
                 if (count > 0)
                 {
                     // Score 2 VP per navy
-                    IVictoryStepHandler vpHandler = GameSession.Current.GameFlow.vpStepHandler;
+                    IVictoryStepHandler vpHandler = GameFlow.Instance.vpStepHandler;
                     await vpHandler.ScorePoints(new VPEntry(count * 2, $"{count * 2} VP for Japanese Navies in or adjacent to East Pacific."));
                     
                     // US discards 2 cards per navy
-                    DiscardCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardCardsChangeEvent(Faction, Faction.UNITED_STATES, count * 2));
+                    ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_STATES, count * 2));
                     discardEvent.IsTrigger = true;
                     return discardEvent;
                 }

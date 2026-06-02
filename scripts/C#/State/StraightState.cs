@@ -1,17 +1,18 @@
 using Godot;
 using System;
+using System.Text.Json.Serialization;
 
 public partial class StraightState : StateObject
 {
-    public StraightData StaticStraightData;
+    [JsonIgnore] public StraightData StaticStraightData;
     public int ControllingCountryId { get; set; }
     public int ControlledCountryId1 { get; set; }
     public int ControlledCountryId2 { get; set; }
 
-    public CountryState ControllingCountryState => CountryState.ForId(ControllingCountryId);
-    public CountryState ControlledCountryState1 => CountryState.ForId(ControlledCountryId1);
-    public CountryState ControlledCountryState2 => CountryState.ForId(ControlledCountryId2);
-    public Sprite2D StraightSpriteNode => ControllingCountryState.CountryScene.StraightSpriteNode;
+    [JsonIgnore] public CountryState ControllingCountryState => CountryState.ForId(ControllingCountryId);
+    [JsonIgnore] public CountryState ControlledCountryState1 => CountryState.ForId(ControlledCountryId1);
+    [JsonIgnore] public CountryState ControlledCountryState2 => CountryState.ForId(ControlledCountryId2);
+    [JsonIgnore] public Sprite2D StraightSpriteNode => ControllingCountryState.CountryScene.StraightSpriteNode;
 
     public StraightState(int controllingCountryId, StraightData staticStraightData)
     {

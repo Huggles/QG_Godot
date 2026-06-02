@@ -4,12 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public partial class GameFlow : Node
+public partial class GameFlow : SingletonNode<GameFlow>
 {
-    private bool GameStarted { get; set; } = false;
-    public int GameTurn { get; set; } = 0;
-    public int TurnStepCounter { get; set; } = 0;
-    public TurnStep TurnStep { get; set; } = 0;
+    [Export] private bool GameStarted { get; set; } = false;
+    [Export] public int GameTurn { get; set; } = 0;
+    [Export] public int TurnStepCounter { 
+        get; 
+        set
+        {            
+            field = value;
+            DebugUtilities.PrintPeer($"TurnStepCounter: {field}");
+            if(field > 0)
+            {
+                GameTurnStep gameTurnStep = gameTurnSteps[field - 1];
+                if(Multiplayer.IsServer())
+                {
+                    
+                    gameTurnStep.Handler();
+                    
+                }
+                EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
+            }
+        } } = 0;
+    [Export] public TurnStep TurnStep { get; set; } = 0;
 
     public int Round
     {
@@ -37,7 +54,7 @@ public partial class GameFlow : Node
         get { return GameSession.Current.GameState; }
     }
 
-    public FactionState CurrentFactionState => GameSession.Current.GameState.FactionStates[CurrentFaction];
+    public FactionState CurrentFactionState => FactionState.ForEnum(CurrentFaction);
     public DeckState CurrentFactionDeckState => DeckState.ForFaction(CurrentFaction);
 
     public FactionTeam CurrentFactionTeam =>
@@ -48,6 +65,9 @@ public partial class GameFlow : Node
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
     private List<GameTurnStep> gameTurnSteps;
+
+    public InputRequest CurrentInputRequest { get; set; }
+    
     public GameFlow()
     {
         gameTurnSteps = new List<GameTurnStep> {
@@ -70,9 +90,12 @@ public partial class GameFlow : Node
 
     public void StartGame()
     {
-        foreach (FactionState faction in gameState.FactionStates.Values)
+        DebugUtilities.PrintPeer("GameFlow: Starting game");
+        foreach (FactionState faction in gameState.FactionStates)
         {
-            faction.DeckState.DrawCards(7);
+            DrawCardsChangeEvent drawCardsChangeEvent = new DrawCardsChangeEvent(Faction.NONE, faction.Faction, 7, false);
+            drawCardsChangeEvent.IsTrigger = false;
+            _ = CardPlayPool.DoChangeEvent(drawCardsChangeEvent);
         }
 
         GameStateCalculator.CalculateAll();
@@ -84,19 +107,20 @@ public partial class GameFlow : Node
 
         GameStarted = true;
 
-        DebugUtilities.PrintPeer("GameFlow: Starting game", DebugVerbosity.INFO);
+        
         // Only fade the local (host) player's loading screen here.
         // Client loading screens are faded via GameSession.ReceiveGameStarted RPC.
-        PlayerScene localPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(
-            PlayerFactionRegistry.GetLocalPlayerFactions().FirstOrDefault());
-        localPlayer?.FadeLoadingScreen();
-
         _ = StartNewTurn();
     }
 
-    public void ProgressGame()
+    private async Task StartNewTurn()
     {
-        DebugUtilities.PrintPeer($"ProgressGame: {GameTurn}", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("StartNewTurn");
+        GameTurn += 1;
+        TurnStepCounter = 0;
+        DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
+        EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
+        await Task.Delay(100);        
         StartNextStep();
     }
 
@@ -104,21 +128,9 @@ public partial class GameFlow : Node
     {
         DebugUtilities.PrintPeer("StartNextStep");
         TurnStepCounter++;
-        GameTurnStep gameTurnStep = gameTurnSteps[TurnStepCounter - 1];
-        gameTurnStep.Handler();
-        EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
     }
 
-    private async Task StartNewTurn()
-    {
-        DebugUtilities.PrintPeer("StartNewTurn", DebugVerbosity.INFO);
-        GameTurn += 1;
-        TurnStepCounter = 0;
-        DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )", DebugVerbosity.INFO);
-        EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
-        await Task.Delay(100);        
-        StartNextStep();
-    }
+    
 
     private async Task StartTurnStep()
     {
@@ -132,12 +144,12 @@ public partial class GameFlow : Node
     private void StartTurnStepFinishedHandler()
     {
         startTurnStepHandler.StartTurnStepFinished -= StartTurnStepFinishedHandler;
-        ProgressGame();
+        StartNextStep();
     }
 
     private async Task PlayCardStep()
     {
-        DebugUtilities.PrintPeer("PlayCardStep", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("PlayCardStep");
         this.TurnStep = TurnStep.PLAY_CARD;
         playStepHandlerDefault = new PlayStepHandlerDefault();
         playStepHandlerDefault.PlayStepFinished += PlayCardStepFinishedHandler;
@@ -146,13 +158,13 @@ public partial class GameFlow : Node
     private void PlayCardStepFinishedHandler()
     {
         playStepHandlerDefault.PlayStepFinished -= PlayCardStepFinishedHandler;
-        ProgressGame();
+        StartNextStep();
     }
 
     private async Task SupplyStep()
     {
         this.TurnStep = TurnStep.SUPPLY;
-        DebugUtilities.PrintPeer("SupplyStep", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("SupplyStep");
         supplyStepHandler = new SupplyStepHandlerDefault();
         supplyStepHandler.SupplyStepFinished += SupplyStepFinishedHandler;
         supplyStepHandler.Start(CurrentFaction);
@@ -161,20 +173,20 @@ public partial class GameFlow : Node
     private void SupplyStepFinishedHandler()
     {
         supplyStepHandler.SupplyStepFinished -= SupplyStepFinishedHandler;
-        ProgressGame();
+        StartNextStep();
     }
 
     private async Task VictoryPointStep()
     {
-        DebugUtilities.PrintPeer("VictoryPointStep", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("VictoryPointStep");
         this.TurnStep = TurnStep.VICTORY_POINT;
         await vpStepHandler.ProcessVictoryStep(CurrentFaction);
-        ProgressGame();
+        StartNextStep();
     }
 
     private async Task DiscardStep()
     {
-        DebugUtilities.PrintPeer("DiscardStep", DebugVerbosity.INFO);
+        DebugUtilities.PrintPeer("DiscardStep");
         this.TurnStep = TurnStep.DISCARD;
         discardStepHandler = new DiscardStepHandlerDefault();
         discardStepHandler.DiscardStepFinished += DiscardStepFinishedHandler;
@@ -184,12 +196,12 @@ public partial class GameFlow : Node
     private void DiscardStepFinishedHandler()
     {
         discardStepHandler.DiscardStepFinished -= DiscardStepFinishedHandler;
-        ProgressGame();
+        StartNextStep();
     }
 
     private async Task DrawStep()
-    {
-        DebugUtilities.PrintPeer("DrawStep", DebugVerbosity.INFO);
+    {        
+        DebugUtilities.PrintPeer("DrawStep");
         this.TurnStep = TurnStep.DRAW;
         drawStepHandler = new DrawStepHandlerDefault();
         drawStepHandler.DrawStepFinished += DrawStepFinishedHandler;
@@ -199,7 +211,7 @@ public partial class GameFlow : Node
     private void DrawStepFinishedHandler()
     {
         drawStepHandler.DrawStepFinished -= DrawStepFinishedHandler;
-        ProgressGame();
+        StartNextStep();
     }
 
     public class GameTurnStep
