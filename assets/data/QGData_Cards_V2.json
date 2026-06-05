@@ -230,12 +230,12 @@
 		"Text": "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army."
 	},
 	{
-		"UniqueName": "EventPlunder",
+		"UniqueName": "EventPlunder_Germany",
 		"Number": "44",
 		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "EventPlunder",
+		"ExecutionClass": "EventPlunder_Germany",
 		"Label": "Plunder",
 		"Text": "Gain +1 Victory Point for each German Army or Navy outside Germany."
 	},
@@ -786,16 +786,16 @@
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusScorchedEarth",
-		"Label": "Guards",
+		"Label": "Scorched Earth",
 		"Text": "Ukraine is not a Supply space for the Axis."
 	},
 	{
-		"UniqueName": "EventPlunder",
+		"UniqueName": "EventPlunder_Italy",
 		"Number": "101",
 		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
-		"ExecutionClass": "EventPlunder",
+		"ExecutionClass": "EventPlunder_Italy",
 		"Label": "Plunder",
 		"Text": "Gain +1 Victory Point for each Italian Army or Navy outside Italy."
 	},

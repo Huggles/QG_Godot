@@ -99,13 +99,13 @@ public partial class ClickableSprite : Area2D
 
 	private void OnMouseEnterSpriteOpaque()
 	{
-		DebugUtilities.PrintPeer("OnMouseEnterSpriteOpaque");
+		DebugUtilities.PrintPeerFinest("OnMouseEnterSpriteOpaque");
 		Sprite.Modulate = HOVER_COLOR;
 	}
 
     private void OnMouseExitSpriteOpaque()
     {
-        DebugUtilities.PrintPeer("OnMouseExitSpriteOpaque");
+        DebugUtilities.PrintPeerFinest("OnMouseExitSpriteOpaque");
         Sprite.Modulate = SELECTABLE_COLOR;
     }
 

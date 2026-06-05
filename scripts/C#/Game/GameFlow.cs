@@ -134,7 +134,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     private async Task StartTurnStep()
     {
-        DebugUtilities.PrintPeer("_start_turn_step");
+        DebugUtilities.PrintPeer("StartTurnStep");
         this.TurnStep = TurnStep.START;
         startTurnStepHandler = new StartTurnStepHandler();
         startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;

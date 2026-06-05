@@ -85,7 +85,7 @@ public partial class PresentationModal : Control, LoadableUI
         PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
         propertyTweener1.Finished += async () =>
         {
-            DebugUtilities.PrintPeer("PresentationModal shown");
+            DebugUtilities.PrintPeerFinest("PresentationModal shown");
             EmitSignal(SignalName.OnShow);
             await Task.Delay(GameSettings.PauseDuration);
             tween1.Dispose();
@@ -194,7 +194,7 @@ public partial class PresentationModal : Control, LoadableUI
         PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
         propertyTweener1.Finished += () =>
         {
-            DebugUtilities.PrintPeer("PresentationModal shown");
+            DebugUtilities.PrintPeerFinest("PresentationModal shown");
             EmitSignal(SignalName.OnShow);
             tween1.Dispose();
         };

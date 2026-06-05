@@ -255,7 +255,6 @@ public partial class CountryState : StateObject
 
     public static CountryState ForEnum(Country country)
     {
-        DebugUtilities.PrintPeer(ForEnums(new List<Country> { country })[0].Name);
         return ForEnums(new List<Country> { country })[0];
     }
 

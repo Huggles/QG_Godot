@@ -42,7 +42,7 @@ public partial class GameManager : Node
 
     public override void _Ready()
     {
-        DebugUtilities.PrintPeer("GameManager Ready");
+        DebugUtilities.PrintPeerFinest("GameManager Ready");
         
         // Listen for scene changes
         GetTree().NodeAdded += OnNodeAdded;
@@ -58,10 +58,10 @@ public partial class GameManager : Node
         // When the Game scene root is added, check for pending player-faction assignments
         if (node.Name == "Game" && node.SceneFilePath == "res://scenes/Game.tscn")
         {
-            DebugUtilities.PrintPeer("Game scene detected");
+            DebugUtilities.PrintPeerFinest("Game scene detected");
             node.GetNode<PeerReadinessComponent>("PeerReadinessComponent").AllPeersReady += () =>
             {
-                DebugUtilities.PrintPeer("All peers ready in Game scene - initializing game");
+                DebugUtilities.PrintPeerFinest("All peers ready in Game scene - initializing game");
                 InitializeGame(_pendingPlayerFactionAssignments);                                
             };
             node.Ready += () => node.GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
@@ -74,7 +74,6 @@ public partial class GameManager : Node
     public void SetPendingPlayerFactionAssignments(List<PlayerFactionAssignment> assignments)
     {
         _pendingPlayerFactionAssignments = assignments;
-        DebugUtilities.PrintPeer($"Stored pending faction assignments for {assignments.Count} player(s)");
     }
 
     /// <summary>
@@ -95,9 +94,9 @@ public partial class GameManager : Node
     /// <param name="playerFactionAssignments">Dictionary mapping peer IDs to their assigned factions</param>
     private async Task LoadGame(List<PlayerFactionAssignment> playerFactionAssignments)
     {
-        DebugUtilities.PrintPeer("Multiplayer session started - waiting for clients to initialize");
+        DebugUtilities.PrintPeerFinest("Multiplayer session started - waiting for clients to initialize");
         await NetworkApi.Instance.StartMultiplayerSession(JsonSerializer.Serialize(playerFactionAssignments));
-        DebugUtilities.PrintPeer("Multiplayer session initialization complete - waiting for UI elements to load");
+        DebugUtilities.PrintPeerFinest("Multiplayer session initialization complete - waiting for UI elements to load");
 
         MultiplayerSession.Instance.StartNew(JsonSerializer.Serialize(playerFactionAssignments));
     }

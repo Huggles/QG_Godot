@@ -41,11 +41,7 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
     {
         if (deckState.HandCardIds.Count == 0)
             return;
-
-        DebugUtilities.PrintPeer($"Requesting discard for {faction} (minimum discards: {minimumDiscards}, required: {required})");
         InputRequest response = await new InputRequest.HandCardsDiscardRequestHandler(faction).BroadCast(); 
-        DebugUtilities.PrintPeer($"Received discard response for {faction}: {string.Join(", ", response.ResponseCardIds)}");
-        
 
         if (response.ResponseCardIds.Count > 0)
         {

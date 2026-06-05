@@ -133,7 +133,7 @@ public static partial class StaticGameData
     {
         var dataMap = JsonSerializer.Deserialize<Dictionary<string, string>>(data);
 
-        DebugUtilities.PrintPeer("Init factions constants");
+        DebugUtilities.PrintPeerFinest("Init factions constants");
 
         var factionRows = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(dataMap["faction_data"]);
         var cardRows = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(dataMap["cards_data"]);
@@ -143,22 +143,22 @@ public static partial class StaticGameData
         foreach (var row in factionRows)
             FactionDataList.Add(new FactionData());
 
-        DebugUtilities.PrintPeer($"Loaded {FactionDataList.Count} factions");
+        DebugUtilities.PrintPeerFinest($"Loaded {FactionDataList.Count} factions");
 
         foreach (var row in cardRows)
             CardDataList.Add(new CardData());
 
-        DebugUtilities.PrintPeer($"Loaded {CardDataList.Count} cards");
+        DebugUtilities.PrintPeerFinest($"Loaded {CardDataList.Count} cards");
 
         foreach (var row in deckRows)
             DeckDataList.Add(new DeckData());
 
-        DebugUtilities.PrintPeer($"Loaded {DeckDataList.Count} decks");
+        DebugUtilities.PrintPeerFinest($"Loaded {DeckDataList.Count} decks");
 
         foreach (var row in countryRows)
             CountryDataList.Add(new CountryData());
 
-        DebugUtilities.PrintPeer($"Loaded {CountryDataList.Count} countries");
+        DebugUtilities.PrintPeerFinest($"Loaded {CountryDataList.Count} countries");
     }
 
     

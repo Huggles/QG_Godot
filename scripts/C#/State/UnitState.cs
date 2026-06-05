@@ -40,15 +40,6 @@ public partial class UnitState : StateObject
         EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; };
     }
 
-    public void Debug()
-    {
-        var debugStr = $"{Id} {Faction}";
-        if (CountryState != null)
-            debugStr += $" {CountryState.Label}";
-
-        DebugUtilities.PrintPeer(debugStr);
-    }
-
     public static UnitState ForId(int unitId)
     {
         return GameSession.Current.GameState.UnitStatesById[unitId];

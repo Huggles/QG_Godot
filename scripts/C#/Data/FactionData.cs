@@ -115,7 +115,7 @@ public partial class FactionData : DataObject
             {
                 texturePath = String.Format(CardTexturePath, factionName, factionNameCapitalized, cardType.ToString().Capitalize().Replace(" ", ""));
             }
-            DebugUtilities.PrintPeer(texturePath);
+            DebugUtilities.PrintPeerFinest(texturePath);
             Texture2D texture2D = GD.Load<Texture2D>(texturePath);
             if (texture2D == null)
             {

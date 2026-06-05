@@ -15,7 +15,7 @@ public partial class PlayerInfoDisplay : PanelContainer, LoadableUI
 
     public override void _Ready()
     {
-        DebugUtilities.PrintPeer("PlayerInfoDisplay _Ready called");
+        DebugUtilities.PrintPeerFinest("PlayerInfoDisplay _Ready called");
         Instance = this;
         
         // Hide by default until LoadUI is called

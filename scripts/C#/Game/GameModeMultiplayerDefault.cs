@@ -20,7 +20,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
     public GameModeMultiplayerDefault(){}
 
     public async Task Init(){
-        DebugUtilities.PrintPeer("Init Game Mode => Multiplayer Default");
+        DebugUtilities.PrintPeerFinest("Init Game Mode => Multiplayer Default");
         LoadDataFiles();
         InstantiateCountryStates();
         InstantiateUnitStates();
@@ -30,7 +30,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
         SpawnCountries();
         SpawnUnits();
 
-        DebugUtilities.PrintPeer("Game Mode Finished Initializing");
+        DebugUtilities.PrintPeerFinest("Game Mode Finished Initializing");
         
     }
 
@@ -65,7 +65,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
             countryData.LoadData();
         }
 
-        DebugUtilities.PrintPeer("Data Finished Loading");
+        DebugUtilities.PrintPeerFinest("Data Finished Loading");
     }
 
     public void InstantiateFactionStates(){
@@ -93,7 +93,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 for (int i = 0; i < deckCardData.Number; i++)
                 {
 
-                    CardData cardData  = StaticGameData.CardDataByName[deckCardData.CardName];
+                    CardData cardData  = StaticGameData.CardDataByName[$"{deckCardData.CardName}"];
                      Type cardType = Type.GetType(cardData.ExecutionClass);
                     if(cardType == null) {            
                         throw new Exception($"ExecutionClass not found for {cardData.UniqueName}, {cardData.ExecutionClass}");
@@ -169,47 +169,76 @@ public partial class GameModeMultiplayerDefault : IGameMode
         // Load initial game state configuration from JSON
         DebugUtilities.PrintPeer($"SetupInitialGameState");
         
-        using var initialStateDataFile = FileAccess.Open(INITIAL_GAME_STATE_BASIC_DATA_PATH, FileAccess.ModeFlags.Read);
+        using var initialStateDataFile = FileAccess.Open(INITIAL_GAME_STATE_DATA_PATH, FileAccess.ModeFlags.Read);
         string initialStateDataString = initialStateDataFile.GetAsText();
         InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
 
         await DeployUnits(initialStateData);
         await PlaceCards(initialStateData);
-        ApplyStartingFaction(initialStateData);
-        
-        DebugUtilities.PrintPeer($"FINISHED SetupInitialGameState");
+        await SetStartingFaction(initialStateData);
 
         await Task.Delay(100);
     }
     private async Task DeployUnits(InitialGameStateData initialStateData)
     {
-        DebugUtilities.PrintPeer($"Doing Unit Deployments");
-        foreach (UnitDeploymentData deployment in initialStateData.UnitDeployments)
+        foreach (var (factionKey, factionData) in initialStateData.Factions)
         {
-            DebugUtilities.PrintPeer($"Deploying unit for {deployment.Faction} in {deployment.CountryName}");
             // Parse faction enum
-            if (!Enum.TryParse<Faction>(deployment.Faction, out Faction faction))
+            if (!Enum.TryParse<Faction>(factionKey, out Faction faction))
             {
-                DebugUtilities.PrintPeer($"Warning: Invalid faction '{deployment.Faction}' in initial game state config");
+                DebugUtilities.PrintPeer($"Warning: Invalid faction '{factionKey}' in initial game state config");
                 continue;
             }
 
-            // Get country state by UniqueName
-            CountryState countryState = CountryState.ForName(deployment.CountryName);
-            if (countryState == null)
+            foreach (UnitDeploymentData deployment in factionData.UnitDeployments)
             {
-                throw new Exception($"Country '{deployment.CountryName}' not found in initial game state config. Ensure countryName matches the UniqueName field in QGData_Countries_V2.json.");
-            }            
-            DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(
-                faction, 
-                countryState.Id, 
-                DeployType.RECRUIT
-            );
-            deployUnitChangeEvent.IsTrigger = false;            
-            await deployUnitChangeEvent.ApplyChange();
+                DebugUtilities.PrintPeerFinest($"Deploying unit for {factionKey} in {deployment.CountryName}");
+
+                // Get country state by UniqueName
+                CountryState countryState = CountryState.ForName(deployment.CountryName);
+                if (countryState == null)
+                {
+                    throw new Exception($"Country '{deployment.CountryName}' not found in initial game state config. Ensure countryName matches the UniqueName field in QGData_Countries_V2.json.");
+                }            
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(
+                    faction, 
+                    countryState.Id, 
+                    DeployType.RECRUIT
+                ); 
+                deployUnitChangeEvent.IsTrigger = false;            
+                await deployUnitChangeEvent.ApplyChange();
+            }
         }
     }
-    private void ApplyStartingFaction(InitialGameStateData initialStateData)
+    private async Task PlaceCards(InitialGameStateData initialStateData)
+    {
+        DebugUtilities.PrintPeer($"Placing initial cards");
+
+        foreach (var (factionKey, factionData) in initialStateData.Factions)
+        {
+            // Add initial cards to play area WITHOUT activating them
+            foreach (InitialCardEntry card in factionData.InitialCards)
+            {            
+                CardState cs = CardState.ForName(card.Name);
+                if(cs == null) throw new Exception($"Card '{card.Name}' not found in initial game state config. Ensure name matches the Name field in QGData_Cards_V2.json.");
+                await new PlayCardChangeEvent(cs.Id) {  IsTrigger = false }.ApplyChange();
+            }
+
+            // Move specified cards to the top of each faction's hand
+            Faction faction = System.Enum.Parse<Faction>(factionKey);
+            DeckState deck = DeckState.ForFaction(faction);
+            foreach (InitialHandCardEntry handCard in factionData.InitialHandCards)
+            {
+                int cardId = deck.DrawCardByName(handCard.Name);
+                if (cardId == -1)
+                    DebugUtilities.PrintPeerError($"InitialHandCard not found in deck: {handCard.Name} for {factionKey}");
+                else
+                    DebugUtilities.PrintPeer($"Moved {handCard.Name} to {factionKey} hand");
+            }
+        }
+    }
+
+    private async Task SetStartingFaction(InitialGameStateData initialStateData)
     {
         if (string.IsNullOrEmpty(initialStateData.StartingFaction)) return;
 
@@ -228,28 +257,6 @@ public partial class GameModeMultiplayerDefault : IGameMode
         GameFlow.Instance.GameTurn = factionIndex;
         DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})");
     }
-    private async Task PlaceCards(InitialGameStateData initialStateData)
-    {
-        DebugUtilities.PrintPeer($"Placing initial cards");
-        // Add initial cards to play area WITHOUT activating them
-        foreach (InitialCardEntry card in initialStateData.InitialCards)
-        {
-            await CardPlayPool.AddCardToPlayAreaWithoutActivating(card.Number);
-        }
-
-        // Move specified cards to the top of each faction's hand
-        foreach (InitialHandCardEntry handCard in initialStateData.InitialHandCards)
-        {
-            Faction faction = System.Enum.Parse<Faction>(handCard.Faction);
-            DeckState deck = DeckState.ForFaction(faction);
-            int cardId = deck.DrawCardByName(handCard.Name);
-            if (cardId == -1)
-                DebugUtilities.PrintPeerError($"InitialHandCard not found in deck: {handCard.Name} for {handCard.Faction}");
-            else
-                DebugUtilities.PrintPeer($"Moved {handCard.Name} to {handCard.Faction} hand");
-        }
-    }
-
     
     
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 public partial class PlayCardChangeEvent : ChangeEvent
 {
-    public PlayCardChangeEvent(Faction faction, int cardId) : base(faction)
+    public PlayCardChangeEvent(int cardId) : base(CardState.ForId(cardId).Faction)
     {
         SourceCardId = cardId;
     }

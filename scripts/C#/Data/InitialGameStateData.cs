@@ -3,6 +3,15 @@ using System.Text.Json.Serialization;
 
 public class InitialGameStateData
 {
+    [JsonPropertyName("factions")]
+    public Dictionary<string, FactionScenarioData> Factions { get; set; } = new Dictionary<string, FactionScenarioData>();
+
+    [JsonPropertyName("startingFaction")]
+    public string StartingFaction { get; set; } = null;
+}
+
+public class FactionScenarioData
+{
     [JsonPropertyName("unitDeployments")]
     public List<UnitDeploymentData> UnitDeployments { get; set; } = new List<UnitDeploymentData>();
 
@@ -11,36 +20,22 @@ public class InitialGameStateData
 
     [JsonPropertyName("initialHandCards")]
     public List<InitialHandCardEntry> InitialHandCards { get; set; } = new List<InitialHandCardEntry>();
-
-    [JsonPropertyName("startingFaction")]
-    public string StartingFaction { get; set; } = null;
 }
 
 public class InitialCardEntry
 {
-    [JsonPropertyName("number")]
-    public int Number { get; set; }
-
     [JsonPropertyName("name")]
     public string Name { get; set; }
-
 }
 
 public class InitialHandCardEntry
 {
-    [JsonPropertyName("faction")]
-    public string Faction { get; set; }
-
     [JsonPropertyName("name")]
     public string Name { get; set; }
 }
 
 public class UnitDeploymentData
 {
-    [JsonPropertyName("faction")]
-    public string Faction { get; set; }
-
     [JsonPropertyName("countryName")]
     public string CountryName { get; set; }
-
 }

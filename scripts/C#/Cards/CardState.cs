@@ -54,7 +54,16 @@ public partial class CardState : StateObject
 
     public static CardState ForName(string cardName)
     {
-        return GameSession.Current.GameState.CardStatesByName.ToList().Find(kv => kv.Key.StartsWith(cardName)).Value;
+        if (GameSession.Current.GameState.CardStatesByName.Keys.Contains(cardName))
+        {
+            return GameSession.Current.GameState.CardStatesByName[cardName];
+        }
+        else
+        {
+            return GameSession.Current.GameState.CardStatesByName.ToList().Find(kv => kv.Key.StartsWith(cardName)).Value;
+        }
+
+        
     }
     public static CardState ForNumber(int cardNumber)
     {
@@ -62,6 +71,8 @@ public partial class CardState : StateObject
             return null;
         return ForName(cardData.UniqueName);
     }
+
+    
 
     public static CardState ForStep(int stepId)
     {

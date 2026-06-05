@@ -55,7 +55,7 @@ public partial class GameSession : Node
 
     public async Task StartSession(List<PlayerScene> playerScenes)
     {
-        DebugUtilities.PrintPeer("Start Session");
+        DebugUtilities.PrintPeerFinest("Start Session");
         this.playerScenes = playerScenes;
 
         

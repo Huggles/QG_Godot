@@ -67,7 +67,7 @@ public partial class PlayerScene : CharacterBody2D
             _loadingCoverInterface.Name = "LoadingCoverInterface";
             AddChild(_loadingCoverInterface);
         } 
-        DebugUtilities.PrintPeer($"PlayerScene ready: {PlayerName}");
+        DebugUtilities.PrintPeerFinest($"PlayerScene ready: {PlayerName}");
         GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
         
     }
@@ -76,7 +76,7 @@ public partial class PlayerScene : CharacterBody2D
     {
         if (what == NotificationPredelete)
         {
-            DebugUtilities.PrintPeer($"Player deleted. Name: {_playerName}");
+            DebugUtilities.PrintPeerFinest($"Player deleted. Name: {_playerName}");
         }
     }
 
@@ -93,7 +93,7 @@ public partial class PlayerScene : CharacterBody2D
     public override void _EnterTree()
     {
         base._EnterTree();
-        DebugUtilities.PrintPeer("Entered tree player");
+        DebugUtilities.PrintPeerFinest("Entered tree player");
     }
 
     public void FadeLoadingScreen()
@@ -110,7 +110,7 @@ public partial class PlayerScene : CharacterBody2D
                     .SetTrans(Tween.TransitionType.Sine)
                     .SetEase(Tween.EaseType.InOut);
                 propertyTweener1.Finished += () => {
-                    DebugUtilities.PrintPeer("Removing loading cover");
+                    DebugUtilities.PrintPeerFinest("Removing loading cover");
                     RemoveChild(_loadingCoverInterface);
                 };
             } else {

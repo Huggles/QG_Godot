@@ -16,8 +16,7 @@ public partial class PlayStepHandlerDefault : GodotObject,IPlayStepHandler
     }
 
     public async void CardPoolFinished()
-    {
-        DebugUtilities.PrintPeer("");
+    {        
         CardPlayPool.ClearPool();
         EmitSignal(SignalName.PlayStepFinished);
     }

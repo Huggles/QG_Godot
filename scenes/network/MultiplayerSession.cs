@@ -21,12 +21,12 @@ public partial class MultiplayerSession : Node
     {
         base._EnterTree();
         Instance = this;
-        DebugUtilities.PrintPeer($"MultiplayerSession entered tree (IsServer={Multiplayer.IsServer()})");
+        DebugUtilities.PrintPeerFinest($"MultiplayerSession entered tree (IsServer={Multiplayer.IsServer()})");
     }
 
     public override void _Ready()
     {
-        DebugUtilities.PrintPeer($"MultiplayerSession ready on peer {Multiplayer.GetUniqueId()}");
+        DebugUtilities.PrintPeerFinest($"MultiplayerSession ready on peer {Multiplayer.GetUniqueId()}");
         _peerReadinessComponent.RegisterReady();
     }
 
@@ -47,10 +47,10 @@ public partial class MultiplayerSession : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void StartSession(string configuration)
     {
-        DebugUtilities.PrintPeer($"LoadGame called with config: {configuration}");
+        DebugUtilities.PrintPeerFinest($"LoadGame called with config: {configuration}");
         GameModeMultiplayerDefault gameMode = new GameModeMultiplayerDefault();
         await gameMode.Init();
-        DebugUtilities.PrintPeer("Game mode initialization complete, emitting MultiplayerSessionReady");
+        DebugUtilities.PrintPeerFinest("Game mode initialization complete, emitting MultiplayerSessionReady");
         
 
         if(Multiplayer.IsServer())

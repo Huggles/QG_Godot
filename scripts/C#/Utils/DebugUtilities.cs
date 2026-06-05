@@ -23,20 +23,25 @@ public partial class DebugUtilities : Node
         GD.PrintRich($"{InstancePrefix}[color=red]({FormattedDateTime}) [ERROR]: {message}[/color]");
     }
 
-    /// <summary>Prints when the current debug level is >= the specified level. Defaults to FINEST.</summary>
-    /// 
-    public static void PrintPeer(Object o){
-        if(o == null)
-        {
-            o = "null";
-        }
-        PrintPeer(o.ToString());
-    }
-
-    public static void PrintPeer(String message){
-        GD.PrintRich($"{InstancePrefix}[color={"green"}]({FormattedDateTime})]: {message}[/color]");
+    /// <summary>
+    /// Prints <paramref name="message"/> normally; prints <paramref name="finestMessage"/> instead when verbosity is FINEST.
+    /// </summary>
+    public static void PrintPeer(Object o, Object oFinest = null){
+        PrintPeer(o?.ToString() ?? "null", oFinest?.ToString() ?? "null");
         
     }
+   
+    public static void PrintPeer(string message, string finestMessage = null){
+        if(CurrentVerbosity == DebugVerbosity.INFO && message == null) return;
+
+        string text = (CurrentVerbosity == DebugVerbosity.FINEST && !string.IsNullOrEmpty(finestMessage)) ? finestMessage : message;
+        GD.PrintRich($"{InstancePrefix}[color={"green"}]({FormattedDateTime})]: {text}[/color]");
+    }
+
+    public static void PrintPeerFinest(string message){
+        PrintPeer(null, message);
+    }
+    
     
     
     private static Dictionary<String, Object> ParseCommandLineArguments()

@@ -13,18 +13,18 @@ public partial class FactionsContainer : Control
     {   
         if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
         {
-            DebugUtilities.PrintPeer($"Setting up FactionsContainer for local player: {GetMultiplayerAuthority()}");
+            DebugUtilities.PrintPeerFinest($"Setting up FactionsContainer for local player: {GetMultiplayerAuthority()}");
             Current = this;
             EventBus.Instance.PlayerJoined += InitChildElements;
             EventBus.Instance.PlayerLeft += InitChildElements;
             EventBus.Instance.FactionsAssigned += InitChildElements;        
             EventBus.Instance.GameSessionStarted += InitChildElements;
             EventBus.Instance.UserInterfaceReady += () => {
-                DebugUtilities.PrintPeer("FactionsContainer received UserInterfaceReady signal, initializing child elements");
+                DebugUtilities.PrintPeerFinest("FactionsContainer received UserInterfaceReady signal, initializing child elements");
                 InitChildElements();
             };
         }
-        DebugUtilities.PrintPeer($"FactionsContainer ready: {GetMultiplayerAuthority()}");  
+        DebugUtilities.PrintPeerFinest($"FactionsContainer ready: {GetMultiplayerAuthority()}");  
     }
 
     public override void _ExitTree()
@@ -42,7 +42,7 @@ public partial class FactionsContainer : Control
 
     private void InitChildElements()
     {
-        DebugUtilities.PrintPeer("FactionsContainer initializing child elements");
+        DebugUtilities.PrintPeerFinest("FactionsContainer initializing child elements");
         foreach (Node child in HorizontalContainer.GetChildren())
         {
             HorizontalContainer.RemoveChild(child);

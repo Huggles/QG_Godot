@@ -23,7 +23,7 @@ public partial class GameAPI : Node
     {
         base._EnterTree();
         Instance = this;
-        DebugUtilities.PrintPeer($"MultiplayerSession entered tree (IsServer={Multiplayer.IsServer()})");
+        DebugUtilities.PrintPeerFinest($"MultiplayerSession entered tree (IsServer={Multiplayer.IsServer()})");
     }
 
     private static MultiplayerGameState GameState => GameSession.Current.GameState;

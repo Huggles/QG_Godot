@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class EventPlunder : EventCardLogic
+public partial class EventPlunder_Italy : EventCardLogic
 {
     public override List<CardStep> InitializePlayCardSteps()
     {

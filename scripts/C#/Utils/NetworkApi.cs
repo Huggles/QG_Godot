@@ -59,7 +59,7 @@ public partial class NetworkApi : Node
             List<Faction> factions = assignment.Factions;
             
             string factionNames = string.Join(", ", factions);
-            DebugUtilities.PrintPeer($"Creating player for peer {peerId} with factions: {factionNames}");
+            DebugUtilities.PrintPeerFinest($"Creating player for peer {peerId} with factions: {factionNames}");
             
             PlayerScene player = AssetRepository.PlayerScenePackged.Instantiate<PlayerScene>();
             player.SetMultiplayerAuthority(peerId);
@@ -75,7 +75,7 @@ public partial class NetworkApi : Node
 
             PlayerFactionRegistry.RegisterPlayer(player);
             
-            DebugUtilities.PrintPeer($"Player {peerId} added to scene tree");
+            DebugUtilities.PrintPeerFinest($"Player {peerId} added to scene tree");
         }
         
         // Step 3: Assign factions to players
@@ -95,14 +95,13 @@ public partial class NetworkApi : Node
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void ReceiveChangeEvent(string dtoJson)
-    {
-        
+    {        
         ChangeEventDto dto = JsonSerializer.Deserialize<ChangeEventDto>(dtoJson);
         ChangeEvent ev     = ChangeEvent.FromDto(dto);
-        DebugUtilities.PrintPeer($"ReceiveChangeEvent ({ev.Id}): {dtoJson}");
+        DebugUtilities.PrintPeer($"[color={"blue"}]ReceiveChangeEvent ({ev.Id}): {dto.GetType().Name}");
+        DebugUtilities.PrintPeerFinest($"{dtoJson}");
         ev.ChangeEventApplied += (id) => {
-            string actualHash = MultiplayerSession.Instance.GameState.ComputeHash();
-            DebugUtilities.PrintPeer($"{actualHash}");
+            string actualHash = MultiplayerSession.Instance.GameState.ComputeHash();            
             if (actualHash != ev.HashAfterApplication)
             {
                 DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
@@ -120,9 +119,9 @@ public partial class NetworkApi : Node
 
     public SignalAwaiter SendInputRequest(InputRequest inputRequest)
     {   
-        DebugUtilities.PrintPeer($"SendInputRequest");
-        string payload = inputRequest.ToJson();
-        DebugUtilities.PrintPeer($"Sent input request: {payload}");
+        DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");        
+        string payload = inputRequest.ToJson();        
+        DebugUtilities.PrintPeerFinest($"{payload}");
         Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);        
         return EventBus.Instance.ToSignal(EventBus.Instance, nameof(EventBus.SignalName.InputRequestResponseReceived));
     }
@@ -133,9 +132,10 @@ public partial class NetworkApi : Node
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void ReceiveInputRequest(string dtoJson)
-    {
-        DebugUtilities.PrintPeer($"ReceiveInputRequest: {dtoJson}");
+    {        
         InputRequest dto = InputRequest.FromJson(dtoJson);
+        DebugUtilities.PrintPeer($"[color={"purple"}]ReceiveInputRequest:  {dto.GetType().Name} (For me: {dto.IsForCurrentPeer})");
+        DebugUtilities.PrintPeerFinest($"{dtoJson}");
         await dto.Execute();
 
         if (dto.IsForCurrentPeer)
@@ -180,8 +180,7 @@ public partial class NetworkApi : Node
     /// <summary>Server → client: delivers a full state snapshot in response to RequestResync.</summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void ReceiveFullSnapshot(string snapshotJson)
-    {
-        DebugUtilities.PrintPeer("ReceiveFullSnapshot: applying resync");
+    {        
         MultiplayerGameStateSnapshot snapshot = JsonSerializer.Deserialize<MultiplayerGameStateSnapshot>(snapshotJson);
         MultiplayerSession.Instance.GameState.ApplySnapshot(snapshot);
     }

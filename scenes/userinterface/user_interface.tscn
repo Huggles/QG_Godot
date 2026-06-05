@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dqdvhk2rm85fc"]
+[gd_scene load_steps=9 format=3 uid="uid://dqdvhk2rm85fc"]
 
 [ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="1_bj75k"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://scenes/userinterface/FactionInfo/FactionsContainer.tscn" id="5_8bdsb"]
 [ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="6_x05kf"]
 [ext_resource type="Script" uid="uid://6krq1p1wqi43" path="res://scripts/C#/UI/SpeedControl.cs" id="7_v35kq"]
+[ext_resource type="Script" uid="uid://bkgumcj218qt5" path="res://scripts/C#/UI/DebugVerbosityControl.cs" id="8_debugverb"]
 
 [node name="Interface" type="CanvasLayer"]
 
@@ -33,3 +34,8 @@ mouse_filter = 2
 offset_left = 10.0
 offset_top = 10.0
 script = ExtResource("7_v35kq")
+
+[node name="DebugVerbosityControl" type="PanelContainer" parent="."]
+offset_left = 10.0
+offset_top = 50.0
+script = ExtResource("8_debugverb")

@@ -54,7 +54,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             BattleCountryChangeEventDto d    => new BattleCountryChangeEvent(d.TriggeringFaction, d.CountryId),
             RemoveUnitChangeEventDto d       => new RemoveUnitChangeEvent(d.TriggeringFaction, d.UnitId, d.Reason),
             BattleUnitChangeEventDto d       => new BattleUnitChangeEvent(d.TriggeringFaction, d.UnitId),
-            PlayCardChangeEventDto d         => new PlayCardChangeEvent(d.TriggeringFaction, d.SourceCardId),
+            PlayCardChangeEventDto d         => new PlayCardChangeEvent(d.SourceCardId),
             ActivateReactionChangeEventDto d => new ActivateReactionChangeEvent(d.TriggeringFaction, d.SourceCardId, ForId(d.SourceChangeEventId)),
             ForceDiscardCardsChangeEventDto d     => new ForceDiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
             DiscardHandCardsChangeEventDto d     => new DiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardIds),
@@ -99,8 +99,8 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         
         this.HashAfterApplication = MultiplayerSession.Instance.GameState.ComputeHash();   
         string dtoJson = JsonSerializer.Serialize(ToDto());         
-        DebugUtilities.PrintPeer($"EMITTING ChangeEvent to clients: {ScriptName} (Id: {Id}, Hash: {HashAfterApplication})");            
-        DebugUtilities.PrintPeer($"ChangeEvent DTO JSON: {dtoJson}");
+        DebugUtilities.PrintPeer($"[color={"blue"}]Emitting ChangeEvent to clients: {ScriptName} (Id: {Id}, Hash: {HashAfterApplication})");            
+        DebugUtilities.PrintPeerFinest($"{dtoJson}");
         NetworkApi.Instance.Rpc(nameof(NetworkApi.ReceiveChangeEvent), dtoJson);
     }
 

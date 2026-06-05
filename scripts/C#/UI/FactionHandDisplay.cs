@@ -99,7 +99,7 @@ public partial class FactionHandDisplay : Control
 
     private void OnGameSessionStarted()
     {
-        DebugUtilities.PrintPeer($"Game session started, showing hand display for first faction: {PlayerScene.Current.ControlledFactions[0]}");
+        DebugUtilities.PrintPeerFinest($"Game session started, showing hand display for first faction: {PlayerScene.Current.ControlledFactions[0]}");
         Show(PlayerScene.Current.ControlledFactions[0]);
     }
 
@@ -183,8 +183,7 @@ public partial class FactionHandDisplay : Control
     private void InitCards(List<int> cardIds)
     {
         // Only initialize cards if LoadUI has been called
-        DebugUtilities.PrintPeer($"Initializing cards {string.Join(", ", cardIds)}");
-        DebugUtilities.PrintPeer($"{CardsContainer}");
+        DebugUtilities.PrintPeerFinest($"Initializing cards {string.Join(", ", cardIds)}");        
         if (CardsContainer == null)
         {
             return;
@@ -227,7 +226,6 @@ public partial class FactionHandDisplay : Control
     {
         DebugUtilities.PrintPeer($"Card selected with ID: {cardId}");
         EmitSignal(SignalName.CardSelected, cardId);
-        DebugUtilities.PrintPeer("Emitted CardSelected signal with ID: " + cardId);
     }
 
     private void DeleteCurrentCards()

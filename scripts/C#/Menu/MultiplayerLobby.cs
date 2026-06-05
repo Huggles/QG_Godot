@@ -26,7 +26,7 @@ public partial class MultiplayerLobby : Control
 
     public override void _Ready()
     {
-        DebugUtilities.PrintPeer("MultiplayerLobby: Ready");
+        DebugUtilities.PrintPeerFinest("MultiplayerLobby: Ready");
         
         // Get UI references
         _playerListContainer = GetNode<VBoxContainer>("%PlayerListContainer");

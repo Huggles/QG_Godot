@@ -1,15 +1,48 @@
 {
-  "unitDeployments": [
-    { "faction": "GERMANY",       "countryName": "GERMANY" },
-    { "faction": "UNITED_KINGDOM",       "countryName": "UNITED_KINGDOM" },
-    { "faction": "JAPAN",       "countryName": "JAPAN" },
-    { "faction": "SOVIET",       "countryName": "MOSCOW" },
-    { "faction": "ITALY",       "countryName": "ITALY" },
-    { "faction": "UNITED_STATES",       "countryName": "US_EAST" }
-  ],
   "startingFaction": "GERMANY",
-  "initialCards": [
-  ],
-  "initialHandCards": [
-  ]
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [
+        { "countryName": "GERMANY" }
+      ],
+      "initialCards": [],
+      "initialHandCards": []
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [
+        { "countryName": "UNITED_KINGDOM" }
+      ],
+      "initialCards": [],
+      "initialHandCards": []
+    },
+    "JAPAN": {
+      "unitDeployments": [
+        { "countryName": "JAPAN" }
+      ],
+      "initialCards": [],
+      "initialHandCards": []
+    },
+    "SOVIET": {
+      "unitDeployments": [
+        { "countryName": "MOSCOW" }
+      ],
+      "initialCards": [],
+      "initialHandCards": []
+    },
+    "ITALY": {
+      "unitDeployments": [
+        { "countryName": "ITALY" }
+      ],
+      "initialCards": [],
+      "initialHandCards": []
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [
+        { "countryName": "US_EAST" }
+      ],
+      "initialCards": [],
+      "initialHandCards": []
+    }
+  }
 }
+

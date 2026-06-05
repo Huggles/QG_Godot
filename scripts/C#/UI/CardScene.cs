@@ -59,7 +59,7 @@ public partial class CardScene : Control
     }
     private void CardButton_MouseExited()
     {
-        DebugUtilities.PrintPeer($"Mouse exited card with ID: {CardId}");
+        DebugUtilities.PrintPeerFinest($"Mouse exited card with ID: {CardId}");
         FactionHandDisplay.Current.HideCardEmphasis();        
     }
 

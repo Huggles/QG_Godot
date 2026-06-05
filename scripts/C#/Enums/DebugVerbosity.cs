@@ -1,1 +1,1 @@
-public enum DebugVerbosity { NONE, INFO, FINEST }
+public enum DebugVerbosity { INFO, FINEST }
