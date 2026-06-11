@@ -30,10 +30,10 @@ public partial class InputManager : Node2D
     [Signal]
     public delegate void KeyClickedEventHandler(InputEventKey keyEvent);
 
-    public InputHandlerPlayCard SetPlayCardInputActive(List<CardActivationOption> cardActivationOptions)
-    {        
-        DebugUtilities.PrintPeer("Setting play card input active with options: " + string.Join(", ", cardActivationOptions.Select(opt => opt.CardId)));
-        inputHandler = new InputHandlerPlayCard(cardActivationOptions);
+    public InputHandlerPlayCard SetPlayCardInputActive(List<int> cardIds)
+    {       
+        
+        inputHandler = new InputHandlerPlayCard(cardIds);
         return inputHandler;
     }
 

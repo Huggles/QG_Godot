@@ -7,10 +7,6 @@ using System.Threading.Tasks;
 
 public partial class CardStep
 {
-    public static int stepIdCounter = 100;
-    public static CardStep ForId(int id) => GameSession.Current.GameState.CardStepsById[id];
-    public static List<CardStep> ForIds(List<int> ids) => ids.Select(id => ForId(id)).ToList();
-
     public bool StepFinished { get; set; } = false;
     public bool IsPlayStep { get; set; } = false;
     public bool IsReactStep { get; set; } = false;
@@ -61,20 +57,12 @@ public partial class CardStep
     {
         this.CardLogic = cardLogic;
         this.StepLogic = stepLogic;
-        this.Id = stepIdCounter;
-        stepIdCounter += 1;
         GameSession.Current.GameState.CardSteps.Add(this);
     }    
 
     public CardStep WithId(int id)
     {
         this.Id = id;
-        return this;
-    }
-
-    public CardStep WithPrerequisiteStep(int stepId)
-    {
-        this.PrerequisiteCardStep = CardStep.ForId(stepId);
         return this;
     }
 

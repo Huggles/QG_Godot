@@ -87,52 +87,5 @@ public partial class GameSession : Node
 
     public Dictionary<int, UnitState> UnitStatesById => GameState.UnitStatesById.ToDictionary();
     
-    public async static Task<CardActivationOption> RequestPlay(Faction faction)
-    {
-        // Get the player who controls this faction
-        PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
-        if (controllingPlayer == null)
-        {
-            DebugUtilities.PrintPeerError($"RequestPlay: No player found controlling {faction}");
-            return null;
-        }
-
-        List<CardActivationOption> activationOptions = CardPlayPool.GetNextActions(faction);
-
-        Variant[] response = await NetworkApi.Instance.SendInputRequest(new InputRequest.HandCardPlayRequestHandler(faction, activationOptions.Select(opt => opt.StepId).ToList()));
-        InputRequest responseDto = InputRequest.FromJson(response[0].AsString()); 
-        return activationOptions.Find(opt => opt.StepId == responseDto.ResponseStepIds[0]);
-    }
-    public async static Task<CardActivationOption> RequestBlock(Faction faction)
-    {
-        // Get the player who controls this faction
-        PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
-        if (controllingPlayer == null)
-        {
-            DebugUtilities.PrintPeerError($"RequestBlock: No player found controlling {faction}");
-            return null;
-        }
-
-        List<CardActivationOption> blockOptions = await CardPlayPool.BlockChangeEvents(faction);
-        if (blockOptions == null || blockOptions.Count == 0)
-        {
-            return null;
-        }
-        else
-        {
-            // Route input to the correct player's InputManager
-            controllingPlayer.InputManager.SetPlayCardInputActive(blockOptions);
-            
-            Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
-            if (results == null || results.Length == 0)
-            {
-                return null;
-            }
-            else
-            {
-                return new CardActivationOption((int)results[0]);
-            }
-        }
-
-    }
+    
 }

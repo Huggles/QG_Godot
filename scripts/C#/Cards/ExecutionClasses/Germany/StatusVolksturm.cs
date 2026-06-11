@@ -17,7 +17,11 @@ public partial class StatusVolksturm : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(1), false);
+                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction, 1);
+                discardEvent.IsTrigger = false;
+                await discardEvent.ApplyChange();
+
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
                 await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");          
                 
                 int selectedCountryId = await new SelectCountryHandler(new List<int>{(int)Country.Germany}).Handle();

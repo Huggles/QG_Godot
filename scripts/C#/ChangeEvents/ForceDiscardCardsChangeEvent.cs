@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 public partial class ForceDiscardCardsChangeEvent : ChangeEvent
 {
     public int NumberOfCards { get; set; }
+    public List<int> DiscardedCardIds { get; private set; } = new();
 
     public ForceDiscardCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards) : base(triggeringFaction)
     {
@@ -27,7 +28,7 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         ApplyDiscardModifiers();
 
         DeckState deckState = DeckState.ForFaction(TargetFaction); 
-        deckState.DiscardTopCards(NumberOfCards);
+        DiscardedCardIds = deckState.DiscardTopCards(NumberOfCards);
         PlayerActionLabel.ShowText($"{TriggeringFaction} makes {TargetFaction} discard {NumberOfCards} cards", TriggeringFaction);
         await Task.Delay(GameSettings.PauseDuration);
         return true;

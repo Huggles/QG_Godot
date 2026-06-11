@@ -34,8 +34,7 @@ public partial class StatusBiasForAction : StatusCardLogic
                 .ToList();
 
             List<BattleTarget> attackableUnits = neighBorCountries                
-                .SelectMany(cs => {
-                    DebugUtilities.PrintPeer($"Checking attackable units in {cs.Label}, {cs.Units.Values} ");
+                .SelectMany(cs => {                    
                     List<UnitState> attackableUnits = UnitState.ForIds(cs.Units.Values).Where(us => us.Tags.Has(Tag.Attackable, Faction)).ToList();
                     return attackableUnits;
                 })
@@ -49,7 +48,11 @@ public partial class StatusBiasForAction : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(1), false);
+                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction, 1);
+                discardEvent.IsTrigger = false;
+                await discardEvent.ApplyChange();
+
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
                 await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
                 
                 BattleTarget battleTarget = await new SelectBattleTargetHandler(BattleTargets).Handle();

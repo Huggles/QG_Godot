@@ -9,12 +9,10 @@ public abstract partial class StatusCardLogic : CardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                DeckState deckState = DeckState.ForFaction(Faction);
-                deckState.StatusCardIds.Add(CardState.Id);
-                deckState.HandCardIds.Remove(CardState.Id);
+                // Card is placed in StatusCardIds by DeckState.PlayCard()
                 await Task.CompletedTask;
                 return null;
-            }) 
-        }; 
+            })
+        };
     }
 }

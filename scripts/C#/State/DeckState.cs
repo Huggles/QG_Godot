@@ -130,13 +130,13 @@ public partial class DeckState : StateObject
         DeckCardIds.Remove(cardId);            
 
         CardState cardState = CardState.ForId(cardId);
-        
-        // Only discard event cards - Status and Response cards are moved to their respective lists
-        // by their own PlayCardSteps logic (StatusCardLogic/ResponseCardLogic)
-        if (!cardState.CardLogic.IsReaction)
-        {
+
+        if (cardState.CardData.CardType == CardType.STATUS)
+            StatusCardIds.Add(cardId);
+        else if (cardState.CardData.CardType == CardType.RESPONSE)
+            ResponseCardIds.Add(cardId);
+        else
             DiscardCard(cardId);
-        }
     }
 
 

@@ -17,7 +17,7 @@ public partial class PlayCardChangeEvent : ChangeEvent
     }
 
     protected override async Task<bool> ExecuteAsync(){
-        DeckState.ForFaction(SourceCardState.Faction).PlayCard(SourceCardState.Id);        
+        DeckState.ForFaction(SourceCardState.Faction).PlayCard(SourceCardState.Id);
         await Task.CompletedTask;
         return true;
     }

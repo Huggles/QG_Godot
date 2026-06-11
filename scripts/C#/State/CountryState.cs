@@ -126,6 +126,7 @@ public partial class CountryState : StateObject
         UnitState unit = UnitState.ForId(unitId);
         Units.Remove(unit.Faction);
         unit.CountryId = -1;
+        EventBus.Emit(EventBus.SignalName.UnitRemoved, unitId, Id);
     }
 
     public bool CanBuild(Faction faction)

@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://mkqa1n4o3kva"]
+[gd_scene load_steps=2 format=3 uid="uid://mkqa1n4o3kva"]
 
-[ext_resource type="Script" uid="uid://dvfjq50xm1rst" path="res://scripts/Menu/MainMenuUIScript.gd" id="1_nly4e"]
-[ext_resource type="Texture2D" uid="uid://bac4xdyyb4tvc" path="res://assets/textures/Other/Menu_Background.jpg" id="2_7ots7"]
+[ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -14,7 +13,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-script = ExtResource("1_nly4e")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -23,7 +21,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_7ots7")
+texture = ExtResource("1_m2yvp")
 expand_mode = 3
 
 [node name="HostButton" type="Button" parent="."]

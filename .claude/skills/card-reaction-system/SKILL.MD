@@ -293,6 +293,32 @@ public override List<CardStep> InitializeReactCardSteps()
 }
 ```
 
+### Prerequisite Change Events Within a Step
+
+Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `ApplyChange()` directly — no need to split into two steps or go through `CardPlayPool`.
+
+```csharp
+new CardStep(this, async() => {
+    // Prerequisite: discard 2 cards and sync to clients
+    ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction, 2);
+    discardEvent.IsTrigger = false;   // not blockable, no reactions
+    await discardEvent.ApplyChange(); // executes, broadcasts, and populates DiscardedCardIds
+
+    // Use runtime results from the prerequisite if needed
+    List<PresentationItem> items = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
+    await PresentationModal.Current.ShowModal(items, "Discarded cards");
+
+    // Main action
+    int countryId = await new SelectCountryHandler(targets.ToCountryIds()).Handle();
+    return BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
+})
+```
+
+**Rules for prerequisite change events:**
+- Set `IsTrigger = false` so no block/reaction chain is triggered
+- Call `ApplyChange()` directly (not `CardPlayPool.DoChangeEvent`) — no need to register in the pool unless other cards need to query it
+- Any runtime results (e.g. `DiscardedCardIds`) are available on the local instance immediately after `await`
+
 ## Key Design Principles
 
 1. **Recursive by Nature**: Every reaction goes through the same flow as the original action, enabling deep chains

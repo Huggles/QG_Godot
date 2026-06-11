@@ -8,14 +8,14 @@ public partial class InputHandlerPlayCard
 {
     private GameFlow gameFlow => GameFlow.Instance;
 
-    private List<CardActivationOption> CardActivationOptions;
+    private List<int> cardIds;
 
-    public InputHandlerPlayCard(List<CardActivationOption> cardActivationOptions)
+    public InputHandlerPlayCard(List<int> cardIds)
     {
-        CardActivationOptions = cardActivationOptions;
+        this.cardIds = cardIds;
         Faction currentFaction = gameFlow.CurrentFaction;
         PlayerActionLabel.ShowText("Choose a card", currentFaction);
-        FactionHandDisplay.Current.Show(cardActivationOptions);        
+        FactionHandDisplay.Current.Show(cardIds);        
         FactionHandDisplay.Current.CardSelected += HandleItemSelected;
     }
 
@@ -23,7 +23,6 @@ public partial class InputHandlerPlayCard
     {
         FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
         FactionHandDisplay.Current.Hide();        
-        CardActivationOption selectedCardActivationOption = CardActivationOptions.Find(cao => cao.CardId == cardId);        
-        EventBus.Emit("CardSelected", selectedCardActivationOption.StepId);
+        EventBus.Emit("CardSelected", cardId);
     }    
 }

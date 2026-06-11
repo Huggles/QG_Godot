@@ -226,14 +226,10 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
             // Move specified cards to the top of each faction's hand
             Faction faction = System.Enum.Parse<Faction>(factionKey);
-            DeckState deck = DeckState.ForFaction(faction);
             foreach (InitialHandCardEntry handCard in factionData.InitialHandCards)
             {
-                int cardId = deck.DrawCardByName(handCard.Name);
-                if (cardId == -1)
-                    DebugUtilities.PrintPeerError($"InitialHandCard not found in deck: {handCard.Name} for {factionKey}");
-                else
-                    DebugUtilities.PrintPeer($"Moved {handCard.Name} to {factionKey} hand");
+                var drawEvent = new DrawCardByNameChangeEvent(Faction.NONE, faction, handCard.Name) { IsTrigger = false };
+                await drawEvent.ApplyChange();
             }
         }
     }

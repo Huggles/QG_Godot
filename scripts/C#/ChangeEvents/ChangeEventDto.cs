@@ -17,6 +17,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(DrawCardsChangeEventDto),        "DrawCards")]
 [JsonDerivedType(typeof(ScorePointsChangeEventDto),      "ScorePoints")]
 [JsonDerivedType(typeof(DiscardHandCardsChangeEventDto), "VoluntaryDiscardCards")]
+[JsonDerivedType(typeof(DrawCardByNameChangeEventDto),   "DrawCardByName")]
 public abstract class ChangeEventDto
 {
     public int Id { get; set; }
@@ -91,4 +92,9 @@ public class ScorePointsChangeEventDto : ChangeEventDto
 public class DiscardHandCardsChangeEventDto : ChangeEventDto
 {
     public List<int> CardIds { get; set; }
+}
+
+public class DrawCardByNameChangeEventDto : ChangeEventDto
+{
+    public string CardName { get; set; }
 }

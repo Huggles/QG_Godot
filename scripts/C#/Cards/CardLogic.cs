@@ -86,12 +86,12 @@ public abstract partial class CardLogic : GodotObject
         bool canActivate = !IsActivatedThisTurn && !IsActivationFinished && TriggerConditionsMet;
         if (CardData.Type == "STATUS" || CardData.Type == "RESPONSE")
         {
-            DebugUtilities.PrintPeer($"CanBeActivated {CardData.UniqueName}: IsPlayed={IsPlayed}, IsActivatedThisTurn={IsActivatedThisTurn}, IsActivationFinished={IsActivationFinished}, TriggerConditionsMet={TriggerConditionsMet}, Result={canActivate}");
+            DebugUtilities.PrintPeerFinest($"CanBeActivated {CardData.UniqueName}: IsPlayed={IsPlayed}, IsActivatedThisTurn={IsActivatedThisTurn}, IsActivationFinished={IsActivationFinished}, TriggerConditionsMet={TriggerConditionsMet}, Result={canActivate}");
             if (CardTriggers().Count > 0)
             {
                 foreach (var trigger in CardTriggers())
                 {
-                    DebugUtilities.PrintPeer($"  Trigger {trigger.GetType().Name}: {trigger.MeetCondition()}");
+                    DebugUtilities.PrintPeerFinest($"  Trigger {trigger.GetType().Name}: {trigger.MeetCondition()}");
                 }
             }
         }
@@ -108,16 +108,6 @@ public abstract partial class CardLogic : GodotObject
     }
     public List<CardStep> ExecutablePlaySteps => PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished && playCardStep.MeetAllConditions).ToList();
     public List<CardStep> ExecutableReactSteps => ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.PrerequisiteStepFinished && reactCardStep.MeetAllConditions).ToList();
-
-    public CardStep CardStepForId(int id)
-    {
-        CardStep cardStep = PlayCardSteps.Find(step => step.Id == id);
-        if (cardStep == null)
-        {
-            cardStep = ReactCardSteps.Find(step => step.Id == id);
-        }
-        return cardStep;
-    }
 
     public CardLogic()
     {        
@@ -144,20 +134,6 @@ public abstract partial class CardLogic : GodotObject
             ReactCardSteps.ForEach(reactCardStep => reactCardStep.StepFinished = false);
         };
     }    
-
-    public async Task<ChangeEvent> PlayCard(int stepId)
-    {
-        string message = PlayActionGuidance();
-        PlayerActionLabel.ShowText(message, -1, Faction);
-        return await CardStepForId(stepId).Execute();
-    }
-
-    public async Task<ChangeEvent> React(int stepId)
-    {
-        string message = ActivateActionGuidance();
-        PlayerActionLabel.ShowText(message, -1, Faction);        
-        return await CardStepForId(stepId).Execute();        
-    }
 
     public virtual string PlayActionGuidance() =>
         $"Play {GetType().Name}";

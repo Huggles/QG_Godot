@@ -5,31 +5,19 @@ using System.Threading.Tasks;
 
 public partial class StartTurnStepHandler : GodotObject, IStartTurnStepHandler
 {
-
     private Faction faction { get; set; }
     [Signal] public delegate void StartTurnStepFinishedEventHandler();
 
     public void Start(Faction faction)
     {
         this.faction = faction;
-        EventBus.Instance.CardPlayPoolFinished += EndHandler;
-        RequestCardPlay();
+        EventBus.Instance.CardPlayPoolFinished += OnRoundFinished;
+        _ = new CardPlayRound().Start(faction).ContinueWith(_ => { });
     }
 
-    public async void RequestCardPlay()
+    private void OnRoundFinished()
     {
-        CardActivationOption cardActivationOption = await CardPlayPool.RequestCardActivationOptions(faction);
-        if (cardActivationOption == null)
-        {
-            CardPlayPool.ClearPool();
-            EndHandler();
-        }
+        EventBus.Instance.CardPlayPoolFinished -= OnRoundFinished;
+        EmitSignal(SignalName.StartTurnStepFinished);
     }
-
-    public void EndHandler()
-    {
-        CardPlayPool.ClearPool();
-        EmitSignal(SignalName.StartTurnStepFinished); 
-    }
-
 }

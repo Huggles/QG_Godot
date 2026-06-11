@@ -7,6 +7,7 @@ public partial class StatusWolfPacks : StatusCardLogic, IDiscardModifier
 {
     public int ModifyDiscard(ForceDiscardCardsChangeEvent discardEvent)
     {
+        if(discardEvent.SourceCardState == null) return 0; // If SourceCardState is null, this discard event is not caused by a card play and should not be modified
         bool isSubmarineEW = discardEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE
             && discardEvent.SourceCardState.Faction == Faction
             && discardEvent.SourceCardState.CardData.Label.Contains("Submarines");

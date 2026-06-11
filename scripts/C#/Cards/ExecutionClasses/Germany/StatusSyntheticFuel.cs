@@ -37,14 +37,20 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardTopCards(2), false);
+                DebugUtilities.PrintPeer("StatusSyntheticFuel react step");
+                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction, 2);
+                discardEvent.IsTrigger = false;
+                await discardEvent.ApplyChange();
+
+                DebugUtilities.PrintPeer("StatusSyntheticFuel ApplyChange step");
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
                 await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
 
-                int countryId = await new SelectCountryHandler(DeployTargets.ToCountryIds()).Handle();                
+                int countryId = await new SelectCountryHandler(DeployTargets.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;                
-            }).WithGuidance("Deploy an army adjacent to where you've deployed an army this turn") 
+                return deployUnitChangeEvent;
+            }).WithGuidance("Deploy an army adjacent to where you've deployed an army this turn")
         };
     }
 }

@@ -143,15 +143,10 @@ public partial class FactionHandDisplay : Control
         }
     }
 
-    public void Show(List<CardActivationOption> cardActivationOptions)
+    public void Show(List<int> cardIds)
     {
-        showingFaction = cardActivationOptions[0].CardState.Faction;
+        showingFaction = CardState.ForId(cardIds[0]).Faction; // Assumes all cards are from the same faction, which should be true for hand display
         ResetVisibility();
-        List<int> cardIds = new List<int>();
-        foreach (CardActivationOption cardActivationOption in cardActivationOptions)
-        {
-            cardIds.Add(cardActivationOption.CardId);
-        }
         InitCards(cardIds);
     }
 

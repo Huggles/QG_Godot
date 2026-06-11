@@ -1,7 +1,9 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -34,10 +36,8 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
     public ChangeEvent(Faction triggeringFaction)
     {
         TriggeringFaction = triggeringFaction;
-
         changeEventCounter += 1;
-        Id = changeEventCounter;
-        
+        Id = changeEventCounter;        
     }
 
     protected abstract Task<bool> ExecuteAsync();
@@ -59,6 +59,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             ForceDiscardCardsChangeEventDto d     => new ForceDiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
             DiscardHandCardsChangeEventDto d     => new DiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardIds),
             DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards, d.ShowDrawnCards),
+            DrawCardByNameChangeEventDto d   => new DrawCardByNameChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardName),
             ScorePointsChangeEventDto d      => new ScorePointsChangeEvent(d.VPTurnSummary),
             _ => throw new NotSupportedException($"Unknown ChangeEventDto type: {dto.GetType().Name}")
         };
@@ -86,6 +87,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         EventBus.Emit(EventBus.SignalName.GameChangeEventAfter, ScriptName);        
         return true;
     }
+
 
     // Display/debug methods
     public virtual string TraceText() => ScriptName;
