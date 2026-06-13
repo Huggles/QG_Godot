@@ -8,4 +8,9 @@ using System.Threading.Tasks;
 public abstract class ChangeEventAnimation
 {
     public abstract Task Execute();
+
+    public class DeployUnitAnimationException : System.Exception
+    {
+        public DeployUnitAnimationException(string message) : base(message) { }
+    }
 }

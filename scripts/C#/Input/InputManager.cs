@@ -5,7 +5,7 @@ using System.Linq;
 
 public partial class InputManager : Node2D
 {
-    public static InputManager Instance;
+    public static InputManager Current;
     private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
     private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(0.15f,0.15f);
     private const float ZOOM_STEP = 0.05f;
@@ -39,8 +39,18 @@ public partial class InputManager : Node2D
 
     public override void _Ready()
     {
-        Instance = this;
-        ApplyZoom();
+        if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
+        {
+            Current = this;
+            Camera.Enabled = true;
+            ApplyZoom();
+        }
+        else
+        {
+            // Remote player's camera must be disabled so only the local
+            // player's camera renders the viewport.
+            Camera.Enabled = false;
+        }
     }
 
     public override void _EnterTree()

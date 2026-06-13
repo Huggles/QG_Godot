@@ -67,10 +67,10 @@ public partial class PresentationModal : Control, LoadableUI
             // Unsubscribe first to prevent duplicate connections
             if (onKeyClicked != null)
             {
-                InputManager.Instance.KeyClicked -= onKeyClicked;
+                InputManager.Current.KeyClicked -= onKeyClicked;
             }
             onKeyClicked = HandleKeyboardInput;
-            InputManager.Instance.KeyClicked += onKeyClicked;
+            InputManager.Current.KeyClicked += onKeyClicked;
         }        
         ShowModalPersistent(presentationItems, title);        
         return ToSignal(this, SignalName.ItemSelected);
@@ -250,7 +250,7 @@ public partial class PresentationModal : Control, LoadableUI
     {
         if (onKeyClicked != null)
         {
-            InputManager.Instance.KeyClicked -= onKeyClicked;
+            InputManager.Current.KeyClicked -= onKeyClicked;
             onKeyClicked = null;
         }
         

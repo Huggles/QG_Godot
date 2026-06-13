@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public partial class DeployUnitChangeEvent : ChangeEvent
@@ -33,6 +34,17 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         dto.DeploymentType = DeploymentType;
         return dto;
     }
+
+    protected override List<ChangeEventAnimation> BeforeAnimations => new()
+    {
+        new ZoomToCountryAnimation(CountryId),
+    };
+
+    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    {
+        new DeployUnitAnimation(UnitId),
+        new ReturnCameraAnimation(),
+    };
 
     protected override async Task<bool> ExecuteAsync()
     {

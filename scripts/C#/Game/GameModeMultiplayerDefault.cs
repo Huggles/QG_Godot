@@ -24,14 +24,12 @@ public partial class GameModeMultiplayerDefault : IGameMode
         LoadDataFiles();
         InstantiateCountryStates();
         InstantiateUnitStates();
-        InstantiateFactionStates();
-        
+        InstantiateFactionStates();        
         
         SpawnCountries();
         SpawnUnits();
 
-        DebugUtilities.PrintPeerFinest("Game Mode Finished Initializing");
-        
+        DebugUtilities.PrintPeerFinest("Game Mode Finished Initializing");        
     }
 
     public void LoadDataFiles() {
@@ -115,6 +113,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
         }
 
     }
+
     public void InstantiateCountryStates(){
         //Generate Country States
         foreach(CountryData countryData in StaticGameData.CountryDataList){
@@ -135,6 +134,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
             gameState.StraightStates.Add(straightState);
         }
     }
+
     public void InstantiateUnitStates(){
         foreach(FactionData factionData in StaticGameData.FactionDataList){
             for(int i = 0; i < factionData.NumberOfArmyUnits; i++){
@@ -147,6 +147,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
             }
         }
     }
+
     public void SpawnCountries(){
         foreach( CountryState countryState in gameState.CountryStates){
             CountryScene.SpawnCountry(countryState.Id);
@@ -157,7 +158,6 @@ public partial class GameModeMultiplayerDefault : IGameMode
             UnitScene.SpawnUnit(unitState.Id);
         }
     }
-
 
     public async Task InitStartingState()
     {        
@@ -205,7 +205,8 @@ public partial class GameModeMultiplayerDefault : IGameMode
                     countryState.Id, 
                     DeployType.RECRUIT
                 ); 
-                deployUnitChangeEvent.IsTrigger = false;            
+                deployUnitChangeEvent.IsTrigger = false;                  
+                deployUnitChangeEvent.PlayAnimations = false; // prevent animations during initial setup
                 await deployUnitChangeEvent.ApplyChange();
             }
         }

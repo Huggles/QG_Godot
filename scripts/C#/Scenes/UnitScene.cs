@@ -117,27 +117,16 @@ public partial class UnitScene : Node2D
         }
     }
 
-    private async void OnUnitDeployedToCountry(int unitId, int countryId)
+    private void OnUnitDeployedToCountry(int unitId, int countryId)
     {
         if(unitId != this.UnitId)
             return;
         CountryState.CountryScene.AddUnit(this);
-        Tween tween = CreateTween();
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.5f, 1.5f), GameSettings.AnimationDurationSeconds/2);
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1, 1), GameSettings.AnimationDurationSeconds/2);
-        await ToSignal(tween, "finished");
     }
 
-    private async void OnUnitRemovedFromCountry(int unitId, int countryId)
+    private void OnUnitRemovedFromCountry(int unitId, int countryId)
     {
-        if(unitId != this.UnitId)
-            return;
-        Tween tween = CreateTween(); 
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), GameSettings.AnimationDurationSeconds/2);
-        tween.TweenProperty(UnitSpriteNode, "scale", new Vector2(0,0), GameSettings.AnimationDurationSeconds/2);
-        await ToSignal(tween, "finished");
-
-        CountryState.ForId(countryId).CountryScene.RemoveUnit(this);
+        // Scene cleanup (tween + RemoveUnit) is handled by RemoveUnitAnimation.
     }
 
     private void OnClickableSprite3DMouseLeftClickOpaque(ClickableSprite3D sprite)

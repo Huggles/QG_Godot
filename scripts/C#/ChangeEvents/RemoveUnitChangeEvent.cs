@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
@@ -22,6 +23,11 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
         dto.Reason = Reason;
         return dto;
     }
+
+    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    {
+        new RemoveUnitAnimation(UnitId, CountryId),
+    };
 
     protected override async Task<bool> ExecuteAsync()
     {

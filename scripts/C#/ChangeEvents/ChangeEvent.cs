@@ -25,6 +25,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
     public bool SuppressGameProgress { get; set; } = false;
     public bool IsTrigger { get; set; } = true;
     public bool IsBlocked { get; set; } = false;
+    public bool PlayAnimations { get; set; } = true;
     public int SourceCardId { get; set; } = -1;
     public bool HasSourceCard => SourceCardId > -1;
     public CardState SourceCardState => CardState.ForId(SourceCardId);
@@ -71,19 +72,33 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         ev.SourceCardId         = dto.SourceCardId;
         ev.IsTrigger            = dto.IsTrigger;
         ev.SuppressGameProgress = dto.SuppressGameProgress;
+        ev.PlayAnimations        = dto.PlayAnimations;
         
         return ev;
     }
 
     public async Task<bool> ApplyChange()
     {
-        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
-        foreach (var anim in BeforeAnimations)
-            await anim.Execute();
+        // Evaluate both lists upfront so constructors (e.g. ReturnCameraAnimation)
+        // capture state before any animation runs.
+        var beforeAnims = BeforeAnimations;
+        var afterAnims  = AfterAnimations;
+
+        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);        
+        if (PlayAnimations)
+        {
+            DebugUtilities.PrintPeer("Doing before animations for " + ScriptName);
+            foreach (var anim in beforeAnims)
+                await anim.Execute();
+        }
         await ExecuteAsync();
         GameStateCalculator.CalculateAll();
-        foreach (var anim in AfterAnimations)
-            await anim.Execute();
+        if (PlayAnimations)
+        {
+            
+            foreach (var anim in afterAnims)
+                await anim.Execute();
+        }
 
         if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
         {   

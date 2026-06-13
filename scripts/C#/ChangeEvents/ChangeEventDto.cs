@@ -26,6 +26,7 @@ public abstract class ChangeEventDto
     public int     SourceCardId         { get; set; } = -1;
     public bool    IsTrigger            { get; set; } = true;
     public bool    SuppressGameProgress { get; set; } = false;
+    public bool    PlayAnimations        { get; set; } = true;
     public Faction TargetFaction { get; set; }
 
     public static T Build<T>(ChangeEvent handler, int Id) where T : ChangeEventDto, new()
@@ -38,6 +39,7 @@ public abstract class ChangeEventDto
         dto.SourceCardId = handler.SourceCardId;
         dto.IsTrigger = handler.IsTrigger;
         dto.SuppressGameProgress = handler.SuppressGameProgress;
+        dto.PlayAnimations = handler.PlayAnimations;
         return dto;
     }
 }

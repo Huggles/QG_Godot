@@ -18,10 +18,10 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
     public async Task<int> Handle()
     {
         CountryState.ForIds(countryIds).AddTag(Tag.Clickable, Faction.ALL);
-        InputManager.Instance.EnableRayTraceCasting();
+        InputManager.Current.EnableRayTraceCasting();
         int countryId = (await EventBus.GetSignalAwaiter(EventBus.SignalName.CountryClicked))[0].As<int>();
         CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
-        InputManager.Instance.DisableRayTraceCasting();
+        InputManager.Current.DisableRayTraceCasting();
         DebugUtilities.PrintPeer($"Country Clicked: {CountryState.ForId(countryId).StaticCountryData.UniqueNameCamelCase}");
         return countryId;
     }
