@@ -42,6 +42,9 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
     protected abstract Task<bool> ExecuteAsync();
 
+    protected virtual List<ChangeEventAnimation> BeforeAnimations { get; } = new();
+    protected virtual List<ChangeEventAnimation> AfterAnimations  { get; } = new();
+
     /// <summary>Serialize this event to its wire-format DTO for multiplayer replication.</summary>
     public abstract ChangeEventDto ToDto();
 
@@ -74,9 +77,13 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
     public async Task<bool> ApplyChange()
     {
-        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);        
-        await ExecuteAsync();        
+        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
+        foreach (var anim in BeforeAnimations)
+            await anim.Execute();
+        await ExecuteAsync();
         GameStateCalculator.CalculateAll();
+        foreach (var anim in AfterAnimations)
+            await anim.Execute();
 
         if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
         {   
