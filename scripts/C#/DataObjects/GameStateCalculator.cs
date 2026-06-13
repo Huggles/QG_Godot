@@ -104,7 +104,7 @@ public class GameStateCalculator
         foreach (var cardState in deckState.HandCardStates)
         {
             // Card must have CardLogic and pass CanPlayCard() check
-            if (cardState.CardLogic != null && cardState.CanPlayCard())
+            if (cardState.CardLogic != null && cardState.CanPlayCard)
             {
                 calculator.PlayableCardIds.Add(cardState.Id);
             }

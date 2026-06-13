@@ -24,12 +24,7 @@ public partial class CardState : StateObject
         this.CardLogic = InitiateCardLogicClass();
     }
     
-    public bool CanPlayCard()
-    {
-        if (CardLogic != null)
-            return CardLogic.CanPlayCard();
-        return false;
-    }
+    public bool CanPlayCard => CardLogic?.IsPlayable ?? false;
 
     public CardLogic InitiateCardLogicClass()
     {

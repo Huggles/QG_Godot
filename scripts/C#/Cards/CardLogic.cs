@@ -70,10 +70,7 @@ public abstract partial class CardLogic : GodotObject
     public abstract List<CardStep> InitializePlayCardSteps();
     public virtual List<CardStep> InitializeReactCardSteps() { return new(); }    
 
-    public bool CanPlayCard()
-    {
-        return !IsPlayed && !IsPlayFinished && ExecutablePlaySteps.Count > 0;
-    }
+    public bool IsPlayable => !IsPlayed && !IsPlayFinished && ExecutablePlaySteps.Count > 0;
     
     public bool CanBeActivated()
     {

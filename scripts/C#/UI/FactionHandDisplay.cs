@@ -196,6 +196,7 @@ public partial class FactionHandDisplay : Control
 
         foreach (var (cardId, index) in cardIds.Select((cardId, index) => (cardId, index)))
         {
+            CardState cardState = CardState.ForId(cardId);
             var cardSceneInstance = CardScene.CardScenePackedPath.Instantiate<CardScene>();
             cardSceneInstance.Size = cardSize;
             cardSceneInstance.Scale = cardScale;
