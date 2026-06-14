@@ -27,7 +27,7 @@ public partial class UnitState : StateObject
     public bool IsArmy => Type == UnitType.ARMY;
     public bool IsNavy => Type == UnitType.NAVY;
 
-    [JsonIgnore] public UnitScene Node { get; set; }
+    [JsonIgnore] public UnitScene UnitScene { get; set; }
     [JsonIgnore] public Callable ClickableCallback { get; set; }
     public FactionTeam FactionTeam { get { return StaticGameData.FactionTeamForFaction(Faction); } }
 

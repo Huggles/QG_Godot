@@ -5,15 +5,11 @@ public partial class UnitScene : Node2D
 {   
     public int UnitId { get; set; }
     public UnitState UnitState => UnitState.ForId(UnitId);
-
     public Sprite2D UnitSpriteNode => GetNode<Sprite2D>("UnitSprite2D");
     public ClickableSprite TargetSprite => GetNode<ClickableSprite>("TargetSprite");
     public Sprite2D OutOfSupplyNode => GetNode<Sprite2D>("OutOfSupplyIcon");
-
-    
-    // Signals
+    public static float DefaultSpriteScale = 0.2f;    
     [Signal] public delegate void UnitClickedEventHandler();
-
     [Signal] public delegate void UnitDoubleClickedEventHandler();
 
     // Properties
@@ -37,6 +33,7 @@ public partial class UnitScene : Node2D
         // Subscribe to tag events for visual updates
         unitSceneInstance.UnitState.Tags.TagAdded += unitSceneInstance.OnTagAdded;
         unitSceneInstance.UnitState.Tags.TagRemoved += unitSceneInstance.OnTagRemoved;
+        unitSceneInstance.UnitState.UnitScene = unitSceneInstance; // set reference for easy access in animations
         NodeUtilities.Instance.UnitsNode.AddChild(unitSceneInstance, true);
 
         return unitSceneInstance;
@@ -44,9 +41,6 @@ public partial class UnitScene : Node2D
 
     public override void _Ready()
     {
-        EventBus.Instance.UnitDeployed += OnUnitDeployedToCountry;
-        EventBus.Instance.UnitRemoved += OnUnitRemovedFromCountry;
-
         SetSprite();
         SetUnclickable();
         if (UnitState.CountryId >= 0 && !UnitState.InSupply)
@@ -115,18 +109,6 @@ public partial class UnitScene : Node2D
         {
             ShowOutOfSupply();
         }
-    }
-
-    private void OnUnitDeployedToCountry(int unitId, int countryId)
-    {
-        if(unitId != this.UnitId)
-            return;
-        CountryState.CountryScene.AddUnit(this);
-    }
-
-    private void OnUnitRemovedFromCountry(int unitId, int countryId)
-    {
-        // Scene cleanup (tween + RemoveUnit) is handled by RemoveUnitAnimation.
     }
 
     private void OnClickableSprite3DMouseLeftClickOpaque(ClickableSprite3D sprite)

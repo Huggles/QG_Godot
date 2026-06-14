@@ -16,6 +16,8 @@ public partial class AssetRepository : Node
     public static readonly Texture2D NavySprite = GD.Load<Texture2D>(NavySpritePath);
     public static readonly Texture2D StraightIcon = GD.Load<Texture2D>("res://assets/textures/Other/StraightIcon.png");
     public static readonly Texture2D StraightIconInverse = GD.Load<Texture2D>("res://assets/textures/Other/StraightIconInverse.png");
+    public static readonly Texture2D TargetSprite = GD.Load<Texture2D>("res://assets/textures/Other/target.png");
+    public static readonly Texture2D TargetCountrySprite = GD.Load<Texture2D>("res://assets/textures/Other/target_country.png");
 
     // Materials
     public ShaderMaterial normalShaderMaterial = GD.Load<ShaderMaterial>("res://assets/materials/unit_shader_material.tres").Duplicate() as ShaderMaterial;

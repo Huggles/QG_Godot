@@ -16,7 +16,7 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
                 // Count German units in or adjacent to Scandinavia
                 var germanUnits = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
                     .Where(u => u.CountryState.Country == Country.Scandinavia || 
-                               scandinavia.NeighborCountryStates.Contains(u.CountryState))
+                               scandinavia.ConnectedCountryStates.Contains(u.CountryState))
                     .ToList();
                 
                 int count = germanUnits.Count;

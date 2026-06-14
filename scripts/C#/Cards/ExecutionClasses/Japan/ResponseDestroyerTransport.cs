@@ -22,7 +22,7 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
                     .Where(ce => ce.TriggeringFaction == Faction).ToList();
                 var battleLocation = battleEvents.Last().CountryState;
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
-                    .Where(cs => battleLocation.NeighborCountryStates.Contains(cs))
+                    .Where(cs => battleLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
@@ -33,7 +33,7 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
                     .Where(ce => ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.SEA).ToList();
                 if (!battleEvents.Any()) return false;
                 var battleLocation = battleEvents.Last().CountryState;
-                return CountryState.BuildableLand(Faction).Any(cs => battleLocation.NeighborCountryStates.Contains(cs));
+                return CountryState.BuildableLand(Faction).Any(cs => battleLocation.ConnectedCountryStates.Contains(cs));
             }), this))
             .WithGuidance("Build an army adjacent to the battled space"),
             
@@ -43,7 +43,7 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
                     .Where(ce => ce.TriggeringFaction == Faction).ToList();
                 var battleLocation = battleEvents.First(ce => ce.CountryState.Type == CountryType.SEA).CountryState;
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
-                    .Where(cs => battleLocation.NeighborCountryStates.Contains(cs))
+                    .Where(cs => battleLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
@@ -54,7 +54,7 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
                     .Where(ce => ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.SEA).ToList();
                 if (!battleEvents.Any()) return false;
                 var battleLocation = battleEvents.Last().CountryState;
-                return CountryState.BuildableLand(Faction).Any(cs => battleLocation.NeighborCountryStates.Contains(cs));
+                return CountryState.BuildableLand(Faction).Any(cs => battleLocation.ConnectedCountryStates.Contains(cs));
             }), this))
             .WithGuidance("Build another army adjacent to the battled space"),
         }; 

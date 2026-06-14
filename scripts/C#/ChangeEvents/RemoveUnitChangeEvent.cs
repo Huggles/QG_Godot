@@ -26,7 +26,7 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
 
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
-        new RemoveUnitAnimation(UnitId, CountryId),
+        
     };
 
     protected override async Task<bool> ExecuteAsync()

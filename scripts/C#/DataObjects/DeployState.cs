@@ -25,7 +25,7 @@ public partial class DeployState : Node
         {
             foreach (CountryState countryState in CountryState.ForUnitIds(suppliedUnitIds))
             {
-                foreach (CountryState neighbor in countryState.NeighborCountryStates)
+                foreach (CountryState neighbor in countryState.ConnectedCountryStates)
                 {
                     if (neighbor.CanBuild(faction))
                     {

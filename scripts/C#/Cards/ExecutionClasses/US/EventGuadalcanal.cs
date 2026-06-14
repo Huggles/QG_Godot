@@ -23,7 +23,7 @@ public partial class EventGuadalcanal : EventCardLogic
             new CardStep(this, async() => {
                 var newZealand = CountryState.ForEnum(Country.NewZealand);
                 var adjacentBuildableNavies = CountryState.BuildableSea(Faction)
-                    .Where(cs => newZealand.NeighborCountryStates.Contains(cs))
+                    .Where(cs => newZealand.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = await new SelectCountryHandler(adjacentBuildableNavies.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
@@ -32,7 +32,7 @@ public partial class EventGuadalcanal : EventCardLogic
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 var newZealand = CountryState.ForEnum(Country.NewZealand);
-                return CountryState.BuildableSea(Faction).Any(cs => newZealand.NeighborCountryStates.Contains(cs));
+                return CountryState.BuildableSea(Faction).Any(cs => newZealand.ConnectedCountryStates.Contains(cs));
             }), this))
             .WithGuidance("Build a navy adjacent to New Zealand"),
         }; 

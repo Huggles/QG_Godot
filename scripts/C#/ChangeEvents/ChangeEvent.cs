@@ -26,6 +26,8 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
     public bool IsTrigger { get; set; } = true;
     public bool IsBlocked { get; set; } = false;
     public bool PlayAnimations { get; set; } = true;
+    /// <summary>When false, animations are fire-and-forget — ApplyChange does not wait for them to finish.</summary>
+    public bool BlockAnimationQueue { get; set; } = true;
     public int SourceCardId { get; set; } = -1;
     public bool HasSourceCard => SourceCardId > -1;
     public CardState SourceCardState => CardState.ForId(SourceCardId);
@@ -73,6 +75,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         ev.IsTrigger            = dto.IsTrigger;
         ev.SuppressGameProgress = dto.SuppressGameProgress;
         ev.PlayAnimations        = dto.PlayAnimations;
+        ev.BlockAnimationQueue   = dto.BlockAnimationQueue;
         
         return ev;
     }
@@ -84,29 +87,35 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         var beforeAnims = BeforeAnimations;
         var afterAnims  = AfterAnimations;
 
-        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);        
-        if (PlayAnimations)
+        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);      
+
+        foreach (var anim in beforeAnims)
         {
-            DebugUtilities.PrintPeer("Doing before animations for " + ScriptName);
-            foreach (var anim in beforeAnims)
-                await anim.Execute();
+            if(PlayAnimations)
+            {
+                _ = AnimationQueue.Instance.Enqueue(anim);            
+            }
+            
         }
         await ExecuteAsync();
         GameStateCalculator.CalculateAll();
-        if (PlayAnimations)
-        {
-            
-            foreach (var anim in afterAnims)
-                await anim.Execute();
-        }
-
+        EmitSignal(SignalName.ChangeEventApplied, Id);       
         if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
         {   
             await BroadCast();
         }
+        foreach (var anim in afterAnims)
+        {
+            if(PlayAnimations)
+            {
+                _ = AnimationQueue.Instance.Enqueue(anim);            
+            }
+            
+        }
+        await AnimationQueue.Instance.Start(); // ensure queue is processing (no-op if already running)
         LatestAppliedId = Id;
-        EmitSignal(SignalName.ChangeEventApplied, Id);        
         EventBus.Emit(EventBus.SignalName.GameChangeEventAfter, ScriptName);        
+        
         return true;
     }
 

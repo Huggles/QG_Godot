@@ -74,7 +74,15 @@ public partial class CountryScene : Node2D
 
     private void ApplyTexture()
     {
-        CountrySprite.SetTexture(StaticCountryData.Texture);
+        CountrySprite.SetTexture(AssetRepository.TargetCountrySprite);
+    }
+
+    public UnitScene AddUnit(int unitId)
+    {
+        UnitScene unitScene = UnitState.ForId(unitId).UnitScene;
+        if(unitScene == null) throw new Exception($"CountryScene.AddUnit: No UnitScene found for unitId {unitId}.");
+        AddUnit(unitScene);
+        return unitScene;
     }
 
     public void AddUnit(UnitScene unitScene)

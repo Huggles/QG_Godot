@@ -27,6 +27,7 @@ public abstract class ChangeEventDto
     public bool    IsTrigger            { get; set; } = true;
     public bool    SuppressGameProgress { get; set; } = false;
     public bool    PlayAnimations        { get; set; } = true;
+    public bool    BlockAnimationQueue   { get; set; } = true;
     public Faction TargetFaction { get; set; }
 
     public static T Build<T>(ChangeEvent handler, int Id) where T : ChangeEventDto, new()
@@ -40,6 +41,7 @@ public abstract class ChangeEventDto
         dto.IsTrigger = handler.IsTrigger;
         dto.SuppressGameProgress = handler.SuppressGameProgress;
         dto.PlayAnimations = handler.PlayAnimations;
+        dto.BlockAnimationQueue = handler.BlockAnimationQueue;
         return dto;
     }
 }

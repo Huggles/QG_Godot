@@ -19,7 +19,7 @@ public partial class ResponseMobileForce : ResponseCardLogic
             new CardStep(this, async() => {
                 var northPacific = CountryState.ForEnum(Country.NorthPacific);
                 var recruitableTargets = CountryState.RecruitableSea(Faction)
-                    .Where(cs => cs == northPacific || northPacific.NeighborCountryStates.Contains(cs))
+                    .Where(cs => cs == northPacific || northPacific.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = await new SelectCountryHandler(recruitableTargets.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
@@ -28,7 +28,7 @@ public partial class ResponseMobileForce : ResponseCardLogic
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 var northPacific = CountryState.ForEnum(Country.NorthPacific);
-                return CountryState.RecruitableSea(Faction).Any(cs => cs == northPacific || northPacific.NeighborCountryStates.Contains(cs));
+                return CountryState.RecruitableSea(Faction).Any(cs => cs == northPacific || northPacific.ConnectedCountryStates.Contains(cs));
             }), this))
             .WithGuidance("Recruit a navy in or adjacent to the North Pacific"),
         }; 

@@ -15,7 +15,7 @@ public partial class EWSubmarinesEnforceBlockade : EWCardLogic
                 
                 // Count German Armies adjacent to North Sea
                 var germanArmies = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-                    .Where(u => u.Type == UnitType.ARMY && northSea.NeighborCountryStates.Contains(u.CountryState))
+                    .Where(u => u.Type == UnitType.ARMY && northSea.ConnectedCountryStates.Contains(u.CountryState))
                     .ToList();
                 
                 int count = germanArmies.Count;

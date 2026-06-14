@@ -42,13 +42,12 @@ public partial class DeployUnitChangeEvent : ChangeEvent
 
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
-        new DeployUnitAnimation(UnitId),
         new ReturnCameraAnimation(),
     };
 
     protected override async Task<bool> ExecuteAsync()
     {
-        GameAPI.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType);
+        GameAPI.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType, BlockAnimationQueue);
         await Task.CompletedTask;
         return true;
     }

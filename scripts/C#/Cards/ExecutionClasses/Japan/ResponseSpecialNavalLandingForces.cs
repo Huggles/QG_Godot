@@ -24,7 +24,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                                 ce.UnitType == UnitType.NAVY).ToList();
                 var builtLocation = deployEvents.Last().CountryState;
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
-                    .Where(cs => builtLocation.NeighborCountryStates.Contains(cs))
+                    .Where(cs => builtLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
@@ -37,7 +37,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                                 ce.UnitType == UnitType.NAVY).ToList();
                 if (!deployEvents.Any()) return false;
                 var builtLocation = deployEvents.Last().CountryState;
-                return CountryState.BuildableLand(Faction).Any(cs => builtLocation.NeighborCountryStates.Contains(cs));
+                return CountryState.BuildableLand(Faction).Any(cs => builtLocation.ConnectedCountryStates.Contains(cs));
             }), this))
             .WithGuidance("Build an army adjacent to the navy just built"),
             
@@ -49,7 +49,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                                 ce.UnitType == UnitType.NAVY).ToList();
                 var builtLocation = deployEvents.Last().CountryState;
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
-                    .Where(cs => builtLocation.NeighborCountryStates.Contains(cs))
+                    .Where(cs => builtLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
@@ -62,7 +62,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                                 ce.UnitType == UnitType.NAVY).ToList();
                 if (!deployEvents.Any()) return false;
                 var builtLocation = deployEvents.Last().CountryState;
-                return CountryState.BuildableLand(Faction).Any(cs => builtLocation.NeighborCountryStates.Contains(cs));
+                return CountryState.BuildableLand(Faction).Any(cs => builtLocation.ConnectedCountryStates.Contains(cs));
             }), this))
             .WithGuidance("Build second army adjacent to the navy just built"),
         }; 

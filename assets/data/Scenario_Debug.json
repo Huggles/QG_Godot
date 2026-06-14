@@ -3,9 +3,11 @@
   "factions": {
     "GERMANY": {
       "unitDeployments": [
-        { "countryName": "GERMANY" }
+        { "countryName": "GERMANY" },
+        { "countryName": "ITALY" },
+        { "countryName": "MEDITERRANEAN_SEA" }
       ],
-      "initialCards": [
+      "initialCards": [ 
         { "name": "StatusDiveBombers" },
         { "name": "StatusWolfPacks" },
         { "name": "StatusBlitzkrieg" },
@@ -22,7 +24,6 @@
     "UNITED_KINGDOM": {
       "unitDeployments": [
         { "countryName": "UNITED_KINGDOM" },
-        { "countryName": "NORTH_SEA" },
         { "countryName": "AUSTRALIA" },
         { "countryName": "CHINA" }
       ],

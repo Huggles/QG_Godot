@@ -10,7 +10,7 @@ public class DeployUnitAnimation : ChangeEventAnimation
 {
     private readonly int _unitId;
     private readonly int _countryId;
-
+    
     public DeployUnitAnimation(int unitId, int countryId)
     {
         _unitId = unitId;
@@ -20,17 +20,11 @@ public class DeployUnitAnimation : ChangeEventAnimation
     public override async Task Execute()
     {
         CountryScene countryScene = CountryState.ForId(_countryId).CountryScene;
-
-        UnitScene unitScene = new[] { countryScene.UnitScene1, countryScene.UnitScene2, countryScene.UnitScene3 }
-            .FirstOrDefault(u => u?.UnitId == _unitId);
-
-        if (unitScene == null) throw new DeployUnitAnimationException($"DeployUnitAnimation: Could not find unit {_unitId} in country {_countryId} scene.");
-
-        unitScene.AddChild(unitScene);
-
+        UnitScene unitScene = countryScene.AddUnit(_unitId);
+        
         Tween tween = unitScene.CreateTween();
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(1.5f, 1.5f), GameSettings.AnimationDurationSeconds / 2);
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(1f, 1f), GameSettings.AnimationDurationSeconds / 2);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale*1.5f, UnitScene.DefaultSpriteScale*1.5f), GameSettings.AnimationDurationSeconds / 2);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale, UnitScene.DefaultSpriteScale), GameSettings.AnimationDurationSeconds / 2);
         await unitScene.ToSignal(tween, Tween.SignalName.Finished);
         tween.Dispose();
     }

@@ -26,7 +26,7 @@ public partial class StatusBiasForAction : StatusCardLogic
         get
         {
             List<CountryState> neighBorCountries = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()                
-                .SelectMany(ce => CountryState.ForId(ce.CountryId).NeighborCountryStates).Distinct().ToList();
+                .SelectMany(ce => CountryState.ForId(ce.CountryId).ConnectedCountryStates).Distinct().ToList();
                 
             List<BattleTarget> attackableCountries = neighBorCountries                
                 .Where(cs => CountryState.AttackableLand(Faction).Contains(cs))

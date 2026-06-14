@@ -17,7 +17,7 @@ public partial class EWIndianOceanPatrols : EWCardLogic
                 var japaneseNavies = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
                     .Where(u => u.Type == UnitType.NAVY && 
                                (u.CountryState.Country == Country.BayOfBengal || 
-                               bayOfBengal.NeighborCountryStates.Contains(u.CountryState)))
+                               bayOfBengal.ConnectedCountryStates.Contains(u.CountryState)))
                     .ToList();
                 
                 int count = japaneseNavies.Count;

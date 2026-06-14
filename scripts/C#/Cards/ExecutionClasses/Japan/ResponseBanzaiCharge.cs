@@ -24,7 +24,7 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
                 
                 // Get same or adjacent land spaces that are attackable
                 var targetCountries = battleLocations
-                    .SelectMany(bl => bl.NeighborCountryStates.Append(bl))
+                    .SelectMany(bl => bl.ConnectedCountryStates.Append(bl))
                     .Distinct()
                     .Where(cs => cs.Type == CountryType.LAND && cs.Tags.Has(Tag.Attackable, Faction))
                     .ToList();

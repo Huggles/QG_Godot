@@ -23,7 +23,7 @@ public partial class PathFindingService
         {
             CountryState countryState = CountryState.ForId(countryId);
 
-            foreach (CountryState connectedState in countryState.ConnectedCountries(faction))
+            foreach (CountryState connectedState in countryState.AdjacentCountryStates(faction))
             {
                 if (_aStar.HasPoint(connectedState.Id))
                 {

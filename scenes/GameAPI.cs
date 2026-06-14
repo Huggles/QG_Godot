@@ -137,14 +137,33 @@ public partial class GameAPI : Node
     /**
     * Board Management API
     */
-    public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType)
+    public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType, bool awaitAnimation = true)
     {   
-        CountryState country = GameState.CountryStateById[countryId];
-        country.DeployUnit(faction, unitType, deployType);
+        CountryState countryState = GameState.CountryStateById[countryId];
+
+        int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
+        if(unitId == -1) throw new Exception($"No available units of type {unitType} for faction {faction}");
+        UnitState unitState = UnitState.ForId(unitId);
+
+        bool deployable = deployType != DeployType.BUILD || countryState.CanBuild(faction);
+        if (!countryState.IsCountryFull && deployable)
+        {
+            countryState.Units[faction] = unitState.Id;
+            unitState.CountryId = countryState.Id;
+        }
+        EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
+        AnimationQueue.Instance.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
     }
-    public static void RemoveUnitFromCountry(int unitId)
-    {        
-        CountryState.ForId(UnitState.ForId(unitId).CountryId).RemoveUnit(unitId);
+    public static void RemoveUnitFromCountry(int unitId, bool awaitAnimation = true)
+    {   
+        UnitState unitState = UnitState.ForId(unitId);
+        CountryState countryState = CountryState.ForId(unitState.CountryId);
+
+        AnimationQueue.Instance.Enqueue(new RemoveUnitAnimation(unitId, countryState.Id){ BlockQueue = awaitAnimation });     
+
+        unitState.CountryId = -1;
+        countryState.Units.Remove(unitState.Faction);
+        EventBus.Emit(EventBus.SignalName.UnitRemoved, unitId, countryState.Id);
     }
 
     /**

@@ -52,10 +52,8 @@ public partial class StraightState : StateObject
         ChangeColorTeam(ControllingCountryState.OccupyingTeam);
     }
 
-    public FactionTeam ControlledByFaction()
-    {
-        return ControllingCountryState.OccupyingTeam;
-    }
+    public FactionTeam ControlledByFaction => ControllingCountryState.OccupyingTeam == FactionTeam.NONE ? FactionTeam.ALLIES : ControllingCountryState.OccupyingTeam;
+    public bool IsControlledByFaction(Faction faction) => ControlledByFaction == StaticGameData.FactionTeamForFaction(faction);
 
     public void ShowStraightSprite()
     {
@@ -74,6 +72,8 @@ public partial class StraightState : StateObject
     {
         StraightSpriteNode.Visible = false;
     }
+
+    public bool IsForIds(int countryId1, int countryId2) => (ControlledCountryId1 == countryId1 && ControlledCountryId2 == countryId2) || (ControlledCountryId1 == countryId2 && ControlledCountryId2 == countryId1);
 
     public void ChangeColorTeam(FactionTeam controllingTeam)
     {

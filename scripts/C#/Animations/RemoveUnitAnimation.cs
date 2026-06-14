@@ -21,8 +21,7 @@ public class RemoveUnitAnimation : ChangeEventAnimation
     public override async Task Execute()
     {
         CountryScene countryScene = CountryState.ForId(_countryId).CountryScene;
-        UnitScene unitScene = new[] { countryScene.UnitScene1, countryScene.UnitScene2, countryScene.UnitScene3 }
-            .FirstOrDefault(u => u?.UnitId == _unitId);
+        UnitScene unitScene = UnitState.ForId(_unitId).UnitScene;
 
         if (unitScene == null) return;
 
@@ -33,7 +32,6 @@ public class RemoveUnitAnimation : ChangeEventAnimation
         tween.Dispose();
 
         countryScene.RemoveUnit(unitScene);
-        NodeUtilities.Instance.AddChild(unitScene);
         unitScene.UnitSpriteNode.Scale = new Vector2(1f, 1f);
 
         

@@ -25,7 +25,7 @@ public partial class StatusSyntheticFuel : StatusCardLogic
         {
             return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
                 .Map(changeEvent => changeEvent.CountryId)
-                .SelectMany(countryId => CountryState.ForId(countryId).ConnectedCountries(Faction))
+                .SelectMany(countryId => CountryState.ForId(countryId).AdjacentCountryStates(Faction))
                 .Distinct()
                 .Where(countryState => countryState.CanBuild(Faction) && countryState.IsLand)
                 .ToList();

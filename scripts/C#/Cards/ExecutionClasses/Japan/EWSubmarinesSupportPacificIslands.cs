@@ -17,7 +17,7 @@ public partial class EWSubmarinesSupportPacificIslands : EWCardLogic
                 var japaneseNavies = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
                     .Where(u => u.Type == UnitType.NAVY && 
                                (u.CountryState.Country == Country.EastPacific || 
-                               eastPacific.NeighborCountryStates.Contains(u.CountryState)))
+                               eastPacific.ConnectedCountryStates.Contains(u.CountryState)))
                     .ToList();
                 
                 int count = japaneseNavies.Count;

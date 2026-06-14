@@ -140,7 +140,7 @@ public abstract class Condition
         public override bool MeetCondition()
         {
             return CountryStates.Any(countryState => 
-                countryState.NeighborCountryStates.Any(neighbor => neighbor.Tags.HasForAny(Tag.Attackable)));
+                countryState.ConnectedCountryStates.Any(neighbor => neighbor.Tags.HasForAny(Tag.Attackable)));
         }
     }
 

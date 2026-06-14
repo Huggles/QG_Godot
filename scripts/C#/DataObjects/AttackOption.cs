@@ -20,7 +20,7 @@ public partial class AttackOption : GodotObject
         UnitState unitState = UnitState.ForId(unitId);
         attackOption.Faction = unitState.Faction;        
         FactionTeam enemyTeam = StaticGameData.OpponentFactionTeamForFaction(unitState.Faction);
-        foreach (CountryState countryState in unitState.CountryState.ConnectedCountries(unitState.Faction))
+        foreach (CountryState countryState in unitState.CountryState.AdjacentCountryStates(unitState.Faction))
         {
             if (countryState.OccupyingTeam == enemyTeam)
             {

@@ -204,9 +204,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
                     faction, 
                     countryState.Id, 
                     DeployType.RECRUIT
-                ); 
-                deployUnitChangeEvent.IsTrigger = false;                  
-                deployUnitChangeEvent.PlayAnimations = false; // prevent animations during initial setup
+                ) { IsTrigger = false, BlockAnimationQueue = false, PlayAnimations = false }; // prevent animations during initial setup
                 await deployUnitChangeEvent.ApplyChange();
             }
         }

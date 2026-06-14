@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://l5548wfmcdsi"]
+[gd_scene load_steps=7 format=3 uid="uid://l5548wfmcdsi"]
 
 [ext_resource type="Script" uid="uid://blm76drcs8wms" path="res://scripts/C#/Scenes/CountryScene.cs" id="1_upkmi"]
 [ext_resource type="Texture2D" uid="uid://ceg5tibtem12g" path="res://assets/textures/Other/StraightIcon.png" id="2_llf52"]
+[ext_resource type="Texture2D" uid="uid://bs3yx35coiu1s" path="res://assets/textures/Other/target_country.png" id="5_1hw3w"]
 [ext_resource type="PackedScene" uid="uid://cfav78gd417lf" path="res://scenes/ClickableSprite.tscn" id="5_oqybm"]
 [ext_resource type="Texture2D" uid="uid://c73fkdd7t4mmu" path="res://assets/textures/Other/SupplyStar.png" id="5_twgbx"]
 
@@ -32,3 +33,5 @@ texture = ExtResource("2_llf52")
 [node name="CountrySprite" parent="." instance=ExtResource("5_oqybm")]
 z_index = 20
 material = SubResource("CanvasItemMaterial_8mwya")
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("5_1hw3w")
