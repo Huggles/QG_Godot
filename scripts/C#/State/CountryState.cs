@@ -85,8 +85,7 @@ public partial class CountryState : StateObject
     public List<StraightState> UncontrolledStraightStatesForFaction(Faction faction) => ControlledByStraightStates.Where(ss => !ss.IsControlledByFaction(faction)).ToList();
     public bool IsControlledByStraightState => ControlledByStraightStates.Count > 0;
 
-    public List<int> AdjacentCountryIds(Faction faction) {
-        DebugUtilities.PrintPeer($"Getting adjacent countries for {Name} ({Id}) for faction {faction}");
+    public List<int> AdjacentCountryIds(Faction faction) {        
         List<StraightState> _uncontrolledStraightStatesForFaction = UncontrolledStraightStatesForFaction(faction);
         return !IsControlledByStraightState 
         ? ConnectedCountryStates.Select(ccs => ccs.Id).ToList() 

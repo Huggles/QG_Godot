@@ -106,7 +106,7 @@ public partial class PlayerScene : CharacterBody2D
                 var loadingCover = _loadingCoverInterface.GetNodeOrNull<Control>("LoadingCover");
 
                 var tween = GetTree().CreateTween();   
-                PropertyTweener propertyTweener1 = tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.AnimationDurationSeconds)
+                PropertyTweener propertyTweener1 = tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.DurationMediumSeconds)
                     .SetTrans(Tween.TransitionType.Sine)
                     .SetEase(Tween.EaseType.InOut);
                 propertyTweener1.Finished += () => {

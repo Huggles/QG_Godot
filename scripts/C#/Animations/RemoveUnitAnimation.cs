@@ -18,7 +18,7 @@ public class RemoveUnitAnimation : ChangeEventAnimation
         _countryId = countryId;
     }
 
-    public override async Task Execute()
+    protected override async Task AnimateForTargetFaction()
     {
         CountryScene countryScene = CountryState.ForId(_countryId).CountryScene;
         UnitScene unitScene = UnitState.ForId(_unitId).UnitScene;
@@ -26,8 +26,8 @@ public class RemoveUnitAnimation : ChangeEventAnimation
         if (unitScene == null) return;
 
         Tween tween = unitScene.CreateTween();
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), GameSettings.AnimationDurationSeconds / 2);
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(0f, 0f), GameSettings.AnimationDurationSeconds / 2);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), GameSettings.DurationShortSeconds);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(0f, 0f), GameSettings.DurationShortSeconds);
         await unitScene.ToSignal(tween, Tween.SignalName.Finished);
         tween.Dispose();
 

@@ -1,16 +1,14 @@
-[gd_scene load_steps=14 format=3 uid="uid://bjpmsri3am6gm"]
+[gd_scene load_steps=17 format=3 uid="uid://bjpmsri3am6gm"]
 
 [ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
 [ext_resource type="StyleBox" uid="uid://iry13465ja03" path="res://scenes/cards/CardButtonStyleHovered.tres" id="2_h8eod"]
 [ext_resource type="Texture2D" uid="uid://ddr7do1nkqeou" path="res://assets/factions/germany/Germany_Flag.png" id="2_s1j4j"]
+[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="3_gac4n"]
 [ext_resource type="Texture2D" uid="uid://deodddhcuupnq" path="res://assets/textures/Other/DeckIcon.png" id="3_s1j4j"]
 [ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/PlayedCardsIcon.png" id="4_rhpmq"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_rib18"]
-resource_local_to_scene = true
-font_size = 36
-outline_size = 7
-outline_color = Color(0, 0, 0, 1)
+[ext_resource type="Script" uid="uid://nwhfij0f43sv" path="res://scenes/userinterface/FactionInfo/CardsAnimationControl.cs" id="7_0r4er"]
+[ext_resource type="Texture2D" uid="uid://cpfklff0i6sut" path="res://assets/factions/germany/cards/Germany_CardBack.png" id="7_48ey3"]
+[ext_resource type="LabelSettings" uid="uid://cy7n8wr0krac1" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsLarge.tres" id="8_48ey3"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
 resource_local_to_scene = true
@@ -81,7 +79,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "9"
-label_settings = SubResource("LabelSettings_rib18")
+label_settings = ExtResource("3_gac4n")
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -177,3 +175,32 @@ grow_vertical = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_osvc4")
 theme_override_styles/hover = ExtResource("2_h8eod")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_h8eod")
+
+[node name="CardsAnimationControl" type="Control" parent="."]
+anchors_preset = 0
+offset_top = 60.0
+offset_right = 50.0
+offset_bottom = 130.0
+script = ExtResource("7_0r4er")
+
+[node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_48ey3")
+expand_mode = 5
+
+[node name="CardsAnimationControlLabel" type="Label" parent="CardsAnimationControl"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+label_settings = ExtResource("8_48ey3")
+horizontal_alignment = 1
+vertical_alignment = 1

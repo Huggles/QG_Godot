@@ -17,14 +17,14 @@ public class DeployUnitAnimation : ChangeEventAnimation
         _countryId = countryId;
     }
 
-    public override async Task Execute()
+    protected override async Task AnimateForTargetFaction()
     {
         CountryScene countryScene = CountryState.ForId(_countryId).CountryScene;
         UnitScene unitScene = countryScene.AddUnit(_unitId);
         
         Tween tween = unitScene.CreateTween();
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale*1.5f, UnitScene.DefaultSpriteScale*1.5f), GameSettings.AnimationDurationSeconds / 2);
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale, UnitScene.DefaultSpriteScale), GameSettings.AnimationDurationSeconds / 2);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale*1.5f, UnitScene.DefaultSpriteScale*1.5f), GameSettings.DurationShortSeconds);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale, UnitScene.DefaultSpriteScale), GameSettings.DurationShortSeconds);
         await unitScene.ToSignal(tween, Tween.SignalName.Finished);
         tween.Dispose();
     }

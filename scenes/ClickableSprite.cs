@@ -6,7 +6,8 @@ public partial class ClickableSprite : Area2D
 	public Sprite2D Sprite => GetNode<Sprite2D>("Sprite2D");
 	private CollisionShape2D CollisionShape => GetNode<CollisionShape2D>("CollisionShape2D");
 
-	private bool IsClickable = false;	
+	private bool IsClickable = false;
+	private Tween _alphaWaveTween;
 
 	[Export]
 	private Texture2D texture;
@@ -74,27 +75,22 @@ public partial class ClickableSprite : Area2D
 		IsClickable = false;
 		CollisionShape.Disabled = true;
 		CollisionShape.Visible = false;
+		StopAlphaWaveAnimation();
 	}
 
 	public void SpriteAlphaWaveAnimation()
-    {
-        var tween1 = GetTree().CreateTween();        
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(Sprite, "modulate:a", 0.3, GameSettings.AnimationDurationSeconds * 10);
-        propertyTweener1.Finished += () =>
-        {
-			tween1.Dispose();
-			var tween2 = GetTree().CreateTween();
-            PropertyTweener propertyTweener2 = tween2.TweenProperty(Sprite, "modulate:a", 0.8, GameSettings.AnimationDurationSeconds * 10);
-            propertyTweener2.Finished += () =>
-            {
-				tween2.Dispose();
-                if (Sprite.Visible)
-				{
-					SpriteAlphaWaveAnimation();
-				}
-            };
-        };        
-    }
+	{
+		_alphaWaveTween?.Kill();
+		_alphaWaveTween = GetTree().CreateTween().SetLoops();
+		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.3, GameSettings.DurationLongSeconds * 10);
+		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.8, GameSettings.DurationLongSeconds * 10);
+	}
+
+	public void StopAlphaWaveAnimation()
+	{
+		_alphaWaveTween?.Kill();
+		_alphaWaveTween = null;
+	}
 
 
 	private void OnMouseEnterSpriteOpaque()

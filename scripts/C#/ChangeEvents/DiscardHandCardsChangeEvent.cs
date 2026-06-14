@@ -25,7 +25,7 @@ public partial class DiscardHandCardsChangeEvent : ChangeEvent
     protected override async Task<bool> ExecuteAsync()
     {
         await GameAPI.DiscardHandCards(TargetFaction, CardIds);
-        await Task.Delay(GameSettings.PauseDuration);
+        await Task.Delay(GameSettings.DurationShort);
         return true;
     }
 }

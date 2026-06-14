@@ -7,7 +7,7 @@ public partial class UnitScene : Node2D
     public UnitState UnitState => UnitState.ForId(UnitId);
     public Sprite2D UnitSpriteNode => GetNode<Sprite2D>("UnitSprite2D");
     public ClickableSprite TargetSprite => GetNode<ClickableSprite>("TargetSprite");
-    public Sprite2D OutOfSupplyNode => GetNode<Sprite2D>("OutOfSupplyIcon");
+    public BlinkingSprite2D OutOfSupplyNode => GetNode<BlinkingSprite2D>("OutOfSupplyIcon");
     public static float DefaultSpriteScale = 0.2f;    
     [Signal] public delegate void UnitClickedEventHandler();
     [Signal] public delegate void UnitDoubleClickedEventHandler();
@@ -77,15 +77,8 @@ public partial class UnitScene : Node2D
         TargetSprite.SetUnclickable();
     }
 
-    public void ShowOutOfSupply()
-    {
-        OutOfSupplyNode.Visible = true;
-    }
-
-    public void HideOutOfSupply()
-    {
-        OutOfSupplyNode.Visible = false;
-    }
+    public void ShowOutOfSupply() => OutOfSupplyNode.Show();
+    public void HideOutOfSupply() => OutOfSupplyNode.Hide();
 
     private void OnTagAdded(Tag tag, Faction faction)
     {

@@ -18,10 +18,10 @@ public class ReturnCameraAnimation : ChangeEventAnimation
         _savedZoom     = camera.Zoom;
     }
 
-    public override async Task Execute()
+    protected override async Task AnimateForTargetFaction()
     {
         Camera2D camera  = InputManager.Current.Camera;
-        double   duration = GameSettings.AnimationDurationSeconds * 3;
+        double   duration = GameSettings.DurationMediumSeconds;
 
         Tween tween = camera.CreateTween().SetParallel();
         tween.TweenProperty(camera, "position", _savedPosition, duration)

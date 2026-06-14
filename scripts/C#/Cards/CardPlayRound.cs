@@ -391,7 +391,7 @@ public partial class CardPlayRound : GodotObject
         if (options.Count > 0)
         {
             DebugUtilities.PrintPeer($"{faction} has {options.Count} block reaction options");
-            await Task.Delay(GameSettings.PauseDuration);
+            await Task.Delay(GameSettings.DurationMedium);
         }
         else
         {

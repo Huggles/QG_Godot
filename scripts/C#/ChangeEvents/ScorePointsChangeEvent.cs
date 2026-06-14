@@ -21,7 +21,7 @@ public partial class ScorePointsChangeEvent : ChangeEvent
     protected override async Task<bool> ExecuteAsync()
     {
         GameAPI.ScorePoints(VPTurnSummary);        
-        await Task.Delay(GameSettings.PauseDuration);
+        await Task.Delay(GameSettings.DurationLong);
         return true;
     }
 }

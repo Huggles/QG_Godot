@@ -53,7 +53,7 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
         else
         {
             // No cards to discard
-            await Task.Delay(GameSettings.PauseDuration);
+            await Task.Delay(GameSettings.DurationShort);
         }
 
         

@@ -1,0 +1,7 @@
+[gd_resource type="LabelSettings" format=3 uid="uid://bymnxius4fktx"]
+
+[resource]
+resource_local_to_scene = true
+font_size = 36
+outline_size = 7
+outline_color = Color(0, 0, 0, 1)

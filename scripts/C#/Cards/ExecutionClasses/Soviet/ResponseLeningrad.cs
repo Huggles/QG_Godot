@@ -29,7 +29,7 @@ public partial class ResponseLeningrad : ResponseCardLogic
                     battleUnitChangeEvent.IsBlocked = true;
                     battleUnitChangeEvent.UnitState.ImmuneForTurn = true;
                     PlayerActionLabel.ShowText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the land battle on his army in {CountryState.ForId(targetCountries[0])}", Faction);
-                    await Task.Delay(GameSettings.PauseDuration);
+                    await Task.Delay(GameSettings.DurationMedium);
                     return null;
                 }else {
                     throw new Exception("Reaction should be to a discard change event");

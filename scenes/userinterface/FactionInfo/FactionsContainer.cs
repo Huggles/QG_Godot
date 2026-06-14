@@ -7,7 +7,7 @@ public partial class FactionsContainer : Control
     public static FactionsContainer Current;
 
     private HBoxContainer HorizontalContainer => GetNode<HBoxContainer>("%FactionsHorizontalContainer");
-    private Dictionary<Faction, FactionInfoRow> factionInfoNodes = new();    
+    public Dictionary<Faction, FactionInfoRow> FactionInfoNodes = new();    
 
     public override void _Ready()
     {   
@@ -49,7 +49,7 @@ public partial class FactionsContainer : Control
             child.QueueFree();
         }
 
-        factionInfoNodes.Clear();
+        FactionInfoNodes.Clear();
 
         // Only show factions controlled by the local player
         List<Faction> playerFactions = StaticGameData.PlayableFactions;
@@ -65,12 +65,12 @@ public partial class FactionsContainer : Control
             FactionInfoRow rowInstance = AssetRepository.FactionInfoRowScenePacked.Instantiate<FactionInfoRow>();
             rowInstance.Faction = faction;
             HorizontalContainer.AddChild(rowInstance);
-            factionInfoNodes[faction] = rowInstance;
+            FactionInfoNodes[faction] = rowInstance;
         }
     }
 
     public FactionInfoRow GetFactionInfoNodeForFaction(Faction faction)
     {
-        return factionInfoNodes[faction];
+        return FactionInfoNodes[faction];
     }
 }

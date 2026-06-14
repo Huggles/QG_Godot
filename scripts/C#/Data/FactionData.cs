@@ -14,44 +14,34 @@ public partial class FactionData : DataObject
     public int NumberOfArmyUnits { get; set; }
     public int NumberOfNavyUnits { get; set; }
 
-    public Faction Faction
-    {
-        get
-        {
-            return (Faction)Index;
-        }
-    }
+    public Faction Faction => (Faction)Index;
 
-    public Color FactionColor
-    {
-        get
-        {
-            return Color.FromString(ColorString, new Color(1, 1, 1, 1));
-        }
-    }
-    public Color FactionColorText
-    {
-        get
-        {
-            return Color.FromString(ColorStringText, new Color(1, 1, 1, 1));
-        }
-    }
+    public Color FactionColor => Color.FromString(ColorString, new Color(1, 1, 1, 1));
+    
+    public Color FactionColorText => Color.FromString(ColorStringText, new Color(1, 1, 1, 1));
 
-    public CountryState HomeSpaceCountryState
+    public string factionName => Faction.ToString().ToLower();
+    public string factionNameCapitalized => factionName.Capitalize().Replace(" ", "_");
+
+    public CountryState HomeSpaceCountryState => CountryState.ForName(Homespace);
+
+    public Texture2D CardBackTexture
     {
         get
         {
-            return CountryState.ForName(Homespace);
+            if(field == null)
+            {
+                field = GD.Load<Texture2D>(String.Format(CardTexturePath, factionName, factionNameCapitalized, "CardBack"));
+            }
+            return field;
         }
     }
 
     public Texture2D FlagTexture => FactionFlags[Faction];
 
-    public String FactionAdjactiveLabel
-    {
-        get
-        {
-            return new Dictionary<Faction, String>
+    public string FactionAdjactiveLabel => FactionAdjactiveLabels[Faction];
+
+    public static Dictionary<Faction, string> FactionAdjactiveLabels => new Dictionary<Faction, string>
             {
                 { Faction.GERMANY, "German"},
                 { Faction.UNITED_KINGDOM, "United Kingdom"},
@@ -59,9 +49,7 @@ public partial class FactionData : DataObject
                 { Faction.SOVIET, "Soviet"},
                 { Faction.ITALY, "Italian"},
                 { Faction.UNITED_STATES, "United States"}
-            }[Faction];
-        }
-    }
+            };
 
 
     public Dictionary<CardType, Texture2D> CardFrontTextures = new Dictionary<CardType, Texture2D>();
@@ -98,8 +86,7 @@ public partial class FactionData : DataObject
     }
     private void LoadCardTextures()
     {
-        string factionName = Faction.ToString().ToLower();
-        string factionNameCapitalized = factionName.Capitalize().Replace(" ", "_");
+        
         foreach (CardType cardType in Enum.GetValues(typeof(CardType)))
         {
             if (excludeCards[Faction].Contains(cardType))

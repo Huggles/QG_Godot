@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -20,5 +22,21 @@ public abstract class ChangeEventAnimation
     /// </summary>
     public virtual bool BlockQueue { get; set; } = true;
 
-    public abstract Task Execute();
+    public virtual List<Faction> ForFactions => StaticGameData.PlayableFactions;
+    public bool ForMyFaction => PlayerScene.Current.ControlledFactions.Intersect(ForFactions).Any();
+
+    public async Task Execute()
+    {
+        if(ForMyFaction)
+        {
+            await AnimateForTargetFaction();
+        }
+        else
+        {
+            await AnimateForEnemyFaction();
+        }
+    }
+
+    protected abstract Task AnimateForTargetFaction();
+    protected virtual Task AnimateForEnemyFaction(){ return Task.CompletedTask; }
 }

@@ -11,7 +11,6 @@ public partial class SpeedControl : PanelContainer
         GameSpeed.Slow,
         GameSpeed.Normal,
         GameSpeed.Fast,
-        GameSpeed.VeryFast
     };
 
     private Button _cycleButton;
@@ -52,11 +51,10 @@ public partial class SpeedControl : PanelContainer
     {
         _cycleButton.Text = GameSettings.Instance.PresentationSpeed switch
         {
-            GameSpeed.Slow     => "Slow",
-            GameSpeed.Normal   => "Normal",
-            GameSpeed.Fast     => "Fast",
-            GameSpeed.VeryFast => "Very Fast",
-            _                  => "Normal"
+            GameSpeed.Slow   => "Slow",
+            GameSpeed.Normal => "Normal",
+            GameSpeed.Fast   => "Fast",
+            _                => "Normal"
         };
     }
 }

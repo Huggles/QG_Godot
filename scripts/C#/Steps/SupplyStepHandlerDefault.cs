@@ -47,12 +47,12 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
             }
             
             // Give player time to see the changes
-            await Task.Delay(GameSettings.PauseDuration);
+            await Task.Delay(GameSettings.DurationMedium);
         }
         else
         {
             // No units out of supply
-            await Task.Delay(GameSettings.PauseDuration);
+            await Task.Delay(GameSettings.DurationShort);
         }
 
         SupplyStepFinished?.Invoke();

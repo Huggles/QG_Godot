@@ -82,14 +82,9 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
     public async Task<bool> ApplyChange()
     {
-        // Evaluate both lists upfront so constructors (e.g. ReturnCameraAnimation)
-        // capture state before any animation runs.
-        var beforeAnims = BeforeAnimations;
-        var afterAnims  = AfterAnimations;
-
         EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);      
 
-        foreach (var anim in beforeAnims)
+        foreach (var anim in BeforeAnimations)
         {
             if(PlayAnimations)
             {
@@ -104,7 +99,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         {   
             await BroadCast();
         }
-        foreach (var anim in afterAnims)
+        foreach (var anim in AfterAnimations)
         {
             if(PlayAnimations)
             {

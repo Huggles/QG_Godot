@@ -18,6 +18,7 @@ public partial class FactionInfoRow : Control
     private Button DeckButton => BackgroundPanel.GetNode<Button>("DeckButton");
     private Button PlayedCardsButton => BackgroundPanel.GetNode<Button>("PlayedCardsButton");
     private RichTextLabel TurnSummariesRichText => DetailPanel.GetNode<RichTextLabel>("MarginContainer/TurnSummariesRichText");
+    private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
 
     private Timer hoverTimer;
     private bool isMouseOver = false;
@@ -139,8 +140,8 @@ public partial class FactionInfoRow : Control
     {
         ScoreLabel.Text = score.ToString();
         var tween = GetTree().CreateTween();
-        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 72, GameSettings.AnimationDurationSeconds);
-        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 36, GameSettings.AnimationDurationSeconds);
+        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 72, GameSettings.DurationShortSeconds);
+        tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 36, GameSettings.DurationShortSeconds);
         LoadVPDetails();
     }
 
@@ -169,5 +170,10 @@ public partial class FactionInfoRow : Control
         }
 
         TurnSummariesRichText.Text = string.Join("\n", textRows);
+    }
+
+    public void ShowCardDelta(int delta)
+    {
+        CardsAnimationControl.ShowCardsAnimation(delta);
     }
 }

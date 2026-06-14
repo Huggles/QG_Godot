@@ -32,7 +32,7 @@ public partial class DrawStepHandlerDefault : GodotObject, IDrawStepHandler
         else
         {
             // No cards to draw
-            await Task.Delay(GameSettings.PauseDuration);
+            await Task.Delay(GameSettings.DurationShort);
         }
 
         DrawStepFinished?.Invoke();

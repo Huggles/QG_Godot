@@ -24,22 +24,41 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public static DebugVerbosity Debug => Instance.DebugLevel;
     public static bool IsDebugMultiplayer => Instance.DebugMultiplayer;
 
-    /// <summary>Duration in milliseconds for the current presentation speed.</summary>
-    public static int Duration => Instance.PresentationSpeed switch
+    /// <summary>
+    /// Duration table in milliseconds: rows = GameSpeed (Slow/Normal/Fast),
+    /// columns = DurationScale (VeryLong/Long/Medium/Short/VeryShort).
+    /// </summary>
+    private static readonly int[,] DurationTable =
     {
-        GameSpeed.Slow     => 3000,
-        GameSpeed.Normal   => 1000,
-        GameSpeed.Fast     => 500,
-        GameSpeed.VeryFast => 250,
-        _                  => 1000
+        //  VeryLong  Long  Medium  Short  VeryShort
+        {    6000,   4000,   3000,  2000,   1000 },   // Slow
+        {    3000,   2000,   1000,   750,    500 },   // Normal
+        {    1500,   1000,    500,   250,    100 },   // Fast
     };
 
-    
-    public static int PauseDuration => Duration;
-    public static double PauseDurationSeconds => Duration / 1000.0;
-    public static int AnimationDuration => Duration;
-    public static double AnimationDurationSeconds => AnimationDuration / 1000.0;
+    /// <summary>Returns the duration in milliseconds for the current speed and the given scale.</summary>
+    public static int GetDuration(DurationScale scale = DurationScale.Medium)
+        => DurationTable[(int)Instance.PresentationSpeed, (int)scale];
 
+    /// <summary>Returns the duration in seconds for the current speed and the given scale.</summary>
+    public static double GetDurationSeconds(DurationScale scale = DurationScale.Medium)
+        => GetDuration(scale) / 1000.0;
+
+    public static int    DurationVeryLong        => GetDuration(DurationScale.VeryLong);
+    public static double DurationVeryLongSeconds => GetDurationSeconds(DurationScale.VeryLong);
+
+    public static int    DurationLong            => GetDuration(DurationScale.Long);
+    public static double DurationLongSeconds     => GetDurationSeconds(DurationScale.Long);
+
+    public static int    DurationMedium          => GetDuration(DurationScale.Medium);
+    public static double DurationMediumSeconds   => GetDurationSeconds(DurationScale.Medium);
+
+    public static int    DurationShort           => GetDuration(DurationScale.Short);
+    public static double DurationShortSeconds    => GetDurationSeconds(DurationScale.Short);
+
+    public static int    DurationVeryShort        => GetDuration(DurationScale.VeryShort);
+    public static double DurationVeryShortSeconds => GetDurationSeconds(DurationScale.VeryShort);
+    
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
     public void SetDebugMultiplayer(bool value)        { DebugMultiplayer  = value; Save(); }
@@ -57,7 +76,9 @@ public partial class GameSettings : SingletonNode<GameSettings>
         var config = new ConfigFile();
         if (config.Load(ConfigPath) == Error.Ok)
         {
-            PresentationSpeed = (GameSpeed)config.GetValue(Section, "presentation_speed", (int)GameSpeed.Normal).As<int>();
+            var saved = config.GetValue(Section, "presentation_speed", (int)GameSpeed.Normal).As<int>();
+            // Clamp in case a saved VeryFast (3) value exists from before the redesign.
+            PresentationSpeed = (GameSpeed)Math.Clamp(saved, 0, 2);
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
             DebugMultiplayer  = config.GetValue(Section, "debug_multiplayer", false).As<bool>();
         }

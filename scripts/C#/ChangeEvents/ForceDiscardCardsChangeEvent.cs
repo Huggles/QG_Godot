@@ -26,13 +26,16 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
     protected override async Task<bool> ExecuteAsync()
     {
         ApplyDiscardModifiers();
-
         DeckState deckState = DeckState.ForFaction(TargetFaction); 
         DiscardedCardIds = deckState.DiscardTopCards(NumberOfCards);
-        PlayerActionLabel.ShowText($"{TriggeringFaction} makes {TargetFaction} discard {NumberOfCards} cards", TriggeringFaction);
-        await Task.Delay(GameSettings.PauseDuration);
         return true;
     }
+
+    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    {
+        new ShowNotificationLabelAnimation($"{TriggeringFaction} makes {TargetFaction} discard {NumberOfCards} cards", TriggeringFaction),
+        new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards")
+    };
 
     private void ApplyDiscardModifiers()
     {

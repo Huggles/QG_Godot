@@ -82,15 +82,15 @@ public partial class PresentationModal : Control, LoadableUI
         Visible = true;
 
         var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds);
         propertyTweener1.Finished += async () =>
         {
             DebugUtilities.PrintPeerFinest("PresentationModal shown");
             EmitSignal(SignalName.OnShow);
-            await Task.Delay(GameSettings.PauseDuration);
+            await Task.Delay(GameSettings.DurationLong);
             tween1.Dispose();
 
-            if (GameSettings.AnimationDurationSeconds > 0)
+            if (GameSettings.DurationShortSeconds > 0)
             {
                 _ = HideModal();
             }
@@ -104,7 +104,7 @@ public partial class PresentationModal : Control, LoadableUI
         Visible = true;
 
         var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds);
         
         propertyTweener1.Finished += async () =>
         {   
@@ -191,7 +191,7 @@ public partial class PresentationModal : Control, LoadableUI
         }
 
         var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.AnimationDurationSeconds);
+        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds);
         propertyTweener1.Finished += () =>
         {
             DebugUtilities.PrintPeerFinest("PresentationModal shown");
@@ -259,7 +259,7 @@ public partial class PresentationModal : Control, LoadableUI
         minimumSelections = 0;
 
         var tween2 = GetTree().CreateTween();
-        PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, GameSettings.AnimationDurationSeconds);
+        PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, GameSettings.DurationShortSeconds);
         propertyTweener2.Finished += () =>
         {
             tween2.Dispose();

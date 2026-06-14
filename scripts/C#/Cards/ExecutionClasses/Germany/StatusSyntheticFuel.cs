@@ -38,13 +38,9 @@ public partial class StatusSyntheticFuel : StatusCardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 DebugUtilities.PrintPeer("StatusSyntheticFuel react step");
-                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction, 2);
+                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
-
-                DebugUtilities.PrintPeer("StatusSyntheticFuel ApplyChange step");
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
+                await CardPlayPool.DoChangeEvent(discardEvent);
 
                 int countryId = await new SelectCountryHandler(DeployTargets.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
