@@ -137,7 +137,7 @@ public partial class GameAPI : Node
     /**
     * Board Management API
     */
-    public static void DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType, bool awaitAnimation = true)
+    public static int DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType, bool awaitAnimation = true)
     {   
         CountryState countryState = GameState.CountryStateById[countryId];
 
@@ -153,6 +153,7 @@ public partial class GameAPI : Node
         }
         EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
         AnimationQueue.Instance.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+        return unitId;
     }
     public static void RemoveUnitFromCountry(int unitId, bool awaitAnimation = true)
     {   

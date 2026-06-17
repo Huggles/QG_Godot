@@ -21,4 +21,9 @@ public partial class PlayCardChangeEvent : ChangeEvent
         await Task.CompletedTask;
         return true;
     }
+
+    public override string SummaryText() => 
+        SourceCardState.CardData.CardType == CardType.RESPONSE ? 
+        $"{TriggeringFaction} played a response card (hidden)" :
+        $"{TriggeringFaction} played {SourceCardState.CardData.CardType} card {SourceCardState.CardName}";
 }

@@ -27,4 +27,9 @@ public partial class DrawCardsChangeEvent : ChangeEvent
         await GameAPI.DrawCards(TargetFaction, NumberOfCards, ShowDrawnCards);                
         return true;
     }
+
+    public override string SummaryText()
+    {
+        return $"{TargetFaction} drew {NumberOfCards} card(s) from the deck";
+    }
 }

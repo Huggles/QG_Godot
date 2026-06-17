@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://bhqnymug3arir"]
+
+[ext_resource type="Script" uid="uid://ktk2bkxu122e" path="res://scenes/userinterface/History/GameHistoryItem.cs" id="1_s2x5k"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_un8ke"]
+font_size = 12
+
+[node name="GameHistoryItem" type="Control"]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1720.0
+offset_bottom = -1030.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_s2x5k")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "This is a dummy text"
+label_settings = SubResource("LabelSettings_un8ke")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2

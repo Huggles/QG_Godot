@@ -47,7 +47,7 @@ public partial class DeployUnitChangeEvent : ChangeEvent
 
     protected override async Task<bool> ExecuteAsync()
     {
-        GameAPI.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType, BlockAnimationQueue);
+        UnitId = GameAPI.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType, BlockAnimationQueue);
         await Task.CompletedTask;
         return true;
     }
@@ -57,16 +57,6 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         return $"{ScriptName}-{Enum.GetName(typeof(Faction), TriggeringFaction)}-{CountryState.ForId(CountryId).Label}-{Enum.GetName(typeof(UnitType), UnitType)}";
     }
 
-    public override string SummaryText()
-    {
-        return $"{UnitState.Faction} deployed to {CountryState.ForId(CountryId).Label}";
-    }
-
-    public override string DebugText()
-    {
-        return $"Deployed {Enum.GetName(typeof(Faction), TriggeringFaction)} {Enum.GetName(typeof(UnitType), UnitType)} to country: {CountryState.ForId(CountryId).Label}";
-    }
-
-    
-
+    public override string SummaryText() => $"{TriggeringFaction} deployed to {CountryState.ForId(CountryId).Label}";
+    public override string DebugText() => $"Deployed {Enum.GetName(typeof(Faction), TriggeringFaction)} {Enum.GetName(typeof(UnitType), UnitType)} to country: {CountryState.ForId(CountryId).Label}";
 }

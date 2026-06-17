@@ -15,13 +15,6 @@ public partial class BattleUnitChangeEvent : RemoveUnitChangeEvent
         return dto;
     }
 
-    public override string SummaryText()
-    {
-        return $"Battled {UnitState.Faction} unit in {CountryState.ForId(CountryId).Label}";
-    }
-
-    public override string DebugText()
-    {
-        return $"{Faction.GetNames(typeof(Faction))[(int)TriggeringFaction]} battled {UnitState.ForId(UnitId).Faction} in {CountryState.ForId(CountryId).Label}";
-    }
+    public override string SummaryText() => $"{TriggeringFaction} battled {UnitState.Faction} unit in {CountryState.ForId(CountryId).Label}";
+    public override string DebugText() => $"{Faction.GetNames(typeof(Faction))[(int)TriggeringFaction]} battled {UnitState.ForId(UnitId).Faction} in {CountryState.ForId(CountryId).Label}";
 }

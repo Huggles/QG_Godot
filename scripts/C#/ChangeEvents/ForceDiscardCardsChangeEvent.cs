@@ -52,4 +52,6 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
                 NumberOfCards = Math.Max(NumberOfCards + delta, 0);
         }
     }
+
+    public override string SummaryText() => $"{TargetFaction} was forced to discard {NumberOfCards} cards by {TriggeringFaction}";
 }

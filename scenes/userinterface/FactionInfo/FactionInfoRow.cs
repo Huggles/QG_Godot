@@ -9,7 +9,7 @@ public partial class FactionInfoRow : Control
     public Faction Faction;
     private FactionState FactionState => FactionState.ForEnum(Faction);
     private MultiplayerGameState gameState { get { return GameSession.Current.GameState; } }
-
+    private Panel ActiveFactionPanel => GetNode<Panel>("ActiveFactionPanel");
     private Panel BackgroundPanel => GetNode<Panel>("%BackgroundPanel");
     private TextureRect FactionFlagNode => GetNode<TextureRect>("FactionFlag");    
     private Label ScoreLabel => FactionFlagNode.GetNode<Label>("ScoreLabel");
@@ -119,11 +119,14 @@ public partial class FactionInfoRow : Control
         PresentationModal.Current.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Draw Deck", false);
     }
     
-    
-    private void SetModulation()
+    private void SetActiveFactionPanel()
     {
+        ActiveFactionPanel.Visible = GameFlow.Instance.CurrentFaction == Faction;
+    }
+    private void SetModulation()
+    {        
         if (PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction))
-        {
+        {            
             Modulate = new Color(1, 1, 1, 1f); // Full opacity for factions controlled by the local player
         } 
         else
@@ -134,6 +137,7 @@ public partial class FactionInfoRow : Control
         {
             Modulate = new Color(Modulate.R - 0.2f, Modulate.G - 0.2f, Modulate.B - 0.2f,  Modulate.A); // Further dim the row if it's not the current faction's turn
         }
+        SetActiveFactionPanel();
     }
 
     private void SetScore(int score)

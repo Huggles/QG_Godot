@@ -12,8 +12,9 @@ public partial class AssetRepository : Node
     public static readonly PackedScene multiplayerSessionScenePacked = GD.Load<PackedScene>("res://scenes/network/MultiplayerSession.tscn");
     public static readonly PackedScene PlayerScenePackged = GD.Load<PackedScene>("res://scenes/Player/Player.tscn");
     public static readonly PackedScene UnitScenePacked = GD.Load<PackedScene>("res://scenes/Units/Unit.tscn");    
+    public static readonly PackedScene GameHistoryItemScenePackaged = GD.Load<PackedScene>("res://scenes/userinterface/History/game_history_item.tscn");
     public static readonly Texture2D ArmySprite = GD.Load<Texture2D>(ArmySpritePath);
-    public static readonly Texture2D NavySprite = GD.Load<Texture2D>(NavySpritePath);
+    public static readonly Texture2D NavySprite = GD.Load<Texture2D>(NavySpritePath);    
     public static readonly Texture2D StraightIcon = GD.Load<Texture2D>("res://assets/textures/Other/StraightIcon.png");
     public static readonly Texture2D StraightIconInverse = GD.Load<Texture2D>("res://assets/textures/Other/StraightIconInverse.png");
     public static readonly Texture2D TargetSprite = GD.Load<Texture2D>("res://assets/textures/Other/target.png");

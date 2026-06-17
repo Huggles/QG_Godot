@@ -18,6 +18,7 @@ public partial class PresentationModal : Control, LoadableUI
     private bool multiSelectMode = false;
     private int minimumSelections = 0;
     private List<int> selectedIdentifiers = new List<int>();
+    private Tween _activeTween;
     public List<PresentationItem> PresentationItems = new List<PresentationItem>();
     public List<Control> PresentationItemControls = new List<Control>();
 
@@ -53,6 +54,20 @@ public partial class PresentationModal : Control, LoadableUI
         ExitButton.Visible = false;
         ExitButton.Pressed += OnExitButtonPressed;
     }
+    private void FadeIn(Action onComplete = null)
+    {
+        _activeTween?.Kill();
+        _activeTween = GetTree().CreateTween();
+        _activeTween.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds)
+            .Finished += () => onComplete?.Invoke();
+    }
+    private void FadeOut(Action onComplete = null)
+    {
+        _activeTween?.Kill();
+        _activeTween = GetTree().CreateTween();
+        _activeTween.TweenProperty(this, "modulate:a", 0, GameSettings.DurationShortSeconds)
+            .Finished += () => onComplete?.Invoke();
+    }
     public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, bool requireSelection)
     {
         RequireSelection = requireSelection;
@@ -81,20 +96,16 @@ public partial class PresentationModal : Control, LoadableUI
         TitleText.Text = title;
         Visible = true;
 
-        var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds);
-        propertyTweener1.Finished += async () =>
+        FadeIn(async () =>
         {
             DebugUtilities.PrintPeerFinest("PresentationModal shown");
             EmitSignal(SignalName.OnShow);
             await Task.Delay(GameSettings.DurationLong);
-            tween1.Dispose();
-
             if (GameSettings.DurationShortSeconds > 0)
             {
                 _ = HideModal();
             }
-        };
+        });
         return ToSignal(this, SignalName.OnHide);        
     }
     public SignalAwaiter ShowModalPersistent(List<PresentationItem> presentationItems, string title)
@@ -103,14 +114,7 @@ public partial class PresentationModal : Control, LoadableUI
         TitleText.Text = title;
         Visible = true;
 
-        var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds);
-        
-        propertyTweener1.Finished += async () =>
-        {   
-            tween1.Dispose();
-            EmitSignal(SignalName.OnShow);
-        };
+        FadeIn(() => EmitSignal(SignalName.OnShow));
         return ToSignal(this, SignalName.OnShow);        
     }
 
@@ -190,14 +194,11 @@ public partial class PresentationModal : Control, LoadableUI
             ShowExitButton();
         }
 
-        var tween1 = GetTree().CreateTween();
-        PropertyTweener propertyTweener1 = tween1.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds);
-        propertyTweener1.Finished += () =>
+        FadeIn(() =>
         {
             DebugUtilities.PrintPeerFinest("PresentationModal shown");
             EmitSignal(SignalName.OnShow);
-            tween1.Dispose();
-        };
+        });
         return ToSignal(this, SignalName.OnHide);
     }
     private void HandleItemClickedMultiSelect(int identifier)
@@ -258,11 +259,8 @@ public partial class PresentationModal : Control, LoadableUI
         multiSelectMode = false;
         minimumSelections = 0;
 
-        var tween2 = GetTree().CreateTween();
-        PropertyTweener propertyTweener2 = tween2.TweenProperty(this, "modulate:a", 0, GameSettings.DurationShortSeconds);
-        propertyTweener2.Finished += () =>
+        FadeOut(() =>
         {
-            tween2.Dispose();
             Visible = false;
             ExitButton.Visible = false;
             if (ConfirmButton != null)
@@ -284,7 +282,7 @@ public partial class PresentationModal : Control, LoadableUI
             PresentationItems.Clear();
             EmitSignal(SignalName.OnHide, new PresentationItemResponse { SelectedItems = new List<int>(selectedIdentifiers) });
             selectedIdentifiers.Clear();
-        };
+        });
         return ToSignal(this, SignalName.OnHide);
     }
 

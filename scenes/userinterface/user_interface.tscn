@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dqdvhk2rm85fc"]
+[gd_scene load_steps=11 format=3 uid="uid://dqdvhk2rm85fc"]
 
 [ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="1_bj75k"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="6_x05kf"]
 [ext_resource type="Script" uid="uid://6krq1p1wqi43" path="res://scripts/C#/UI/SpeedControl.cs" id="7_v35kq"]
 [ext_resource type="Script" uid="uid://bkgumcj218qt5" path="res://scripts/C#/UI/DebugVerbosityControl.cs" id="8_debugverb"]
+[ext_resource type="Script" uid="uid://poytc7oh3ay1" path="res://scenes/userinterface/History/GameHistoryList.cs" id="9_oxwje"]
+[ext_resource type="PackedScene" uid="uid://bhqnymug3arir" path="res://scenes/userinterface/History/game_history_item.tscn" id="10_dvfjj"]
 
 [node name="Interface" type="CanvasLayer"]
 
@@ -39,3 +41,92 @@ script = ExtResource("7_v35kq")
 offset_left = 10.0
 offset_top = 50.0
 script = ExtResource("8_debugverb")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = 200.0
+offset_bottom = -250.0
+grow_horizontal = 0
+grow_vertical = 2
+vertical_scroll_mode = 3
+
+[node name="GameHistoryList" type="VBoxContainer" parent="ScrollContainer"]
+clip_contents = true
+layout_mode = 2
+script = ExtResource("9_oxwje")
+
+[node name="GameHistoryItem" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem2" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem3" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem4" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem5" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem6" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem7" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem8" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem9" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem10" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem11" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem12" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem13" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem14" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem15" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem16" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem17" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem18" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem19" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem20" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem21" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem22" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem23" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2
+
+[node name="GameHistoryItem24" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+layout_mode = 2

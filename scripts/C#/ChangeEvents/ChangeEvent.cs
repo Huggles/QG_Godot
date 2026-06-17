@@ -32,6 +32,8 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
     public bool HasSourceCard => SourceCardId > -1;
     public CardState SourceCardState => CardState.ForId(SourceCardId);
 
+    public virtual bool ToHistoryItem => true; // whether this event should be converted to a GameHistoryItem and displayed in the game history UI
+
     // Signal
     [Signal] public delegate void ChangeEventAppliedEventHandler(int changeEventId);
 
@@ -106,8 +108,10 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
                 _ = AnimationQueue.Instance.Enqueue(anim);            
             }
             
-        }
+        }        
         await AnimationQueue.Instance.Start(); // ensure queue is processing (no-op if already running)
+        
+        MultiplayerSession.Instance?.GameState.GameChangeEvents.Add(this);
         LatestAppliedId = Id;
         EventBus.Emit(EventBus.SignalName.GameChangeEventAfter, ScriptName);        
         
@@ -122,9 +126,13 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
     public virtual string DebugText() => ScriptName;
 
-    public async Task BroadCast()
+    public GameHistoryItem ToGameHistoryItem()
     {
-        
+        return ToHistoryItem ? GameHistoryItem.Create(SummaryText(), TriggeringFaction) : null;
+    }
+
+    public async Task BroadCast()
+    {        
         this.HashAfterApplication = MultiplayerSession.Instance.GameState.ComputeHash();   
         string dtoJson = JsonSerializer.Serialize(ToDto());         
         DebugUtilities.PrintPeer($"[color={"blue"}]Emitting ChangeEvent to clients: {ScriptName} (Id: {Id}, Hash: {HashAfterApplication})");            

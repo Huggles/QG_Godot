@@ -21,4 +21,6 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         SourceCardState.CardLogic.ActivatedInTurns.Add(GameFlow.Instance.GameTurn);        
         return true;
     }
+
+    public override string SummaryText() => $"{TriggeringFaction} activated card {SourceCardState.CardName}";
 }

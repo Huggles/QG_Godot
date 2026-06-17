@@ -24,4 +24,8 @@ public partial class ScorePointsChangeEvent : ChangeEvent
         await Task.Delay(GameSettings.DurationLong);
         return true;
     }
+
+    public override string SummaryText() => $"{TriggeringFaction} scored {VPTurnSummary.TotalScore} points";
+
+    
 }
