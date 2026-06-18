@@ -11,7 +11,6 @@ public partial class CardStep
     public bool IsPlayStep { get; set; } = false;
     public bool IsReactStep { get; set; } = false;
     public int Id { get; set; } = 0;
-    [JsonIgnore] public CardStep PrerequisiteCardStep { get; set; }
     [JsonIgnore] public CardStep NextCardStep
     {
         get
@@ -87,12 +86,6 @@ public partial class CardStep
     {
         this.ActionGuidance = actionGuidance;
         return this;
-    }
-
-
-    [JsonIgnore] public bool PrerequisiteStepFinished
-    {
-        get { return PrerequisiteCardStep != null ? PrerequisiteCardStep.StepFinished : true; }
     }
 
     public async Task<ChangeEvent> Execute()

@@ -103,29 +103,15 @@ public abstract partial class CardLogic : GodotObject
     {
         return new();
     }
-    public List<CardStep> ExecutablePlaySteps => PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.PrerequisiteStepFinished && playCardStep.MeetAllConditions).ToList();
-    public List<CardStep> ExecutableReactSteps => ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.PrerequisiteStepFinished && reactCardStep.MeetAllConditions).ToList();
+    public List<CardStep> ExecutablePlaySteps => PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.MeetAllConditions).ToList();
+    public List<CardStep> ExecutableReactSteps => ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.MeetAllConditions).ToList();
 
     public CardLogic()
     {        
         PlayCardSteps = InitializePlayCardSteps();
         ReactCardSteps = InitializeReactCardSteps();
-        for (int i = PlayCardSteps.Count - 1; i > 0; i--)
-        {
-            PlayCardSteps[i].IsPlayStep = true;
-            if (PlayCardSteps[i].PrerequisiteCardStep == null)
-            {
-                PlayCardSteps[i].PrerequisiteCardStep = PlayCardSteps[i - 1];
-            }
-        }
-        for (int i = ReactCardSteps.Count - 1; i > 0; i--)
-        {
-            ReactCardSteps[i].IsReactStep = true;
-            if (ReactCardSteps[i].PrerequisiteCardStep == null)
-            {
-                ReactCardSteps[i].PrerequisiteCardStep = ReactCardSteps[i - 1];
-            }
-        }
+        PlayCardSteps.ForEach(step => step.IsPlayStep = true);
+        ReactCardSteps.ForEach(step => step.IsReactStep = true);
         EventBus.Instance.NewTurnStarted += (turnNumber) => 
         {
             ReactCardSteps.ForEach(reactCardStep => reactCardStep.StepFinished = false);
