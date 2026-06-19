@@ -75,14 +75,16 @@ public abstract partial class InputRequest
 
     public class HandCardPlayRequestHandler : InputRequest
     {
-        public HandCardPlayRequestHandler(Faction targetFaction, List<int> targetCardIds) : base(targetFaction)
+        public RequestCardActionType ActionType { get; set; }
+
+        public HandCardPlayRequestHandler(Faction targetFaction, RequestCardActionType actionType) : base(targetFaction)
         {
-            TargetCardIds = targetCardIds;
+            ActionType = actionType;
         }
 
         public override async Task Handle()
         {
-            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetCardIds);
+            PlayerScene.Current.InputManager.SetPlayCardInputActive(ActionType, TargetFaction);
             DebugUtilities.PrintPeer($"RequestCardPlay: Waiting for player input.");
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
             if (results != null && results.Length > 0)

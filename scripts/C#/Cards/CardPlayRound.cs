@@ -287,11 +287,11 @@ public partial class CardPlayRound : GodotObject
             return -1;
         }
 
-        List<int> options = GetNextActions(faction);
         Variant[] response = await NetworkApi.Instance.SendInputRequest(
-            new InputRequest.HandCardPlayRequestHandler(faction, options));
+            new InputRequest.HandCardPlayRequestHandler(faction, RequestCardActionType.PlayCard));
         InputRequest responseDto = InputRequest.FromJson(response[0].AsString());
-        return options.Find(id => id == responseDto.ResponseCardIds[0]);
+        int selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
+        return GetNextActions(faction).Contains(selectedId) ? selectedId : -1;
     }
 
     /// <summary>Ask the faction to choose a block-reaction step, or pass.</summary>
@@ -304,11 +304,24 @@ public partial class CardPlayRound : GodotObject
             return -1;
         }
 
-        List<int> blockOptions = await GetBlockOptions(faction);
-        if (blockOptions.Count == 0)
+        // Factions cannot block their own events
+        if (LastChangeEvent?.TriggeringFaction == faction)
             return -1;
 
-        controllingPlayer.InputManager.SetPlayCardInputActive(blockOptions);
+        bool hasBlockOptions = GameSession.Current.GameState.CardStatesById.Values
+            .Any(cs => cs.Tags.Has(Tag.IsBlockReaction, faction));
+
+        if (!hasBlockOptions)
+        {
+            DebugUtilities.PrintPeer($"{faction} has no block reactions available");
+            await Task.Delay(10);
+            return -1;
+        }
+
+        DebugUtilities.PrintPeer($"{faction} has block reaction options");
+        await Task.Delay(GameSettings.DurationMedium);
+
+        controllingPlayer.InputManager.SetPlayCardInputActive(RequestCardActionType.BlockReaction, faction);
         Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
         if (results == null || results.Length == 0)
             return -1;
@@ -337,30 +350,6 @@ public partial class CardPlayRound : GodotObject
     /// <summary>Card IDs of after-reactions (non-block) available to the faction.</summary>
     public List<int> GetAfterReactionOptions(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsAfterReaction, faction)).Select(cs => cs.Id).ToList();
 
-    /// <summary>Card IDs of block-reactions available to the faction for the current change event.</summary>
-    public async Task<List<int>> GetBlockOptions(Faction faction)
-    {
-        if (LastChangeEvent?.TriggeringFaction == faction)
-            return new List<int>();
-
-        List<int> options = ActivatableCardIds(faction)
-            .Where(cardId => CardIsBlockReaction(cardId))
-            .ToList();
-
-        if (options.Count > 0)
-        {
-            DebugUtilities.PrintPeer($"{faction} has {options.Count} block reaction options");
-            await Task.Delay(GameSettings.DurationMedium);
-        }
-        else
-        {
-            DebugUtilities.PrintPeer($"{faction} has no block reactions available");
-            await Task.Delay(10);
-        }
-
-        return options;
-    }
-
     public List<T> GetChangeEvents<T>() where T : ChangeEvent
     {
         return ChangeEventsPool.OfType<T>().ToList();
@@ -385,10 +374,4 @@ public partial class CardPlayRound : GodotObject
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
-
-    private bool CardIsBlockReaction(int cardId)
-    {
-        CardState card = CardState.ForId(cardId);
-        return card?.CardLogic?.IsBlockReaction == true;
-    }
 }

@@ -30,9 +30,25 @@ public partial class InputManager : Node2D
     [Signal]
     public delegate void KeyClickedEventHandler(InputEventKey keyEvent);
 
-    public InputHandlerPlayCard SetPlayCardInputActive(List<int> cardIds)
-    {       
-        
+    public InputHandlerPlayCard SetPlayCardInputActive(RequestCardActionType actionType, Faction faction)
+    {
+        var allCards = GameSession.Current.GameState.CardStatesById.Values;
+        List<int> cardIds;
+
+        if (actionType == RequestCardActionType.PlayCard)
+        {
+            cardIds = new List<int>();
+            bool isInitialPlay = CardPlayRound.Current?.CardPool.Count == 0
+                                 && GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
+            if (isInitialPlay)
+                cardIds.AddRange(allCards.Where(cs => cs.Tags.Has(Tag.IsPlayable, faction)).Select(cs => cs.Id));
+            cardIds.AddRange(allCards.Where(cs => cs.Tags.Has(Tag.IsAfterReaction, faction)).Select(cs => cs.Id));
+        }
+        else // BlockReaction
+        {
+            cardIds = allCards.Where(cs => cs.Tags.Has(Tag.IsBlockReaction, faction)).Select(cs => cs.Id).ToList();
+        }
+
         inputHandler = new InputHandlerPlayCard(cardIds);
         return inputHandler;
     }

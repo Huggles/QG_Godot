@@ -39,6 +39,10 @@ public class GameStateCalculator
     public List<int> AfterReactionCardIds = new List<int>();
     public List<CardState> AfterReactionCardStates => CardState.ForIds(AfterReactionCardIds);
 
+    // Block-reaction cards state (activatable cards that are block reactions)
+    public List<int> BlockReactionCardIds = new List<int>();
+    public List<CardState> BlockReactionCardStates => CardState.ForIds(BlockReactionCardIds);
+
     // Supply state
     public List<int> InSupplyUnitIds = new List<int>();
     public List<UnitState> InSupplyUnitStates => InSupplyUnitIds.ToUnitStates();
@@ -180,6 +184,22 @@ public class GameStateCalculator
         CardState.ForIds(calculator.AfterReactionCardIds).AddTag(Tag.IsAfterReaction, faction);
     }
 
+    private static void CalculateBlockReactionCardsForFaction(Faction faction, GameStateCalculator calculator)
+    {
+        ClearTagsForFaction(faction, Tag.IsBlockReaction);
+
+        foreach (int cardId in calculator.ActivatableCardIds)
+        {
+            CardState cardState = CardState.ForId(cardId);
+            if (cardState?.CardLogic?.IsBlockReaction == true)
+            {
+                calculator.BlockReactionCardIds.Add(cardId);
+            }
+        }
+
+        CardState.ForIds(calculator.BlockReactionCardIds).AddTag(Tag.IsBlockReaction, faction);
+    }
+
     private static void CalculatePlayableCardsForFaction(Faction faction, GameStateCalculator calculator)
     {
         ClearTagsForFaction(faction, Tag.IsPlayable);
@@ -277,6 +297,7 @@ public class GameStateCalculator
         CalculatePlayedCardsForFaction(faction, calculator);
         CalculateActivatableCardsForFaction(faction, calculator);
         CalculateAfterReactionCardsForFaction(faction, calculator);
+        CalculateBlockReactionCardsForFaction(faction, calculator);
         CalculateStraightControlForFaction(faction, calculator);
         
         // Cache the result

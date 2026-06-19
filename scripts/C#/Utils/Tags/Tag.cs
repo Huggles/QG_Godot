@@ -21,6 +21,7 @@ public enum Tag
     IsPlayable,
     IsActivatable,
     IsAfterReaction,
+    IsBlockReaction,
     IsPlayed,
     IsDiscarded,
     

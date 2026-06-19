@@ -85,9 +85,6 @@ public static class CardPlayPool
     public static List<int> GetAfterReactionOptions(Faction faction) =>
         CardPlayRound.Current?.GetAfterReactionOptions(faction) ?? new();
 
-    public static Task<List<int>> BlockChangeEvents(Faction faction) =>
-        CardPlayRound.Current?.GetBlockOptions(faction) ?? Task.FromResult(new List<int>());
-
     public static List<int> PlayableCardIds(Faction faction) =>
         CardPlayRound.Current?.PlayableCardIds(faction) ?? new();
 }
