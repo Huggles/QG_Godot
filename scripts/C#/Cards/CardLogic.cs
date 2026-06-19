@@ -14,28 +14,8 @@ public abstract partial class CardLogic : GodotObject
 
     public List<int> ActivatedInTurns = new();
 
-    // IsPlayed is computed based on the card's location in DeckState
-    public bool IsPlayed
-    {
-        get
-        {
-            DeckState deckState = DeckState.ForFaction(Faction);
-            
-            if (CardData.Type == "STATUS")
-            {
-                return deckState.StatusCardIds.Contains(CardState.Id);
-            }
-            else if (CardData.Type == "RESPONSE")
-            {
-                return deckState.ResponseCardIds.Contains(CardState.Id);
-            }
-            else
-            {
-                // Event cards are played if they're in the discard pile or currently in the card pool
-                return deckState.DiscardedCardIds.Contains(CardState.Id) || CardPlayPool.CardPoolMap.ContainsKey(CardState.Id);
-            }
-        }
-    }
+    // IsPlayed is computed based on the card's tag
+    public bool IsPlayed => CardState.Tags.Has(Tag.IsPlayed, Faction);
     
     public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
     public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
@@ -65,8 +45,8 @@ public abstract partial class CardLogic : GodotObject
 
     [Signal] public delegate void CardFinishedEventHandler();
     
-    public List<CardStep> PlayCardSteps;
-    public List<CardStep> ReactCardSteps;
+    public List<CardStep> PlayCardSteps = new();
+    public List<CardStep> ReactCardSteps = new();
     public abstract List<CardStep> InitializePlayCardSteps();
     public virtual List<CardStep> InitializeReactCardSteps() { return new(); }    
 
@@ -84,13 +64,7 @@ public abstract partial class CardLogic : GodotObject
         if (CardData.Type == "STATUS" || CardData.Type == "RESPONSE")
         {
             DebugUtilities.PrintPeerFinest($"CanBeActivated {CardData.UniqueName}: IsPlayed={IsPlayed}, IsActivatedThisTurn={IsActivatedThisTurn}, IsActivationFinished={IsActivationFinished}, TriggerConditionsMet={TriggerConditionsMet}, Result={canActivate}");
-            if (CardTriggers().Count > 0)
-            {
-                foreach (var trigger in CardTriggers())
-                {
-                    DebugUtilities.PrintPeerFinest($"  Trigger {trigger.GetType().Name}: {trigger.MeetCondition()}");
-                }
-            }
+            CardTriggers().ForEach(trigger => DebugUtilities.PrintPeerFinest($"  Trigger {trigger.GetType().Name}: {trigger.MeetCondition()}"));
         }
         return canActivate;
     }
@@ -99,10 +73,8 @@ public abstract partial class CardLogic : GodotObject
         get { return CardTriggers().Count > 0 && CardTriggers().All(condition=>condition.MeetCondition()); }
     }
 
-    protected virtual List<Condition> CardTriggers()
-    {
-        return new();
-    }
+    protected virtual List<Condition> CardTriggers() => new();
+
     public List<CardStep> ExecutablePlaySteps => PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.MeetAllConditions).ToList();
     public List<CardStep> ExecutableReactSteps => ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.MeetAllConditions).ToList();
 

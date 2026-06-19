@@ -69,6 +69,8 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards, d.ShowDrawnCards),
             DrawCardByNameChangeEventDto d   => new DrawCardByNameChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardName),
             ScorePointsChangeEventDto d      => new ScorePointsChangeEvent(d.VPTurnSummary),
+            ChangeStepChangeEventDto d        => new ChangeStepChangeEvent(d.NewStep),
+            ChangeRoundChangeEventDto d       => new ChangeRoundChangeEvent(d.NewTurn),
             _ => throw new NotSupportedException($"Unknown ChangeEventDto type: {dto.GetType().Name}")
         };
         ev.Id                   = dto.Id;

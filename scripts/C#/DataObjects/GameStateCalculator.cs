@@ -27,6 +27,18 @@ public class GameStateCalculator
     public List<int> PlayableCardIds = new List<int>();
     public List<CardState> PlayableCardStates => CardState.ForIds(PlayableCardIds);
 
+    // Played cards state
+    public List<int> PlayedCardIds = new List<int>();
+    public List<CardState> PlayedCardStates => CardState.ForIds(PlayedCardIds);
+
+    // Activatable cards state (status/response cards with executable steps)
+    public List<int> ActivatableCardIds = new List<int>();
+    public List<CardState> ActivatableCardStates => CardState.ForIds(ActivatableCardIds);
+
+    // After-reaction cards state (activatable cards that are not block reactions)
+    public List<int> AfterReactionCardIds = new List<int>();
+    public List<CardState> AfterReactionCardStates => CardState.ForIds(AfterReactionCardIds);
+
     // Supply state
     public List<int> InSupplyUnitIds = new List<int>();
     public List<UnitState> InSupplyUnitStates => InSupplyUnitIds.ToUnitStates();
@@ -95,9 +107,82 @@ public class GameStateCalculator
         CountryState.ForIds(calculator.RecruitableCountryIds).AddTag(Tag.Recruitable, faction);
     }
 
+    private static void CalculateActivatableCardsForFaction(Faction faction, GameStateCalculator calculator)
+    {
+        ClearTagsForFaction(faction, Tag.IsActivatable);
+
+        DeckState deckState = DeckState.ForFaction(faction);
+        List<CardState> candidates = new();
+        candidates.AddRange(deckState.StatusCardStates);
+        candidates.AddRange(deckState.ResponseCardStates);
+
+        foreach (var cardState in candidates)
+        {
+            if (cardState.CardLogic == null) continue;
+
+            bool canActivate = cardState.CardLogic.CanBeActivated();
+            bool hasContinuationSteps = cardState.CardLogic.IsActivatedThisTurn
+                                        && cardState.CardLogic.ExecutableReactSteps.Count > 0;
+
+            if (canActivate || hasContinuationSteps)
+            {
+                if (cardState.CardLogic.ReactCardSteps.Count == 0)
+                    throw new NotImplementedException(
+                        $"{cardState.CardData.UniqueName} has no REACT steps implemented: {cardState.CardLogic.GetClass()}");
+
+                calculator.ActivatableCardIds.Add(cardState.Id);
+            }
+        }
+
+        CardState.ForIds(calculator.ActivatableCardIds).AddTag(Tag.IsActivatable, faction);
+    }
+
+    private static void CalculatePlayedCardsForFaction(Faction faction, GameStateCalculator calculator)
+    {
+        ClearTagsForFaction(faction, Tag.IsPlayed);
+
+        DeckState deckState = DeckState.ForFaction(faction);
+
+        // STATUS and RESPONSE cards are played once they are in their permanent piles
+        calculator.PlayedCardIds.AddRange(deckState.StatusCardIds);
+        calculator.PlayedCardIds.AddRange(deckState.ResponseCardIds);
+
+        // EVENT cards are played once discarded
+        calculator.PlayedCardIds.AddRange(deckState.DiscardedCardIds);
+
+        // EVENT cards currently in the active play round pool are also considered played
+        // (covers the window between entering the pool and being moved to discard)
+        if (CardPlayRound.Current != null)
+        {
+            foreach (var cardState in CardPlayRound.Current.CardPool)
+            {
+                if (cardState.Faction == faction && !calculator.PlayedCardIds.Contains(cardState.Id))
+                    calculator.PlayedCardIds.Add(cardState.Id);
+            }
+        }
+
+        CardState.ForIds(calculator.PlayedCardIds).AddTag(Tag.IsPlayed, faction);
+    }
+
+    private static void CalculateAfterReactionCardsForFaction(Faction faction, GameStateCalculator calculator)
+    {
+        ClearTagsForFaction(faction, Tag.IsAfterReaction);
+
+        foreach (int cardId in calculator.ActivatableCardIds)
+        {
+            CardState cardState = CardState.ForId(cardId);
+            if (cardState?.CardLogic?.IsBlockReaction != true)
+            {
+                calculator.AfterReactionCardIds.Add(cardId);
+            }
+        }
+
+        CardState.ForIds(calculator.AfterReactionCardIds).AddTag(Tag.IsAfterReaction, faction);
+    }
+
     private static void CalculatePlayableCardsForFaction(Faction faction, GameStateCalculator calculator)
     {
-        ClearTagsForFaction(faction, Tag.Playable);
+        ClearTagsForFaction(faction, Tag.IsPlayable);
         
         // Cards are only playable if they belong to the faction
         DeckState deckState = DeckState.ForFaction(faction);
@@ -110,7 +195,7 @@ public class GameStateCalculator
             }
         }
         
-        CardState.ForIds(calculator.PlayableCardIds).AddTag(Tag.Playable, faction);
+        CardState.ForIds(calculator.PlayableCardIds).AddTag(Tag.IsPlayable, faction);
     }
 
     private static void CalculateInSupplyForFaction(Faction faction, GameStateCalculator calculator)
@@ -189,6 +274,9 @@ public class GameStateCalculator
         CalculateBuildableCountriesForFaction(faction, calculator);
         CalculateRecruitableCountriesForFaction(faction, calculator);
         CalculatePlayableCardsForFaction(faction, calculator);
+        CalculatePlayedCardsForFaction(faction, calculator);
+        CalculateActivatableCardsForFaction(faction, calculator);
+        CalculateAfterReactionCardsForFaction(faction, calculator);
         CalculateStraightControlForFaction(faction, calculator);
         
         // Cache the result

@@ -50,4 +50,11 @@ public partial class CardState : StateObject
             return null;
         return ForName(cardData.UniqueName);
     }
+    
+
+    public static Dictionary<int, CardState> All => GameSession.Current.GameState.CardStatesById;
+    public static Dictionary<int, CardState> AllForFaction(Faction faction) => 
+        GameSession.Current.GameState.CardStatesById.Values
+            .Where(cs => cs.Faction == faction)
+            .ToDictionary(cs => cs.Id, cs => cs);
 }

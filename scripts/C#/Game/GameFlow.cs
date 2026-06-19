@@ -116,7 +116,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task StartNewTurn()
     {
         DebugUtilities.PrintPeer("StartNewTurn");
-        GameTurn += 1;
+        await new ChangeRoundChangeEvent(GameTurn + 1).ApplyChange();
         TurnStepCounter = 0;
         DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
         EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
@@ -135,7 +135,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task StartTurnStep()
     {
         DebugUtilities.PrintPeer("StartTurnStep");
-        this.TurnStep = TurnStep.START;
+        await new ChangeStepChangeEvent(TurnStep.START).ApplyChange();
         startTurnStepHandler = new StartTurnStepHandler();
         startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;
         startTurnStepHandler.Start(CurrentFaction);        
@@ -150,7 +150,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task PlayCardStep()
     {
         DebugUtilities.PrintPeer("PlayCardStep");
-        this.TurnStep = TurnStep.PLAY_CARD;
+        await new ChangeStepChangeEvent(TurnStep.PLAY_CARD).ApplyChange();
         playStepHandlerDefault = new PlayStepHandlerDefault();
         playStepHandlerDefault.PlayStepFinished += PlayCardStepFinishedHandler;
         playStepHandlerDefault.Start(CurrentFaction);
@@ -163,7 +163,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     private async Task SupplyStep()
     {
-        this.TurnStep = TurnStep.SUPPLY;
+        await new ChangeStepChangeEvent(TurnStep.SUPPLY).ApplyChange();
         DebugUtilities.PrintPeer("SupplyStep");
         supplyStepHandler = new SupplyStepHandlerDefault();
         supplyStepHandler.SupplyStepFinished += SupplyStepFinishedHandler;
@@ -179,7 +179,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task VictoryPointStep()
     {
         DebugUtilities.PrintPeer("VictoryPointStep");
-        this.TurnStep = TurnStep.VICTORY_POINT;
+        await new ChangeStepChangeEvent(TurnStep.VICTORY_POINT).ApplyChange();
         await vpStepHandler.ProcessVictoryStep(CurrentFaction);
         StartNextStep();
     }
@@ -187,7 +187,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task DiscardStep()
     {
         DebugUtilities.PrintPeer("DiscardStep");
-        this.TurnStep = TurnStep.DISCARD;
+        await new ChangeStepChangeEvent(TurnStep.DISCARD).ApplyChange();
         discardStepHandler = new DiscardStepHandlerDefault();
         discardStepHandler.DiscardStepFinished += DiscardStepFinishedHandler;
         discardStepHandler.Start(CurrentFaction);
@@ -202,7 +202,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task DrawStep()
     {        
         DebugUtilities.PrintPeer("DrawStep");
-        this.TurnStep = TurnStep.DRAW;
+        await new ChangeStepChangeEvent(TurnStep.DRAW).ApplyChange();
         drawStepHandler = new DrawStepHandlerDefault();
         drawStepHandler.DrawStepFinished += DrawStepFinishedHandler;
         drawStepHandler.Start(CurrentFaction);

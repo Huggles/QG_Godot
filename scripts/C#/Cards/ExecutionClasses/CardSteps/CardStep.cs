@@ -99,7 +99,7 @@ public partial class CardStep
             //Should skip step
             DebugUtilities.PrintPeer("SKIPPING STEP");
             PlayerActionLabel.ShowText("Unable to: " + ActionGuidance, -1, TriggeringFaction);
-            await Task.Delay(GameSettings.DurationShort);
+            await Task.Delay(GameSettings.DurationLong);
             if (NextCardStep != null)
             {
                 result = await NextCardStep.Execute();

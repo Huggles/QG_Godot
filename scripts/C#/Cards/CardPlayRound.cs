@@ -102,12 +102,16 @@ public partial class CardPlayRound : GodotObject
             introWasBlocked = introEvent.IsBlocked;
         }
 
-        // Step 2: Execute the card's next executable step if not blocked
+        // Step 2: Execute the card's next unfinished step if not blocked.
+        // We use all unfinished steps (not just executable ones) so that Execute() can
+        // show the "Unable to" skip message for steps whose conditions fail before
+        // automatically cascading to the next step.
         if (!introWasBlocked)
         {
-            List<CardStep> nextSteps = cardLogic.IsReaction
-                ? cardLogic.ExecutableReactSteps
-                : cardLogic.ExecutablePlaySteps;
+            List<CardStep> allSteps = cardLogic.IsReaction
+                ? cardLogic.ReactCardSteps
+                : cardLogic.PlayCardSteps;
+            List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
 
             if (nextSteps.Count > 0)
             {
@@ -325,58 +329,13 @@ public partial class CardPlayRound : GodotObject
     }
 
     /// <summary>Card IDs of hand cards the faction can play from hand.</summary>
-    public List<int> PlayableCardIds(Faction faction)
-    {
-        List<int> cardIds = new();
-        foreach (CardState cardState in DeckState.ForFaction(faction).HandCardStates)
-        {
-            if (cardState.CardLogic == null) continue;
-            if (cardState.CardLogic.ExecutablePlaySteps.Count > 0)
-                cardIds.Add(cardState.Id);
-        }
-        return cardIds;
-    }
+    public List<int> PlayableCardIds(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsPlayable, faction)).Select(cs => cs.Id).ToList();
 
     /// <summary>Card IDs of status/response cards the faction can activate now.</summary>
-    public List<int> ActivatableCardIds(Faction faction)
-    {
-        DeckState deck = DeckState.ForFaction(faction);
-        List<int> cardIds = new();
-        cardIds.AddRange(ActivatableCardIdsFromCards(deck.StatusCardStates));
-        cardIds.AddRange(ActivatableCardIdsFromCards(deck.ResponseCardStates));
-        return cardIds;
-    }
-
-    private List<int> ActivatableCardIdsFromCards(List<CardState> cardStates)
-    {
-        List<int> cardIds = new();
-        foreach (CardState cardState in cardStates)
-        {
-            if (cardState.CardLogic == null) continue;
-
-            bool canActivate = cardState.CardLogic.CanBeActivated();
-            bool hasContinuationSteps = cardState.CardLogic.IsActivatedThisTurn
-                                        && cardState.CardLogic.ExecutableReactSteps.Count > 0;
-
-            if (canActivate || hasContinuationSteps)
-            {
-                if (cardState.CardLogic.ReactCardSteps.Count == 0)
-                    throw new NotImplementedException(
-                        $"{cardState.CardData.UniqueName} has no REACT steps implemented: {cardState.CardLogic.GetClass()}");
-
-                cardIds.Add(cardState.Id);
-            }
-        }
-        return cardIds;
-    }
+    public List<int> ActivatableCardIds(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsActivatable, faction)).Select(cs => cs.Id).ToList();
 
     /// <summary>Card IDs of after-reactions (non-block) available to the faction.</summary>
-    public List<int> GetAfterReactionOptions(Faction faction)
-    {
-        return GetNextActions(faction)
-            .Where(cardId => !CardIsBlockReaction(cardId))
-            .ToList();
-    }
+    public List<int> GetAfterReactionOptions(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsAfterReaction, faction)).Select(cs => cs.Id).ToList();
 
     /// <summary>Card IDs of block-reactions available to the faction for the current change event.</summary>
     public async Task<List<int>> GetBlockOptions(Faction faction)

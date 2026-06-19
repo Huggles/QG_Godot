@@ -18,7 +18,12 @@ public enum Tag
     AlliesControlled,
 
     //Card Tags    
-    Playable,
+    IsPlayable,
+    IsActivatable,
+    IsAfterReaction,
+    IsPlayed,
+    IsDiscarded,
+    
 
     //Unit Tags
     InSupply,
