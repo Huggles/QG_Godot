@@ -4,11 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// Extension methods for filtering collections of ITaggable objects.
-/// Makes querying by tags much more concise.
+/// Extension methods for ITaggable objects and collections.
+/// Makes querying and mutating tags more concise.
 /// </summary>
 public static class TaggableExtensions
 {
+    // ── Single-object extensions ───────────────────────────────────────────────
+
+    public static bool HasTag(this ITaggable item, Tag tag, Faction faction) =>
+        item.Tags.Has(tag, faction);
+
+    public static bool HasTagForAny(this ITaggable item, Tag tag) =>
+        item.Tags.HasForAny(tag);
+
+    public static void AddTag(this ITaggable item, Tag tag, Faction faction) =>
+        item.Tags.Add(tag, faction);
+
+    public static void AddTagForAll(this ITaggable item, Tag tag) =>
+        item.Tags.AddForAll(tag);
+
+    public static void RemoveTag(this ITaggable item, Tag tag, Faction faction) =>
+        item.Tags.Remove(tag, faction);
+
+    public static void RemoveTagForAll(this ITaggable item, Tag tag) =>
+        item.Tags.RemoveForAll(tag);
+
+    // ── Collection extensions ──────────────────────────────────────────────────
+
     /// <summary>
     /// Filters to items that have the specified tag for a specific faction.
     /// </summary>
