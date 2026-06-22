@@ -6,7 +6,7 @@ using Godot;
 
 public partial class EventIncreasedCommonwealthSupport : EventCardLogic
 {
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         List<Country> targetCountries = [Country.India, Country.Australia, Country.Canada];
         

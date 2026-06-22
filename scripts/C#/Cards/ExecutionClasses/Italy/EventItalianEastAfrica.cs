@@ -5,7 +5,7 @@ using Godot;
 public partial class EventItalianEastAfrica : ResponseCardLogic
 {
     public List<Country> targetCountries = [Country.NorthAfrica, Country.BayOfBengal];
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

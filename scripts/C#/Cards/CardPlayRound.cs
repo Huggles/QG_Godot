@@ -87,14 +87,14 @@ public partial class CardPlayRound : GodotObject
         // Step 1: Introduction event (may be blocked)
         bool introWasBlocked = false;
 
-        if (!cardLogic.IsPlayed)
+        if (!cardState.IsPlayed)
         {
             PlayCardChangeEvent introEvent = new PlayCardChangeEvent(cardState.Id);
             introEvent.IsTrigger = true;
             await ProcessIntroductionEvent(introEvent);
             introWasBlocked = introEvent.IsBlocked;
         }
-        else if (cardLogic.IsReaction && !cardLogic.IsActivatedThisTurn)
+        else
         {
             ActivateReactionChangeEvent introEvent = new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, null);
             introEvent.IsTrigger = true;
@@ -108,9 +108,7 @@ public partial class CardPlayRound : GodotObject
         // automatically cascading to the next step.
         if (!introWasBlocked)
         {
-            List<CardStep> allSteps = cardLogic.IsReaction
-                ? cardLogic.ReactCardSteps
-                : cardLogic.PlayCardSteps;
+            List<CardStep> allSteps = cardLogic.CardSteps;
             List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
 
             if (nextSteps.Count > 0)
@@ -156,6 +154,7 @@ public partial class CardPlayRound : GodotObject
         if (!changeEvent.IsBlocked)
         {
             LastChangeEvent = changeEvent;
+            DebugUtilities.PrintPeer($"Applying change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
             await changeEvent.ApplyChange();
         }
 
@@ -236,15 +235,8 @@ public partial class CardPlayRound : GodotObject
             hasMoreSteps = false;
             foreach (CardState cardState in CardPool)
             {
-                if (cardState.CardLogic == null) continue;
-
-                List<CardStep> nextSteps = new();
-                if (cardState.CardLogic.IsPlayed && !cardState.CardLogic.IsReaction)
-                    nextSteps = cardState.CardLogic.ExecutablePlaySteps;
-                else if (cardState.CardLogic.IsActivatedThisTurn)
-                    nextSteps = cardState.CardLogic.ExecutableReactSteps;
-
-                if (nextSteps.Count > 0)
+                if (cardState.CardLogic == null) continue;                
+                if (cardState.CardLogic.ExecutableCardSteps.Count >0)
                 {
                     DebugUtilities.PrintPeer($"Continuing with next step for {cardState.CardName}");
                     await DoCard(cardState.Id);
@@ -259,14 +251,7 @@ public partial class CardPlayRound : GodotObject
 
     /// <summary>Request the faction's initial card play, then execute the chosen card.</summary>
     public async Task<int> RequestCardPlay(Faction faction)
-    {
-        List<int> options = GetNextActions(faction);
-        if (options.Count == 0)
-        {
-            DebugUtilities.PrintPeer($"{faction} has no available actions");
-            return -1;
-        }
-
+    {        
         int cardId = await RequestPlay(faction);
         if (cardId > -1)
         {
@@ -287,11 +272,15 @@ public partial class CardPlayRound : GodotObject
             return -1;
         }
 
-        Variant[] response = await NetworkApi.Instance.SendInputRequest(
-            new InputRequest.HandCardPlayRequestHandler(faction, RequestCardActionType.PlayCard));
-        InputRequest responseDto = InputRequest.FromJson(response[0].AsString());
-        int selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
-        return GetNextActions(faction).Contains(selectedId) ? selectedId : -1;
+        int selectedId = -1;
+        if(DeckState.ForFaction(faction).ActivatableCardIds.Count > 0)
+        {
+            InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(new InputRequest.HandCardPlayRequestHandler(faction));       
+            selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
+        }
+
+        
+        return selectedId;
     }
 
     /// <summary>Ask the faction to choose a block-reaction step, or pass.</summary>
@@ -321,7 +310,7 @@ public partial class CardPlayRound : GodotObject
         DebugUtilities.PrintPeer($"{faction} has block reaction options");
         await Task.Delay(GameSettings.DurationMedium);
 
-        controllingPlayer.InputManager.SetPlayCardInputActive(RequestCardActionType.BlockReaction, faction);
+        controllingPlayer.InputManager.SetPlayCardInputActive(faction);
         Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
         if (results == null || results.Length == 0)
             return -1;
@@ -329,20 +318,10 @@ public partial class CardPlayRound : GodotObject
         return (int)results[0];
     }
 
-    // ── Action query methods ───────────────────────────────────────────────────
-
-    /// <summary>All card IDs the faction may play or activate right now.</summary>
-    public List<int> GetNextActions(Faction faction)
-    {
-        List<int> actions = new();
-        if (CardPool.Count == 0 && GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD)
-            actions.AddRange(PlayableCardIds(faction));
-        actions.AddRange(ActivatableCardIds(faction));
-        return actions;
-    }
-
     /// <summary>Card IDs of hand cards the faction can play from hand.</summary>
-    public List<int> PlayableCardIds(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsPlayable, faction)).Select(cs => cs.Id).ToList();
+    public List<int> PlayableCardIds(Faction faction) => ActivatableCardIds(faction).Where(id => CardState.ForId(id).IsPlayed == false).ToList();
+
+    public List<int> PlayableHandCardIds(Faction faction) => PlayableCardIds(faction).Intersect(DeckState.ForFaction(faction).HandCardIds).ToList();
 
     /// <summary>Card IDs of status/response cards the faction can activate now.</summary>
     public List<int> ActivatableCardIds(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsActivatable, faction)).Select(cs => cs.Id).ToList();

@@ -6,7 +6,7 @@ using Godot;
 
 public partial class EventGermanSovietTreatyofFriendshipCooperationandDemarcation : EventCardLogic
 {
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
             // Recruit an Army in Russia

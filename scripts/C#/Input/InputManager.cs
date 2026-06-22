@@ -27,28 +27,21 @@ public partial class InputManager : Node2D
 
     private InputHandlerPlayCard inputHandler;
 
-    [Signal]
-    public delegate void KeyClickedEventHandler(InputEventKey keyEvent);
+    [Signal] public delegate void KeyClickedEventHandler(InputEventKey keyEvent);    
 
-    public InputHandlerPlayCard SetPlayCardInputActive(RequestCardActionType actionType, Faction faction)
-    {
-        var allCards = GameSession.Current.GameState.CardStatesById.Values;
-        List<int> cardIds;
-
-        if (actionType == RequestCardActionType.PlayCard)
+    public InputHandlerPlayCard SetPlayCardInputActive(Faction faction, bool includeHandCards = false)
+    {        
+        List<int> cardIds = DeckState.ForFaction(faction).ActivatableCardIds;
+        if(includeHandCards)
         {
-            cardIds = new List<int>();
-            bool isInitialPlay = CardPlayRound.Current?.CardPool.Count == 0
-                                 && GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
-            if (isInitialPlay)
-                cardIds.AddRange(allCards.Where(cs => cs.Tags.Has(Tag.IsPlayable, faction)).Select(cs => cs.Id));
-            cardIds.AddRange(allCards.Where(cs => cs.Tags.Has(Tag.IsAfterReaction, faction)).Select(cs => cs.Id));
+            cardIds.AddRange(DeckState.ForFaction(faction).HandCardIds);
+            cardIds = cardIds.Distinct().ToList();
         }
-        else // BlockReaction
+        
+        if(cardIds.Count == 0)
         {
-            cardIds = allCards.Where(cs => cs.Tags.Has(Tag.IsBlockReaction, faction)).Select(cs => cs.Id).ToList();
+            return null;
         }
-
         inputHandler = new InputHandlerPlayCard(cardIds);
         return inputHandler;
     }

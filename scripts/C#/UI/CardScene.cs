@@ -14,36 +14,29 @@ public partial class CardScene : Control
     public FactionState FactionState => FactionState.ForEnum(CardState.Faction);
 
     private bool triggersEmphasis = true;
+    
+    private bool showActivatableOverlay = false;
 
-    private VBoxContainer textBackgroundContainerNode;
-    private VBoxContainer textContainerNode;
-    private VBoxContainer textInnerContainerNode;
-    private RichTextLabel titleNode;
-    private RichTextLabel textNode;
-    private TextureRect cardTextureNode;
-    private TextureRect textBoxTexture;
-    private Button cardButton;
+    private VBoxContainer textBackgroundContainerNode => GetNode<VBoxContainer>("%TextBackgroundBox");
+    private VBoxContainer textContainerNode => GetNode<VBoxContainer>("%TextContainer");
+    private VBoxContainer textInnerContainerNode => GetNode<VBoxContainer>("%TextInnerContainer");
+    private RichTextLabel titleNode => GetNode<RichTextLabel>("%Title");
+    private RichTextLabel textNode => GetNode<RichTextLabel>("%Text");
+    private TextureRect cardTextureNode => GetNode<TextureRect>("%CardTexture");
+    private TextureRect textBoxTexture => GetNode<TextureRect>("%TextBoxTexture");
+    private Button cardButton => GetNode<Button>("%CardButton");
+    private ColorRect activatableColorOverlay => GetNode<ColorRect>("ActivatableColorOverlay");
 
     [Signal] public delegate void SelectedEventHandler(int cardId);
 
     public override void _Ready()
-    {        
-        textBackgroundContainerNode = GetNode<VBoxContainer>("%TextBackgroundBox");
-        textContainerNode = GetNode<VBoxContainer>("%TextContainer");
-        textInnerContainerNode = GetNode<VBoxContainer>("%TextInnerContainer");
-        titleNode = GetNode<RichTextLabel>("%Title");
-        textNode = GetNode<RichTextLabel>("%Text");
-        cardTextureNode = GetNode<TextureRect>("%CardTexture");
-        textBoxTexture = GetNode<TextureRect>("%TextBoxTexture");
-
-        cardButton = GetNode<Button>("%CardButton");
+    {     
         cardButton.Pressed += CardButton_Pressed;
         cardButton.MouseEntered += CardButton_MouseEntered;
         cardButton.MouseExited += CardButton_MouseExited;
+
+        SetActivatable(!showActivatableOverlay);
     }
-
-
-
 
     private void CardButton_Pressed()
     {
@@ -106,6 +99,17 @@ public partial class CardScene : Control
     {
         cardButton.Disabled = !clickable;
     }
+    public void SetActivatable(bool activatable)
+    {
+        showActivatableOverlay = !activatable;
+        if(activatableColorOverlay != null)
+        {
+            activatableColorOverlay.Visible = !activatable;
+        }
+        
+    }
+
+    
     public void TriggersEmphasis(bool triggersEmphasis)
     {
         this.triggersEmphasis = triggersEmphasis;

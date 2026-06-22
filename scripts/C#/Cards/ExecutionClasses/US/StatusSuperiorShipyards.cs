@@ -21,7 +21,7 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
         }
     }
 
-    public override List<CardStep> InitializeReactCardSteps()
+    public override List<CardStep> OnActivate()
     {
         //TODO
         return new List<CardStep> {

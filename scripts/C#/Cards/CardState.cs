@@ -17,14 +17,14 @@ public partial class CardState : StateObject
     public List<int> PlayedInTurn { get; set; } = new();
     public List<int> ActivatedInTurns { get; set; } = new();
 
+    public bool IsPlayed => this.HasTag(Tag.IsPlayed, Faction);
+
     // Constructor
     public CardState(CardData cardData)
     {
         CardData = cardData;
         this.CardLogic = InitiateCardLogicClass();
     }
-    
-    public bool CanPlayCard => CardLogic?.IsPlayable ?? false;
 
     public CardLogic InitiateCardLogicClass()
     {

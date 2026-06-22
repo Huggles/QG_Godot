@@ -52,8 +52,7 @@ public abstract partial class InputRequest
     public async Task<InputRequest> BroadCast()
     {
         DebugUtilities.PrintPeer($"Broadcasting input request {GetType().Name} to {TargetFaction}");
-        Variant[] response = await NetworkApi.Instance.SendInputRequest(this);
-        InputRequest responseDto = InputRequest.FromJson(response[0].AsString());       
+        InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(this);              
         return responseDto;
     }
 
@@ -75,16 +74,11 @@ public abstract partial class InputRequest
 
     public class HandCardPlayRequestHandler : InputRequest
     {
-        public RequestCardActionType ActionType { get; set; }
-
-        public HandCardPlayRequestHandler(Faction targetFaction, RequestCardActionType actionType) : base(targetFaction)
-        {
-            ActionType = actionType;
-        }
+        public HandCardPlayRequestHandler(Faction targetFaction) : base(targetFaction) {}
 
         public override async Task Handle()
         {
-            PlayerScene.Current.InputManager.SetPlayCardInputActive(ActionType, TargetFaction);
+            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, true);
             DebugUtilities.PrintPeer($"RequestCardPlay: Waiting for player input.");
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
             if (results != null && results.Length > 0)

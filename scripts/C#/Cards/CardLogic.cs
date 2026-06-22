@@ -15,80 +15,60 @@ public abstract partial class CardLogic : GodotObject
     public List<int> ActivatedInTurns = new();
 
     // IsPlayed is computed based on the card's tag
-    public bool IsPlayed => CardState.Tags.Has(Tag.IsPlayed, Faction);
+    
     
     public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
     public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
-    public bool IsReaction => CardData.Type == "RESPONSE" || CardData.Type == "STATUS";
-    public bool IsPubliclyVisible => IsPlayed || (CardData.Type == "RESPONSE" && IsActivatedOnce);
+    public bool IsResponse => CardData.Type == "RESPONSE";
+    public bool IsStatus => CardData.Type == "STATUS";
+    public bool IsPubliclyVisible => CardState.IsPlayed || (IsResponse && IsActivatedOnce);
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
-    public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);
-    public int NextStepId
-    {
-        get
-        {
-            if (!IsPlayed)
-            {
-                return ExecutablePlaySteps[0].Id;
-            }
-            else if (IsReaction)
-            {
-                return ExecutableReactSteps[0].Id;
-            }
-            else
-            {
-                return -1;
-            }            
-        }
-    }
+    public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);    
+    public bool HasExecutableCardSteps => ExecutableCardSteps.Count > 0;
+    public int NextStepId => HasExecutableCardSteps ? ExecutableCardSteps[0].Id : -1;
+    public virtual int MaxActivationsPerRound => 1;
 
     [Signal] public delegate void CardFinishedEventHandler();
     
-    public List<CardStep> PlayCardSteps = new();
-    public List<CardStep> ReactCardSteps = new();
-    public abstract List<CardStep> InitializePlayCardSteps();
-    public virtual List<CardStep> InitializeReactCardSteps() { return new(); }    
-
-    public bool IsPlayable => !IsPlayed && !IsPlayFinished && ExecutablePlaySteps.Count > 0;
+    public List<CardStep> CardSteps = new();
+    public abstract List<CardStep> OnActivate();
     
-    public bool CanBeActivated()
+    public bool CanBeActivated() => !IsActivatedThisTurn && !IsActivationFinished && TriggerConditionsMet && HasExecutableCardSteps;
+    
+    public bool TriggerConditionsMet => _conditions.All(condition=>condition.MeetCondition());
+
+    private List<Condition> _conditions
     {
-        // Status and Response cards must be played before they can be activated
-        if (IsReaction && !IsPlayed)
-        {
-            return false;
+        get {  
+            // If the card has specific triggers, use those; otherwise, default to if its the faction's turn and a card hasn't been played this turn step
+            return CardTriggers().Count > 0 
+                ? CardTriggers() 
+                : new List<Condition>
+                {
+                    new Condition.IsGameFlowStep(TurnStep.PLAY_CARD),
+                    new Condition.IsFactionTurn(Faction),
+                    new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction))
+                }; 
         }
+    }
         
-        bool canActivate = !IsActivatedThisTurn && !IsActivationFinished && TriggerConditionsMet;
-        if (CardData.Type == "STATUS" || CardData.Type == "RESPONSE")
-        {
-            DebugUtilities.PrintPeerFinest($"CanBeActivated {CardData.UniqueName}: IsPlayed={IsPlayed}, IsActivatedThisTurn={IsActivatedThisTurn}, IsActivationFinished={IsActivationFinished}, TriggerConditionsMet={TriggerConditionsMet}, Result={canActivate}");
-            CardTriggers().ForEach(trigger => DebugUtilities.PrintPeerFinest($"  Trigger {trigger.GetType().Name}: {trigger.MeetCondition()}"));
-        }
-        return canActivate;
-    }
-    private bool TriggerConditionsMet
-    {
-        get { return CardTriggers().Count > 0 && CardTriggers().All(condition=>condition.MeetCondition()); }
-    }
 
     protected virtual List<Condition> CardTriggers() => new();
 
-    public List<CardStep> ExecutablePlaySteps => PlayCardSteps.Where(playCardStep => !playCardStep.StepFinished && playCardStep.MeetAllConditions).ToList();
-    public List<CardStep> ExecutableReactSteps => ReactCardSteps.Where(reactCardStep => !reactCardStep.StepFinished && reactCardStep.MeetAllConditions).ToList();
+    public List<CardStep> ExecutableCardSteps => CardSteps.Where(step => step.HasTagForAny(Tag.IsExecutable)).ToList();
 
     public CardLogic()
     {        
-        PlayCardSteps = InitializePlayCardSteps();
-        ReactCardSteps = InitializeReactCardSteps();
-        PlayCardSteps.ForEach(step => step.IsPlayStep = true);
-        ReactCardSteps.ForEach(step => step.IsReactStep = true);
-        EventBus.Instance.NewTurnStarted += (turnNumber) => 
-        {
-            ReactCardSteps.ForEach(reactCardStep => reactCardStep.StepFinished = false);
-        };
+        CardSteps = OnActivate();
+        EventBus.Instance.NewTurnStarted += OnNewTurnStarted;
     }    
+
+    public void OnNewTurnStarted(int turnNumber)
+    {
+        if (IsStatus)
+            CardSteps.ForEach(step => step.StepFinished = false);
+    }
 
     public virtual string PlayActionGuidance() =>
         $"Play {GetType().Name}";

@@ -5,7 +5,7 @@ using Godot;
 
 public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
 {
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

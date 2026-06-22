@@ -24,6 +24,9 @@ public enum Tag
     IsBlockReaction,
     IsPlayed,
     IsDiscarded,
+
+    //CardStep Tags
+    IsExecutable,
     
 
     //Unit Tags

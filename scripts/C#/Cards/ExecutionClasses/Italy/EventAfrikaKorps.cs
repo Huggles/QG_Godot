@@ -7,7 +7,7 @@ public partial class EventAfrikaKorps : ResponseCardLogic
     public List<Country> targetCountries = [Country.NorthAfrica, Country.MediterraneanSea];
     public Faction targetFaction = Faction.GERMANY;
 
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

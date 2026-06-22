@@ -20,7 +20,7 @@ public partial class ResponseLeningrad : ResponseCardLogic
 
         };
     }
-    public override List<CardStep> InitializeReactCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

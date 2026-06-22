@@ -16,7 +16,7 @@ public partial class InputHandlerPlayCard
         Faction currentFaction = gameFlow.CurrentFaction;
         PlayerActionLabel.ShowText("Choose a card", currentFaction);
         FactionHandDisplay.Current.Show(cardIds);        
-        FactionHandDisplay.Current.CardSelected += HandleItemSelected;
+        FactionHandDisplay.Current.CardSelected += HandleItemSelected;        
     }
 
     private void HandleItemSelected(int cardId)

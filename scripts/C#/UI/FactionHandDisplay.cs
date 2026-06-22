@@ -215,6 +215,17 @@ public partial class FactionHandDisplay : Control
             cardSceneInstance.Selected += OnCardSelected;
             CardScenes.Add(cardSceneInstance);
             cardSceneInstance.ShowCard(cardId);
+
+            if (cardState.HasTag(Tag.IsActivatable, cardState.Faction))
+            {
+                cardSceneInstance.SetClickable(true);
+                cardSceneInstance.SetActivatable(true);
+            }
+            else
+            {
+                cardSceneInstance.SetClickable(false);
+                cardSceneInstance.SetActivatable(false);
+            }
         }
     }
 

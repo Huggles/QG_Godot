@@ -1,10 +1,13 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
+[DebuggerDisplay("Condition: {GetType().Name}: {_meetsCondition}")]
 public abstract class Condition
 {
+    private bool _meetsCondition => MeetCondition();
     public abstract bool MeetCondition();
     public CardLogic CardLogic;
 
@@ -48,6 +51,10 @@ public abstract class Condition
     public class Never : Condition
     {
         public override bool MeetCondition() { return false; }
+    }
+    public class Not : CustomCondition
+    {
+        public Not(Condition condition) : base(() => !condition.MeetCondition()) { }
     }
 
     public class CountryIsBuildable : Condition
@@ -302,7 +309,7 @@ public abstract class Condition
             {
                 throw new Exception("Card is not status or response");
             }
-            return CardState.CardLogic.IsPlayed;
+            return CardState.IsPlayed;
         }
     }
 
@@ -418,36 +425,38 @@ public abstract class Condition
         }
     }
 
+    public class HasPlayedCardThisTurnStep : Condition
+    {
+        public HasPlayedCardThisTurnStep(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(Faction) && GameFlow.Instance.CardsPlayedThisTurnStep[Faction] > 0;
+    }
+
+    public class IsFactionTurn : Condition
+    {
+        public IsFactionTurn(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => GameFlow.Instance.CurrentFaction == Faction;
+    }
+
     public class IsVictoryPointStep : Condition
     {
-        public override bool MeetCondition() => 
-            GameFlow.Instance.TurnStep == TurnStep.VICTORY_POINT;
+        public override bool MeetCondition() => GameFlow.Instance.TurnStep == TurnStep.VICTORY_POINT;
     }
 
     public class IsPlayCardStep : Condition
     {
-        public override bool MeetCondition() => 
-            GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
+        public override bool MeetCondition() => GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
     }
 
     public class IsStartStep : Condition
     {
-        public override bool MeetCondition() => 
-            GameFlow.Instance.TurnStep == TurnStep.START;
+        public override bool MeetCondition() => GameFlow.Instance.TurnStep == TurnStep.START;
     }
 
     public class CustomCondition : Condition
     {
         Func<bool> Condition;
-        public CustomCondition(Func<bool> condition)
-        {
-            this.Condition = condition;
-        }
-
-        public override bool MeetCondition()
-        {
-            return Condition.Invoke();
-        }
+        public CustomCondition(Func<bool> condition) => this.Condition = condition;
+        public override bool MeetCondition() => Condition.Invoke();
     }
 
     public Condition WithCountries(List<int> countryIds)

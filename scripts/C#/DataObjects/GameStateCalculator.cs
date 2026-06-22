@@ -5,10 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class GameStateCalculator
-{
-    // Cache of last calculated state per faction
-    private static Dictionary<Faction, GameStateCalculator> _cachedCalculators = new Dictionary<Faction, GameStateCalculator>();
-    
+{    
     public Faction Faction;
     
 
@@ -52,27 +49,35 @@ public class GameStateCalculator
         ClearTagsForFaction(faction, Tag.IsActivatable);
 
         DeckState deckState = DeckState.ForFaction(faction);
-        List<CardState> candidates = new();
+        List<CardState> candidates = new();        
+        candidates.AddRange(deckState.HandCardStates);
         candidates.AddRange(deckState.StatusCardStates);
         candidates.AddRange(deckState.ResponseCardStates);
+
+        List<CardState> cardPlayedThisTurn = CardState.AllForFaction(faction).Values.Where(cs => cs.PlayedInTurn.Contains(GameFlow.Instance.GameTurn)).ToList();
+        candidates.AddRange(cardPlayedThisTurn);
+
+        candidates = candidates.Distinct().ToList();
 
         foreach (var cardState in candidates)
         {
             if (cardState.CardLogic == null) continue;
 
-            bool canActivate = cardState.CardLogic.CanBeActivated();
-            bool hasContinuationSteps = cardState.CardLogic.IsActivatedThisTurn
-                                        && cardState.CardLogic.ExecutableReactSteps.Count > 0;
+            bool isActivatedThisTurn = cardState.CardLogic.IsActivatedThisTurn;
+            bool isActivationFinished = cardState.CardLogic.IsActivationFinished;
+            bool triggerConditionsMet = cardState.CardLogic.TriggerConditionsMet;
+            bool hasExecutableCardSteps = cardState.CardLogic.HasExecutableCardSteps;
 
-            if (canActivate || hasContinuationSteps)
+            bool canActivate = cardState.CardLogic.CanBeActivated();
+            if (canActivate)
             {
-                if (cardState.CardLogic.ReactCardSteps.Count == 0)
+                if (cardState.CardLogic.CardSteps.Count == 0)
                     throw new NotImplementedException(
                         $"{cardState.CardData.UniqueName} has no REACT steps implemented: {cardState.CardLogic.GetClass()}");
 
                 cardState.AddTag(Tag.IsActivatable, faction);
             }
-        }
+        };  
     }
 
     private static void CalculatePlayedCardsForFaction(Faction faction)
@@ -103,24 +108,20 @@ public class GameStateCalculator
     private static void CalculateAfterReactionCardsForFaction(Faction faction)
     {
         ClearTagsForFaction(faction, Tag.IsAfterReaction);
-
-        foreach (var cardState in GameSession.Current.GameState.CardStatesById.Values)
+        CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
-            if (cardState.Tags.Has(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction != true)
+            if (cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
                 cardState.AddTag(Tag.IsAfterReaction, faction);
-        }
+        });
+
+        
     }
 
     private static void CalculatePlayableCardsForFaction(Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.IsPlayable);
-        
+        ClearTagsForFaction(faction, Tag.IsPlayable);        
         DeckState deckState = DeckState.ForFaction(faction);
-        foreach (var cardState in deckState.HandCardStates)
-        {
-            if (cardState.CardLogic != null && cardState.CanPlayCard)
-                cardState.AddTag(Tag.IsPlayable, faction);
-        }
+        deckState.HandCardStates.Where(cs => cs.HasTag(Tag.IsActivatable, faction) && !cs.IsPlayed).AddTag(Tag.IsPlayable, faction);
     }
 
     private static void CalculateInSupplyForFaction(Faction faction)
@@ -153,6 +154,19 @@ public class GameStateCalculator
         return false;
     }
 
+    private static void CalculateExecutableStepsForFaction(Faction faction)
+    {        
+        CardStep.All.ForEach(step => step.Tags.Remove(Tag.IsExecutable, faction));
+        CardStep.All.ForEach(step =>
+        {
+            bool stepFinished = step.StepFinished;
+            bool meetConditions = step.MeetAllConditions;
+            bool isExecutable = !stepFinished && step.MeetAllConditions;
+            if (isExecutable) 
+                step.Tags.Add(Tag.IsExecutable, faction);
+        });
+    }
+
     private static void CalculateStraightControlForFaction(Faction faction)
     {
         // Clear old straight control tags
@@ -174,47 +188,41 @@ public class GameStateCalculator
         }
     }
 
+    
+    
+
+    public static List<GameStateCalculator> CalculateAll()
+    {
+        DebugUtilities.PrintPeer("Calculating game state for all factions");
+        var calculators = new List<GameStateCalculator>();
+        
+        foreach (Faction faction in StaticGameData.PlayableFactions)
+        {
+            calculators.Add(CalculateAllForFaction(faction));
+        }
+        
+        return calculators;
+    }
+    
     public static GameStateCalculator CalculateAllForFaction(Faction faction)
     {
         GameStateCalculator calculator = new GameStateCalculator { Faction = faction };
         
         // Calculate supply first - it's needed by buildable/attackable checks
-        CalculateInSupplyForFaction(faction);
-        
+        CalculateInSupplyForFaction(faction);        
         CalculateAttackableForFaction(faction);
         CalculateBuildableCountriesForFaction(faction);
-        CalculateRecruitableCountriesForFaction(faction);
-        CalculatePlayableCardsForFaction(faction);
+        CalculateRecruitableCountriesForFaction(faction);        
         CalculatePlayedCardsForFaction(faction);
-        CalculateActivatableCardsForFaction(faction);
-        CalculateAfterReactionCardsForFaction(faction);
-        CalculateStraightControlForFaction(faction);
-        
-        // Cache the result
-        _cachedCalculators[faction] = calculator;
-        return calculator;
-    }
-    
-    public static GameStateCalculator GetCachedForFaction(Faction faction)
-    {
-        if (_cachedCalculators.TryGetValue(faction, out var calculator))
-        {
-            return calculator;
-        }
-        // If no cache exists, calculate and cache it
-        return CalculateAllForFaction(faction);
-    }
 
-    public static Dictionary<Faction, GameStateCalculator> CalculateAll()
-    {
-        var calculators = new Dictionary<Faction, GameStateCalculator>();
-        
-        foreach (Faction faction in StaticGameData.PlayableFactions)
-        {
-            calculators[faction] = CalculateAllForFaction(faction);
-        }
-        
-        return calculators;
+        CalculateExecutableStepsForFaction(faction);
+        CalculateActivatableCardsForFaction(faction);
+        CalculateAfterReactionCardsForFaction(faction);        
+        CalculatePlayableCardsForFaction(faction);
+
+        CalculateStraightControlForFaction(faction);
+
+        return calculator;
     }
 
     private static void ClearTagsForFaction(Faction faction, Tag tag)

@@ -31,7 +31,7 @@ public partial class StatusDiveBombers : StatusCardLogic
         }
     }
 
-    public override List<CardStep> InitializeReactCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
             new CardStep(this, async() => {

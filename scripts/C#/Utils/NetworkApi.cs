@@ -117,13 +117,15 @@ public partial class NetworkApi : Node
         ChangeEventQueue.Instance.Enqueue(ev);
     }
 
-    public SignalAwaiter SendInputRequest(InputRequest inputRequest)
+    public async Task<InputRequest> SendInputRequest(InputRequest inputRequest)
     {   
         DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");        
         string payload = inputRequest.ToJson();        
         DebugUtilities.PrintPeerFinest($"{payload}");
         Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);        
-        return EventBus.Instance.ToSignal(EventBus.Instance, nameof(EventBus.SignalName.InputRequestResponseReceived));
+        var response = await EventBus.Instance.ToSignal(EventBus.Instance, nameof(EventBus.SignalName.InputRequestResponseReceived));
+        InputRequest responseDto = InputRequest.FromJson(response[0].AsString());
+        return responseDto;
     }
 
     /// <summary>

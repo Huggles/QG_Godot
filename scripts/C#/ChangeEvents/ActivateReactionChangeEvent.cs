@@ -12,7 +12,7 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
     {
         this.SourceChangeEvent = sourceChangeEvent;
         this.SourceCardId = cardId;
-        this.StepId = SourceCardState.CardLogic.ReactCardSteps[0].Id;
+        this.StepId = SourceCardState.CardLogic.CardSteps[0].Id;
     }
 
     public override ChangeEventDto ToDto() => ChangeEventDto.Build<ActivateReactionChangeEventDto>(this, Id);

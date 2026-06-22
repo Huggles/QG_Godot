@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 public partial class SeaBattle : CardLogic
 {
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
             new CardStep(this, async() => {

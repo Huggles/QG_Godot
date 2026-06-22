@@ -7,7 +7,7 @@ using Godot;
 public partial class EWBomberCommand : EWCardLogic
 {
     
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

@@ -5,7 +5,7 @@ using Godot;
 public partial class EventMilitaryDictatorshipsInTheBalkans : EventCardLogic
 {
     public List<Country> targetCountries = [Country.Ukraine, Country.Russia];
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

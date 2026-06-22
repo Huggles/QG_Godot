@@ -30,7 +30,7 @@ public partial class DeckState : StateObject
     [JsonIgnore] public List<CardState> DiscardedCardStates => CardState.ForIds(DiscardedCardIds);
     [JsonIgnore] public List<CardState> ResponseCardStates => CardState.ForIds(ResponseCardIds);
     [JsonIgnore] public List<CardState> StatusCardStates => CardState.ForIds(StatusCardIds);
-
+    public List<int> ActivatableCardIds => CardState.AllForFaction(Faction).Values.ToList().Where(cs => cs.HasTag(Tag.IsActivatable, Faction)).Select(cs => cs.Id).ToList();        
     
     public DeckState(FactionState factionState)
     {

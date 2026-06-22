@@ -6,7 +6,7 @@ using Godot;
 
 public partial class EventFreeFrenchAllies : EventCardLogic
 {
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         List<Country> targetCountries = [Country.WesternEurope, Country.NorthAfrica, Country.Africa];
 

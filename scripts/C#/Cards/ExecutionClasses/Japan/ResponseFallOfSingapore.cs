@@ -13,11 +13,12 @@ public partial class ResponseFallOfSingapore : StatusCardLogic
         return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).WithCountries([SouthEastAsia.Id]), this) };
     }
 
-    public override List<CardStep> InitializeReactCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
 
             new CardStep(this, async() => {
+                
                 BattleTarget target = await new SelectBattleTargetHandler(CountryState.ForEnum(Country.SouthChinaSea).BattleTargets(Faction)).Handle();
                 BattleCountryChangeEvent battleCountryChangeEvent = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChangeEvent.IsTrigger = true;

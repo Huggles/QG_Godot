@@ -5,7 +5,7 @@ using Godot;
 
 public partial class EventPlunder_Italy : EventCardLogic
 {
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

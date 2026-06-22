@@ -5,7 +5,7 @@ using Godot;
 public partial class EventGermanAidinGreece : EWCardLogic
 {
     public List<Country> targetCountries = [Country.Balkans];
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
@@ -23,7 +23,7 @@ public partial class EventGermanAidinGreece : EWCardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
-            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable([(int)targetCountries[1]], Faction),this))
+            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable([(int)targetCountries[0]], Faction),this))
             .WithGuidance($"Build an army in {CountryState.ForEnum(targetCountries[0]).Label}"),
         };
         

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 public partial class LandBattle : CardLogic
 {    
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
             new CardStep(this, async() => {

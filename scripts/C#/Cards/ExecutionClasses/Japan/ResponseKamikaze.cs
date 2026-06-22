@@ -4,7 +4,7 @@ using Godot;
 
 public partial class ResponseKamikaze : ResponseCardLogic
 {
-public override List<CardStep> InitializePlayCardSteps()
+public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {}; 
     }

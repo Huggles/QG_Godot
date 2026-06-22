@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 public partial class BuildArmy : CardLogic
 {  
-    public override List<CardStep> InitializePlayCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
                 var targetableCountries = CountryState.BuildableLand(Faction);
-                Variant[] response = await NetworkApi.Instance.SendInputRequest(new InputRequest.SelectCountryRequestHandler(Faction, targetableCountries.ToCountryIds()));
-                InputRequest responseDto = InputRequest.FromJson(response[0].AsString());                
+                InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(new InputRequest.SelectCountryRequestHandler(Faction, targetableCountries.ToCountryIds()));                               
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, responseDto.ResponseCountryIds[0], DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;                

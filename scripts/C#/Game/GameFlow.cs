@@ -16,46 +16,23 @@ public partial class GameFlow : SingletonNode<GameFlow>
             DebugUtilities.PrintPeer($"TurnStepCounter: {field}");
             if(field > 0)
             {
+                CardsPlayedThisTurnStep.Clear();
                 GameTurnStep gameTurnStep = gameTurnSteps[field - 1];
                 if(Multiplayer.IsServer())
-                {
-                    
-                    gameTurnStep.Handler();
-                    
+                {                    
+                    gameTurnStep.Handler();                    
                 }
                 EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
             }
         } } = 0;
     [Export] public TurnStep TurnStep { get; set; } = 0;
 
-    public int Round
-    {
-        get => ((GameTurn - 1) / StaticGameData.PlayableFactions.Count) + 1;
-    }
-
-    public Faction CurrentFaction
-    {
-        get
-        {
-            if (GameTurn > 0)
-            {
-                int factionInt = (GameTurn - 1) % StaticGameData.PlayableFactions.Count;
-                return StaticGameData.PlayableFactions[factionInt];
-            }
-            else
-            {
-                return Faction.GERMANY;
-            }
-        }
-    }
-
-    private MultiplayerGameState gameState
-    {
-        get { return GameSession.Current.GameState; }
-    }
-
+    public int Round => ((GameTurn - 1) / StaticGameData.PlayableFactions.Count) + 1;
+    public Faction CurrentFaction => GameTurn > 0 ? StaticGameData.PlayableFactions[(GameTurn - 1) % StaticGameData.PlayableFactions.Count] : Faction.GERMANY;
+    private MultiplayerGameState gameState => GameSession.Current.GameState;
     public FactionState CurrentFactionState => FactionState.ForEnum(CurrentFaction);
     public DeckState CurrentFactionDeckState => DeckState.ForFaction(CurrentFaction);
+    public Dictionary<Faction, int> CardsPlayedThisTurnStep = new Dictionary<Faction, int>();
 
     public FactionTeam CurrentFactionTeam =>
         (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;

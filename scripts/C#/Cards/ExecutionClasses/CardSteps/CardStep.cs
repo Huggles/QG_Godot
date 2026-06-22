@@ -5,50 +5,20 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-public partial class CardStep
+public partial class CardStep : ITaggable
 {
-    public bool StepFinished { get; set; } = false;
-    public bool IsPlayStep { get; set; } = false;
-    public bool IsReactStep { get; set; } = false;
-    public int Id { get; set; } = 0;
-    [JsonIgnore] public CardStep NextCardStep
-    {
-        get
-        {
-            return IsPlayStep
-            ? CardLogic.PlayCardSteps.ElementAtOrDefault(CardLogic.PlayCardSteps.IndexOf(this) + 1)
-            : CardLogic.ReactCardSteps.ElementAtOrDefault(CardLogic.ReactCardSteps.IndexOf(this) + 1);
-        }
-    }
+    [JsonIgnore] private readonly TagContainer _tags = new();
+    [JsonIgnore] public TagContainer Tags => _tags;
 
+    public bool StepFinished { get; set; } = false;
+    public int Id { get; set; } = 0;
+    [JsonIgnore] public CardStep NextCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) + 1);
     [JsonIgnore] public CardLogic CardLogic;    
     protected Func<Task<ChangeEvent>> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
-    protected Func<Condition> GetConditionMethod;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
-    [JsonIgnore] protected List<Condition> Conditions
-    {
-        get
-        {
-            if (GetConditionsMethod != null)
-            {
-                return GetConditionsMethod();
-            }
-            else if (GetConditionMethod != null)
-            {
-                return new List<Condition> { GetConditionMethod() };
-            }
-            return null;
-        }
-    }
-    [JsonIgnore] public bool MeetAllConditions
-    {
-        get
-        {
-            return Conditions != null ? Conditions.All(condition => condition.MeetCondition()) : true;
-        }
-    }
-
+    [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod != null ? GetConditionsMethod() : null;
+    [JsonIgnore] public bool MeetAllConditions => Conditions != null ? Conditions.All(condition => condition.MeetCondition()) : true;
 
     public string ActionGuidance;
 
@@ -78,7 +48,7 @@ public partial class CardStep
     }
     public CardStep WithCondition(Func<Condition> getConditionMethod)
     {
-        this.GetConditionMethod = getConditionMethod;
+        this.GetConditionsMethod = () => new List<Condition> { getConditionMethod() };
         return this;
     }
 
@@ -137,4 +107,6 @@ public partial class CardStep
         changeEvent.TriggeringFaction = CardLogic.CardState.Faction;
         return changeEvent;
     }
+
+    public static List<CardStep> All => CardState.All.Values.SelectMany(cardState => cardState.CardLogic.CardSteps).ToList();
 }

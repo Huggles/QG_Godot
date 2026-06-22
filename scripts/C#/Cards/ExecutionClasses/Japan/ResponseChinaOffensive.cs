@@ -19,7 +19,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
         return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).WithCountries(targetCountries.ToCountryIds()), this) };
     }
  
-    public override List<CardStep> InitializeReactCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
             new CardStep(this, async() => {

@@ -15,7 +15,7 @@ public partial class StatusAtlanticWall : StatusCardLogic
         };
     }
 
-    public override List<CardStep> InitializeReactCardSteps()
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {

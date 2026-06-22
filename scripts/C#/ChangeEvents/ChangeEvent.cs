@@ -96,7 +96,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             }
             
         }
-        await ExecuteAsync();
+        await ExecuteAsync();        
         GameStateCalculator.CalculateAll();
         EmitSignal(SignalName.ChangeEventApplied, Id);       
         if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)

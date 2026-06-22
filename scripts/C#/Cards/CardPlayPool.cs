@@ -79,9 +79,6 @@ public static class CardPlayPool
     public static Task<int> RequestBlock(Faction faction) =>
         CardPlayRound.Current?.RequestBlock(faction) ?? Task.FromResult(-1);
 
-    public static List<int> GetNextActions(Faction faction) =>
-        CardPlayRound.Current?.GetNextActions(faction) ?? new();
-
     public static List<int> GetAfterReactionOptions(Faction faction) =>
         CardPlayRound.Current?.GetAfterReactionOptions(faction) ?? new();
 
