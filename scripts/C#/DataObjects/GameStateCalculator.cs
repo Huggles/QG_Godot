@@ -71,10 +71,6 @@ public class GameStateCalculator
             bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
             {
-                if (cardState.CardLogic.CardSteps.Count == 0)
-                    throw new NotImplementedException(
-                        $"{cardState.CardData.UniqueName} has no REACT steps implemented: {cardState.CardLogic.GetClass()}");
-
                 cardState.AddTag(Tag.IsActivatable, faction);
             }
         };  

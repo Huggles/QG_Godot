@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(SelectCountryRequestHandler),       "SelectCountry")]
 [JsonDerivedType(typeof(HandCardPlayRequestHandler),        "RequestHandCardPlay")]
+[JsonDerivedType(typeof(ActivateCardRequestHandler),        "ActivateCard")]
 [JsonDerivedType(typeof(HandCardsDiscardRequestHandler),    "RequestHandCardsDiscard")]
 [JsonDerivedType(typeof(CardsRequestHandler),               "RequestCards")]
 public abstract partial class InputRequest
@@ -78,8 +79,23 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, true);
-            DebugUtilities.PrintPeer($"RequestCardPlay: Waiting for player input.");
+            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, true);            
+            Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
+            if (results != null && results.Length > 0)
+            {
+                ResponseCardIds.Add((int)results[0]);
+            }
+        }
+    }
+
+    public class ActivateCardRequestHandler : InputRequest
+    {
+        public ActivateCardRequestHandler(Faction targetFaction) : base(targetFaction) {}
+
+        public override async Task Handle()
+        {
+            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, false);
+            DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
             if (results != null && results.Length > 0)
             {

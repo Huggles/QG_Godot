@@ -25,7 +25,7 @@ public abstract partial class CardLogic : GodotObject
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
     public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);    
-    public bool HasExecutableCardSteps => ExecutableCardSteps.Count > 0;
+    public bool HasExecutableCardSteps => CardSteps.Count == 0 || ExecutableCardSteps.Count > 0;
     public int NextStepId => HasExecutableCardSteps ? ExecutableCardSteps[0].Id : -1;
     public virtual int MaxActivationsPerRound => 1;
 
@@ -38,18 +38,27 @@ public abstract partial class CardLogic : GodotObject
     
     public bool TriggerConditionsMet => _conditions.All(condition=>condition.MeetCondition());
 
+
+    private List<Condition> _defaultPlayConditions => new List<Condition> 
+    {
+        new Condition.IsGameFlowStep(TurnStep.PLAY_CARD),
+        new Condition.IsFactionTurn(Faction),
+        new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction))
+    };
+    
+
     private List<Condition> _conditions
     {
         get {  
+            if(GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD)
+            {
+                DebugUtilities.PrintPeer($"Checking play conditions for {CardData.Label} - IsPlayed: {CardState.IsPlayed}, IsFactionTurn: {GameFlow.Instance.CurrentFaction == Faction}, HasPlayedCardThisTurnStep: {new Condition.HasPlayedCardThisTurnStep(Faction).MeetCondition()}");
+                DebugUtilities.PrintPeer($"Default play conditions met: {_defaultPlayConditions.All(condition => condition.MeetCondition())}");
+            }
             // If the card has specific triggers, use those; otherwise, default to if its the faction's turn and a card hasn't been played this turn step
-            return CardTriggers().Count > 0 
+            return CardTriggers().Count > 0 && CardState.IsPlayed
                 ? CardTriggers() 
-                : new List<Condition>
-                {
-                    new Condition.IsGameFlowStep(TurnStep.PLAY_CARD),
-                    new Condition.IsFactionTurn(Faction),
-                    new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction))
-                }; 
+                : _defaultPlayConditions; 
         }
     }
         

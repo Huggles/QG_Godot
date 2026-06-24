@@ -160,7 +160,7 @@ public partial class CardPlayRound : GodotObject
 
         if (changeEvent.IsTrigger && !changeEvent.IsBlocked)
         {
-            await RequestAfterReactions();
+            await RequestAfterReactions();            
             await ContinueWithNextSteps();
         }
     }
@@ -205,6 +205,7 @@ public partial class CardPlayRound : GodotObject
 
     private async Task RequestAfterReactions()
     {
+        DebugUtilities.PrintPeer("RequestAfterReactions");
         bool anyReactionPlayed = true;
         while (anyReactionPlayed)
         {
@@ -225,10 +226,12 @@ public partial class CardPlayRound : GodotObject
                 }
             }
         }
+        DebugUtilities.PrintPeer("No more after-reaction options available for any faction");
     }
 
     private async Task ContinueWithNextSteps()
     {
+        DebugUtilities.PrintPeer("ContinueWithNextSteps");
         bool hasMoreSteps = true;
         while (hasMoreSteps)
         {
@@ -245,6 +248,7 @@ public partial class CardPlayRound : GodotObject
                 }
             }
         }
+        DebugUtilities.PrintPeer("No more executable steps available for any card in the pool");
     }
 
     // ── Player input requests ──────────────────────────────────────────────────
@@ -275,7 +279,11 @@ public partial class CardPlayRound : GodotObject
         int selectedId = -1;
         if(DeckState.ForFaction(faction).ActivatableCardIds.Count > 0)
         {
-            InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(new InputRequest.HandCardPlayRequestHandler(faction));       
+            bool hasPlayedHandCardThisTurnStep = GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(faction);
+            InputRequest request = hasPlayedHandCardThisTurnStep
+                ? new InputRequest.ActivateCardRequestHandler(faction)
+                : new InputRequest.HandCardPlayRequestHandler(faction);
+            InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
             selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
         }
 
