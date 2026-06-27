@@ -132,17 +132,26 @@ Requests block reactions from all factions in order:
 - Each faction can play one block reaction
 - Block reactions are processed recursively
 
-#### `RequestAfterReactions()`
-Requests after reactions from all factions:
-- Loops until no faction plays a reaction
-- Each reaction is processed recursively
-- After all reactions complete, continues with next steps
+#### `RequestAfterReactions()` → returns `bool`
+Requests after reactions from all factions. Returns `true` if at least one reaction was played, `false` if everyone skipped or had no options.
+
+- Iterates factions in `RequestOrder`; skips factions in `_afterReactionPassedFactions`
+- If a faction skips → added to `_afterReactionPassedFactions` (not asked again until a new reaction is played)
+- If a faction plays → `_afterReactionPassedFactions.Clear()` **before** `DoCard`, so all factions get a fresh chance during that reaction's resolution; then `break` to restart with updated `RequestOrder`
+- Loop exits when a full pass through all non-skipped factions produces no plays
 
 #### `ContinueWithNextSteps()`
 Checks all cards in the pool for executable next steps:
-- Executes steps sequentially
-- Each step triggers the full reaction chain
+- **Only called if `RequestAfterReactions` returned `true`** — if everyone skipped/had no options, the pipeline stops immediately and the round ends
+- Executes steps sequentially; each step triggers the full reaction chain
 - When no more steps available, play step ends
+
+#### `_afterReactionPassedFactions` (instance field, `HashSet<Faction>`)
+Tracks which factions have explicitly passed in the current reaction chain:
+- Shared across all nested `RequestAfterReactions` calls within the same round
+- Cleared when a new reaction is about to be played (before `DoCard`)
+- Cleared by `ClearPool()` when the round ends
+- Prevents a faction from being asked twice for the same reaction window
 
 ### Helper Methods
 
@@ -323,9 +332,13 @@ new CardStep(this, async() => {
 
 1. **Recursive by Nature**: Every reaction goes through the same flow as the original action, enabling deep chains
 2. **Faction Order Matters**: Opponents always get first chance to respond
-3. **Steps Execute Sequentially**: Next steps only execute after all reactions to previous steps complete
+3. **Steps Execute Sequentially**: Next steps only execute after all reactions to previous steps complete, AND only if at least one reaction was played
 4. **Two Reaction Timings**: Block (before) and After (after) reactions provide strategic options
 5. **Self-Response Allowed**: Factions can respond to their own team's actions, but not block their own
+6. **Pass-Once Per Window**: Once a faction skips a reaction, they aren't asked again until a new reaction resets the window
+7. **Priority Reset on Play**: When any faction plays a reaction, all pass-locks are cleared before resolving it — everyone gets a fresh opportunity during its resolution
+8. **Round Ends on All-Skip**: If no faction plays a reaction (everyone skips or has no options), `ContinueWithNextSteps` is skipped and `Finish()` is called at the top-level `DoCard`
+9. **`Finish()` is Unconditional at Top Level**: `DoCard` calls `Finish()` whenever `reactionDepth` returns to 0 for the initial play — the old `hasRemainingActions` guard was wrong because skipped reactions don't consume their tags
 
 ## Common Pitfalls
 
@@ -334,3 +347,5 @@ new CardStep(this, async() => {
 3. **Infinite loops**: Ensure reaction triggers have conditions that eventually become false
 4. **Blocking yourself**: The system prevents self-blocking, but be aware of the rules
 5. **Step prerequisites**: Make sure prerequisite steps are properly set for multi-step cards
+6. **Double-ask bug**: `RequestAfterReactions` is called at every `DoChangeEvent` level. Without `_afterReactionPassedFactions`, a faction could be asked inside a nested reaction window AND again in the outer loop restart. Always use the shared pass-tracking set.
+7. **Stale `hasRemainingActions` check**: Checking for remaining reaction tags to decide whether to `Finish()` is incorrect — a skipped faction still holds the tag. `Finish()` must always fire when returning to `reactionDepth == 0`.

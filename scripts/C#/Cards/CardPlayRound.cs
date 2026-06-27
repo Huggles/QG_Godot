@@ -19,6 +19,7 @@ public partial class CardPlayRound : GodotObject
     public List<ChangeEvent> ChangeEventsPool { get; private set; } = new();
     public ChangeEvent LastChangeEvent { get; set; }
     private int reactionDepth = 0;
+    private HashSet<Faction> _afterReactionPassedFactions = new();
 
     // ── Computed properties ────────────────────────────────────────────────────
     public Dictionary<int, CardState> CardPoolMap =>
@@ -30,14 +31,11 @@ public partial class CardPlayRound : GodotObject
     public Faction LastChangeEventByFaction =>
         LastChangeEvent != null ? LastChangeEvent.TriggeringFaction : Faction.GERMANY;
 
-    public FactionTeam LastChangeEventByTeam =>
-        StaticGameData.OpponentFactionTeamForFaction(LastChangeEventByFaction);
+    public FactionTeam LastChangeEventByTeam => StaticGameData.FactionTeamForFaction(LastChangeEventByFaction);
 
-    public ChangeEvent LastNoneNewCardChangeEvent =>
-        ChangeEventsPool.LastOrDefault(c => c is not PlayCardChangeEvent && c is not ActivateReactionChangeEvent);
+    public ChangeEvent LastNoneNewCardChangeEvent => ChangeEventsPool.LastOrDefault(c => c is not PlayCardChangeEvent && c is not ActivateReactionChangeEvent);
 
-    public List<Faction> RequestOrder =>
-        LastChangeEventByTeam == FactionTeam.AXIS ? AlliesFirstOrder : AxisFirstOrder;
+    public List<Faction> RequestOrder => LastChangeEventByTeam == FactionTeam.AXIS ? AlliesFirstOrder : AxisFirstOrder;
 
     public static List<Faction> AxisFirstOrder => new()
         { Faction.GERMANY, Faction.JAPAN, Faction.ITALY, Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
@@ -121,14 +119,12 @@ public partial class CardPlayRound : GodotObject
 
         reactionDepth--;
 
-        // Step 3: If we're back to the top level, check whether the round is complete
+        // Step 3: If we're back to the top level, the round is complete.
+        // RequestAfterReactions has already given every faction the chance to react
+        // (whether they played or skipped), so we always finish here.
         if (reactionDepth == 0 && isInitialPlay)
         {
-            bool hasRemainingActions = RequestOrder.Any(f => GetAfterReactionOptions(f).Count > 0);
-            if (!hasRemainingActions)
-            {
-                Finish();
-            }
+            Finish();
         }
     }
 
@@ -160,8 +156,9 @@ public partial class CardPlayRound : GodotObject
 
         if (changeEvent.IsTrigger && !changeEvent.IsBlocked)
         {
-            await RequestAfterReactions();            
-            await ContinueWithNextSteps();
+            bool anyReactionPlayed = await RequestAfterReactions();
+            if (anyReactionPlayed)
+                await ContinueWithNextSteps();
         }
     }
 
@@ -203,15 +200,17 @@ public partial class CardPlayRound : GodotObject
         }
     }
 
-    private async Task RequestAfterReactions()
+    private async Task<bool> RequestAfterReactions()
     {
         DebugUtilities.PrintPeer("RequestAfterReactions");
-        bool anyReactionPlayed = true;
-        while (anyReactionPlayed)
+        bool anyEverPlayed = false;
+        bool anyPlayedThisPass = true;
+        while (anyPlayedThisPass)
         {
-            anyReactionPlayed = false;
+            anyPlayedThisPass = false;
             foreach (Faction faction in RequestOrder)
             {
+                if (_afterReactionPassedFactions.Contains(faction)) continue;
                 List<int> options = GetAfterReactionOptions(faction);
                 if (options.Count > 0)
                 {
@@ -219,14 +218,21 @@ public partial class CardPlayRound : GodotObject
                     if (cardId != -1)
                     {
                         DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
+                        _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
                         await DoCard(cardId);
-                        anyReactionPlayed = true;
+                        anyEverPlayed = true;
+                        anyPlayedThisPass = true;
                         break; // Restart with updated RequestOrder
+                    }
+                    else
+                    {
+                        _afterReactionPassedFactions.Add(faction);
                     }
                 }
             }
         }
         DebugUtilities.PrintPeer("No more after-reaction options available for any faction");
+        return anyEverPlayed;
     }
 
     private async Task ContinueWithNextSteps()
@@ -279,7 +285,7 @@ public partial class CardPlayRound : GodotObject
         int selectedId = -1;
         if(DeckState.ForFaction(faction).ActivatableCardIds.Count > 0)
         {
-            bool hasPlayedHandCardThisTurnStep = GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(faction);
+            bool hasPlayedHandCardThisTurnStep = GameFlow.Instance.CardsPlayedThisTurnStep.Values.Sum() > 0;
             InputRequest request = hasPlayedHandCardThisTurnStep
                 ? new InputRequest.ActivateCardRequestHandler(faction)
                 : new InputRequest.HandCardPlayRequestHandler(faction);
@@ -358,6 +364,7 @@ public partial class CardPlayRound : GodotObject
         LastChangeEvent = null;
         reactionDepth = 0;
         Current = null;
+        _afterReactionPassedFactions.Clear();
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────

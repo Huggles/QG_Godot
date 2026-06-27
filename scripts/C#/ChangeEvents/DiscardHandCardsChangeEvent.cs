@@ -22,6 +22,12 @@ public partial class DiscardHandCardsChangeEvent : ChangeEvent
         return dto;
     }
 
+    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    {
+        new ShowNotificationLabelAnimation($"{TriggeringFaction} makes {TargetFaction} discard {CardIds.Count} cards", TriggeringFaction),
+        new ShowDiscardModalAnimation(CardIds, "Discarded cards")
+    };
+
     protected override async Task<bool> ExecuteAsync()
     {
         await GameAPI.DiscardHandCards(TargetFaction, CardIds);

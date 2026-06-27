@@ -1,11 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Godot;
 
 public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
 {
-public override List<CardStep> OnActivate()
+    protected override List<Condition> CardTriggers()
     {
-        return new List<CardStep> {}; 
+        return new List<Condition> {
+            Condition.Build(new Condition.CustomCondition(() =>
+                CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>()
+                    .Any(ce => ce.TriggeringFaction == Faction.GERMANY
+                            && ce.SourceCardState.CardData.CardType == CardType.STATUS)
+            ), this)
+        };
+    }
+
+    public override List<CardStep> OnActivate()
+    {
+        return new List<CardStep> {
+            new CardStep(this, async () => {
+                var statusActivation = CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>()
+                    .Last(ce => ce.TriggeringFaction == Faction.GERMANY
+                             && ce.SourceCardState.CardData.CardType == CardType.STATUS);
+
+                DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardHandCardsChangeEvent(Faction, Faction.GERMANY, new List<int> { statusActivation.SourceCardId }));
+                discardEvent.IsTrigger = true;
+                await discardEvent.ApplyChange();
+                return null;
+            })
+            .WithGuidance("Discard Germany's Status card")
+        };
     }
 }

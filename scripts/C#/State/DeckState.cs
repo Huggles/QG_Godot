@@ -105,10 +105,7 @@ public partial class DeckState : StateObject
     {
         foreach (int cardId in cardIds)
         {
-            if(HandCardIds.Contains(cardId))
-                DiscardCardAtHandIndex(HandCardIds.IndexOf(cardId));
-            else
-                DebugUtilities.PrintPeerError($"Cannot discard card that is not in hand: {cardId} => {CardState.ForId(cardId).CardData.UniqueName}");            
+            DiscardCard(cardId);
         }
     }
 

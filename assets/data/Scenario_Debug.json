@@ -27,7 +27,9 @@
         { "countryName": "AUSTRALIA" },
         { "countryName": "CHINA" }
       ],
-      "initialCards": [],
+      "initialCards": [
+        { "name": "ResponseEnigmaCodeCracked" }
+      ],
       "initialHandCards": []
     },
     "JAPAN": {
