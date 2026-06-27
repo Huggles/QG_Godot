@@ -31,7 +31,6 @@ public abstract class Condition
     List<Faction> TargetFactions;
     
     FactionTeam TargetFactionTeam;
-    List<FactionTeam> TargetFactionTeams;
 
 
     TurnStep TurnStep;
@@ -204,10 +203,7 @@ public abstract class Condition
             List<DeployUnitChangeEvent> deployUnitChangeEvents = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>();
             deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.TriggeringFaction == this.Faction).ToList();
             deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.DeploymentType == this.DeployType).ToList();
-            if (this.UnitType != UnitType.ANY)
-            {
-                deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.UnitType == this.UnitType).ToList();
-            }
+            deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => this.UnitType.Matches(ce.UnitType)).ToList();
             List<CountryState> countryStates = deployUnitChangeEvents.Map(ce => ce.CountryState).ToList();
             filterCountryStates(ref countryStates);
             
@@ -239,10 +235,10 @@ public abstract class Condition
             {
                 // Check if any units have attackable tag for this faction
                 var allUnits = GameSession.Current.GameState.UnitStatesById.Values;
-                bool hasAttackableUnits = allUnits.Any(us => us.Tags.Has(Tag.Attackable, Faction) && (unitType == UnitType.ANY || us.Type == unitType));
+                bool hasAttackableUnits = allUnits.Any(us => us.Tags.Has(Tag.Attackable, Faction) && us.Type.Matches(unitType));
                 // Check if any countries have attackable tag for this faction
                 bool hasAttackableCountries = CountryState.AllCountryStates.Any(cs => cs.Tags.Has(Tag.Attackable, Faction) && 
-                    (unitType == UnitType.ANY || (unitType == UnitType.ARMY && cs.Type == CountryType.LAND) || (unitType == UnitType.NAVY && cs.Type == CountryType.SEA)));
+                    ((unitType.Matches(UnitType.ARMY) && cs.Type == CountryType.LAND) || (unitType.Matches(UnitType.NAVY) && cs.Type == CountryType.SEA)));
                 return hasAttackableUnits || hasAttackableCountries;
             }
         }
@@ -343,13 +339,64 @@ public abstract class Condition
             if (TargetFactionTeam != FactionTeam.NONE
                 && StaticGameData.FactionTeamForFaction(removeEvent.UnitState.Faction) != TargetFactionTeam)
                 return false;
-            if (UnitType != UnitType.ANY && removeEvent.UnitState.Type != UnitType)
+            if (!UnitType.Matches(removeEvent.UnitState.Type))
                 return false;
             if (_requireInSupply && !removeEvent.UnitState.InSupply)
                 return false;
             if (CountryIds?.Count > 0 && !CountryIds.Contains(removeEvent.UnitState.CountryId))
                 return false;
             return true;
+        }
+    }
+
+    /// <summary>
+    /// After-reaction or block-reaction condition: a DeployUnitChangeEvent is present in the pool
+    /// matching optional faction, faction team, unit type, and country filters.
+    /// </summary>
+    public class UnitAboutToBeDeployed : Condition
+    {
+        /// <summary>Matches any DeployUnitChangeEvent.</summary>
+        public UnitAboutToBeDeployed() { }
+
+        /// <summary>Matches a DeployUnitChangeEvent from a specific faction and unit type.</summary>
+        public UnitAboutToBeDeployed(Faction targetFaction, UnitType unitType = UnitType.ANY)
+        {
+            this.TargetFaction = targetFaction;
+            this.UnitType = unitType;
+        }
+
+        /// <summary>Matches a DeployUnitChangeEvent from any of the given factions and a specific unit type.</summary>
+        public UnitAboutToBeDeployed(List<Faction> targetFactions, UnitType unitType = UnitType.ANY)
+        {
+            TargetFactions = targetFactions;
+            this.UnitType = unitType;
+        }
+
+        /// <summary>Matches a DeployUnitChangeEvent from a faction team and optional unit type.</summary>
+        public UnitAboutToBeDeployed(FactionTeam targetFactionTeam, UnitType unitType = UnitType.ANY)
+        {
+            this.TargetFactionTeam = targetFactionTeam;
+            this.UnitType = unitType;
+        }
+
+        public override bool MeetCondition()
+        {
+            return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Any(ce =>
+            {
+                if (TargetFactions?.Count > 0 && !TargetFactions.Contains(ce.TriggeringFaction))
+                    return false;
+                if ((TargetFactions == null || TargetFactions.Count == 0)
+                    && TargetFaction != Faction.NONE && ce.TriggeringFaction != TargetFaction)
+                    return false;
+                if (TargetFactionTeam != FactionTeam.NONE
+                    && StaticGameData.FactionTeamForFaction(ce.TriggeringFaction) != TargetFactionTeam)
+                    return false;
+                if (!UnitType.Matches(ce.UnitType))
+                    return false;
+                if (CountryIds?.Count > 0 && !CountryIds.Contains(ce.CountryId))
+                    return false;
+                return true;
+            });
         }
     }
 
