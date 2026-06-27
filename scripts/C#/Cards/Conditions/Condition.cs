@@ -27,8 +27,11 @@ public abstract class Condition
     Faction Faction;
     FactionTeam FactionTeam;
 
-    Faction TargetFaction;
+    Faction TargetFaction;    
+    List<Faction> TargetFactions;
+    
     FactionTeam TargetFactionTeam;
+    List<FactionTeam> TargetFactionTeams;
 
 
     TurnStep TurnStep;
@@ -294,6 +297,58 @@ public abstract class Condition
     {
         public override bool MeetCondition()
         {
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Block-reaction condition: the pending change event is a RemoveUnitChangeEvent
+    /// matching optional faction, unit type, supply, and country filters.
+    /// </summary>
+    public class UnitAboutToBeRemoved : Condition
+    {
+        private readonly bool _requireInSupply;
+
+        /// <summary>Matches any RemoveUnitChangeEvent, optionally requiring in-supply.</summary>
+        public UnitAboutToBeRemoved(bool requireInSupply = false)
+        {
+            _requireInSupply = requireInSupply;
+        }
+
+        /// <summary>Matches a RemoveUnitChangeEvent for a specific faction and unit type.</summary>
+        public UnitAboutToBeRemoved(Faction targetFaction, UnitType unitType = UnitType.ANY, bool requireInSupply = false)
+        {
+            this.TargetFaction = targetFaction;
+            this.UnitType = unitType;
+            _requireInSupply = requireInSupply;
+        }
+
+        /// <summary>Matches a RemoveUnitChangeEvent for any of the given factions and a specific unit type.</summary>
+        public UnitAboutToBeRemoved(List<Faction> targetFactions, UnitType unitType = UnitType.ANY, bool requireInSupply = false)
+        {
+            TargetFactions = targetFactions;
+            this.UnitType = unitType;
+            _requireInSupply = requireInSupply;
+        }
+
+        public override bool MeetCondition()
+        {
+            if (CardPlayPool.LastNoneNewCardChangeEvent is not RemoveUnitChangeEvent removeEvent)
+                return false;
+            if (TargetFactions?.Count > 0 && !TargetFactions.Contains(removeEvent.UnitState.Faction))
+                return false;
+            if ((TargetFactions == null || TargetFactions.Count == 0)
+                && TargetFaction != Faction.NONE && removeEvent.UnitState.Faction != TargetFaction)
+                return false;
+            if (TargetFactionTeam != FactionTeam.NONE
+                && StaticGameData.FactionTeamForFaction(removeEvent.UnitState.Faction) != TargetFactionTeam)
+                return false;
+            if (UnitType != UnitType.ANY && removeEvent.UnitState.Type != UnitType)
+                return false;
+            if (_requireInSupply && !removeEvent.UnitState.InSupply)
+                return false;
+            if (CountryIds?.Count > 0 && !CountryIds.Contains(removeEvent.UnitState.CountryId))
+                return false;
             return true;
         }
     }
