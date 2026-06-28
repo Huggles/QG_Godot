@@ -1,5 +1,5 @@
 {
-  "startingFaction": "GERMANY",
+  "startingFaction": "UNITED_KINGDOM",
   "factions": {
     "GERMANY": {
       "unitDeployments": [
@@ -30,7 +30,9 @@
       "initialCards": [
         { "name": "ResponseEnigmaCodeCracked" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [        
+        { "name": "EWMaltaSubmarines" }    
+      ]
     },
     "JAPAN": {
       "unitDeployments": [
@@ -43,7 +45,8 @@
         { "name": "ResponseChinaOffensive" },
         { "name": "ResponseFallOfSingapore" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [    
+      ]
     },
     "SOVIET": {
       "unitDeployments": [

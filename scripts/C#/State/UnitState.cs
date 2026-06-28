@@ -19,7 +19,11 @@ public partial class UnitState : StateObject
     [JsonIgnore] public CountryState CountryState => CountryId >= 0 ? CountryState.ForId(CountryId) : null;
     // InSupply is computed from tags - tag is the source of truth
     public bool InSupply => Tags.Has(Tag.InSupply, Faction);
-    [Export] public bool ImmuneForTurn { get; set; } = false;
+    public bool ImmuneForTurn
+    {
+        get => Tags.Has(Tag.Immune, Faction.ALL);
+        set { if (value) Tags.Add(Tag.Immune, Faction.ALL); else Tags.Remove(Tag.Immune, Faction.ALL); }
+    }
 
     public int CountryId = -1;
     public bool IsDeployedToCountry => CountryId >= 0;
