@@ -208,7 +208,8 @@ public class GameStateCalculator
         CalculateInSupplyForFaction(faction);        
         CalculateAttackableForFaction(faction);
         CalculateBuildableCountriesForFaction(faction);
-        CalculateRecruitableCountriesForFaction(faction);        
+        CalculateRecruitableCountriesForFaction(faction);
+        ApplyCountryTagModifiersForFaction(faction);
         CalculatePlayedCardsForFaction(faction);
 
         CalculateExecutableStepsForFaction(faction);
@@ -221,8 +222,16 @@ public class GameStateCalculator
         return calculator;
     }
 
-    private static void ClearTagsForFaction(Faction faction, Tag tag)
+    private static void ApplyCountryTagModifiersForFaction(Faction faction)
     {
+        foreach (CardState cardState in DeckState.ForFaction(faction).StatusCardStates)
+        {
+            if (cardState.CardLogic is ICountryTagModifier modifier)
+                modifier.ApplyTagModifiers(faction);
+        }
+    }
+
+    private static void ClearTagsForFaction(Faction faction, Tag tag)    {
         foreach (var unitState in GameSession.Current.GameState.UnitStatesById.Values)
         {
             unitState.Tags.Remove(tag, faction);

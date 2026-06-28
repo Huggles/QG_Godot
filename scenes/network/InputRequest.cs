@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 [JsonDerivedType(typeof(ActivateCardRequestHandler),        "ActivateCard")]
 [JsonDerivedType(typeof(HandCardsDiscardRequestHandler),    "RequestHandCardsDiscard")]
 [JsonDerivedType(typeof(CardsRequestHandler),               "RequestCards")]
+[JsonDerivedType(typeof(ForceDiscardHandCardsRequestHandler), "ForceDiscardHandCards")]
 public abstract partial class InputRequest
 {   
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -127,6 +128,28 @@ public abstract partial class InputRequest
         {            
             InputHandlerDiscard inputHandler = new InputHandlerDiscard(TargetFaction, TargetCardIds, 0, false);
             List<int> selectedCardIds = await inputHandler.GetSelectedCards();            
+            ResponseCardIds = selectedCardIds;
+        }
+    }
+
+    /// <summary>
+    /// Sent to the peer controlling <see cref="InputRequest.TargetFaction"/>.
+    /// Only that client's Handle() runs; all others wait.
+    /// </summary>
+    public class ForceDiscardHandCardsRequestHandler : InputRequest
+    {
+        public int NumberOfCards { get; set; }
+
+        public ForceDiscardHandCardsRequestHandler(Faction targetFaction, int numberOfCards) : base(targetFaction)
+        {
+            NumberOfCards = numberOfCards;
+        }
+
+        public override async Task Handle()
+        {
+            List<int> handCardIds = DeckState.ForFaction(TargetFaction).HandCardIds;
+            InputHandlerDiscard inputHandler = new InputHandlerDiscard(TargetFaction, handCardIds, NumberOfCards, true);
+            List<int> selectedCardIds = await inputHandler.GetSelectedCards();
             ResponseCardIds = selectedCardIds;
         }
     }

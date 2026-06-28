@@ -1,11 +1,13 @@
-using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Godot;
 
-public partial class StatusLordLinlithgowDeclaresIndiatoBeatWar : StatusCardLogic
+public partial class StatusLordLinlithgowDeclaresIndiatoBeatWar : StatusCardLogic, ICountryTagModifier
 {
-public override List<CardStep> OnActivate()
+    public void ApplyTagModifiers(Faction faction)
     {
-        return new List<CardStep> {}; 
+        CountryState india = CountryState.ForEnum(Country.India);
+        if (india.CanRecruit(faction))
+            india.AddTag(Tag.Buildable, faction);
     }
 }
