@@ -47,14 +47,9 @@ public abstract partial class CardLogic : GodotObject
     };
     
 
-    private List<Condition> _conditions
+    public List<Condition> _conditions
     {
         get {  
-            if(GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD)
-            {
-                DebugUtilities.PrintPeer($"Checking play conditions for {CardData.Label} - IsPlayed: {CardState.IsPlayed}, IsFactionTurn: {GameFlow.Instance.CurrentFaction == Faction}, HasPlayedCardThisTurnStep: {new Condition.HasPlayedCardThisTurnStep(Faction).MeetCondition()}");
-                DebugUtilities.PrintPeer($"Default play conditions met: {_defaultPlayConditions.All(condition => condition.MeetCondition())}");
-            }
             // If the card has specific triggers, use those; otherwise, default to if its the faction's turn and a card hasn't been played this turn step
             return CardTriggers().Count > 0 && CardState.IsPlayed
                 ? CardTriggers() 

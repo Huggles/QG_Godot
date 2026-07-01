@@ -10,9 +10,15 @@ public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.CustomCondition(() =>
-                CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>()
+            {
+                DebugUtilities.PrintPeer($"{CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>().Count}");
+                DebugUtilities.PrintPeer($"{CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>().Count(ce => ce.TriggeringFaction == Faction.GERMANY)}");
+                DebugUtilities.PrintPeer($"{CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>().Count(ce => ce.SourceCardState.CardData.CardType == CardType.STATUS)}");
+                return CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>()
                     .Any(ce => ce.TriggeringFaction == Faction.GERMANY
-                            && ce.SourceCardState.CardData.CardType == CardType.STATUS)
+                            && ce.SourceCardState.CardData.CardType == CardType.STATUS);
+            }
+                
             ), this)
         };
     }

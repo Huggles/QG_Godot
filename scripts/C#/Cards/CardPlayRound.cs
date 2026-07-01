@@ -165,16 +165,12 @@ public partial class CardPlayRound : GodotObject
     // ── Reaction chain helpers ─────────────────────────────────────────────────
 
     private async Task ProcessIntroductionEvent(ChangeEvent introEvent)
-    {
-        RegisterChangeEvent(introEvent);
-        await RequestBlockReactions(introEvent);
-        if (!introEvent.IsBlocked)
-        {
-            await introEvent.ApplyChange();
-        }
+    {        
+        await introEvent.ApplyChange();
+        await RequestBlockReactions(introEvent);        
     }
 
-    private void RegisterChangeEvent(ChangeEvent changeEvent)
+    public void RegisterChangeEvent(ChangeEvent changeEvent)
     {
         int sourceCardId = changeEvent.SourceCardId;
         if (sourceCardId > -1 && !CardPoolMap.ContainsKey(sourceCardId))

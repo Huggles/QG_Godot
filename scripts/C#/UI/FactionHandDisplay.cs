@@ -145,7 +145,12 @@ public partial class FactionHandDisplay : Control
 
     public void Show(List<int> cardIds)
     {
-        showingFaction = CardState.ForId(cardIds[0]).Faction; // Assumes all cards are from the same faction, which should be true for hand display
+        Show(cardIds, cardIds.Count > 0 ? CardState.ForId(cardIds[0]).Faction : Faction.NONE); // Assumes all cards are from the same faction, which should be true for hand display
+    }
+
+    public void Show(List<int> cardIds, Faction faction)
+    {
+        showingFaction = faction;
         ResetVisibility();
         InitCards(cardIds);
     }

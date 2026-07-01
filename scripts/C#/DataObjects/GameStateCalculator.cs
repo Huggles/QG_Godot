@@ -69,8 +69,29 @@ public class GameStateCalculator
             bool hasExecutableCardSteps = cardState.CardLogic.HasExecutableCardSteps;
 
             bool canActivate = cardState.CardLogic.CanBeActivated();
-            if (canActivate)
+
+            
+            if(cardState.CardData.UniqueName == "ResponseEnigmaCodeCracked")
             {
+                DebugUtilities.PrintPeer($"||||||||ResponseEnigmaCodeCracked|||||||||||");
+                
+                DebugUtilities.PrintPeer($"IsPlayed {cardState.IsPlayed}");
+                DebugUtilities.PrintPeer($"TriggerConditions {cardState.CardLogic.TriggerConditionsMet}");
+                cardState.CardLogic._conditions.ForEach(condition => {
+                    DebugUtilities.PrintPeer($"{condition.MeetCondition()}");
+                });                    
+
+
+
+                DebugUtilities.PrintPeer($"HasExecutableCardSteps {cardState.CardLogic.HasExecutableCardSteps}");
+                cardState.CardLogic.ExecutableCardSteps.ForEach(step => {
+                    DebugUtilities.PrintPeer($"{step.MeetAllConditions}");
+                });                    
+                
+            }    
+            if (canActivate)
+            {           
+                DebugUtilities.PrintPeer($"Card {cardState.CardData.UniqueName} is activatable for {faction}");                 
                 cardState.AddTag(Tag.IsActivatable, faction);
             }
         };  

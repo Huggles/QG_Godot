@@ -17,7 +17,8 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
 
     public override ChangeEventDto ToDto() => ChangeEventDto.Build<ActivateReactionChangeEventDto>(this, Id);
 
-    protected override async Task<bool> ExecuteAsync(){                
+    protected override async Task<bool> ExecuteAsync(){               
+        DebugUtilities.PrintPeer($"Activating reaction card {SourceCardState.CardName} for faction {TriggeringFaction}");         
         SourceCardState.CardLogic.ActivatedInTurns.Add(GameFlow.Instance.GameTurn);        
         return true;
     }

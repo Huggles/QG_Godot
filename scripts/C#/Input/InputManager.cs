@@ -32,19 +32,25 @@ public partial class InputManager : Node2D
     public InputHandlerPlayCard SetPlayCardInputActive(Faction faction, bool includeHandCards = false)
     {        
         List<int> cardIds = DeckState.ForFaction(faction).ActivatableCardIds;
+        DebugUtilities.PrintPeer($"SetPlayCardInputActive: ActivatableCardIds for {faction} = {string.Join(",", cardIds)}");
         if(includeHandCards)
         {
             cardIds.AddRange(DeckState.ForFaction(faction).HandCardIds);
             cardIds = cardIds.Distinct().ToList();
         }
         
-        if(cardIds.Count == 0)
-        {
-            return null;
-        }
-        inputHandler = new InputHandlerPlayCard(cardIds);
+        PlayerActionLabel.ShowText("Choose a card", faction);
+        FactionHandDisplay.Current.Show(cardIds);        
+        FactionHandDisplay.Current.CardSelected += HandleItemSelected;        
         return inputHandler;
     }
+
+    private void HandleItemSelected(int cardId)
+    {
+        FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
+        FactionHandDisplay.Current.Hide();        
+        EventBus.Emit("CardSelected", cardId);
+    } 
 
     public override void _Ready()
     {
