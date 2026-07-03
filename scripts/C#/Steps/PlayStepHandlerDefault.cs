@@ -13,7 +13,7 @@ public partial class PlayStepHandlerDefault : GodotObject, IPlayStepHandler
     {
         this.faction = faction;
         EventBus.Instance.CardPlayPoolFinished += OnRoundFinished;
-        _ = new CardPlayRound().Start(faction).ContinueWith(_ => { });
+        _ = CardPlayRound.Current.Start(faction);
     }
 
     private void OnRoundFinished()

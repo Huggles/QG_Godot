@@ -16,11 +16,12 @@ public partial class ChangeStepChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    protected override Task<bool> ExecuteAsync()
     {
-        GameFlow.Instance.TurnStep = NewStep;
-        await Task.CompletedTask;
-        return true;
+        var flow = GameFlow.Instance;
+        flow.TurnStep = NewStep;
+        flow.CardPlayRounds.Add(CardPlayRound.StartNew());
+        return Task.FromResult(true);
     }
 
     public override bool ToHistoryItem => true;

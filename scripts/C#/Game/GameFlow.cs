@@ -41,6 +41,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
     
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
+    public List<CardPlayRound> CardPlayRounds { get; } = new();
+    public CardPlayRound CurrentCardPlayRound => CardPlayRounds.LastOrDefault();
+
     private List<GameTurnStep> gameTurnSteps;
 
     public InputRequest CurrentInputRequest { get; set; }
@@ -101,7 +104,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
         StartNextStep();
     }
 
-    private void StartNextStep()
+    public void StartNextStep()
     {
         DebugUtilities.PrintPeer("StartNextStep");
         TurnStepCounter++;
@@ -111,14 +114,14 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     private async Task StartTurnStep()
     {
-        DebugUtilities.PrintPeer("StartTurnStep");
         await new ChangeStepChangeEvent(TurnStep.START).ApplyChange();
+        DebugUtilities.PrintPeer("StartTurnStep");
         startTurnStepHandler = new StartTurnStepHandler();
         startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;
-        startTurnStepHandler.Start(CurrentFaction);        
+        startTurnStepHandler.Start(CurrentFaction);
     }
 
-    private void StartTurnStepFinishedHandler()
+    public void StartTurnStepFinishedHandler()
     {
         startTurnStepHandler.StartTurnStepFinished -= StartTurnStepFinishedHandler;
         StartNextStep();
@@ -126,13 +129,14 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     private async Task PlayCardStep()
     {
-        DebugUtilities.PrintPeer("PlayCardStep");
         await new ChangeStepChangeEvent(TurnStep.PLAY_CARD).ApplyChange();
+        DebugUtilities.PrintPeer("PlayCardStep");
         playStepHandlerDefault = new PlayStepHandlerDefault();
         playStepHandlerDefault.PlayStepFinished += PlayCardStepFinishedHandler;
         playStepHandlerDefault.Start(CurrentFaction);
     }
-    private void PlayCardStepFinishedHandler()
+
+    public void PlayCardStepFinishedHandler()
     {
         playStepHandlerDefault.PlayStepFinished -= PlayCardStepFinishedHandler;
         StartNextStep();
@@ -147,7 +151,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
         supplyStepHandler.Start(CurrentFaction);
     }
 
-    private void SupplyStepFinishedHandler()
+    public void SupplyStepFinishedHandler()
     {
         supplyStepHandler.SupplyStepFinished -= SupplyStepFinishedHandler;
         StartNextStep();
@@ -155,37 +159,37 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     private async Task VictoryPointStep()
     {
-        DebugUtilities.PrintPeer("VictoryPointStep");
         await new ChangeStepChangeEvent(TurnStep.VICTORY_POINT).ApplyChange();
+        DebugUtilities.PrintPeer("VictoryPointStep");
         await vpStepHandler.ProcessVictoryStep(CurrentFaction);
         StartNextStep();
     }
 
     private async Task DiscardStep()
     {
-        DebugUtilities.PrintPeer("DiscardStep");
         await new ChangeStepChangeEvent(TurnStep.DISCARD).ApplyChange();
+        DebugUtilities.PrintPeer("DiscardStep");
         discardStepHandler = new DiscardStepHandlerDefault();
         discardStepHandler.DiscardStepFinished += DiscardStepFinishedHandler;
         discardStepHandler.Start(CurrentFaction);
     }
 
-    private void DiscardStepFinishedHandler()
+    public void DiscardStepFinishedHandler()
     {
         discardStepHandler.DiscardStepFinished -= DiscardStepFinishedHandler;
         StartNextStep();
     }
 
     private async Task DrawStep()
-    {        
-        DebugUtilities.PrintPeer("DrawStep");
+    {
         await new ChangeStepChangeEvent(TurnStep.DRAW).ApplyChange();
+        DebugUtilities.PrintPeer("DrawStep");
         drawStepHandler = new DrawStepHandlerDefault();
         drawStepHandler.DrawStepFinished += DrawStepFinishedHandler;
         drawStepHandler.Start(CurrentFaction);
     }
 
-    private void DrawStepFinishedHandler()
+    public void DrawStepFinishedHandler()
     {
         drawStepHandler.DrawStepFinished -= DrawStepFinishedHandler;
         StartNextStep();

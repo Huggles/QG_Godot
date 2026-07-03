@@ -12,7 +12,7 @@ public partial class StartTurnStepHandler : GodotObject, IStartTurnStepHandler
     {
         this.faction = faction;
         EventBus.Instance.CardPlayPoolFinished += OnRoundFinished;
-        _ = new CardPlayRound().Start(faction).ContinueWith(_ => { });
+        _ = CardPlayRound.Current.Start(faction);
     }
 
     private void OnRoundFinished()

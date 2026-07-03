@@ -87,11 +87,10 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
     public async Task<bool> ApplyChange()
     {
-        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);      
-        DebugUtilities.PrintPeer($"Registering change event {CardState.ForId(SourceCardId).CardName}");
+        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);              
         if(CardPlayRound.Current != null)
         {
-            DebugUtilities.PrintPeer($"Registering change event {CardState.ForId(SourceCardId).CardName}");
+            DebugUtilities.PrintPeer($"Registering change event {ScriptName} (Id: {Id}) with current CardPlayRound");
             CardPlayRound.Current.RegisterChangeEvent(this);
         }
         foreach (var anim in BeforeAnimations)

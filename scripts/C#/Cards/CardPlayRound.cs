@@ -14,6 +14,13 @@ public partial class CardPlayRound : GodotObject
     // ── Static accessor ────────────────────────────────────────────────────────
     public static CardPlayRound Current { get; private set; }
 
+    /// <summary>Create a fresh CardPlayRound, register it as Current, and return it.</summary>
+    public static CardPlayRound StartNew()
+    {
+        Current = new CardPlayRound();
+        return Current;
+    }
+
     // ── Instance state ─────────────────────────────────────────────────────────
     public List<CardState> CardPool { get; private set; } = new();
     public List<ChangeEvent> ChangeEventsPool { get; private set; } = new();
