@@ -32,7 +32,7 @@ public partial class StatusResistance : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                ForceDiscardHandCardsChangeEvent discardEvent = new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2);
+                ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 

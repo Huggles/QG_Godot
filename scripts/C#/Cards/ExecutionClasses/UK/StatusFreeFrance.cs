@@ -16,7 +16,7 @@ public partial class StatusFreeFrance : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction, 2);
+                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 
