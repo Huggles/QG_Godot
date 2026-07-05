@@ -1,5 +1,5 @@
 {
-  "startingFaction": "GERMANY",
+  "startingFaction": "JAPAN",
   "factions": {
     "GERMANY": {
       "unitDeployments": [
@@ -34,16 +34,19 @@
         { "name": "EWMaltaSubmarines" }    
       ]
     },
-    "JAPAN": {
+    "JAPAN": { 
       "unitDeployments": [
         { "countryName": "JAPAN" },
         { "countryName": "SEA_OF_JAPAN" },
         { "countryName": "SOUTH_CHINA_SEA" },
+        { "countryName": "NORTH_PACIFIC" },
         { "countryName": "PHILIPPINES" }
       ],
       "initialCards": [
         { "name": "ResponseChinaOffensive" },
-        { "name": "ResponseFallOfSingapore" }
+        { "name": "ResponseFallOfSingapore" },
+        { "name": "ResponseDestroyerTransport" },
+        { "name": "ResponseSurpriseAttack" }
       ],
       "initialHandCards": [    
       ]

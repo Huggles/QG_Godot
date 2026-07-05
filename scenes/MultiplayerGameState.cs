@@ -21,6 +21,7 @@ public class MultiplayerGameState
     public List<CardState>                 CardStates     { get; set; } = new();
     public List<StraightState>             StraightStates { get; set; } = new();
     public List<FactionState>              FactionStates  { get; set; } = new();
+    
     public List<ChangeEvent>               GameChangeEvents { get; set; } = new();
     public List<CardStep>                  CardSteps    { get; set; } = new();
 
@@ -44,7 +45,11 @@ public class MultiplayerGameState
 
     [JsonIgnore] public Dictionary<Faction, FactionState> FactionStatesByFaction => FactionStates.ToDictionary(fs => fs.Faction);
 
+    [JsonIgnore] public Dictionary<Faction, FactionState> PlayableFactionStatesByFaction => FactionStates.Where(fs => fs.Playable).ToDictionary(fs => fs.Faction);
+
     [JsonIgnore] public Dictionary<int, CardStep> CardStepsById => CardSteps.ToDictionary(cs => cs.Id);
+    
+    [JsonIgnore] public List<FactionState> PlayableFactionStates => FactionStates.Where(fs => fs.Playable).ToList();
 
 
 
@@ -141,7 +146,7 @@ public class MultiplayerGameState
         foreach (var ss in StraightStates.OrderBy(s => s.Id))
             sb.Append($"S{ss.Id}:{ss.ControllingCountryId}|");
 
-        foreach (var kv in FactionStatesByFaction.OrderBy(kv => (int)kv.Key))
+        foreach (var kv in PlayableFactionStatesByFaction.OrderBy(kv => (int)kv.Key))
         {
             var deck = kv.Value.DeckState;
             sb.Append($"F{(int)kv.Key}:{kv.Value.Score}," +

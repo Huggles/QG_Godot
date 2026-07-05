@@ -71,7 +71,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public void StartGame()
     {
         DebugUtilities.PrintPeer("GameFlow: Starting game");
-        foreach (FactionState faction in gameState.FactionStates)
+        foreach (FactionState faction in gameState.PlayableFactionStates)
         {
             DrawCardsChangeEvent drawCardsChangeEvent = new DrawCardsChangeEvent(Faction.NONE, faction.Faction, 7, false);
             drawCardsChangeEvent.IsTrigger = false;

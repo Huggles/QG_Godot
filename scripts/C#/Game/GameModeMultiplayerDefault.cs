@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -68,10 +69,19 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
     public void InstantiateFactionStates(){
          // First pass: create a FactionState for each FactionData
-        foreach (FactionData factionData in StaticGameData.FactionDataList)
+        foreach (Faction faction in Faction.GetValues(typeof(Faction)))
         {
-            FactionState factionState = new FactionState(factionData);
-            gameState.FactionStates.Add(factionState);            
+            FactionData factionData = StaticGameData.FactionDataList.FirstOrDefault(fd => fd.Faction == faction);
+            if (factionData != null)
+            {
+                FactionState factionState = new FactionState(factionData);
+                gameState.FactionStates.Add(factionState);
+            }
+            else
+            {
+                FactionState factionState = new FactionState(faction);
+                gameState.FactionStates.Add(factionState);
+            }
         }
 
         int cardCounter = 0;

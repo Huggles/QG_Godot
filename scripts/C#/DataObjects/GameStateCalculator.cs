@@ -63,32 +63,25 @@ public class GameStateCalculator
         {
             if (cardState.CardLogic == null) continue;
 
-            bool isActivatedThisTurn = cardState.CardLogic.IsActivatedThisTurn;
-            bool isActivationFinished = cardState.CardLogic.IsActivationFinished;
-            bool triggerConditionsMet = cardState.CardLogic.TriggerConditionsMet;
-            bool hasExecutableCardSteps = cardState.CardLogic.HasExecutableCardSteps;
-
-            bool canActivate = cardState.CardLogic.CanBeActivated();
-
-            
-            if(cardState.CardData.UniqueName == "ResponseEnigmaCodeCracked")
-            {
-                DebugUtilities.PrintPeer($"||||||||ResponseEnigmaCodeCracked|||||||||||");
+            // bool isActivatedThisTurn = cardState.CardLogic.IsActivatedThisTurn;
+            // bool isActivationFinished = cardState.CardLogic.IsActivationFinished;
+            // bool triggerConditionsMet = cardState.CardLogic.TriggerConditionsMet;
+            // bool hasExecutableCardSteps = cardState.CardLogic.HasExecutableCardSteps;
+            // if(cardState.CardData.UniqueName == "ResponseEnigmaCodeCracked")
+            // {
+            //     DebugUtilities.PrintPeer($"IsPlayed {cardState.IsPlayed}");
+            //     DebugUtilities.PrintPeer($"TriggerConditions {cardState.CardLogic.TriggerConditionsMet}");
+            //     cardState.CardLogic._conditions.ForEach(condition => {
+            //         DebugUtilities.PrintPeer($"{condition.MeetCondition()}");
+            //     });                    
+            //     DebugUtilities.PrintPeer($"HasExecutableCardSteps {cardState.CardLogic.HasExecutableCardSteps}");
+            //     cardState.CardLogic.ExecutableCardSteps.ForEach(step => {
+            //         DebugUtilities.PrintPeer($"{step.MeetAllConditions}");
+            //     });                    
                 
-                DebugUtilities.PrintPeer($"IsPlayed {cardState.IsPlayed}");
-                DebugUtilities.PrintPeer($"TriggerConditions {cardState.CardLogic.TriggerConditionsMet}");
-                cardState.CardLogic._conditions.ForEach(condition => {
-                    DebugUtilities.PrintPeer($"{condition.MeetCondition()}");
-                });                    
+            // }   
 
-
-
-                DebugUtilities.PrintPeer($"HasExecutableCardSteps {cardState.CardLogic.HasExecutableCardSteps}");
-                cardState.CardLogic.ExecutableCardSteps.ForEach(step => {
-                    DebugUtilities.PrintPeer($"{step.MeetAllConditions}");
-                });                    
-                
-            }    
+            bool canActivate = cardState.CardLogic.CanBeActivated(); 
             if (canActivate)
             {           
                 DebugUtilities.PrintPeer($"Card {cardState.CardData.UniqueName} is activatable for {faction}");                 

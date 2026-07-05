@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class ResponseFallOfSingapore : StatusCardLogic
+public partial class ResponseFallOfSingapore : ResponseCardLogic
 {
     CountryState SouthEastAsia = CountryState.ForEnum(Country.SouthEastAsia);
     CountryState SouthChinaSea = CountryState.ForEnum(Country.SouthChinaSea);

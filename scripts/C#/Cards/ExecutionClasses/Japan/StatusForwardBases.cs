@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class StatusForwardBases : StatusCardLogic
+public partial class StatusForwardBases : StatusCardLogic, IStatusVictoryPoints
 {
     public virtual VPEntry AddVictoryPoints()
     {
