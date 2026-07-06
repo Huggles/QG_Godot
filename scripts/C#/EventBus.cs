@@ -82,4 +82,6 @@ public partial class EventBus : GodotObject
 
     [Signal] public delegate void UnitDeployedEventHandler(int unitId, int countryId);
     [Signal] public delegate void UnitRemovedEventHandler(int unitId, int countryId);
+
+    [Signal] public delegate void GameStateRecalculatedEventHandler();
 }

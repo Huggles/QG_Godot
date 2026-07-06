@@ -210,7 +210,8 @@ public class GameStateCalculator
         {
             calculators.Add(CalculateAllForFaction(faction));
         }
-        
+
+        EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
         return calculators;
     }
     

@@ -59,7 +59,8 @@ public abstract class Condition
     }
     public class Not : CustomCondition
     {
-        public Not(Condition condition) : base(() => !condition.MeetCondition()) { }
+        public Condition Inner { get; }
+        public Not(Condition condition) : base(() => !condition.MeetCondition()) { Inner = condition; }
     }
 
     public class CountryIsBuildable : Condition

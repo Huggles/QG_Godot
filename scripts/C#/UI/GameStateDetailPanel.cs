@@ -16,6 +16,8 @@ public partial class GameStateDetailPanel : PanelContainer
     };
 
     private VBoxContainer _content;
+    private EventBus.GameStateRecalculatedEventHandler _onRecalculated;
+    private readonly System.Collections.Generic.HashSet<string> _expandedSections = new();
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -24,10 +26,15 @@ public partial class GameStateDetailPanel : PanelContainer
         Instance = this;
         BuildShell();
         Hide();
+
+        _onRecalculated = () => { if (Visible) CallDeferred(MethodName.Refresh); };
+        EventBus.Instance.GameStateRecalculated += _onRecalculated;
     }
 
     public override void _ExitTree()
     {
+        if (EventBus.Instance != null && _onRecalculated != null)
+            EventBus.Instance.GameStateRecalculated -= _onRecalculated;
         if (Instance == this) Instance = null;
     }
 
@@ -59,35 +66,36 @@ public partial class GameStateDetailPanel : PanelContainer
     private void AddFactionSection(Faction faction)
     {
         DeckState deck = DeckState.ForFaction(faction);
+        string fk = faction.ToString();
 
         VBoxContainer factionBody;
         AddCollapsibleSection(
             _content, faction.ToString(),
             new Color(0.95f, 0.8f, 0.25f, 1f), 12,
-            indent: 0, startExpanded: true,
+            indent: 0, startExpanded: true, sectionKey: fk,
             out factionBody);
 
         VBoxContainer cardsBody;
         AddCollapsibleSection(
             factionBody, $"Cards ({deck.AllCardIds.Count})",
             new Color(0.55f, 0.85f, 0.55f, 1f), 11,
-            indent: 1, startExpanded: false,
+            indent: 1, startExpanded: false, sectionKey: fk + "/Cards",
             out cardsBody);
 
-        AddCardPile(cardsBody, "Hand",     deck.HandCardStates,      faction);
-        AddCardPile(cardsBody, "Deck",     deck.DeckCardStates,      faction);
-        AddCardPile(cardsBody, "Discard",  deck.DiscardedCardStates, faction);
-        AddCardPile(cardsBody, "Status",   deck.StatusCardStates,    faction);
-        AddCardPile(cardsBody, "Response", deck.ResponseCardStates,  faction);
+        AddCardPile(cardsBody, "Hand",     deck.HandCardStates,      faction, fk + "/Cards");
+        AddCardPile(cardsBody, "Deck",     deck.DeckCardStates,      faction, fk + "/Cards");
+        AddCardPile(cardsBody, "Discard",  deck.DiscardedCardStates, faction, fk + "/Cards");
+        AddCardPile(cardsBody, "Status",   deck.StatusCardStates,    faction, fk + "/Cards");
+        AddCardPile(cardsBody, "Response", deck.ResponseCardStates,  faction, fk + "/Cards");
 
-        AddFactionWorldSection(factionBody, faction);
+        AddFactionWorldSection(factionBody, faction, fk);
 
         var spacer = new Control();
         spacer.CustomMinimumSize = new Vector2(0, 4);
         _content.AddChild(spacer);
     }
 
-    private void AddFactionWorldSection(VBoxContainer parent, Faction faction)
+    private void AddFactionWorldSection(VBoxContainer parent, Faction faction, string factionKey)
     {
         var relevant = CountryState.AllCountryStates
             .Where(cs => cs.Tags.GetTagsForFaction(faction).Any(t => !StaticTags.Contains(t)))
@@ -100,7 +108,7 @@ public partial class GameStateDetailPanel : PanelContainer
         AddCollapsibleSection(
             parent, $"World ({relevant.Count})",
             new Color(0.85f, 0.65f, 0.85f, 1f), 11,
-            indent: 1, startExpanded: false,
+            indent: 1, startExpanded: false, sectionKey: factionKey + "/World",
             out worldBody);
 
         foreach (CountryState cs in relevant)
@@ -113,45 +121,92 @@ public partial class GameStateDetailPanel : PanelContainer
     }
 
     private void AddCardPile(VBoxContainer parent, string pileName,
-        System.Collections.Generic.List<CardState> cards, Faction faction)
+        System.Collections.Generic.List<CardState> cards, Faction faction, string parentKey)
     {
         if (cards.Count == 0) return;
+        string pileKey = parentKey + "/" + pileName;
 
         VBoxContainer pileBody;
         AddCollapsibleSection(
             parent, $"{pileName} ({cards.Count})",
             new Color(0.45f, 0.75f, 1f, 1f), 11,
-            indent: 2, startExpanded: false,
+            indent: 2, startExpanded: false, sectionKey: pileKey,
             out pileBody);
 
         foreach (CardState card in cards)
         {
             var tags = card.Tags.GetTagsForFaction(faction);
             string tagStr = tags.Any() ? string.Join(", ", tags) : "—";
-            var row = MakeLabel($"  [{card.Id}] {card.CardName}  [{tagStr}]", new Color(0.82f, 0.82f, 0.82f, 1f), 10);
-            row.AutowrapMode = TextServer.AutowrapMode.Off;
-            pileBody.AddChild(row);
+
+            VBoxContainer cardBody;
+            AddCollapsibleSection(
+                pileBody, $"[{card.Id}] {card.CardName}  [{tagStr}]",
+                new Color(0.82f, 0.82f, 0.82f, 1f), 10,
+                indent: 3, startExpanded: false, sectionKey: pileKey + "/" + card.Id,
+                out cardBody);
+
+            AddCardConditions(cardBody, card);
         }
     }
 
-    /// <summary>
+    private static void AddCardConditions(VBoxContainer parent, CardState card)
+    {
+        var logic = card.CardLogic;
+        if (logic == null) return;
+
+        var conditions = logic._conditions;
+        if (conditions == null || conditions.Count == 0)
+        {
+            parent.AddChild(MakeLabel("    —", new Color(0.5f, 0.5f, 0.5f, 1f), 10));
+            return;
+        }
+
+        foreach (var condition in conditions)
+        {
+            bool met;
+            try { met = condition.MeetCondition(); }
+            catch { met = false; }
+
+            string symbol = met ? "✓" : "✗";
+            var color = met ? new Color(0.35f, 0.85f, 0.35f, 1f) : new Color(0.85f, 0.35f, 0.35f, 1f);
+            var label = MakeLabel($"    {symbol} {ConditionName(condition)}", color, 10);
+            label.AutowrapMode = TextServer.AutowrapMode.Off;
+            parent.AddChild(label);
+        }
+    }
+
+    private static string ConditionName(Condition condition) =>
+        condition is Condition.Not not
+            ? $"Not({ConditionName(not.Inner)})"
+            : condition.GetType().Name;    /// <summary>
     /// Adds a flat toggle button + a body VBoxContainer to <paramref name="parent"/>.
     /// Clicking the button shows/hides the body and updates the ▼/▶ prefix.
     /// </summary>
-    private static void AddCollapsibleSection(
+    private void AddCollapsibleSection(
         VBoxContainer parent,
         string headerText,
         Color headerColor,
         int fontSize,
         int indent,
         bool startExpanded,
+        string sectionKey,
         out VBoxContainer body)
     {
         string pad = new string(' ', indent * 2);
-        string arrow = startExpanded ? "▼ " : "▶ ";
+
+        bool expanded;
+        if (_expandedSections.Contains(sectionKey))
+            expanded = true;
+        else if (startExpanded)
+        {
+            _expandedSections.Add(sectionKey);
+            expanded = true;
+        }
+        else
+            expanded = false;
 
         var btn = new Button();
-        btn.Text = pad + arrow + headerText;
+        btn.Text = pad + (expanded ? "▼ " : "▶ ") + headerText;
         btn.Flat = true;
         btn.Alignment = HorizontalAlignment.Left;
         btn.AddThemeColorOverride("font_color", headerColor);
@@ -162,12 +217,16 @@ public partial class GameStateDetailPanel : PanelContainer
 
         var capturedBody = new VBoxContainer();
         capturedBody.AddThemeConstantOverride("separation", 1);
-        capturedBody.Visible = startExpanded;
+        capturedBody.Visible = expanded;
         parent.AddChild(capturedBody);
 
         btn.Pressed += () =>
         {
             capturedBody.Visible = !capturedBody.Visible;
+            if (capturedBody.Visible)
+                _expandedSections.Add(sectionKey);
+            else
+                _expandedSections.Remove(sectionKey);
             btn.Text = pad + (capturedBody.Visible ? "▼ " : "▶ ") + headerText;
         };
 
