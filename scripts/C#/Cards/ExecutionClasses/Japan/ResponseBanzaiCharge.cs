@@ -9,7 +9,7 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> { 
-            Condition.Build(new Condition.HasBattledOnLand(Faction), this) 
+            Condition.Build(new Condition.HasBattledOnLand(Faction).Immediately(), this) 
         };
     }
 
@@ -17,14 +17,13 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                var battleEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-                    .Where(ce => ce.TriggeringFaction == Faction).ToList();
-                var battleLocations = battleEvents.Map(ce => ce.CountryState)
-                    .Where(cs => cs.Type == CountryType.LAND).ToList();
+                var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                if (triggerBattle == null) return null;
+                var battleLocation = triggerBattle.CountryState;
                 
                 // Get same or adjacent land spaces that are attackable
-                var targetCountries = battleLocations
-                    .SelectMany(bl => bl.ConnectedCountryStates.Append(bl))
+                var targetCountries = battleLocation.ConnectedCountryStates
+                    .Append(battleLocation)
                     .Distinct()
                     .Where(cs => cs.Type == CountryType.LAND && cs.Tags.Has(Tag.Attackable, Faction))
                     .ToList();

@@ -16,7 +16,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
 
     protected override List<Condition> CardTriggers()
     {
-        return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).WithCountries(targetCountries.ToCountryIds()), this) };
+        return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).Immediately().WithCountries(targetCountries.ToCountryIds()), this) };
     }
  
     public override List<CardStep> OnActivate()
@@ -43,13 +43,12 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
 
     private List<int> EligibleAttackedCountries()
     {
-        List<BattleCountryChangeEvent> battleCountryChangeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>();
-        battleCountryChangeEvents = battleCountryChangeEvents.Where(b => b.TriggeringFaction == Faction).ToList();
-        battleCountryChangeEvents = battleCountryChangeEvents.Where(b => targetCountries.Contains(b.CountryState)).ToList();
-        List<int> attackedCountries = battleCountryChangeEvents.Where(
-                        changeEvent => changeEvent.TriggeringFaction == Faction &&
-                        targetCountries.Contains(changeEvent.CountryState)).ToList()
-                        .Map(changeEvent => changeEvent.CountryId).ToList();
-        return attackedCountries;
+        if (CardPlayPool.CurrentReactionTrigger is BattleCountryChangeEvent trigger
+            && trigger.TriggeringFaction == Faction
+            && targetCountries.Contains(trigger.CountryState))
+        {
+            return new List<int> { trigger.CountryId };
+        }
+        return new List<int>();
     }
 }

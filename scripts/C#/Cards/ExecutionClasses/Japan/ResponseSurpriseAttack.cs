@@ -9,7 +9,7 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> { 
-            Condition.Build(new Condition.HasBattledAtSea(Faction), this) 
+            Condition.Build(new Condition.HasBattledAtSea(Faction).Immediately(), this)
         };
     }
 

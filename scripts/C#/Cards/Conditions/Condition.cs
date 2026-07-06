@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+/// <summary>Controls whether an <see cref="Condition.EventCondition"/> checks the full event pool or only the current reaction window trigger.</summary>
+public enum ConditionScope { Pool, Immediate }
+
 [DebuggerDisplay("Condition: {GetType().Name}: {_meetsCondition}")]
 public abstract class Condition
 {
@@ -153,44 +156,31 @@ public abstract class Condition
         }
     }
 
-    public class FactionBattled : Condition
+    public class FactionBattled : EventCondition
     {
-        public FactionBattled(Faction faction)
-        {
-            this.Faction = faction;
-        }
-        public FactionBattled(FactionTeam factionTeam)
-        {
-            this.FactionTeam = factionTeam;
-        }
-        public override bool MeetCondition()
-        {
-            List<BattleCountryChangeEvent> battleCountryChangeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>();
-            if (Faction != Faction.NONE)
-            {
-                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => changeEvent.TriggeringFaction == Faction).ToList();
-            }
-            else
-            {
-                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.TriggeringFaction) == this.FactionTeam).ToList();
-            }
+        public FactionBattled(Faction faction) { this.Faction = faction; }
+        public FactionBattled(FactionTeam factionTeam) { this.FactionTeam = factionTeam; }
 
+        public override bool IsMatch(ChangeEvent ce)
+        {
+            if (ce is not BattleCountryChangeEvent bce) return false;
+            if (Faction != Faction.NONE && bce.TriggeringFaction != Faction) return false;
+            if (this.FactionTeam != FactionTeam.NONE && StaticGameData.FactionTeamForFaction(bce.TriggeringFaction) != this.FactionTeam) return false;
             if (TargetFaction != Faction.NONE)
             {
-                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => changeEvent is BattleUnitChangeEvent battleUnitChangeEvent && battleUnitChangeEvent.UnitState.Faction == TargetFaction).ToList();
+                if (bce is not BattleUnitChangeEvent bue || bue.UnitState.Faction != TargetFaction) return false;
             }
             if (TargetFactionTeam != FactionTeam.NONE)
             {
-                battleCountryChangeEvents = battleCountryChangeEvents.Where(changeEvent => changeEvent is BattleUnitChangeEvent battleUnitChangeEvent && battleUnitChangeEvent.UnitState.FactionTeam == TargetFactionTeam).ToList();
+                if (bce is not BattleUnitChangeEvent bue2 || bue2.UnitState.FactionTeam != TargetFactionTeam) return false;
             }
-
-            List<CountryState> countryStates = battleCountryChangeEvents.Map(ce => ce.CountryState).ToList();
-            filterCountryStates(ref countryStates);           
-            return countryStates.Count > 0;
+            if (this.CountryType != CountryType.NONE && bce.CountryState.Type != this.CountryType) return false;
+            if (CountryIds?.Count > 0 && !CountryIds.Contains(bce.CountryState.Id)) return false;
+            return true;
         }
     }
 
-    public class FactionDeployed : Condition
+    public class FactionDeployed : EventCondition
     {
         public FactionDeployed(Faction faction, DeployType deployType)
         {
@@ -198,16 +188,15 @@ public abstract class Condition
             this.DeployType = deployType;
         }
 
-        public override bool MeetCondition()
+        public override bool IsMatch(ChangeEvent ce)
         {
-            List<DeployUnitChangeEvent> deployUnitChangeEvents = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>();
-            deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.TriggeringFaction == this.Faction).ToList();
-            deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => ce.DeploymentType == this.DeployType).ToList();
-            deployUnitChangeEvents = deployUnitChangeEvents.Where(ce => this.UnitType.Matches(ce.UnitType)).ToList();
-            List<CountryState> countryStates = deployUnitChangeEvents.Map(ce => ce.CountryState).ToList();
-            filterCountryStates(ref countryStates);
-            
-            return countryStates.Count > 0;
+            if (ce is not DeployUnitChangeEvent dce) return false;
+            if (dce.TriggeringFaction != Faction) return false;
+            if (dce.DeploymentType != this.DeployType) return false;
+            if (!this.UnitType.Matches(dce.UnitType)) return false;
+            if (this.CountryType != CountryType.NONE && dce.CountryState.Type != this.CountryType) return false;
+            if (CountryIds?.Count > 0 && !CountryIds.Contains(dce.CountryId)) return false;
+            return true;
         }
     }   
 
@@ -244,16 +233,10 @@ public abstract class Condition
         }
     }
 
-    public class FactionUnitIsAttacked : Condition
+    public class FactionUnitIsAttacked : EventCondition
     {
-        public FactionUnitIsAttacked(Faction faction)
-        {
-            this.Faction = faction;
-        }
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => changeEvent.UnitState.Faction == Faction);
-        }
+        public FactionUnitIsAttacked(Faction faction) { this.Faction = faction; }
+        public override bool IsMatch(ChangeEvent ce) => ce is BattleUnitChangeEvent bue && bue.UnitState.Faction == Faction;
     }
     public class FactionUnitInCountryIsAttacked : FactionUnitIsAttacked
     {
@@ -261,21 +244,14 @@ public abstract class Condition
         {
             this.CountryIds = countryIds;
         }
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => changeEvent.UnitState.Faction == Faction && this.CountryIds.Contains(changeEvent.CountryId));
-        }
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is BattleUnitChangeEvent bue && bue.UnitState.Faction == Faction && CountryIds.Contains(bue.CountryId);
     }
-    public class FactionTeamUnitIsAttacked : Condition
+    public class FactionTeamUnitIsAttacked : EventCondition
     {
-        public FactionTeamUnitIsAttacked(FactionTeam factionTeam)
-        {
-            this.FactionTeam = factionTeam;
-        }
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.UnitState.Faction) == this.FactionTeam);
-        }
+        public FactionTeamUnitIsAttacked(FactionTeam factionTeam) { this.FactionTeam = factionTeam; }
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is BattleUnitChangeEvent bue && StaticGameData.FactionTeamForFaction(bue.UnitState.Faction) == this.FactionTeam;
     }
     public class FactionTeamUnitInCountryIsAttacked : FactionTeamUnitIsAttacked
     {
@@ -283,10 +259,10 @@ public abstract class Condition
         {
             this.CountryIds = countryIds;
         }
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<BattleUnitChangeEvent>().Any(changeEvent => StaticGameData.FactionTeamForFaction(changeEvent.UnitState.Faction) == this.FactionTeam);
-        }
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is BattleUnitChangeEvent bue
+               && StaticGameData.FactionTeamForFaction(bue.UnitState.Faction) == this.FactionTeam
+               && CountryIds.Contains(bue.CountryId);
     }
 
     public class IsBlockRequest : Condition
@@ -479,52 +455,32 @@ public abstract class Condition
             UnitState.AttackableNavies(Faction).Any() || CountryState.AttackableSea(Faction).Any();
     }
 
-    public class HasDeployedArmy : Condition
+    public class HasDeployedArmy : EventCondition
     {
         public HasDeployedArmy(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
-                .Any(ce => ce.TriggeringFaction == Faction && 
-                           ce.DeploymentType == DeployType.BUILD && 
-                           ce.UnitType == UnitType.ARMY);
-        }
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is DeployUnitChangeEvent dce && dce.TriggeringFaction == Faction && dce.DeploymentType == DeployType.BUILD && dce.UnitType == UnitType.ARMY;
     }
 
-    public class HasDeployedNavy : Condition
+    public class HasDeployedNavy : EventCondition
     {
         public HasDeployedNavy(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition()
-        {
-            return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
-                .Any(ce => ce.TriggeringFaction == Faction && 
-                           ce.DeploymentType == DeployType.BUILD && 
-                           ce.UnitType == UnitType.NAVY);
-        }
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is DeployUnitChangeEvent dce && dce.TriggeringFaction == Faction && dce.DeploymentType == DeployType.BUILD && dce.UnitType == UnitType.NAVY;
     }
 
-    public class HasBattledOnLand : Condition
+    public class HasBattledOnLand : EventCondition
     {
         public HasBattledOnLand(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition()
-        {
-            var battleEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-                .Where(ce => ce.TriggeringFaction == Faction).ToList();
-            var countryStates = battleEvents.Map(ce => ce.CountryState).ToList();
-            return countryStates.Any(cs => cs.Type == CountryType.LAND);
-        }
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is BattleCountryChangeEvent bce && bce.TriggeringFaction == Faction && bce.CountryState.Type == CountryType.LAND;
     }
 
-    public class HasBattledAtSea : Condition
+    public class HasBattledAtSea : EventCondition
     {
         public HasBattledAtSea(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition()
-        {
-            var battleEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-                .Where(ce => ce.TriggeringFaction == Faction).ToList();
-            var countryStates = battleEvents.Map(ce => ce.CountryState).ToList();
-            return countryStates.Any(cs => cs.Type == CountryType.SEA);
-        }
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is BattleCountryChangeEvent bce && bce.TriggeringFaction == Faction && bce.CountryState.Type == CountryType.SEA;
     }
 
     public class HasPlayedCardThisTurnStep : Condition
@@ -559,6 +515,30 @@ public abstract class Condition
         Func<bool> Condition;
         public CustomCondition(Func<bool> condition) => this.Condition = condition;
         public override bool MeetCondition() => Condition.Invoke();
+    }
+
+    /// <summary>
+    /// Base class for event-based conditions. Subclasses override <see cref="IsMatch"/> to check a single event.
+    /// <para>
+    /// <b>Pool</b> (default): scans the full event pool — "did this happen this round?"<br/>
+    /// Use for status card scoring and step conditions.<br/><br/>
+    /// <b>Immediate</b> (via <see cref="Immediately"/>): checks only <c>CardPlayPool.CurrentReactionTrigger</c> — "is the current reaction window triggered by this event?"<br/>
+    /// Use in response card <c>CardTriggers()</c> for "immediately after X" reactions.
+    /// </para>
+    /// </summary>
+    public abstract class EventCondition : Condition
+    {
+        private ConditionScope _scope = ConditionScope.Pool;
+
+        /// <summary>Scopes this condition to the current reaction window trigger instead of the full pool. Use in response card <c>CardTriggers()</c>.</summary>
+        public Condition Immediately() { _scope = ConditionScope.Immediate; return this; }
+
+        public virtual bool IsMatch(ChangeEvent ce) => false;
+
+        public override bool MeetCondition() =>
+            _scope == ConditionScope.Immediate
+                ? IsMatch(CardPlayPool.CurrentReactionTrigger)
+                : CardPlayPool.ChangeEventsPool.Any(IsMatch);
     }
 
     public Condition WithCountries(List<int> countryIds)

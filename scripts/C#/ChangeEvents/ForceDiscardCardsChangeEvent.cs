@@ -39,7 +39,7 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
 
     private void ApplyDiscardModifiers()
     {
-        var allStatusCardLogics = GameSession.Current.GameState.FactionStates
+        var allStatusCardLogics = GameSession.Current.GameState.PlayableFactionStates
             .SelectMany(fs => DeckState.ForFaction(fs.FactionData.Faction).StatusCardStates)
             .Where(cs => cs.IsPlayed)
             .Select(cs => cs.CardLogic)

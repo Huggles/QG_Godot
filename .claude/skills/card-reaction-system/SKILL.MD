@@ -2,6 +2,8 @@
 description: Documentation for the card reaction system, including how play steps and reactions work, the flow of events, and how to implement cards with multiple steps and reactions.
 ---
 
+> **Authority:** This skill describes the *implementation* of the reaction system. If anything here conflicts with the board game rules in `reaction-specifics`, **`reaction-specifics` takes precedence** and the implementation should be updated to match.
+
 # Card Reaction System Documentation
 
 ## Overview
@@ -132,13 +134,23 @@ Requests block reactions from all factions in order:
 - Each faction can play one block reaction
 - Block reactions are processed recursively
 
-#### `RequestAfterReactions()` → returns `bool`
+#### `RequestAfterReactions(ChangeEvent triggerEvent)` → returns `bool`
 Requests after reactions from all factions. Returns `true` if at least one reaction was played, `false` if everyone skipped or had no options.
 
+- Takes the `triggerEvent` that opened this reaction window
+- Sets `CurrentReactionTrigger = triggerEvent` for the duration of the window, then restores the previous value in a `finally` block (safe for nested windows)
 - Iterates factions in `RequestOrder`; skips factions in `_afterReactionPassedFactions`
 - If a faction skips → added to `_afterReactionPassedFactions` (not asked again until a new reaction is played)
 - If a faction plays → `_afterReactionPassedFactions.Clear()` **before** `DoCard`, so all factions get a fresh chance during that reaction's resolution; then `break` to restart with updated `RequestOrder`
 - Loop exits when a full pass through all non-skipped factions produces no plays
+
+#### `CurrentReactionTrigger` (property on `CardPlayRound` / `CardPlayPool`)
+The change event that opened the currently-active reaction window. Card step logic reads this to determine *which specific event* it is reacting to, so targets are computed relative to that event rather than all matching events in the pool.
+
+- Set at the start of each `RequestAfterReactions` call, restored (stack-safe) in the `finally` block
+- Accessible from card logic via `CardPlayPool.CurrentReactionTrigger`
+- Nested windows work correctly: the inner window overwrites the value, the outer window gets it back when the inner window finishes
+- During `ContinueWithNextSteps`, the trigger is the restored outer value — subsequent steps that rely on `SourceCardId` (not `CurrentReactionTrigger`) are unaffected
 
 #### `ContinueWithNextSteps()`
 Checks all cards in the pool for executable next steps:
@@ -302,6 +314,44 @@ public override List<CardStep> InitializeReactCardSteps()
 }
 ```
 
+### Reaction-Scoped Targeting with `CurrentReactionTrigger`
+
+When a card can trigger in multiple different reaction windows (e.g. reacting to any sea battle in the pool), the targets must be computed from the *specific event that opened the current window*, not from all matching events.
+
+Use `CardPlayPool.CurrentReactionTrigger` for both `CardTriggers()` and step logic:
+
+```csharp
+// CardTriggers: only available in a window opened by the relevant event type
+protected override List<Condition> CardTriggers()
+{
+    return new List<Condition> {
+        Condition.Build(new Condition.CustomCondition(() => {
+            // DT is only available immediately in the reaction window of a Japan sea battle
+            return CardPlayPool.CurrentReactionTrigger is BattleCountryChangeEvent ce
+                && ce.TriggeringFaction == Faction
+                && ce.CountryState.Type == CountryType.SEA;
+        }), this)
+    };
+}
+
+// Step logic: targets derived from the specific triggering event
+new CardStep(this, async() => {
+    var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+    if (triggerBattle == null) return null;
+    var adjacentBuildable = CountryState.BuildableLand(Faction)
+        .Where(cs => triggerBattle.CountryState.ConnectedCountryStates.Contains(cs))
+        .ToList();
+    int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
+    return BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
+})
+```
+
+**Why this matters:** If two sea battles happened (e.g. Bay of Bengal, then South China Sea via Surprise Attack), `CurrentReactionTrigger` tells the card *which* battle opened the window it's being played in, so targets are correctly scoped to that battle's sea space — not all sea spaces in the pool.
+
+**`CardTriggers()` vs pool-based conditions:**
+- Use `CurrentReactionTrigger` in `CardTriggers()` for response cards that react *immediately* to a specific event — ensures the card only appears as an option in the correct window
+- Use pool-based conditions (`HasBattledAtSea`, etc.) for status cards that can score or activate at any point after the event occurred
+
 ### Prerequisite Change Events Within a Step
 
 Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `ApplyChange()` directly — no need to split into two steps or go through `CardPlayPool`.
@@ -339,6 +389,7 @@ new CardStep(this, async() => {
 7. **Priority Reset on Play**: When any faction plays a reaction, all pass-locks are cleared before resolving it — everyone gets a fresh opportunity during its resolution
 8. **Round Ends on All-Skip**: If no faction plays a reaction (everyone skips or has no options), `ContinueWithNextSteps` is skipped and `Finish()` is called at the top-level `DoCard`
 9. **`Finish()` is Unconditional at Top Level**: `DoCard` calls `Finish()` whenever `reactionDepth` returns to 0 for the initial play — the old `hasRemainingActions` guard was wrong because skipped reactions don't consume their tags
+10. **Reaction Windows are Trigger-Scoped**: `CurrentReactionTrigger` identifies which specific event opened the active window. Cards that can react to multiple different events (e.g. a card reacting to *any* sea battle in the pool) must use `CurrentReactionTrigger` to scope their targets to the correct event — not scan all matching events in the pool
 
 ## Common Pitfalls
 

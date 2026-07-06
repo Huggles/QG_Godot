@@ -10,7 +10,7 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
 
     protected override List<Condition> CardTriggers()
     {
-        return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).WithCountries([SouthEastAsia.Id]), this) };
+        return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).Immediately().WithCountries([SouthEastAsia.Id]), this) };
     }
 
     public override List<CardStep> OnActivate()

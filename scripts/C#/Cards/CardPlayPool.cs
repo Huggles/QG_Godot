@@ -38,6 +38,9 @@ public static class CardPlayPool
     public static ChangeEvent LastNoneNewCardChangeEvent =>
         CardPlayRound.Current?.LastNoneNewCardChangeEvent;
 
+    public static ChangeEvent CurrentReactionTrigger =>
+        CardPlayRound.Current?.CurrentReactionTrigger;
+
     public static List<Faction> RequestOrder =>
         CardPlayRound.Current?.RequestOrder ?? CardPlayRound.AxisFirstOrder;
 

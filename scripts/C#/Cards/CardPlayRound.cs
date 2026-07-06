@@ -28,6 +28,13 @@ public partial class CardPlayRound : GodotObject
     private int reactionDepth = 0;
     private HashSet<Faction> _afterReactionPassedFactions = new();
 
+    /// <summary>
+    /// The change event that opened the currently-active reaction window.
+    /// Set before each <see cref="RequestAfterReactions"/> call and restored afterwards,
+    /// so card step logic can determine which specific event they are reacting to.
+    /// </summary>
+    public ChangeEvent CurrentReactionTrigger { get; private set; }
+
     // ── Computed properties ────────────────────────────────────────────────────
     public Dictionary<int, CardState> CardPoolMap =>
         CardPool.ToDictionary(c => c.Id, c => c);
@@ -163,7 +170,7 @@ public partial class CardPlayRound : GodotObject
 
         if (changeEvent.IsTrigger && !changeEvent.IsBlocked)
         {
-            bool anyReactionPlayed = await RequestAfterReactions();
+            bool anyReactionPlayed = await RequestAfterReactions(changeEvent);
             if (anyReactionPlayed)
                 await ContinueWithNextSteps();
         }
@@ -203,38 +210,52 @@ public partial class CardPlayRound : GodotObject
         }
     }
 
-    private async Task<bool> RequestAfterReactions()
+    private async Task<bool> RequestAfterReactions(ChangeEvent triggerEvent)
     {
         DebugUtilities.PrintPeer("RequestAfterReactions");
+        var previousTrigger = CurrentReactionTrigger;
+        CurrentReactionTrigger = triggerEvent;
         bool anyEverPlayed = false;
-        bool anyPlayedThisPass = true;
-        while (anyPlayedThisPass)
+        try
         {
-            anyPlayedThisPass = false;
-            foreach (Faction faction in RequestOrder)
+            bool anyPlayedThisPass = true;
+            while (anyPlayedThisPass)
             {
-                if (_afterReactionPassedFactions.Contains(faction)) continue;
-                List<int> options = GetAfterReactionOptions(faction);
-                if (options.Count > 0)
+                // Recalculate tags at the start of every pass so Immediate-scope
+                // EventConditions always evaluate against the current (possibly restored)
+                // CurrentReactionTrigger — including after a nested reaction card resolves
+                // and the trigger is restored from the finally block.
+                GameStateCalculator.CalculateAll();
+                anyPlayedThisPass = false;
+                foreach (Faction faction in RequestOrder)
                 {
-                    int cardId = await RequestPlay(faction);
-                    if (cardId != -1)
+                    if (_afterReactionPassedFactions.Contains(faction)) continue;
+                    List<int> options = GetAfterReactionOptions(faction);
+                    if (options.Count > 0)
                     {
-                        DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
-                        _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
-                        await DoCard(cardId);
-                        anyEverPlayed = true;
-                        anyPlayedThisPass = true;
-                        break; // Restart with updated RequestOrder
-                    }
-                    else
-                    {
-                        _afterReactionPassedFactions.Add(faction);
+                        int cardId = await RequestPlay(faction);
+                        if (cardId != -1)
+                        {
+                            DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
+                            _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
+                            await DoCard(cardId);
+                            anyEverPlayed = true;
+                            anyPlayedThisPass = true;
+                            break; // Restart with updated RequestOrder
+                        }
+                        else
+                        {
+                            _afterReactionPassedFactions.Add(faction);
+                        }
                     }
                 }
             }
+            DebugUtilities.PrintPeer("No more after-reaction options available for any faction");
         }
-        DebugUtilities.PrintPeer("No more after-reaction options available for any faction");
+        finally
+        {
+            CurrentReactionTrigger = previousTrigger;
+        }
         return anyEverPlayed;
     }
 
@@ -245,12 +266,13 @@ public partial class CardPlayRound : GodotObject
         while (hasMoreSteps)
         {
             hasMoreSteps = false;
-            foreach (CardState cardState in CardPool)
+            foreach (CardState cardState in CardPool.AsEnumerable().Reverse())
             {
                 if (cardState.CardLogic == null) continue;                
                 if (cardState.CardLogic.ExecutableCardSteps.Count >0)
                 {
                     DebugUtilities.PrintPeer($"Continuing with next step for {cardState.CardName}");
+                    _afterReactionPassedFactions.Clear(); // New step = fresh reaction window for all factions
                     await DoCard(cardState.Id);
                     hasMoreSteps = true;
                     break; // Restart after processing one step

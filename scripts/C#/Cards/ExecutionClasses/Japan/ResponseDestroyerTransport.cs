@@ -9,31 +9,29 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> { 
-            Condition.Build(new Condition.HasBattledAtSea(Faction), this) 
+            Condition.Build(new Condition.HasBattledAtSea(Faction).Immediately(), this)
         };
     }
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            // Build first Army adjacent to any battled sea space
+            // Build first Army adjacent to the battled sea space that triggered this reaction
             new CardStep(this, async() => {
-                var battleLocations = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-                    .Where(ce => ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.SEA)
-                    .Select(ce => ce.CountryState).Distinct().ToList();
+                var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                if (triggerBattle == null) return null;
+                var battleLocation = triggerBattle.CountryState;
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
-                    .Where(cs => battleLocations.Any(bl => bl.ConnectedCountryStates.Contains(cs)))
+                    .Where(cs => battleLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
-                var battleLocations = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-                    .Where(ce => ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.SEA)
-                    .Select(ce => ce.CountryState).Distinct().ToList();
-                if (!battleLocations.Any()) return false;
-                return CountryState.BuildableLand(Faction).Any(cs => battleLocations.Any(bl => bl.ConnectedCountryStates.Contains(cs)));
+                var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                if (triggerBattle == null) return false;
+                return CountryState.BuildableLand(Faction).Any(cs => triggerBattle.CountryState.ConnectedCountryStates.Contains(cs));
             }), this))
             .WithGuidance("Build an army adjacent to a battled sea space"),
             
