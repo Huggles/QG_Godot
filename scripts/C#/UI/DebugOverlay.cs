@@ -13,6 +13,9 @@ public partial class DebugOverlay : PanelContainer
     private Label _factionLabel;
     private Label _stepCounterLabel;
 
+    // ── Toggle button ─────────────────────────────────────────────────────────
+    private Button _detailsToggle;
+
     // ── Labels: CardPlayRound ─────────────────────────────────────────────────
     private Label _cprHeaderLabel;
     private Label _cardPoolLabel;
@@ -98,6 +101,24 @@ public partial class DebugOverlay : PanelContainer
         _lastChangeEventLabel = MakeValueLabel(); vbox.AddChild(_lastChangeEventLabel);
         _reactionTriggerLabel = MakeValueLabel(); vbox.AddChild(_reactionTriggerLabel);
         _reactionDepthLabel   = MakeValueLabel(); vbox.AddChild(_reactionDepthLabel);
+
+        // ── Details toggle ────────────────────────────────────────────────────
+        var sep2 = new HSeparator();
+        sep2.AddThemeConstantOverride("separation", 4);
+        vbox.AddChild(sep2);
+
+        _detailsToggle = new Button();
+        _detailsToggle.Text = "Details ▼";
+        _detailsToggle.AddThemeFontSizeOverride("font_size", 11);
+        _detailsToggle.Pressed += OnDetailsTogglePressed;
+        vbox.AddChild(_detailsToggle);
+    }
+
+    private void OnDetailsTogglePressed()
+    {
+        GameStateDetailPanel.Instance?.Toggle();
+        bool open = GameStateDetailPanel.Instance?.Visible ?? false;
+        _detailsToggle.Text = open ? "Details ▲" : "Details ▼";
     }
 
     private static Label MakeSectionHeader(string text)
