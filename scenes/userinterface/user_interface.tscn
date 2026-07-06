@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dqdvhk2rm85fc"]
+[gd_scene load_steps=12 format=3 uid="uid://dqdvhk2rm85fc"]
 
 [ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="1_bj75k"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://bkgumcj218qt5" path="res://scripts/C#/UI/DebugVerbosityControl.cs" id="8_debugverb"]
 [ext_resource type="Script" uid="uid://poytc7oh3ay1" path="res://scenes/userinterface/History/GameHistoryList.cs" id="9_oxwje"]
 [ext_resource type="PackedScene" uid="uid://bhqnymug3arir" path="res://scenes/userinterface/History/game_history_item.tscn" id="10_dvfjj"]
+[ext_resource type="Script" uid="uid://debugoverlay_01" path="res://scripts/C#/UI/DebugOverlay.cs" id="11_debugoverlay"]
 
 [node name="Interface" type="CanvasLayer"]
 
@@ -132,3 +133,15 @@ layout_mode = 2
 
 [node name="GameHistoryItem24" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
 layout_mode = 2
+
+[node name="DebugOverlay" type="PanelContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -230.0
+offset_top = 100.0
+offset_right = -10.0
+offset_bottom = 320.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("11_debugoverlay")

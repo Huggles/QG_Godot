@@ -25,7 +25,7 @@ public partial class CardPlayRound : GodotObject
     public List<CardState> CardPool { get; private set; } = new();
     public List<ChangeEvent> ChangeEventsPool { get; private set; } = new();
     public ChangeEvent LastChangeEvent { get; set; }
-    private int reactionDepth = 0;
+    public int ReactionDepth { get; private set; } = 0;
     private HashSet<Faction> _afterReactionPassedFactions = new();
 
     /// <summary>
@@ -93,8 +93,8 @@ public partial class CardPlayRound : GodotObject
 
         CardLogic cardLogic = cardState.CardLogic;
 
-        reactionDepth++;
-        bool isInitialPlay = reactionDepth == 1;
+        ReactionDepth++;
+        bool isInitialPlay = ReactionDepth == 1;
 
         // Step 1: Introduction event (may be blocked)
         bool introWasBlocked = false;
@@ -131,12 +131,12 @@ public partial class CardPlayRound : GodotObject
             }
         }
 
-        reactionDepth--;
+        ReactionDepth--;
 
         // Step 3: If we're back to the top level, the round is complete.
         // RequestAfterReactions has already given every faction the chance to react
         // (whether they played or skipped), so we always finish here.
-        if (reactionDepth == 0 && isInitialPlay)
+        if (ReactionDepth == 0 && isInitialPlay)
         {
             Finish();
         }
@@ -387,7 +387,7 @@ public partial class CardPlayRound : GodotObject
         CardPool.Clear();
         ChangeEventsPool.Clear();
         LastChangeEvent = null;
-        reactionDepth = 0;
+        ReactionDepth = 0;
         Current = null;
         _afterReactionPassedFactions.Clear();
     }
