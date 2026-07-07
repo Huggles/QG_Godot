@@ -9,7 +9,6 @@
       ],
       "initialCards": [ 
         { "name": "StatusDiveBombers" },
-        { "name": "StatusWolfPacks" },
         { "name": "StatusBlitzkrieg" },
         { "name": "StatusBiasForAction" },
         { "name": "StatusAbundantResources" },
@@ -17,7 +16,8 @@
         { "name": "StatusAtlanticWall" },
         { "name": "StatusVolksturm" }
       ],
-      "initialHandCards": [
+      "initialHandCards": [        
+        { "name": "StatusWolfPacks" },
         { "name": "EWSubmarinesRaidMurmanskConvoy" }
       ]
     },

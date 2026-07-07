@@ -18,11 +18,16 @@ public partial class UnitState : StateObject
     
     [JsonIgnore] public CountryState CountryState => CountryId >= 0 ? CountryState.ForId(CountryId) : null;
     // InSupply is computed from tags - tag is the source of truth
-    public bool InSupply => Tags.Has(Tag.InSupply, Faction);
+    public bool InSupply => Tags.Has(Tag.InSupply, Faction) || SuppliedForTurn;
     public bool ImmuneForTurn
     {
         get => Tags.Has(Tag.Immune, Faction.ALL);
         set { if (value) Tags.Add(Tag.Immune, Faction.ALL); else Tags.Remove(Tag.Immune, Faction.ALL); }
+    }
+    public bool SuppliedForTurn
+    {
+        get => Tags.Has(Tag.SuppliedForTurn, Faction.ALL);
+        set { if (value) Tags.Add(Tag.SuppliedForTurn, Faction.ALL); else Tags.Remove(Tag.SuppliedForTurn, Faction.ALL); }
     }
 
     public int CountryId = -1;
@@ -41,7 +46,7 @@ public partial class UnitState : StateObject
         Type = type;
         Faction = faction;
 
-        EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; };
+        EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; this.SuppliedForTurn = false; };
     }
 
     public static UnitState ForId(int unitId)

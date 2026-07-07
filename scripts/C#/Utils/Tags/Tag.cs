@@ -32,6 +32,7 @@ public enum Tag
     //Unit Tags
     InSupply,
     Immune,
+    SuppliedForTurn,
 
     //UI Tags
     Clickable,

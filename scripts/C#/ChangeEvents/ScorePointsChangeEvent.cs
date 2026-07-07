@@ -11,6 +11,13 @@ public partial class ScorePointsChangeEvent : ChangeEvent
         VPTurnSummary = vPTurnSummary;
     }
 
+    public ScorePointsChangeEvent(VPEntry vpEntry, Faction faction) : base(faction)
+    {
+        var summary = new VPTurnSummary(GameFlow.Instance.GameTurn);
+        summary.AddScore(vpEntry);
+        VPTurnSummary = summary;
+    }
+
     public override ChangeEventDto ToDto()
     {
         ScorePointsChangeEventDto dto = ChangeEventDto.Build<ScorePointsChangeEventDto>(this, Id);

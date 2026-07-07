@@ -69,9 +69,10 @@ public class MultiplayerGameState
 
             UnitStates = UnitStates.Select(us => new UnitStateDto
             {
-                Id            = us.Id,
-                CountryId     = us.CountryId,
-                ImmuneForTurn = us.ImmuneForTurn
+                Id              = us.Id,
+                CountryId       = us.CountryId,
+                ImmuneForTurn   = us.ImmuneForTurn,
+                SuppliedForTurn = us.SuppliedForTurn
             }).ToList(),
 
             StraightStates = StraightStates.Select(ss => new StraightStateDto
@@ -106,9 +107,10 @@ public class MultiplayerGameState
 
         foreach (var dto in snapshot.UnitStates)
         {
-            var us          = UnitStatesById[dto.Id];
-            us.CountryId     = dto.CountryId;
-            us.ImmuneForTurn = dto.ImmuneForTurn;
+            var us              = UnitStatesById[dto.Id];
+            us.CountryId         = dto.CountryId;
+            us.ImmuneForTurn     = dto.ImmuneForTurn;
+            us.SuppliedForTurn   = dto.SuppliedForTurn;
         }
 
         foreach (var dto in snapshot.StraightStates)
@@ -141,7 +143,7 @@ public class MultiplayerGameState
             sb.Append($"C{cs.Id}:{string.Join(",", cs.Units.OrderBy(kv => (int)kv.Key).Select(kv => $"{(int)kv.Key}={kv.Value}"))}|");
 
         foreach (var us in UnitStates.OrderBy(u => u.Id))
-            sb.Append($"U{us.Id}:{us.CountryId},{us.ImmuneForTurn}|");
+            sb.Append($"U{us.Id}:{us.CountryId},{us.ImmuneForTurn},{us.SuppliedForTurn}|");
 
         foreach (var ss in StraightStates.OrderBy(s => s.Id))
             sb.Append($"S{ss.Id}:{ss.ControllingCountryId}|");
@@ -186,9 +188,10 @@ public class CountryStateDto
 
 public class UnitStateDto
 {
-    public int  Id            { get; set; }
-    public int  CountryId     { get; set; }
-    public bool ImmuneForTurn { get; set; }
+    public int  Id              { get; set; }
+    public int  CountryId       { get; set; }
+    public bool ImmuneForTurn   { get; set; }
+    public bool SuppliedForTurn { get; set; }
 }
 
 public class StraightStateDto

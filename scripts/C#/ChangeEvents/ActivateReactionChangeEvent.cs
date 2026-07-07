@@ -19,7 +19,7 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
 
     protected override async Task<bool> ExecuteAsync(){               
         DebugUtilities.PrintPeer($"Activating reaction card {SourceCardState.CardName} for faction {TriggeringFaction}");         
-        SourceCardState.CardLogic.ActivatedInTurns.Add(GameFlow.Instance.GameTurn);        
+        SourceCardState.ActivatedInTurns.Add(GameFlow.Instance.GameTurn);        
         return true;
     }
 

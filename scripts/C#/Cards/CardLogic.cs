@@ -12,13 +12,10 @@ public abstract partial class CardLogic : GodotObject
     public Faction Faction => CardState.Faction;
     public FactionData FactionData => StaticGameData.FactionDataMap.ContainsKey(Faction) ? StaticGameData.FactionDataMap[Faction] : null;
 
-    public List<int> ActivatedInTurns = new();
-
     // IsPlayed is computed based on the card's tag
-    
-    
-    public bool IsActivatedOnce => ActivatedInTurns.Count > 0;
-    public bool IsActivatedThisTurn => ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
+
+    public bool IsActivatedOnce => CardState.ActivatedInTurns.Count > 0;
+    public bool IsActivatedThisTurn => CardState.ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
     public bool IsResponse => CardData.Type == "RESPONSE";
     public bool IsStatus => CardData.Type == "STATUS";
     public bool IsPubliclyVisible => CardState.IsPlayed || (IsResponse && IsActivatedOnce);
@@ -39,11 +36,12 @@ public abstract partial class CardLogic : GodotObject
     public bool TriggerConditionsMet => _conditions.All(condition=>condition.MeetCondition());
 
 
-    private List<Condition> _defaultPlayConditions => new List<Condition> 
+    protected virtual List<Condition> _defaultPlayConditions => new List<Condition> 
     {
         new Condition.IsGameFlowStep(TurnStep.PLAY_CARD),
         new Condition.IsFactionTurn(Faction),
-        new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction))
+        new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction)),
+        new Condition.CardHasNotBeenActivatedThisTurn(CardState)
     };
     
 

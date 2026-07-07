@@ -63,6 +63,74 @@ public abstract class Condition
         public Not(Condition condition) : base(() => !condition.MeetCondition()) { Inner = condition; }
     }
 
+    public class CardIsPlayed : Condition
+    {
+        private readonly CardState _cardState;
+        public CardIsPlayed(CardState cardState) { _cardState = cardState; }
+        public override bool MeetCondition() => _cardState.IsPlayed;
+    }
+
+    public class CardHasBeenPlayedInTurn : Condition
+    {
+        private readonly CardState _cardState;
+        private readonly int _turn;
+        public CardHasBeenPlayedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
+        public override bool MeetCondition() => _cardState.PlayedInTurn.Contains(_turn);
+    }
+
+    public class CardHasBeenPlayedThisTurn : Condition
+    {
+        private readonly CardState _cardState;
+        public CardHasBeenPlayedThisTurn(CardState cardState) { _cardState = cardState; }
+        public override bool MeetCondition() => _cardState.PlayedInTurn.Contains(GameFlow.Instance.GameTurn);
+    }
+
+    public class CardHasNotBeenPlayedInTurn : Condition
+    {
+        private readonly CardState _cardState;
+        private readonly int _turn;
+        public CardHasNotBeenPlayedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
+        public override bool MeetCondition() => !_cardState.PlayedInTurn.Contains(_turn);
+    }
+
+    public class CardHasNotBeenPlayedThisTurn : Condition
+    {
+        private readonly CardState _cardState;
+        public CardHasNotBeenPlayedThisTurn(CardState cardState) { _cardState = cardState; }
+        public override bool MeetCondition() =>
+            !_cardState.PlayedInTurn.Contains(GameFlow.Instance.GameTurn);
+    }
+
+    public class CardHasBeenActivatedInTurn : Condition
+    {
+        private readonly CardState _cardState;
+        private readonly int _turn;
+        public CardHasBeenActivatedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
+        public override bool MeetCondition() => _cardState.ActivatedInTurns.Contains(_turn);
+    }
+
+    public class CardHasBeenActivatedThisTurn : Condition
+    {
+        private readonly CardState _cardState;
+        public CardHasBeenActivatedThisTurn(CardState cardState) { _cardState = cardState; }
+        public override bool MeetCondition() => _cardState.ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
+    }
+
+    public class CardHasNotBeenActivatedInTurn : Condition
+    {
+        private readonly CardState _cardState;
+        private readonly int _turn;
+        public CardHasNotBeenActivatedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
+        public override bool MeetCondition() => !_cardState.ActivatedInTurns.Contains(_turn);
+    }
+
+    public class CardHasNotBeenActivatedThisTurn : Condition
+    {
+        private readonly CardState _cardState;
+        public CardHasNotBeenActivatedThisTurn(CardState cardState) { _cardState = cardState; }
+        public override bool MeetCondition() => !_cardState.ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
+    }
+
     public class CountryIsBuildable : Condition
     {
         public CountryIsBuildable(List<int> countryIds, Faction faction)
@@ -384,7 +452,7 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            if (CardState.CardData.CardType != CardType.STATUS || CardState.CardData.CardType != CardType.RESPONSE)
+            if (CardState.CardData.CardType != CardType.STATUS && CardState.CardData.CardType != CardType.RESPONSE)
             {
                 throw new Exception("Card is not status or response");
             }
@@ -466,8 +534,15 @@ public abstract class Condition
     public class HasDeployedNavy : EventCondition
     {
         public HasDeployedNavy(Faction faction) { this.Faction = faction; }
+        public HasDeployedNavy(FactionTeam factionTeam) { this.FactionTeam = factionTeam; }
         public override bool IsMatch(ChangeEvent ce)
-            => ce is DeployUnitChangeEvent dce && dce.TriggeringFaction == Faction && dce.DeploymentType == DeployType.BUILD && dce.UnitType == UnitType.NAVY;
+        {
+            if (ce is not DeployUnitChangeEvent dce) return false;
+            if (dce.DeploymentType != DeployType.BUILD || dce.UnitType != UnitType.NAVY) return false;
+            if (Faction != Faction.NONE && dce.TriggeringFaction != Faction) return false;
+            if (FactionTeam != FactionTeam.NONE && StaticGameData.FactionTeamForFaction(dce.TriggeringFaction) != FactionTeam) return false;
+            return true;
+        }
     }
 
     public class HasBattledOnLand : EventCondition

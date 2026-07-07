@@ -86,7 +86,7 @@ public partial class UnitScene : Node2D
         {
             SetClickable();
         }
-        else if (tag == Tag.InSupply)
+        else if (tag == Tag.InSupply || tag == Tag.SuppliedForTurn)
         {
             HideOutOfSupply();
         }
@@ -98,7 +98,7 @@ public partial class UnitScene : Node2D
         {
             SetUnclickable();
         }
-        else if (tag == Tag.InSupply)
+        else if ((tag == Tag.InSupply || tag == Tag.SuppliedForTurn) && !UnitState.InSupply)
         {
             ShowOutOfSupply();
         }

@@ -311,6 +311,7 @@ public partial class CardPlayRound : GodotObject
         if(DeckState.ForFaction(faction).ActivatableCardIds.Count > 0)
         {
             bool hasPlayedHandCardThisTurnStep = GameFlow.Instance.CardsPlayedThisTurnStep.Values.Sum() > 0;
+            bool isPlayCardStep = GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
             InputRequest request = hasPlayedHandCardThisTurnStep
                 ? new InputRequest.ActivateCardRequestHandler(faction)
                 : new InputRequest.HandCardPlayRequestHandler(faction);

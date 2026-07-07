@@ -28,6 +28,8 @@ public partial class PlayCardChangeEvent : ChangeEvent
         {
             GameFlow.Instance.CardsPlayedThisTurnStep[SourceCardState.Faction] += 1;
         }
+
+        SourceCardState.PlayedInTurn.Add(GameFlow.Instance.GameTurn);
         
         await Task.CompletedTask;
         return true;

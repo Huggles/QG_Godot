@@ -34,10 +34,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public DeckState CurrentFactionDeckState => DeckState.ForFaction(CurrentFaction);
     public Dictionary<Faction, int> CardsPlayedThisTurnStep = new Dictionary<Faction, int>();
 
-    public FactionTeam CurrentFactionTeam =>
-        (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;
-
-    
+    public FactionTeam CurrentFactionTeam => (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;
     
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
