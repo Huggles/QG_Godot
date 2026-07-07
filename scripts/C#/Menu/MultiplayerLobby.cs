@@ -23,6 +23,7 @@ public partial class MultiplayerLobby : Control
     // State
     private Dictionary<int, Label> _playerLabels = new Dictionary<int, Label>();
     private bool _isHost = false;
+    private bool _lobbyOnlyMode = false;
 
     public override void _Ready()
     {
@@ -57,14 +58,20 @@ public partial class MultiplayerLobby : Control
         UpdateStatusLabel("Waiting to host or join...");
 
         int instanceNumber = GetInstanceNumber();
+        _lobbyOnlyMode = OS.GetCmdlineUserArgs().Contains("lobby_only=true");
+
         if (GameSettings.IsDebugMultiplayer && instanceNumber == 1)
         {
-            DebugUtilities.PrintPeer("DebugMultiplayer Instance 1: auto-hosting...");
+            DebugUtilities.PrintPeer(_lobbyOnlyMode
+                ? "DebugMultiplayer Instance 1: auto-hosting (lobby only)..."
+                : "DebugMultiplayer Instance 1: auto-hosting...");
             OnHostButtonPressed();
         }
         else if (GameSettings.IsDebugMultiplayer && instanceNumber == 2)
         {
-            DebugUtilities.PrintPeer("DebugMultiplayer Instance 2: auto-joining...");
+            DebugUtilities.PrintPeer(_lobbyOnlyMode
+                ? "DebugMultiplayer Instance 2: auto-joining (lobby only)..."
+                : "DebugMultiplayer Instance 2: auto-joining...");
             _ipAddressInput.Text = DEFAULT_SERVER_IP;
             OnJoinButtonPressed();
         }
@@ -266,7 +273,7 @@ public partial class MultiplayerLobby : Control
         if (_isHost)
         {
             RpcId((int)peerId, nameof(SyncPlayerList), GetPlayerListData());
-            if (GameSettings.IsDebugMultiplayer) {
+            if (GameSettings.IsDebugMultiplayer && !_lobbyOnlyMode) {
                 OnStartGameButtonPressed();
             }
         }        

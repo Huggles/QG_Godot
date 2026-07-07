@@ -1,5 +1,12 @@
-{
-    "key": "f6",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Launch Two Instances (Multiplayer)"
-}
+[
+    {
+        "key": "f6",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Launch Two Instances (Multiplayer)"
+    },
+    {
+        "key": "f7",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Launch Two Instances (Lobby Only)"
+    }
+]
