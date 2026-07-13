@@ -22,7 +22,7 @@ public partial class StatusBlitzkrieg : StatusCardLogic
                 await CardPlayPool.DoChangeEvent(discardEvent);
                                 
                 List<BattleCountryChangeEvent> changeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Where(changeEvent=>changeEvent.CountryState.Units.Count == 0).ToList();
-                int selectedCountryId = await new SelectCountryHandler(changeEvents.Map(changeEvent => changeEvent.CountryId)).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, changeEvents.Map(changeEvent => changeEvent.CountryId)).BroadCast()).ResponseCountryIds[0];
 
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;

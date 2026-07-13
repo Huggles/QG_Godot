@@ -49,6 +49,8 @@ public partial class UnitState : StateObject
         EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; this.SuppliedForTurn = false; };
     }
 
+    
+
     public static UnitState ForId(int unitId)
     {
         return GameSession.Current.GameState.UnitStatesById[unitId];

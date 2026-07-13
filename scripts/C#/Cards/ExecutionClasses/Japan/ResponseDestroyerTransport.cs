@@ -24,7 +24,7 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
                     .Where(cs => battleLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
-                int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 return deployUnitChangeEvent;
             })
@@ -44,7 +44,7 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
                     .Where(cs => adjacentSeas.Any(sea => sea.ConnectedCountryStates.Contains(cs)))
                     .ToList();
-                int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 return deployUnitChangeEvent;
             })

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ using System.Threading.Tasks;
 [JsonDerivedType(typeof(HandCardsDiscardRequestHandler),    "RequestHandCardsDiscard")]
 [JsonDerivedType(typeof(CardsRequestHandler),               "RequestCards")]
 [JsonDerivedType(typeof(ForceDiscardHandCardsRequestHandler), "ForceDiscardHandCards")]
+[JsonDerivedType(typeof(SelectUnitRequestHandler),           "SelectUnit")]
+[JsonDerivedType(typeof(SelectBattleTargetRequestHandler),   "SelectBattleTarget")]
 public abstract partial class InputRequest
 {   
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -154,7 +157,44 @@ public abstract partial class InputRequest
         }
     }
 
-    
+    public class SelectUnitRequestHandler : InputRequest
+    {
+        public SelectUnitRequestHandler(Faction targetFaction, List<int> targetUnitIds) : base(targetFaction)
+        {
+            TargetUnitIds = targetUnitIds;
+        }
+
+        public override async Task Handle()
+        {
+            ResponseUnitIds.Add(await new SelectUnitHandler(TargetUnitIds).Handle());
+        }
+    }
+
+    public class SelectBattleTargetRequestHandler : InputRequest
+    {
+        [JsonConstructor]
+        public SelectBattleTargetRequestHandler(Faction targetFaction, List<int> targetCountryIds, List<int> targetUnitIds) : base(targetFaction)
+        {
+            TargetCountryIds = targetCountryIds;
+            TargetUnitIds = targetUnitIds;
+        }
+
+        public SelectBattleTargetRequestHandler(Faction targetFaction, List<BattleTarget> targets) : base(targetFaction)
+        {
+            TargetCountryIds = targets.Where(bt => bt.Type == TargetType.COUNTRY).Select(bt => bt.Id).ToList();
+            TargetUnitIds = targets.Where(bt => bt.Type == TargetType.UNIT).Select(bt => bt.Id).ToList();
+        }
+
+        public override async Task Handle()
+        {
+            SelectBattleTargetHandler handler = new SelectBattleTargetHandler(TargetCountryIds, TargetUnitIds);
+            BattleTarget result = await handler.Handle();
+            if (result.Type == TargetType.COUNTRY)
+                ResponseCountryIds.Add(result.Id);
+            else
+                ResponseUnitIds.Add(result.Id);
+        }
+    }
 
 
     

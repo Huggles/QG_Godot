@@ -11,7 +11,7 @@ public partial class EventGuadalcanal : EventCardLogic
         return new List<CardStep> {
             // Recruit an Army in New Zealand
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([(int)Country.NewZealand]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.NewZealand]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
@@ -25,7 +25,7 @@ public partial class EventGuadalcanal : EventCardLogic
                 var adjacentBuildableNavies = CountryState.BuildableSea(Faction)
                     .Where(cs => newZealand.ConnectedCountryStates.Contains(cs))
                     .ToList();
-                int selectedCountryId = await new SelectCountryHandler(adjacentBuildableNavies.ToCountryIds()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildableNavies.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

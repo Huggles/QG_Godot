@@ -90,6 +90,10 @@ public partial class UnitScene : Node2D
         {
             HideOutOfSupply();
         }
+        else if (tag == Tag.OutOfSupply || tag == Tag.SuppliedForTurn)
+        {
+            ShowOutOfSupply();
+        }
     }
 
     private void OnTagRemoved(Tag tag, Faction faction)
@@ -102,6 +106,11 @@ public partial class UnitScene : Node2D
         {
             ShowOutOfSupply();
         }
+        else if ((tag == Tag.OutOfSupply || tag == Tag.SuppliedForTurn) && UnitState.InSupply)
+        {
+            HideOutOfSupply();
+        }
+        
     }
 
     private void OnClickableSprite3DMouseLeftClickOpaque(ClickableSprite3D sprite)

@@ -41,7 +41,7 @@ public partial class EWMaltaSubmarines : EWCardLogic
 
             if (choice == CHOICE_ELIMINATE && navies.Count > 0)
             {
-                int selectedUnitId = await new SelectUnitHandler(navies).Handle();
+                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, navies).BroadCast()).ResponseUnitIds[0];
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;

@@ -16,7 +16,6 @@ public partial class GameFlow : SingletonNode<GameFlow>
             DebugUtilities.PrintPeer($"TurnStepCounter: {field}");
             if(field > 0)
             {
-                CardsPlayedThisTurnStep.Clear();
                 GameTurnStep gameTurnStep = gameTurnSteps[field - 1];
                 if(Multiplayer.IsServer())
                 {                    

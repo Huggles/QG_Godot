@@ -11,7 +11,7 @@ public partial class EventGermanSovietTreatyofFriendshipCooperationandDemarcatio
         return new List<CardStep> {
             // Recruit an Army in Russia
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([(int)Country.Russia]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.Russia]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
@@ -21,7 +21,7 @@ public partial class EventGermanSovietTreatyofFriendshipCooperationandDemarcatio
             
             // Recruit an Army in Eastern Europe
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([(int)Country.EasternEurope]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.EasternEurope]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

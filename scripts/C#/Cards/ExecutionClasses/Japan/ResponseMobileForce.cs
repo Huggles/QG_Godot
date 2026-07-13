@@ -21,7 +21,7 @@ public partial class ResponseMobileForce : ResponseCardLogic
                 var recruitableTargets = CountryState.RecruitableSea(Faction)
                     .Where(cs => cs == northPacific || northPacific.ConnectedCountryStates.Contains(cs))
                     .ToList();
-                int selectedCountryId = await new SelectCountryHandler(recruitableTargets.ToCountryIds()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitableTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

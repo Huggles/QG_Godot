@@ -38,7 +38,7 @@ public partial class EventBus : GodotObject
 
     [Signal] public delegate void GameChangeEventOccurredEventHandler();
 
-    [Signal] public delegate void CardSelectedEventHandler();
+    [Signal] public delegate void CardSelectedEventHandler(int cardId);
 
     [Signal] public delegate void CardsDrawnEventHandler(int faction, int numberOfCards);
     [Signal] public delegate void CardsDiscardedEventHandler(int faction, int numberOfCards);

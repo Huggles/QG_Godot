@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 
 /// <summary>
 /// Top-right HUD panel showing live GameFlow and CardPlayRound debug state.
@@ -112,6 +113,8 @@ public partial class DebugOverlay : PanelContainer
         _detailsToggle.AddThemeFontSizeOverride("font_size", 11);
         _detailsToggle.Pressed += OnDetailsTogglePressed;
         vbox.AddChild(_detailsToggle);
+
+
     }
 
     private void OnDetailsTogglePressed()
@@ -202,4 +205,5 @@ public partial class DebugOverlay : PanelContainer
         _reactionTriggerLabel.Text = $"RxTrigger:    {cpr.CurrentReactionTrigger?.GetType().Name ?? "—"}";
         _reactionDepthLabel.Text   = $"RxDepth:      {cpr.ReactionDepth}";
     }
+
 }

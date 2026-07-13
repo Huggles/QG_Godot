@@ -18,7 +18,7 @@ public partial class EventKingPeterEnthronedinYugoslavia : EventCardLogic
         return new List<CardStep> {
             // Eliminate an Axis Army in the Balkans
             new CardStep(this, async () => {
-                int selectedUnitId = await new SelectUnitHandler(AxisArmiesInBalkans).Handle();
+                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesInBalkans).BroadCast()).ResponseUnitIds[0];
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;

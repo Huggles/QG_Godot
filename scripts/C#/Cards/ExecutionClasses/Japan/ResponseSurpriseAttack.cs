@@ -20,7 +20,10 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
             new CardStep(this, async() => {
                 List<int> navyUnits = UnitState.AttackableNavyIds(Faction);
                 List<int> emptyCountries = CountryState.AttackableSeaIds(Faction);
-                BattleTarget target = await new SelectBattleTargetHandler(emptyCountries, navyUnits).Handle();
+                var respSea = await new InputRequest.SelectBattleTargetRequestHandler(Faction, emptyCountries, navyUnits).BroadCast();
+                BattleTarget target = respSea.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(respSea.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(respSea.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 return battleCountryChange;
             })
@@ -31,7 +34,10 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
             new CardStep(this, async() => {
                 List<int> armyUnits = UnitState.AttackableArmyIds(Faction);
                 List<int> emptyCountries = CountryState.AttackableLandIds(Faction);
-                BattleTarget target = await new SelectBattleTargetHandler(emptyCountries, armyUnits).Handle();
+                var respLand = await new InputRequest.SelectBattleTargetRequestHandler(Faction, emptyCountries, armyUnits).BroadCast();
+                BattleTarget target = respLand.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(respLand.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(respLand.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 return battleCountryChange;
             })

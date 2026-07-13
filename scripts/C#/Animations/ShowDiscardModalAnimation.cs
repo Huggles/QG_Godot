@@ -10,10 +10,9 @@ public class ShowDiscardModalAnimation : ShowCardsModalAnimation
     public ShowDiscardModalAnimation(List<int> cardIds, string title) : base(cardIds, title) {}
 
     protected override async Task AnimateForTargetFaction()
-    {
-        DebugUtilities.PrintPeer($"AnimateForTargetFaction 123: {targetFaction}");
+    {        
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(_cardIds, false);
-        await PresentationModal.Current.ShowModal(presentationItems, _title);
+        await PresentationModal.Current.ShowModal(presentationItems, _title);        
     }
 
     protected override async Task AnimateForEnemyFaction()

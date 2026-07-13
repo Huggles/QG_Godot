@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 public partial class ChangeEventQueue : SingletonNode<ChangeEventQueue>
 {
     [Signal] public delegate void ChangeEventAppliedEventHandler(int changeEventId);
+    [Signal] public delegate void QueueDrainedEventHandler();
 
     private readonly Queue<ChangeEvent> _queue = new();
     private bool _isProcessing = false;
+
+    public bool IsIdle => !_isProcessing && _queue.Count == 0;
 
     public void Enqueue(ChangeEvent changeEvent)
     {
@@ -26,5 +29,6 @@ public partial class ChangeEventQueue : SingletonNode<ChangeEventQueue>
             EmitSignal(SignalName.ChangeEventApplied, next.Id);
         }
         _isProcessing = false;
+        EmitSignal(SignalName.QueueDrained);
     }
 }

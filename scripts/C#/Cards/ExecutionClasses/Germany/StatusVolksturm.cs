@@ -24,7 +24,7 @@ public partial class StatusVolksturm : StatusCardLogic
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
                 await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");          
                 
-                int selectedCountryId = await new SelectCountryHandler(new List<int>{(int)Country.Germany}).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int>{(int)Country.Germany}).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

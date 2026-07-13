@@ -93,7 +93,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             DebugUtilities.PrintPeer($"Registering change event {ScriptName} (Id: {Id}) with current CardPlayRound");
             CardPlayRound.Current.RegisterChangeEvent(this);
         }
-        foreach (var anim in BeforeAnimations)
+        foreach (ChangeEventAnimation anim in BeforeAnimations)
         {
             if(PlayAnimations)
             {
@@ -108,19 +108,23 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         {   
             await BroadCast();
         }
-        foreach (var anim in AfterAnimations)
+        foreach (ChangeEventAnimation anim in AfterAnimations)
         {
             if(PlayAnimations)
             {
-                _ = AnimationQueue.Instance.Enqueue(anim);            
+                DebugUtilities.PrintPeer($"Enqueuing animation {anim.ScriptName} for change event {ScriptName} (Id: {Id})");
+                _ = AnimationQueue.Instance.Enqueue(anim);                            
             }
             
         }        
+        DebugUtilities.PrintPeer($"Awaiting)");
         await AnimationQueue.Instance.Start(); // ensure queue is processing (no-op if already running)
+        DebugUtilities.PrintPeer($"Continue");
         
         MultiplayerSession.Instance?.GameState.GameChangeEvents.Add(this);
         LatestAppliedId = Id;
         EventBus.Emit(EventBus.SignalName.GameChangeEventAfter, ScriptName);        
+        DebugUtilities.PrintPeer($"GameChangeEventAfter");
         
         return true;
     }

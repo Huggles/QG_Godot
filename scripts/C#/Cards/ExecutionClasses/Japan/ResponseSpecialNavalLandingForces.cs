@@ -28,7 +28,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
                     .Where(cs => _triggerNavyLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
-                int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 return deployUnitChangeEvent;
             })
@@ -45,7 +45,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
                     .Where(cs => _triggerNavyLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
-                int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 return deployUnitChangeEvent;
             })

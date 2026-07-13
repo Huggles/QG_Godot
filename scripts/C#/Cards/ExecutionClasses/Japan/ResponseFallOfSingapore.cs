@@ -19,7 +19,10 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
 
             new CardStep(this, async() => {
                 
-                BattleTarget target = await new SelectBattleTargetHandler(CountryState.ForEnum(Country.SouthChinaSea).BattleTargets(Faction)).Handle();
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, CountryState.ForEnum(Country.SouthChinaSea).BattleTargets(Faction)).BroadCast();
+                BattleTarget target = resp.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChangeEvent = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChangeEvent.IsTrigger = true;
                 return battleCountryChangeEvent;
@@ -27,9 +30,7 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
             .WithGuidance("Battle in the South China Sea")
             .WithConditions( () => { return new List<Condition> { new Condition.CountryIsAttackable([CountryState.ForEnum(Country.SouthChinaSea).Id], Faction) }; } ),
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler(
-                        new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id }
-                    ).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id }).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

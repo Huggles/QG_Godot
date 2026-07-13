@@ -12,7 +12,7 @@ public partial class EventAfrikaKorps : ResponseCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
@@ -20,7 +20,7 @@ public partial class EventAfrikaKorps : ResponseCardLogic
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)targetCountries[0]], Faction),this))
             .WithGuidance($"Recruit a {FactionState.ForEnum(targetFaction).FactionData.FactionAdjactiveLabel} army in {CountryState.ForEnum(targetCountries[0]).Label}"),
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

@@ -166,14 +166,17 @@ public partial class CardPlayRound : GodotObject
             LastChangeEvent = changeEvent;
             DebugUtilities.PrintPeer($"Applying change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
             await changeEvent.ApplyChange();
+            DebugUtilities.PrintPeer($"Finished applying change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
         }
 
         if (changeEvent.IsTrigger && !changeEvent.IsBlocked)
         {
+            DebugUtilities.PrintPeer($"Requesting after-reactions for change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
             bool anyReactionPlayed = await RequestAfterReactions(changeEvent);
             if (anyReactionPlayed)
                 await ContinueWithNextSteps();
         }
+        DebugUtilities.PrintPeer($"Finished processing change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
     }
 
     // ── Reaction chain helpers ─────────────────────────────────────────────────

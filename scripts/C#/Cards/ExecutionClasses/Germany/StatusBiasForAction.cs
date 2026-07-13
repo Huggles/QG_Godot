@@ -55,7 +55,10 @@ public partial class StatusBiasForAction : StatusCardLogic
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
                 await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
                 
-                BattleTarget battleTarget = await new SelectBattleTargetHandler(BattleTargets).Handle();
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
+                BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
                 return battleCountryChange;

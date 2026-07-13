@@ -41,8 +41,8 @@ public partial class StatusSyntheticFuel : StatusCardLogic
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
                 await CardPlayPool.DoChangeEvent(discardEvent);
-
-                int countryId = await new SelectCountryHandler(DeployTargets.ToCountryIds()).Handle();
+                
+                int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

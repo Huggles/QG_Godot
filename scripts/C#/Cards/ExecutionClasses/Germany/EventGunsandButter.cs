@@ -42,27 +42,33 @@ public partial class EventGunsAndButter : EventCardLogic
                 if (selectedCardId == buildArmyId)
                 {
                     var buildableLand = CountryState.BuildableLand(Faction);
-                    int armyCountryId = await new SelectCountryHandler(buildableLand.ToCountryIds()).Handle();
+                    int armyCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableLand.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                     result = BuildChangeEvent(new DeployUnitChangeEvent(Faction, armyCountryId, DeployType.BUILD));
                 }
                 else if (selectedCardId == buildNavyId)
                 {
                     var buildableSea = CountryState.BuildableSea(Faction);
-                    int navyCountryId = await new SelectCountryHandler(buildableSea.ToCountryIds()).Handle();
+                    int navyCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableSea.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                     result = BuildChangeEvent(new DeployUnitChangeEvent(Faction, navyCountryId, DeployType.BUILD));
                 }
                 else if (selectedCardId == landBattleId)
                 {
                     List<int> armyUnits = UnitState.AttackableArmyIds(Faction);
                     List<int> landCountries = CountryState.AttackableLandIds(Faction);
-                    BattleTarget landTarget = await new SelectBattleTargetHandler(landCountries, armyUnits).Handle();
+                    var landResp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, landCountries, armyUnits).BroadCast();
+                    BattleTarget landTarget = landResp.ResponseCountryIds.Count > 0
+                        ? new BattleTarget(landResp.ResponseCountryIds[0], TargetType.COUNTRY)
+                        : new BattleTarget(landResp.ResponseUnitIds[0], TargetType.UNIT);
                     result = BuildChangeEvent(landTarget.ToAttackChangeEvent(Faction));
                 }
                 else if (selectedCardId == seaBattleId)
                 {
                     List<int> navyUnits = UnitState.AttackableNavyIds(Faction);
                     List<int> seaCountries = CountryState.AttackableSeaIds(Faction);
-                    BattleTarget seaTarget = await new SelectBattleTargetHandler(seaCountries, navyUnits).Handle();
+                    var seaResp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, seaCountries, navyUnits).BroadCast();
+                    BattleTarget seaTarget = seaResp.ResponseCountryIds.Count > 0
+                        ? new BattleTarget(seaResp.ResponseCountryIds[0], TargetType.COUNTRY)
+                        : new BattleTarget(seaResp.ResponseUnitIds[0], TargetType.UNIT);
                     result = BuildChangeEvent(seaTarget.ToAttackChangeEvent(Faction));
                 }
                 

@@ -12,7 +12,10 @@ public partial class SeaBattle : CardLogic
             new CardStep(this, async() => {
                 List<int> navyUnits = UnitState.AttackableNavyIds(Faction);
                 List<int> emptyCountries = CountryState.AttackableSeaIds(Faction);
-                BattleTarget target = await new SelectBattleTargetHandler(emptyCountries, navyUnits).Handle();
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, emptyCountries, navyUnits).BroadCast();
+                BattleTarget target = resp.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
                 return battleCountryChange;

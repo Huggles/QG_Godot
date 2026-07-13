@@ -41,7 +41,10 @@ public partial class StatusDiveBombers : StatusCardLogic
 
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
                 await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
-                BattleTarget target = await new SelectBattleTargetHandler(battleTargets).Handle();
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, battleTargets).BroadCast();
+                BattleTarget target = resp.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChangeEvent = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChangeEvent.IsTrigger = true;
                 return battleCountryChangeEvent;

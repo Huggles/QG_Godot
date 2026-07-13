@@ -50,6 +50,7 @@ public partial class NetworkApi : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void LoadPlayers(string configuration)
     {
+        PlayerFactionRegistry.Clear();
         List<PlayerFactionAssignment> playerFactionAssignments = JsonSerializer.Deserialize<List<PlayerFactionAssignment>>(configuration);
         // Step 2: Create and register all players
         int remaining = playerFactionAssignments.Count;
@@ -138,6 +139,8 @@ public partial class NetworkApi : Node
         InputRequest dto = InputRequest.FromJson(dtoJson);
         DebugUtilities.PrintPeer($"[color={"purple"}]ReceiveInputRequest:  {dto.GetType().Name} (For me: {dto.IsForCurrentPeer})");
         DebugUtilities.PrintPeerFinest($"{dtoJson}");
+        if (!ChangeEventQueue.Instance.IsIdle)
+            await ChangeEventQueue.Instance.ToSignal(ChangeEventQueue.Instance, ChangeEventQueue.SignalName.QueueDrained);
         await dto.Execute();
 
         if (dto.IsForCurrentPeer)

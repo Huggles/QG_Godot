@@ -29,7 +29,10 @@ public partial class StatusTheRoyalNavy : StatusCardLogic
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 
-                BattleTarget battleTarget = await new SelectBattleTargetHandler(SeaBattleTargets).Handle();
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, SeaBattleTargets).BroadCast();
+                BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
                 return battleEvent;

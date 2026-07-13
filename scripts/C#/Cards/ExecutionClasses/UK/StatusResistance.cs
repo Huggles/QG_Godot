@@ -36,7 +36,10 @@ public partial class StatusResistance : StatusCardLogic
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 
-                BattleTarget battleTarget = await new SelectBattleTargetHandler(BattleTargets).Handle();
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
+                BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
                 return battleEvent;

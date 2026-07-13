@@ -23,7 +23,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler(EligibleAttackedCountries()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, EligibleAttackedCountries()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 return deployUnitChangeEvent;
             })
@@ -32,7 +32,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
 
             new CardStep(this, async() => {
                 List<int> targets = targetCountries.Where(targetCountry=>targetCountry.CanAttack(Faction)).ToList().ToUnitIds();
-                int selectedCountryId = await new SelectUnitHandler(targets).Handle();
+                int selectedCountryId = (await new InputRequest.SelectUnitRequestHandler(Faction, targets).BroadCast()).ResponseUnitIds[0];
                 BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedCountryId));
                 return battleUnitChangeEvent;
             }).WithCondition(

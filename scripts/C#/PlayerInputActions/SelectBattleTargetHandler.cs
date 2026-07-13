@@ -1,14 +1,10 @@
-using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public partial class SelectBattleTargetHandler : GodotObject, IGameEventHandler<BattleTarget>
+public partial class SelectBattleTargetHandler : IGameEventHandler<BattleTarget>
 {
-
-    [Signal] public delegate void BattleTargetSelectedEventHandler(int target, TargetType type);
-
     private List<int> unitIds;
     private List<int> countryIds;
     public SelectBattleTargetHandler(List<BattleTarget> battleTargets)
@@ -31,34 +27,26 @@ public partial class SelectBattleTargetHandler : GodotObject, IGameEventHandler<
 
     public async Task<BattleTarget> Handle()
     {
-        UnitState.ForIds(unitIds).ForEach(us => {
-            us.Tags.AddForAll(Tag.Clickable);
-        });
+        var tcs = new TaskCompletionSource<BattleTarget>();
+
+        void onCountry(int id) { tcs.TrySetResult(new BattleTarget(id, TargetType.COUNTRY)); }
+        void onUnit(int id)    { tcs.TrySetResult(new BattleTarget(id, TargetType.UNIT)); }
+
+        UnitState.ForIds(unitIds).ForEach(us => us.Tags.AddForAll(Tag.Clickable));
         CountryState.ForIds(countryIds).ForEach(cs => cs.Tags.AddForAll(Tag.Clickable));
         InputManager.Current.EnableRayTraceCasting();
-        
-        EventBus.Instance.CountryClicked += OnCountrySelected;
-        EventBus.Instance.UnitClicked += OnUnitSelected;
 
-        Variant[] results = await ToSignal(this, SignalName.BattleTargetSelected);
-        EventBus.Instance.CountryClicked -= OnCountrySelected;
-        EventBus.Instance.UnitClicked -= OnUnitSelected;
+        EventBus.Instance.CountryClicked += onCountry;
+        EventBus.Instance.UnitClicked    += onUnit;
 
+        BattleTarget result = await tcs.Task;
+
+        EventBus.Instance.CountryClicked -= onCountry;
+        EventBus.Instance.UnitClicked    -= onUnit;
         UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
         CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
         InputManager.Current.DisableRayTraceCasting();
 
-        int targetId = results[0].As<int>();
-        TargetType type = results[1].As<TargetType>();
-        return new BattleTarget(targetId, type);
-    }
-
-    public void OnCountrySelected(int unitId)
-    {
-        EmitSignal(SignalName.BattleTargetSelected, unitId, Variant.From(TargetType.COUNTRY));
-    }
-    public void OnUnitSelected(int unitId)
-    {
-        EmitSignal(SignalName.BattleTargetSelected, unitId, Variant.From(TargetType.UNIT));
+        return result;
     }
 }

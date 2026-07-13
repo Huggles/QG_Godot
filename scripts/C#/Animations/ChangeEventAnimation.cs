@@ -12,6 +12,7 @@ public abstract class ChangeEventAnimation
 
     /// <summary>Awaitable that completes when the queue finishes executing this animation.</summary>
     public Task CompletionTask => _tcs.Task;
+    public string ScriptName => GetType().ToString();
 
     /// <summary>Called by AnimationQueue after Execute() finishes (or immediately if BlockQueue is false).</summary>
     internal void Complete() => _tcs.SetResult();

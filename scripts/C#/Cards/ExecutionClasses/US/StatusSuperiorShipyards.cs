@@ -27,7 +27,7 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 ;
-                int selectedCountryId = await new SelectCountryHandler(DeployableCountryIds).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;                

@@ -19,6 +19,7 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
     protected override async Task<bool> ExecuteAsync()
     {
         GameFlow.Instance.GameTurn = NewTurn;
+        GameFlow.Instance.CardsPlayedThisTurnStep.Clear();
         await Task.CompletedTask;
         return true;
     }

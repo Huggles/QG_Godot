@@ -27,7 +27,7 @@ public partial class StatusConscription : StatusCardLogic
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
                 await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
                 
-                int selectedCountryId = await new SelectCountryHandler(BuildableLandCountries()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildableLandCountries()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

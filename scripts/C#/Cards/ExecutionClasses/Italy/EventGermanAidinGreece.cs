@@ -10,7 +10,7 @@ public partial class EventGermanAidinGreece : EWCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
@@ -18,7 +18,7 @@ public partial class EventGermanAidinGreece : EWCardLogic
             .WithCondition(()=> Condition.Build(new Condition.CountryHasEnemyUnit((int)targetCountries[0], Faction),this))
             .WithGuidance($"Eliminate an army in {CountryState.ForEnum(targetCountries[0]).Label}"),
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([targetCountries[0]]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

@@ -11,7 +11,7 @@ public partial class EventSingaporeFortified : EventCardLogic
         return new List<CardStep> {
             // Recruit an Army in Southeast Asia
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([(int)Country.SouthEastAsia]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.SouthEastAsia]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
@@ -21,7 +21,7 @@ public partial class EventSingaporeFortified : EventCardLogic
             
             // Recruit a Navy in South China Sea
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([(int)Country.SouthChinaSea]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.SouthChinaSea]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

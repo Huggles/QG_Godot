@@ -11,7 +11,7 @@ public partial class EventGeneralSmutsStrengthensTiestoUK : EventCardLogic
         return new List<CardStep> {
             // Recruit an Army in Africa
             new CardStep(this, async() => {
-                int selectedCountryId = await new SelectCountryHandler([(int)Country.Africa]).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.Africa]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
@@ -25,7 +25,7 @@ public partial class EventGeneralSmutsStrengthensTiestoUK : EventCardLogic
                 var recruitableTargets = CountryState.RecruitableSea(Faction)
                     .Where(cs => targetCountries.Contains(cs.Country))
                     .ToList();
-                int selectedCountryId = await new SelectCountryHandler(recruitableTargets.ToCountryIds()).Handle();
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitableTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;

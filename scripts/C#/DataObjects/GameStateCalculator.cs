@@ -58,12 +58,13 @@ public class GameStateCalculator
         candidates.AddRange(cardPlayedThisTurn);
 
         candidates = candidates.Distinct().ToList();
+        
 
         foreach (var cardState in candidates)
         {
-            if (cardState.CardLogic == null) continue;
+            if (cardState.CardLogic == null) { DebugUtilities.PrintPeer($"[DIAG]   {cardState.CardData?.UniqueName ?? "?"} skipped - CardLogic is null"); continue; }
 
-            bool canActivate = cardState.CardLogic.CanBeActivated(); 
+            bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
             {           
                 DebugUtilities.PrintPeer($"Card {cardState.CardData.UniqueName} is activatable for {faction}");                 
@@ -119,6 +120,7 @@ public class GameStateCalculator
     private static void CalculateInSupplyForFaction(Faction faction)
     {
         ClearTagsForFaction(faction, Tag.InSupply);
+        ClearTagsForFaction(faction, Tag.OutOfSupply);
         
         var factionState = FactionState.ForEnum(faction);
         var pathFindingService = new PathFindingService(new PathFindingNodeDefault(), faction);
@@ -127,7 +129,13 @@ public class GameStateCalculator
         foreach (UnitState unit in activeUnits)
         {
             if (CalculateSupplyForUnit(pathFindingService, unit.Id, faction))
+            {
                 unit.AddTag(Tag.InSupply, faction);
+            } 
+            else
+            {
+                unit.AddTag(Tag.OutOfSupply, faction);
+            }
         }
     }
 

@@ -494,7 +494,7 @@ public partial class MultiplayerLobby : Control
         var panel = new PanelContainer();
         var style = new StyleBoxFlat
         {
-            BgColor                 = new Color(0.08f, 0.10f, 0.18f, 0.85f),
+            BgColor                 = new Color(0.15f, 0.15f, 0.15f, 0.55f),
             CornerRadiusTopLeft     = 4,
             CornerRadiusTopRight    = 4,
             CornerRadiusBottomLeft  = 4,
@@ -520,6 +520,7 @@ public partial class MultiplayerLobby : Control
         // ── Faction flags ─────────────────────────────────────────────────
         var flagsBox = new HBoxContainer();
         flagsBox.AddThemeConstantOverride("separation", 6);
+        flagsBox.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
         hbox.AddChild(flagsBox);
 
         _factionButtons[peerId] = new Dictionary<Faction, TextureButton>();
@@ -530,19 +531,20 @@ public partial class MultiplayerLobby : Control
             // Visual separator between the Axis block (GER/JAP/ITA) and the Allies block.
             if (!separatorAdded && !AxisSet.Contains(faction))
             {
-                flagsBox.AddChild(new VSeparator { CustomMinimumSize = new Vector2(2, 48) });
+                flagsBox.AddChild(new VSeparator { CustomMinimumSize = new Vector2(2, 96) });
                 separatorAdded = true;
             }
 
             var tex = GD.Load<Texture2D>(FlagPaths[faction]);
             var btn = new TextureButton
             {
-                TextureNormal     = tex,
-                TextureDisabled   = tex,    // colour state is driven entirely by Modulate
-                StretchMode       = TextureButton.StretchModeEnum.KeepAspectCentered,
-                IgnoreTextureSize = true,
-                CustomMinimumSize = new Vector2(72, 52),
-                TooltipText       = FactionNames[faction]
+                TextureNormal        = tex,
+                TextureDisabled      = tex,    // colour state is driven entirely by Modulate
+                StretchMode          = TextureButton.StretchModeEnum.KeepAspectCentered,
+                IgnoreTextureSize    = true,
+                CustomMinimumSize    = new Vector2(0, 96),
+                SizeFlagsHorizontal  = Control.SizeFlags.ExpandFill,
+                TooltipText          = FactionNames[faction]
             };
 
             // Capture loop variables for the closure.

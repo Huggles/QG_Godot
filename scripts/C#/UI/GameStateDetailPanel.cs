@@ -63,6 +63,58 @@ public partial class GameStateDetailPanel : PanelContainer
 
     // ── Content building ──────────────────────────────────────────────────────
 
+    private void AddUnitsSection()
+    {
+        var allUnits = UnitState.AllUnitStates
+            .Where(u => u.IsDeployedToCountry)
+            .ToList();
+
+        int total = allUnits.Count;
+
+        VBoxContainer unitsBody;
+        AddCollapsibleSection(
+            _content, $"Units ({total})",
+            new Color(0.85f, 0.75f, 0.45f, 1f), 12,
+            indent: 0, startExpanded: true, sectionKey: "Units",
+            out unitsBody);
+
+        if (total == 0)
+        {
+            unitsBody.AddChild(MakeLabel("  no deployed units", new Color(0.55f, 0.55f, 0.55f, 1f), 10));
+            return;
+        }
+
+        var byFaction = allUnits
+            .GroupBy(u => u.Faction)
+            .OrderBy(g => g.Key.ToString());
+
+        foreach (var group in byFaction)
+        {
+            Faction faction = group.Key;
+            var units = group.OrderBy(u => u.Type.ToString()).ToList();
+
+            VBoxContainer factionBody;
+            AddCollapsibleSection(
+                unitsBody, $"{faction} ({units.Count})",
+                new Color(0.95f, 0.8f, 0.25f, 1f), 11,
+                indent: 1, startExpanded: true, sectionKey: $"Units/{faction}",
+                out factionBody);
+
+            foreach (var unit in units)
+            {
+                var tags = unit.Tags.GetTagsForFaction(unit.Faction);
+                string tagStr = tags.Any() ? string.Join(", ", tags) : "—";
+                string countryName = unit.CountryState?.Name ?? "?";
+
+                var row = MakeLabel(
+                    $"    [{unit.Id}] {unit.Type} @ {countryName}  [{tagStr}]",
+                    new Color(0.82f, 0.82f, 0.82f, 1f), 10);
+                row.AutowrapMode = TextServer.AutowrapMode.Off;
+                factionBody.AddChild(row);
+            }
+        }
+    }
+
     private void AddFactionSection(Faction faction)
     {
         DeckState deck = DeckState.ForFaction(faction);
@@ -89,10 +141,45 @@ public partial class GameStateDetailPanel : PanelContainer
         AddCardPile(cardsBody, "Response", deck.ResponseCardStates,  faction, fk + "/Cards");
 
         AddFactionWorldSection(factionBody, faction, fk);
+        AddFactionUnitsSection(factionBody, faction, fk);
 
         var spacer = new Control();
         spacer.CustomMinimumSize = new Vector2(0, 4);
         _content.AddChild(spacer);
+    }
+
+    private void AddFactionUnitsSection(VBoxContainer parent, Faction faction, string factionKey)
+    {
+        var units = UnitState.AllUnitStates
+            .Where(u => u.Faction == faction && u.IsDeployedToCountry)
+            .OrderBy(u => u.Type.ToString())
+            .ToList();
+
+        VBoxContainer unitsBody;
+        AddCollapsibleSection(
+            parent, $"Units ({units.Count})",
+            new Color(0.85f, 0.75f, 0.45f, 1f), 11,
+            indent: 1, startExpanded: false, sectionKey: factionKey + "/Units",
+            out unitsBody);
+
+        if (units.Count == 0)
+        {
+            unitsBody.AddChild(MakeLabel("  no deployed units", new Color(0.55f, 0.55f, 0.55f, 1f), 10));
+            return;
+        }
+
+        foreach (var unit in units)
+        {
+            var tags = unit.Tags.GetTagsForFaction(unit.Faction);
+            string tagStr = tags.Any() ? string.Join(", ", tags) : "—";
+            string countryName = unit.CountryState?.Name ?? "?";
+
+            var row = MakeLabel(
+                $"  [{unit.Id}] {unit.Type} @ {countryName}  [{tagStr}]",
+                new Color(0.82f, 0.82f, 0.82f, 1f), 10);
+            row.AutowrapMode = TextServer.AutowrapMode.Off;
+            unitsBody.AddChild(row);
+        }
     }
 
     private void AddFactionWorldSection(VBoxContainer parent, Faction faction, string factionKey)
