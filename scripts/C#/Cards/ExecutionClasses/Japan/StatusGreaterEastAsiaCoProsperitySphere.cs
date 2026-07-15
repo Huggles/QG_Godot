@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class StatusGreaterEastAsiaCoProsperitySphere : StatusCardLogic, IStatusVictoryPoints
+public partial class StatusGreaterEastAsiaCoProsperitySphere : StatusCardLogic, IVPModifier
 {
     public virtual VPEntry AddVictoryPoints()
     {

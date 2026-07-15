@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class StatusAbundantResources : StatusCardLogic, IStatusVictoryPoints
+public partial class StatusAbundantResources : StatusCardLogic, IVPModifier
 {
     public virtual VPEntry AddVictoryPoints()
     {

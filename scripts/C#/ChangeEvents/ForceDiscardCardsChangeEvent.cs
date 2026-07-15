@@ -39,13 +39,7 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
 
     private void ApplyDiscardModifiers()
     {
-        var allStatusCardLogics = GameSession.Current.GameState.PlayableFactionStates
-            .SelectMany(fs => DeckState.ForFaction(fs.FactionData.Faction).StatusCardStates)
-            .Where(cs => cs.IsPlayed)
-            .Select(cs => cs.CardLogic)
-            .OfType<IDiscardModifier>();
-
-        foreach (var modifier in allStatusCardLogics)
+        foreach (IDiscardModifier modifier in ModifierRegistry.GetAll<IDiscardModifier>())
         {
             int delta = modifier.ModifyDiscard(this);
             if (delta != 0)

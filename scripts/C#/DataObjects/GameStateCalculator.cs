@@ -229,11 +229,8 @@ public class GameStateCalculator
 
     private static void ApplyCountryTagModifiersForFaction(Faction faction)
     {
-        foreach (CardState cardState in DeckState.ForFaction(faction).StatusCardStates)
-        {
-            if (cardState.CardLogic is ICountryTagModifier modifier)
-                modifier.ApplyTagModifiers(faction);
-        }
+        foreach (ICountryTagModifier modifier in ModifierRegistry.GetAll<ICountryTagModifier>())
+            modifier.ApplyTagModifiers(faction);
     }
 
     private static void ClearTagsForFaction(Faction faction, Tag tag)    {

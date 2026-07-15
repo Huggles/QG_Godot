@@ -3,7 +3,7 @@
 /// (e.g. Buildable, Recruitable) after the standard GameStateCalculator pass.
 /// Called once per faction recalculation, only for cards currently in the status zone.
 /// </summary>
-public interface ICountryTagModifier
+public interface ICountryTagModifier : IModifier
 {
     void ApplyTagModifiers(Faction faction);
 }

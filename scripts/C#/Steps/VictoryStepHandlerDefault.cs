@@ -47,12 +47,9 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     }
     public void HandleStatusCardVictoryPoints()
     {
-        foreach (CardState cardState in DeckState.ForFaction(Faction).StatusCardStates)
+        foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>())
         {
-            if (cardState.CardLogic.CanBeActivated() && cardState.CardLogic is IStatusVictoryPoints statusVictoryPoints)
-            {             
-                vpTurnSummary.AddScore(statusVictoryPoints.AddVictoryPoints());                
-            }
+            vpTurnSummary.AddScore(modifier.AddVictoryPoints());
         }
     }
 

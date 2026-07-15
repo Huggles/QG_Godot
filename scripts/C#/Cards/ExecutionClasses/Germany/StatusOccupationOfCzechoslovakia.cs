@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class StatusOccupationOfCzechoslovakia : StatusCardLogic, IStatusVictoryPoints
+public partial class StatusOccupationOfCzechoslovakia : StatusCardLogic, IVPModifier
 {
     public virtual VPEntry AddVictoryPoints()
     {

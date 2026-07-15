@@ -4,7 +4,7 @@ using Godot;
 /// Implemented by status cards that passively modify a ForceDiscardCardsChangeEvent
 /// before it executes. Modifiers are applied automatically — no player activation needed.
 /// </summary>
-public interface IDiscardModifier
+public interface IDiscardModifier : IModifier
 {
     /// <summary>
     /// Return the delta to apply to NumberOfCards (negative = reduce, positive = increase).

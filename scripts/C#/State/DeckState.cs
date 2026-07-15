@@ -129,7 +129,11 @@ public partial class DeckState : StateObject
         CardState cardState = CardState.ForId(cardId);
 
         if (cardState.CardData.CardType == CardType.STATUS)
+        {
             StatusCardIds.Add(cardId);
+            if (cardState.CardLogic is IModifier modifier)
+                ModifierRegistry.Register(modifier);
+        }
         else if (cardState.CardData.CardType == CardType.RESPONSE)
             ResponseCardIds.Add(cardId);
         else
@@ -150,6 +154,9 @@ public partial class DeckState : StateObject
         else if (StatusCardIds.Contains(cardId))
         {
             StatusCardIds.Remove(cardId);
+            CardState statusCard = CardState.ForId(cardId);
+            if (statusCard.CardLogic is IModifier modifier)
+                ModifierRegistry.Unregister(modifier);
         }
         else if (ResponseCardIds.Contains(cardId))
         {

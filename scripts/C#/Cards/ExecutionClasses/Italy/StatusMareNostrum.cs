@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class StatusMareNostrum : StatusCardLogic, IStatusVictoryPoints
+public partial class StatusMareNostrum : StatusCardLogic, IVPModifier
 {
     public virtual VPEntry AddVictoryPoints()
     {
