@@ -682,7 +682,7 @@
 	{
 		"UniqueName": "ResponseDefenseoftheMotherland",
 		"Number": "90",
-		"Type": "EVENT",
+		"Type": "RESPONSE",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseDefenseoftheMotherland",
