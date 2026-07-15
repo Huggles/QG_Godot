@@ -1,11 +1,38 @@
-using System;
 using System.Collections.Generic;
-using Godot;
+using System.Linq;
+using System.Threading.Tasks;
 
 public partial class StatusWomenConscripts : StatusCardLogic
 {
-public override List<CardStep> OnActivate()
+    protected override List<Condition> CardTriggers()
     {
-        return new List<CardStep> {}; 
+        return new List<Condition> {
+            Condition.Build(new Condition.CustomCondition(() =>
+                CardPlayPool.GetChangeEvents<PlayCardChangeEvent>().Any(ce =>
+                    ce.TriggeringFaction == Faction &&
+                    CardState.ForId(ce.SourceCardId).CardData.CardType == CardType.BUILD_ARMY &&
+                    DeckState.ForFaction(Faction).DiscardedCardIds.Contains(ce.SourceCardId))
+            ), this)
+        };
+    }
+
+    public override List<CardStep> OnActivate()
+    {
+        return new List<CardStep> {
+            new CardStep(this, async () => {
+                DeckState deckState = DeckState.ForFaction(Faction);
+                PlayCardChangeEvent playEvent = CardPlayPool.GetChangeEvents<PlayCardChangeEvent>()
+                    .Last(ce =>
+                        ce.TriggeringFaction == Faction &&
+                        CardState.ForId(ce.SourceCardId).CardData.CardType == CardType.BUILD_ARMY &&
+                        deckState.DiscardedCardIds.Contains(ce.SourceCardId));
+
+                RecycleCardChangeEvent recycleEvent = BuildChangeEvent(new RecycleCardChangeEvent(Faction, Faction, playEvent.SourceCardId, RecycleDestination.TopOfDeck));
+                recycleEvent.IsTrigger = false;
+                await recycleEvent.ApplyChange();
+                return null;
+            })
+            .WithGuidance("Place Build Army card on top of draw deck")
+        };
     }
 }

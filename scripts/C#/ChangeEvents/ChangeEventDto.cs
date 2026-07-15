@@ -21,6 +21,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(DrawCardByNameChangeEventDto),   "DrawCardByName")]
 [JsonDerivedType(typeof(ChangeStepChangeEventDto),       "ChangeStep")]
 [JsonDerivedType(typeof(ChangeRoundChangeEventDto),      "ChangeRound")]
+[JsonDerivedType(typeof(RecycleCardChangeEventDto),      "RecycleCard")]
 public abstract class ChangeEventDto
 {
     public int Id { get; set; }
@@ -119,4 +120,10 @@ public class ChangeStepChangeEventDto : ChangeEventDto
 public class ChangeRoundChangeEventDto : ChangeEventDto
 {
     public int NewTurn { get; set; }
+}
+
+public class RecycleCardChangeEventDto : ChangeEventDto
+{
+    public int CardId { get; set; }
+    public RecycleDestination Destination { get; set; }
 }

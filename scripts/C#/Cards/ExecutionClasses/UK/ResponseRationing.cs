@@ -26,12 +26,9 @@ public partial class ResponseRationing : ResponseCardLogic
                         ce.TriggeringFaction == Faction &&
                         deckState.DiscardedCardIds.Contains(ce.SourceCardId));
 
-                deckState.DiscardedCardIds.Remove(playEvent.SourceCardId);
-                deckState.DeckCardIds.Add(playEvent.SourceCardId);
-                deckState.ShuffleDeck();
-
-                PlayerActionLabel.ShowText("Rationing: Card shuffled back into draw deck", Faction);
-                await Task.Delay(GameSettings.DurationMedium);
+                RecycleCardChangeEvent recycleEvent = BuildChangeEvent(new RecycleCardChangeEvent(Faction, Faction, playEvent.SourceCardId, RecycleDestination.ShuffleIntoDeck));
+                recycleEvent.IsTrigger = false;
+                await recycleEvent.ApplyChange();
                 return null;
             })
             .WithGuidance("Shuffle last played card into your draw deck")
