@@ -162,6 +162,11 @@ public class GameStateCalculator
             bool stepFinished = step.StepFinished;
             bool meetConditions = step.MeetAllConditions;
             bool isExecutable = !stepFinished && step.MeetAllConditions;
+
+            if (step.CardLogic.CardState.CardName == "EventTransSiberianRailroad")
+            {
+                DebugUtilities.PrintPeer($"[DIAG]   {step.CardLogic.CardState.CardData?.UniqueName ?? "?"} skipped - TransSiberianRailroad is not activatable on turn 1");
+            }
             if (isExecutable) 
                 step.Tags.Add(Tag.IsExecutable, faction);
         });

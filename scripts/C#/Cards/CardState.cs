@@ -31,7 +31,8 @@ public partial class CardState : StateObject
         Type cardType = Type.GetType(CardData.ExecutionClass);
         if(cardType != null) {            
             CardLogic cardLogic = (CardLogic)Activator.CreateInstance(cardType);
-            cardLogic.CardState = this;            
+            cardLogic.CardState = this;
+            cardLogic.CardSteps = cardLogic.OnActivate();
             return cardLogic;
         }
         DebugUtilities.PrintPeerError($"Could not find card logic class for: {CardData.ExecutionClass}");

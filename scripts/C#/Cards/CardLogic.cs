@@ -61,8 +61,7 @@ public abstract partial class CardLogic : GodotObject
     public List<CardStep> ExecutableCardSteps => CardSteps.Where(step => step.HasTagForAny(Tag.IsExecutable)).ToList();
 
     public CardLogic()
-    {        
-        CardSteps = OnActivate();
+    {   
         EventBus.Instance.NewTurnStarted += OnNewTurnStarted;
     }    
 

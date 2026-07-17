@@ -121,10 +121,9 @@ public partial class CardPlayRound : GodotObject
         if (!introWasBlocked)
         {
             List<CardStep> allSteps = cardLogic.CardSteps;
-            List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
-
-            if (nextSteps.Count > 0)
+            while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0)
             {
+                List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
                 ChangeEvent stepResult = await nextSteps[0].Execute();
                 if (stepResult != null)
                     await DoChangeEvent(stepResult);

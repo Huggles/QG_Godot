@@ -1,5 +1,5 @@
 {
-  "startingFaction": "GERMANY",
+  "startingFaction": "SOVIET",
   "factions": {
     "GERMANY": {
       "unitDeployments": [
@@ -63,7 +63,9 @@
       "initialCards": [
         { "name": "ResponseLeningrad" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [
+        { "name": "EventTransSiberianRailroad" }
+      ]
     },
     "ITALY": {
       "unitDeployments": [
