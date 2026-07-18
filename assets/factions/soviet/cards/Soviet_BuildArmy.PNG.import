@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/soviet/cards/Soviet_BuildArmy.PNG"
+source_file="res://assets/factions/soviet/cards/Soviet_BuildArmy.png"
 dest_files=["res://.godot/imported/Soviet_BuildArmy.PNG-5a69f7174e49fd4eec0141bcb1d0a2c2.ctex"]
 
 [params]

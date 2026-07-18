@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/japan/cards/Japan_EconomicWarfare.PNG"
+source_file="res://assets/factions/japan/cards/Japan_EconomicWarfare.png"
 dest_files=["res://.godot/imported/Japan_EconomicWarfare.PNG-22598dad8ebd6cbe3b7eeb876b1b478c.ctex"]
 
 [params]

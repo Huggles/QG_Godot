@@ -82,6 +82,11 @@ public partial class GameSettings : SingletonNode<GameSettings>
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
             DebugMultiplayer  = config.GetValue(Section, "debug_multiplayer", false).As<bool>();
         }
+
+        // Command-line user arg overrides the config file (e.g. launched via quick_launch.ps1)
+        if (OS.GetCmdlineUserArgs().Contains("is_debug_multiplayer=true"))
+            DebugMultiplayer = true;
+
         Save();
     }
 

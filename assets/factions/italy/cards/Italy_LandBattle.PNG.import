@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_LandBattle.PNG"
+source_file="res://assets/factions/italy/cards/Italy_LandBattle.png"
 dest_files=["res://.godot/imported/Italy_LandBattle.PNG-f8ed4f65266ab8f691ac1dbff058a854.ctex"]
 
 [params]

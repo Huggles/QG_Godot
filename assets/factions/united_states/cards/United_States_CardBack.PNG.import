@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/united_states/cards/United_States_CardBack.PNG"
+source_file="res://assets/factions/united_states/cards/United_States_CardBack.png"
 dest_files=["res://.godot/imported/United_States_CardBack.PNG-deb400c0806f58a094577807a051a451.ctex"]
 
 [params]

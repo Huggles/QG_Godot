@@ -59,14 +59,6 @@ public partial class EventTransSiberianRailroad : EventCardLogic
             deployEvent.IsTrigger = true;
             return deployEvent;
         })
-        .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-        {
-            var eligible = GetSovietArmyIds
-                .Where(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0)
-                .ToList();
-            return eligible.Count > 0 && CountryState.BuildableLand(Faction).Count > 0;
-        }), this))
         .WithGuidance("Select a Soviet Army to eliminate and rebuild");
-
     }
 }

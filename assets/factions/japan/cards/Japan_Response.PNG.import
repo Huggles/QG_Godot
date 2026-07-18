@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/japan/cards/Japan_Response.PNG"
+source_file="res://assets/factions/japan/cards/Japan_Response.png"
 dest_files=["res://.godot/imported/Japan_Response.PNG-3736256febd949c534e15ebaf7396185.ctex"]
 
 [params]

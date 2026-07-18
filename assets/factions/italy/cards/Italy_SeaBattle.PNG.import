@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_SeaBattle.PNG"
+source_file="res://assets/factions/italy/cards/Italy_SeaBattle.png"
 dest_files=["res://.godot/imported/Italy_SeaBattle.PNG-9f7302affc52f3dc9a4fa5da7c8be97c.ctex"]
 
 [params]

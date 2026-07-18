@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/united_states/cards/United_States_BuildNavy.PNG"
+source_file="res://assets/factions/united_states/cards/United_States_BuildNavy.png"
 dest_files=["res://.godot/imported/United_States_BuildNavy.PNG-d7f383abe7d25aef863d291778060fed.ctex"]
 
 [params]

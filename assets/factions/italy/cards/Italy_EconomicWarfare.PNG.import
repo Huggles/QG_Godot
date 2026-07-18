@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://assets/factions/italy/cards/Italy_EconomicWarfare.PNG"
+source_file="res://assets/factions/italy/cards/Italy_EconomicWarfare.png"
 dest_files=["res://.godot/imported/Italy_EconomicWarfare.PNG-9efeff1997569fb90bb0418749c2f85f.ctex"]
 
 [params]

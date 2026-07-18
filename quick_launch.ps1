@@ -15,7 +15,7 @@ Write-Host "Build successful! Launching two instances..." -ForegroundColor Green
 $godot = $null
 $attempts = @(
     "godot",
-    "C:\Users\Hugo\Downloads\Godot_v4.5-stable_mono_win64\Godot_v4.5-stable_mono_win64\Godot_v4.5-stable_mono_win64_console.exe"
+    "C:\Users\Huggles\Desktop\Godot\Godot_v4.7.1-stable_mono_win64.exe"
 )
 
 foreach ($path in $attempts) {
@@ -40,10 +40,10 @@ if ($godot) {
     Write-Host "Found Godot: $godot" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Starting Instance 1 (Host)..." -ForegroundColor Yellow
-    Start-Process $godot -ArgumentList "--path", (Get-Location), "--", "instance=1"
+    Start-Process $godot -ArgumentList "--path", (Get-Location), "--", "instance=1", "is_debug_multiplayer=true"
     Start-Sleep -Seconds 2
     Write-Host "Starting Instance 2 (Client)..." -ForegroundColor Yellow
-    Start-Process $godot -ArgumentList "--path", (Get-Location), "--", "instance=2"
+    Start-Process $godot -ArgumentList "--path", (Get-Location), "--", "instance=2", "is_debug_multiplayer=true"
     Write-Host ""
     Write-Host "Instructions:" -ForegroundColor Cyan
     Write-Host "  Instance 1: Click 'Host Game'" -ForegroundColor White
