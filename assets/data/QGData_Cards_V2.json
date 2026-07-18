@@ -922,7 +922,7 @@
 	{
 		"UniqueName": "EWRegiaMarinaClosesShippingLanes",
 		"Number": "114",
-		"Type": "EVENT",
+		"Type": "EW",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWRegiaMarinaClosesShippingLanes",
@@ -932,7 +932,7 @@
 	{
 		"UniqueName": "ResponseMonteCassino",
 		"Number": "115",
-		"Type": "EW",
+		"Type": "RESPONSE",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseMonteCassino",
