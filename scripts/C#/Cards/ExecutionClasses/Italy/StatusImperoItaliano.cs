@@ -9,7 +9,8 @@ public partial class StatusImperoItaliano : StatusCardLogic, IVPModifier
     {
         List<Country> countries = [Country.NorthAfrica, Country.Africa, Country.MiddleEast];
         List<Faction> factions = [Faction.GERMANY, Faction.JAPAN, Faction.ITALY];
-        int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum());        
+        int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates()
+            .Count(unitState => countries.Contains(unitState.CountryState.Country) && unitState.Type == UnitType.ARMY));
         return new VPEntry(score, $"{score} victory points for axis armies in {CountryState.ForEnum(countries[0]).Label},  {CountryState.ForEnum(countries[1]).Label}, and {CountryState.ForEnum(countries[2]).Label}");
     }
 

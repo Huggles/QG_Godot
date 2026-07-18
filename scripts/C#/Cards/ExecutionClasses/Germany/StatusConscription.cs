@@ -12,7 +12,9 @@ public partial class StatusConscription : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.IsPlayCardStep(), this)
+            Condition.Build(new Condition.IsPlayCardStep(), this),
+            Condition.Build(new Condition.IsFactionTurn(Faction), this),
+            Condition.Build(new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction)), this)
         };
     }
 
@@ -20,6 +22,10 @@ public partial class StatusConscription : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {
+                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
+                spendEvent.IsTrigger = false;
+                await spendEvent.ApplyChange();
+
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();

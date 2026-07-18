@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bf56uqmhc5ni"
-path="res://.godot/imported/Soviet_SeaBattle.PNG-cb678eae974ff5c82333a35c41dcaaea.ctex"
+path="res://.godot/imported/Soviet_SeaBattle.png-5807c9efa61cc961ec48012a40e6d92d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/soviet/cards/Soviet_SeaBattle.png"
-dest_files=["res://.godot/imported/Soviet_SeaBattle.PNG-cb678eae974ff5c82333a35c41dcaaea.ctex"]
+dest_files=["res://.godot/imported/Soviet_SeaBattle.png-5807c9efa61cc961ec48012a40e6d92d.ctex"]
 
 [params]
 

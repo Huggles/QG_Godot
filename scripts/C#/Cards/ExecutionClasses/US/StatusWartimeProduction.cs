@@ -23,15 +23,20 @@ public partial class StatusWartimeProduction : StatusCardLogic
 
     public override List<CardStep> OnActivate()
     {
-        //TODO
         return new List<CardStep> {
             new CardStep(this, async() => {
-                ;
+                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
+                discardEvent.IsTrigger = false;
+                await discardEvent.ApplyChange();
+
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
+                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
+
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;                
-            }).WithGuidance("Build an army")
+            }).WithGuidance("Discard top 1 deck card to build an additional Army")
         };
     }
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3302hhadd1xu"
-path="res://.godot/imported/Soviet_BuildArmy.PNG-5a69f7174e49fd4eec0141bcb1d0a2c2.ctex"
+path="res://.godot/imported/Soviet_BuildArmy.png-bee7ff53338cac66f66e162e8543ce9f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/soviet/cards/Soviet_BuildArmy.png"
-dest_files=["res://.godot/imported/Soviet_BuildArmy.PNG-5a69f7174e49fd4eec0141bcb1d0a2c2.ctex"]
+dest_files=["res://.godot/imported/Soviet_BuildArmy.png-bee7ff53338cac66f66e162e8543ce9f.ctex"]
 
 [params]
 

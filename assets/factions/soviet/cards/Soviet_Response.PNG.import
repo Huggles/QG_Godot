@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://br8evssu010b7"
-path="res://.godot/imported/Soviet_Response.PNG-a31adec8c0007ffbbfddf23f145edbc3.ctex"
+path="res://.godot/imported/Soviet_Response.png-d68653a924ffa27e2bc2260522bccffe.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/soviet/cards/Soviet_Response.png"
-dest_files=["res://.godot/imported/Soviet_Response.PNG-a31adec8c0007ffbbfddf23f145edbc3.ctex"]
+dest_files=["res://.godot/imported/Soviet_Response.png-d68653a924ffa27e2bc2260522bccffe.ctex"]
 
 [params]
 

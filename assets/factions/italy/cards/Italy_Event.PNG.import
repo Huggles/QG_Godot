@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dldl3ub0m73yb"
-path="res://.godot/imported/Italy_Event.PNG-b47b9bae11795d52bf3c96778466b1e8.ctex"
+path="res://.godot/imported/Italy_Event.png-d0224a587f5898b78aec48f5c0cf4ec9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/italy/cards/Italy_Event.png"
-dest_files=["res://.godot/imported/Italy_Event.PNG-b47b9bae11795d52bf3c96778466b1e8.ctex"]
+dest_files=["res://.godot/imported/Italy_Event.png-d0224a587f5898b78aec48f5c0cf4ec9.ctex"]
 
 [params]
 

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bf2cyn8gg5h0f"
-path="res://.godot/imported/United_States_Event.PNG-fa856287ff2612e743179a6e806edd1e.ctex"
+path="res://.godot/imported/United_States_Event.png-72612b7a52aca75ab4a25a2692b696c5.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/united_states/cards/United_States_Event.png"
-dest_files=["res://.godot/imported/United_States_Event.PNG-fa856287ff2612e743179a6e806edd1e.ctex"]
+dest_files=["res://.godot/imported/United_States_Event.png-72612b7a52aca75ab4a25a2692b696c5.ctex"]
 
 [params]
 

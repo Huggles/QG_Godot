@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b46x7xtosuo1v"
-path="res://.godot/imported/Italy_SeaBattle.PNG-9f7302affc52f3dc9a4fa5da7c8be97c.ctex"
+path="res://.godot/imported/Italy_SeaBattle.png-4683d0c4ae963cc08b410383c84cd609.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/italy/cards/Italy_SeaBattle.png"
-dest_files=["res://.godot/imported/Italy_SeaBattle.PNG-9f7302affc52f3dc9a4fa5da7c8be97c.ctex"]
+dest_files=["res://.godot/imported/Italy_SeaBattle.png-4683d0c4ae963cc08b410383c84cd609.ctex"]
 
 [params]
 

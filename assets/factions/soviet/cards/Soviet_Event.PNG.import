@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cpbrmxk8dpy80"
-path="res://.godot/imported/Soviet_Event.PNG-83a40c1baf455e18b21f070a61c0706f.ctex"
+path="res://.godot/imported/Soviet_Event.png-63bb987b7e8e60c56f422eb58e958a16.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/soviet/cards/Soviet_Event.png"
-dest_files=["res://.godot/imported/Soviet_Event.PNG-83a40c1baf455e18b21f070a61c0706f.ctex"]
+dest_files=["res://.godot/imported/Soviet_Event.png-63bb987b7e8e60c56f422eb58e958a16.ctex"]
 
 [params]
 

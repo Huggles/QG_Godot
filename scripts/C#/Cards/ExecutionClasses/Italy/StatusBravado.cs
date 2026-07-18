@@ -28,6 +28,10 @@ public partial class StatusBravado : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
+                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
+                spendEvent.IsTrigger = false;
+                await spendEvent.ApplyChange();
+
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
@@ -39,11 +43,6 @@ public partial class StatusBravado : StatusCardLogic
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-
-                if (!GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(Faction))
-                    GameFlow.Instance.CardsPlayedThisTurnStep[Faction] = 1;
-                else
-                    GameFlow.Instance.CardsPlayedThisTurnStep[Faction] += 1;
 
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;

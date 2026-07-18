@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgylv63ggf1ro"
-path="res://.godot/imported/Japan_Status.PNG-9036a58309501642b80db89deaabb032.ctex"
+path="res://.godot/imported/Japan_Status.png-06b507dd3f4cae983bdb5934eab6c763.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/japan/cards/Japan_Status.png"
-dest_files=["res://.godot/imported/Japan_Status.PNG-9036a58309501642b80db89deaabb032.ctex"]
+dest_files=["res://.godot/imported/Japan_Status.png-06b507dd3f4cae983bdb5934eab6c763.ctex"]
 
 [params]
 

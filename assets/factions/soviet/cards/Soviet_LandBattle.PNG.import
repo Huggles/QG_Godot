@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ccuu7bi2p7kbr"
-path="res://.godot/imported/Soviet_LandBattle.PNG-ed7c50fc659cdd371a20082c719b7747.ctex"
+path="res://.godot/imported/Soviet_LandBattle.png-787f7ff2717c6d99d658d01ee9ab05df.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/soviet/cards/Soviet_LandBattle.png"
-dest_files=["res://.godot/imported/Soviet_LandBattle.PNG-ed7c50fc659cdd371a20082c719b7747.ctex"]
+dest_files=["res://.godot/imported/Soviet_LandBattle.png-787f7ff2717c6d99d658d01ee9ab05df.ctex"]
 
 [params]
 

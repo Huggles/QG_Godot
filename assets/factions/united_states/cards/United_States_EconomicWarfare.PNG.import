@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c7ofyb438cvp0"
-path="res://.godot/imported/United_States_EconomicWarfare.PNG-bec909b86f82311dd41a09ada4e70ff5.ctex"
+path="res://.godot/imported/United_States_EconomicWarfare.png-cf3a8138e8d23a08ea8d568da687525c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/factions/united_states/cards/United_States_EconomicWarfare.png"
-dest_files=["res://.godot/imported/United_States_EconomicWarfare.PNG-bec909b86f82311dd41a09ada4e70ff5.ctex"]
+dest_files=["res://.godot/imported/United_States_EconomicWarfare.png-cf3a8138e8d23a08ea8d568da687525c.ctex"]
 
 [params]
 

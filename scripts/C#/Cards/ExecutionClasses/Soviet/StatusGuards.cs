@@ -12,6 +12,8 @@ public partial class StatusGuards : StatusCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.IsPlayCardStep(), this),
+            Condition.Build(new Condition.IsFactionTurn(Faction), this),
+            Condition.Build(new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction)), this),
             Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction).HandCardIds.Count >= 2), this),
             Condition.Build(new Condition.CustomCondition(() =>
@@ -25,6 +27,10 @@ public partial class StatusGuards : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
+                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
+                spendEvent.IsTrigger = false;
+                await spendEvent.ApplyChange();
+
                 ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();

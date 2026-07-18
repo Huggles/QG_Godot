@@ -832,7 +832,7 @@
 	{
 		"UniqueName": "StatusImperoItaliano",
 		"Number": "105",
-		"Type": "EVENT",
+		"Type": "STATUS",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusImperoItaliano",
@@ -872,7 +872,7 @@
 	{
 		"UniqueName": "EventDivisionAzul",
 		"Number": "109",
-		"Type": "STATUS",
+		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventDivisionAzul",
@@ -952,7 +952,7 @@
 	{
 		"UniqueName": "StatusMareNostrum",
 		"Number": "117",
-		"Type": "EVENT",
+		"Type": "STATUS",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusMareNostrum",
@@ -982,7 +982,7 @@
 	{
 		"UniqueName": "EventOperationMagic",
 		"Number": "120",
-		"Type": "STATUS",
+		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventOperationMagic",
@@ -1002,7 +1002,7 @@
 	{
 		"UniqueName": "EWB29Superfortress",
 		"Number": "122",
-		"Type": "EVENT",
+		"Type": "EW",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWB29Superfortress",
@@ -1022,7 +1022,7 @@
 	{
 		"UniqueName": "EWB26Marauder",
 		"Number": "124",
-		"Type": "EVENT",
+		"Type": "EW",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWB26Marauder",
@@ -1032,7 +1032,7 @@
 	{
 		"UniqueName": "StatusRadar",
 		"Number": "125",
-		"Type": "EW",
+		"Type": "STATUS",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusRadar",
@@ -1052,7 +1052,7 @@
 	{
 		"UniqueName": "EventFlexibleResources",
 		"Number": "127",
-		"Type": "STATUS",
+		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventFlexibleResources",
@@ -1062,7 +1062,7 @@
 	{
 		"UniqueName": "StatusAircraftCarriers",
 		"Number": "128",
-		"Type": "EVENT",
+		"Type": "STATUS",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusAircraftCarriers",
@@ -1102,7 +1102,7 @@
 	{
 		"UniqueName": "EWFirestormBombing",
 		"Number": "132",
-		"Type": "EVENT",
+		"Type": "EW",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWFirestormBombing",
@@ -1132,7 +1132,7 @@
 	{
 		"UniqueName": "EWSBDDauntless",
 		"Number": "135",
-		"Type": "EVENT",
+		"Type": "EW",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWSBDDauntless",
@@ -1152,7 +1152,7 @@
 	{
 		"UniqueName": "EWB24Liberator",
 		"Number": "137",
-		"Type": "EVENT",
+		"Type": "EW",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWB24Liberator",

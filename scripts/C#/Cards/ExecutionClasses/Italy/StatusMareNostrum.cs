@@ -7,9 +7,8 @@ public partial class StatusMareNostrum : StatusCardLogic, IVPModifier
 {
     public virtual VPEntry AddVictoryPoints()
     {
-        List<Country> countries = [Country.NorthAfrica, Country.Africa, Country.MiddleEast];
-        List<Faction> factions = [Faction];
-        int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum());        
+        int score = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+            .Count(unitState => unitState.Type == UnitType.NAVY);
         return new VPEntry(score, $"{score} victory points for all {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} navies on the board.");
     }
 

@@ -7,10 +7,9 @@ public partial class StatusBalkanResources : StatusCardLogic, IVPModifier
 {
     public virtual VPEntry AddVictoryPoints()
     {
-        List<Country> countries = [Country.Balkans];
-        List<Faction> factions = [Faction];
-        int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum());        
-        return new VPEntry(score, $"{score} victory points for italian army in {CountryState.ForEnum(countries[0]).Label}");
+        int score = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+            .Any(us => us.CountryState.Country == Country.Balkans && us.Type == UnitType.ARMY) ? 1 : 0;
+        return new VPEntry(score, score == 1 ? "1 victory point for an Italian Army in the Balkans." : "No Italian Army in the Balkans.");
     }
 
     protected override List<Condition> CardTriggers()
