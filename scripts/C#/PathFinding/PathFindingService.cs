@@ -33,14 +33,30 @@ public partial class PathFindingService
         }
     }
 
-    public bool CalculatePath(int fromCountryId, int toCountryId)
+    /// <summary>Geographic (supply-agnostic) — includes all countries and all connections.</summary>
+    public PathFindingService()
+    {
+        _aStar = new AStar2D();
+        foreach (CountryState cs in GameSession.Current.GameState.CountryStates)
+            _aStar.AddPoint(cs.Id, Vector2.One, 1);
+        foreach (CountryState cs in GameSession.Current.GameState.CountryStates)
+            foreach (CountryState neighbor in cs.ConnectedCountryStates)
+                if (_aStar.HasPoint(neighbor.Id))
+                    _aStar.ConnectPoints(cs.Id, neighbor.Id, bidirectional: true);
+    }
+
+    /// <summary>Returns the number of hops in the shortest path, or -1 if no path exists.</summary>
+    public int CalculatePath(int fromCountryId, int toCountryId)
     {
         long[] path = _aStar.GetIdPath(fromCountryId, toCountryId, false);
+        return path.Length == 0 ? -1 : path.Length - 1;
+    }
 
-        if (path.Length == 0)
-        {
-            return false;
-        }
-        return true;
+    /// <summary>Returns true if the shortest geographic path between two countries is within maxHops steps (supply-agnostic).</summary>
+    public static bool IsWithinGeographicDistance(int fromCountryId, int toCountryId, int maxHops)
+    {
+        var service = new PathFindingService();
+        int distance = service.CalculatePath(fromCountryId, toCountryId);
+        return distance >= 0 && distance <= maxHops;
     }
 }

@@ -5,7 +5,8 @@ public enum RecycleDestination
 {
     TopOfDeck,
     ShuffleIntoDeck,
-    Hand
+    Hand,
+    BottomOfDeck
 }
 
 public partial class RecycleCardChangeEvent : ChangeEvent
@@ -44,6 +45,9 @@ public partial class RecycleCardChangeEvent : ChangeEvent
             case RecycleDestination.Hand:
                 deckState.HandCardIds.Add(CardId);
                 break;
+            case RecycleDestination.BottomOfDeck:
+                deckState.DeckCardIds.Add(CardId);
+                break;
         }
         await Task.CompletedTask;
         return true;
@@ -61,6 +65,7 @@ public partial class RecycleCardChangeEvent : ChangeEvent
             RecycleDestination.TopOfDeck => "top of draw deck",
             RecycleDestination.ShuffleIntoDeck => "draw deck (shuffled)",
             RecycleDestination.Hand => "hand",
+            RecycleDestination.BottomOfDeck => "bottom of draw deck",
             _ => "draw deck"
         };
         return $"{TriggeringFaction} recycled a card to {dest}";

@@ -144,7 +144,7 @@ public class GameStateCalculator
         var unit = UnitState.ForId(unitId);
         foreach (var supplyId in GameAPI.GetSupplyCountryIds(faction))
         {
-            if (pathFinding.CalculatePath(unit.CountryId, supplyId))
+            if (pathFinding.CalculatePath(unit.CountryId, supplyId) >= 0)
             {
                 if (unit.IsNavy)
                     return unit.CountryState.HasHarbor(faction);
