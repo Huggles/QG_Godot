@@ -21,8 +21,7 @@ public partial class EWSubmarinesoftheMonsoonGroup : EWCardLogic
                 discardEvent.IsTrigger = true;
                 
                 // Score 2 VP
-                IVictoryStepHandler vpHandler = GameFlow.Instance.vpStepHandler;
-                await vpHandler.ScorePoints(new VPEntry(2, "2 VP for Submarines of the Monsoon Group."));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(2, "2 VP for Submarines of the Monsoon Group."), Faction));
                 
                 return discardEvent;
             })

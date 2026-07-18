@@ -812,7 +812,7 @@
 	{
 		"UniqueName": "EWDecimaFlottigliaMASFrogmen",
 		"Number": "103",
-		"Type": "EVENT",
+		"Type": "EW",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EWDecimaFlottigliaMASFrogmen",
@@ -882,7 +882,7 @@
 	{
 		"UniqueName": "ResponseGermanReinforcementsCounterattack",
 		"Number": "110",
-		"Type": "EVENT",
+		"Type": "RESPONSE",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "ResponseGermanReinforcementsCounterattack",
