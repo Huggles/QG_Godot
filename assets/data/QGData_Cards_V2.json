@@ -1092,7 +1092,7 @@
 	{
 		"UniqueName": "EventTheaterShift",
 		"Number": "131",
-		"Type": "STATUS",
+		"Type": "EVENT",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "EventTheaterShift",

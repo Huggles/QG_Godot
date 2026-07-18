@@ -5,33 +5,49 @@ using Godot;
 
 public partial class StatusAmphibiousLandings : StatusCardLogic
 {
+    private BattleCountryChangeEvent LastLandBattle =>
+        CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
+            .LastOrDefault(ce => ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.LAND);
+
+    private bool HasAdjacentSuppliedUSNavy =>
+        LastLandBattle != null && CountryState.ForId(LastLandBattle.CountryId).ConnectedCountryStates
+            .Any(adj => FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+                .Any(us => us.Type == UnitType.NAVY && us.CountryId == adj.Id && us.InSupply));
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
             Condition.Build(new Condition.HasBattledOnLand(Faction), this),
-            Condition.Build(new Condition.HasBuildableLand(Faction), this)
+            Condition.Build(new Condition.CardHasNotBeenActivatedThisTurn(CardState), this),
+            Condition.Build(new Condition.CustomCondition(() => HasAdjacentSuppliedUSNavy), this),
+            Condition.Build(new Condition.CustomCondition(() => {
+                var b = LastLandBattle;
+                return b != null && CountryState.ForId(b.CountryId).Tags.Has(Tag.Buildable, Faction);
+            }), this)
         };
-    }
-    
-    public List<int> DeployableCountryIds
-    {
-        get
-        {
-            return CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
-        }
     }
 
     public override List<CardStep> OnActivate()
     {
-        //TODO
         return new List<CardStep> {
             new CardStep(this, async() => {
-                ;
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;                
-            }).WithGuidance("Build an army")
+                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
+                discardEvent.IsTrigger = false;
+                await discardEvent.ApplyChange();
+
+                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
+                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
+
+                int countryId = LastLandBattle.CountryId;
+                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
+                deployEvent.IsTrigger = true;
+                return deployEvent;
+            })
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
+                var b = LastLandBattle;
+                return b != null && CountryState.ForId(b.CountryId).Tags.Has(Tag.Buildable, Faction) && HasAdjacentSuppliedUSNavy;
+            }), this))
+            .WithGuidance("Discard top 1 deck card to build an Army in the space just battled")
         };
     }
 }
