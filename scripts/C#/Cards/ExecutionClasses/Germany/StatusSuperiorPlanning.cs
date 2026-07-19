@@ -26,12 +26,12 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
                 var resp = await new InputRequest.ReorderCardsRequestHandler(Faction, topCards).BroadCast();
                 List<int> reorderedIds = resp.ResponseCardIds;
 
-                // Apply reorder directly to deck state
-                for (int i = 0; i < peekCount; i++)
-                    deck.DeckCardIds.RemoveAt(0);
-                deck.DeckCardIds.InsertRange(0, reorderedIds);
+                List<int> fullDeck = new List<int>(reorderedIds);
+                fullDeck.AddRange(deck.DeckCardIds.Skip(peekCount));
 
-                return null;
+                ReorderDeckChangeEvent reorderEvent = BuildChangeEvent(new ReorderDeckChangeEvent(Faction, fullDeck));
+                reorderEvent.IsTrigger = false;
+                return reorderEvent;
             }).WithGuidance("Examine and reorder the top 4 cards of your draw deck")
         };
     }

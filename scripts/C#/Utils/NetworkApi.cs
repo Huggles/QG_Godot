@@ -164,6 +164,26 @@ public partial class NetworkApi : Node
         EventBus.Emit(EventBus.SignalName.InputRequestResponseReceived, dtoJson);
     }
 
+    /// <summary>
+    /// Called on all clients by the server after CalculateAll() completes.
+    /// Clients apply the pre-computed tags directly instead of recalculating locally.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void ReceiveComputedTags(string tagsJson)
+    {
+        var snapshot = JsonSerializer.Deserialize<ComputedTagsSnapshot>(tagsJson);
+        GameStateCalculator.ApplyComputedTags(snapshot);
+    }
+
+    /// <summary>
+    /// Broadcasts a PlayerActionLabel message from the server to all peers.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void ShowPlayerActionLabel(string text, int duration, int faction)
+    {
+        PlayerActionLabel.ShowText(text, duration, (Faction)faction);
+    }
+
     /// <summary>Client → server: request a full state snapshot due to hash mismatch.</summary>
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void RequestResync()

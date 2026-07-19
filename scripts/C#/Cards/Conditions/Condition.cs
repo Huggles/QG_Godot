@@ -232,9 +232,6 @@ public abstract class Condition
 
         public override bool IsMatch(ChangeEvent ce)
         {
-
-            DebugUtilities.PrintPeer($"Checking FactionBattled condition for faction {Faction} against change event: {ce?.ScriptName}");
-            DebugUtilities.PrintPeer($"Is BattleUnitChangeEvent: {ce is BattleUnitChangeEvent}");
             if (ce is not BattleCountryChangeEvent bce) return false;
             if (Faction != Faction.NONE && bce.TriggeringFaction != Faction) return false;
             if (this.FactionTeam != FactionTeam.NONE && StaticGameData.FactionTeamForFaction(bce.TriggeringFaction) != this.FactionTeam) return false;

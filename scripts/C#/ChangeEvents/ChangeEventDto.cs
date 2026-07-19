@@ -23,6 +23,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(ChangeRoundChangeEventDto),      "ChangeRound")]
 [JsonDerivedType(typeof(RecycleCardChangeEventDto),      "RecycleCard")]
 [JsonDerivedType(typeof(SpendPlayActionChangeEventDto),  "SpendPlayAction")]
+[JsonDerivedType(typeof(ReorderDeckChangeEventDto),      "ReorderDeck")]
 public abstract class ChangeEventDto
 {
     public int Id { get; set; }
@@ -131,3 +132,8 @@ public class RecycleCardChangeEventDto : ChangeEventDto
 
 /// <summary>No extra fields needed — TriggeringFaction is sufficient.</summary>
 public class SpendPlayActionChangeEventDto : ChangeEventDto { }
+
+public class ReorderDeckChangeEventDto : ChangeEventDto
+{
+    public List<int> ReorderedCardIds { get; set; }
+}

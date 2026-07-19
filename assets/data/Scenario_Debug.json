@@ -1,11 +1,8 @@
 {
-  "startingFaction": "JAPAN",
+  "startingFaction": "GERMANY",
   "factions": {
     "GERMANY": {
       "unitDeployments": [
-        { "countryName": "GERMANY" },
-        { "countryName": "ITALY" },
-        { "countryName": "MEDITERRANEAN_SEA" }
       ],
       "initialCards": [ 
         { "name": "StatusSuperiorPlanning" },

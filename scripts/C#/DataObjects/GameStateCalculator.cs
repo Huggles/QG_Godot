@@ -1,11 +1,29 @@
 using Godot;
 using System;
-
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 public class GameStateCalculator
-{    
+{
+    /// <summary>
+    /// Tags computed by this calculator that are replicated to clients.
+    /// CardStep.IsExecutable is intentionally excluded — it is server-internal execution state.
+    /// Tags.Clickable is excluded — it is set by input handlers locally.
+    /// </summary>
+    public static readonly HashSet<Tag> ReplicatedTags = new()
+    {
+        // Country
+        Tag.Attackable, Tag.Buildable, Tag.Recruitable,
+        // Unit
+        Tag.InSupply, Tag.OutOfSupply,
+        // Card
+        Tag.IsActivatable, Tag.IsPlayable, Tag.IsAfterReaction, Tag.IsPlayed,
+        // Straight tags (AxisControlled / AlliesControlled) are intentionally excluded:
+        // they are 100% deterministic from ControllingCountryId and are recomputed
+        // locally via CalculateStraightControlForFaction() on every peer.
+    };
+
     public static bool Enabled {
         get { return field; }
         set { 
@@ -216,6 +234,14 @@ public class GameStateCalculator
             return;
         }
 
+        // Tag calculation is server-authoritative. Clients receive computed tags via
+        // NetworkApi.ReceiveComputedTags and never recalculate independently.
+        if (MultiplayerSession.Instance != null && !MultiplayerSession.Instance.Multiplayer.IsServer())
+        {
+            DebugUtilities.PrintPeer("[SKIP] GameStateCalculator.CalculateAll is server-only — awaiting tags from server");
+            return;
+        }
+
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
@@ -230,7 +256,16 @@ public class GameStateCalculator
             // Straight control writes global (non-faction-scoped) tags — run once after parallel work
             CalculateStraightControlForFaction();
 
-            EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
+            // Build snapshot, apply locally, and broadcast to clients
+            var snapshot = BuildTagsSnapshot();
+            ApplyComputedTags(snapshot);
+
+            if (NetworkApi.Instance != null)
+            {
+                string json = JsonSerializer.Serialize(snapshot);
+                NetworkApi.Instance.Rpc(nameof(NetworkApi.ReceiveComputedTags), json);
+            }
+
             stopwatch.Stop();
             DebugUtilities.PrintPeer($"[TIMING] CalculateAll completed in {stopwatch.ElapsedMilliseconds}ms");
             return;
@@ -243,6 +278,82 @@ public class GameStateCalculator
             DebugUtilities.PrintPeer($"[ERROR] Stack Trace: {ex.StackTrace}");
             throw;
         }        
+    }
+
+    /// <summary>
+    /// Serializes all replicated tags from live state objects into a snapshot for wire transmission.
+    /// Called on the server after every CalculateAll().
+    /// </summary>
+    public static ComputedTagsSnapshot BuildTagsSnapshot()
+    {
+        var entries = new List<TagEntry>();
+        var state   = GameSession.Current.GameState;
+
+        foreach (var cs in state.CountryStateById.Values)
+            foreach (var tag in ReplicatedTags)
+                foreach (var faction in cs.Tags.GetFactionsWithTag(tag))
+                    entries.Add(new TagEntry { ObjectType = "Country", Id = cs.Id, Tag = tag, Faction = faction });
+
+        foreach (var us in state.UnitStatesById.Values)
+            foreach (var tag in ReplicatedTags)
+                foreach (var faction in us.Tags.GetFactionsWithTag(tag))
+                    entries.Add(new TagEntry { ObjectType = "Unit", Id = us.Id, Tag = tag, Faction = faction });
+
+        foreach (var card in state.CardStatesById.Values)
+            foreach (var tag in ReplicatedTags)
+                foreach (var faction in card.Tags.GetFactionsWithTag(tag))
+                    entries.Add(new TagEntry { ObjectType = "Card", Id = card.Id, Tag = tag, Faction = faction });
+
+        return new ComputedTagsSnapshot { Entries = entries };
+    }
+
+    /// <summary>
+    /// Clears all replicated tags from all state objects and re-applies them from the snapshot.
+    /// Called on both server (after CalculateAll) and client (after receiving ReceiveComputedTags RPC).
+    /// Emits GameStateRecalculated when done.
+    /// </summary>
+    public static void ApplyComputedTags(ComputedTagsSnapshot snapshot)
+    {
+        var state = GameSession.Current.GameState;
+
+        // Clear all replicated tags before re-applying
+        foreach (var cs in state.CountryStateById.Values)
+            foreach (var tag in ReplicatedTags)
+                cs.Tags.RemoveForAll(tag);
+
+        foreach (var us in state.UnitStatesById.Values)
+            foreach (var tag in ReplicatedTags)
+                us.Tags.RemoveForAll(tag);
+
+        foreach (var card in state.CardStatesById.Values)
+            foreach (var tag in ReplicatedTags)
+                card.Tags.RemoveForAll(tag);
+
+        // Apply entries from snapshot
+        foreach (var entry in snapshot.Entries)
+        {
+            switch (entry.ObjectType)
+            {
+                case "Country":
+                    if (state.CountryStateById.TryGetValue(entry.Id, out var cs))
+                        cs.Tags.Add(entry.Tag, entry.Faction);
+                    break;
+                case "Unit":
+                    if (state.UnitStatesById.TryGetValue(entry.Id, out var us))
+                        us.Tags.Add(entry.Tag, entry.Faction);
+                    break;
+                case "Card":
+                    if (state.CardStatesById.TryGetValue(entry.Id, out var card))
+                        card.Tags.Add(entry.Tag, entry.Faction);
+                    break;
+            }
+        }
+
+        // Straight control is deterministic from ControllingCountryId — recompute locally
+        // on every peer rather than including it in the snapshot.
+        CalculateStraightControlForFaction();
+
+        EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
     }
     
     public static GameStateCalculator CalculateAllForFaction(Faction faction)

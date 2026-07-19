@@ -68,7 +68,7 @@ public partial class CardStep : ITaggable
         {
             //Should skip step
             DebugUtilities.PrintPeer("SKIPPING STEP");
-            PlayerActionLabel.ShowText("Unable to: " + ActionGuidance, -1, TriggeringFaction);
+            NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), "Unable to: " + ActionGuidance, -1, (int)TriggeringFaction);
             await Task.Delay(GameSettings.DurationLong);
             if (NextCardStep != null)
             {
@@ -84,7 +84,7 @@ public partial class CardStep : ITaggable
             try
             {
                 DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName}");
-                PlayerActionLabel.ShowText(ActionGuidance, -1, TriggeringFaction);
+                NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), ActionGuidance, -1, (int)TriggeringFaction);
                 result = await StepLogic.Invoke();
             }
             catch (Exception e)

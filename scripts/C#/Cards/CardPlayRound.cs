@@ -62,17 +62,35 @@ public partial class CardPlayRound : GodotObject
     /// <summary>
     /// Start this round for the given faction. Assigns itself as Current, requests
     /// the faction's card play, and finishes when no more actions remain.
-    /// Returns the step ID that was played, or -1 if the faction passed.
+    /// During the start turn step, loops to allow multiple card activations.
+    /// Returns the last step ID that was played, or -1 if the faction passed immediately.
     /// </summary>
     public async Task<int> Start(Faction faction)
     {
         Current = this;
-        int stepId = await RequestCardPlay(faction);
-        if (stepId == -1)
+        bool isStartTurnStep = GameFlow.Instance.TurnStep == TurnStep.START;
+        int lastStepId = -1;
+
+        while (true)
         {
-            Finish();
+            int stepId = await RequestCardPlay(faction);
+            if (stepId == -1)
+            {
+                break;
+            }
+            
+            lastStepId = stepId;
+
+            // During the start turn step, keep looping to allow multiple activations.
+            // During any other step, one card play ends the round.
+            if (!isStartTurnStep)
+            {
+                break;
+            }
         }
-        return stepId;
+
+        Finish();
+        return lastStepId;
     }
 
     // ── Core pipeline ──────────────────────────────────────────────────────────
@@ -131,14 +149,6 @@ public partial class CardPlayRound : GodotObject
         }
 
         ReactionDepth--;
-
-        // Step 3: If we're back to the top level, the round is complete.
-        // RequestAfterReactions has already given every faction the chance to react
-        // (whether they played or skipped), so we always finish here.
-        if (ReactionDepth == 0 && isInitialPlay)
-        {
-            Finish();
-        }
     }
 
     /// <summary>

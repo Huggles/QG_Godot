@@ -93,7 +93,9 @@ public class MultiplayerGameState
                     ResponseCardIds  = new List<int>(fs.DeckState.ResponseCardIds),
                     StatusCardIds    = new List<int>(fs.DeckState.StatusCardIds)
                 }
-            }).ToList()
+            }).ToList(),
+
+            ComputedTags = GameStateCalculator.BuildTagsSnapshot()
         };
     }
 
@@ -131,8 +133,10 @@ public class MultiplayerGameState
             deck.StatusCardIds.Clear();    deck.StatusCardIds.AddRange(dto.Deck.StatusCardIds);
         }
 
-        // Tags are never in the snapshot — always recomputed
-        GameStateCalculator.CalculateAll();
+        // Tags are included in the snapshot as server-computed state.
+        // Clients apply them directly rather than recalculating independently.
+        if (snapshot.ComputedTags != null)
+            GameStateCalculator.ApplyComputedTags(snapshot.ComputedTags);
     }
 
     public string ComputeHash()
@@ -178,6 +182,7 @@ public class MultiplayerGameStateSnapshot
     public List<UnitStateDto>     UnitStates     { get; set; } = new();
     public List<StraightStateDto> StraightStates { get; set; } = new();
     public List<FactionStateDto>  FactionStates  { get; set; } = new();
+    public ComputedTagsSnapshot   ComputedTags   { get; set; }
 }
 
 public class CountryStateDto
