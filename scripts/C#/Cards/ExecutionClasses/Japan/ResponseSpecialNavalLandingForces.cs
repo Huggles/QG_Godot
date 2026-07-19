@@ -30,6 +30,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                     .ToList();
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
+                deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
@@ -47,6 +48,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                     .ToList();
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
+                deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {

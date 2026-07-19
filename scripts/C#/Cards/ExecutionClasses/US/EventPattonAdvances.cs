@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class EventPattonAdvances : EWCardLogic
+public partial class EventPattonAdvances : EventCardLogic
 {
     private static readonly List<int> battleCountryIds = [(int)Country.Germany, (int)Country.Italy];
 

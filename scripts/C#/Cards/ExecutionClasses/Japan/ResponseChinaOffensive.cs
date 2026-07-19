@@ -5,7 +5,7 @@ using System.Linq;
 
 public partial class ResponseChinaOffensive : ResponseCardLogic
 {
-    public List<CountryState> targetCountries = CountryState.ForEnums(new List<Country>
+    private List<CountryState> TargetCountries => CountryState.ForEnums(new List<Country>
     {
         Country.China,
         Country.Vladivostok,
@@ -16,7 +16,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
 
     protected override List<Condition> CardTriggers()
     {
-        return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).Immediately().WithCountries(targetCountries.ToCountryIds()), this) };
+        return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).Immediately().WithCountries(TargetCountries.ToCountryIds()), this) };
     }
  
     public override List<CardStep> OnActivate()
@@ -25,18 +25,20 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
             new CardStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, EligibleAttackedCountries()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
+                deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
             })
             .WithConditions(()=>{ return EligibleAttackedCountries().Map(countryId => Condition.Build(new Condition.CountryIsEmpty(countryId), this)).ToList<Condition>(); })
             .WithGuidance("Build an army in the country just battled"), 
 
             new CardStep(this, async() => {
-                List<int> targets = targetCountries.Where(targetCountry=>targetCountry.CanAttack(Faction)).ToList().ToUnitIds();
+                List<int> targets = TargetCountries.Where(targetCountry=>targetCountry.CanAttack(Faction)).ToList().ToUnitIds();
                 int selectedCountryId = (await new InputRequest.SelectUnitRequestHandler(Faction, targets).BroadCast()).ResponseUnitIds[0];
                 BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedCountryId));
+                battleUnitChangeEvent.IsTrigger = true;
                 return battleUnitChangeEvent;
             }).WithCondition(
-                ()=>{ return Condition.Build(new Condition.CountryIsAttackable(targetCountries.ToCountryIds(), Faction), this); }
+                ()=>{ return Condition.Build(new Condition.CountryIsAttackable(TargetCountries.ToCountryIds(), Faction), this); }
             ).WithGuidance("Attack an army in China or an adjacent country"),
         };
     }
@@ -45,7 +47,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
     {
         if (CardPlayPool.CurrentReactionTrigger is BattleCountryChangeEvent trigger
             && trigger.TriggeringFaction == Faction
-            && targetCountries.Contains(trigger.CountryState))
+            && TargetCountries.Contains(trigger.CountryState))
         {
             return new List<int> { trigger.CountryId };
         }

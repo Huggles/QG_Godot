@@ -8,7 +8,7 @@ public partial class StatusBiasForAction : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {        
         return new List<Condition> {
-            Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD), this),
+            Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD), this).Immediately(),
             Condition.Build(new Condition.FactionHasBattleTarget(
                 Faction,
                 UnitType.ARMY,
@@ -25,7 +25,8 @@ public partial class StatusBiasForAction : StatusCardLogic
     {
         get
         {
-            List<CountryState> neighBorCountries = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()                
+            List<CountryState> neighBorCountries = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
+                .Where(ce => ce.TriggeringFaction == Faction)
                 .SelectMany(ce => CountryState.ForId(ce.CountryId).ConnectedCountryStates).Distinct().ToList();
                 
             List<BattleTarget> attackableCountries = neighBorCountries                
@@ -40,7 +41,8 @@ public partial class StatusBiasForAction : StatusCardLogic
                 })
                 .Select(us => new BattleTarget(us.Id, TargetType.UNIT))
                 .ToList();
-            return attackableCountries.Concat(attackableUnits).ToList();
+            var targets = attackableCountries.Concat(attackableUnits).ToList();
+            return targets;
         }
     }
 

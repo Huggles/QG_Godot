@@ -35,6 +35,13 @@ public partial class CardPlayRound : GodotObject
     /// </summary>
     public ChangeEvent CurrentReactionTrigger { get; private set; }
 
+    /// <summary>
+    /// The change event currently being evaluated for blocking.
+    /// Set for the duration of <see cref="RequestBlockReactions"/> so the UI can
+    /// show the faction what they are being asked to block.
+    /// </summary>
+    public ChangeEvent CurrentBlockTrigger { get; private set; }
+
     // ── Computed properties ────────────────────────────────────────────────────
     public Dictionary<int, CardState> CardPoolMap =>
         CardPool.ToDictionary(c => c.Id, c => c);
@@ -116,20 +123,23 @@ public partial class CardPlayRound : GodotObject
 
         // Step 1: Introduction event (may be blocked)
         bool introWasBlocked = false;
+        ChangeEvent introEvent;
 
         if (!cardState.IsPlayed)
         {
-            PlayCardChangeEvent introEvent = new PlayCardChangeEvent(cardState.Id);
-            introEvent.IsTrigger = true;
-            await ProcessIntroductionEvent(introEvent);
-            introWasBlocked = introEvent.IsBlocked;
+            var evt = new PlayCardChangeEvent(cardState.Id);
+            evt.IsTrigger = true;
+            introEvent = evt;
+            await ProcessIntroductionEvent(evt);
+            introWasBlocked = evt.IsBlocked;
         }
         else
         {
-            ActivateReactionChangeEvent introEvent = new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, null);
-            introEvent.IsTrigger = true;
-            await ProcessIntroductionEvent(introEvent);
-            introWasBlocked = introEvent.IsBlocked;
+            var evt = new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, null);
+            evt.IsTrigger = true;
+            introEvent = evt;
+            await ProcessIntroductionEvent(evt);
+            introWasBlocked = evt.IsBlocked;
         }
 
         // Step 2: Execute the card's next unfinished step if not blocked.
@@ -146,6 +156,14 @@ public partial class CardPlayRound : GodotObject
                 if (stepResult != null)
                     await DoChangeEvent(stepResult);
             }
+
+            // Card-completion window: fires after ALL steps finish, regardless of what
+            // the last step returned (including null). CurrentReactionTrigger is set to
+            // introEvent so .Immediately() conditions like CardActivated can match it.
+            _afterReactionPassedFactions.Clear();
+            bool anyCompletionReaction = await RequestAfterReactions(introEvent);
+            if (anyCompletionReaction)
+                await ContinueWithNextSteps();
         }
 
         ReactionDepth--;
@@ -209,16 +227,24 @@ public partial class CardPlayRound : GodotObject
 
     private async Task RequestBlockReactions(ChangeEvent changeEvent)
     {
-        foreach (Faction faction in RequestOrder)
+        CurrentBlockTrigger = changeEvent;
+        try
         {
-            if (faction == changeEvent.TriggeringFaction)
-                continue; // Factions cannot block their own actions
-
-            int cardId = await RequestBlock(faction);
-            if (cardId != -1)
+            foreach (Faction faction in RequestOrder)
             {
-                await DoCard(cardId);
+                if (faction == changeEvent.TriggeringFaction)
+                    continue; // Factions cannot block their own actions
+
+                int cardId = await RequestBlock(faction);
+                if (cardId != -1)
+                {
+                    await DoCard(cardId);
+                }
             }
+        }
+        finally
+        {
+            CurrentBlockTrigger = null;
         }
     }
 
@@ -299,6 +325,9 @@ public partial class CardPlayRound : GodotObject
     /// <summary>Request the faction's initial card play, then execute the chosen card.</summary>
     public async Task<int> RequestCardPlay(Faction faction)
     {        
+        // Recalculate at depth 0 so purely state-based cards (e.g. start-step status cards)
+        // are correctly reflected in ActivatableCardIds for subsequent START-step iterations.
+        GameStateCalculator.CalculateAll();
         int cardId = await RequestPlay(faction);
         if (cardId > -1)
         {
@@ -327,6 +356,13 @@ public partial class CardPlayRound : GodotObject
             InputRequest request = hasPlayedHandCardThisTurnStep || isStartTurnStep
                 ? new InputRequest.ActivateCardRequestHandler(faction)
                 : new InputRequest.HandCardPlayRequestHandler(faction);
+
+            if (CurrentReactionTrigger != null)
+            {
+                request.TriggerCardId = GetTriggerCardId(CurrentReactionTrigger);
+                request.TriggerSummaryText = CurrentReactionTrigger.SummaryText();
+            }
+
             InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
             selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
         }
@@ -363,6 +399,9 @@ public partial class CardPlayRound : GodotObject
         await Task.Delay(GameSettings.DurationMedium);
 
         controllingPlayer.InputManager.SetPlayCardInputActive(faction);
+        FactionHandDisplay.Current?.ShowTriggerContext(
+            GetTriggerCardId(CurrentBlockTrigger),
+            CurrentBlockTrigger?.SummaryText());
         Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
         if (results == null || results.Length == 0)
             return -1;
@@ -406,4 +445,14 @@ public partial class CardPlayRound : GodotObject
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns the card ID to display for a trigger event.
+    /// Prefers the event's own source card; falls back to the last card in the pool.
+    /// </summary>
+    private int GetTriggerCardId(ChangeEvent trigger)
+    {
+        if (trigger?.SourceCardId > -1) return trigger.SourceCardId;
+        return CardPool.LastOrDefault()?.Id ?? -1;
+    }
 }

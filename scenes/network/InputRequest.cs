@@ -38,6 +38,9 @@ public abstract partial class InputRequest
     public List<Faction> ResponseFactions { get; set; } = new();
     public List<int> ResponseStepIds { get; set; } = new();
 
+    public int TriggerCardId { get; set; } = -1;
+    public string TriggerSummaryText { get; set; }
+
     public InputRequest(Faction targetFaction)
     {
         TargetFaction = targetFaction;
@@ -103,6 +106,8 @@ public abstract partial class InputRequest
         public override async Task Handle()
         {
             PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, false);
+            if (TriggerCardId > -1)
+                FactionHandDisplay.Current?.ShowTriggerContext(TriggerCardId, TriggerSummaryText);
             DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
             if (results != null && results.Length > 0)

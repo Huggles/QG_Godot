@@ -22,6 +22,8 @@ public abstract partial class CardLogic : GodotObject
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
     public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);    
+    public bool HasEventBasedTrigger => CardTriggers().Any(c => c.RequiresEventContext);
+    public bool HasImmediateTrigger => CardTriggers().Any(c => c is Condition.EventCondition ec && ec.IsImmediate);
     public bool HasExecutableCardSteps => CardSteps.Count == 0 || ExecutableCardSteps.Count > 0;
     public int NextStepId => HasExecutableCardSteps ? ExecutableCardSteps[0].Id : -1;
     public virtual int MaxActivationsPerRound => 1;
@@ -31,7 +33,21 @@ public abstract partial class CardLogic : GodotObject
     public List<CardStep> CardSteps = new();
     public abstract List<CardStep> OnActivate();
     
-    public bool CanBeActivated() => !IsActivatedThisTurn && !IsActivationFinished && TriggerConditionsMet && HasExecutableCardSteps;
+    public bool CanBeActivated()
+    {
+        if (IsActivatedThisTurn || IsActivationFinished || !TriggerConditionsMet || !HasExecutableCardSteps)
+            return false;
+
+        // Cards whose triggers are purely state-based (no event/block conditions) must not
+        // appear as options inside a reaction chain — only at reaction depth 0.
+        if (!HasEventBasedTrigger)
+        {
+            int reactionDepth = CardPlayRound.Current?.ReactionDepth ?? 0;
+            return reactionDepth == 0;
+        }
+
+        return true;
+    }
     
     public bool TriggerConditionsMet => _conditions.All(condition=>condition.MeetCondition());
 

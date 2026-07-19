@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-public partial class EventItalianEastAfrica : ResponseCardLogic
+public partial class EventItalianEastAfrica : EventCardLogic
 {
     public List<Country> targetCountries = [Country.NorthAfrica, Country.BayOfBengal];
     public override List<CardStep> OnActivate()

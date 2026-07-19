@@ -24,11 +24,15 @@ public partial class ResponseTruk : ResponseCardLogic
                     .Distinct()
                     .ToList();
 
-                foreach (var unitId in FactionState.ForEnum(Faction).ActiveUnitIds)
+                var unitIds = FactionState.ForEnum(Faction).ActiveUnitIds
+                    .Where(uid => targetCountries.Contains(UnitState.ForId(uid).CountryState))
+                    .ToList();
+
+                if (unitIds.Count > 0)
                 {
-                    var unit = UnitState.ForId(unitId);
-                    if (targetCountries.Contains(unit.CountryState))
-                        unit.SuppliedForTurn = true;
+                    GrantSupplyChangeEvent grantEvent = BuildChangeEvent(new GrantSupplyChangeEvent(Faction, unitIds));
+                    grantEvent.IsTrigger = false;
+                    await grantEvent.ApplyChange();
                 }
 
                 PlayerActionLabel.ShowText("Truk: Japanese pieces in or adjacent to the Central Pacific are in supply this turn.", Faction);

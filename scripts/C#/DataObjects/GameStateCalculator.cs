@@ -130,6 +130,12 @@ public class GameStateCalculator
         ClearTagsForFaction(faction, Tag.IsAfterReaction);
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
+            if(cardState.CardName == "Enigma Code Cracked")
+            {
+                DebugUtilities.PrintPeer($"[DIAG]   {cardState.CardData?.UniqueName ?? "?"} skipped - ResponseEnigmaCodeCracked is not after-reaction");
+                int i = 0;
+            }
+            
             if (cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
                 cardState.AddTag(Tag.IsAfterReaction, faction);
         });
@@ -158,7 +164,7 @@ public class GameStateCalculator
             bool modifierGrantsSupply = ModifierRegistry.GetAll<IUnitSupplyModifier>()
                 .Any(m => m.GrantsSupply(unit));
 
-            if (modifierGrantsSupply || CalculateSupplyForUnit(pathFindingService, unit.Id, faction))
+            if (modifierGrantsSupply || unit.SuppliedForTurn || CalculateSupplyForUnit(pathFindingService, unit.Id, faction))
             {
                 unit.AddTag(Tag.InSupply, faction);
             } 

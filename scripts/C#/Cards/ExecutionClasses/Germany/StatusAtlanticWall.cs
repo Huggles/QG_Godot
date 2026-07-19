@@ -11,7 +11,7 @@ public partial class StatusAtlanticWall : StatusCardLogic
         return new List<Condition> {
             Condition.Build(
                 new Condition.FactionBattled(StaticGameData.OpponentFactionTeamForFaction(Faction))
-                .WithCountries(new List<int> { (int)Country.WesternEurope }), this)
+                .Immediately().WithCountries(new List<int> { (int)Country.WesternEurope }), this)
         };
     }
 
@@ -20,8 +20,7 @@ public partial class StatusAtlanticWall : StatusCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                Faction attackingFaction = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-                    .Last(ce => ce.CountryState.Country == Country.WesternEurope).TriggeringFaction;
+                Faction attackingFaction = (CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent).TriggeringFaction;
                 ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, attackingFaction, 3));
                 ForceDiscardCardsChangeEvent.IsTrigger = true;
                 await Task.CompletedTask;

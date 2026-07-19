@@ -8,7 +8,7 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.HasDeployedNavy(Faction), this),
+            Condition.Build(new Condition.HasDeployedNavy(Faction), this).Immediately(),
             Condition.Build(new Condition.HasBuildableSea(Faction), this)
         };
     }

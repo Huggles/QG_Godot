@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-public partial class EventAfrikaKorps : ResponseCardLogic
+public partial class EventAfrikaKorps : EventCardLogic
 {
     public List<Country> targetCountries = [Country.NorthAfrica, Country.MediterraneanSea];
     public Faction targetFaction = Faction.GERMANY;

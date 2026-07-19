@@ -15,11 +15,6 @@ public partial class EventBroadFront : EventCardLogic
             .Select(us => us.CountryId)
             .ToHashSet();
 
-        FactionState.ForEnum(Faction.SOVIET).ActiveUnitIds.ToUnitStates()
-            .Where(us => us.Type == UnitType.ARMY)
-            .Select(us => us.CountryId)
-            .ToHashSet();
-
         return FactionState.ForEnum(Faction.SOVIET).ActiveUnitIds.ToUnitStates()
             .Where(us => us.Type == UnitType.ARMY
                       && CountryState.ForId(us.CountryId).ConnectedCountryStates

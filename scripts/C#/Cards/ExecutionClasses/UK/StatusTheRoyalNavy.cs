@@ -15,7 +15,7 @@ public partial class StatusTheRoyalNavy : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.HasBattledAtSea(Faction), this),
+            Condition.Build(new Condition.HasBattledAtSea(Faction), this).Immediately(),
             Condition.Build(new Condition.HasSeaBattleTarget(Faction), this),
             Condition.Build(new Condition.CustomCondition(() => DeckState.ForFaction(Faction).HandCardIds.Count >= 2), this)
         };

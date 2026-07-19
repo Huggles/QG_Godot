@@ -39,6 +39,7 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+                battleCountryChange.IsTrigger = true;
                 return battleCountryChange;
             })
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))

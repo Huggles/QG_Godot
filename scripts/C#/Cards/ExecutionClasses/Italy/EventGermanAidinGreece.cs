@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class EventGermanAidinGreece : EWCardLogic
+public partial class EventGermanAidinGreece : EventCardLogic
 {
     public List<Country> targetCountries = [Country.Balkans];
     public override List<CardStep> OnActivate()

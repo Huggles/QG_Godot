@@ -75,6 +75,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             RecycleCardChangeEventDto d        => new RecycleCardChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardId, d.Destination),
             SpendPlayActionChangeEventDto d    => new SpendPlayActionChangeEvent(d.TriggeringFaction),
             ReorderDeckChangeEventDto d        => new ReorderDeckChangeEvent(d.TriggeringFaction, d.ReorderedCardIds),
+            GrantSupplyChangeEventDto d         => new GrantSupplyChangeEvent(d.TriggeringFaction, d.UnitIds),
             _ => throw new NotSupportedException($"Unknown ChangeEventDto type: {dto.GetType().Name}")
         };
         ev.Id                   = dto.Id;

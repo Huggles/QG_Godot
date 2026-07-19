@@ -25,6 +25,7 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
                     ? new BattleTarget(respSea.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(respSea.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+                battleCountryChange.IsTrigger = true;
                 return battleCountryChange;
             })
             .WithCondition(()=> Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))
@@ -39,6 +40,7 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
                     ? new BattleTarget(respLand.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(respLand.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+                battleCountryChange.IsTrigger = true;
                 return battleCountryChange;
             })
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))

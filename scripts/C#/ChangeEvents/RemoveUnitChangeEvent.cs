@@ -9,6 +9,13 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
     public UnitRemovalReason Reason { get; private set; }
 
     /// <summary>
+    /// Whether the unit was in supply at the moment the event was created (before ExecuteAsync removes it).
+    /// Use this in after-reaction conditions instead of UnitState.InSupply, which is cleared by
+    /// CalculateAll before reactions are checked.
+    /// </summary>
+    public bool WasInSupply { get; private set; }
+
+    /// <summary>
     /// WARNING: UnitState.CountryId is set to -1 after ExecuteAsync runs (unit removed from country).
     /// Always use this event's inherited <see cref="BattleCountryChangeEvent.CountryId"/> to get the
     /// country — it is captured at construction time and remains valid after execution.
@@ -19,6 +26,7 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
     {
         UnitId = unitId;        
         Reason = removalReason;
+        WasInSupply = UnitState.ForId(unitId).InSupply;
     }
 
     public override ChangeEventDto ToDto()

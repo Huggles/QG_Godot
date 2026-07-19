@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
 
-public partial class EventLendLease : EWCardLogic
+public partial class EventLendLease : EventCardLogic
 {
     public override List<CardStep> OnActivate()
     {

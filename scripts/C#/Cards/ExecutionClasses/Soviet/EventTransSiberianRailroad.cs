@@ -59,6 +59,6 @@ public partial class EventTransSiberianRailroad : EventCardLogic
             deployEvent.IsTrigger = true;
             return deployEvent;
         })
-        .WithGuidance("Select a Soviet Army to eliminate and rebuild");
+        .WithGuidance("Select where to rebuild the Soviet Army");
     }
 }

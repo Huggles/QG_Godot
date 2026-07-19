@@ -14,6 +14,14 @@ public abstract class Condition
     public abstract bool MeetCondition();
     public CardLogic CardLogic;
 
+    /// <summary>
+    /// True when this condition only makes sense in the context of an active change-event
+    /// (i.e. it inspects the change-event pool, the current block target, or is a block marker).
+    /// Used by <see cref="CardLogic.HasEventBasedTrigger"/> to decide whether a card may
+    /// activate inside a reaction chain.
+    /// </summary>
+    public virtual bool RequiresEventContext => false;
+
     List<int> CountryIds;
     List<CountryState> CountryStates => CountryState.ForIds(CountryIds);
     CountryState CountryState => CountryStates[0];
@@ -288,6 +296,10 @@ public abstract class Condition
             if (CountryIds != null && CountryIds.Count > 0)
             {
                 return CountryStates.Any(countryState => countryState.Tags.Has(Tag.Attackable, Faction));
+            } 
+            else if (CountryIds == null || CountryIds.Count == 0)
+            {
+                return false;
             }
             else
             {
@@ -334,8 +346,34 @@ public abstract class Condition
                && CountryIds.Contains(bue.CountryId);
     }
 
+    /// <summary>
+    /// Matches an <see cref="ActivateReactionChangeEvent"/> from an optional faction and/or card type.
+    /// Use with <see cref="EventCondition.Immediately"/> in <c>CardTriggers()</c> to react to a
+    /// specific card completing all its steps (fires in the card-completion window opened by DoCard).
+    /// </summary>
+    public class CardActivated : EventCondition
+    {
+        private readonly Faction _faction;
+        private readonly CardType? _cardType;
+
+        public CardActivated(Faction faction = Faction.NONE, CardType? cardType = null)
+        {
+            _faction = faction;
+            _cardType = cardType;
+        }
+
+        public override bool IsMatch(ChangeEvent ce)
+        {
+            if (ce is not ActivateReactionChangeEvent) return false;
+            if (_faction != Faction.NONE && ce.TriggeringFaction != _faction) return false;
+            if (_cardType.HasValue && ce.SourceCardState?.CardData.CardType != _cardType.Value) return false;
+            return true;
+        }
+    }
+
     public class IsBlockRequest : Condition
     {
+        public override bool RequiresEventContext => true;
         public override bool MeetCondition()
         {
             return true;
@@ -348,6 +386,7 @@ public abstract class Condition
     /// </summary>
     public class UnitAboutToBeRemoved : Condition
     {
+        public override bool RequiresEventContext => true;
         private readonly bool _requireInSupply;
 
         /// <summary>Matches any RemoveUnitChangeEvent, optionally requiring in-supply.</summary>
@@ -400,6 +439,7 @@ public abstract class Condition
     /// </summary>
     public class UnitAboutToBeDeployed : Condition
     {
+        public override bool RequiresEventContext => true;
         /// <summary>Matches any DeployUnitChangeEvent.</summary>
         public UnitAboutToBeDeployed() { }
 
@@ -604,10 +644,14 @@ public abstract class Condition
     /// </summary>
     public abstract class EventCondition : Condition
     {
+        public override bool RequiresEventContext => true;
         private ConditionScope _scope = ConditionScope.Pool;
 
         /// <summary>Scopes this condition to the current reaction window trigger instead of the full pool. Use in response card <c>CardTriggers()</c>.</summary>
         public Condition Immediately() { _scope = ConditionScope.Immediate; return this; }
+
+        /// <summary>True when this condition has been scoped with <see cref="Immediately"/>.</summary>
+        public bool IsImmediate => _scope == ConditionScope.Immediate;
 
         public virtual bool IsMatch(ChangeEvent ce) => false;
 

@@ -8,7 +8,7 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {        
         return new List<Condition> {
-            Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD), this),
+            Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD), this).Immediately(),
             Condition.Build(
                 new Condition.CountryIsBuildable(
                     DeployTargets.ToCountryIds(),

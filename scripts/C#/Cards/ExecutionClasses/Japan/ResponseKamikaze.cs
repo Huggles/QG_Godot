@@ -27,6 +27,7 @@ public partial class ResponseKamikaze : ResponseCardLogic
                 if (trigger == null) return null;
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE));
+                removeEvent.IsTrigger = true;
                 return removeEvent;
             })
             .WithGuidance("Eliminate the Allied Navy just built"),

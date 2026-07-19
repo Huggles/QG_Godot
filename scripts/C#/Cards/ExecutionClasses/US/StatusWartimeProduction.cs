@@ -8,7 +8,7 @@ public partial class StatusWartimeProduction : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.HasDeployedArmy(Faction), this),
+            Condition.Build(new Condition.HasDeployedArmy(Faction), this).Immediately(),
             Condition.Build(new Condition.HasBuildableLand(Faction), this)
         };
     }

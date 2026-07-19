@@ -8,7 +8,7 @@ public partial class StatusDiveBombers : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionBattled(Faction), this)
+            Condition.Build(new Condition.FactionBattled(Faction), this).Immediately()
         };
     }
     
@@ -16,10 +16,9 @@ public partial class StatusDiveBombers : StatusCardLogic
     {
         get
         {
-            List<BattleTarget> battleTargets = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-                .Map(changeEvent => changeEvent.CountryId)
-                .SelectMany(countryId => CountryState.ForId(countryId).AdjacentBattleTargets(Faction, CountryType.LAND)).Distinct().ToList();
-            return battleTargets;
+            var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+            if (trigger == null) return new List<BattleTarget>();
+            return CountryState.ForId(trigger.CountryId).AdjacentBattleTargets(Faction, CountryType.LAND).Distinct().ToList();
         }
     }
     public List<int> battleTargetCountryIds

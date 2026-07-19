@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class EventFleetDeployedtoPearlHarbor : EWCardLogic
+public partial class EventFleetDeployedtoPearlHarbor : EventCardLogic
 {
     public override List<CardStep> OnActivate()
     {

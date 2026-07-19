@@ -7,8 +7,13 @@ public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLog
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.IsBlockRequest(), this),
-            Condition.Build(new Condition.UnitAboutToBeRemoved(Faction.ITALY, UnitType.ARMY, requireInSupply: true), this),
+            Condition.Build(new Condition.CustomCondition(() => {
+                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)
+                    return removeEvent.UnitState.Faction == Faction.ITALY
+                        && removeEvent.UnitState.Type == UnitType.ARMY
+                        && removeEvent.WasInSupply;
+                return false;
+            }), this),
         };
     }
 
@@ -16,7 +21,7 @@ public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLog
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
+                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent) {
                     int countryId = removeEvent.CountryId;
                     DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction.GERMANY, countryId, DeployType.RECRUIT));
                     deployEvent.IsTrigger = true;
@@ -25,11 +30,8 @@ public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLog
                 return null;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent)
-                {
-                    CountryState cs = CountryState.ForId(removeEvent.CountryId);
-                    return cs.Tags.Has(Tag.Recruitable, Faction.GERMANY);
-                }
+                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)
+                    return CountryState.ForId(removeEvent.CountryId).Tags.Has(Tag.Recruitable, Faction.GERMANY);
                 return false;
             }), this))
             .WithGuidance("Recruit a German Army in the space where the Italian Army was removed")

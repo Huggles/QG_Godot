@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class EventMurmanskConvoy : EWCardLogic
+public partial class EventMurmanskConvoy : EventCardLogic
 {
     public override List<CardStep> OnActivate()
     {

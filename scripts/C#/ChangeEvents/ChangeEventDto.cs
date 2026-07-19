@@ -24,6 +24,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(RecycleCardChangeEventDto),      "RecycleCard")]
 [JsonDerivedType(typeof(SpendPlayActionChangeEventDto),  "SpendPlayAction")]
 [JsonDerivedType(typeof(ReorderDeckChangeEventDto),      "ReorderDeck")]
+[JsonDerivedType(typeof(GrantSupplyChangeEventDto),       "GrantSupply")]
 public abstract class ChangeEventDto
 {
     public int Id { get; set; }
@@ -136,4 +137,9 @@ public class SpendPlayActionChangeEventDto : ChangeEventDto { }
 public class ReorderDeckChangeEventDto : ChangeEventDto
 {
     public List<int> ReorderedCardIds { get; set; }
+}
+
+public class GrantSupplyChangeEventDto : ChangeEventDto
+{
+    public List<int> UnitIds { get; set; }
 }

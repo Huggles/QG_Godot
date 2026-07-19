@@ -11,8 +11,8 @@ public partial class BuildArmy : CardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 var targetableCountries = CountryState.BuildableLand(Faction);
-                InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(new InputRequest.SelectCountryRequestHandler(Faction, targetableCountries.ToCountryIds()));                               
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, responseDto.ResponseCountryIds[0], DeployType.BUILD));
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, targetableCountries.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
+                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;                
             })

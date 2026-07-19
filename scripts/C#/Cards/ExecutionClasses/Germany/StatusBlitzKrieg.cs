@@ -8,8 +8,11 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionBattled(Faction), this),
-            Condition.Build(new Condition.CountryIsEmpty(CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Map(changeEvent=> changeEvent.CountryId)),this)
+            Condition.Build(new Condition.FactionBattled(Faction), this).Immediately(),
+            Condition.Build(new Condition.CustomCondition(() => {
+                var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                return trigger != null && trigger.CountryState.Units.Count == 0;
+            }), this)
         };
     }
 
@@ -20,14 +23,14 @@ public partial class StatusBlitzkrieg : StatusCardLogic
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
                 discardEvent.IsTrigger = false;
                 await CardPlayPool.DoChangeEvent(discardEvent);
-                                
-                List<BattleCountryChangeEvent> changeEvents = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Where(changeEvent=>changeEvent.CountryState.Units.Count == 0).ToList();
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, changeEvents.Map(changeEvent => changeEvent.CountryId)).BroadCast()).ResponseCountryIds[0];
 
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
+                var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                if (trigger == null) return null;
+
+                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, trigger.CountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;                
-            }).WithGuidance("Deploy an army in a country where you've battle this turn") 
+            }).WithGuidance("Deploy an army in the country where you just battled") 
         };
     }
 }

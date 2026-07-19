@@ -5,8 +5,8 @@ using System.Linq;
 
 public partial class ResponseFallOfSingapore : ResponseCardLogic
 {
-    CountryState SouthEastAsia = CountryState.ForEnum(Country.SouthEastAsia);
-    CountryState SouthChinaSea = CountryState.ForEnum(Country.SouthChinaSea);
+    private CountryState SouthEastAsia => CountryState.ForEnum(Country.SouthEastAsia);
+    private CountryState SouthChinaSea => CountryState.ForEnum(Country.SouthChinaSea);
 
     protected override List<Condition> CardTriggers()
     {

@@ -15,6 +15,9 @@ public partial class FactionHandDisplay : Control
     private Button DeckButton => GetNode<Button>("%DeckButton");
     private Button DiscardedDeckButton => GetNode<Button>("%DiscardedDeckButton");
     private Button TestButton => GetNode<Button>("%TestButton");
+    private Panel TriggerContextPanel => GetNode<Panel>("%TriggerContextPanel");
+    private CardScene TriggerCardScene => GetNode<CardScene>("%TriggerCard");
+    private RichTextLabel TriggerLabel => GetNode<RichTextLabel>("%TriggerLabel");
 
     private List<CardScene> CardScenes = new List<CardScene>();
     private Faction showingFaction;
@@ -51,6 +54,9 @@ public partial class FactionHandDisplay : Control
         EventBus.Instance.NextStepStarted += OnNextStepStarted;
         EventBus.Instance.CardsDrawn += OnCardsDrawn;
         EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
+
+        TriggerCardScene.TriggersEmphasis(false);
+        TriggerCardScene.SetClickable(false);
         
 
         // Unsubscribe first to prevent duplicate connections
@@ -171,6 +177,7 @@ public partial class FactionHandDisplay : Control
     public new void Hide()
     {
         Visible = false;
+        HideTriggerContext();
         
         // Only access CardsContainer if it's been initialized (in LoadUI)
         if (CardsContainer != null)
@@ -271,6 +278,31 @@ public partial class FactionHandDisplay : Control
             CardPreview.Visible = false;
             CardPreview.MouseFilter = MouseFilterEnum.Ignore;
         }
+    }
+
+    public void ShowTriggerContext(int cardId, string summaryText)
+    {
+        if (TriggerContextPanel == null) return;
+
+        if (cardId > -1)
+        {
+            TriggerCardScene.Visible = true;
+            TriggerCardScene.ShowCard(cardId);
+            TriggerCardScene.SetActivatable(true);
+        }
+        else
+        {
+            TriggerCardScene.Visible = false;
+        }
+
+        TriggerLabel.Text = $"[b]Reacting to:[/b]\n{summaryText ?? string.Empty}";
+        TriggerContextPanel.Visible = true;
+    }
+
+    public void HideTriggerContext()
+    {
+        if (TriggerContextPanel != null)
+            TriggerContextPanel.Visible = false;
     }
 
     private void UnsubscribeFromEvents()

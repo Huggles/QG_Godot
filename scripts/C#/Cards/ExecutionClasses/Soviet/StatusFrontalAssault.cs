@@ -45,7 +45,7 @@ public partial class StatusFrontalAssault : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.HasBattledOnLand(Faction), this),
+            Condition.Build(new Condition.HasBattledOnLand(Faction), this).Immediately(),
             Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction).HandCardIds.Count >= 2), this)
         };
