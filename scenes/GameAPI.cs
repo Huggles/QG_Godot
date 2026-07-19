@@ -47,10 +47,10 @@ public partial class GameAPI : Node
         var response = new List<int>();
         foreach (var countryState in GameState.CountryStates)
         {
-            if (countryState.IsSupply && countryState.OccupyingFactions.Contains(faction))
-            {
-                response.Insert(0, countryState.Id); // push_front equivalent
-            }
+            bool blocked = ModifierRegistry.GetAll<ISupplyBlockModifier>()
+                .Any(m => m.BlocksSupply(countryState.Id, faction));
+            if (!blocked && countryState.IsSupply && countryState.OccupyingFactions.Contains(faction))
+                response.Insert(0, countryState.Id);
         }
         return response;
     }

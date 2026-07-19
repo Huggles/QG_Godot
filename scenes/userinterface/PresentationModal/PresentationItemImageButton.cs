@@ -33,6 +33,11 @@ public partial class PresentationItemImageButton : PresentationItem
     public override Control InitializeControl()
     {        
         Control = PresentationItemImageButtonPackedPath.Instantiate<PresentationItemImageButtonControl>();
+        _orderBadge = new Label();
+        _orderBadge.Visible = false;
+        _orderBadge.Position = new Vector2(8, 8);
+        _orderBadge.ZIndex = 100;
+        Control.AddChild(_orderBadge);
         return Control;
     }
 

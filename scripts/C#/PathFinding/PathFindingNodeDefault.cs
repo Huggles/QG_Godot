@@ -11,11 +11,6 @@ public partial class PathFindingNodeDefault : IPathFindingNode
 
     public bool CountryLinksSupplyForFaction(int countryId, Faction faction)
     {
-        CountryState countryState = CountryState.ForId(countryId);
-        if(countryState.OccupyingFactions.Contains(faction)){
-            return true;        
-        }
-        return false;
+        return CountryState.ForId(countryId).OccupyingFactions.Contains(faction);
     }
-
 }

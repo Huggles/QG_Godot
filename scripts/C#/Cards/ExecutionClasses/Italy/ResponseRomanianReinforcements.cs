@@ -17,7 +17,7 @@ public partial class ResponseRomanianReinforcements : ResponseCardLogic
         return new List<CardStep> {
             new CardStep(this, async () => {
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
-                    int countryId = removeEvent.UnitState.CountryId;
+                    int countryId = removeEvent.CountryId;
                     DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT));
                     deployEvent.IsTrigger = true;
                     return deployEvent;
@@ -26,7 +26,7 @@ public partial class ResponseRomanianReinforcements : ResponseCardLogic
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent)
-                    return CountryState.ForId(removeEvent.UnitState.CountryId).Tags.Has(Tag.Recruitable, Faction);
+                    return CountryState.ForId(removeEvent.CountryId).Tags.Has(Tag.Recruitable, Faction);
                 return false;
             }), this))
             .WithGuidance("Recruit an Italian Army in the space where the German Army was removed")

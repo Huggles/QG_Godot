@@ -34,7 +34,7 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 return deployUnitChangeEvent;
-            }).WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsBuildable([CountryState.ForEnum(Country.SouthEastAsia).Id], Faction)}; } )
+            }).WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsRecruitable([CountryState.ForEnum(Country.SouthEastAsia).Id], Faction)}; } )
             .WithGuidance("Recruit an army in South East Asia")
 
         };

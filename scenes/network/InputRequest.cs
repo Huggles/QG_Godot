@@ -15,6 +15,9 @@ using System.Threading.Tasks;
 [JsonDerivedType(typeof(ForceDiscardHandCardsRequestHandler), "ForceDiscardHandCards")]
 [JsonDerivedType(typeof(SelectUnitRequestHandler),           "SelectUnit")]
 [JsonDerivedType(typeof(SelectBattleTargetRequestHandler),   "SelectBattleTarget")]
+[JsonDerivedType(typeof(SelectFactionRequestHandler),        "SelectFaction")]
+[JsonDerivedType(typeof(SelectOptionRequestHandler),         "SelectOption")]
+[JsonDerivedType(typeof(ReorderCardsRequestHandler),         "ReorderCards")]
 public abstract partial class InputRequest
 {   
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -27,6 +30,7 @@ public abstract partial class InputRequest
     public List<int> TargetCardIds { get; set; }
     public List<int> TargetStepIds { get; set; }
     public List<Faction> TargetFactions { get; set; }
+    public List<string> TargetOptionLabels { get; set; }
 
     public List<int> ResponseCountryIds { get; set; } = new();
     public List<int> ResponseUnitIds { get; set; } = new();
@@ -193,6 +197,67 @@ public abstract partial class InputRequest
                 ResponseCountryIds.Add(result.Id);
             else
                 ResponseUnitIds.Add(result.Id);
+        }
+    }
+
+    public class SelectFactionRequestHandler : InputRequest
+    {
+        [JsonConstructor]
+        public SelectFactionRequestHandler(Faction targetFaction, List<Faction> targetFactions) : base(targetFaction)
+        {
+            TargetFactions = targetFactions;
+        }
+
+        public override async Task Handle()
+        {
+            var items = PresentationItem.ForFactions(TargetFactions);
+            ModalResult result = await PresentationModal.Current.Show(
+                ModalConfig.SelectOne("Select a faction", items));
+            ResponseCardIds.Add(result.WasCancelled ? -1 : result.SelectedItems[0]);
+        }
+    }
+
+    public class SelectOptionRequestHandler : InputRequest
+    {
+        public List<int> TargetOptionIds { get; set; } = new();
+        public string ModalTitle { get; set; }
+
+        [JsonConstructor]
+        public SelectOptionRequestHandler(Faction targetFaction, List<string> targetOptionLabels, List<int> targetOptionIds, string modalTitle) : base(targetFaction)
+        {
+            TargetOptionLabels = targetOptionLabels;
+            TargetOptionIds = targetOptionIds;
+            ModalTitle = modalTitle;
+        }
+
+        // Convenience: auto 0-based identifiers
+        public SelectOptionRequestHandler(Faction targetFaction, List<string> targetOptionLabels, string modalTitle)
+            : this(targetFaction, targetOptionLabels,
+                   Enumerable.Range(0, targetOptionLabels.Count).ToList(), modalTitle) { }
+
+        public override async Task Handle()
+        {
+            var items = TargetOptionLabels
+                .Select((label, i) => (PresentationItem)new PresentationItemImageButton(TargetOptionIds[i], label, true))
+                .ToList();
+            ModalResult result = await PresentationModal.Current.Show(ModalConfig.SelectOne(ModalTitle, items));
+            ResponseCardIds.Add(result.WasCancelled ? -1 : result.SelectedItems[0]);
+        }
+    }
+
+    public class ReorderCardsRequestHandler : InputRequest
+    {
+        public ReorderCardsRequestHandler(Faction targetFaction, List<int> targetCardIds) : base(targetFaction)
+        {
+            TargetCardIds = targetCardIds;
+        }
+
+        public override async Task Handle()
+        {
+            var items = PresentationItemCard.FromCardIds(TargetCardIds, true);
+            ModalResult result = await PresentationModal.Current.Show(
+                ModalConfig.Reorder("Reorder the top cards of your draw deck", items));
+            ResponseCardIds = result.WasCancelled ? new List<int>(TargetCardIds) : result.SelectedItems;
         }
     }
 

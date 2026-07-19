@@ -33,8 +33,7 @@ public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
 
                 DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardHandCardsChangeEvent(Faction, Faction.GERMANY, new List<int> { statusActivation.SourceCardId }));
                 discardEvent.IsTrigger = true;
-                await discardEvent.ApplyChange();
-                return null;
+                return discardEvent;
             })
             .WithGuidance("Discard Germany's Status card")
         };

@@ -31,6 +31,11 @@ public partial class PresentationItemCard : PresentationItem
         cardSceneInstance.Size = CardSize;
         cardSceneInstance.CustomMinimumSize = CardSize;
         Control = cardSceneInstance;
+        _orderBadge = new Label();
+        _orderBadge.Visible = false;
+        _orderBadge.Position = new Vector2(8, 8);
+        _orderBadge.ZIndex = 100;
+        Control.AddChild(_orderBadge);
         return cardSceneInstance;
     }
     public override void LoadControl()

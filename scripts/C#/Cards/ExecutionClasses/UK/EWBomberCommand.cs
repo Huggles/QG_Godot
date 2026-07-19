@@ -13,9 +13,9 @@ public partial class EWBomberCommand : EWCardLogic
         {
             new CardStep(this, async() => {
 
-                Variant[] response = await PresentationModal.Current.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.ITALY]), "Select a faction");                
-                Faction selectedFaction = (Faction)response[0].As<int>();
-                await PresentationModal.Current.HideModal();
+                var factionResp = await new InputRequest.SelectFactionRequestHandler(
+                    Faction, new List<Faction> { Faction.GERMANY, Faction.ITALY }).BroadCast();
+                Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
 
                 ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, selectedFaction, 4));
                 ForceDiscardCardsChangeEvent.IsTrigger = true;

@@ -84,15 +84,15 @@ public partial class UnitScene : Node2D
     {
         if (tag == Tag.Clickable)
         {
-            SetClickable();
+            Callable.From(SetClickable).CallDeferred();
         }
         else if (tag == Tag.InSupply || tag == Tag.SuppliedForTurn)
         {
-            HideOutOfSupply();
+            Callable.From(HideOutOfSupply).CallDeferred();
         }
         else if (tag == Tag.OutOfSupply || tag == Tag.SuppliedForTurn)
         {
-            ShowOutOfSupply();
+            Callable.From(ShowOutOfSupply).CallDeferred();
         }
     }
 
@@ -100,15 +100,15 @@ public partial class UnitScene : Node2D
     {
         if (tag == Tag.Clickable)
         {
-            SetUnclickable();
+            Callable.From(SetUnclickable).CallDeferred();
         }
         else if ((tag == Tag.InSupply || tag == Tag.SuppliedForTurn) && !UnitState.InSupply)
         {
-            ShowOutOfSupply();
+            Callable.From(ShowOutOfSupply).CallDeferred();
         }
         else if ((tag == Tag.OutOfSupply || tag == Tag.SuppliedForTurn) && UnitState.InSupply)
         {
-            HideOutOfSupply();
+            Callable.From(HideOutOfSupply).CallDeferred();
         }
         
     }

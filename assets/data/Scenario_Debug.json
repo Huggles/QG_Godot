@@ -1,5 +1,5 @@
 {
-  "startingFaction": "SOVIET",
+  "startingFaction": "GERMANY",
   "factions": {
     "GERMANY": {
       "unitDeployments": [
@@ -8,6 +8,7 @@
         { "countryName": "MEDITERRANEAN_SEA" }
       ],
       "initialCards": [ 
+        { "name": "StatusSuperiorPlanning" },
         { "name": "StatusDiveBombers" },
         { "name": "StatusBlitzkrieg" },
         { "name": "StatusBiasForAction" },

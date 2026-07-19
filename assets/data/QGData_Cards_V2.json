@@ -732,7 +732,7 @@
 	{
 		"UniqueName": "StatusShverniksEvacuationCouncil",
 		"Number": "95",
-		"Type": "RESPONSE",
+		"Type": "STATUS",
 		"Implemented": "0",
 		"Testing": "0",
 		"ExecutionClass": "StatusShverniksEvacuationCouncil",

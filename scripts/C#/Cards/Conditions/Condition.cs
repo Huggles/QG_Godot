@@ -388,7 +388,7 @@ public abstract class Condition
                 return false;
             if (_requireInSupply && !removeEvent.UnitState.InSupply)
                 return false;
-            if (CountryIds?.Count > 0 && !CountryIds.Contains(removeEvent.UnitState.CountryId))
+            if (CountryIds?.Count > 0 && !CountryIds.Contains(removeEvent.CountryId))
                 return false;
             return true;
         }

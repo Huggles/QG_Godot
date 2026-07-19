@@ -39,8 +39,6 @@ public partial class StatusDiveBombers : StatusCardLogic
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, battleTargets).BroadCast();
                 BattleTarget target = resp.ResponseCountryIds.Count > 0
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)

@@ -10,11 +10,9 @@ public partial class EventLendLease : EWCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async () => {
-                Variant[] response = await PresentationModal.Current.ShowModal(
-                    PresentationItemImageButton.ForFactions([Faction.UNITED_KINGDOM, Faction.SOVIET]),
-                    "Select Allied country");
-                Faction selectedFaction = (Faction)response[0].As<int>();
-                await PresentationModal.Current.HideModal();
+                var factionResp = await new InputRequest.SelectFactionRequestHandler(
+                    Faction, new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET }).BroadCast();
+                Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
 
                 var cardResp = await new InputRequest.HandCardPlayRequestHandler(selectedFaction).BroadCast();
                 if (cardResp.ResponseCardIds.Count > 0)

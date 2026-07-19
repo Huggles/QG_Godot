@@ -23,21 +23,14 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
                 int peekCount = Math.Min(4, deck.DeckCardIds.Count);
                 List<int> topCards = deck.DeckCardIds.Take(peekCount).ToList();
 
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(topCards, true);
-                var completionSource = new TaskCompletionSource<List<int>>();
-                Variant[] response = await PresentationModal.Current.ShowModalMultiSelect(
-                    presentationItems,
-                    "Reorder the top 4 cards of your deck (select in desired order)",
-                    peekCount                   
-                );
-                //  reorderedIds => {
-                //         for (int i = 0; i < peekCount; i++)
-                //             deck.DeckCardIds.RemoveAt(0);
-                //         deck.DeckCardIds.InsertRange(0, reorderedIds);
-                //         completionSource.SetResult(reorderedIds);
-                //     },
-                //     () => completionSource.SetResult(topCards) // skip: keep original order
-                await completionSource.Task;
+                var resp = await new InputRequest.ReorderCardsRequestHandler(Faction, topCards).BroadCast();
+                List<int> reorderedIds = resp.ResponseCardIds;
+
+                // Apply reorder directly to deck state
+                for (int i = 0; i < peekCount; i++)
+                    deck.DeckCardIds.RemoveAt(0);
+                deck.DeckCardIds.InsertRange(0, reorderedIds);
+
                 return null;
             }).WithGuidance("Examine and reorder the top 4 cards of your draw deck")
         };

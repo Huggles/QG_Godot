@@ -13,7 +13,7 @@ public partial class ResponseMonteCassino : ResponseCardLogic
                 if (CardPlayPool.LastNoneNewCardChangeEvent is not RemoveUnitChangeEvent removeEvent) return false;
                 return StaticGameData.FactionTeamForFaction(removeEvent.UnitState.Faction) == FactionTeam.AXIS
                     && removeEvent.UnitState.Type == UnitType.ARMY
-                    && removeEvent.UnitState.CountryId == (int)Country.Italy;
+                    && removeEvent.CountryId == (int)Country.Italy;
             }), this),
         };
     }

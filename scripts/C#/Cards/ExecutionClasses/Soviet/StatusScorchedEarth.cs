@@ -2,10 +2,16 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-public partial class StatusScorchedEarth : StatusCardLogic
+public partial class StatusScorchedEarth : StatusCardLogic, ISupplyBlockModifier
 {
-public override List<CardStep> OnActivate()
+    public bool BlocksSupply(int countryId, Faction faction)
     {
-        return new List<CardStep> {}; 
+        return countryId == (int)Country.Ukraine
+            && StaticGameData.FactionTeamForFaction(faction) == FactionTeam.AXIS;
+    }
+
+    protected override List<Condition> CardTriggers()
+    {
+        return new List<Condition> { Condition.Build(new Condition.IsVictoryPointStep(), this) };
     }
 }

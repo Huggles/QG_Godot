@@ -29,19 +29,22 @@ public partial class EWMaltaSubmarines : EWCardLogic
         return new CardStep(this, async () => {
             List<int> navies = MediterraneanNaviesFor(targetFaction);
 
-            List<PresentationItem> options = new() {
-                new PresentationItemImageButton(CHOICE_DISCARD,   "Discard top 2 cards from draw deck",        true),
-                new PresentationItemImageButton(CHOICE_ELIMINATE, "Eliminate a Navy in the Mediterranean", navies.Count > 0)
-            };
+            List<string> penaltyLabels = new() { "Discard top 2 cards from draw deck" };
+            List<int> penaltyIds = new() { CHOICE_DISCARD };
+            if (navies.Count > 0)
+            {
+                penaltyLabels.Add("Eliminate a Navy in the Mediterranean");
+                penaltyIds.Add(CHOICE_ELIMINATE);
+            }
 
-            Variant[] response = await PresentationModal.Current.ShowModal(
-                options, $"{targetFaction} must choose a penalty", requireSelection: true);
-            int choice = response[0].As<int>();
-            await PresentationModal.Current.HideModal();
+            var penaltyResp = await new InputRequest.SelectOptionRequestHandler(
+                targetFaction, penaltyLabels, penaltyIds,
+                $"{targetFaction} must choose a penalty").BroadCast();
+            int choice = penaltyResp.ResponseCardIds[0];
 
             if (choice == CHOICE_ELIMINATE && navies.Count > 0)
             {
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, navies).BroadCast()).ResponseUnitIds[0];
+                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(targetFaction, navies).BroadCast()).ResponseUnitIds[0];
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;

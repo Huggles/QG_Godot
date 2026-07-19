@@ -29,11 +29,9 @@ public partial class EventTitosPartisans : EventCardLogic
 
             // Step 2: Recruit a Soviet or United Kingdom Army in the Balkans
             new CardStep(this, async () => {
-                Variant[] response = await PresentationModal.Current.ShowModal(
-                    PresentationItemImageButton.ForFactions([Faction.SOVIET, Faction.UNITED_KINGDOM]),
-                    "Choose which faction recruits in the Balkans", requireSelection: true);
-                Faction selectedFaction = (Faction)response[0].As<int>();
-                await PresentationModal.Current.HideModal();
+                var factionResp = await new InputRequest.SelectFactionRequestHandler(
+                    Faction, new List<Faction> { Faction.SOVIET, Faction.UNITED_KINGDOM }).BroadCast();
+                Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
 
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
                     new DeployUnitChangeEvent(selectedFaction, (int)Country.Balkans, DeployType.RECRUIT));

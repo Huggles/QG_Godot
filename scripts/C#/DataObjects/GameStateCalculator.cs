@@ -128,7 +128,10 @@ public class GameStateCalculator
         
         foreach (UnitState unit in activeUnits)
         {
-            if (CalculateSupplyForUnit(pathFindingService, unit.Id, faction))
+            bool modifierGrantsSupply = ModifierRegistry.GetAll<IUnitSupplyModifier>()
+                .Any(m => m.GrantsSupply(unit));
+
+            if (modifierGrantsSupply || CalculateSupplyForUnit(pathFindingService, unit.Id, faction))
             {
                 unit.AddTag(Tag.InSupply, faction);
             } 
@@ -172,7 +175,7 @@ public class GameStateCalculator
         });
     }
 
-    private static void CalculateStraightControlForFaction(Faction faction)
+    private static void CalculateStraightControlForFaction()
     {
         // Clear old straight control tags
         foreach (var straightState in GameSession.Current.GameState.StraightStates)
@@ -198,16 +201,33 @@ public class GameStateCalculator
 
     public static List<GameStateCalculator> CalculateAll()
     {
-        DebugUtilities.PrintPeer("Calculating game state for all factions");
-        var calculators = new List<GameStateCalculator>();
-        
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        try
         {
-            calculators.Add(CalculateAllForFaction(faction));
-        }
+            DebugUtilities.PrintPeer("Calculating game state for all factions");
+            var calculators = new System.Collections.Concurrent.ConcurrentBag<GameStateCalculator>();
+            
+            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions, faction =>
+            {
+                calculators.Add(CalculateAllForFaction(faction));
+            });
 
-        EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
-        return calculators;
+            // Straight control writes global (non-faction-scoped) tags — run once after parallel work
+            CalculateStraightControlForFaction();
+
+            EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
+            stopwatch.Stop();
+            DebugUtilities.PrintPeer($"[TIMING] CalculateAll completed in {stopwatch.ElapsedMilliseconds}ms");
+            return calculators.ToList();
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            DebugUtilities.PrintPeer($"[TIMING] CalculateAll FAILED in {stopwatch.ElapsedMilliseconds}ms");
+            DebugUtilities.PrintPeer($"[ERROR] Exception during game state calculation after {stopwatch.ElapsedMilliseconds}ms: {ex.Message}");
+            DebugUtilities.PrintPeer($"[ERROR] Stack Trace: {ex.StackTrace}");
+            throw;
+        }        
     }
     
     public static GameStateCalculator CalculateAllForFaction(Faction faction)
@@ -226,8 +246,6 @@ public class GameStateCalculator
         CalculateActivatableCardsForFaction(faction);
         CalculateAfterReactionCardsForFaction(faction);        
         CalculatePlayableCardsForFaction(faction);
-
-        CalculateStraightControlForFaction(faction);
 
         return calculator;
     }

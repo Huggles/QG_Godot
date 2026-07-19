@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public partial class PresentationModal : Control, LoadableUI
@@ -9,41 +10,34 @@ public partial class PresentationModal : Control, LoadableUI
     public RichTextLabel TitleText => GetNode<RichTextLabel>("%TitleText");
     public PanelContainer PanelContainer => GetNode<PanelContainer>("%PanelContainer");
     public GridContainer GridCardContainer => GetNode<GridContainer>("%GridCardContainer");
-    public ScrollContainer CardScrollContainer => GetNode<ScrollContainer>("%CardScrollContainer");    
+    public ScrollContainer CardScrollContainer => GetNode<ScrollContainer>("%CardScrollContainer");
     public Button ExitButton => GetNode<Button>("%ExitButton");
     public Button ConfirmButton => GetNode<Button>("%ConfirmButton");
 
-    // Multi-select support
-    public bool RequireSelection;
-    private bool multiSelectMode = false;
-    private int minimumSelections = 0;
-    private List<int> selectedIdentifiers = new List<int>();
-    private Tween _activeTween;
-    public List<PresentationItem> PresentationItems = new List<PresentationItem>();
-    public List<Control> PresentationItemControls = new List<Control>();
+    private ModalConfig _activeConfig;
+    private List<int> _selectedItems = new();
+    private List<int> _orderedItems = new();
+    private TaskCompletionSource<ModalResult> _tcs;
 
-    private InputManager.KeyClickedEventHandler onKeyClicked;
+    private Tween _activeTween;
+    public List<PresentationItem> PresentationItems = new();
+    public List<Control> PresentationItemControls = new();
+    private InputManager.KeyClickedEventHandler _onKeyClicked;
 
     [Signal] public delegate void OnShowEventHandler();
     [Signal] public delegate void OnHideEventHandler();
     [Signal] public delegate void ItemSelectedEventHandler(int identifier);
 
-
     public override void _Ready()
     {
-        if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
-        {
+        if (Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
             Current = this;
-            
-        } 
-        // Hide by default until LoadUI is called
         Hide();
         LoadUI();
     }
+
     public void LoadUI()
-    {   
-        
-        // Try to get ConfirmButton if it exists in the scene
+    {
         if (ConfirmButton != null)
         {
             ConfirmButton.Pressed += OnConfirmButtonPressed;
@@ -54,6 +48,7 @@ public partial class PresentationModal : Control, LoadableUI
         ExitButton.Visible = false;
         ExitButton.Pressed += OnExitButtonPressed;
     }
+
     private void FadeIn(Action onComplete = null)
     {
         _activeTween?.Kill();
@@ -61,6 +56,7 @@ public partial class PresentationModal : Control, LoadableUI
         _activeTween.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds)
             .Finished += () => onComplete?.Invoke();
     }
+
     private void FadeOut(Action onComplete = null)
     {
         _activeTween?.Kill();
@@ -68,196 +64,214 @@ public partial class PresentationModal : Control, LoadableUI
         _activeTween.TweenProperty(this, "modulate:a", 0, GameSettings.DurationShortSeconds)
             .Finished += () => onComplete?.Invoke();
     }
-    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, bool requireSelection)
+
+    // ── Primary entry point ─────────────────────────────────────────────────
+    public Task<ModalResult> Show(ModalConfig config)
     {
-        RequireSelection = requireSelection;
-        return ShowModal(presentationItems, title, null);
-    }
-    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, Action exitCallback)
-    {
-        if (!RequireSelection)
-        {
-            ShowExitButton();
-            
-            // Unsubscribe first to prevent duplicate connections
-            if (onKeyClicked != null)
-            {
-                InputManager.Current.KeyClicked -= onKeyClicked;
-            }
-            onKeyClicked = HandleKeyboardInput;
-            InputManager.Current.KeyClicked += onKeyClicked;
-        }        
-        ShowModalPersistent(presentationItems, title);        
-        return ToSignal(this, SignalName.ItemSelected);
-    }
-    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title)
-    {
-        HandlePresentationItems(presentationItems);
-        TitleText.Text = title;
+        _activeConfig = config;
+        _selectedItems.Clear();
+        _orderedItems.Clear();
+        _tcs = new TaskCompletionSource<ModalResult>();
+
+        HandlePresentationItems(config.Items, config.Mode != ModalSelectionMode.Display);
+        TitleText.Text = config.Title;
         Visible = true;
 
-        FadeIn(async () =>
-        {
-            DebugUtilities.PrintPeerFinest("PresentationModal shown");
-            EmitSignal(SignalName.OnShow);
-            await Task.Delay(GameSettings.DurationLong);
-            if (GameSettings.DurationShortSeconds > 0)
-            {
-                _ = HideModal();
-            }
-        });
-        return ToSignal(this, SignalName.OnHide);        
-    }
-    public SignalAwaiter ShowModalPersistent(List<PresentationItem> presentationItems, string title)
-    {
-        HandlePresentationItems(presentationItems);
-        TitleText.Text = title;
-        Visible = true;
+        ConfirmButton.Visible = config.ShowApplyButton;
+        ConfirmButton.Text = config.ApplyLabel;
+        ConfirmButton.Disabled = config.MinSelections > 0;
+        ExitButton.Visible = config.ShowCancelButton;
+        ExitButton.Text = config.CancelLabel;
+
+        if (config.ShowCancelButton)
+            ConnectEscapeKey();
 
         FadeIn(() => EmitSignal(SignalName.OnShow));
-        return ToSignal(this, SignalName.OnShow);        
+
+        return _tcs.Task;
+    }
+
+    // ── Legacy wrappers ──────────────────────────────────────────────────────
+    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, bool requireSelection)
+    {
+        _ = Show(requireSelection
+            ? ModalConfig.SelectOne(title, presentationItems)
+            : ModalConfig.Display(title, presentationItems));
+        return ToSignal(this, requireSelection ? SignalName.ItemSelected : SignalName.OnHide);
+    }
+
+    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title, Action exitCallback)
+    {
+        _ = Show(ModalConfig.SelectOne(title, presentationItems, required: false));
+        return ToSignal(this, SignalName.ItemSelected);
+    }
+
+    public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title)
+    {
+        _ = Show(ModalConfig.Display(title, presentationItems));
+        return ToSignal(this, SignalName.OnHide);
+    }
+
+    public SignalAwaiter ShowModalPersistent(List<PresentationItem> presentationItems, string title)
+    {
+        _ = Show(ModalConfig.Display(title, presentationItems));
+        return ToSignal(this, SignalName.OnShow);
     }
 
     public void ShowExitButton()
     {
-        ExitButton.Visible = true;        
+        ExitButton.Visible = true;
     }
 
-    private void HandlePresentationItems(List<PresentationItem> presentationItems)
-    {
-        int maxColumns = 7;
-        if (presentationItems != null && presentationItems.Count > 0)
-        {
-            PresentationItems = presentationItems;
-            
-            // Set columns to at most 7 per row
-            GridCardContainer.Columns = Math.Min(presentationItems.Count, maxColumns);            
-            int rows = (int)Math.Ceiling((double)presentationItems.Count / maxColumns);
-            
-            foreach (PresentationItem presentationItem in presentationItems)
-            {
-                Control control = presentationItem.InitializeControl();
-                GridCardContainer.AddChild(control);
-
-                PresentationItemControls.Add(control);
-                presentationItem.LoadControl();
-                
-                // Connect to appropriate handler based on mode
-                if (multiSelectMode)
-                {
-                    presentationItem.ItemClicked += HandleItemClickedMultiSelect;
-                    // Initialize all cards as unselected (darker)
-                    control.Modulate = new Color(0.5f, 0.5f, 0.5f);
-                }
-                else
-                {
-                    presentationItem.ItemClicked += HandleItemClicked;
-                }
-            }
-            
-            // Set grid size to fit one row of cards
-            Vector2 gridSize = new Vector2(0, PresentationItemControls[0].Size.Y * Mathf.Clamp(rows, 1, 2.1f));
-            CardScrollContainer.CustomMinimumSize = gridSize;
-            CardScrollContainer.Size = gridSize;
-            CardScrollContainer.ScrollVertical = 0;
-        }
-    }
-    private void HandleItemClicked(int identifier) {        
-        EmitSignal(SignalName.ItemSelected, identifier);
-    }
-    private void HandleKeyboardInput(InputEventKey inputEventKey)
-    {
-        if (inputEventKey.Keycode == Key.Escape)
-        {
-            HideModal();
-        }
-    }
     public SignalAwaiter ShowModalMultiSelect(List<PresentationItem> presentationItems, string title, int minimumSelections)
     {
-        this.multiSelectMode = true;
-        this.minimumSelections = minimumSelections;
-        this.selectedIdentifiers.Clear();
-
-        HandlePresentationItems(presentationItems);
-        TitleText.Text = title;
-        Visible = true;
-
-        // Show buttons
-        if (ConfirmButton != null)
-        {
-            ConfirmButton.Visible = true;
-            UpdateConfirmButton();
-        }
-        
-        if (minimumSelections == 0)
-        {
-            ShowExitButton();
-        }
-
-        FadeIn(() =>
-        {
-            DebugUtilities.PrintPeerFinest("PresentationModal shown");
-            EmitSignal(SignalName.OnShow);
-        });
+        _ = Show(ModalConfig.SelectMany(title, presentationItems, minimumSelections));
         return ToSignal(this, SignalName.OnHide);
     }
-    private void HandleItemClickedMultiSelect(int identifier)
+
+    // ── Item rendering ───────────────────────────────────────────────────────
+    private void HandlePresentationItems(List<PresentationItem> presentationItems, bool darkInitially)
     {
-        if (selectedIdentifiers.Contains(identifier))
+        const int maxColumns = 7;
+        if (presentationItems == null || presentationItems.Count == 0) return;
+
+        foreach (Control old in PresentationItemControls)
+            old.QueueFree();
+        PresentationItemControls.Clear();
+        GridCardContainer.Columns = Math.Min(presentationItems.Count, maxColumns);
+        PresentationItems = presentationItems;
+        int rows = (int)Math.Ceiling((double)presentationItems.Count / maxColumns);
+
+        foreach (PresentationItem item in presentationItems)
         {
-            selectedIdentifiers.Remove(identifier);
-            UpdateItemVisual(identifier, false);
+            Control control = item.InitializeControl();
+            GridCardContainer.AddChild(control);
+            PresentationItemControls.Add(control);
+            item.LoadControl();
+            item.ItemClicked += HandleItemClick;
+
+            if (darkInitially)
+                control.Modulate = new Color(0.5f, 0.5f, 0.5f);
         }
-        else
-        {
-            selectedIdentifiers.Add(identifier);
-            UpdateItemVisual(identifier, true);
-        }
-        
-        UpdateConfirmButton();
+
+        Vector2 gridSize = new Vector2(0, PresentationItemControls[0].Size.Y * Mathf.Clamp(rows, 1, 2.1f));
+        CardScrollContainer.CustomMinimumSize = gridSize;
+        CardScrollContainer.Size = gridSize;
+        CardScrollContainer.ScrollVertical = 0;
     }
+
+    // ── Click handling ───────────────────────────────────────────────────────
+    private void HandleItemClick(int identifier)
+    {
+        if (_activeConfig == null) return;
+
+        switch (_activeConfig.Mode)
+        {
+            case ModalSelectionMode.Display:
+                break;
+
+            case ModalSelectionMode.MultiSelect:
+                if (_selectedItems.Contains(identifier))
+                {
+                    _selectedItems.Remove(identifier);
+                    UpdateItemVisual(identifier, false);
+                }
+                else if (_activeConfig.MaxSelections < 0 || _selectedItems.Count < _activeConfig.MaxSelections)
+                {
+                    _selectedItems.Add(identifier);
+                    UpdateItemVisual(identifier, true);
+                }
+                UpdateConfirmButton();
+                // Emit ItemSelected for legacy wrappers that await it
+                if (_activeConfig.MaxSelections == 1)
+                    EmitSignal(SignalName.ItemSelected, identifier);
+                break;
+
+            case ModalSelectionMode.Reorder:
+                if (_orderedItems.Contains(identifier))
+                    _orderedItems.Remove(identifier);
+                else
+                    _orderedItems.Add(identifier);
+                RefreshOrderBadges();
+                UpdateConfirmButton();
+                break;
+        }
+    }
+
+    // ── Visual helpers ───────────────────────────────────────────────────────
     private void UpdateItemVisual(int identifier, bool selected)
     {
         PresentationItem item = PresentationItems.Find(p => p.Identifier == identifier);
         if (item?.Control != null)
-        {
-            // Visual feedback for selection
             item.Control.Modulate = selected ? new Color(1, 1, 1) : new Color(0.5f, 0.5f, 0.5f);
+    }
+
+    private void RefreshOrderBadges()
+    {
+        foreach (PresentationItem item in PresentationItems)
+        {
+            int pos = _orderedItems.IndexOf(item.Identifier);
+            if (pos >= 0)
+            {
+                item.UpdateOrderBadge(pos + 1);
+                item.Control.Modulate = new Color(1, 1, 1);
+            }
+            else
+            {
+                item.UpdateOrderBadge(null);
+                item.Control.Modulate = new Color(0.5f, 0.5f, 0.5f);
+            }
         }
     }
+
     private void UpdateConfirmButton()
     {
-        if (ConfirmButton != null)
-        {
-            bool canConfirm = selectedIdentifiers.Count >= minimumSelections;
-            ConfirmButton.Disabled = !canConfirm;
-            ConfirmButton.Text = minimumSelections > 0 
-                ? $"Confirm ({selectedIdentifiers.Count}/{minimumSelections})"
-                : $"Discard {selectedIdentifiers.Count} Card(s)";
-        }
+        if (ConfirmButton == null || _activeConfig == null) return;
+        int count = _activeConfig.Mode == ModalSelectionMode.Reorder ? _orderedItems.Count : _selectedItems.Count;
+        ConfirmButton.Disabled = count < _activeConfig.MinSelections;
+        ConfirmButton.Text = _activeConfig.MinSelections > 0
+            ? $"{_activeConfig.ApplyLabel} ({count}/{_activeConfig.MinSelections})"
+            : $"{_activeConfig.ApplyLabel} ({count})";
     }
+
+    // ── Button handlers ──────────────────────────────────────────────────────
     private void OnConfirmButtonPressed()
     {
+        List<int> result = _activeConfig?.Mode == ModalSelectionMode.Reorder
+            ? new List<int>(_orderedItems)
+            : new List<int>(_selectedItems);
+        _tcs?.TrySetResult(new ModalResult(result));
         _ = HideModal();
     }
 
     private void OnExitButtonPressed()
     {
-        selectedIdentifiers.Clear();
+        _tcs?.TrySetResult(ModalResult.Cancelled);
         _ = HideModal();
     }
 
+    private void ConnectEscapeKey()
+    {
+        if (_onKeyClicked != null)
+            InputManager.Current.KeyClicked -= _onKeyClicked;
+        _onKeyClicked = key =>
+        {
+            if (key.Keycode == Key.Escape) _ = HideModal();
+        };
+        InputManager.Current.KeyClicked += _onKeyClicked;
+    }
+
+    // ── Hide ─────────────────────────────────────────────────────────────────
     public SignalAwaiter HideModal()
     {
-        if (onKeyClicked != null)
+        if (_onKeyClicked != null)
         {
-            InputManager.Current.KeyClicked -= onKeyClicked;
-            onKeyClicked = null;
+            InputManager.Current.KeyClicked -= _onKeyClicked;
+            _onKeyClicked = null;
         }
-        
-        // Reset multi-select state
-        multiSelectMode = false;
-        minimumSelections = 0;
+
+        // Resolve TCS if still pending (covers external HideModal calls)
+        _tcs?.TrySetResult(ModalResult.Cancelled);
 
         FadeOut(() =>
         {
@@ -265,30 +279,34 @@ public partial class PresentationModal : Control, LoadableUI
             ExitButton.Visible = false;
             if (ConfirmButton != null)
                 ConfirmButton.Visible = false;
-                
-            foreach (PresentationItem presentationItem in PresentationItems)
+
+            foreach (PresentationItem item in PresentationItems)
+                item.ItemClicked -= HandleItemClick;
+
+            foreach (Control control in PresentationItemControls)
             {
-                presentationItem.ItemClicked -= HandleItemClicked;
-                presentationItem.ItemClicked -= HandleItemClickedMultiSelect;
+                if (control.GetParent() != null)
+                    control.GetParent().RemoveChild(control);
             }
-            foreach (Control presentationItemControl in PresentationItemControls)
-            {
-                if (presentationItemControl.GetParent() != null)
-                {                    
-                    presentationItemControl.GetParent().RemoveChild(presentationItemControl);
-                }
-            }
+
             PresentationItemControls.Clear();
             PresentationItems.Clear();
-            EmitSignal(SignalName.OnHide, new PresentationItemResponse { SelectedItems = new List<int>(selectedIdentifiers) });
-            selectedIdentifiers.Clear();
+
+            EmitSignal(SignalName.OnHide,
+                new PresentationItemResponse { SelectedItems = new List<int>(_selectedItems) });
+
+            _selectedItems.Clear();
+            _orderedItems.Clear();
+            _activeConfig = null;
+            _tcs = null;
         });
+
         return ToSignal(this, SignalName.OnHide);
     }
 
+    // ── Nested types ─────────────────────────────────────────────────────────
     public partial class PresentationItemResponse : GodotObject
     {
         public List<int> SelectedItems;
-       
     }
 }

@@ -28,7 +28,11 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
                     .Where(cs => cs.Type == CountryType.LAND && cs.Tags.Has(Tag.Attackable, Faction))
                     .ToList();
 
-                List<int> armyUnits = UnitState.AttackableArmyIds(Faction);
+                var attackableArmyIds = UnitState.AttackableArmyIds(Faction).ToHashSet();
+                List<int> armyUnits = targetCountries
+                    .SelectMany(cs => cs.Units.Values)
+                    .Where(uId => attackableArmyIds.Contains(uId))
+                    .ToList();
                 List<int> emptyCountries = targetCountries.Select(c => c.Id).ToList();
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, emptyCountries, armyUnits).BroadCast();
                 BattleTarget target = resp.ResponseCountryIds.Count > 0

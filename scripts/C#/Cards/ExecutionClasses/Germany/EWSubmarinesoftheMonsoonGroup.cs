@@ -9,12 +9,10 @@ public partial class EWSubmarinesoftheMonsoonGroup : EWCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                // Show modal to select Allied faction
-                Variant[] response = await PresentationModal.Current.ShowModal(
-                    PresentationItemImageButton.ForFactions([Faction.UNITED_KINGDOM, Faction.UNITED_STATES, Faction.SOVIET]), 
-                    "Select Allied country");
-                Faction selectedFaction = (Faction)response[0].As<int>();
-                await PresentationModal.Current.HideModal();
+                // Select Allied faction via network-safe handler
+                var factionResp = await new InputRequest.SelectFactionRequestHandler(
+                    Faction, new List<Faction> { Faction.UNITED_KINGDOM, Faction.UNITED_STATES, Faction.SOVIET }).BroadCast();
+                Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
                 
                 // Selected faction discards 2 cards
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, selectedFaction, 2));

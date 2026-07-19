@@ -8,6 +8,11 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
     public int UnitId { get; private set; }
     public UnitRemovalReason Reason { get; private set; }
 
+    /// <summary>
+    /// WARNING: UnitState.CountryId is set to -1 after ExecuteAsync runs (unit removed from country).
+    /// Always use this event's inherited <see cref="BattleCountryChangeEvent.CountryId"/> to get the
+    /// country — it is captured at construction time and remains valid after execution.
+    /// </summary>
     public UnitState UnitState => UnitState.ForId(UnitId);
 
     public RemoveUnitChangeEvent(Faction triggeringFaction, int unitId, UnitRemovalReason removalReason) : base(triggeringFaction, UnitState.ForId(unitId).CountryId)
