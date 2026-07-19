@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="6_x05kf"]
 [ext_resource type="Script" uid="uid://6krq1p1wqi43" path="res://scripts/C#/UI/SpeedControl.cs" id="7_v35kq"]
 [ext_resource type="Script" uid="uid://bkgumcj218qt5" path="res://scripts/C#/UI/DebugVerbosityControl.cs" id="8_debugverb"]
+[ext_resource type="Script" uid="uid://autodismiss_01" path="res://scripts/C#/UI/AutoDismissControl.cs" id="13_autodismiss"]
 [ext_resource type="Script" uid="uid://poytc7oh3ay1" path="res://scenes/userinterface/History/GameHistoryList.cs" id="9_oxwje"]
 [ext_resource type="PackedScene" uid="uid://bhqnymug3arir" path="res://scenes/userinterface/History/game_history_item.tscn" id="10_dvfjj"]
 [ext_resource type="Script" uid="uid://debugoverlay_01" path="res://scripts/C#/UI/DebugOverlay.cs" id="11_debugoverlay"]
@@ -43,6 +44,11 @@ script = ExtResource("7_v35kq")
 offset_left = 10.0
 offset_top = 50.0
 script = ExtResource("8_debugverb")
+
+[node name="AutoDismissControl" type="PanelContainer" parent="."]
+offset_left = 10.0
+offset_top = 90.0
+script = ExtResource("13_autodismiss")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 anchors_preset = 11

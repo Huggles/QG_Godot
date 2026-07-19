@@ -17,8 +17,10 @@ public class ModalConfig
     public string ApplyLabel { get; private set; } = "Apply";
     public string CancelLabel { get; private set; } = "Cancel";
 
+    public bool AutoDismiss { get; private set; } = false;
+
     public bool ShowApplyButton => Mode != ModalSelectionMode.Display;
-    public bool ShowCancelButton => MinSelections == 0;
+    public bool ShowCancelButton => MinSelections == 0 && !AutoDismiss;
 
     private ModalConfig() { }
 
@@ -40,4 +42,11 @@ public class ModalConfig
 
     public ModalConfig WithApplyLabel(string label) { ApplyLabel = label; return this; }
     public ModalConfig WithCancelLabel(string label) { CancelLabel = label; return this; }
+    public ModalConfig WithAutoDismiss()
+    {
+        if (MinSelections > 0)
+            throw new System.InvalidOperationException("Cannot auto-dismiss a modal that requires selection.");
+        AutoDismiss = true;
+        return this;
+    }
 }

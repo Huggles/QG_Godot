@@ -313,8 +313,8 @@ public partial class CardPlayRound : GodotObject
         if(DeckState.ForFaction(faction).ActivatableCardIds.Count > 0)
         {
             bool hasPlayedHandCardThisTurnStep = GameFlow.Instance.CardsPlayedThisTurnStep.Values.Sum() > 0;
-            bool isPlayCardStep = GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
-            InputRequest request = hasPlayedHandCardThisTurnStep
+            bool isStartTurnStep = GameFlow.Instance.TurnStep == TurnStep.START;
+            InputRequest request = hasPlayedHandCardThisTurnStep || isStartTurnStep
                 ? new InputRequest.ActivateCardRequestHandler(faction)
                 : new InputRequest.HandCardPlayRequestHandler(faction);
             InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);

@@ -431,12 +431,21 @@ public partial class MultiplayerLobby : Control
     /// <summary>
     /// Default faction assignment for F6 debug auto-start:
     /// host (peer 1) → Axis, connecting client → Allies.
+    /// F7 (swapped_teams=true): host → Allies, client → Axis.
     /// </summary>
     private void AutoAssignDebugFactions(int clientPeerId)
     {
         _assignments.Clear();
-        foreach (var f in AxisSet)                              _assignments[f] = 1;
-        foreach (var f in AllPlayableFactions.Except(AxisSet)) _assignments[f] = clientPeerId;
+        if (GameSettings.IsDebugTeamsSwapped)
+        {
+            foreach (var f in AxisSet)                              _assignments[f] = clientPeerId;
+            foreach (var f in AllPlayableFactions.Except(AxisSet)) _assignments[f] = 1;
+        }
+        else
+        {
+            foreach (var f in AxisSet)                              _assignments[f] = 1;
+            foreach (var f in AllPlayableFactions.Except(AxisSet)) _assignments[f] = clientPeerId;
+        }
     }
 
     private void OnPeerDisconnected(long peerId)

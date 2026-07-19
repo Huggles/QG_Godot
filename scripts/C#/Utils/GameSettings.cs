@@ -21,8 +21,13 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>When true, enables extra logging and tooling for multiplayer debugging.</summary>
     public bool DebugMultiplayer { get; private set; } = false;
 
+    /// <summary>When true, display-only modals dismiss automatically after a delay instead of requiring the user to click Close.</summary>
+    public bool AutoDismissModal { get; private set; } = true;
+
     public static DebugVerbosity Debug => Instance.DebugLevel;
     public static bool IsDebugMultiplayer => Instance.DebugMultiplayer;
+    public static bool IsAutoDismissModal => Instance.AutoDismissModal;
+    public static bool IsDebugTeamsSwapped => OS.GetCmdlineUserArgs().Contains("swapped_teams=true");
 
     /// <summary>
     /// Duration table in milliseconds: rows = GameSpeed (Slow/Normal/Fast),
@@ -62,6 +67,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
     public void SetDebugMultiplayer(bool value)        { DebugMultiplayer  = value; Save(); }
+    public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
 
     public override void _Ready()
     {
@@ -81,6 +87,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             PresentationSpeed = (GameSpeed)Math.Clamp(saved, 0, 2);
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
             DebugMultiplayer  = config.GetValue(Section, "debug_multiplayer", false).As<bool>();
+            AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
         }
 
         // Command-line user arg overrides the config file (e.g. launched via quick_launch.ps1)
@@ -96,6 +103,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "presentation_speed", (int)PresentationSpeed);
         config.SetValue(Section, "debug_level",         (int)DebugLevel);
         config.SetValue(Section, "debug_multiplayer",   DebugMultiplayer);
+        config.SetValue(Section, "auto_dismiss_modal",    AutoDismissModal);
         config.Save(ConfigPath);
     }
 }

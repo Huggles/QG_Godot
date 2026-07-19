@@ -86,7 +86,21 @@ public partial class PresentationModal : Control, LoadableUI
         if (config.ShowCancelButton)
             ConnectEscapeKey();
 
-        FadeIn(() => EmitSignal(SignalName.OnShow));
+        if (config.AutoDismiss && GameSettings.IsAutoDismissModal)
+        {
+            FadeIn(async () =>
+            {
+                EmitSignal(SignalName.OnShow);
+                await Task.Delay(GameSettings.DurationLong);
+                if (Visible) _ = HideModal();
+            });
+        }
+        else
+        {
+            if (config.AutoDismiss)
+                ShowExitButton();
+            FadeIn(() => EmitSignal(SignalName.OnShow));
+        }
 
         return _tcs.Task;
     }
@@ -108,7 +122,7 @@ public partial class PresentationModal : Control, LoadableUI
 
     public SignalAwaiter ShowModal(List<PresentationItem> presentationItems, string title)
     {
-        _ = Show(ModalConfig.Display(title, presentationItems));
+        _ = Show(ModalConfig.Display(title, presentationItems).WithAutoDismiss());
         return ToSignal(this, SignalName.OnHide);
     }
 

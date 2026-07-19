@@ -7,6 +7,7 @@ public partial class TagContainer : Node
 {
     // Maps each tag to the set of factions it applies to
     private readonly Dictionary<Tag, HashSet<Faction>> _tags = new();
+    private readonly object _lock = new();
 
     public event Action<Tag, Faction> TagAdded;
     public event Action<Tag, Faction> TagRemoved;
@@ -19,15 +20,16 @@ public partial class TagContainer : Node
         if (faction == Faction.NONE)
             return false;
 
-        if (!_tags.ContainsKey(tag))
+        lock (_lock)
         {
-            _tags[tag] = new HashSet<Faction>();
-        }
+            if (!_tags.ContainsKey(tag))
+                _tags[tag] = new HashSet<Faction>();
 
-        if (_tags[tag].Add(faction))
-        {
-            TagAdded?.Invoke(tag, faction);
-            return true;
+            if (_tags[tag].Add(faction))
+            {
+                TagAdded?.Invoke(tag, faction);
+                return true;
+            }
         }
         return false;
     }
@@ -45,19 +47,21 @@ public partial class TagContainer : Node
     /// </summary>
     public bool Remove(Tag tag, Faction faction)
     {
-        if (!_tags.ContainsKey(tag))
-            return false;
-
-        if (_tags[tag].Remove(faction))
+        lock (_lock)
         {
-            TagRemoved?.Invoke(tag, faction);
-            
-            // Clean up empty tag entries
-            if (_tags[tag].Count == 0)
+            if (!_tags.ContainsKey(tag))
+                return false;
+
+            if (_tags[tag].Remove(faction))
             {
-                _tags.Remove(tag);
+                TagRemoved?.Invoke(tag, faction);
+
+                // Clean up empty tag entries
+                if (_tags[tag].Count == 0)
+                    _tags.Remove(tag);
+
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -67,14 +71,15 @@ public partial class TagContainer : Node
     /// </summary>
     public void RemoveForAll(Tag tag)
     {
-        if (!_tags.ContainsKey(tag))
-            return;
-
-        var factions = _tags[tag].ToArray();
-        foreach (var faction in factions)
+        Faction[] factions;
+        lock (_lock)
         {
-            Remove(tag, faction);
+            if (!_tags.ContainsKey(tag))
+                return;
+            factions = _tags[tag].ToArray();
         }
+        foreach (var faction in factions)
+            Remove(tag, faction);
     }
 
     /// <summary>
@@ -95,10 +100,12 @@ public partial class TagContainer : Node
     /// </summary>
     public bool Has(Tag tag, Faction faction)
     {
-        if (!_tags.ContainsKey(tag))
-            return false;
-
-        return _tags[tag].Contains(faction) || _tags[tag].Contains(Faction.ALL);
+        lock (_lock)
+        {
+            if (!_tags.ContainsKey(tag))
+                return false;
+            return _tags[tag].Contains(faction) || _tags[tag].Contains(Faction.ALL);
+        }
     }
 
     /// <summary>
@@ -106,7 +113,8 @@ public partial class TagContainer : Node
     /// </summary>
     public bool HasForAny(Tag tag)
     {
-        return _tags.ContainsKey(tag) && _tags[tag].Count > 0;
+        lock (_lock)
+            return _tags.ContainsKey(tag) && _tags[tag].Count > 0;
     }
 
     /// <summary>
@@ -114,10 +122,12 @@ public partial class TagContainer : Node
     /// </summary>
     public IEnumerable<Faction> GetFactionsWithTag(Tag tag)
     {
-        if (!_tags.ContainsKey(tag))
-            return Enumerable.Empty<Faction>();
-
-        return _tags[tag];
+        lock (_lock)
+        {
+            if (!_tags.ContainsKey(tag))
+                return Enumerable.Empty<Faction>();
+            return _tags[tag].ToArray();
+        }
     }
 
     /// <summary>
@@ -157,21 +167,23 @@ public partial class TagContainer : Node
     /// <summary>
     /// Returns all unique tags in the container (regardless of faction).
     /// </summary>
-    public IEnumerable<Tag> GetAllTags() => _tags.Keys;
+    public IEnumerable<Tag> GetAllTags() { lock (_lock) return _tags.Keys.ToArray(); }
 
     /// <summary>
     /// Returns all tags that apply to a specific faction.
     /// </summary>
     public IEnumerable<Tag> GetTagsForFaction(Faction faction)
     {
-        return _tags.Where(kvp => kvp.Value.Contains(faction) || kvp.Value.Contains(Faction.ALL))
-                    .Select(kvp => kvp.Key);
+        lock (_lock)
+            return _tags.Where(kvp => kvp.Value.Contains(faction) || kvp.Value.Contains(Faction.ALL))
+                        .Select(kvp => kvp.Key)
+                        .ToArray();
     }
 
     /// <summary>
     /// Returns the total number of unique tags.
     /// </summary>
-    public int Count => _tags.Count;
+    public int Count { get { lock (_lock) return _tags.Count; } }
 
     /// <summary>
     /// Adds multiple tags for a specific faction.

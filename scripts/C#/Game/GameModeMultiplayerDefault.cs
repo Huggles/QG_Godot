@@ -183,10 +183,12 @@ public partial class GameModeMultiplayerDefault : IGameMode
         string initialStateDataString = initialStateDataFile.GetAsText();
         InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
 
+
+        GameStateCalculator.Enabled = false;
         await DeployUnits(initialStateData);
         await PlaceCards(initialStateData);
         await SetStartingFaction(initialStateData);
-
+        GameStateCalculator.Enabled = true;
         await Task.Delay(100);
     }
     private async Task DeployUnits(InitialGameStateData initialStateData)

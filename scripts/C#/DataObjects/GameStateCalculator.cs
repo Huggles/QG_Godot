@@ -6,6 +6,15 @@ using System.Linq;
 
 public class GameStateCalculator
 {    
+    public static bool Enabled {
+        get { return field; }
+        set { 
+            field = value;
+            if(field) CalculateAll();
+        }
+    } = true;
+    
+
     public Faction Faction;
     
 
@@ -199,8 +208,14 @@ public class GameStateCalculator
     
     
 
-    public static List<GameStateCalculator> CalculateAll()
+    public static void CalculateAll()
     {
+        if (!Enabled)
+        {
+            DebugUtilities.PrintPeer("[SKIP] GameStateCalculator is disabled");
+            return;
+        }
+
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
@@ -218,7 +233,7 @@ public class GameStateCalculator
             EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
             stopwatch.Stop();
             DebugUtilities.PrintPeer($"[TIMING] CalculateAll completed in {stopwatch.ElapsedMilliseconds}ms");
-            return calculators.ToList();
+            return;
         }
         catch (Exception ex)
         {

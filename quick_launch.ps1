@@ -15,7 +15,7 @@ Write-Host "Build successful! Launching two instances..." -ForegroundColor Green
 $godot = $null
 $attempts = @(
     "godot",
-    "C:\Users\Huggles\Desktop\Godot\Godot_v4.7.1-stable_mono_win64.exe"
+    "C:\Users\Huggles\Desktop\Godot\Godot_v4.7.1-stable_mono_win64_console.exe"
 )
 
 foreach ($path in $attempts) {

@@ -64,16 +64,17 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public IDrawStepHandler drawStepHandler;
     public ISupplyStepHandler supplyStepHandler;
 
-    public void StartGame()
+    public async void StartGame()
     {
         DebugUtilities.PrintPeer("GameFlow: Starting game");
+        GameStateCalculator.Enabled = false;
         foreach (FactionState faction in gameState.PlayableFactionStates)
-        {
-            DrawCardsChangeEvent drawCardsChangeEvent = new DrawCardsChangeEvent(Faction.NONE, faction.Faction, 7, false);
+        {            
+            DrawCardsChangeEvent drawCardsChangeEvent =  new DrawCardsChangeEvent(Faction.NONE, faction.Faction, 7, false);
             drawCardsChangeEvent.IsTrigger = false;
-            _ = CardPlayPool.DoChangeEvent(drawCardsChangeEvent);
+            await CardPlayPool.DoChangeEvent(drawCardsChangeEvent);
         }
-
+        GameStateCalculator.Enabled = true;
         GameStateCalculator.CalculateAll();
 
         foreach (Faction faction in StaticGameData.PlayableFactions)
