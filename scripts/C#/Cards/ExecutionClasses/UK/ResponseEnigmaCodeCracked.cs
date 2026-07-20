@@ -17,9 +17,8 @@ public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                var statusActivation = CardPlayPool.GetChangeEvents<ActivateReactionChangeEvent>()
-                    .Last(ce => ce.TriggeringFaction == Faction.GERMANY
-                             && ce.SourceCardState.CardData.CardType == CardType.STATUS);
+                var statusActivation = CardPlayPool.CurrentReactionTrigger as ActivateReactionChangeEvent;
+                if (statusActivation == null) return null;
 
                 DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardHandCardsChangeEvent(Faction, Faction.GERMANY, new List<int> { statusActivation.SourceCardId }));
                 discardEvent.IsTrigger = true;

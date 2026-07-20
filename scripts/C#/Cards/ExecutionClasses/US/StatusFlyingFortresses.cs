@@ -4,11 +4,6 @@ using Godot;
 
 public partial class StatusFlyingFortresses : StatusCardLogic, IDiscardModifier
 {
-    protected override List<Condition> CardTriggers()
-    {
-        return new List<Condition> { Condition.Build(new Condition.IsVictoryPointStep(), this) };
-    }
-
     public int ModifyDiscard(ForceDiscardCardsChangeEvent discardEvent)
     {
         if (discardEvent.SourceCardState == null) return 0;

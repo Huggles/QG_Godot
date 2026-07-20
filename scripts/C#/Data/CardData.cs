@@ -9,6 +9,8 @@ public partial class CardData : DataObject
     public string Text {get; set;}
     public string Type {get; set;}
     public string ExecutionClass {get; set;}
+    // true = fires every time the trigger is met; false (default) = once per faction turn.
+    public bool MultipleActivationsPerTurn { get; set; } = false;
 
     public CardType CardType
     {

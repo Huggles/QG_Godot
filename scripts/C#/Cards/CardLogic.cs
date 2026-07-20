@@ -26,8 +26,6 @@ public abstract partial class CardLogic : GodotObject
     public bool HasImmediateTrigger => CardTriggers().Any(c => c is Condition.EventCondition ec && ec.IsImmediate);
     public bool HasExecutableCardSteps => CardSteps.Count == 0 || ExecutableCardSteps.Count > 0;
     public int NextStepId => HasExecutableCardSteps ? ExecutableCardSteps[0].Id : -1;
-    public virtual int MaxActivationsPerRound => 1;
-
     [Signal] public delegate void CardFinishedEventHandler();
     
     public List<CardStep> CardSteps = new();
@@ -35,7 +33,12 @@ public abstract partial class CardLogic : GodotObject
     
     public bool CanBeActivated()
     {
-        if (IsActivatedThisTurn || IsActivationFinished || !TriggerConditionsMet || !HasExecutableCardSteps)
+        if (IsActivationFinished || !TriggerConditionsMet || !HasExecutableCardSteps)
+            return false;
+
+        // "Once per turn" cards (MultipleActivationsPerTurn = false) may not activate
+        // again in the same faction turn.
+        if (!CardData.MultipleActivationsPerTurn && IsActivatedThisTurn)
             return false;
 
         // Cards whose triggers are purely state-based (no event/block conditions) must not

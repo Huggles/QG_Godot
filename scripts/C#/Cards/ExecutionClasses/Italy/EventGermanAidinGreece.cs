@@ -11,16 +11,15 @@ public partial class EventGermanAidinGreece : EventCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                var alliedArmyTargets = GameSession.Current.GameState.UnitStatesById.Values
-                    .Where(us => StaticGameData.FactionTeamForFaction(us.Faction) == FactionTeam.ALLIES
-                               && us.Type == UnitType.ARMY
-                               && us.CountryState.Country == targetCountries[0])
-                    .Select(us => new BattleTarget(us.Id, TargetType.UNIT))
+                var alliedArmyIds = CountryState.ForEnum(targetCountries[0]).Units.Values
+                    .Where(uId => StaticGameData.FactionTeamForFaction(UnitState.ForId(uId).Faction) == FactionTeam.ALLIES
+                               && UnitState.ForId(uId).IsArmy
+                               && !UnitState.ForId(uId).ImmuneForTurn)
                     .ToList();
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, alliedArmyTargets).BroadCast();
-                BattleCountryChangeEvent battleEvent = BuildChangeEvent(new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT).ToAttackChangeEvent(Faction));
-                battleEvent.IsTrigger = true;
-                return battleEvent;
+                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, alliedArmyIds).BroadCast()).ResponseUnitIds[0];
+                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
+                removeEvent.IsTrigger = true;
+                return removeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryHasEnemyUnit((int)targetCountries[0], Faction),this))
             .WithGuidance($"Eliminate an Allied army in {CountryState.ForEnum(targetCountries[0]).Label}"),

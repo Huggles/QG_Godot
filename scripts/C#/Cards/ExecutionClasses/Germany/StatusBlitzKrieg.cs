@@ -9,6 +9,8 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.FactionBattled(Faction), this).Immediately(),
+            // The space must be empty after the battle: if an enemy unit survived it is still
+            // occupied and we cannot deploy an Army into it, so Blitzkrieg does not fire.
             Condition.Build(new Condition.CustomCondition(() => {
                 var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
                 return trigger != null && trigger.CountryState.Units.Count == 0;

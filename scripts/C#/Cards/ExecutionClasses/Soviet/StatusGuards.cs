@@ -5,9 +5,6 @@ using Godot;
 
 public partial class StatusGuards : StatusCardLogic
 {
-    private List<int> BuildableLandIds =>
-        CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
-
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
@@ -35,12 +32,18 @@ public partial class StatusGuards : StatusCardLogic
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildableLandIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-                deployEvent.IsTrigger = true;
-                return deployEvent;
+                // Play a BuildArmy card from discard so that reaction cards (e.g. Women Conscripts)
+                // trigger correctly on the resulting PlayCardChangeEvent.
+                int buildArmyCardId = DeckState.ForFaction(Faction).DiscardedCardIds
+                    .First(id => CardState.ForId(id).CardData.CardType == CardType.BUILD_ARMY);
+                RecycleCardChangeEvent recycleEvent = BuildChangeEvent(
+                    new RecycleCardChangeEvent(Faction, Faction, buildArmyCardId, RecycleDestination.Hand));
+                recycleEvent.IsTrigger = false;
+                await recycleEvent.ApplyChange();
+                await CardPlayPool.DoCard(buildArmyCardId);
+                return null;
             })
-            .WithGuidance("Discard 2 cards from hand to build an army")
+            .WithGuidance("Discard 2 cards from hand to play a Build Army card from your discard pile")
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
         };
     }

@@ -7,12 +7,11 @@ public partial class StatusWomenConscripts : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.CustomCondition(() =>
-                CardPlayPool.GetChangeEvents<PlayCardChangeEvent>().Any(ce =>
-                    ce.TriggeringFaction == Faction &&
-                    CardState.ForId(ce.SourceCardId).CardData.CardType == CardType.BUILD_ARMY &&
-                    DeckState.ForFaction(Faction).DiscardedCardIds.Contains(ce.SourceCardId))
-            ), this)
+            Condition.Build(new Condition.CustomCondition(() => {
+                if (CardPlayPool.CurrentReactionTrigger is not PlayCardChangeEvent playCard) return false;
+                return playCard.TriggeringFaction == Faction
+                    && CardState.ForId(playCard.SourceCardId).CardData.CardType == CardType.BUILD_ARMY;
+            }), this)
         };
     }
 

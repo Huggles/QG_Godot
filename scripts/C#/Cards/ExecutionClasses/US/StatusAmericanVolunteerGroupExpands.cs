@@ -3,8 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICountryTagModifier
+public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICountryTagModifier, IUnitSupplyModifier
 {
+    public bool GrantsSupply(UnitState unit)
+    {
+        return StaticGameData.FactionTeamForFaction(unit.Faction) == FactionTeam.ALLIES
+            && unit.Type == UnitType.ARMY
+            && unit.CountryState.Country == Country.Szechuan;
+    }
+
     public void ApplyTagModifiers(Faction faction)
     {
         if (StaticGameData.FactionTeamForFaction(faction) != FactionTeam.ALLIES) return;

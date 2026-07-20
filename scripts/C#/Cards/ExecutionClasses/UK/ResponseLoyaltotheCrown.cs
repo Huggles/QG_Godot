@@ -10,8 +10,12 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.UnitAboutToBeDeployed(FactionTeam.AXIS, UnitType.ARMY)
-                .WithCountries(TargetCountries), this)
+            Condition.Build(new Condition.CustomCondition(() => {
+                if (CardPlayPool.CurrentReactionTrigger is not DeployUnitChangeEvent deployEvent) return false;
+                return StaticGameData.FactionTeamForFaction(deployEvent.TriggeringFaction) == FactionTeam.AXIS
+                    && deployEvent.UnitType == UnitType.ARMY
+                    && TargetCountries.Contains(deployEvent.CountryState.Country);
+            }), this)
         };
     }
 
@@ -19,12 +23,8 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                var deployEvent = CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
-                    .Last(ce =>
-                        StaticGameData.FactionTeamForFaction(ce.TriggeringFaction) == FactionTeam.AXIS
-                        && ce.UnitType == UnitType.ARMY
-                        && TargetCountries.Contains(ce.CountryState.Country)
-                    );
+                var deployEvent = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
+                if (deployEvent == null) return null;
 
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, deployEvent.UnitId, UnitRemovalReason.ELIMINATE));

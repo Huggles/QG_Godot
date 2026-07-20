@@ -7,8 +7,9 @@ public partial class StatusSwedishIronOre : StatusCardLogic, IVPModifier
 {
     public virtual VPEntry AddVictoryPoints()
     {
-        List<Country> countries = [Country.Scandinavia, Country.BalticSea];
-        int score = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum();
+        int score = 0;
+        if (FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates().Any(u => u.CountryState.Country == Country.BalticSea && u.Type == UnitType.NAVY)) score++;
+        if (FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates().Any(u => u.CountryState.Country == Country.Scandinavia && u.Type == UnitType.ARMY)) score++;
         return new VPEntry(score, $"{score} victory points for a navy in the Baltic Sea and army in Scandinavia.");
     }
 

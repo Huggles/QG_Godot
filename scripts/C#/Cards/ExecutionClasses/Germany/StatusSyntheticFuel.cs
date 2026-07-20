@@ -23,13 +23,12 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     {
         get 
         {
-            return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>()
-                .Map(changeEvent => changeEvent.CountryId)
-                .SelectMany(countryId => CountryState.ForId(countryId).AdjacentCountryStates(Faction))
-                .Distinct()
+            var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
+            if (trigger == null) return new List<CountryState>();
+            return CountryState.ForId(trigger.CountryId).AdjacentCountryStates(Faction)
                 .Where(countryState => countryState.CanBuild(Faction) && countryState.IsLand)
+                .Distinct()
                 .ToList();
-            
         }
     }
 
