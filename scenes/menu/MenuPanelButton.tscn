@@ -1,0 +1,87 @@
+[gd_scene format=3 uid="uid://dxq3kwan4wpb5"]
+
+[ext_resource type="Texture2D" uid="uid://d3ccya2smu5cj" path="res://assets/textures/Other/MenuPanelButton.png" id="1_tex"]
+[ext_resource type="Script" uid="uid://cbtnmr7p4xq8g" path="res://scripts/C#/Menu/MenuPanelButton.cs" id="2_script"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kb8kt"]
+texture = ExtResource("1_tex")
+texture_margin_left = 80.0
+texture_margin_top = 55.0
+texture_margin_right = 80.0
+texture_margin_bottom = 55.0
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_5581r"]
+load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_dgjnc"]
+texture = SubResource("CompressedTexture2D_5581r")
+texture_margin_left = 80.0
+texture_margin_top = 55.0
+texture_margin_right = 80.0
+texture_margin_bottom = 55.0
+modulate_color = Color(0.60933006, 0.6093301, 0.60933006, 1)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ouugf"]
+load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qiktu"]
+texture = SubResource("CompressedTexture2D_ouugf")
+texture_margin_left = 80.0
+texture_margin_top = 55.0
+texture_margin_right = 80.0
+texture_margin_bottom = 55.0
+modulate_color = Color(0.8776157, 0.8776158, 0.8776157, 1)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_qiktu"]
+load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5581r"]
+texture = SubResource("CompressedTexture2D_qiktu")
+texture_margin_left = 80.0
+texture_margin_top = 55.0
+texture_margin_right = 80.0
+texture_margin_bottom = 55.0
+modulate_color = Color(0.60933006, 0.6093301, 0.60933006, 1)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_q0r3r"]
+load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_13edg"]
+texture = SubResource("CompressedTexture2D_q0r3r")
+texture_margin_left = 80.0
+texture_margin_top = 55.0
+texture_margin_right = 80.0
+texture_margin_bottom = 55.0
+modulate_color = Color(0.28974146, 0.28974146, 0.28974146, 1)
+
+[node name="Button" type="Button" unique_id=566933446]
+custom_minimum_size = Vector2(160, 110)
+offset_right = 320.0
+offset_bottom = 160.0
+theme_override_styles/normal = SubResource("StyleBoxTexture_kb8kt")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_dgjnc")
+theme_override_styles/hover = SubResource("StyleBoxTexture_qiktu")
+theme_override_styles/hover_mirrored = SubResource("StyleBoxTexture_qiktu")
+theme_override_styles/hover_pressed = SubResource("StyleBoxTexture_5581r")
+theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxTexture_5581r")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_13edg")
+script = ExtResource("2_script")
+
+[node name="Label" type="RichTextLabel" parent="." unique_id=1225715149]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -0.5
+offset_top = -20.0
+offset_right = 0.5
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 32
+bbcode_enabled = true
+text = "[center]Jingle Bells[/center]"
+fit_content = true
+scroll_active = false

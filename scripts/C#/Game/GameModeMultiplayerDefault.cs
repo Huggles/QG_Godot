@@ -179,7 +179,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
         // Load initial game state configuration from JSON
         DebugUtilities.PrintPeer($"SetupInitialGameState");
         
-        using var initialStateDataFile = FileAccess.Open(INITIAL_GAME_STATE_DATA_PATH, FileAccess.ModeFlags.Read);
+        using var initialStateDataFile = FileAccess.Open(GameManager.PendingScenarioPath, FileAccess.ModeFlags.Read);
         string initialStateDataString = initialStateDataFile.GetAsText();
         InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
 

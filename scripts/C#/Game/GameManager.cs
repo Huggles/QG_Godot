@@ -26,6 +26,9 @@ public partial class GameManager : Node
     private List<PlayerFactionAssignment> _pendingPlayerFactionAssignments;
     private bool _gameInitialized = false;
 
+    /// <summary>Scenario data file to load when the game starts. Set before navigating to Game.tscn.</summary>
+    public static string PendingScenarioPath { get; set; } = "res://assets/data/Scenario_Debug.json";
+
     public Camera2D MyCamera => GetViewport().GetCamera2D();
     public InputManager MyInputManager => playerStates.Count > 0 ? playerStates[0].InputManager : null;
     

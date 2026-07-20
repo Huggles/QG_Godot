@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dbqgnfm4l7r5p"]
+
+[ext_resource type="Script" path="res://scripts/C#/Menu/MainScene.cs" id="1_main"]
+
+[node name="MainScene" type="Node"]
+script = ExtResource("1_main")

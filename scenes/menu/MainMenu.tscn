@@ -1,20 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://mkqa1n4o3kva"]
+[gd_scene format=3 uid="uid://mkqa1n4o3kva"]
 
 [ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
+[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="Script" uid="uid://bwx4k7nap2qnr" path="res://scripts/C#/Menu/MainMenu.cs" id="3_script"]
 
-[node name="Control" type="Control"]
+[node name="Control" type="Control" unique_id=533686469]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 2.0
-offset_right = 2.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
+script = ExtResource("3_script")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=630335957]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,57 +23,33 @@ grow_vertical = 2
 texture = ExtResource("1_m2yvp")
 expand_mode = 3
 
-[node name="HostButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 769.0
-offset_top = 392.0
-offset_right = 1148.0
-offset_bottom = 501.0
-text = "Host
-"
-
-[node name="MultiplayerButton" type="Button" parent="."]
+[node name="ButtonContainer" type="VBoxContainer" parent="." unique_id=586174224]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -48.5
-offset_top = -15.5
-offset_right = 48.5
-offset_bottom = 15.5
+offset_left = 67.0
+offset_top = -484.0
+offset_right = 852.0
+offset_bottom = 456.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Multiplayer
-"
+theme_override_constants/separation = 20
 
-[node name="ExitGameButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -48.5
-offset_top = 26.0
-offset_right = 48.5
-offset_bottom = 57.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "Exit Game
-"
+[node name="SinglePlayerButton" parent="ButtonContainer" unique_id=409954901 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+layout_mode = 2
 
-[node name="DEBUG" type="Button" parent="."]
-layout_mode = 0
-offset_left = 768.0
-offset_top = 722.0
-offset_right = 1147.0
-offset_bottom = 831.0
-text = "Debug
-"
+[node name="MultiplayerHostButton" parent="ButtonContainer" unique_id=1302279736 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+layout_mode = 2
 
-[connection signal="pressed" from="HostButton" to="." method="_on_host_button_pressed"]
-[connection signal="pressed" from="MultiplayerButton" to="." method="_on_multiplayer_button_pressed"]
-[connection signal="pressed" from="ExitGameButton" to="." method="_on_exit_game_button_pressed"]
-[connection signal="pressed" from="DEBUG" to="." method="_on_debug_pressed"]
+[node name="MultiplayerJoinButton" parent="ButtonContainer" unique_id=2125586497 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="QuitButton" parent="ButtonContainer" unique_id=1588731681 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+layout_mode = 2

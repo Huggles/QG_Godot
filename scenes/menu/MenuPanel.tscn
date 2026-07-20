@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://cviw1rdhjifft"]
+
+[ext_resource type="Texture2D" uid="uid://c3t4waaubobm" path="res://assets/textures/Other/MenuPanelBackground.png" id="1_emoit"]
+
+[node name="NinePatchRect" type="NinePatchRect" unique_id=779728291]
+offset_left = -1254.0
+offset_top = -100.0
+offset_right = -179.0
+offset_bottom = 954.0
+texture = ExtResource("1_emoit")
+patch_margin_left = 400
+patch_margin_top = 400
+patch_margin_right = 400
+patch_margin_bottom = 400
