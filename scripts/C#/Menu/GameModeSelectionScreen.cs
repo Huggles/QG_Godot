@@ -3,16 +3,19 @@ using System.Collections.Generic;
 
 public partial class GameModeSelectionScreen : Control
 {
-    private const string ScenarioBasicPath = "res://assets/data/Scenario_Basic.json";
-    private const string ScenarioDebugPath = "res://assets/data/Scenario_Debug.json";
+    private const string ScenarioBasicPath    = "res://assets/data/Scenario_Basic.json";
+    private const string ScenarioDebugPath    = "res://assets/data/Scenario_Debug.json";
+    private const string ScenarioAllCardsPath = "res://assets/data/Scenario_AllCards.json";
 
     public override void _Ready()
     {
-        var standardBtn = GetNode<MenuPanelButton>("%StandardGameButton");
-        var debugBtn    = GetNode<MenuPanelButton>("%DebugScenarioButton");
+        var standardBtn  = GetNode<MenuPanelButton>("%StandardGameButton");
+        var debugBtn     = GetNode<MenuPanelButton>("%DebugScenarioButton");
+        var allCardsBtn  = GetNode<MenuPanelButton>("%AllCardsButton");
 
         standardBtn.CustomMinimumSize = new Vector2(600, 180);
         debugBtn.CustomMinimumSize    = new Vector2(600, 180);
+        allCardsBtn.CustomMinimumSize = new Vector2(600, 180);
 
         standardBtn.ButtonText =
             "[b][font_size=28]Standard Game[/font_size][/b]\n" +
@@ -24,8 +27,14 @@ public partial class GameModeSelectionScreen : Control
             "[color=#bbbbbb][font_size=18]Germany starts with pre-loaded status cards.\n" +
             "No unit deployments — ideal for testing card effects.[/font_size][/color]";
 
-        standardBtn.Pressed += () => StartGame(ScenarioBasicPath);
-        debugBtn.Pressed    += () => StartGame(ScenarioDebugPath);
+        allCardsBtn.ButtonText =
+            "[b][font_size=28]All Cards In Play[/font_size][/b]\n" +
+            "[color=#bbbbbb][font_size=18]Every faction's status and response cards are already played.\n" +
+            "Home territory deployments — ideal for testing card interactions.[/font_size][/color]";
+
+        standardBtn.Pressed  += () => StartGame(ScenarioBasicPath);
+        debugBtn.Pressed     += () => StartGame(ScenarioDebugPath);
+        allCardsBtn.Pressed  += () => StartGame(ScenarioAllCardsPath);
     }
 
     private void StartGame(string scenarioPath)

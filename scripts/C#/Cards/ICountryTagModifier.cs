@@ -5,5 +5,6 @@
 /// </summary>
 public interface ICountryTagModifier : IModifier
 {
+    Faction Faction { get; }
     void ApplyTagModifiers(Faction faction);
 }

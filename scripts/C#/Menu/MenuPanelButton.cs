@@ -17,12 +17,11 @@ public partial class MenuPanelButton : Button
 		}
 	}
 
-	private RichTextLabel _label;
+	private RichTextLabel _label => GetNode<RichTextLabel>("MarginContainer/Label");
 	private string _pendingText = "";
 
 	public override void _Ready()
-	{
-		_label = GetNode<RichTextLabel>("Label");
+	{		
 		_label.Text = $"[center]{_pendingText}[/center]";
 		MouseDefaultCursorShape = CursorShape.PointingHand;
 	}

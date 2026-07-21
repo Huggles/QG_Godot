@@ -5,5 +5,6 @@
 /// </summary>
 public interface IVPModifier : IModifier
 {
+    Faction Faction { get; }
     VPEntry AddVictoryPoints();
 }

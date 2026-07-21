@@ -384,7 +384,7 @@ public class GameStateCalculator
 
     private static void ApplyCountryTagModifiersForFaction(Faction faction)
     {
-        foreach (ICountryTagModifier modifier in ModifierRegistry.GetAll<ICountryTagModifier>())
+        foreach (ICountryTagModifier modifier in ModifierRegistry.GetAll<ICountryTagModifier>().Where(m => m.Faction == faction))
             modifier.ApplyTagModifiers(faction);
     }
 

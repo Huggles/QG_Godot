@@ -66,11 +66,13 @@ public abstract partial class CardLogic : GodotObject
 
     public List<Condition> _conditions
     {
-        get {  
-            // If the card has specific triggers, use those; otherwise, default to if its the faction's turn and a card hasn't been played this turn step
-            return CardTriggers().Count > 0 && CardState.IsPlayed
-                ? CardTriggers() 
-                : _defaultPlayConditions; 
+        get {
+            if (!CardState.IsPlayed)
+                return _defaultPlayConditions;
+            if (CardTriggers().Count > 0)
+                return CardTriggers();
+            // Played with no custom triggers = passive modifier, never re-activatable
+            return new List<Condition> { new Condition.Never() };
         }
     }
         

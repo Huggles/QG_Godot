@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://cscreengmd5k3"]
+[gd_scene format=3 uid="uid://cscreengmd5k3"]
 
 [ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
@@ -46,9 +46,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -200.0
+offset_top = -300.0
 offset_right = 300.0
-offset_bottom = 200.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 30
@@ -57,24 +57,11 @@ theme_override_constants/separation = 30
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Label" parent="ButtonContainer/StandardGameButton"]
-anchors_preset = 15
-anchor_top = 0.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
-
 [node name="DebugScenarioButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Label" parent="ButtonContainer/DebugScenarioButton"]
-anchors_preset = 15
-anchor_top = 0.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
+[node name="AllCardsButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+layout_mode = 2
+

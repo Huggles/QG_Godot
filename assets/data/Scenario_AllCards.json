@@ -1,0 +1,121 @@
+{
+  "startingFaction": "GERMANY",
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [
+        { "countryName": "GERMANY" }
+      ],
+      "initialCards": [
+        { "name": "StatusOccupationOfCzechoslovakia" },
+        { "name": "StatusBlitzkrieg" },
+        { "name": "StatusSyntheticFuel" },
+        { "name": "StatusBiasForAction" },
+        { "name": "StatusDiveBombers" },
+        { "name": "StatusAbundantResources" },
+        { "name": "StatusAtlanticWall" },
+        { "name": "StatusConscription" },
+        { "name": "StatusSuperiorPlanning" },
+        { "name": "StatusJetFighters" },
+        { "name": "StatusWolfPacks" },
+        { "name": "StatusVolksturm" }
+      ],
+      "initialHandCards": []
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [
+        { "countryName": "UNITED_KINGDOM" }
+      ],
+      "initialCards": [
+        { "name": "ResponseASWTactics" },
+        { "name": "ResponseDefensivePosture" },
+        { "name": "ResponseDestroyers" },
+        { "name": "ResponseEnigmaCodeCracked" },
+        { "name": "ResponseLoyaltotheCrown" },
+        { "name": "ResponseRAF" },
+        { "name": "ResponseRationing" },
+        { "name": "StatusAustraliaFormstheDirectorateofManpower" },
+        { "name": "StatusFreeFrance" },
+        { "name": "StatusLordLinlithgowDeclaresIndiatoBeatWar" },
+        { "name": "StatusMackenzieKingDraftstheNationalResourcesMobilizationAct" },
+        { "name": "StatusResistance" },
+        { "name": "StatusTheRoyalNavy" }
+      ],
+      "initialHandCards": []
+    },
+    "JAPAN": {
+      "unitDeployments": [
+        { "countryName": "JAPAN" }
+      ],
+      "initialCards": [
+        { "name": "ResponseBanzaiCharge" },
+        { "name": "ResponseBattleshipRepair" },
+        { "name": "ResponseChinaOffensive" },
+        { "name": "ResponseDestroyerTransport" },
+        { "name": "ResponseFallOfSingapore" },
+        { "name": "ResponseKamikaze" },
+        { "name": "ResponseKwantungArmy" },
+        { "name": "ResponseMobileForce" },
+        { "name": "ResponseSpecialNavalLandingForces" },
+        { "name": "ResponseSurpriseAttack" },
+        { "name": "ResponseTruk" },
+        { "name": "StatusForwardBases" },
+        { "name": "StatusGreaterEastAsiaCoProsperitySphere" },
+        { "name": "StatusImperialDesigns" },
+        { "name": "StatusUnimpededMerchantShipping" }
+      ],
+      "initialHandCards": []
+    },
+    "SOVIET": {
+      "unitDeployments": [
+        { "countryName": "MOSCOW" }
+      ],
+      "initialCards": [
+        { "name": "ResponseDefenseoftheMotherland" },
+        { "name": "ResponseLeningrad" },
+        { "name": "ResponseMoscow" },
+        { "name": "ResponseRasputitsa" },
+        { "name": "ResponseStalingrad" },
+        { "name": "StatusFrontalAssault" },
+        { "name": "StatusGuards" },
+        { "name": "StatusScorchedEarth" },
+        { "name": "StatusShverniksEvacuationCouncil" },
+        { "name": "StatusStavkaFormsArtilleryCorps" },
+        { "name": "StatusWomenConscripts" }
+      ],
+      "initialHandCards": []
+    },
+    "ITALY": {
+      "unitDeployments": [
+        { "countryName": "ITALY" }
+      ],
+      "initialCards": [
+        { "name": "ResponseGermanReinforcementsCounterattack" },
+        { "name": "ResponseMonteCassino" },
+        { "name": "ResponseRomanianReinforcements" },
+        { "name": "ResponseSkilledPilots" },
+        { "name": "StatusAntiCommunistSentiment" },
+        { "name": "StatusBalkanResources" },
+        { "name": "StatusBravado" },
+        { "name": "StatusImperoItaliano" },
+        { "name": "StatusMareNostrum" }
+      ],
+      "initialHandCards": []
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [
+        { "countryName": "US_EAST" }
+      ],
+      "initialCards": [
+        { "name": "StatusAircraftCarriers" },
+        { "name": "StatusAmericanVolunteerGroupExpands" },
+        { "name": "StatusAmphibiousLandings" },
+        { "name": "StatusFlyingFortresses" },
+        { "name": "StatusRadar" },
+        { "name": "StatusRosietheRiveter" },
+        { "name": "StatusSuperiorShipyards" },
+        { "name": "StatusWartimeProduction" }
+      ],
+      "initialHandCards": []
+    }
+  }
+}

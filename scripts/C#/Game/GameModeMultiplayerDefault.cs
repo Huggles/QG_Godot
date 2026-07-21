@@ -184,6 +184,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
         InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
 
 
+        GameStateCalculator.CalculateAll();
         GameStateCalculator.Enabled = false;
         await DeployUnits(initialStateData);
         await PlaceCards(initialStateData);

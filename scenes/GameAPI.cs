@@ -110,29 +110,7 @@ public partial class GameAPI : Node
             (straight.ControlledCountryId1 == countryId2 && straight.ControlledCountryId2 == countryId1)).ToList();
 
         return matches.Count > 0 ? matches[0] : null;
-    }
-    
-    public static void RequestResponseCardActivation(ChangeEvent changeEvent, Callable callback)
-    {
-        foreach (Faction faction in Enum.GetValues<Faction>()) // Assuming GetKeys() exists
-        {
-            RequestResponseCardActivationForFaction(changeEvent, (Faction)faction, callback);
-        }
-    }
-    public static void RequestResponseCardActivationForFaction(ChangeEvent changeEvent, Faction faction, Callable callback)
-    {
-        if (DeckState.ForFaction(faction).ResponseCardIds.Count > 0)
-        {
-            // TODO: Implement callback invocation
-        }
-    }
-    public static void RequestStatusCardActivation(ChangeEvent changeEvent, Callable callback)
-    {
-        foreach (Faction faction in Enum.GetValues<Faction>())
-        {
-            RequestResponseCardActivationForFaction(changeEvent, faction, callback);
-        }
-    }
+    }    
 
     /**
     * Board Management API
@@ -145,14 +123,18 @@ public partial class GameAPI : Node
         if(unitId == -1) throw new Exception($"No available units of type {unitType} for faction {faction}");
         UnitState unitState = UnitState.ForId(unitId);
 
-        bool deployable = deployType != DeployType.BUILD || countryState.CanBuild(faction);
+        bool deployable = deployType == DeployType.BUILD ? countryState.Tags.Has(Tag.Buildable, faction) : countryState.Tags.Has(Tag.Recruitable, faction);
+
         if (!countryState.IsCountryFull && deployable)
         {
             countryState.Units[faction] = unitState.Id;
             unitState.CountryId = countryState.Id;
+            EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
+            AnimationQueue.Instance.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+        } else {
+            throw new GameAPIException($"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. Country is full or not deployable.");
         }
-        EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
-        AnimationQueue.Instance.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+        
         return unitId;
     }
     public static void RemoveUnitFromCountry(int unitId, bool awaitAnimation = true)
@@ -218,5 +200,10 @@ public partial class GameAPI : Node
         GameFlow.Instance.VictoryPointSummaries[vpTurnSummary.Faction].Add(vpTurnSummary);  
         DebugUtilities.PrintPeer($"Faction {vpTurnSummary.Faction} scored {vpTurnSummary.TotalScore} points (Total Score: {factionState.Score})");      
         EventBus.Emit(EventBus.SignalName.FactionScoredPoints, (int)vpTurnSummary.Faction, factionState.Score);
+    }
+
+    public class GameAPIException : Exception
+    {
+        public GameAPIException(string message) : base(message) { }
     }
 }

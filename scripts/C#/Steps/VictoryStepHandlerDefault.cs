@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
@@ -35,7 +36,8 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
 
     public void ScoreSupplyCountryVPs()
     {
-        foreach (CountryState cs in CountryState.ForIds(FactionState.OccupiedCountryIds))
+        List<CountryState> occupiedCountries = CountryState.ForIds(FactionState.OccupiedCountryIds);
+        foreach (CountryState cs in occupiedCountries)
         {
             if (cs.IsSupply)
             {
@@ -47,7 +49,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     }
     public void HandleStatusCardVictoryPoints()
     {
-        foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>())
+        foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>().Where(m => m.Faction == Faction))
         {
             vpTurnSummary.AddScore(modifier.AddVictoryPoints());
         }
