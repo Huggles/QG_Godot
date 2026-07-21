@@ -76,6 +76,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             SpendPlayActionChangeEventDto d    => new SpendPlayActionChangeEvent(d.TriggeringFaction),
             ReorderDeckChangeEventDto d        => new ReorderDeckChangeEvent(d.TriggeringFaction, d.ReorderedCardIds),
             GrantSupplyChangeEventDto d         => new GrantSupplyChangeEvent(d.TriggeringFaction, d.UnitIds),
+            RecalculateTagsChangeEventDto d     => new RecalculateTagsChangeEvent(d.Snapshot),
             _ => throw new NotSupportedException($"Unknown ChangeEventDto type: {dto.GetType().Name}")
         };
         ev.Id                   = dto.Id;
@@ -89,29 +90,34 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         return ev;
     }
 
-    public async Task<bool> ApplyChange()
+    public virtual async Task<bool> ApplyChange()
     {
-        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);              
+        EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
+        DebugUtilities.PrintPeer($"Doing change event {ScriptName} (Id: {Id}) with source card {SourceCardId} and triggering faction {TriggeringFaction}");           
         if(CardPlayRound.Current != null)
         {
             DebugUtilities.PrintPeer($"Registering change event {ScriptName} (Id: {Id}) with current CardPlayRound");
             CardPlayRound.Current.RegisterChangeEvent(this);
         }
+        DebugUtilities.PrintPeer($"PlayAnimations: {PlayAnimations}, BlockAnimationQueue: {BlockAnimationQueue}");           
         foreach (ChangeEventAnimation anim in BeforeAnimations)
         {
             if(PlayAnimations)
             {
                 _ = AnimationQueue.Instance.Enqueue(anim);            
-            }
-            
+            }            
         }
-        await ExecuteAsync();        
-        GameStateCalculator.CalculateAll();
-        EmitSignal(SignalName.ChangeEventApplied, Id);       
+        DebugUtilities.PrintPeer($"Execute Async");           
+        await ExecuteAsync();
+        // Broadcast this change event to clients BEFORE recalculating tags, so the tags snapshot
+        // that CalculateAll() broadcasts (as a RecalculateTagsChangeEvent) is enqueued on clients
+        // right behind this event and always applies to post-change state — never before it.
         if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
-        {   
+        {
             await BroadCast();
         }
+        GameStateCalculator.CalculateAll();
+        EmitSignal(SignalName.ChangeEventApplied, Id);
         foreach (ChangeEventAnimation anim in AfterAnimations)
         {
             if(PlayAnimations)

@@ -240,8 +240,8 @@ public class GameStateCalculator
             return;
         }
 
-        // Tag calculation is server-authoritative. Clients receive computed tags via
-        // NetworkApi.ReceiveComputedTags and never recalculate independently.
+        // Tag calculation is server-authoritative. Clients receive computed tags via the
+        // RecalculateTagsChangeEvent broadcast after each ChangeEvent and never recalculate independently.
         if (MultiplayerSession.Instance != null && !MultiplayerSession.Instance.Multiplayer.IsServer())
         {
             DebugUtilities.PrintPeer("[SKIP] GameStateCalculator.CalculateAll is server-only — awaiting tags from server");
@@ -262,14 +262,16 @@ public class GameStateCalculator
             // Straight control writes global (non-faction-scoped) tags — run once after parallel work
             CalculateStraightControlForFaction();
 
-            // Build snapshot, apply locally, and broadcast to clients
+            // Build the snapshot, apply it locally, and replicate it to clients as an ordered
+            // RecalculateTagsChangeEvent. Because ChangeEvent.ApplyChange() broadcasts the change
+            // event BEFORE calling CalculateAll(), this tags message is enqueued on clients right
+            // behind that change event and always applies to post-change state in queue order.
             var snapshot = BuildTagsSnapshot();
             ApplyComputedTags(snapshot);
 
-            if (NetworkApi.Instance != null)
+            if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
             {
-                string json = JsonSerializer.Serialize(snapshot);
-                NetworkApi.Instance.Rpc(nameof(NetworkApi.ReceiveComputedTags), json);
+                _ = new RecalculateTagsChangeEvent(snapshot).BroadCast();
             }
 
             stopwatch.Stop();
@@ -315,7 +317,7 @@ public class GameStateCalculator
 
     /// <summary>
     /// Clears all replicated tags from all state objects and re-applies them from the snapshot.
-    /// Called on both server (after CalculateAll) and client (after receiving ReceiveComputedTags RPC).
+    /// Called on the server (after CalculateAll), on clients (via RecalculateTagsChangeEvent), and on resync.
     /// Emits GameStateRecalculated when done.
     /// </summary>
     public static void ApplyComputedTags(ComputedTagsSnapshot snapshot)

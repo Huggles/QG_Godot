@@ -349,7 +349,8 @@ public abstract class Condition
     /// <summary>
     /// Matches an <see cref="ActivateReactionChangeEvent"/> from an optional faction and/or card type.
     /// Use with <see cref="EventCondition.Immediately"/> in <c>CardTriggers()</c> to react to a
-    /// specific card completing all its steps (fires in the card-completion window opened by DoCard).
+    /// card being activated (fires in the activation window opened by DoCard, immediately after
+    /// the card is activated and block reactions resolve, before its own steps execute).
     /// </summary>
     public class CardActivated : EventCondition
     {

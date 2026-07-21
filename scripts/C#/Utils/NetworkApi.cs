@@ -165,17 +165,6 @@ public partial class NetworkApi : Node
     }
 
     /// <summary>
-    /// Called on all clients by the server after CalculateAll() completes.
-    /// Clients apply the pre-computed tags directly instead of recalculating locally.
-    /// </summary>
-    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void ReceiveComputedTags(string tagsJson)
-    {
-        var snapshot = JsonSerializer.Deserialize<ComputedTagsSnapshot>(tagsJson);
-        GameStateCalculator.ApplyComputedTags(snapshot);
-    }
-
-    /// <summary>
     /// Broadcasts a PlayerActionLabel message from the server to all peers.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

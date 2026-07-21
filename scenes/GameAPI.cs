@@ -117,6 +117,7 @@ public partial class GameAPI : Node
     */
     public static int DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType, bool awaitAnimation = true)
     {   
+        DebugUtilities.PrintPeer($"Deploying unit of type {unitType} for faction {faction} to country {countryId} with deploy type {deployType}");
         CountryState countryState = GameState.CountryStateById[countryId];
 
         int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
@@ -132,7 +133,9 @@ public partial class GameAPI : Node
             EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
             AnimationQueue.Instance.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
         } else {
-            throw new GameAPIException($"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. Country is full or not deployable.");
+            string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. Country is full or not deployable.";
+            DebugUtilities.PrintPeer(exceptionMessage);
+            throw new GameAPIException(exceptionMessage);
         }
         
         return unitId;

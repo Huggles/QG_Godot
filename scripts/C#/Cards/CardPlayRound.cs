@@ -148,6 +148,17 @@ public partial class CardPlayRound : GodotObject
         // automatically cascading to the next step.
         if (!introWasBlocked)
         {
+            // Activation window: fires immediately after the card is activated/played and
+            // block reactions resolve, before its own steps execute. CurrentReactionTrigger
+            // is set to introEvent so .Immediately() conditions like CardActivated (e.g.
+            // ResponseEnigmaCodeCracked discarding the activated card) fire here, ahead of
+            // any reactions to the change events this card's own steps are about to produce.
+            // ContinueWithNextSteps is intentionally not called here: this card's own steps
+            // are resumed by the loop right below, and any change event a triggered reaction
+            // produces already gets its own continuation handling via its nested DoCard call.
+            _afterReactionPassedFactions.Clear();
+            await RequestAfterReactions(introEvent);
+
             List<CardStep> allSteps = cardLogic.CardSteps;
             while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0)
             {
@@ -156,14 +167,6 @@ public partial class CardPlayRound : GodotObject
                 if (stepResult != null)
                     await DoChangeEvent(stepResult);
             }
-
-            // Card-completion window: fires after ALL steps finish, regardless of what
-            // the last step returned (including null). CurrentReactionTrigger is set to
-            // introEvent so .Immediately() conditions like CardActivated can match it.
-            _afterReactionPassedFactions.Clear();
-            bool anyCompletionReaction = await RequestAfterReactions(introEvent);
-            if (anyCompletionReaction)
-                await ContinueWithNextSteps();
         }
 
         ReactionDepth--;
