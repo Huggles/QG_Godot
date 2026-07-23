@@ -1,13 +1,15 @@
-[gd_scene load_steps=6 format=3 uid="uid://bsfwdbone0b1r"]
+[gd_scene format=3 uid="uid://bsfwdbone0b1r"]
 
 [ext_resource type="Script" uid="uid://1urdnsxckvlr" path="res://scripts/C#/UI/FactionHandDisplay.cs" id="1_yrcqs"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_xs7nf"]
 [ext_resource type="StyleBox" uid="uid://dmulmhugod2s6" path="res://scenes/cards/NormalButtonStyle_Hover.tres" id="3_ff84v"]
 [ext_resource type="StyleBox" uid="uid://bg8upag18tny5" path="res://scenes/cards/NormalButtonStyle_Normal.tres" id="4_54hqk"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ff84v"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xs7nf"]
 
-[node name="FactionHandDisplay" type="Control"]
+[node name="FactionHandDisplay" type="Control" unique_id=1411337718]
 custom_minimum_size = Vector2(0, 1080)
 layout_mode = 3
 anchors_preset = 15
@@ -18,7 +20,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_yrcqs")
 
-[node name="CardsContainerPanel" type="Panel" parent="."]
+[node name="CardsContainerPanel" type="Panel" parent="." unique_id=1243657932]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 1
@@ -29,8 +31,9 @@ anchor_bottom = 1.0
 offset_top = -200.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ff84v")
 
-[node name="CardPreviewContainer" type="Panel" parent="."]
+[node name="CardPreviewContainer" type="Panel" parent="." unique_id=1410620602]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 350)
 layout_mode = 0
@@ -40,7 +43,7 @@ offset_right = 360.0
 offset_bottom = 540.0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_xs7nf")
 
-[node name="CardPreview" parent="CardPreviewContainer" instance=ExtResource("2_xs7nf")]
+[node name="CardPreview" parent="CardPreviewContainer" unique_id=127952172 instance=ExtResource("2_xs7nf")]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -53,7 +56,7 @@ offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 0.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1963215262]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 1
 anchors_preset = 2
@@ -63,32 +66,7 @@ offset_top = -40.0
 offset_right = 118.0
 grow_vertical = 0
 
-[node name="SkipButton" type="Button" parent="HBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 50)
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 28
-theme_override_styles/normal = ExtResource("4_54hqk")
-theme_override_styles/hover = ExtResource("3_ff84v")
-text = "Skip
-"
-
-[node name="DiscardedDeckButton" type="Button" parent="HBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 50)
-layout_mode = 2
-focus_mode = 0
-mouse_force_pass_scroll_events = false
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 28
-theme_override_styles/normal = ExtResource("4_54hqk")
-theme_override_styles/hover = ExtResource("3_ff84v")
-text = "Discarded
-"
-
-[node name="TestButton" type="Button" parent="HBoxContainer"]
+[node name="TestButton" type="Button" parent="HBoxContainer" unique_id=1523460222]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(200, 50)
@@ -102,15 +80,13 @@ theme_override_styles/hover = ExtResource("3_ff84v")
 text = "Test
 "
 
-[node name="TriggerContextPanel" type="Panel" parent="."]
+[node name="TriggerContextPanel" type="Panel" parent="." unique_id=1847086414]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
-anchor_top = 0.0
 anchor_right = 1.0
-anchor_bottom = 0.0
 offset_left = -360.0
 offset_top = 190.0
 offset_right = -110.0
@@ -119,7 +95,7 @@ grow_horizontal = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_xs7nf")
 
-[node name="TriggerCard" parent="TriggerContextPanel" instance=ExtResource("2_xs7nf")]
+[node name="TriggerCard" parent="TriggerContextPanel" unique_id=1227013941 instance=ExtResource("2_xs7nf")]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
@@ -132,17 +108,12 @@ offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 350.0
 
-[node name="TriggerLabel" type="RichTextLabel" parent="TriggerContextPanel"]
+[node name="TriggerLabel" type="RichTextLabel" parent="TriggerContextPanel" unique_id=1506333915]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.0
-anchor_top = 0.0
 anchor_right = 1.0
-anchor_bottom = 0.0
-offset_left = 0.0
 offset_top = 360.0
-offset_right = 0.0
 offset_bottom = 490.0
-scroll_active = false
 fit_content = true
+scroll_active = false

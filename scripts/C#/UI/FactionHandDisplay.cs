@@ -6,327 +6,327 @@ using System.Linq;
 public partial class FactionHandDisplay : Control
 {
 
-    public static FactionHandDisplay Current;
+	public static FactionHandDisplay Current;
 
-    private Control CardsContainer => GetNode<Panel>("%CardsContainerPanel");
-    private Panel CardPreviewContainer => GetNode<Panel>("%CardPreviewContainer");
-    private CardScene CardPreview => GetNode<CardScene>("%CardPreview");
-    private Button SkipButton => GetNode<Button>("%SkipButton");
-    private Button DeckButton => GetNode<Button>("%DeckButton");
-    private Button DiscardedDeckButton => GetNode<Button>("%DiscardedDeckButton");
-    private Button TestButton => GetNode<Button>("%TestButton");
-    private Panel TriggerContextPanel => GetNode<Panel>("%TriggerContextPanel");
-    private CardScene TriggerCardScene => GetNode<CardScene>("%TriggerCard");
-    private RichTextLabel TriggerLabel => GetNode<RichTextLabel>("%TriggerLabel");
+	private Control CardsContainer => GetNode<Panel>("%CardsContainerPanel");
+	private Panel CardPreviewContainer => GetNode<Panel>("%CardPreviewContainer");
+	private CardScene CardPreview => GetNode<CardScene>("%CardPreview");
+	private Button SkipButton => GetNode<Button>("%SkipButton");
+	private Button DeckButton => GetNode<Button>("%DeckButton");
+	private Button DiscardedDeckButton => GetNode<Button>("%DiscardedDeckButton");
+	private Button TestButton => GetNode<Button>("%TestButton");
+	private Panel TriggerContextPanel => GetNode<Panel>("%TriggerContextPanel");
+	private CardScene TriggerCardScene => GetNode<CardScene>("%TriggerCard");
+	private RichTextLabel TriggerLabel => GetNode<RichTextLabel>("%TriggerLabel");
 
-    private List<CardScene> CardScenes = new List<CardScene>();
-    private Faction showingFaction;
+	private List<CardScene> CardScenes = new List<CardScene>();
+	private Faction showingFaction;
 
-    [Signal] public delegate void CardSelectedEventHandler(int cardId);
+	[Signal] public delegate void CardSelectedEventHandler(int cardId);
 
-    // Event handlers for cleanup
-    private Action onSkipButtonPressed;
-    private Action onDiscardedDeckButtonPressed;
-    private Action onTestButtonPressed;
+	// Event handlers for cleanup
+	private Action onSkipButtonPressed;
+	private Action onDiscardedDeckButtonPressed;
+	private Action onTestButtonPressed;
 
-    
-
-
-    public override void _Ready()
-    {        
-        if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
-        {
-            Current = this;
-            LoadUI();          
-        }        
-    }  
+	
 
 
-    public override void _ExitTree()
-    {
-        UnsubscribeFromEvents();
-    }
-
-    private void LoadUI()
-    {
-        Hide();        
-        EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
-        EventBus.Instance.NextStepStarted += OnNextStepStarted;
-        EventBus.Instance.CardsDrawn += OnCardsDrawn;
-        EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
-
-        TriggerCardScene.TriggersEmphasis(false);
-        TriggerCardScene.SetClickable(false);
-        
-
-        // Unsubscribe first to prevent duplicate connections
-        UnsubscribeFromEvents();
-
-        onSkipButtonPressed = () => 
-        { 
-            if (!IsInstanceValid(this) || !IsInsideTree()) return;
-            OnCardSelected(-1); 
-        };
-        SkipButton.Pressed += onSkipButtonPressed;
-
-        onDiscardedDeckButtonPressed = () =>
-        {
-            if (!IsInstanceValid(this) || !IsInsideTree()) return;
-            
-            List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DiscardedCardIds, false);            
-            PresentationModal.Current.ShowModalPersistent(presentationItems, "Your Discarded Cards");
-        };
-        DiscardedDeckButton.Pressed += onDiscardedDeckButtonPressed;
-
-        onTestButtonPressed = () =>
-        {
-            if (!IsInstanceValid(this) || !IsInsideTree()) return;
-            
-            PresentationModal.Current.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
-        };
-        TestButton.Pressed += onTestButtonPressed;
-    }
-
-    private void OnCardsDrawn(int faction, int numberOfCards)
-    {
-        if (showingFaction == (Faction)faction)
-        {
-            Show(showingFaction);
-        }
-    }
-
-    private void OnCardsDiscarded(int faction, int numberOfCards)
-    {
-        if (showingFaction == (Faction)faction)
-        {
-            Show(showingFaction);
-        }
-    }
-
-    private void OnGameSessionStarted()
-    {
-        DebugUtilities.PrintPeerFinest($"Game session started, showing hand display for first faction: {PlayerScene.Current.ControlledFactions[0]}");
-        Show(PlayerScene.Current.ControlledFactions[0]);
-    }
+	public override void _Ready()
+	{        
+		if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+		{
+			Current = this;
+			LoadUI();          
+		}        
+	}  
 
 
-    private void OnNextStepStarted(int turnStep)
-    {
-        switch((TurnStep)turnStep)
-        {
-            case TurnStep.START:       
-                OnStartTurnStepStarted();
-                break;
-            case TurnStep.PLAY_CARD:            
-                OnPlayCardTurnStepStarted();
-                break;
-            default:
-                Hide();
-                break;
-        };
-    }
+	public override void _ExitTree()
+	{
+		UnsubscribeFromEvents();
+	}
 
-    private void OnStartTurnStepStarted()
-    {
-        
-    }
+	private void LoadUI()
+	{
+		Hide();        
+		EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
+		EventBus.Instance.NextStepStarted += OnNextStepStarted;
+		EventBus.Instance.CardsDrawn += OnCardsDrawn;
+		EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
 
-    private void OnPlayCardTurnStepStarted()
-    {        
-        if(PlayerScene.Current.ControlledFactions.Contains(GameFlow.Instance.CurrentFaction))
-        {
-            Show(GameFlow.Instance.CurrentFaction);
-        }
-    }
+		TriggerCardScene.TriggersEmphasis(false);
+		TriggerCardScene.SetClickable(false);
+		
 
-    public void Show(Faction faction)
-    {
-        showingFaction = faction;
-        ResetVisibility();
-        if (faction != Faction.NONE && faction != Faction.ALL)
-        {
-            InitCards(DeckState.ForFaction(faction).HandCardIds);
-        }
-    }
+		// Unsubscribe first to prevent duplicate connections
+		UnsubscribeFromEvents();
 
-    public void Show(List<int> cardIds)
-    {
-        Show(cardIds, cardIds.Count > 0 ? CardState.ForId(cardIds[0]).Faction : Faction.NONE); // Assumes all cards are from the same faction, which should be true for hand display
-    }
+		onSkipButtonPressed = () => 
+		{ 
+			if (!IsInstanceValid(this) || !IsInsideTree()) return;
+			OnCardSelected(-1); 
+		};
+		SkipButton.Pressed += onSkipButtonPressed;
 
-    public void Show(List<int> cardIds, Faction faction)
-    {
-        showingFaction = faction;
-        ResetVisibility();
-        InitCards(cardIds);
-    }
+		onDiscardedDeckButtonPressed = () =>
+		{
+			if (!IsInstanceValid(this) || !IsInsideTree()) return;
+			
+			List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DiscardedCardIds, false);            
+			PresentationModal.Current.ShowModalPersistent(presentationItems, "Your Discarded Cards");
+		};
+		DiscardedDeckButton.Pressed += onDiscardedDeckButtonPressed;
 
-    private void ResetVisibility()
-    {
-        Visible = true;
-        
-        // Only access CardsContainer if it's been initialized (in LoadUI)
-        if (CardsContainer != null)
-        {
-            CardsContainer.MouseFilter = MouseFilterEnum.Stop;
-        }
-        
-        HideCardEmphasis();
-    }
+		onTestButtonPressed = () =>
+		{
+			if (!IsInstanceValid(this) || !IsInsideTree()) return;
+			
+			PresentationModal.Current.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
+		};
+		TestButton.Pressed += onTestButtonPressed;
+	}
 
-    public new void Hide()
-    {
-        Visible = false;
-        HideTriggerContext();
-        
-        // Only access CardsContainer if it's been initialized (in LoadUI)
-        if (CardsContainer != null)
-        {
-            CardsContainer.MouseFilter = MouseFilterEnum.Ignore;
-            DeleteCurrentCards();
-        }
-    }
+	private void OnCardsDrawn(int faction, int numberOfCards)
+	{
+		if (showingFaction == (Faction)faction)
+		{
+			Show(showingFaction);
+		}
+	}
 
-    private void InitCards(List<int> cardIds)
-    {
-        // Only initialize cards if LoadUI has been called
-        DebugUtilities.PrintPeerFinest($"Initializing cards {string.Join(", ", cardIds)}");        
-        if (CardsContainer == null)
-        {
-            return;
-        }
-        
-        DeleteCurrentCards();
+	private void OnCardsDiscarded(int faction, int numberOfCards)
+	{
+		if (showingFaction == (Faction)faction)
+		{
+			Show(showingFaction);
+		}
+	}
 
-        const int cardStepSize = 100;
-        const int rotationStepSize = 10;
-        Vector2 cardSize = new Vector2(500, 700);
-        Vector2 cardScale = new Vector2(0.5f, 0.5f);
-
-        float totalRotationSize = (cardIds.Count - 1) * rotationStepSize;
-        float totalSizeX = (cardIds.Count - 1) * cardStepSize;
-
-        foreach (var (cardId, index) in cardIds.Select((cardId, index) => (cardId, index)))
-        {
-            CardState cardState = CardState.ForId(cardId);
-            var cardSceneInstance = CardScene.CardScenePackedPath.Instantiate<CardScene>();
-            cardSceneInstance.Size = cardSize;
-            cardSceneInstance.Scale = cardScale;
-            CardsContainer.AddChild(cardSceneInstance);
-
-            Vector2 basePosition = new Vector2(CardsContainer.Size.X * 0.5f, 0);
-            basePosition.X += cardStepSize * index;
-            basePosition.X -= (totalSizeX / 2) + cardSceneInstance.PivotOffset.X;
-            basePosition.Y -= cardSceneInstance.Size.Y / 3;
+	private void OnGameSessionStarted()
+	{
+		DebugUtilities.PrintPeerFinest($"Game session started, showing hand display for first faction: {PlayerScene.Current.ControlledFactions[0]}");
+		Show(PlayerScene.Current.ControlledFactions[0]);
+	}
 
 
-            cardSceneInstance.Position = basePosition;
-            cardSceneInstance.ZIndex = index;
-            cardSceneInstance.RotationDegrees = index * rotationStepSize - (totalRotationSize / 2f);
+	private void OnNextStepStarted(int turnStep)
+	{
+		switch((TurnStep)turnStep)
+		{
+			case TurnStep.START:       
+				OnStartTurnStepStarted();
+				break;
+			case TurnStep.PLAY_CARD:            
+				OnPlayCardTurnStepStarted();
+				break;
+			default:
+				Hide();
+				break;
+		};
+	}
 
-            cardSceneInstance.Selected += OnCardSelected;
-            CardScenes.Add(cardSceneInstance);
-            cardSceneInstance.ShowCard(cardId);
+	private void OnStartTurnStepStarted()
+	{
+		
+	}
 
-            if (cardState.HasTag(Tag.IsActivatable, cardState.Faction))
-            {
-                cardSceneInstance.SetClickable(true);
-                cardSceneInstance.SetActivatable(true);
-            }
-            else
-            {
-                cardSceneInstance.SetClickable(false);
-                cardSceneInstance.SetActivatable(false);
-            }
-        }
-    }
+	private void OnPlayCardTurnStepStarted()
+	{        
+		if(PlayerScene.Current.ControlledFactions.Contains(GameFlow.Instance.CurrentFaction))
+		{
+			Show(GameFlow.Instance.CurrentFaction);
+		}
+	}
 
-    private void OnCardSelected(int cardId)
-    {
-        DebugUtilities.PrintPeer($"Card selected with ID: {cardId}");
-        EmitSignal(SignalName.CardSelected, cardId);
-    }
+	public void Show(Faction faction)
+	{
+		showingFaction = faction;
+		ResetVisibility();
+		if (faction != Faction.NONE && faction != Faction.ALL)
+		{
+			InitCards(DeckState.ForFaction(faction).HandCardIds);
+		}
+	}
 
-    private void DeleteCurrentCards()
-    {
-        foreach (CardScene cardScene in CardScenes)
-        {
-            // Only remove from CardsContainer if it's been initialized
-            if (CardsContainer != null)
-            {
-                CardsContainer.RemoveChild(cardScene);
-            }
-            cardScene.Selected -= OnCardSelected;
-            cardScene.QueueFree(); // Ensure memory is cleaned up
-        }
-        CardScenes.Clear();
-    }
+	public void Show(List<int> cardIds)
+	{
+		Show(cardIds, cardIds.Count > 0 ? CardState.ForId(cardIds[0]).Faction : Faction.NONE); // Assumes all cards are from the same faction, which should be true for hand display
+	}
 
-    public void ShowCardEmphasis(int cardId)
-    {        
-        // Only access CardPreview if it's been initialized (in LoadUI)
-        if (CardPreview != null)
-        {
-            CardPreview.ShowCard(cardId);
-        }
-    }
-    public void HideCardEmphasis()
-    {
-        // Only access CardPreview if it's been initialized (in LoadUI)
-        if (CardPreview != null)
-        {
-            CardPreview.Visible = false;
-            CardPreview.MouseFilter = MouseFilterEnum.Ignore;
-        }
-    }
+	public void Show(List<int> cardIds, Faction faction)
+	{
+		showingFaction = faction;
+		ResetVisibility();
+		InitCards(cardIds);
+	}
 
-    public void ShowTriggerContext(int cardId, string summaryText)
-    {
-        if (TriggerContextPanel == null) return;
+	private void ResetVisibility()
+	{
+		Visible = true;
+		
+		// Only access CardsContainer if it's been initialized (in LoadUI)
+		if (CardsContainer != null)
+		{
+			CardsContainer.MouseFilter = MouseFilterEnum.Stop;
+		}
+		
+		HideCardEmphasis();
+	}
 
-        if (cardId > -1)
-        {
-            TriggerCardScene.Visible = true;
-            TriggerCardScene.ShowCard(cardId);
-            TriggerCardScene.SetActivatable(true);
-        }
-        else
-        {
-            TriggerCardScene.Visible = false;
-        }
+	public new void Hide()
+	{
+		Visible = false;
+		HideTriggerContext();
+		
+		// Only access CardsContainer if it's been initialized (in LoadUI)
+		if (CardsContainer != null)
+		{
+			CardsContainer.MouseFilter = MouseFilterEnum.Ignore;
+			DeleteCurrentCards();
+		}
+	}
 
-        TriggerLabel.Text = $"[b]Reacting to:[/b]\n{summaryText ?? string.Empty}";
-        TriggerContextPanel.Visible = true;
-    }
+	private void InitCards(List<int> cardIds)
+	{
+		// Only initialize cards if LoadUI has been called
+		DebugUtilities.PrintPeerFinest($"Initializing cards {string.Join(", ", cardIds)}");        
+		if (CardsContainer == null)
+		{
+			return;
+		}
+		
+		DeleteCurrentCards();
 
-    public void HideTriggerContext()
-    {
-        if (TriggerContextPanel != null)
-            TriggerContextPanel.Visible = false;
-    }
+		const int cardStepSize = 100;
+		const int rotationStepSize = 10;
+		Vector2 cardSize = new Vector2(500, 700);
+		Vector2 cardScale = new Vector2(0.5f, 0.5f);
 
-    private void UnsubscribeFromEvents()
-    {
-        // Unsubscribe from EventBus events
-        if (EventBus.Instance != null && OnNextStepStarted != null)
-        {
-            EventBus.Instance.NextStepStarted -= OnNextStepStarted;
-        }
+		float totalRotationSize = (cardIds.Count - 1) * rotationStepSize;
+		float totalSizeX = (cardIds.Count - 1) * cardStepSize;
 
-        // Unsubscribe from button events
-        if (IsInstanceValid(SkipButton) && onSkipButtonPressed != null)
-        {
-            SkipButton.Pressed -= onSkipButtonPressed;
-        }
+		foreach (var (cardId, index) in cardIds.Select((cardId, index) => (cardId, index)))
+		{
+			CardState cardState = CardState.ForId(cardId);
+			var cardSceneInstance = CardScene.CardScenePackedPath.Instantiate<CardScene>();
+			cardSceneInstance.Size = cardSize;
+			cardSceneInstance.Scale = cardScale;
+			CardsContainer.AddChild(cardSceneInstance);
 
-        if (IsInstanceValid(DiscardedDeckButton) && onDiscardedDeckButtonPressed != null)
-        {
-            DiscardedDeckButton.Pressed -= onDiscardedDeckButtonPressed;
-        }
+			Vector2 basePosition = new Vector2(CardsContainer.Size.X * 0.5f, 0);
+			basePosition.X += cardStepSize * index;
+			basePosition.X -= (totalSizeX / 2) + cardSceneInstance.PivotOffset.X;
+			basePosition.Y -= cardSceneInstance.Size.Y / 3;
 
-        if (IsInstanceValid(TestButton) && onTestButtonPressed != null)
-        {
-            TestButton.Pressed -= onTestButtonPressed;
-        }
-    }
+
+			cardSceneInstance.Position = basePosition;
+			cardSceneInstance.ZIndex = index;
+			cardSceneInstance.RotationDegrees = index * rotationStepSize - (totalRotationSize / 2f);
+
+			cardSceneInstance.Selected += OnCardSelected;
+			CardScenes.Add(cardSceneInstance);
+			cardSceneInstance.ShowCard(cardId);
+
+			if (cardState.HasTag(Tag.IsActivatable, cardState.Faction))
+			{
+				cardSceneInstance.SetClickable(true);
+				cardSceneInstance.SetActivatable(true);
+			}
+			else
+			{
+				cardSceneInstance.SetClickable(false);
+				cardSceneInstance.SetActivatable(false);
+			}
+		}
+	}
+
+	private void OnCardSelected(int cardId)
+	{
+		DebugUtilities.PrintPeer($"Card selected with ID: {cardId}");
+		EmitSignal(SignalName.CardSelected, cardId);
+	}
+
+	private void DeleteCurrentCards()
+	{
+		foreach (CardScene cardScene in CardScenes)
+		{
+			// Only remove from CardsContainer if it's been initialized
+			if (CardsContainer != null)
+			{
+				CardsContainer.RemoveChild(cardScene);
+			}
+			cardScene.Selected -= OnCardSelected;
+			cardScene.QueueFree(); // Ensure memory is cleaned up
+		}
+		CardScenes.Clear();
+	}
+
+	public void ShowCardEmphasis(int cardId)
+	{        
+		// Only access CardPreview if it's been initialized (in LoadUI)
+		if (CardPreview != null)
+		{
+			CardPreview.ShowCard(cardId);
+		}
+	}
+	public void HideCardEmphasis()
+	{
+		// Only access CardPreview if it's been initialized (in LoadUI)
+		if (CardPreview != null)
+		{
+			CardPreview.Visible = false;
+			CardPreview.MouseFilter = MouseFilterEnum.Ignore;
+		}
+	}
+
+	public void ShowTriggerContext(int cardId, string summaryText)
+	{
+		if (TriggerContextPanel == null) return;
+
+		if (cardId > -1)
+		{
+			TriggerCardScene.Visible = true;
+			TriggerCardScene.ShowCard(cardId);
+			TriggerCardScene.SetActivatable(true);
+		}
+		else
+		{
+			TriggerCardScene.Visible = false;
+		}
+
+		TriggerLabel.Text = $"[b]Reacting to:[/b]\n{summaryText ?? string.Empty}";
+		TriggerContextPanel.Visible = true;
+	}
+
+	public void HideTriggerContext()
+	{
+		if (TriggerContextPanel != null)
+			TriggerContextPanel.Visible = false;
+	}
+
+	private void UnsubscribeFromEvents()
+	{
+		// Unsubscribe from EventBus events
+		if (EventBus.Instance != null && OnNextStepStarted != null)
+		{
+			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
+		}
+
+		// Unsubscribe from button events
+		if (IsInstanceValid(SkipButton) && onSkipButtonPressed != null)
+		{
+			SkipButton.Pressed -= onSkipButtonPressed;
+		}
+
+		if (IsInstanceValid(DiscardedDeckButton) && onDiscardedDeckButtonPressed != null)
+		{
+			DiscardedDeckButton.Pressed -= onDiscardedDeckButtonPressed;
+		}
+
+		if (IsInstanceValid(TestButton) && onTestButtonPressed != null)
+		{
+			TestButton.Pressed -= onTestButtonPressed;
+		}
+	}
 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dqdvhk2rm85fc"]
+[gd_scene format=3 uid="uid://dqdvhk2rm85fc"]
 
 [ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="1_bj75k"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
@@ -8,49 +8,66 @@
 [ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="6_x05kf"]
 [ext_resource type="Script" uid="uid://6krq1p1wqi43" path="res://scripts/C#/UI/SpeedControl.cs" id="7_v35kq"]
 [ext_resource type="Script" uid="uid://bkgumcj218qt5" path="res://scripts/C#/UI/DebugVerbosityControl.cs" id="8_debugverb"]
-[ext_resource type="Script" path="res://scripts/C#/UI/AutoDismissControl.cs" id="13_autodismiss"]
 [ext_resource type="Script" uid="uid://poytc7oh3ay1" path="res://scenes/userinterface/History/GameHistoryList.cs" id="9_oxwje"]
 [ext_resource type="PackedScene" uid="uid://bhqnymug3arir" path="res://scenes/userinterface/History/game_history_item.tscn" id="10_dvfjj"]
-[ext_resource type="Script" path="res://scripts/C#/UI/DebugOverlay.cs" id="11_debugoverlay"]
-[ext_resource type="Script" path="res://scripts/C#/UI/GameStateDetailPanel.cs" id="12_gamestatedetail"]
+[ext_resource type="Script" uid="uid://bqnash47ag2v1" path="res://scripts/C#/UI/DebugOverlay.cs" id="11_debugoverlay"]
+[ext_resource type="Script" uid="uid://cnu2sfmowg40f" path="res://scripts/C#/UI/GameStateDetailPanel.cs" id="12_gamestatedetail"]
+[ext_resource type="Script" uid="uid://b0yaf6jd2tqqi" path="res://scripts/C#/UI/AutoDismissControl.cs" id="13_autodismiss"]
+[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
+[ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
 
-[node name="Interface" type="CanvasLayer"]
+[node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
-[node name="InputMessaging" parent="." instance=ExtResource("1_bj75k")]
+[node name="InputMessaging" parent="." unique_id=2087545050 instance=ExtResource("1_bj75k")]
 visible = false
 offset_left = 1494.0
 offset_bottom = -347.0
 
-[node name="FactionHandDisplay" parent="." instance=ExtResource("2_ntnkv")]
+[node name="FactionHandDisplay" parent="." unique_id=1158523193 instance=ExtResource("2_ntnkv")]
 
-[node name="PresentationModal" parent="." instance=ExtResource("3_oxwje")]
+[node name="PresentationModal" parent="." unique_id=78458452 instance=ExtResource("3_oxwje")]
 z_index = 100
 
-[node name="PlayerAction" parent="." instance=ExtResource("4_dvfjj")]
+[node name="PlayerAction" parent="." unique_id=836962227 instance=ExtResource("4_dvfjj")]
 offset_bottom = -942.0
 
-[node name="FactionsContainer" parent="." instance=ExtResource("5_8bdsb")]
+[node name="SelectionSkipButton" parent="." unique_id=1187079456 instance=ExtResource("14_skipscene")]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(160, 50)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 49.0
+offset_top = -104.0
+offset_right = 625.0
+offset_bottom = 14.0
+grow_vertical = 0
+scale = Vector2(0.5, 0.5)
+script = ExtResource("15_skip")
+
+[node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
 offset_bottom = -1005.0
 mouse_filter = 2
 
-[node name="PlayerInfoDisplay" parent="." instance=ExtResource("6_x05kf")]
+[node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
 
-[node name="SpeedControl" type="PanelContainer" parent="."]
+[node name="SpeedControl" type="PanelContainer" parent="." unique_id=1382976398]
 offset_left = 10.0
 offset_top = 10.0
 script = ExtResource("7_v35kq")
 
-[node name="DebugVerbosityControl" type="PanelContainer" parent="."]
+[node name="DebugVerbosityControl" type="PanelContainer" parent="." unique_id=428700644]
 offset_left = 10.0
 offset_top = 50.0
 script = ExtResource("8_debugverb")
 
-[node name="AutoDismissControl" type="PanelContainer" parent="."]
+[node name="AutoDismissControl" type="PanelContainer" parent="." unique_id=1819554252]
 offset_left = 10.0
 offset_top = 90.0
 script = ExtResource("13_autodismiss")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1849432082]
 anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
@@ -63,85 +80,86 @@ grow_vertical = 2
 mouse_filter = 2
 vertical_scroll_mode = 3
 
-[node name="GameHistoryList" type="VBoxContainer" parent="ScrollContainer"]
+[node name="GameHistoryList" type="VBoxContainer" parent="ScrollContainer" unique_id=703922686]
 clip_contents = true
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("9_oxwje")
 
-[node name="GameHistoryItem" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem" parent="ScrollContainer/GameHistoryList" unique_id=25697885 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem2" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem2" parent="ScrollContainer/GameHistoryList" unique_id=985338498 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem3" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem3" parent="ScrollContainer/GameHistoryList" unique_id=1362701879 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem4" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem4" parent="ScrollContainer/GameHistoryList" unique_id=82989387 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem5" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem5" parent="ScrollContainer/GameHistoryList" unique_id=1792206939 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem6" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem6" parent="ScrollContainer/GameHistoryList" unique_id=2042053802 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem7" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem7" parent="ScrollContainer/GameHistoryList" unique_id=176663758 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem8" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem8" parent="ScrollContainer/GameHistoryList" unique_id=821174274 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem9" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem9" parent="ScrollContainer/GameHistoryList" unique_id=1408296756 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem10" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem10" parent="ScrollContainer/GameHistoryList" unique_id=262856464 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem11" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem11" parent="ScrollContainer/GameHistoryList" unique_id=1558625472 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem12" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem12" parent="ScrollContainer/GameHistoryList" unique_id=1439508234 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem13" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem13" parent="ScrollContainer/GameHistoryList" unique_id=630753780 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem14" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem14" parent="ScrollContainer/GameHistoryList" unique_id=273191322 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem15" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem15" parent="ScrollContainer/GameHistoryList" unique_id=1622001418 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem16" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem16" parent="ScrollContainer/GameHistoryList" unique_id=1865985524 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem17" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem17" parent="ScrollContainer/GameHistoryList" unique_id=757867390 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem18" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem18" parent="ScrollContainer/GameHistoryList" unique_id=1471282942 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem19" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem19" parent="ScrollContainer/GameHistoryList" unique_id=149778884 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem20" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem20" parent="ScrollContainer/GameHistoryList" unique_id=1806427071 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem21" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem21" parent="ScrollContainer/GameHistoryList" unique_id=736604701 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem22" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem22" parent="ScrollContainer/GameHistoryList" unique_id=1859050773 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem23" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem23" parent="ScrollContainer/GameHistoryList" unique_id=1075375160 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="GameHistoryItem24" parent="ScrollContainer/GameHistoryList" instance=ExtResource("10_dvfjj")]
+[node name="GameHistoryItem24" parent="ScrollContainer/GameHistoryList" unique_id=1529306972 instance=ExtResource("10_dvfjj")]
 layout_mode = 2
 
-[node name="DebugOverlay" type="PanelContainer" parent="."]
+[node name="DebugOverlay" type="PanelContainer" parent="." unique_id=256508831]
+z_index = 99
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -150,11 +168,11 @@ offset_top = 100.0
 offset_right = -10.0
 offset_bottom = 320.0
 grow_horizontal = 0
-z_index = 99
 mouse_filter = 2
 script = ExtResource("11_debugoverlay")
 
-[node name="GameStateDetailPanel" type="PanelContainer" parent="."]
+[node name="GameStateDetailPanel" type="PanelContainer" parent="." unique_id=1175739522]
+z_index = 99
 anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
@@ -164,6 +182,5 @@ offset_top = 10.0
 offset_right = -240.0
 offset_bottom = -10.0
 grow_horizontal = 0
-z_index = 99
 mouse_filter = 2
 script = ExtResource("12_gamestatedetail")

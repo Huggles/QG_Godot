@@ -32,14 +32,17 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = 67.0
 offset_top = -484.0
-offset_right = 852.0
-offset_bottom = 456.0
+offset_right = 1729.0
+offset_bottom = 1478.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.5, 0.5)
 theme_override_constants/separation = 20
+alignment = 1
 
 [node name="SinglePlayerButton" parent="ButtonContainer" unique_id=409954901 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 150)
 layout_mode = 2
 
 [node name="MultiplayerHostButton" parent="ButtonContainer" unique_id=1302279736 instance=ExtResource("2_btn")]

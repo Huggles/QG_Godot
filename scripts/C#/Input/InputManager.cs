@@ -40,17 +40,28 @@ public partial class InputManager : Node2D
         }
         
         PlayerActionLabel.ShowText("Choose a card", faction);
-        FactionHandDisplay.Current.Show(cardIds);        
-        FactionHandDisplay.Current.CardSelected += HandleItemSelected;        
+        FactionHandDisplay.Current.Show(cardIds);
+        FactionHandDisplay.Current.CardSelected += HandleItemSelected;
+        // The Skip button now doubles as the "pass" affordance for choosing a card to play/activate.
+        SelectionSkipButton.Current?.Show();
+        EventBus.Instance.SelectionSkipped += OnPlayCardSkipped;
         return inputHandler;
+    }
+
+    private void OnPlayCardSkipped()
+    {
+        // Skipping the card-play prompt is a pass (card id -1).
+        HandleItemSelected(-1);
     }
 
     private void HandleItemSelected(int cardId)
     {
         FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
-        FactionHandDisplay.Current.Hide();        
+        EventBus.Instance.SelectionSkipped -= OnPlayCardSkipped;
+        SelectionSkipButton.Current?.Hide();
+        FactionHandDisplay.Current.Hide();
         EventBus.Emit("CardSelected", cardId);
-    } 
+    }
 
     public override void _Ready()
     {

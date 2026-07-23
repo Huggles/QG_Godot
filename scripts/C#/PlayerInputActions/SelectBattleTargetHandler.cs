@@ -31,18 +31,23 @@ public partial class SelectBattleTargetHandler : IGameEventHandler<BattleTarget>
 
         void onCountry(int id) { tcs.TrySetResult(new BattleTarget(id, TargetType.COUNTRY)); }
         void onUnit(int id)    { tcs.TrySetResult(new BattleTarget(id, TargetType.UNIT)); }
+        void onSkip()          { tcs.TrySetResult(null); }
 
         UnitState.ForIds(unitIds).ForEach(us => us.Tags.AddForAll(Tag.Clickable));
         CountryState.ForIds(countryIds).ForEach(cs => cs.Tags.AddForAll(Tag.Clickable));
         InputManager.Current.EnableRayTraceCasting();
+        SelectionSkipButton.Current?.Show();
 
         EventBus.Instance.CountryClicked += onCountry;
         EventBus.Instance.UnitClicked    += onUnit;
+        EventBus.Instance.SelectionSkipped += onSkip;
 
         BattleTarget result = await tcs.Task;
 
         EventBus.Instance.CountryClicked -= onCountry;
         EventBus.Instance.UnitClicked    -= onUnit;
+        EventBus.Instance.SelectionSkipped -= onSkip;
+        SelectionSkipButton.Current?.Hide();
         UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
         CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
         InputManager.Current.DisableRayTraceCasting();

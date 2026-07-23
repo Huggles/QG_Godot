@@ -56,8 +56,9 @@ modulate_color = Color(0.28974146, 0.28974146, 0.28974146, 1)
 
 [node name="Button" type="Button" unique_id=566933446]
 custom_minimum_size = Vector2(160, 110)
-offset_right = 320.0
+offset_right = 680.0
 offset_bottom = 160.0
+scale = Vector2(0.5, 0.5)
 theme_override_styles/normal = SubResource("StyleBoxTexture_kb8kt")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_dgjnc")
 theme_override_styles/hover = SubResource("StyleBoxTexture_qiktu")
@@ -83,7 +84,7 @@ theme_override_constants/margin_right = 30
 [node name="Label" type="RichTextLabel" parent="MarginContainer" unique_id=1225715149]
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/normal_font_size = 32
+theme_override_font_sizes/normal_font_size = 48
 bbcode_enabled = true
 text = "[center]Jingle Bells[/center]"
 fit_content = true

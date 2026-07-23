@@ -87,6 +87,14 @@ public partial class CardStep : ITaggable
                 NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), ActionGuidance, -1, (int)TriggeringFaction);
                 result = await StepLogic.Invoke();
             }
+            catch (StepSkippedException)
+            {
+                // Player chose to skip this step's selection. Only the current step is
+                // abandoned (result stays null so no change event fires); StepFinished is
+                // already true, so DoCard advances to the card's next step (if any).
+                DebugUtilities.PrintPeer("Player skipped step");
+                NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), "Skipped: " + ActionGuidance, -1, (int)TriggeringFaction);
+            }
             catch (Exception e)
             {
                 DebugUtilities.PrintPeer(e.Message);

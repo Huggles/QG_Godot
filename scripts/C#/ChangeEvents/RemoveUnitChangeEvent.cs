@@ -37,10 +37,20 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
         return dto;
     }
 
-    protected override List<ChangeEventAnimation> AfterAnimations => new()
-    {
-        
-    };
+    /// <summary>
+    /// Battle and eliminate removals get the deploy-style camera zoom; supply attrition does not.
+    /// </summary>
+    private bool ShouldZoom => Reason != UnitRemovalReason.SUPPLY;
+
+    protected override List<ChangeEventAnimation> BeforeAnimations =>
+        ShouldZoom
+            ? new() { new ZoomToCountryAnimation(CountryId) }
+            : new();
+
+    protected override List<ChangeEventAnimation> AfterAnimations =>
+        ShouldZoom
+            ? new() { new ReturnCameraAnimation() }
+            : new();
 
     protected override async Task<bool> ExecuteAsync()
     {

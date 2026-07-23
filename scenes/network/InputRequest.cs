@@ -41,6 +41,14 @@ public abstract partial class InputRequest
     public int TriggerCardId { get; set; } = -1;
     public string TriggerSummaryText { get; set; }
 
+    /// <summary>
+    /// Set by a selection handler's <see cref="Handle"/> when the player skipped the
+    /// input instead of making a choice. Serialized so it survives the DTO round-trip;
+    /// <see cref="BroadCast"/> throws <see cref="StepSkippedException"/> when it is true.
+    /// Mandatory-input handlers (discards) never set this, so those inputs stay required.
+    /// </summary>
+    public bool WasSkipped { get; set; } = false;
+
     public InputRequest(Faction targetFaction)
     {
         TargetFaction = targetFaction;
@@ -64,7 +72,12 @@ public abstract partial class InputRequest
     public async Task<InputRequest> BroadCast()
     {
         DebugUtilities.PrintPeer($"Broadcasting input request {GetType().Name} to {TargetFaction}");
-        InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(this);              
+        InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(this);
+        if (responseDto.WasSkipped)
+        {
+            DebugUtilities.PrintPeer($"Input request {GetType().Name} was skipped by {TargetFaction}");
+            throw new StepSkippedException();
+        }
         return responseDto;
     }
 
@@ -80,9 +93,15 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            ResponseCountryIds.Add(await new SelectCountryHandler(TargetCountryIds).Handle());
+            int countryId = await new SelectCountryHandler(TargetCountryIds).Handle();
+            if (countryId == -1)
+            {
+                WasSkipped = true;
+                return;
+            }
+            ResponseCountryIds.Add(countryId);
         }
-    }    
+    }
 
     public class HandCardPlayRequestHandler : InputRequest
     {
@@ -175,7 +194,13 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            ResponseUnitIds.Add(await new SelectUnitHandler(TargetUnitIds).Handle());
+            int unitId = await new SelectUnitHandler(TargetUnitIds).Handle();
+            if (unitId == -1)
+            {
+                WasSkipped = true;
+                return;
+            }
+            ResponseUnitIds.Add(unitId);
         }
     }
 
@@ -198,6 +223,11 @@ public abstract partial class InputRequest
         {
             SelectBattleTargetHandler handler = new SelectBattleTargetHandler(TargetCountryIds, TargetUnitIds);
             BattleTarget result = await handler.Handle();
+            if (result == null)
+            {
+                WasSkipped = true;
+                return;
+            }
             if (result.Type == TargetType.COUNTRY)
                 ResponseCountryIds.Add(result.Id);
             else
@@ -218,7 +248,12 @@ public abstract partial class InputRequest
             var items = PresentationItem.ForFactions(TargetFactions);
             ModalResult result = await PresentationModal.Current.Show(
                 ModalConfig.SelectOne("Select a faction", items));
-            ResponseCardIds.Add(result.WasCancelled ? -1 : result.SelectedItems[0]);
+            if (result.WasCancelled)
+            {
+                WasSkipped = true;
+                return;
+            }
+            ResponseCardIds.Add(result.SelectedItems[0]);
         }
     }
 
@@ -243,10 +278,15 @@ public abstract partial class InputRequest
         public override async Task Handle()
         {
             var items = TargetOptionLabels
-                .Select((label, i) => (PresentationItem)new PresentationItemImageButton(TargetOptionIds[i], label, true))
+                .Select((label, i) => (PresentationItem)new PresentationItemTextButton(TargetOptionIds[i], label, true))
                 .ToList();
             ModalResult result = await PresentationModal.Current.Show(ModalConfig.SelectOne(ModalTitle, items));
-            ResponseCardIds.Add(result.WasCancelled ? -1 : result.SelectedItems[0]);
+            if (result.WasCancelled)
+            {
+                WasSkipped = true;
+                return;
+            }
+            ResponseCardIds.Add(result.SelectedItems[0]);
         }
     }
 

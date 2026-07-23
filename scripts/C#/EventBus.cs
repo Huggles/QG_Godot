@@ -36,6 +36,9 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void CountryClickedEventHandler(int countryClicked);
     [Signal] public delegate void UnitClickedEventHandler(int unitClicked);
 
+    // Emitted when the player presses the Skip button during a card-step board selection.
+    [Signal] public delegate void SelectionSkippedEventHandler();
+
     [Signal] public delegate void GameChangeEventOccurredEventHandler();
 
     [Signal] public delegate void CardSelectedEventHandler(int cardId);

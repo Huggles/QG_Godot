@@ -13,11 +13,31 @@ public partial class SelectUnitHandler : IGameEventHandler<int>
 
     public async Task<int> Handle()
     {
+        var tcs = new TaskCompletionSource<int>();
+        void onUnit(int id) { tcs.TrySetResult(id); }
+        void onSkip() { tcs.TrySetResult(-1); }
+
         UnitState.ForIds(unitIds).AddTag(Tag.Clickable, Faction.ALL);
         InputManager.Current.EnableRayTraceCasting();
-        int unitId = (await EventBus.GetSignalAwaiter(EventBus.SignalName.UnitClicked))[0].As<int>();
+        SelectionSkipButton.Current?.Show();
+
+        EventBus.Instance.UnitClicked += onUnit;
+        EventBus.Instance.SelectionSkipped += onSkip;
+
+        int unitId = await tcs.Task;
+
+        EventBus.Instance.UnitClicked -= onUnit;
+        EventBus.Instance.SelectionSkipped -= onSkip;
+        SelectionSkipButton.Current?.Hide();
         UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
         InputManager.Current.DisableRayTraceCasting();
+
+        if (unitId == -1)
+        {
+            DebugUtilities.PrintPeer("Unit selection skipped");
+            return -1;
+        }
+
         DebugUtilities.PrintPeerError($"Unit Clicked: {UnitState.ForId(unitId).CountryState.StaticCountryData.UniqueNameCamelCase} {UnitState.ForId(unitId).Faction}");
         return unitId;
     }

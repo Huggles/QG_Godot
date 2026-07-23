@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public partial class BattleCountryChangeEvent : ChangeEvent
@@ -12,6 +13,16 @@ public partial class BattleCountryChangeEvent : ChangeEvent
     {
         CountryId = countryId;
     }
+
+    protected override List<ChangeEventAnimation> BeforeAnimations => new()
+    {
+        new ZoomToCountryAnimation(CountryId),
+    };
+
+    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    {
+        new ReturnCameraAnimation(),
+    };
 
     public override ChangeEventDto ToDto()
     {
