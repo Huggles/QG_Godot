@@ -1,0 +1,99 @@
+[gd_scene format=3 uid="uid://lxs4ht0c4jlg"]
+
+[ext_resource type="Texture2D" uid="uid://bqpfq0aoas6p5" path="res://assets/textures/ScoreScreen.png" id="1_bg"]
+[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="Script" uid="uid://cwsi814d2uspu" path="res://scripts/C#/Menu/VictoryScreen.cs" id="3_script"]
+[ext_resource type="Texture2D" uid="uid://canhirkc65nvb" path="res://assets/textures/Other/ScoreScreenModal.png" id="4_modal"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_modal"]
+content_margin_left = 90.0
+content_margin_top = 70.0
+content_margin_right = 90.0
+content_margin_bottom = 70.0
+texture = ExtResource("4_modal")
+texture_margin_left = 100.0
+texture_margin_top = 100.0
+texture_margin_right = 100.0
+texture_margin_bottom = 100.0
+
+[node name="Control" type="Control" unique_id=2067255044]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_script")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=2142784661]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_bg")
+expand_mode = 3
+
+[node name="PanelCenter" type="MarginContainer" parent="." unique_id=603222815]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 91.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 200
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelCenter" unique_id=798335258]
+layout_mode = 2
+
+[node name="ScorePanel" type="PanelContainer" parent="PanelCenter/CenterContainer" unique_id=264376463]
+custom_minimum_size = Vector2(1466, 931)
+propagate_maximum_size = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_modal")
+
+[node name="PanelVBox" type="VBoxContainer" parent="PanelCenter/CenterContainer/ScorePanel" unique_id=1004918596]
+propagate_maximum_size = false
+layout_mode = 2
+offset_transform_position = Vector2(0, 100)
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="TitleLabel" type="RichTextLabel" parent="PanelCenter/CenterContainer/ScorePanel/PanelVBox" unique_id=1403919059]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="ResultsContainer" type="HBoxContainer" parent="PanelCenter/CenterContainer/ScorePanel/PanelVBox" unique_id=454270427]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 60
+alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="." unique_id=1977198968]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 441.0
+offset_top = -89.0
+offset_right = 591.0
+offset_bottom = 45.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(0.5, 0.5)
+alignment = 1
+
+[node name="MainMenuButton" parent="ButtonRow" unique_id=1160922925 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 110)
+layout_mode = 2

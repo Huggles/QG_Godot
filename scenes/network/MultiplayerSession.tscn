@@ -24,6 +24,9 @@ script = ExtResource("1_fxsb3")
 [node name="PeerReadinessComponent" type="Node" parent="."]
 script = ExtResource("2_2awua")
 
+[node name="EndGameReadinessComponent" type="Node" parent="."]
+script = ExtResource("2_2awua")
+
 [node name="GameFlow" type="Node" parent="."]
 script = ExtResource("3_jir0j")
 
