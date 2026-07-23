@@ -256,6 +256,12 @@ public partial class CardPlayRound : GodotObject
         DebugUtilities.PrintPeer("RequestAfterReactions");
         var previousTrigger = CurrentReactionTrigger;
         CurrentReactionTrigger = triggerEvent;
+        // Scope the pass-tracking set to this reaction window, mirroring CurrentReactionTrigger.
+        // Each nested window gets its own set so a faction that passes on an inner trigger (e.g.
+        // skipping Synthetic Fuel on a deploy) is not wrongly treated as having passed on the
+        // outer trigger (e.g. still being owed a Dive Bombers offer on the original battle).
+        var previousPassed = _afterReactionPassedFactions;
+        _afterReactionPassedFactions = new HashSet<Faction>();
         bool anyEverPlayed = false;
         try
         {
@@ -296,6 +302,7 @@ public partial class CardPlayRound : GodotObject
         finally
         {
             CurrentReactionTrigger = previousTrigger;
+            _afterReactionPassedFactions = previousPassed;
         }
         return anyEverPlayed;
     }
