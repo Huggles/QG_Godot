@@ -64,12 +64,12 @@ public partial class MainMenu : Control
         // Made-up per-faction, per-round scores over 20 rounds.
         var fakeScores = new Dictionary<Faction, int[]>
         {
-            [Faction.GERMANY]        = new[] { 3, 2, 4, 1, 3, 5, 2, 4 },
-            [Faction.JAPAN]          = new[] { 2, 3, 1, 4, 2, 3, 1, 2 },
-            [Faction.ITALY]          = new[] { 1, 0, 2, 1, 3, 1, 2, 1 },
-            [Faction.UNITED_KINGDOM] = new[] { 2, 3, 2, 4, 1, 3, 2, 3 },
-            [Faction.SOVIET]         = new[] { 4, 2, 3, 2, 4, 3, 2, 4 },
-            [Faction.UNITED_STATES]  = new[] { 1, 2, 3, 2, 3, 4, 2, 3 },
+            [Faction.GERMANY]        = new[] { 3, 2, 4, 1, 3, 5, 2, 4, 3, 2, 4, 3, 5, 2, 3, 4, 2, 3, 4, 3 },
+            [Faction.JAPAN]          = new[] { 2, 3, 1, 4, 2, 3, 1, 2, 3, 2, 1, 3, 2, 4, 2, 1, 3, 2, 3, 2 },
+            [Faction.ITALY]          = new[] { 1, 0, 2, 1, 3, 1, 2, 1, 2, 0, 1, 2, 1, 3, 2, 1, 0, 2, 1, 2 },
+            [Faction.UNITED_KINGDOM] = new[] { 2, 3, 2, 4, 1, 3, 2, 3, 2, 4, 3, 2, 1, 3, 2, 4, 3, 2, 3, 2 },
+            [Faction.SOVIET]         = new[] { 4, 2, 3, 2, 4, 3, 2, 4, 3, 2, 4, 3, 2, 3, 4, 2, 3, 4, 2, 3 },
+            [Faction.UNITED_STATES]  = new[] { 1, 2, 3, 2, 3, 4, 2, 3, 2, 3, 4, 2, 3, 2, 3, 4, 2, 3, 2, 3 },
         };
 
         // Fallback display data for when no game has been loaded (StaticGameData is empty on this path).

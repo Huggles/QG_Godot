@@ -1,10 +1,12 @@
 {
   "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 20,
   "factions": {
     "GERMANY": {
       "unitDeployments": [
       ],
-      "initialCards": [ 
+      "initialCards": [
         { "name": "StatusSuperiorPlanning" },
         { "name": "StatusDiveBombers" },
         { "name": "StatusBlitzkrieg" },
@@ -14,10 +16,11 @@
         { "name": "StatusAtlanticWall" },
         { "name": "StatusVolksturm" }
       ],
-      "initialHandCards": [        
+      "initialHandCards": [
         { "name": "StatusWolfPacks" },
         { "name": "EWSubmarinesRaidMurmanskConvoy" }
-      ]
+      ],
+      "startingVP": 0
     },
     "UNITED_KINGDOM": {
       "unitDeployments": [
@@ -28,11 +31,12 @@
       "initialCards": [
         { "name": "ResponseEnigmaCodeCracked" }
       ],
-      "initialHandCards": [        
-        { "name": "EWMaltaSubmarines" }    
-      ]
+      "initialHandCards": [
+        { "name": "EWMaltaSubmarines" }
+      ],
+      "startingVP": 0
     },
-    "JAPAN": { 
+    "JAPAN": {
       "unitDeployments": [
         { "countryName": "JAPAN" },
         { "countryName": "SEA_OF_JAPAN" },
@@ -46,8 +50,9 @@
         { "name": "ResponseDestroyerTransport" },
         { "name": "ResponseSurpriseAttack" }
       ],
-      "initialHandCards": [    
-      ]
+      "initialHandCards": [
+      ],
+      "startingVP": 0
     },
     "SOVIET": {
       "unitDeployments": [
@@ -63,7 +68,8 @@
       ],
       "initialHandCards": [
         { "name": "EventTransSiberianRailroad" }
-      ]
+      ],
+      "startingVP": 0
     },
     "ITALY": {
       "unitDeployments": [
@@ -73,7 +79,8 @@
       "initialCards": [
         { "name": "ResponseSkilledPilots" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     },
     "UNITED_STATES": {
       "unitDeployments": [
@@ -82,8 +89,8 @@
         { "countryName": "VLADIVOSTOK" }
       ],
       "initialCards": [],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     }
   }
 }
-

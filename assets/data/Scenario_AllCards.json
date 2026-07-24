@@ -1,5 +1,7 @@
 {
   "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 20,
   "factions": {
     "GERMANY": {
       "unitDeployments": [
@@ -19,7 +21,8 @@
         { "name": "StatusWolfPacks" },
         { "name": "StatusVolksturm" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     },
     "UNITED_KINGDOM": {
       "unitDeployments": [
@@ -40,7 +43,8 @@
         { "name": "StatusResistance" },
         { "name": "StatusTheRoyalNavy" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     },
     "JAPAN": {
       "unitDeployments": [
@@ -63,7 +67,8 @@
         { "name": "StatusImperialDesigns" },
         { "name": "StatusUnimpededMerchantShipping" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     },
     "SOVIET": {
       "unitDeployments": [
@@ -82,7 +87,8 @@
         { "name": "StatusStavkaFormsArtilleryCorps" },
         { "name": "StatusWomenConscripts" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     },
     "ITALY": {
       "unitDeployments": [
@@ -99,7 +105,8 @@
         { "name": "StatusImperoItaliano" },
         { "name": "StatusMareNostrum" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     },
     "UNITED_STATES": {
       "unitDeployments": [
@@ -115,7 +122,8 @@
         { "name": "StatusSuperiorShipyards" },
         { "name": "StatusWartimeProduction" }
       ],
-      "initialHandCards": []
+      "initialHandCards": [],
+      "startingVP": 0
     }
   }
 }

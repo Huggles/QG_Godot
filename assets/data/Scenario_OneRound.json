@@ -1,7 +1,10 @@
 {
   "startingFaction": "GERMANY",
   "startingRound": 1,
-  "maxRounds": 20,
+  "maxRounds": 1,
+  "randomizeStartingVP": true,
+  "randomStartingVPMin": 0,
+  "randomStartingVPMax": 20,
   "factions": {
     "GERMANY": {
       "unitDeployments": [

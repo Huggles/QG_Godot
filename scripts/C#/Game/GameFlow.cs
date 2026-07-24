@@ -26,6 +26,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             }
         } } = 0;
     [Export] public TurnStep TurnStep { get; set; } = 0;
+    [Export] public int MaxRound { get; set; } = 20;
 
     public int Round => ((GameTurn - 1) / StaticGameData.PlayableFactions.Count) + 1;
     public Faction CurrentFaction => GameTurn > 0 ? StaticGameData.PlayableFactions[(GameTurn - 1) % StaticGameData.PlayableFactions.Count] : Faction.GERMANY;
@@ -103,10 +104,10 @@ public partial class GameFlow : SingletonNode<GameFlow>
             int axis   = StaticGameData.FactionsForTeam(FactionTeam.AXIS).Sum(f => FactionState.ForEnum(f).Score);
             int allies = StaticGameData.FactionsForTeam(FactionTeam.ALLIES).Sum(f => FactionState.ForEnum(f).Score);
             bool pointLead  = Math.Abs(axis - allies) >= 30;
-            bool roundLimit = Round >= 20;
+            bool roundLimit = Round >= MaxRound;
             if (pointLead || roundLimit)
             {
-                GameResult result = BuildGameResult(axis, allies, pointLead ? "30-point lead" : "Round 20 reached");
+                GameResult result = BuildGameResult(axis, allies, pointLead ? "30-point lead" : $"Round {MaxRound} reached");
                 DebugUtilities.PrintPeer($"Game over ({result.EndReason}) — Axis {axis} / Allies {allies}, winner {result.WinningTeam}");
                 MultiplayerSession.Instance.Rpc(nameof(MultiplayerSession.BeginEndGame), JsonSerializer.Serialize(result));
                 return; // stop the loop: do NOT start a new turn / round

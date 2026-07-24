@@ -184,13 +184,51 @@ public partial class GameModeMultiplayerDefault : IGameMode
         InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
 
 
+        GameFlow.Instance.MaxRound = initialStateData.MaxRounds;
+
         GameStateCalculator.CalculateAll();
         GameStateCalculator.Enabled = false;
         await DeployUnits(initialStateData);
         await PlaceCards(initialStateData);
+        await ApplyStartingVictoryPoints(initialStateData);
         await SetStartingFaction(initialStateData);
         GameStateCalculator.Enabled = true;
         await Task.Delay(100);
+    }
+
+    private async Task ApplyStartingVictoryPoints(InitialGameStateData initialStateData)
+    {
+        // Randomized mode: the host rolls a VP for every playable faction; the values reach
+        // clients through the replicated SetStartingScoreChangeEvent (clients never run setup).
+        if (initialStateData.RandomizeStartingVP)
+        {
+            int min = initialStateData.RandomStartingVPMin;
+            int max = initialStateData.RandomStartingVPMax;
+            var rng = new RandomNumberGenerator();
+            rng.Randomize();
+
+            foreach (Faction faction in StaticGameData.PlayableFactions)
+            {
+                int vp = rng.RandiRange(min, max);
+                DebugUtilities.PrintPeer($"Random starting VP for {faction}: {vp} (range {min}-{max})");
+                await new SetStartingScoreChangeEvent(faction, vp) { IsTrigger = false }.ApplyChange();
+            }
+            return;
+        }
+
+        foreach (var (factionKey, factionData) in initialStateData.Factions)
+        {
+            if (factionData.StartingVictoryPoints == 0) continue;
+
+            if (!Enum.TryParse<Faction>(factionKey, out Faction faction))
+            {
+                DebugUtilities.PrintPeer($"Warning: Invalid faction '{factionKey}' in initial game state config");
+                continue;
+            }
+
+            DebugUtilities.PrintPeer($"Setting starting VP for {faction} to {factionData.StartingVictoryPoints}");
+            await new SetStartingScoreChangeEvent(faction, factionData.StartingVictoryPoints) { IsTrigger = false }.ApplyChange();
+        }
     }
     private async Task DeployUnits(InitialGameStateData initialStateData)
     {
@@ -248,22 +286,30 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
     private async Task SetStartingFaction(InitialGameStateData initialStateData)
     {
-        if (string.IsNullOrEmpty(initialStateData.StartingFaction)) return;
+        await Task.CompletedTask;
 
-        if (!Enum.TryParse<Faction>(initialStateData.StartingFaction, out Faction startingFaction))
+        int count = StaticGameData.PlayableFactions.Count;
+
+        // Default to the first faction of the round when no startingFaction is specified.
+        int factionIndex = 0;
+        if (!string.IsNullOrEmpty(initialStateData.StartingFaction))
         {
-            throw new Exception($"Invalid startingFaction '{initialStateData.StartingFaction}' in scenario config.");
+            if (!Enum.TryParse<Faction>(initialStateData.StartingFaction, out Faction startingFaction))
+            {
+                throw new Exception($"Invalid startingFaction '{initialStateData.StartingFaction}' in scenario config.");
+            }
+
+            factionIndex = StaticGameData.PlayableFactions.IndexOf(startingFaction);
+            if (factionIndex < 0)
+            {
+                throw new Exception($"startingFaction '{initialStateData.StartingFaction}' is not in PlayableFactions.");
+            }
         }
 
-        int factionIndex = StaticGameData.PlayableFactions.IndexOf(startingFaction);
-        if (factionIndex < 0)
-        {
-            throw new Exception($"startingFaction '{initialStateData.StartingFaction}' is not in PlayableFactions.");
-        }
-
-        // GameTurn = factionIndex + 1 puts CurrentFaction at the desired faction on the first StartNewTurn increment
-        GameFlow.Instance.GameTurn = factionIndex;
-        DebugUtilities.PrintPeer($"Starting faction set to {startingFaction} (GameTurn offset: {factionIndex})");
+        // GameTurn is the seed the first StartNewTurn increments by 1 before the opening turn runs,
+        // so CurrentFaction lands on factionIndex and Round lands on StartingRound.
+        GameFlow.Instance.GameTurn = (initialStateData.StartingRound - 1) * count + factionIndex;
+        DebugUtilities.PrintPeer($"Starting round {initialStateData.StartingRound}, faction index {factionIndex} (GameTurn seed: {GameFlow.Instance.GameTurn})");
     }
     
     

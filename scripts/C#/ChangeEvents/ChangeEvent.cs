@@ -70,6 +70,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards, d.ShowDrawnCards),
             DrawCardByNameChangeEventDto d   => new DrawCardByNameChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardName),
             ScorePointsChangeEventDto d      => new ScorePointsChangeEvent(d.VPTurnSummary),
+            SetStartingScoreChangeEventDto d => new SetStartingScoreChangeEvent(d.TriggeringFaction, d.Score),
             ChangeStepChangeEventDto d        => new ChangeStepChangeEvent(d.NewStep),
             ChangeRoundChangeEventDto d       => new ChangeRoundChangeEvent(d.NewTurn),
             RecycleCardChangeEventDto d        => new RecycleCardChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardId, d.Destination),

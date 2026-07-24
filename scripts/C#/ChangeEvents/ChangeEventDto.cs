@@ -16,6 +16,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(ForceDiscardCardsChangeEventDto),     "DiscardCards")]
 [JsonDerivedType(typeof(DrawCardsChangeEventDto),        "DrawCards")]
 [JsonDerivedType(typeof(ScorePointsChangeEventDto),      "ScorePoints")]
+[JsonDerivedType(typeof(SetStartingScoreChangeEventDto), "SetStartingScore")]
 [JsonDerivedType(typeof(DiscardHandCardsChangeEventDto), "VoluntaryDiscardCards")]
 [JsonDerivedType(typeof(ForceDiscardHandCardsChangeEventDto), "ForceDiscardHandCards")]
 [JsonDerivedType(typeof(DrawCardByNameChangeEventDto),   "DrawCardByName")]
@@ -99,6 +100,11 @@ public class DrawCardsChangeEventDto : ChangeEventDto
 public class ScorePointsChangeEventDto : ChangeEventDto
 {
     public VPTurnSummary VPTurnSummary { get; set; }
+}
+
+public class SetStartingScoreChangeEventDto : ChangeEventDto
+{
+    public int Score { get; set; }
 }
 
 public class DiscardHandCardsChangeEventDto : ChangeEventDto
