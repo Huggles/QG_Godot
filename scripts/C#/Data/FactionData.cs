@@ -83,6 +83,8 @@ public partial class FactionData : DataObject
     
     public void LoadTextures()
     {
+        // A headless/dedicated server has no rendering and does not import textures — skip entirely.
+        if (GameContext.IsHeadless) return;
         LoadCardTextures();
     }
     private void LoadCardTextures()

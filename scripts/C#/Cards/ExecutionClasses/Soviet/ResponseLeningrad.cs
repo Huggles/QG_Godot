@@ -28,7 +28,7 @@ public partial class ResponseLeningrad : ResponseCardLogic
                 if(CardPlayPool.LastNoneNewCardChangeEvent is BattleUnitChangeEvent battleUnitChangeEvent){
                     battleUnitChangeEvent.IsBlocked = true;
                     battleUnitChangeEvent.UnitState.ImmuneForTurn = true;
-                    PlayerActionLabel.ShowText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the land battle on his army in {CountryState.ForId(targetCountries[0])}", Faction);
+                    PresentationServices.Notification.ShowActionText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the land battle on his army in {CountryState.ForId(targetCountries[0])}", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                     return null;
                 }else {

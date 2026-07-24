@@ -23,12 +23,12 @@ public partial class StatusRadar : StatusCardLogic
                 await discardEvent.ApplyChange();
 
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
+                await PresentationServices.Notification.ShowModal(presentationItems, "Discarded cards");
 
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
-                    PlayerActionLabel.ShowText("Radar: US Navy will not be removed this turn", Faction);
+                    PresentationServices.Notification.ShowActionText("Radar: US Navy will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
                 return null;

@@ -35,9 +35,9 @@ public partial class ResponseTruk : ResponseCardLogic
                     await grantEvent.ApplyChange();
                 }
 
-                PlayerActionLabel.ShowText("Truk: Japanese pieces in or adjacent to the Central Pacific are in supply this turn.", Faction);
+                PresentationServices.Notification.ShowActionText("Truk: Japanese pieces in or adjacent to the Central Pacific are in supply this turn.", Faction);
                 await Task.Delay(GameSettings.DurationLong);
-                PlayerActionLabel.HideText();
+                PresentationServices.Notification.HideActionText();
                 return null;
             })
             .WithGuidance("Grant supply to all Japanese pieces in or adjacent to the Central Pacific"),

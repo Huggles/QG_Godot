@@ -63,6 +63,12 @@ public partial class MultiplayerLobby : Control
 	private bool _isHost        = false;
 	private bool _lobbyOnlyMode = false;
 
+	/// <summary>True when this instance is a dedicated/headless server: it auto-hosts, controls no
+	/// faction, and starts the game automatically once <see cref="_requiredPlayers"/> clients connect.</summary>
+	private bool _dedicatedServer = false;
+	/// <summary>Number of connecting clients a dedicated server waits for before starting (cmdline <c>players=N</c>).</summary>
+	private int  _requiredPlayers = 2;
+
 	/// <summary>peerId → name Label; text is also used as source for SyncPlayerList RPC.</summary>
 	private readonly Dictionary<int, Label>          _playerLabels    = new();
 	/// <summary>peerId → root PanelContainer of that player's row.</summary>
@@ -108,6 +114,24 @@ public partial class MultiplayerLobby : Control
 		_lobbyOnlyMode = OS.GetCmdlineUserArgs().Contains("lobby_only=true");
 		int instance   = GetInstanceNumber();
 
+		// Dedicated/headless server: auto-host and wait for clients. It controls no faction.
+		if (GameContext.IsHeadless)
+		{
+			_dedicatedServer = true;
+			_requiredPlayers = GetIntArg("players", 2);
+			DebugUtilities.PrintPeer($"Dedicated server: auto-hosting, waiting for {_requiredPlayers} client(s)...");
+			OnHostButtonPressed();
+			return;
+		}
+
+		// GUI test client that should connect to a dedicated server without menu interaction.
+		if (OS.GetCmdlineUserArgs().Contains("auto_join=true"))
+		{
+			_ipAddressInput.Text = DEFAULT_SERVER_IP;
+			OnJoinButtonPressed();
+			return;
+		}
+
 		if (GameSettings.IsDebugMultiplayer && instance == 1)
 		{
 			DebugUtilities.PrintPeer(_lobbyOnlyMode
@@ -144,6 +168,18 @@ public partial class MultiplayerLobby : Control
 				return n;
 		}
 		return 0;
+	}
+
+	/// <summary>Parses a <c>key=value</c> integer command-line user arg, or returns <paramref name="fallback"/>.</summary>
+	private static int GetIntArg(string key, int fallback)
+	{
+		string prefix = $"{key}=";
+		foreach (string arg in OS.GetCmdlineUserArgs())
+		{
+			if (arg.StartsWith(prefix) && int.TryParse(arg.Substring(prefix.Length), out int n))
+				return n;
+		}
+		return fallback;
 	}
 
 	public override void _ExitTree()
@@ -429,7 +465,20 @@ public partial class MultiplayerLobby : Control
 			RpcId((int)peerId, nameof(SyncPlayerList),   GetPlayerListData());
 			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments());
 
-			if (GameSettings.IsDebugMultiplayer && !_lobbyOnlyMode)
+			if (_dedicatedServer)
+			{
+				// Dedicated server: assign all factions to the connected clients and start once enough
+				// have joined. The server (peer 1) itself controls no faction.
+				int connectedClients = _playerLabels.Keys.Count(p => p != 1);
+				DebugUtilities.PrintPeer($"Dedicated server: {connectedClients}/{_requiredPlayers} client(s) connected");
+				if (connectedClients >= _requiredPlayers)
+				{
+					AutoAssignDedicatedFactions();
+					Rpc(nameof(SyncFactionState), SerialiseAssignments());
+					OnStartGameButtonPressed();
+				}
+			}
+			else if (GameSettings.IsDebugMultiplayer && !_lobbyOnlyMode)
 			{
 				// F6 debug auto-start: assign default factions, sync to all, then start.
 				AutoAssignDebugFactions((int)peerId);
@@ -456,6 +505,29 @@ public partial class MultiplayerLobby : Control
 		{
 			foreach (var f in AxisSet)                              _assignments[f] = 1;
 			foreach (var f in AllPlayableFactions.Except(AxisSet)) _assignments[f] = clientPeerId;
+		}
+	}
+
+	/// <summary>
+	/// Dedicated-server faction assignment: distributes all six factions across the connected
+	/// clients (the host/peer 1 is excluded — it controls nothing). With exactly two clients this
+	/// is a natural Axis-vs-Allies split; otherwise factions are dealt round-robin in join order.
+	/// </summary>
+	private void AutoAssignDedicatedFactions()
+	{
+		_assignments.Clear();
+		List<int> clientPeers = _playerLabels.Keys.Where(p => p != 1).OrderBy(p => p).ToList();
+		if (clientPeers.Count == 0) return;
+
+		if (clientPeers.Count == 2)
+		{
+			foreach (Faction f in AxisSet)                              _assignments[f] = clientPeers[0];
+			foreach (Faction f in AllPlayableFactions.Except(AxisSet)) _assignments[f] = clientPeers[1];
+		}
+		else
+		{
+			for (int i = 0; i < AllPlayableFactions.Count; i++)
+				_assignments[AllPlayableFactions[i]] = clientPeers[i % clientPeers.Count];
 		}
 	}
 

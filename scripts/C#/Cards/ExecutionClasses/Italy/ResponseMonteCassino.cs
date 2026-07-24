@@ -25,7 +25,7 @@ public partial class ResponseMonteCassino : ResponseCardLogic
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
-                    PlayerActionLabel.ShowText("Monte Cassino: Axis Army in Italy will not be removed this turn", Faction);
+                    PresentationServices.Notification.ShowActionText("Monte Cassino: Axis Army in Italy will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
                 return null;

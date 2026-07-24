@@ -47,6 +47,8 @@ public partial class CountryData : DataObject
 
     public override void LoadData()
     {
+        // A headless/dedicated server has no rendering and does not import textures — skip entirely.
+        if (GameContext.IsHeadless) return;
         var texturePath = $"res://assets/textures/Countries/{UniqueNameCamelCase}.png";
         Texture = GD.Load<Texture2D>(texturePath);
         if (Texture == null)

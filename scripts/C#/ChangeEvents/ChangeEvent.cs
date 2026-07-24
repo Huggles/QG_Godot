@@ -101,12 +101,14 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             CardPlayRound.Current.RegisterChangeEvent(this);
         }
         DebugUtilities.PrintPeer($"PlayAnimations: {PlayAnimations}, BlockAnimationQueue: {BlockAnimationQueue}");           
-        foreach (ChangeEventAnimation anim in BeforeAnimations)
+        // Skip on headless: evaluating the animation lists constructs presentation objects (e.g.
+        // ReturnCameraAnimation reads InputManager.Current.Camera in its ctor), which is null on a
+        // dedicated server. The enqueue itself already no-ops via the null sink; this avoids the
+        // construction too.
+        if (PlayAnimations && !GameContext.IsHeadless)
         {
-            if(PlayAnimations)
-            {
-                _ = AnimationQueue.Instance.Enqueue(anim);            
-            }            
+            foreach (ChangeEventAnimation anim in BeforeAnimations)
+                _ = PresentationServices.Animation.Enqueue(anim);
         }
         DebugUtilities.PrintPeer($"Execute Async");           
         await ExecuteAsync();
@@ -119,17 +121,16 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         }
         GameStateCalculator.CalculateAll();
         EmitSignal(SignalName.ChangeEventApplied, Id);
-        foreach (ChangeEventAnimation anim in AfterAnimations)
+        if (PlayAnimations && !GameContext.IsHeadless)
         {
-            if(PlayAnimations)
+            foreach (ChangeEventAnimation anim in AfterAnimations)
             {
                 DebugUtilities.PrintPeer($"Enqueuing animation {anim.ScriptName} for change event {ScriptName} (Id: {Id})");
-                _ = AnimationQueue.Instance.Enqueue(anim);                            
+                _ = PresentationServices.Animation.Enqueue(anim);
             }
-            
-        }        
+        }
         DebugUtilities.PrintPeer($"Awaiting)");
-        await AnimationQueue.Instance.Start(); // ensure queue is processing (no-op if already running)
+        await PresentationServices.Animation.Start(); // ensure queue is processing (no-op if already running / headless)
         DebugUtilities.PrintPeer($"Continue");
         
         MultiplayerSession.Instance?.GameState.GameChangeEvents.Add(this);

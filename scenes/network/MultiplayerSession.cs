@@ -65,7 +65,8 @@ public partial class MultiplayerSession : Node
 
 
         //NodeUtilities.Instance.PlayersNode.GetChildren().ToList().ForEach(playerScene => (playerScene as PlayerScene).FadeLoadingScreen());
-        PlayerScene.Current.FadeLoadingScreen();
+        // Null on a dedicated/headless server (it controls no faction, so has no local PlayerScene).
+        PlayerScene.Current?.FadeLoadingScreen();
         EventBus.Emit(EventBus.SignalName.GameSessionStarted);
 
     }

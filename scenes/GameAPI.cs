@@ -131,7 +131,7 @@ public partial class GameAPI : Node
             countryState.Units[faction] = unitState.Id;
             unitState.CountryId = countryState.Id;
             EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
-            AnimationQueue.Instance.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+            _ = PresentationServices.Animation.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
         } else {
             string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. Country is full or not deployable.";
             DebugUtilities.PrintPeer(exceptionMessage);
@@ -145,7 +145,7 @@ public partial class GameAPI : Node
         UnitState unitState = UnitState.ForId(unitId);
         CountryState countryState = CountryState.ForId(unitState.CountryId);
 
-        AnimationQueue.Instance.Enqueue(new RemoveUnitAnimation(unitId, countryState.Id){ BlockQueue = awaitAnimation });     
+        _ = PresentationServices.Animation.Enqueue(new RemoveUnitAnimation(unitId, countryState.Id){ BlockQueue = awaitAnimation });
 
         unitState.CountryId = -1;
         countryState.Units.Remove(unitState.Faction);
@@ -160,18 +160,18 @@ public partial class GameAPI : Node
         List<int> drawnCardIds = DeckState.ForFaction(faction).DrawCards(numberOfCards);
         if(showDrawnCards)
         {
-            if(PlayerScene.Current.ControlledFactions.Contains(faction))
+            if(PresentationServices.Notification.LocalPlayerControls(faction))
             {
                 // Optionally show the cards that were drawn
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(drawnCardIds, false);
-                await PresentationModal.Current.ShowModal(presentationItems, $"{faction} drew cards");                
+                await PresentationServices.Notification.ShowModal(presentationItems, $"{faction} drew cards");
             }
             else
             {
                 string message = $"Drawing {numberOfCards} card(s)...";
-                PlayerActionLabel.ShowText(message, faction);
+                PresentationServices.Notification.ShowActionText(message, faction);
             }
-            
+
         }
         EventBus.Emit(EventBus.SignalName.CardsDrawn, (int)faction, numberOfCards);
     }
@@ -179,14 +179,10 @@ public partial class GameAPI : Node
     public static async Task DiscardHandCards(Faction faction, List<int> cardIds)
     {
         DeckState.ForFaction(faction).DiscardHandCards(cardIds);
-        if(PlayerScene.Current.ControlledFactions.Contains(faction))
-        {
-            
-        }
-        else
+        if(!PresentationServices.Notification.LocalPlayerControls(faction))
         {
             string message = $"{faction} discarded {cardIds.Count} card(s)...";
-            PlayerActionLabel.ShowText(message, faction);
+            PresentationServices.Notification.ShowActionText(message, faction);
         }
         DebugUtilities.PrintPeer($"Faction {faction} discards {cardIds.Count} card(s) from hand");
         EventBus.Emit(EventBus.SignalName.CardsDiscarded, (int)faction, cardIds.Count);

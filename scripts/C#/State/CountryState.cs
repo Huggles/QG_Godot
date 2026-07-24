@@ -54,14 +54,19 @@ public partial class CountryState : StateObject
         else
             this.Tags.AddForAll(Tag.SeaCountry);
 
-        this.Tags.TagAdded += (Tag t, Faction f) =>
+        // Presentation side-effect: drive the country's clickable visual off the Clickable tag.
+        // Skipped on a headless server, which has no CountryScene (the getter would throw).
+        if (!GameContext.IsHeadless)
         {
-            if(t is Tag.Clickable) CountryScene.SetClickable();
-        };
-        this.Tags.TagRemoved += (Tag t, Faction f) =>
-        {
-            if(t is Tag.Clickable) CountryScene.SetUnclickable();
-        };
+            this.Tags.TagAdded += (Tag t, Faction f) =>
+            {
+                if(t is Tag.Clickable) CountryScene.SetClickable();
+            };
+            this.Tags.TagRemoved += (Tag t, Faction f) =>
+            {
+                if(t is Tag.Clickable) CountryScene.SetUnclickable();
+            };
+        }
     }
 
     public void InitNeighborCountryStateArray()

@@ -43,7 +43,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     /// <summary>Returns the duration in milliseconds for the current speed and the given scale.</summary>
     public static int GetDuration(DurationScale scale = DurationScale.Medium)
-        => DurationTable[(int)Instance.PresentationSpeed, (int)scale];
+        => GameContext.IsHeadless ? 0 : DurationTable[(int)Instance.PresentationSpeed, (int)scale];
 
     /// <summary>Returns the duration in seconds for the current speed and the given scale.</summary>
     public static double GetDurationSeconds(DurationScale scale = DurationScale.Medium)

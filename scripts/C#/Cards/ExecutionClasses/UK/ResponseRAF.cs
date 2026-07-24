@@ -25,7 +25,7 @@ public partial class ResponseRAF : ResponseCardLogic
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
-                    PlayerActionLabel.ShowText("RAF: UK piece will not be removed this turn", Faction);
+                    PresentationServices.Notification.ShowActionText("RAF: UK piece will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
                 return null;

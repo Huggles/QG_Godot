@@ -19,7 +19,7 @@ public partial class EventOperationMagic : EventCardLogic
                     .WithoutAnimations();
                 discardEvent.IsTrigger = true;
 
-                PlayerActionLabel.ShowText("Operation Magic: A random Japanese Response card has been discarded.", Faction);
+                PresentationServices.Notification.ShowActionText("Operation Magic: A random Japanese Response card has been discarded.", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
 
                 return discardEvent;

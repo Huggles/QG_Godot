@@ -34,7 +34,7 @@ public partial class ResponseKwantungArmy : ResponseCardLogic
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
-                    PlayerActionLabel.ShowText("Kwantung Army: Japanese Army will not be removed this turn", Faction);
+                    PresentationServices.Notification.ShowActionText("Kwantung Army: Japanese Army will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
                 return null;

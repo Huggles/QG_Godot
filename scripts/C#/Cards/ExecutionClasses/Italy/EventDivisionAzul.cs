@@ -19,7 +19,7 @@ public partial class EventDivisionAzul : EventCardLogic
                     .WithoutAnimations();
                 discardEvent.IsTrigger = true;
 
-                PlayerActionLabel.ShowText("Division Azul: A random Soviet Response card has been discarded.", Faction);
+                PresentationServices.Notification.ShowActionText("Division Azul: A random Soviet Response card has been discarded.", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
 
                 return discardEvent;

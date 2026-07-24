@@ -20,7 +20,7 @@ public partial class ResponseDefensivePosture : ResponseCardLogic
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
-                    PlayerActionLabel.ShowText("Defensive Posture: UK Army will not be removed this turn", Faction);
+                    PresentationServices.Notification.ShowActionText("Defensive Posture: UK Army will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
                 return null;

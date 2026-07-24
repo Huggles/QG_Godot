@@ -31,7 +31,7 @@ public partial class StatusAircraftCarriers : StatusCardLogic
                 await discardEvent.ApplyChange();
 
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
+                await PresentationServices.Notification.ShowModal(presentationItems, "Discarded cards");
 
                 int countryId = LastSeaBattle.CountryId;
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));

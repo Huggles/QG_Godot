@@ -25,20 +25,25 @@ public partial class StraightState : StateObject
             ControlledCountryId2 = staticStraightData.ControlledCountry2Id;
         }
 
-        // Subscribe to tag events for visual updates
-        Tags.TagAdded += (Tag t, Faction f) =>
+        // Subscribe to tag events for visual updates. These tags are added by GameStateCalculator
+        // (which runs on the authoritative server), and the handlers touch the straight's Sprite2D
+        // via CountryScene — absent on a headless server (the getter throws) — so skip them there.
+        if (!GameContext.IsHeadless)
         {
-            if (t == Tag.AxisControlled)
-                ChangeColorTeam(FactionTeam.AXIS);
-            else if (t == Tag.AlliesControlled)
-                ChangeColorTeam(FactionTeam.ALLIES);
-        };
-        
-        Tags.TagRemoved += (Tag t, Faction f) =>
-        {
-            if (t == Tag.AxisControlled || t == Tag.AlliesControlled)
-                ChangeColorTeam(FactionTeam.NONE);
-        };
+            Tags.TagAdded += (Tag t, Faction f) =>
+            {
+                if (t == Tag.AxisControlled)
+                    ChangeColorTeam(FactionTeam.AXIS);
+                else if (t == Tag.AlliesControlled)
+                    ChangeColorTeam(FactionTeam.ALLIES);
+            };
+
+            Tags.TagRemoved += (Tag t, Faction f) =>
+            {
+                if (t == Tag.AxisControlled || t == Tag.AlliesControlled)
+                    ChangeColorTeam(FactionTeam.NONE);
+            };
+        }
     }
 
     public void OnReady()

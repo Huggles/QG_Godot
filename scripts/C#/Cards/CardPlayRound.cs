@@ -406,17 +406,18 @@ public partial class CardPlayRound : GodotObject
         }
 
         DebugUtilities.PrintPeer($"{faction} has block reaction options");
-        await Task.Delay(GameSettings.DurationMedium);
 
-        controllingPlayer.InputManager.SetPlayCardInputActive(faction);
-        FactionHandDisplay.Current?.ShowTriggerContext(
-            GetTriggerCardId(CurrentBlockTrigger),
-            CurrentBlockTrigger?.SummaryText());
-        Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
-        if (results == null || results.Length == 0)
-            return -1;
+        // Route through the network seam (like RequestPlay) so the authoritative host — which may
+        // be a faction-less headless server — awaits the controlling peer's response instead of a
+        // local UI click. The client's Handle() runs the actual card-selection UI.
+        InputRequest.BlockReactionRequestHandler request = new InputRequest.BlockReactionRequestHandler(faction)
+        {
+            TriggerCardId = GetTriggerCardId(CurrentBlockTrigger),
+            TriggerSummaryText = CurrentBlockTrigger?.SummaryText()
+        };
 
-        return (int)results[0];
+        InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
+        return responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
     }
 
     /// <summary>Card IDs of hand cards the faction can play from hand.</summary>

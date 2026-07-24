@@ -41,7 +41,7 @@ public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICou
                 await discardEvent.ApplyChange();
 
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
+                await PresentationServices.Notification.ShowModal(presentationItems, "Discarded cards");
 
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.Szechuan]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));

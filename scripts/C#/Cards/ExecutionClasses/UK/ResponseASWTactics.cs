@@ -26,7 +26,7 @@ public partial class ResponseASWTactics : ResponseCardLogic
         return new List<CardStep> {
             new CardStep(this, async () => {
                 CardPlayPool.LastNoneNewCardChangeEvent.IsBlocked = true;
-                PlayerActionLabel.ShowText("ASW Tactics: Axis EW card effect ignored", Faction);
+                PresentationServices.Notification.ShowActionText("ASW Tactics: Axis EW card effect ignored", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
                 return null;
             })

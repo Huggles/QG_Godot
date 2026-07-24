@@ -18,11 +18,14 @@ using System.Threading.Tasks;
 [JsonDerivedType(typeof(SelectFactionRequestHandler),        "SelectFaction")]
 [JsonDerivedType(typeof(SelectOptionRequestHandler),         "SelectOption")]
 [JsonDerivedType(typeof(ReorderCardsRequestHandler),         "ReorderCards")]
+[JsonDerivedType(typeof(BlockReactionRequestHandler),        "BlockReaction")]
 public abstract partial class InputRequest
 {   
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public int TargetPeer => PlayerFactionRegistry.GetPeerIdForFaction(TargetFaction); 
-    public bool IsForCurrentPeer => TargetPeer == PlayerScene.Current.GetMultiplayerAuthority();
+    public int TargetPeer => PlayerFactionRegistry.GetPeerIdForFaction(TargetFaction);
+    // A dedicated/headless server controls no faction and has no local PlayerScene, so no input
+    // request is ever "for" it — guard the null so the server can run this on its CallLocal path.
+    public bool IsForCurrentPeer => PlayerScene.Current != null && TargetPeer == PlayerScene.Current.GetMultiplayerAuthority();
     public Faction TargetFaction { get; set; }
 
     public List<int> TargetCountryIds { get; set; }
@@ -65,8 +68,8 @@ public abstract partial class InputRequest
         } 
         else
         {
-            PlayerActionLabel.ShowText($"Waiting on {TargetFaction} input...");
-        }   
+            PresentationServices.Notification.ShowActionText($"Waiting on {TargetFaction} input...");
+        }
     }
 
     public async Task<InputRequest> BroadCast()
@@ -303,6 +306,30 @@ public abstract partial class InputRequest
             ModalResult result = await PresentationModal.Current.Show(
                 ModalConfig.Reorder("Reorder the top cards of your draw deck", items));
             ResponseCardIds = result.WasCancelled ? new List<int>(TargetCardIds) : result.SelectedItems;
+        }
+    }
+
+    /// <summary>
+    /// Asks the target faction whether to play a block reaction (or pass). Only the controlling
+    /// peer runs Handle(); the authoritative host awaits the response over the network, so a
+    /// faction-less dedicated server never blocks on a local UI click. An empty ResponseCardIds
+    /// (including an explicit skip/pass, card id -1) means "no block".
+    /// </summary>
+    public class BlockReactionRequestHandler : InputRequest
+    {
+        public BlockReactionRequestHandler(Faction targetFaction) : base(targetFaction) {}
+
+        public override async Task Handle()
+        {
+            await Task.Delay(GameSettings.DurationMedium);
+            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction);
+            if (TriggerCardId > -1)
+                FactionHandDisplay.Current?.ShowTriggerContext(TriggerCardId, TriggerSummaryText);
+            Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
+            if (results != null && results.Length > 0 && (int)results[0] > -1)
+            {
+                ResponseCardIds.Add((int)results[0]);
+            }
         }
     }
 

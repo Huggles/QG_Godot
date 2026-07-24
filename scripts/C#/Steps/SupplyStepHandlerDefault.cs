@@ -31,7 +31,7 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
         if (outOfSupplyUnits.Count > 0)
         {
             string message = $"{outOfSupplyUnits.Count} unit(s) removed due to lack of supply";
-            PlayerActionLabel.ShowText(message, this.faction);
+            PresentationServices.Notification.ShowActionText(message, this.faction);
             DebugUtilities.PrintPeer($"Removing {outOfSupplyUnits.Count} out-of-supply units for {this.faction}");
             
             // Create removal events for each out-of-supply unit

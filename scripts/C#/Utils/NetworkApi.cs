@@ -170,7 +170,7 @@ public partial class NetworkApi : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void ShowPlayerActionLabel(string text, int duration, int faction)
     {
-        PlayerActionLabel.ShowText(text, duration, (Faction)faction);
+        PresentationServices.Notification.ShowActionText(text, duration, (Faction)faction);
     }
 
     /// <summary>Client → server: request a full state snapshot due to hash mismatch.</summary>

@@ -37,7 +37,7 @@ public partial class StatusBravado : StatusCardLogic
                 await discardEvent.ApplyChange();
 
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationModal.Current.ShowModal(presentationItems, "Discarded cards");
+                await PresentationServices.Notification.ShowModal(presentationItems, "Discarded cards");
 
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, LandBattleTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0

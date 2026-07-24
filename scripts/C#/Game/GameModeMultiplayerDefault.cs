@@ -25,12 +25,13 @@ public partial class GameModeMultiplayerDefault : IGameMode
         LoadDataFiles();
         InstantiateCountryStates();
         InstantiateUnitStates();
-        InstantiateFactionStates();        
-        
-        SpawnCountries();
-        SpawnUnits();
+        InstantiateFactionStates();
 
-        DebugUtilities.PrintPeerFinest("Game Mode Finished Initializing");        
+        // Visual-only: no-op on a headless/dedicated server (authoritative state is already built above).
+        PresentationServices.World.SpawnCountries();
+        PresentationServices.World.SpawnUnits();
+
+        DebugUtilities.PrintPeerFinest("Game Mode Finished Initializing");
     }
 
     public void LoadDataFiles() {
@@ -155,17 +156,6 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 UnitState unitState = new UnitState(UnitType.NAVY, factionData.Faction);
                 gameState.UnitStates.Add(unitState);
             }
-        }
-    }
-
-    public void SpawnCountries(){
-        foreach( CountryState countryState in gameState.CountryStates){
-            CountryScene.SpawnCountry(countryState.Id);
-        }
-    }
-    public void SpawnUnits(){
-        foreach( UnitState unitState in gameState.UnitStates){
-            UnitScene.SpawnUnit(unitState.Id);
         }
     }
 
