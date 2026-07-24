@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 public partial class FactionData : DataObject
 {
@@ -16,16 +17,16 @@ public partial class FactionData : DataObject
 
     public Faction Faction => (Faction)Index;
 
-    public Color FactionColor => Color.FromString(ColorString, new Color(1, 1, 1, 1));
-    
-    public Color FactionColorText => Color.FromString(ColorStringText, new Color(1, 1, 1, 1));
+    [JsonIgnore] public Color FactionColor => Color.FromString(ColorString, new Color(1, 1, 1, 1));
+
+    [JsonIgnore] public Color FactionColorText => Color.FromString(ColorStringText, new Color(1, 1, 1, 1));
 
     public string factionName => Faction.ToString().ToLower();
     public string factionNameCapitalized => factionName.Capitalize().Replace(" ", "_");
 
-    public CountryState HomeSpaceCountryState => CountryState.ForName(Homespace);
+    [JsonIgnore] public CountryState HomeSpaceCountryState => CountryState.ForName(Homespace);
 
-    public Texture2D CardBackTexture
+    [JsonIgnore] public Texture2D CardBackTexture
     {
         get
         {
@@ -37,7 +38,7 @@ public partial class FactionData : DataObject
         }
     }
 
-    public Texture2D FlagTexture => FactionFlags[Faction];
+    [JsonIgnore] public Texture2D FlagTexture => FactionFlags[Faction];
 
     public string FactionAdjactiveLabel => FactionAdjactiveLabels[Faction];
 
@@ -52,7 +53,7 @@ public partial class FactionData : DataObject
             };
 
 
-    public Dictionary<CardType, Texture2D> CardFrontTextures = new Dictionary<CardType, Texture2D>();
+    [JsonIgnore] public Dictionary<CardType, Texture2D> CardFrontTextures = new Dictionary<CardType, Texture2D>();
     private Dictionary<Faction, List<CardType>> excludeCards = new Dictionary<Faction, List<CardType>>
     {
         { Faction.GERMANY, [CardType.RESPONSE]},

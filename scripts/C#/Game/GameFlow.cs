@@ -155,7 +155,8 @@ public partial class GameFlow : SingletonNode<GameFlow>
                 Faction = faction,
                 Team = StaticGameData.FactionTeamForFaction(faction),
                 Total = factionState?.Score ?? 0,
-                PerRound = perRound
+                PerRound = perRound,
+                FactionData = StaticGameData.FactionDataMap.GetValueOrDefault(faction)
             });
         }
 

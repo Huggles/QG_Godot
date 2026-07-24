@@ -72,6 +72,19 @@ public partial class MainMenu : Control
             [Faction.UNITED_STATES]  = new[] { 1, 2, 3, 2, 3, 4, 2, 3 },
         };
 
+        // Fallback display data for when no game has been loaded (StaticGameData is empty on this path).
+        var fakeLabels = new Dictionary<Faction, string>
+        {
+            [Faction.GERMANY] = "Germany",       [Faction.JAPAN] = "Japan",           [Faction.ITALY] = "Italy",
+            [Faction.UNITED_KINGDOM] = "United Kingdom", [Faction.SOVIET] = "Soviet Union", [Faction.UNITED_STATES] = "United States",
+        };
+        // Match the real faction colours from QGData_Factions_V2.json.
+        var fakeColors = new Dictionary<Faction, string>
+        {
+            [Faction.GERMANY] = "#5f5f5e",        [Faction.JAPAN] = "#ccddee",         [Faction.ITALY] = "#c20070",
+            [Faction.UNITED_KINGDOM] = "#b1b103", [Faction.SOVIET] = "#b60101",        [Faction.UNITED_STATES] = "#006d23",
+        };
+
         var factions = new List<FactionResult>();
         int axisTotal = 0;
         int alliesTotal = 0;
@@ -97,7 +110,15 @@ public partial class MainMenu : Control
                 Faction = faction,
                 Team = team,
                 Total = total,
-                PerRound = perRound
+                PerRound = perRound,
+                FactionData = StaticGameData.FactionDataMap.GetValueOrDefault(faction)
+                    ?? new FactionData
+                    {
+                        Index = (int)faction,
+                        UniqueName = faction.ToString(),
+                        Label = fakeLabels[faction],
+                        ColorString = fakeColors[faction]
+                    }
             });
         }
 

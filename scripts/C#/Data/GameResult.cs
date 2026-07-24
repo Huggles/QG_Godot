@@ -23,6 +23,7 @@ public class FactionResult
     public FactionTeam Team { get; set; }
     public int Total { get; set; }
     public List<RoundScore> PerRound { get; set; } = new();  // one entry per round the faction scored
+    public FactionData FactionData { get; set; }             // display data (label, colour, flag); may be null
 }
 
 public class RoundScore

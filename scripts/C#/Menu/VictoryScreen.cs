@@ -23,6 +23,9 @@ public partial class VictoryScreen : Control
 
         var title   = GetNode<RichTextLabel>("%TitleLabel");
         var results = GetNode<HBoxContainer>("%ResultsContainer");
+        var panel   = GetNode<Control>("PanelCenter/CenterContainer/ScorePanel");
+
+        FadeInPanel(panel);
 
         if (PendingResult == null)
         {
@@ -33,6 +36,14 @@ public partial class VictoryScreen : Control
         BuildTitle(title, PendingResult);
         BuildColumn(results, PendingResult, FactionTeam.AXIS, AxisColor);
         BuildColumn(results, PendingResult, FactionTeam.ALLIES, AlliesColor);
+    }
+
+    /// <summary>Fades the score modal in from transparent over one second.</summary>
+    private void FadeInPanel(Control panel)
+    {
+        panel.Modulate = new Color(1, 1, 1, 0);
+        Tween tween = CreateTween();
+        tween.TweenProperty(panel, "modulate:a", 1.0, 1.0);
     }
 
     private static void BuildTitle(RichTextLabel title, GameResult r)
@@ -65,20 +76,49 @@ public partial class VictoryScreen : Control
 
         foreach (FactionResult faction in r.Factions.Where(f => f.Team == team).OrderByDescending(f => f.Total))
         {
-            var row = NewLabel();
-            row.Text = FactionRowText(faction, teamColor);
-            column.AddChild(row);
+            column.AddChild(BuildFactionRow(faction, teamColor));
         }
+    }
+
+    /// <summary>A faction row: flag icon (if available) beside its name, total and per-round breakdown.</summary>
+    private static Control BuildFactionRow(FactionResult faction, Color teamColor)
+    {
+        var row = new HBoxContainer();
+        row.AddThemeConstantOverride("separation", 16);
+
+        Texture2D flag = faction.FactionData?.FlagTexture;
+        if (flag != null)
+        {
+            var flagRect = new TextureRect
+            {
+                Texture = flag,
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                CustomMinimumSize = new Vector2(72, 48),
+                SizeFlagsVertical = SizeFlags.ShrinkCenter
+            };
+            row.AddChild(flagRect);
+        }
+
+        var label = NewLabel();
+        label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        label.Text = FactionRowText(faction, teamColor);
+        row.AddChild(label);
+
+        return row;
     }
 
     private static string FactionRowText(FactionResult faction, Color teamColor)
     {
+        Color nameColor = faction.FactionData != null ? faction.FactionData.FactionColor : teamColor;
+        string name = faction.FactionData?.Label ?? PrettyName(faction.Faction);
+
         string breakdown = faction.PerRound.Count > 0
             ? string.Join("   ", faction.PerRound.Select(pr => $"R{pr.Round}: {pr.Points}"))
             : "no points scored";
 
         return
-            $"[font_size=24][b][color={teamColor.ToHtml(false)}]{PrettyName(faction.Faction)}[/color][/b]  " +
+            $"[font_size=24][b][color={nameColor.ToHtml(false)}]{name}[/color][/b]  " +
             $"[color={NeutralColor.ToHtml(false)}]{faction.Total} pts[/color][/font_size]\n" +
             $"[font_size=16][color=#999999]{breakdown}[/color][/font_size]";
     }
