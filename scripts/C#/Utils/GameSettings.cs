@@ -66,7 +66,6 @@ public partial class GameSettings : SingletonNode<GameSettings>
     
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
-    public void SetDebugMultiplayer(bool value)        { DebugMultiplayer  = value; Save(); }
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
 
     public override void _Ready()
@@ -86,13 +85,14 @@ public partial class GameSettings : SingletonNode<GameSettings>
             // Clamp in case a saved VeryFast (3) value exists from before the redesign.
             PresentationSpeed = (GameSpeed)Math.Clamp(saved, 0, 2);
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
-            DebugMultiplayer  = config.GetValue(Section, "debug_multiplayer", false).As<bool>();
             AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
         }
 
-        // Command-line user arg overrides the config file (e.g. launched via quick_launch.ps1)
-        if (OS.GetCmdlineUserArgs().Contains("is_debug_multiplayer=true"))
-            DebugMultiplayer = true;
+        // DebugMultiplayer is a runtime-only flag, driven solely by the command-line arg used
+        // by quick_launch.ps1 / F6. It is intentionally NOT loaded from or saved to the config
+        // file: persisting it once caused every later launch (including from the main menu) to
+        // inherit debug_multiplayer=true and auto-start the game as if F6 had been pressed.
+        DebugMultiplayer = OS.GetCmdlineUserArgs().Contains("is_debug_multiplayer=true");
 
         Save();
     }
@@ -102,7 +102,8 @@ public partial class GameSettings : SingletonNode<GameSettings>
         var config = new ConfigFile();
         config.SetValue(Section, "presentation_speed", (int)PresentationSpeed);
         config.SetValue(Section, "debug_level",         (int)DebugLevel);
-        config.SetValue(Section, "debug_multiplayer",   DebugMultiplayer);
+        // debug_multiplayer is deliberately not persisted — it is a runtime-only, command-line
+        // driven flag (see Load). Persisting it would leak F6 auto-start into menu launches.
         config.SetValue(Section, "auto_dismiss_modal",    AutoDismissModal);
         config.Save(ConfigPath);
     }

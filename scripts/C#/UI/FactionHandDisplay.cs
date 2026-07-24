@@ -11,9 +11,6 @@ public partial class FactionHandDisplay : Control
 	private Control CardsContainer => GetNode<Panel>("%CardsContainerPanel");
 	private Panel CardPreviewContainer => GetNode<Panel>("%CardPreviewContainer");
 	private CardScene CardPreview => GetNode<CardScene>("%CardPreview");
-	private Button SkipButton => GetNode<Button>("%SkipButton");
-	private Button DeckButton => GetNode<Button>("%DeckButton");
-	private Button DiscardedDeckButton => GetNode<Button>("%DiscardedDeckButton");
 	private Button TestButton => GetNode<Button>("%TestButton");
 	private Panel TriggerContextPanel => GetNode<Panel>("%TriggerContextPanel");
 	private CardScene TriggerCardScene => GetNode<CardScene>("%TriggerCard");
@@ -25,8 +22,6 @@ public partial class FactionHandDisplay : Control
 	[Signal] public delegate void CardSelectedEventHandler(int cardId);
 
 	// Event handlers for cleanup
-	private Action onSkipButtonPressed;
-	private Action onDiscardedDeckButtonPressed;
 	private Action onTestButtonPressed;
 
 	
@@ -61,22 +56,6 @@ public partial class FactionHandDisplay : Control
 
 		// Unsubscribe first to prevent duplicate connections
 		UnsubscribeFromEvents();
-
-		onSkipButtonPressed = () => 
-		{ 
-			if (!IsInstanceValid(this) || !IsInsideTree()) return;
-			OnCardSelected(-1); 
-		};
-		SkipButton.Pressed += onSkipButtonPressed;
-
-		onDiscardedDeckButtonPressed = () =>
-		{
-			if (!IsInstanceValid(this) || !IsInsideTree()) return;
-			
-			List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(DeckState.ForFaction(showingFaction).DiscardedCardIds, false);            
-			PresentationModal.Current.ShowModalPersistent(presentationItems, "Your Discarded Cards");
-		};
-		DiscardedDeckButton.Pressed += onDiscardedDeckButtonPressed;
 
 		onTestButtonPressed = () =>
 		{
@@ -314,16 +293,6 @@ public partial class FactionHandDisplay : Control
 		}
 
 		// Unsubscribe from button events
-		if (IsInstanceValid(SkipButton) && onSkipButtonPressed != null)
-		{
-			SkipButton.Pressed -= onSkipButtonPressed;
-		}
-
-		if (IsInstanceValid(DiscardedDeckButton) && onDiscardedDeckButtonPressed != null)
-		{
-			DiscardedDeckButton.Pressed -= onDiscardedDeckButtonPressed;
-		}
-
 		if (IsInstanceValid(TestButton) && onTestButtonPressed != null)
 		{
 			TestButton.Pressed -= onTestButtonPressed;
