@@ -511,7 +511,9 @@ public partial class MultiplayerLobby : Control
 	/// <summary>
 	/// Dedicated-server faction assignment: distributes all six factions across the connected
 	/// clients (the host/peer 1 is excluded — it controls nothing). With exactly two clients this
-	/// is a natural Axis-vs-Allies split; otherwise factions are dealt round-robin in join order.
+	/// mirrors the F6/F7 debug split — first client → Axis, second → Allies (swapped when
+	/// swapped_teams=true) — so the same launch produces the same teams as before. With any other
+	/// client count, factions are dealt round-robin in join order.
 	/// </summary>
 	private void AutoAssignDedicatedFactions()
 	{
@@ -521,8 +523,10 @@ public partial class MultiplayerLobby : Control
 
 		if (clientPeers.Count == 2)
 		{
-			foreach (Faction f in AxisSet)                              _assignments[f] = clientPeers[0];
-			foreach (Faction f in AllPlayableFactions.Except(AxisSet)) _assignments[f] = clientPeers[1];
+			int axisClient   = GameSettings.IsDebugTeamsSwapped ? clientPeers[1] : clientPeers[0];
+			int alliesClient = GameSettings.IsDebugTeamsSwapped ? clientPeers[0] : clientPeers[1];
+			foreach (Faction f in AxisSet)                              _assignments[f] = axisClient;
+			foreach (Faction f in AllPlayableFactions.Except(AxisSet)) _assignments[f] = alliesClient;
 		}
 		else
 		{

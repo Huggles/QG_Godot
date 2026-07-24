@@ -7,7 +7,10 @@ public partial class DebugUtilities : Node
 {
     public static Dictionary<String,Object> CommandLineArguments => ParseCommandLineArguments();
 
-    public static string InstancePrefix => PlayerScene.Current != null ? (PlayerScene.Current.GetMultiplayerAuthority() == 1 ? "[SERVER]" : "[CLIENT]") : "[UNKNOWN]";
+    // A headless dedicated server is the authority (peer 1) but controls no faction, so it has no
+    // local PlayerScene — label it [SERVER] directly instead of falling through to [UNKNOWN].
+    public static string InstancePrefix => GameContext.IsHeadless ? "[SERVER]"
+        : PlayerScene.Current != null ? (PlayerScene.Current.GetMultiplayerAuthority() == 1 ? "[SERVER]" : "[CLIENT]") : "[UNKNOWN]";
 
     public static string FormattedDateTime {
         get {

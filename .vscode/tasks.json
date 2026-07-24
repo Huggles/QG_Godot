@@ -20,13 +20,14 @@
       },
       {
         "label": "Launch Two Instances (Multiplayer)",
+        "detail": "Headless dedicated server + 2 GUI clients (auto-join, same Axis/Allies split as before).",
         "type": "shell",
         "command": "powershell",
         "args": [
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "${workspaceFolder}/quick_launch.ps1"
+          "${workspaceFolder}/quick_launch_server.ps1"
         ],
         "problemMatcher": [],
         "presentation": {

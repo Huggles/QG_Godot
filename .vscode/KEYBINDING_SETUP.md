@@ -53,9 +53,9 @@ If you don't want to set up keybindings, you can also:
 ## What Happens When You Press F6
 
 1. ✅ Builds the project with `dotnet build`
-2. ✅ Launches two Godot instances
-3. ✅ Instance 1 auto-hosts, Instance 2 auto-joins
-4. ✅ Game starts automatically once both players are in the lobby
+2. ✅ Launches one **headless dedicated server** (no window) + two GUI client instances
+3. ✅ Both clients auto-join the server
+4. ✅ The server auto-assigns factions (one client → Axis, the other → Allies — same team split as before; swap with `swapped_teams=true`) and starts the game once both clients connect
 
 ## What Happens When You Press F7
 
@@ -67,7 +67,7 @@ If you don't want to set up keybindings, you can also:
 ## Quick Reference
 
 - **F5** - Normal run / debug (single instance)
-- **F6** - Build and launch two instances, auto-start the game
+- **F6** - Build and launch a headless dedicated server + two clients, auto-start the game
 - **F7** - Build and launch two instances, stay in lobby (manual start)
 
 ---
