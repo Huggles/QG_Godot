@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://yiwxtj4mtbau"
 path.s3tc="res://.godot/imported/SouthEastPacific.png-66d3aefec4ca0be6c09489fbb1991e87.s3tc.ctex"
+path.etc2="res://.godot/imported/SouthEastPacific.png-66d3aefec4ca0be6c09489fbb1991e87.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/Countries/SouthEastPacific.png"
-dest_files=["res://.godot/imported/SouthEastPacific.png-66d3aefec4ca0be6c09489fbb1991e87.s3tc.ctex"]
+dest_files=["res://.godot/imported/SouthEastPacific.png-66d3aefec4ca0be6c09489fbb1991e87.s3tc.ctex", "res://.godot/imported/SouthEastPacific.png-66d3aefec4ca0be6c09489fbb1991e87.etc2.ctex"]
 
 [params]
 

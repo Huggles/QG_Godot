@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://damvroefkmxol"
 path.s3tc="res://.godot/imported/Australia.png-de743aa5a7276f3055326e71cfdb62ed.s3tc.ctex"
+path.etc2="res://.godot/imported/Australia.png-de743aa5a7276f3055326e71cfdb62ed.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/Countries/Australia.png"
-dest_files=["res://.godot/imported/Australia.png-de743aa5a7276f3055326e71cfdb62ed.s3tc.ctex"]
+dest_files=["res://.godot/imported/Australia.png-de743aa5a7276f3055326e71cfdb62ed.s3tc.ctex", "res://.godot/imported/Australia.png-de743aa5a7276f3055326e71cfdb62ed.etc2.ctex"]
 
 [params]
 

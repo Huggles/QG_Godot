@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://b4npdllfftdpp"
 path.s3tc="res://.godot/imported/Africa.png-7b86222d6324f4b1fa8c712853c029cc.s3tc.ctex"
+path.etc2="res://.godot/imported/Africa.png-7b86222d6324f4b1fa8c712853c029cc.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/Countries/Africa.png"
-dest_files=["res://.godot/imported/Africa.png-7b86222d6324f4b1fa8c712853c029cc.s3tc.ctex"]
+dest_files=["res://.godot/imported/Africa.png-7b86222d6324f4b1fa8c712853c029cc.s3tc.ctex", "res://.godot/imported/Africa.png-7b86222d6324f4b1fa8c712853c029cc.etc2.ctex"]
 
 [params]
 

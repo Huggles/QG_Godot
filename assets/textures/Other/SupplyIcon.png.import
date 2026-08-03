@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://cqehtwpiof1rd"
 path.s3tc="res://.godot/imported/SupplyIcon.png-508cb2f88c9b6714e84d77c0d94d0a21.s3tc.ctex"
+path.etc2="res://.godot/imported/SupplyIcon.png-508cb2f88c9b6714e84d77c0d94d0a21.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/Other/SupplyIcon.png"
-dest_files=["res://.godot/imported/SupplyIcon.png-508cb2f88c9b6714e84d77c0d94d0a21.s3tc.ctex"]
+dest_files=["res://.godot/imported/SupplyIcon.png-508cb2f88c9b6714e84d77c0d94d0a21.s3tc.ctex", "res://.godot/imported/SupplyIcon.png-508cb2f88c9b6714e84d77c0d94d0a21.etc2.ctex"]
 
 [params]
 

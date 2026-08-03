@@ -4,15 +4,16 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://npkiwkvdtsso"
 path.s3tc="res://.godot/imported/QGArmy.png-96ca466b133e477dbe73832428ec3b10.s3tc.ctex"
+path.etc2="res://.godot/imported/QGArmy.png-96ca466b133e477dbe73832428ec3b10.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/Units/QGArmy.png"
-dest_files=["res://.godot/imported/QGArmy.png-96ca466b133e477dbe73832428ec3b10.s3tc.ctex"]
+dest_files=["res://.godot/imported/QGArmy.png-96ca466b133e477dbe73832428ec3b10.s3tc.ctex", "res://.godot/imported/QGArmy.png-96ca466b133e477dbe73832428ec3b10.etc2.ctex"]
 
 [params]
 
