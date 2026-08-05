@@ -1,4 +1,6 @@
 {
+  "title": "One Round Blitz",
+  "description": "A single round format with random starting victory points and quick, chaotic action.",
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 1,

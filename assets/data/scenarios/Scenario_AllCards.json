@@ -1,4 +1,6 @@
 {
+  "title": "All Cards In Play",
+  "description": "Every faction's status and response cards are already played so you can test interactions immediately.",
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 20,

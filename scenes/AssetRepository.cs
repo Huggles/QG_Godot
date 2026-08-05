@@ -3,8 +3,8 @@ using System;
 
 public partial class AssetRepository : Node
 {
-    public const string ArmySpritePath = "res://assets/textures/Units/QGArmy.png";
-    public const string NavySpritePath = "res://assets/textures/Units/QGNavy.png";
+    public const string ArmySpritePath = "res://assets/textures/Units/QGArmyDetailed.png";
+    public const string NavySpritePath = "res://assets/textures/Units/QGNavyDetailed.png";
 
     public static readonly PackedScene UserInterfaceScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/user_interface.tscn");
     public static readonly PackedScene LoadingCoverInterfaceScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/loading_cover_interface.tscn");

@@ -26,8 +26,13 @@ public partial class GameManager : Node
     private List<PlayerFactionAssignment> _pendingPlayerFactionAssignments;
     private bool _gameInitialized = false;
 
+    private const string ScenarioDirectory = "res://assets/data/scenarios/";
+
     /// <summary>Scenario data file to load when the game starts. Set before navigating to Game.tscn.</summary>
-    public static string PendingScenarioPath { get; set; } = "res://assets/data/Scenario_Debug.json";
+    public static string PendingScenarioPath { get; set; } = "res://assets/data/scenarios/Scenario_Basic.json";
+
+    public List<ScenarioInfo> AvailableScenarios { get; private set; } = new();
+    public ScenarioInfo SelectedScenario { get; private set; }
 
     public Camera2D MyCamera => GetViewport().GetCamera2D();
     public InputManager MyInputManager => playerStates.Count > 0 ? playerStates[0].InputManager : null;
@@ -46,6 +51,7 @@ public partial class GameManager : Node
     public override void _Ready()
     {
         DebugUtilities.PrintPeerFinest("GameManager Ready");
+        LoadAvailableScenarios();
         
         // Listen for scene changes
         GetTree().NodeAdded += OnNodeAdded;
@@ -54,6 +60,77 @@ public partial class GameManager : Node
     public override void _ExitTree()
     {
         GetTree().NodeAdded -= OnNodeAdded;
+    }
+
+    private void LoadAvailableScenarios()
+    {
+        using DirAccess dir = DirAccess.Open(ScenarioDirectory);
+        if (dir == null)
+        {
+            DebugUtilities.PrintPeerError($"GameManager: failed to open scenario directory {ScenarioDirectory}");
+            return;
+        }
+
+        dir.ListDirBegin();
+        string fileName;
+        while ((fileName = dir.GetNext()) != "")
+        {
+            if (dir.CurrentIsDir())
+                continue;
+
+            if (!fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            string path = $"{ScenarioDirectory}{fileName}";
+            try
+            {
+                using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+                string json = file.GetAsText();
+                using JsonDocument document = JsonDocument.Parse(json);
+                JsonElement root = document.RootElement;
+
+                var info = new ScenarioInfo
+                {
+                    Path = path,
+                    Name = System.IO.Path.GetFileNameWithoutExtension(fileName)
+                };
+
+                if (root.TryGetProperty("title", out JsonElement titleElement) && titleElement.ValueKind == JsonValueKind.String)
+                    info.Title = titleElement.GetString();
+
+                if (root.TryGetProperty("description", out JsonElement descriptionElement) && descriptionElement.ValueKind == JsonValueKind.String)
+                    info.Description = descriptionElement.GetString();
+
+                if (string.IsNullOrEmpty(info.Title))
+                    info.Title = info.Name.Replace('_', ' ');
+                if (string.IsNullOrEmpty(info.Description))
+                    info.Description = "No description available.";
+
+                AvailableScenarios.Add(info);
+                DebugUtilities.PrintPeerFinest($"GameManager: loaded scenario '{info.Title}' from {path}");
+            }
+            catch (Exception e)
+            {
+                DebugUtilities.PrintPeerError($"GameManager: failed to load scenario file {path}: {e.Message}");
+            }
+        }
+
+        dir.ListDirEnd();
+        AvailableScenarios = AvailableScenarios.OrderBy(s => s.Name).ToList();
+        SelectedScenario = AvailableScenarios.FirstOrDefault(s => s.Name.Equals("Scenario_Basic", StringComparison.OrdinalIgnoreCase))
+                           ?? AvailableScenarios.FirstOrDefault();
+
+        if (SelectedScenario != null)
+            PendingScenarioPath = SelectedScenario.Path;
+    }
+
+    public void SetSelectedScenarioByIndex(int index)
+    {
+        if (index < 0 || index >= AvailableScenarios.Count)
+            return;
+
+        SelectedScenario = AvailableScenarios[index];
+        PendingScenarioPath = SelectedScenario.Path;
     }
 
     private void OnNodeAdded(Node node)

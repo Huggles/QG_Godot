@@ -11,7 +11,6 @@ public partial class GameModeDefault : IGameMode
     const string FACTIONS_DATA_PATH = "res://assets/data/QGData_Factions_V2.json";
     const string CARDS_DATA_PATH = "res://assets/data/QGData_Cards_V2.json";
     const string DECKS_DATA_PATH = "res://assets/data/QGData_Decks.json";
-    const string INITIAL_GAME_STATE_DATA_PATH = "res://assets/data/Scenario_Debug.json";
     const string WORLD_SCENE_FILE = "res://scenes/World/WorldScene.tscn";
     
     private MultiplayerGameState gameState = GameSession.Current.GameState;
@@ -163,7 +162,7 @@ public partial class GameModeDefault : IGameMode
         // Load initial game state configuration from JSON
         DebugUtilities.PrintPeer($"SetupInitialGameState");
         
-        using var initialStateDataFile = FileAccess.Open(INITIAL_GAME_STATE_DATA_PATH, FileAccess.ModeFlags.Read);
+        using var initialStateDataFile = FileAccess.Open(GameManager.PendingScenarioPath, FileAccess.ModeFlags.Read);
         string initialStateDataString = initialStateDataFile.GetAsText();
         InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
 

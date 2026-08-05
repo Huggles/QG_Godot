@@ -3,58 +3,99 @@ using System.Collections.Generic;
 
 public partial class GameModeSelectionScreen : Control
 {
-    private const string ScenarioBasicPath    = "res://assets/data/Scenario_Basic.json";
-    private const string ScenarioDebugPath    = "res://assets/data/Scenario_Debug.json";
-    private const string ScenarioAllCardsPath = "res://assets/data/Scenario_AllCards.json";
-    private const string ScenarioOneRoundPath = "res://assets/data/Scenario_OneRound.json";
+	private OptionButton _scenarioPicker;
+	private RichTextLabel _descriptionLabel;
+	private MenuPanelButton _startGameButton;
 
-    public override void _Ready()
-    {
-        var standardBtn  = GetNode<MenuPanelButton>("%StandardGameButton");
-        var debugBtn     = GetNode<MenuPanelButton>("%DebugScenarioButton");
-        var allCardsBtn  = GetNode<MenuPanelButton>("%AllCardsButton");
-        var oneRoundBtn  = GetNode<MenuPanelButton>("%OneRoundButton");
+	public override void _Ready()
+	{
+		_scenarioPicker   = GetNode<OptionButton>("ButtonContainer/ScenarioOptionButton");
+		_descriptionLabel = GetNodeOrNull<RichTextLabel>("ButtonContainer/DescriptionPanel/ScenarioDescriptionLabel");
+		if (_descriptionLabel == null)
+		{
+			_descriptionLabel = GetNodeOrNull<RichTextLabel>("ButtonContainer/ScenarioDescriptionLabel");
+		}
+		if (_descriptionLabel == null)
+		{
+			_descriptionLabel = GetNodeOrNull<RichTextLabel>("DescriptionPanel/ScenarioDescriptionLabel");
+		}
+		if (_descriptionLabel == null)
+		{
+			_descriptionLabel = GetNodeOrNull<RichTextLabel>("ScenarioDescriptionLabel");
+		}
+		if (_descriptionLabel == null)
+		{
+			GD.PrintErr("GameModeSelectionScreen: scenario description label node not found.");
+		}
 
-        standardBtn.CustomMinimumSize = new Vector2(600, 180);
-        debugBtn.CustomMinimumSize    = new Vector2(600, 180);
-        allCardsBtn.CustomMinimumSize = new Vector2(600, 180);
-        oneRoundBtn.CustomMinimumSize = new Vector2(600, 180);
+		_startGameButton  = GetNode<MenuPanelButton>("ButtonContainer/StartGameButton");
 
-        standardBtn.ButtonText =
-            "[b][font_size=28]Standard Game[/font_size][/b]\n" +
-            "[color=#bbbbbb][font_size=18]All factions deployed to home territories.\n" +
-            "Classic setup — no pre-loaded cards.[/font_size][/color]";
+		_startGameButton.CustomMinimumSize = new Vector2(600, 180);
+		_startGameButton.ButtonText = "[b][font_size=28]Start Game[/font_size][/b]";
 
-        debugBtn.ButtonText =
-            "[b][font_size=28]Debug Scenario[/font_size][/b]\n" +
-            "[color=#bbbbbb][font_size=18]Germany starts with pre-loaded status cards.\n" +
-            "No unit deployments — ideal for testing card effects.[/font_size][/color]";
+		var gameManager = GetNode<GameManager>("/root/GameManager");
+		_scenarioPicker.Clear();
 
-        allCardsBtn.ButtonText =
-            "[b][font_size=28]All Cards In Play[/font_size][/b]\n" +
-            "[color=#bbbbbb][font_size=18]Every faction's status and response cards are already played.\n" +
-            "Home territory deployments — ideal for testing card interactions.[/font_size][/color]";
+		foreach (var scenario in gameManager.AvailableScenarios)
+		{
+			_scenarioPicker.AddItem(scenario.Title);
+		}
 
-        oneRoundBtn.ButtonText =
-            "[b][font_size=28]One Round Blitz[/font_size][/b]\n" +
-            "[color=#bbbbbb][font_size=18]A single round — every faction starts with random VP.\n" +
-            "Home territory deployments — a quick, chaotic scoring race.[/font_size][/color]";
+		if (gameManager.SelectedScenario != null)
+		{
+			int selectedIndex = gameManager.AvailableScenarios.FindIndex(s => s.Path == gameManager.SelectedScenario.Path);
+			if (selectedIndex >= 0)
+				_scenarioPicker.Selected = selectedIndex;
 
-        standardBtn.Pressed  += () => StartGame(ScenarioBasicPath);
-        debugBtn.Pressed     += () => StartGame(ScenarioDebugPath);
-        allCardsBtn.Pressed  += () => StartGame(ScenarioAllCardsPath);
-        oneRoundBtn.Pressed  += () => StartGame(ScenarioOneRoundPath);
-    }
+			UpdateDescription(gameManager.SelectedScenario.Description);
+		}
+		else
+		{
+			UpdateDescription("No scenarios available. Make sure the scenario files are present in assets/data/scenarios.");
+		}
 
-    private void StartGame(string scenarioPath)
-    {
-        GameManager.PendingScenarioPath = scenarioPath;
+		_scenarioPicker.ItemSelected += OnScenarioSelected;
+		_startGameButton.Pressed += OnStartGamePressed;
+	}
 
-        var assignments = new List<PlayerFactionAssignment>
-        {
-            new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
-        };
-        GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
-        GetTree().ChangeSceneToFile("res://scenes/Game.tscn");
-    }
+	private void OnScenarioSelected(long selectedIndex)
+	{
+		var gameManager = GetNode<GameManager>("/root/GameManager");
+		int index = (int)selectedIndex;
+		if (index < 0 || index >= gameManager.AvailableScenarios.Count)
+			return;
+
+		gameManager.SetSelectedScenarioByIndex(index);
+		UpdateDescription(gameManager.AvailableScenarios[index].Description);
+	}
+
+	private void OnStartGamePressed()
+	{
+		var gameManager = GetNode<GameManager>("/root/GameManager");
+		if (gameManager.SelectedScenario == null)
+		{
+			UpdateDescription("No scenario selected.");
+			return;
+		}
+
+		StartGame(gameManager.SelectedScenario.Path);
+	}
+
+	private void UpdateDescription(string description)
+	{
+		_descriptionLabel.BbcodeEnabled = true;
+		_descriptionLabel.Text = $"[color=#bbbbbb]{description}[/color]";
+	}
+
+	private void StartGame(string scenarioPath)
+	{
+		GameManager.PendingScenarioPath = scenarioPath;
+
+		var assignments = new List<PlayerFactionAssignment>
+		{
+			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
+		};
+		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
+		GetTree().ChangeSceneToFile("res://scenes/Game.tscn");
+	}
 }

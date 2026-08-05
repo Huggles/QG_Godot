@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
-[ext_resource type="Script" path="res://scripts/C#/Menu/JoinGameScreen.cs" id="3_script"]
+[ext_resource type="Script" uid="uid://dih02qchvrpns" path="res://scripts/C#/Menu/JoinGameScreen.cs" id="3_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field"]
 content_margin_left = 12.0
@@ -36,7 +36,7 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="Control" type="Control"]
+[node name="Control" type="Control" unique_id=219608430]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,7 +45,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_script")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1256107074]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -55,7 +55,7 @@ grow_vertical = 2
 texture = ExtResource("1_m2yvp")
 expand_mode = 3
 
-[node name="TitleLabel" type="RichTextLabel" parent="."]
+[node name="TitleLabel" type="RichTextLabel" parent="." unique_id=191252396]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -65,41 +65,41 @@ offset_top = 80.0
 offset_right = 400.0
 offset_bottom = 150.0
 grow_horizontal = 2
+theme_override_font_sizes/normal_font_size = 36
 bbcode_enabled = true
 text = "[center][font_size=42][b]Join Game[/b][/font_size][/center]"
 scroll_active = false
-theme_override_font_sizes/normal_font_size = 36
 
-[node name="FormContainer" type="VBoxContainer" parent="."]
+[node name="FormContainer" type="VBoxContainer" parent="." unique_id=1694625084]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.0
+offset_left = -300.0
 offset_top = -371.0
-offset_right = 450.0
+offset_right = 300.0
 offset_bottom = 371.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="IpLabel" type="RichTextLabel" parent="FormContainer"]
+[node name="IpLabel" type="RichTextLabel" parent="FormContainer" unique_id=663842362]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 text = "[font_size=24]Server address[/font_size]"
 fit_content = true
 scroll_active = false
-theme_override_font_sizes/normal_font_size = 24
+horizontal_alignment = 1
 
-[node name="IpInput" type="LineEdit" parent="FormContainer"]
+[node name="IpInput" type="LineEdit" parent="FormContainer" unique_id=284536560]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 56)
 layout_mode = 2
-size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_placeholder_color = Color(1, 1, 1, 0.45)
 theme_override_colors/caret_color = Color(1, 1, 1, 1)
@@ -110,20 +110,20 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_focus")
 placeholder_text = "127.0.0.1"
 alignment = 1
 
-[node name="PortLabel" type="RichTextLabel" parent="FormContainer"]
+[node name="PortLabel" type="RichTextLabel" parent="FormContainer" unique_id=1556742149]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 text = "[font_size=24]Port[/font_size]"
 fit_content = true
 scroll_active = false
-theme_override_font_sizes/normal_font_size = 24
+horizontal_alignment = 1
 
-[node name="PortInput" type="LineEdit" parent="FormContainer"]
+[node name="PortInput" type="LineEdit" parent="FormContainer" unique_id=1458125045]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 56)
 layout_mode = 2
-size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_placeholder_color = Color(1, 1, 1, 0.45)
 theme_override_colors/caret_color = Color(1, 1, 1, 1)
@@ -134,21 +134,24 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_focus")
 placeholder_text = "7777"
 alignment = 1
 
-[node name="StatusLabel" type="RichTextLabel" parent="FormContainer"]
+[node name="StatusLabel" type="RichTextLabel" parent="FormContainer" unique_id=1517358653]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 70)
 layout_mode = 2
+theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
-theme_override_font_sizes/normal_font_size = 24
 
-[node name="JoinButton" parent="FormContainer" instance=ExtResource("2_btn")]
+[node name="JoinButton" parent="FormContainer" unique_id=1549553159 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(600, 180)
+custom_minimum_size = Vector2(260, 100)
 layout_mode = 2
 
-[node name="LeaveButton" parent="FormContainer" instance=ExtResource("2_btn")]
+[node name="LeaveButton" parent="FormContainer" unique_id=1382638456 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(600, 180)
+custom_minimum_size = Vector2(260, 100)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="FormContainer" unique_id=2001175170]
 layout_mode = 2

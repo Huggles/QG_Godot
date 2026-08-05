@@ -4,6 +4,22 @@
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
 [ext_resource type="Script" uid="uid://bscreengmd5k3" path="res://scripts/C#/Menu/GameModeSelectionScreen.cs" id="3_script"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_bg"]
+bg_color = Color(0.05, 0.05, 0.05, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.4, 0.4, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 16
+content_margin_top = 16
+content_margin_right = 16
+content_margin_bottom = 16
+
 [node name="Control" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -51,21 +67,38 @@ offset_right = 300.0
 offset_bottom = 405.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 20
+alignment = 1
 
-[node name="StandardGameButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
+[node name="ScenarioLabel" type="Label" parent="ButtonContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "Select a Scenario"
+horizontal_alignment = 1
+
+[node name="ScenarioOptionButton" type="OptionButton" parent="ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 60)
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="DescriptionPanel" type="PanelContainer" parent="ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 220)
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_bg")
+
+[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="ButtonContainer/DescriptionPanel"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 200)
+bbcode_enabled = true
+text = "[color=#bbbbbb]Select a scenario to see its description.[/color]"
+scroll_active = false
+theme_override_font_sizes/normal_font_size = 22
+
+[node name="StartGameButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2
-
-[node name="DebugScenarioButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="AllCardsButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="OneRoundButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
-unique_name_in_owner = true
-layout_mode = 2
+custom_minimum_size = Vector2(600, 180)
 

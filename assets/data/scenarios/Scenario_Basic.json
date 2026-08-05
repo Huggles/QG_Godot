@@ -1,4 +1,6 @@
 {
+  "title": "Standard Game",
+  "description": "All factions begin deployed to home territories with no pre-loaded cards.",
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 20,
