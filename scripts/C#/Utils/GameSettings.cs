@@ -24,6 +24,12 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>When true, display-only modals dismiss automatically after a delay instead of requiring the user to click Close.</summary>
     public bool AutoDismissModal { get; private set; } = true;
 
+    /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
+    public string LastJoinIp { get; private set; } = "127.0.0.1";
+
+    /// <summary>Last server port entered on the join screen, restored on the next launch.</summary>
+    public int LastJoinPort { get; private set; } = MultiplayerLobby.DEFAULT_PORT;
+
     public static DebugVerbosity Debug => Instance.DebugLevel;
     public static bool IsDebugMultiplayer => Instance.DebugMultiplayer;
     public static bool IsAutoDismissModal => Instance.AutoDismissModal;
@@ -67,6 +73,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
+    public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
 
     public override void _Ready()
     {
@@ -86,6 +93,8 @@ public partial class GameSettings : SingletonNode<GameSettings>
             PresentationSpeed = (GameSpeed)Math.Clamp(saved, 0, 2);
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
             AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
+            LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
+            LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
         }
 
         // DebugMultiplayer is a runtime-only flag, driven solely by the command-line arg used
@@ -105,6 +114,8 @@ public partial class GameSettings : SingletonNode<GameSettings>
         // debug_multiplayer is deliberately not persisted — it is a runtime-only, command-line
         // driven flag (see Load). Persisting it would leak F6 auto-start into menu launches.
         config.SetValue(Section, "auto_dismiss_modal",    AutoDismissModal);
+        config.SetValue(Section, "last_join_ip",          LastJoinIp);
+        config.SetValue(Section, "last_join_port",        LastJoinPort);
         config.Save(ConfigPath);
     }
 }

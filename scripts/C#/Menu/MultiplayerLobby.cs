@@ -11,7 +11,8 @@ using System.Linq;
 /// </summary>
 public partial class MultiplayerLobby : Control
 {
-	private const int DEFAULT_PORT = 7777;
+	/// <summary>Shared so JoinGameScreen and GameSettings use one source of truth for the port.</summary>
+	public const int DEFAULT_PORT = 7777;
 	private const string DEFAULT_SERVER_IP = "127.0.0.1";
 
 	// ── Faction metadata ───────────────────────────────────────────────────────
@@ -111,6 +112,22 @@ public partial class MultiplayerLobby : Control
 		
 		UpdateStatusLabel("Waiting to host or join...");
 
+		// Arrived from JoinGameScreen, which already established the client connection.
+		// Adopt it rather than creating a second peer.
+		if (Multiplayer.MultiplayerPeer != null
+		    && Multiplayer.MultiplayerPeer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Connected
+		    && !Multiplayer.IsServer())
+		{
+			int me = Multiplayer.GetUniqueId();
+			UpdateStatusLabel("Connected – waiting for lobby data...");
+			AddPlayerRow(me, $"Player {me} (You)");
+			_hostButton.Disabled = true;
+			_joinButton.Disabled = true;
+			// Deferred so this node has finished entering the tree before the RPC goes out.
+			CallDeferred(nameof(RequestLobbyStateFromHost));
+			return;
+		}
+
 		_lobbyOnlyMode = OS.GetCmdlineUserArgs().Contains("lobby_only=true");
 		int instance   = GetInstanceNumber();
 
@@ -152,12 +169,11 @@ public partial class MultiplayerLobby : Control
 			MainMenu.ClearLobbyIntent();
 			OnHostButtonPressed();
 		}
-		else if (MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.Join)
-		{
-			MainMenu.ClearLobbyIntent();
-			_ipAddressInput.Text = DEFAULT_SERVER_IP;
-			OnJoinButtonPressed();
-		}
+	}
+
+	private void RequestLobbyStateFromHost()
+	{
+		RpcId(1, nameof(RequestLobbyState));
 	}
 
 	private static int GetInstanceNumber()
@@ -688,6 +704,22 @@ public partial class MultiplayerLobby : Control
 		var d = new Godot.Collections.Dictionary<int, string>();
 		foreach (var kv in _playerLabels) d[kv.Key] = kv.Value.Text;
 		return d;
+	}
+
+	/// <summary>
+	/// Client → host: "send me the current lobby state".
+	/// Needed because the host's push in <see cref="OnPeerConnected"/> fires the instant the peer
+	/// connects, which on the JoinGameScreen path is before this node exists on the client — Godot
+	/// resolves RPC targets by node path and silently drops packets for a missing node.
+	/// </summary>
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+	private void RequestLobbyState()
+	{
+		if (!Multiplayer.IsServer()) return;
+
+		int requester = Multiplayer.GetRemoteSenderId();
+		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());
+		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments());
 	}
 
 	/// <summary>

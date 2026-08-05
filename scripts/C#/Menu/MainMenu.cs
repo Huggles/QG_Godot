@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public partial class MainMenu : Control
 {
-    public enum LobbyIntent { None, Host, Join }
+    public enum LobbyIntent { None, Host }
 
     /// <summary>Set before navigating to the lobby so it can auto-connect.</summary>
     public static LobbyIntent PendingLobbyIntent { get; private set; } = LobbyIntent.None;
@@ -43,8 +43,10 @@ public partial class MainMenu : Control
 
     private void OnMultiplayerJoinPressed()
     {
-        PendingLobbyIntent = LobbyIntent.Join;
-        GetTree().ChangeSceneToFile("res://scenes/menu/MultiplayerLobby.tscn");
+        // The join screen collects the address and establishes the connection itself; the lobby
+        // then adopts the live peer. No pending intent is needed on this path.
+        ClearLobbyIntent();
+        GetTree().ChangeSceneToFile("res://scenes/menu/JoinGameScreen.tscn");
     }
 
     private void OnQuitPressed()
