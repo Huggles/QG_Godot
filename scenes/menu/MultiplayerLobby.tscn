@@ -3,6 +3,22 @@
 [ext_resource type="Script" uid="uid://c5fpt5gbmo0lv" path="res://scripts/C#/Menu/MultiplayerLobby.cs" id="1_lobby"]
 [ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="2_5rtyc"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_description"]
+bg_color = Color(0, 0, 0, 0.65)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.5, 0.5, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10
+content_margin_top = 10
+content_margin_right = 10
+content_margin_bottom = 10
+
 [node name="GameRoot" type="Node"]
 
 [node name="MultiplayerLobby" type="Control" parent="."]
@@ -90,6 +106,36 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Join Game"
+
+[node name="ScenarioPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ScenarioLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Scenario"
+
+[node name="ScenarioOptionButton" type="OptionButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="DescriptionPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_description")
+
+[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/DescriptionPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+bbcode_enabled = true
+text = "Select a scenario to preview details."
 
 [node name="HSeparator2" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
 layout_mode = 2

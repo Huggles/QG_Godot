@@ -59,6 +59,8 @@ public partial class MultiplayerLobby : Control
 	private Button        _debugSoloButton;
 	private Label         _statusLabel;
 	private LineEdit      _ipAddressInput;
+	private OptionButton  _scenarioPicker;
+	private RichTextLabel _scenarioDescriptionLabel;
 
 	// ── Runtime state ─────────────────────────────────────────────────────────
 	private bool _isHost        = false;
@@ -95,6 +97,8 @@ public partial class MultiplayerLobby : Control
 		_debugSoloButton     = GetNode<Button>("%DebugSoloButton");
 		_statusLabel         = GetNode<Label>("%StatusLabel");
 		_ipAddressInput      = GetNode<LineEdit>("%IpAddressInput");
+		_scenarioPicker      = GetNode<OptionButton>("%ScenarioOptionButton");
+		_scenarioDescriptionLabel = GetNode<RichTextLabel>("%ScenarioDescriptionLabel");
 		
 		_ipAddressInput.Text     = DEFAULT_SERVER_IP;
 		_startGameButton.Visible = false;
@@ -111,6 +115,26 @@ public partial class MultiplayerLobby : Control
 		Multiplayer.ServerDisconnected += OnServerDisconnected;
 		
 		UpdateStatusLabel("Waiting to host or join...");
+
+		var gameManager = GetNode<GameManager>("/root/GameManager");
+		_scenarioPicker.Clear();
+		foreach (var scenario in gameManager.AvailableScenarios)
+			_scenarioPicker.AddItem(scenario.Title);
+
+		if (gameManager.SelectedScenario != null)
+		{
+			int selectedIndex = gameManager.AvailableScenarios.FindIndex(s => s.Path == gameManager.SelectedScenario.Path);
+			if (selectedIndex >= 0)
+				_scenarioPicker.Selected = selectedIndex;
+			UpdateScenarioDescription(gameManager.SelectedScenario.Description);
+		}
+		else
+		{
+			UpdateScenarioDescription("No scenarios available. Make sure the scenario files are present in assets/data/scenarios.");
+		}
+
+		_scenarioPicker.Disabled = true;
+		_scenarioPicker.ItemSelected += OnScenarioSelected;
 
 		// Arrived from JoinGameScreen, which already established the client connection.
 		// Adopt it rather than creating a second peer.
@@ -234,6 +258,7 @@ public partial class MultiplayerLobby : Control
 		_startGameButton.Disabled = true; // unlocks once all 6 factions are assigned
 		_hostButton.Disabled      = true;
 		_joinButton.Disabled      = true;
+		_scenarioPicker.Disabled  = false;
 	}
 
 	private void OnJoinButtonPressed()
@@ -480,6 +505,7 @@ public partial class MultiplayerLobby : Control
 		{
 			RpcId((int)peerId, nameof(SyncPlayerList),   GetPlayerListData());
 			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments());
+			RpcId((int)peerId, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
 
 			if (_dedicatedServer)
 			{
@@ -720,6 +746,7 @@ public partial class MultiplayerLobby : Control
 		int requester = Multiplayer.GetRemoteSenderId();
 		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());
 		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments());
+		RpcId(requester, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
 	}
 
 	/// <summary>
@@ -732,6 +759,41 @@ public partial class MultiplayerLobby : Control
 		ClearAllRows();
 		foreach (var kv in playerData) AddPlayerRow(kv.Key, kv.Value);
 		RefreshAllButtons();
+	}
+
+	private void OnScenarioSelected(long selectedIndex)
+	{
+		if (!_isHost) return;
+
+		var gameManager = GetNode<GameManager>("/root/GameManager");
+		int index = (int)selectedIndex;
+		if (index < 0 || index >= gameManager.AvailableScenarios.Count) return;
+
+		gameManager.SetSelectedScenarioByIndex(index);
+		UpdateScenarioDescription(gameManager.AvailableScenarios[index].Description);
+		Rpc(nameof(SyncScenarioSelection), gameManager.SelectedScenario.Path);
+	}
+
+	private void UpdateScenarioDescription(string description)
+	{
+		if (_scenarioDescriptionLabel == null) return;
+		_scenarioDescriptionLabel.BbcodeEnabled = true;
+		_scenarioDescriptionLabel.Text = $"[color=#bbbbbb]{description}[/color]";
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
+	private void SyncScenarioSelection(string selectedScenarioPath)
+	{
+		if (string.IsNullOrEmpty(selectedScenarioPath))
+			return;
+
+		var gameManager = GetNode<GameManager>("/root/GameManager");
+		int selectedIndex = gameManager.AvailableScenarios.FindIndex(s => s.Path == selectedScenarioPath);
+		if (selectedIndex < 0) return;
+
+		gameManager.SetSelectedScenarioByIndex(selectedIndex);
+		_scenarioPicker.Selected = selectedIndex;
+		UpdateScenarioDescription(gameManager.SelectedScenario.Description);
 	}
 
 	private void UpdateStatusLabel(string msg)

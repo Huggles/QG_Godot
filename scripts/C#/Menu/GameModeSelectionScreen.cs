@@ -13,15 +13,7 @@ public partial class GameModeSelectionScreen : Control
 		_descriptionLabel = GetNodeOrNull<RichTextLabel>("ButtonContainer/DescriptionPanel/ScenarioDescriptionLabel");
 		if (_descriptionLabel == null)
 		{
-			_descriptionLabel = GetNodeOrNull<RichTextLabel>("ButtonContainer/ScenarioDescriptionLabel");
-		}
-		if (_descriptionLabel == null)
-		{
-			_descriptionLabel = GetNodeOrNull<RichTextLabel>("DescriptionPanel/ScenarioDescriptionLabel");
-		}
-		if (_descriptionLabel == null)
-		{
-			_descriptionLabel = GetNodeOrNull<RichTextLabel>("ScenarioDescriptionLabel");
+			GD.PrintErr("GameModeSelectionScreen: scenario description label node not found.");
 		}
 		if (_descriptionLabel == null)
 		{
