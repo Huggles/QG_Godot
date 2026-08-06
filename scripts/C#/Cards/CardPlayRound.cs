@@ -29,6 +29,16 @@ public partial class CardPlayRound : GodotObject
     private HashSet<Faction> _afterReactionPassedFactions = new();
 
     /// <summary>
+    /// Game-loop epoch this round belongs to, captured at construction. Error recovery bumps the
+    /// epoch, so a continuation that resumes from an await after a recovery can compare against this
+    /// and unwind instead of mutating state alongside the resumed loop.
+    /// </summary>
+    private readonly int epoch = ErrorReporter.GameLoopEpoch;
+
+    /// <summary>Throws <see cref="AbortedEpochException"/> if this round has been superseded by a recovery.</summary>
+    private void ThrowIfAborted() => ErrorReporter.ThrowIfStaleEpoch(epoch);
+
+    /// <summary>
     /// The change event that opened the currently-active reaction window.
     /// Set before each <see cref="RequestAfterReactions"/> call and restored afterwards,
     /// so card step logic can determine which specific event they are reacting to.
@@ -109,6 +119,10 @@ public partial class CardPlayRound : GodotObject
     /// </summary>
     public async Task DoCard(int cardId)
     {
+        // If the loop was recovered while this call was queued behind an await, this continuation
+        // belongs to an aborted pipeline. Unwind rather than run alongside the resumed loop.
+        ThrowIfAborted();
+
         CardState cardState = CardState.ForId(cardId);
         if (cardState == null)
         {
@@ -178,6 +192,8 @@ public partial class CardPlayRound : GodotObject
     /// </summary>
     public async Task DoChangeEvent(ChangeEvent changeEvent)
     {
+        ThrowIfAborted();
+
         if (changeEvent is PlayCardChangeEvent || changeEvent is ActivateReactionChangeEvent)
         {
             throw new InvalidOperationException(

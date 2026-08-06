@@ -19,8 +19,13 @@ public partial class GameFlow : SingletonNode<GameFlow>
             {
                 GameTurnStep gameTurnStep = gameTurnSteps[field - 1];
                 if(Multiplayer.IsServer())
-                {                    
-                    gameTurnStep.Handler();                    
+                {
+                    // Guard, not a bare call: Handler is a Func<Task> and the returned Task used to
+                    // be discarded, so any exception below it (card steps, ChangeEvent.ApplyChange,
+                    // InputRequest, GameAPI) went into an unobserved Task and the loop simply stalled
+                    // forever with nothing logged. This is the single highest-leverage seam here.
+                    Guard.FireAndForget(gameTurnStep.Handler,
+                        $"TurnStep {gameTurnStep.TurnStep}", CurrentFaction);
                 }
                 EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
             }
@@ -68,33 +73,43 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     public async void StartGame()
     {
-        DebugUtilities.PrintPeer("GameFlow: Starting game");
-        GameStateCalculator.Enabled = false;
-        foreach (FactionState faction in gameState.PlayableFactionStates)
-        {            
-            DrawCardsChangeEvent drawCardsChangeEvent =  new DrawCardsChangeEvent(Faction.NONE, faction.Faction, 7, false);
-            drawCardsChangeEvent.IsTrigger = false;
-            await CardPlayPool.DoChangeEvent(drawCardsChangeEvent);
-        }
-        GameStateCalculator.Enabled = true;
-        GameStateCalculator.CalculateAll();
-
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        // async void: an uncaught throw here would kill the process rather than surface.
+        try
         {
-            VictoryPointSummaries[faction] = new List<VPTurnSummary>();
+            DebugUtilities.PrintPeer("GameFlow: Starting game");
+            GameStateCalculator.Enabled = false;
+            foreach (FactionState faction in gameState.PlayableFactionStates)
+            {
+                DrawCardsChangeEvent drawCardsChangeEvent =  new DrawCardsChangeEvent(Faction.NONE, faction.Faction, 7, false);
+                drawCardsChangeEvent.IsTrigger = false;
+                await CardPlayPool.DoChangeEvent(drawCardsChangeEvent);
+            }
+            GameStateCalculator.Enabled = true;
+            GameStateCalculator.CalculateAll();
+
+            foreach (Faction faction in StaticGameData.PlayableFactions)
+            {
+                VictoryPointSummaries[faction] = new List<VPTurnSummary>();
+            }
+
+            GameStarted = true;
+
+
+            // Only fade the local (host) player's loading screen here.
+            // Client loading screens are faded via GameSession.ReceiveGameStarted RPC.
+            Guard.FireAndForget(StartNewTurn, "GameFlow.StartNewTurn");
         }
-
-        GameStarted = true;
-
-        
-        // Only fade the local (host) player's loading screen here.
-        // Client loading screens are faded via GameSession.ReceiveGameStarted RPC.
-        _ = StartNewTurn();
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "GameFlow.StartGame");
+        }
     }
 
     private async Task StartNewTurn()
     {
         DebugUtilities.PrintPeer("StartNewTurn");
+        ErrorInjection.MaybeThrow(ErrorInjection.Site.EndStep);
+        ErrorInjection.MaybeReportRecovered(ErrorInjection.Site.SoftRecovered);
 
         // Game-end check: only after the United States (the last faction of each round)
         // has just finished its turn. At this point GameTurn still holds the just-finished
@@ -164,11 +179,87 @@ public partial class GameFlow : SingletonNode<GameFlow>
         return result;
     }
 
+    /// <summary>
+    /// Epoch the current step belongs to. Any advance requested by a handler from an earlier epoch
+    /// is an out-of-band call from an aborted step and is ignored — see <see cref="StartNextStep"/>.
+    /// </summary>
+    private int stepEpoch = 0;
+
     public void StartNextStep()
     {
+        // Gate on the epoch. The play-step handlers subscribe to the GLOBAL
+        // EventBus.CardPlayPoolFinished signal and only unsubscribe inside their own OnRoundFinished,
+        // so an aborted step leaves a live subscription behind. Without this gate, the next round to
+        // finish — including the START step's — would fire the zombie handler and advance the loop a
+        // second time, silently skipping a step.
+        if (stepEpoch != ErrorReporter.GameLoopEpoch)
+        {
+            DebugUtilities.PrintPeer(
+                $"Ignoring StartNextStep from stale epoch {stepEpoch} (current {ErrorReporter.GameLoopEpoch})");
+            return;
+        }
+
         DebugUtilities.PrintPeer("StartNextStep");
         TurnStepCounter++;
     }
+
+    /// <summary>
+    /// Resume the turn loop after a reported failure, abandoning the rest of the failed step.
+    /// Called from the error popup's Continue button via <c>ErrorReporter.RequestResume</c>, after
+    /// the awaiter-cancel sweep has run and the epoch has been bumped.
+    /// </summary>
+    public void ResumeAfterFailure()
+    {
+        if (!Multiplayer.IsServer()) return;
+
+        stepEpoch = ErrorReporter.GameLoopEpoch;
+        DebugUtilities.PrintPeer($"ResumeAfterFailure at TurnStepCounter {TurnStepCounter}");
+
+        // Tags are not part of the replicated hash, so a plain recalculation is enough to make the
+        // resumed step's condition checks see current state.
+        GameStateCalculator.CalculateAll();
+
+        // The branch is required, not defensive. gameTurnSteps has 7 entries and the setter indexes
+        // [counter - 1], so a failure during TurnStep.END (counter 7) would make TurnStepCounter++
+        // index [7] and throw ArgumentOutOfRangeException from inside the recovery path itself.
+        if (TurnStepCounter >= gameTurnSteps.Count)
+            Guard.FireAndForget(StartNewTurn, "resume:StartNewTurn");
+        else
+            TurnStepCounter++;
+    }
+
+    /// <summary>
+    /// Detach the in-flight step handler so its Finished event — which never fired, because the step
+    /// threw — cannot fire later against the resumed loop, and so its global EventBus subscription
+    /// does not leak.
+    /// </summary>
+    public void CancelCurrentStepHandler()
+    {
+        startTurnStepHandler?.Cancel();
+        playStepHandlerDefault?.Cancel();
+
+        // Detach GameFlow's own subscriptions too: the handler instances stay referenced by these
+        // fields, so a late Finished emission would otherwise still reach us.
+        if (startTurnStepHandler != null)
+            startTurnStepHandler.StartTurnStepFinished -= StartTurnStepFinishedHandler;
+        if (playStepHandlerDefault != null)
+            playStepHandlerDefault.PlayStepFinished -= PlayCardStepFinishedHandler;
+        if (supplyStepHandler != null)
+            supplyStepHandler.SupplyStepFinished -= SupplyStepFinishedHandler;
+        if (discardStepHandler != null)
+            discardStepHandler.DiscardStepFinished -= DiscardStepFinishedHandler;
+        if (drawStepHandler != null)
+            drawStepHandler.DrawStepFinished -= DrawStepFinishedHandler;
+
+        startTurnStepHandler = null;
+        playStepHandlerDefault = null;
+        supplyStepHandler = null;
+        discardStepHandler = null;
+        drawStepHandler = null;
+    }
+
+    /// <summary>Drop the shared input-request slot so a stale response cannot be mistaken for a live one.</summary>
+    public void ClearCurrentInputRequest() => CurrentInputRequest = null;
 
     
 

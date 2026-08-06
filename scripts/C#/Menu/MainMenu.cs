@@ -9,8 +9,14 @@ public partial class MainMenu : Control
     public static LobbyIntent PendingLobbyIntent { get; private set; } = LobbyIntent.None;
     public static void ClearLobbyIntent() => PendingLobbyIntent = LobbyIntent.None;
 
-    public override void _Ready()
+    // Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
+    // surfacing rather than a silent console line.
+    public override void _Ready() => Guard.Try(ReadyInternal, "MainMenu._Ready");
+
+    private void ReadyInternal()
     {
+        ErrorInjection.MaybeThrow(ErrorInjection.Site.MenuReady);
+
         var singlePlayer     = GetNode<MenuPanelButton>("%SinglePlayerButton");
         var multiplayerHost  = GetNode<MenuPanelButton>("%MultiplayerHostButton");
         var multiplayerJoin  = GetNode<MenuPanelButton>("%MultiplayerJoinButton");
@@ -32,13 +38,13 @@ public partial class MainMenu : Control
 
     private void OnSinglePlayerPressed()
     {
-        GetTree().ChangeSceneToFile("res://scenes/menu/GameModeSelectionScreen.tscn");
+        SceneFlow.ChangeScene(this, "res://scenes/menu/GameModeSelectionScreen.tscn");
     }
 
     private void OnMultiplayerHostPressed()
     {
         PendingLobbyIntent = LobbyIntent.Host;
-        GetTree().ChangeSceneToFile("res://scenes/menu/MultiplayerLobby.tscn");
+        SceneFlow.ChangeScene(this, "res://scenes/menu/MultiplayerLobby.tscn");
     }
 
     private void OnMultiplayerJoinPressed()
@@ -46,7 +52,7 @@ public partial class MainMenu : Control
         // The join screen collects the address and establishes the connection itself; the lobby
         // then adopts the live peer. No pending intent is needed on this path.
         ClearLobbyIntent();
-        GetTree().ChangeSceneToFile("res://scenes/menu/JoinGameScreen.tscn");
+        SceneFlow.ChangeScene(this, "res://scenes/menu/JoinGameScreen.tscn");
     }
 
     private void OnQuitPressed()
@@ -58,7 +64,7 @@ public partial class MainMenu : Control
     private void OnVictoryScreenTestPressed()
     {
         VictoryScreen.PendingResult = CreateFakeGameResult();
-        GetTree().ChangeSceneToFile("res://scenes/menu/VictoryScreen.tscn");
+        SceneFlow.ChangeScene(this, "res://scenes/menu/VictoryScreen.tscn");
     }
 
     private static GameResult CreateFakeGameResult()

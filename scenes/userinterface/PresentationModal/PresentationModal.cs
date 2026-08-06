@@ -71,6 +71,9 @@ public partial class PresentationModal : Control, LoadableUI
         _activeConfig = config;
         _selectedItems.Clear();
         _orderedItems.Clear();
+        // Complete any previous request before replacing it: overwriting a pending _tcs left its
+        // awaiter hanging forever.
+        _tcs?.TrySetResult(ModalResult.Cancelled);
         _tcs = new TaskCompletionSource<ModalResult>();
 
         HandlePresentationItems(config.Items, config.Mode != ModalSelectionMode.Display);
@@ -273,6 +276,55 @@ public partial class PresentationModal : Control, LoadableUI
             if (key.Keycode == Key.Escape) _ = HideModal();
         };
         InputManager.Current.KeyClicked += _onKeyClicked;
+    }
+
+    /// <summary>
+    /// Release anything waiting on this modal, used by error recovery. Completing <c>_tcs</c> alone
+    /// is not enough: the legacy wrappers (and InputHandlerDiscard.GetSelectedCards) await the
+    /// <c>OnHide</c> / <c>ItemSelected</c> signals rather than the task, so those must be emitted
+    /// too or their awaiters stay parked.
+    /// </summary>
+    public void CancelPending()
+    {
+        bool wasPending = _tcs != null || Visible;
+        if (!wasPending) return;
+
+        _tcs?.TrySetResult(ModalResult.Cancelled);
+
+        if (_onKeyClicked != null)
+        {
+            InputManager.Current.KeyClicked -= _onKeyClicked;
+            _onKeyClicked = null;
+        }
+
+        _activeTween?.Kill();
+        Visible = false;
+        Modulate = new Color(1, 1, 1, 0);
+        ExitButton.Visible = false;
+        if (ConfirmButton != null)
+            ConfirmButton.Visible = false;
+
+        foreach (PresentationItem item in PresentationItems)
+            item.ItemClicked -= HandleItemClick;
+
+        foreach (Control control in PresentationItemControls)
+        {
+            if (control.GetParent() != null)
+                control.GetParent().RemoveChild(control);
+        }
+
+        PresentationItemControls.Clear();
+        PresentationItems.Clear();
+
+        // Emit both, so signal-based awaiters are released as well as task-based ones.
+        EmitSignal(SignalName.ItemSelected, -1);
+        EmitSignal(SignalName.OnHide,
+            new PresentationItemResponse { SelectedItems = new List<int>() });
+
+        _selectedItems.Clear();
+        _orderedItems.Clear();
+        _activeConfig = null;
+        _tcs = null;
     }
 
     // ── Hide ─────────────────────────────────────────────────────────────────

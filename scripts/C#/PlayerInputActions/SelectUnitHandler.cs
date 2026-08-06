@@ -24,13 +24,23 @@ public partial class SelectUnitHandler : IGameEventHandler<int>
         EventBus.Instance.UnitClicked += onUnit;
         EventBus.Instance.SelectionSkipped += onSkip;
 
-        int unitId = await tcs.Task;
-
-        EventBus.Instance.UnitClicked -= onUnit;
-        EventBus.Instance.SelectionSkipped -= onSkip;
-        SelectionSkipButton.Current?.Hide();
-        UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
-        InputManager.Current.DisableRayTraceCasting();
+        // Registered so error recovery can release this selection — see SelectCountryHandler.
+        int unitId;
+        using (PendingLocalInput.Register(onSkip))
+        {
+            try
+            {
+                unitId = await tcs.Task;
+            }
+            finally
+            {
+                EventBus.Instance.UnitClicked -= onUnit;
+                EventBus.Instance.SelectionSkipped -= onSkip;
+                SelectionSkipButton.Current?.Hide();
+                UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
+                InputManager.Current.DisableRayTraceCasting();
+            }
+        }
 
         if (unitId == -1)
         {

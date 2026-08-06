@@ -42,15 +42,25 @@ public partial class SelectBattleTargetHandler : IGameEventHandler<BattleTarget>
         EventBus.Instance.UnitClicked    += onUnit;
         EventBus.Instance.SelectionSkipped += onSkip;
 
-        BattleTarget result = await tcs.Task;
-
-        EventBus.Instance.CountryClicked -= onCountry;
-        EventBus.Instance.UnitClicked    -= onUnit;
-        EventBus.Instance.SelectionSkipped -= onSkip;
-        SelectionSkipButton.Current?.Hide();
-        UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
-        CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
-        InputManager.Current.DisableRayTraceCasting();
+        // Registered so error recovery can release this selection — see SelectCountryHandler.
+        BattleTarget result;
+        using (PendingLocalInput.Register(onSkip))
+        {
+            try
+            {
+                result = await tcs.Task;
+            }
+            finally
+            {
+                EventBus.Instance.CountryClicked -= onCountry;
+                EventBus.Instance.UnitClicked    -= onUnit;
+                EventBus.Instance.SelectionSkipped -= onSkip;
+                SelectionSkipButton.Current?.Hide();
+                UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
+                CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
+                InputManager.Current.DisableRayTraceCasting();
+            }
+        }
 
         return result;
     }

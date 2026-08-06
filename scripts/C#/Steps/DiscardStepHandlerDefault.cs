@@ -13,10 +13,28 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
     public void Start(Faction faction)
     {
         this.faction = faction;
-        _ = ProcessDiscardStep();
+        Guard.FireAndForget(ProcessDiscardStep, "DiscardStep", faction);
     }
 
     private async Task ProcessDiscardStep()
+    {
+        // RequestDiscard calls BroadCast() directly, so a player pressing Skip throws
+        // StepSkippedException right through this method — it is normal control flow and must
+        // complete the step. Any other failure is left for Guard to report, and deliberately does
+        // not fire DiscardStepFinished so the loop pauses for the player's decision.
+        try
+        {
+            await ProcessDiscardStepInternal();
+        }
+        catch (StepSkippedException)
+        {
+            DebugUtilities.PrintPeer("Discard step selection skipped");
+        }
+
+        DiscardStepFinished?.Invoke();
+    }
+
+    private async Task ProcessDiscardStepInternal()
     {
         DeckState deckState = DeckState.ForFaction(faction);
         int handSize = deckState.HandCardIds.Count;
@@ -33,8 +51,6 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
             // Optional discard - player can choose to discard cards
             await RequestDiscard(deckState, 0, false);
         }
-
-        DiscardStepFinished?.Invoke();
     }
 
     private async Task RequestDiscard(DeckState deckState, int minimumDiscards, bool required)

@@ -111,7 +111,9 @@ public partial class GameManager : Node
             }
             catch (Exception e)
             {
-                DebugUtilities.PrintPeerError($"GameManager: failed to load scenario file {path}: {e.Message}");
+                // Report rather than log the message alone: a malformed scenario file is a real
+                // authoring error and the stack trace says which JSON element failed.
+                ErrorReporter.ReportLocalOnly(e, $"Loading scenario file {path}");
             }
         }
 

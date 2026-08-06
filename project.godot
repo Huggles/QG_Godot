@@ -21,6 +21,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+ErrorReporter="*res://scripts/C#/Errors/ErrorReporter.cs"
 GameSettings="*res://scripts/C#/Utils/GameSettings.cs"
 NodeUtilities="*res://scripts/C#/Utils/NodeUtilities.cs"
 DebugUtilities="*res://scripts/C#/Utils/DebugUtilities.cs"

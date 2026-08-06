@@ -27,6 +27,25 @@ public partial class DebugUtilities : Node
     }
 
     /// <summary>
+    /// Prints without BBCode parsing. Use this for anything containing a stack trace or arbitrary
+    /// exception text: <see cref="PrintPeerError"/> goes through <c>GD.PrintRich</c>, which parses
+    /// BBCode and silently eats the square brackets that .NET traces are full of ([T] generic
+    /// frames, [0x0001a] IL offsets, [] array notation) — and an unbalanced tag leaves every
+    /// subsequent console line coloured. Also raises a Godot error so it appears in the editor's
+    /// Errors tab with a source location.
+    /// </summary>
+    public static void PrintPeerErrorRaw(String message){
+        string prefix = $"{InstancePrefix}({FormattedDateTime}) [ERROR]: ";
+        GD.PrintErr($"{prefix}{message}");
+
+        // PushError gets only the first line: it surfaces in the editor's Errors tab, and pushing the
+        // whole multi-line trace there would duplicate everything PrintErr already wrote.
+        int firstBreak = message?.IndexOf('\n') ?? -1;
+        string summary = firstBreak > 0 ? message.Substring(0, firstBreak) : message;
+        GD.PushError($"{prefix}{summary}");
+    }
+
+    /// <summary>
     /// Prints <paramref name="message"/> normally; prints <paramref name="finestMessage"/> instead when verbosity is FINEST.
     /// </summary>
     public static void PrintPeer(Object o, Object oFinest = null){

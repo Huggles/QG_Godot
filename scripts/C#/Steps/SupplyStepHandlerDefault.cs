@@ -13,14 +13,34 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
     public void Start(Faction faction)
     {
         this.faction = faction;
-        _ = ProcessSupplyStep();
+        Guard.FireAndForget(ProcessSupplyStep, "SupplyStep", faction);
     }
 
     private async Task ProcessSupplyStep()
     {
+        // StepSkippedException is caught here (and only here) so a player declining a selection is
+        // treated as "no supply removal" and the step still completes. Any OTHER exception is left to
+        // propagate to Guard, which reports it and deliberately does NOT fire SupplyStepFinished —
+        // the loop stays paused until the player chooses Continue.
+        try
+        {
+            await ProcessSupplyStepInternal();
+        }
+        catch (StepSkippedException)
+        {
+            DebugUtilities.PrintPeer("Supply step selection skipped");
+        }
+
+        SupplyStepFinished?.Invoke();
+    }
+
+    private async Task ProcessSupplyStepInternal()
+    {
+        ErrorInjection.MaybeThrow(ErrorInjection.Site.SupplyStep);
+
         // Recalculate supply for all units
         GameStateCalculator.CalculateAll();
-        
+
         // Get active units for this faction and filter for those out of supply
         List<int> activeUnitIds = GameAPI.ActiveUnitsForFaction(this.faction);
         List<UnitState> outOfSupplyUnits = UnitState.ForIds(activeUnitIds)
@@ -54,7 +74,5 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
             // No units out of supply
             await Task.Delay(GameSettings.DurationShort);
         }
-
-        SupplyStepFinished?.Invoke();
     }
 }

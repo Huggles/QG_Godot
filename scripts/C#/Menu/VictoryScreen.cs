@@ -15,7 +15,11 @@ public partial class VictoryScreen : Control
     private static readonly Color AlliesColor = new Color("#8aa9d9");
     private static readonly Color NeutralColor = new Color("#dddddd");
 
-    public override void _Ready()
+    // Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
+    // surfacing rather than a silent console line.
+    public override void _Ready() => Guard.Try(ReadyInternal, "VictoryScreen._Ready");
+
+    private void ReadyInternal()
     {
         var mainMenu = GetNode<MenuPanelButton>("%MainMenuButton");
         mainMenu.ButtonText = "Main Menu";
@@ -148,8 +152,6 @@ public partial class VictoryScreen : Control
     private void OnMainMenuPressed()
     {
         // Cleanly leave any multiplayer session so a fresh game can be hosted/joined.
-        if (Multiplayer.MultiplayerPeer != null)
-            Multiplayer.MultiplayerPeer = null;
-        GetTree().ChangeSceneToFile("res://scenes/menu/MainMenu.tscn");
+        SceneFlow.ChangeScene(this, "res://scenes/menu/MainMenu.tscn", leaveSession: true);
     }
 }

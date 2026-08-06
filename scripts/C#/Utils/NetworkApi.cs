@@ -18,7 +18,14 @@ public partial class NetworkApi : Node
 
     public override void _Ready()
     {
-        Instance = this;        
+        Instance = this;
+        Multiplayer.PeerDisconnected += OnPeerDisconnectedDuringInput;
+    }
+
+    public override void _ExitTree()
+    {
+        if (Multiplayer != null)
+            Multiplayer.PeerDisconnected -= OnPeerDisconnectedDuringInput;
     }
     
     public async Task StartMultiplayerSession(string configuration)
@@ -95,8 +102,23 @@ public partial class NetworkApi : Node
     /// Clients reconstruct the event, apply it locally, then verify the state hash.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void ReceiveChangeEvent(string dtoJson)
-    {        
+    public void ReceiveChangeEvent(string dtoJson)
+    {
+        // Was `async void` with no catch (it never actually awaited): a malformed payload or an
+        // unregistered DTO type (ChangeEvent.FromDto throws NotSupportedException) killed the client
+        // process outright.
+        try
+        {
+            ReceiveChangeEventInternal(dtoJson);
+        }
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "Rpc ReceiveChangeEvent");
+        }
+    }
+
+    private void ReceiveChangeEventInternal(string dtoJson)
+    {
         ChangeEventDto dto = JsonSerializer.Deserialize<ChangeEventDto>(dtoJson);
         ChangeEvent ev     = ChangeEvent.FromDto(dto);
         DebugUtilities.PrintPeer($"[color={"blue"}]ReceiveChangeEvent ({ev.Id}): {dto.GetType().Name}");
@@ -118,15 +140,183 @@ public partial class NetworkApi : Node
         ChangeEventQueue.Instance.Enqueue(ev);
     }
 
+    // ── Input-request rendezvous ─────────────────────────────────────────────
+    //
+    // This used to be `await EventBus.ToSignal(InputRequestResponseReceived)`: untimed and, worse,
+    // UNCORRELATED — a bare global signal carrying no request id. An abandoned awaiter from a failed
+    // step stayed registered, so a later response resumed the DEAD continuation and walked the old
+    // card pipeline concurrently with the recovered loop (double ApplyChange, double Rpc, guaranteed
+    // desync). It is now a TaskCompletionSource keyed on InputRequest.Id, with a bounded wait so a
+    // client that cannot reply at all (e.g. FromJson threw, so it cannot even tell whether the
+    // request was for it) does not hang the host forever.
+
+    /// <summary>
+    /// Backstop only, for the case where the controlling peer can never reply at all — deliberately
+    /// long, because a real player is allowed to deliberate. A peer that drops is unblocked
+    /// immediately by <see cref="OnPeerDisconnectedDuringInput"/> instead of waiting this out.
+    /// </summary>
+    private const int InputResponseTimeoutMs = 15 * 60 * 1000;
+
+    private TaskCompletionSource<string> _pendingInputTcs;
+    private string _pendingInputId = null;
+    private int _pendingInputPeer = 0;
+
+    /// <summary>
+    /// The request we are waiting on. Kept so cancellation can complete the wait with a real
+    /// (empty, skipped) response instead of cancelling the task: an empty response is exactly how a
+    /// player "passes", so both callers unwind correctly — <c>RequestPlay</c> reads no card ids and
+    /// treats it as a pass, while <c>InputRequest.BroadCast</c> sees WasSkipped and raises
+    /// StepSkippedException, which CardStep already handles. Cancelling the task instead would
+    /// unwind the play step without ever firing CardPlayPoolFinished, stalling the turn loop.
+    /// </summary>
+    private InputRequest _pendingInputRequest;
+
     public async Task<InputRequest> SendInputRequest(InputRequest inputRequest)
-    {   
-        DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");        
-        string payload = inputRequest.ToJson();        
+    {
+        DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");
+        string payload = inputRequest.ToJson();
         DebugUtilities.PrintPeerFinest($"{payload}");
-        Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);        
-        var response = await EventBus.Instance.ToSignal(EventBus.Instance, nameof(EventBus.SignalName.InputRequestResponseReceived));
-        InputRequest responseDto = InputRequest.FromJson(response[0].AsString());
-        return responseDto;
+
+        // Create the awaiter BEFORE the Rpc — the same ordering StartMultiplayerSession uses, and
+        // the reason it is the one rendezvous in this file without a check-then-await race.
+        TaskCompletionSource<string> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pendingInputTcs = tcs;
+        _pendingInputId = inputRequest.Id;
+        _pendingInputPeer = SafeTargetPeer(inputRequest);
+        _pendingInputRequest = inputRequest;
+
+        Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);
+
+        Task completed = await Task.WhenAny(tcs.Task, Task.Delay(InputResponseTimeoutMs));
+        if (completed != tcs.Task)
+        {
+            DebugUtilities.PrintPeerErrorRaw(
+                $"No input response for {inputRequest.GetType().Name} (Id {inputRequest.Id}) after " +
+                $"{InputResponseTimeoutMs / 60000} minutes — treating as skipped so the turn loop can continue.");
+            ClearPendingInput(tcs);
+            inputRequest.WasSkipped = true;
+            return inputRequest;
+        }
+
+        ClearPendingInput(tcs);
+        return InputRequest.FromJson(await tcs.Task);
+    }
+
+    private static int SafeTargetPeer(InputRequest inputRequest)
+    {
+        try { return inputRequest.TargetPeer; }
+        catch { return 0; }
+    }
+
+    /// <summary>
+    /// If the peer we are waiting on for input drops, complete the wait as skipped straight away.
+    /// Otherwise a mid-turn disconnect left the host parked on the request until the backstop
+    /// timeout — indistinguishable from a freeze.
+    /// </summary>
+    private void OnPeerDisconnectedDuringInput(long peerId)
+    {
+        if (Multiplayer?.MultiplayerPeer == null || !Multiplayer.IsServer()) return;
+        if (_pendingInputTcs == null) return;
+        if (_pendingInputPeer != 0 && _pendingInputPeer != (int)peerId) return;
+
+        DebugUtilities.PrintPeerErrorRaw(
+            $"Peer {peerId} disconnected while we were waiting on its input — treating as skipped.");
+        CancelPendingInputRequest();
+    }
+
+    /// <summary>
+    /// Complete the in-flight input request as skipped so the awaiting chain unwinds through the
+    /// existing StepSkippedException path. Called by the recovery sweep.
+    /// </summary>
+    public void CancelPendingInputRequest()
+    {
+        TaskCompletionSource<string> tcs = _pendingInputTcs;
+        if (tcs == null || tcs.Task.IsCompleted) return;
+
+        DebugUtilities.PrintPeer($"Cancelling pending input request (Id {_pendingInputId})");
+
+        // Complete with the request itself, marked skipped and carrying no responses — see the note on
+        // _pendingInputRequest for why this rather than TrySetCanceled.
+        InputRequest skipped = _pendingInputRequest;
+        if (skipped != null)
+        {
+            skipped.WasSkipped = true;
+            tcs.TrySetResult(skipped.ToJson());
+        }
+        else
+        {
+            tcs.TrySetCanceled();
+        }
+        ClearPendingInput(tcs);
+        GameFlow.Instance?.ClearCurrentInputRequest();
+    }
+
+    private void ClearPendingInput(TaskCompletionSource<string> tcs)
+    {
+        if (ReferenceEquals(_pendingInputTcs, tcs))
+        {
+            _pendingInputTcs = null;
+            _pendingInputId = null;
+            _pendingInputPeer = 0;
+            _pendingInputRequest = null;
+        }
+    }
+
+    /// <summary>
+    /// Tell every client to release any open board selection, so a client sitting on a
+    /// SelectCountry/SelectUnit prompt for an aborted step does not stay stuck on it.
+    /// </summary>
+    public void AbortRemoteInput()
+    {
+        if (Multiplayer?.MultiplayerPeer == null) return;
+        if (!Multiplayer.IsServer()) return;
+        Rpc(nameof(AbortInputRequest));
+    }
+
+    /// <summary>Server → all peers: cancel any local board selection currently awaiting a click.</summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void AbortInputRequest()
+    {
+        PendingLocalInput.CancelAll();
+        PresentationModal.Current?.CancelPending();
+    }
+
+    // ── Error propagation ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Client → server. A client's Rpc with AnyPeer only reaches the server, so the server has to
+    /// rebroadcast for the other clients to learn about it.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void ReportErrorToServer(string errorJson)
+    {
+        if (!Multiplayer.IsServer()) return;
+        try
+        {
+            ErrorReporter.ReportFromRemote(GameError.FromJson(errorJson));
+            Rpc(nameof(BroadcastError), errorJson);
+        }
+        catch (Exception e)
+        {
+            DebugUtilities.PrintPeerErrorRaw($"Failed to relay a peer error report: {e}");
+        }
+    }
+
+    /// <summary>
+    /// Server → all peers. Without this, a host-side failure leaves every client staring at a
+    /// frozen board with nothing on screen, since the authoritative loop runs only on the host.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void BroadcastError(string errorJson)
+    {
+        try
+        {
+            ErrorReporter.ReportFromRemote(GameError.FromJson(errorJson));
+        }
+        catch (Exception e)
+        {
+            DebugUtilities.PrintPeerErrorRaw($"Failed to ingest a broadcast error report: {e}");
+        }
     }
 
     /// <summary>
@@ -135,17 +325,47 @@ public partial class NetworkApi : Node
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void ReceiveInputRequest(string dtoJson)
-    {        
-        InputRequest dto = InputRequest.FromJson(dtoJson);
-        DebugUtilities.PrintPeer($"[color={"purple"}]ReceiveInputRequest:  {dto.GetType().Name} (For me: {dto.IsForCurrentPeer})");
-        DebugUtilities.PrintPeerFinest($"{dtoJson}");
-        if (!ChangeEventQueue.Instance.IsIdle)
-            await ChangeEventQueue.Instance.ToSignal(ChangeEventQueue.Instance, ChangeEventQueue.SignalName.QueueDrained);
-        await dto.Execute();
-
-        if (dto.IsForCurrentPeer)
+    {
+        InputRequest dto = null;
+        try
         {
-            Rpc(nameof(ReceiveInputResponse), dto.ToJson());
+            dto = InputRequest.FromJson(dtoJson);
+            DebugUtilities.PrintPeer($"[color={"purple"}]ReceiveInputRequest:  {dto.GetType().Name} (For me: {dto.IsForCurrentPeer})");
+            DebugUtilities.PrintPeerFinest($"{dtoJson}");
+
+            // WhenDrained() instead of `if (!IsIdle) await ToSignal(QueueDrained)`: that was a
+            // check-then-await race — if the queue drained in between, QueueDrained had already
+            // fired and the await hung forever.
+            await ChangeEventQueue.Instance.WhenDrained();
+            if (dto.IsForCurrentPeer && !Multiplayer.IsServer())
+                ErrorInjection.MaybeThrow(ErrorInjection.Site.ClientInput, dto.GetType().Name);
+            await dto.Execute();
+
+            if (dto.IsForCurrentPeer)
+            {
+                Rpc(nameof(ReceiveInputResponse), dto.ToJson());
+            }
+        }
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "Rpc ReceiveInputRequest", dto?.TargetFaction);
+
+            // Still reply, marked skipped, so the host's await unwinds through the existing
+            // StepSkippedException path instead of waiting forever. If `dto` is null the request
+            // could not even be parsed — we cannot know whether it was for this peer, so there is
+            // nothing safe to send and the host's bounded wait is the only cover.
+            if (dto != null && dto.IsForCurrentPeer)
+            {
+                try
+                {
+                    dto.WasSkipped = true;
+                    Rpc(nameof(ReceiveInputResponse), dto.ToJson());
+                }
+                catch (Exception replyFailure)
+                {
+                    DebugUtilities.PrintPeerErrorRaw($"Could not send skip reply: {replyFailure}");
+                }
+            }
         }
     }
 
@@ -153,15 +373,45 @@ public partial class NetworkApi : Node
     
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    private async void ReceiveInputResponse(string dtoJson)
+    private void ReceiveInputResponse(string dtoJson)
     {
-        if(!Multiplayer.IsServer())
+        // Was `async void` with no catch: any throw here went to the synchronization context and
+        // took the process down.
+        try
         {
-            PlayerActionLabel.HideText();
-            return;
+            if (!Multiplayer.IsServer())
+            {
+                PlayerActionLabel.HideText();
+                return;
+            }
+
+            InputRequest response = InputRequest.FromJson(dtoJson);
+            GameFlow.Instance.CurrentInputRequest = response;
+
+            // Drop responses that belong to a request we are no longer waiting on, so a late reply
+            // from an aborted step cannot resume a dead continuation.
+            TaskCompletionSource<string> tcs = _pendingInputTcs;
+            if (tcs == null)
+            {
+                DebugUtilities.PrintPeer($"Ignoring input response {response?.Id} — no request pending");
+                return;
+            }
+            if (response != null && _pendingInputId != null && response.Id != _pendingInputId)
+            {
+                DebugUtilities.PrintPeer(
+                    $"Ignoring stale input response (Id {response.Id}, waiting on {_pendingInputId})");
+                return;
+            }
+
+            tcs.TrySetResult(dtoJson);
+
+            // Kept for UI/debug listeners that were already observing this signal.
+            EventBus.Emit(EventBus.SignalName.InputRequestResponseReceived, dtoJson);
         }
-        GameFlow.Instance.CurrentInputRequest = InputRequest.FromJson(dtoJson);            
-        EventBus.Emit(EventBus.SignalName.InputRequestResponseReceived, dtoJson);
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "Rpc ReceiveInputResponse");
+        }
     }
 
     /// <summary>

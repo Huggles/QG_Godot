@@ -14,8 +14,13 @@ public abstract class ChangeEventAnimation
     public Task CompletionTask => _tcs.Task;
     public string ScriptName => GetType().ToString();
 
-    /// <summary>Called by AnimationQueue after Execute() finishes (or immediately if BlockQueue is false).</summary>
-    internal void Complete() => _tcs.SetResult();
+    /// <summary>
+    /// Called by AnimationQueue after Execute() finishes (or immediately if BlockQueue is false).
+    /// TrySetResult, not SetResult: the queue now completes animations from a finally block and the
+    /// cancel sweep can complete them too, so a double-complete is reachable — and plain SetResult
+    /// throws InvalidOperationException on the second call.
+    /// </summary>
+    internal void Complete() => _tcs.TrySetResult();
 
     /// <summary>
     /// When true (default), the queue waits for this animation to finish before starting the next one.

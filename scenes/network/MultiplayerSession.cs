@@ -51,24 +51,33 @@ public partial class MultiplayerSession : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void StartSession(string configuration)
     {
-        DebugUtilities.PrintPeerFinest($"LoadGame called with config: {configuration}");
-        GameModeMultiplayerDefault gameMode = new GameModeMultiplayerDefault();
-        await gameMode.Init();
-        DebugUtilities.PrintPeerFinest("Game mode initialization complete, emitting MultiplayerSessionReady");
-        
+        // async void: an uncaught throw here goes to the synchronization context and kills the
+        // process. A failure during session init is not recoverable (the readiness barrier will
+        // never complete), but it must be visible rather than a silent crash.
+        try
+        {
+            DebugUtilities.PrintPeerFinest($"LoadGame called with config: {configuration}");
+            GameModeMultiplayerDefault gameMode = new GameModeMultiplayerDefault();
+            await gameMode.Init();
+            DebugUtilities.PrintPeerFinest("Game mode initialization complete, emitting MultiplayerSessionReady");
 
-        if(Multiplayer.IsServer())
-        {            
-            await gameMode.InitStartingState();            
-            GameFlow.Instance.StartGame();
+
+            if(Multiplayer.IsServer())
+            {
+                await gameMode.InitStartingState();
+                GameFlow.Instance.StartGame();
+            }
+
+
+            //NodeUtilities.Instance.PlayersNode.GetChildren().ToList().ForEach(playerScene => (playerScene as PlayerScene).FadeLoadingScreen());
+            // Null on a dedicated/headless server (it controls no faction, so has no local PlayerScene).
+            PlayerScene.Current?.FadeLoadingScreen();
+            EventBus.Emit(EventBus.SignalName.GameSessionStarted);
         }
-
-
-        //NodeUtilities.Instance.PlayersNode.GetChildren().ToList().ForEach(playerScene => (playerScene as PlayerScene).FadeLoadingScreen());
-        // Null on a dedicated/headless server (it controls no faction, so has no local PlayerScene).
-        PlayerScene.Current?.FadeLoadingScreen();
-        EventBus.Emit(EventBus.SignalName.GameSessionStarted);
-
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "MultiplayerSession.StartSession");
+        }
     }
 
     /// <summary>
@@ -80,15 +89,27 @@ public partial class MultiplayerSession : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void BeginEndGame(string resultJson)
     {
-        DebugUtilities.PrintPeer("BeginEndGame received — draining local queues before victory screen");
-        VictoryScreen.PendingResult = JsonSerializer.Deserialize<GameResult>(resultJson);
+        try
+        {
+            DebugUtilities.PrintPeer("BeginEndGame received — draining local queues before victory screen");
+            VictoryScreen.PendingResult = JsonSerializer.Deserialize<GameResult>(resultJson);
 
-        // Drain change events first (applying one may enqueue animations), then animations.
-        if (!ChangeEventQueue.Instance.IsIdle)
-            await ToSignal(ChangeEventQueue.Instance, ChangeEventQueue.SignalName.QueueDrained);
-        await AnimationQueue.Instance.Start();
-
-        _endGameReadiness.RegisterReady();
+            // Drain change events first (applying one may enqueue animations), then animations.
+            // WhenDrained() replaces `if (!IsIdle) await ToSignal(QueueDrained)`, which was a
+            // check-then-await race that hung forever if the queue drained in between.
+            await ChangeEventQueue.Instance.WhenDrained();
+            await AnimationQueue.Instance.Start();
+        }
+        catch (Exception e)
+        {
+            // Report but still report ready: a peer that fails to drain must not strand every other
+            // peer on the readiness barrier and leave the victory screen unreachable for everyone.
+            ErrorReporter.Report(e, "MultiplayerSession.BeginEndGame");
+        }
+        finally
+        {
+            _endGameReadiness.RegisterReady();
+        }
     }
 
     /// <summary>Phase B: runs on the host once host + all clients have drained and reported ready.</summary>
@@ -103,7 +124,7 @@ public partial class MultiplayerSession : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void PerformVictorySwitch()
     {
-        GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/menu/VictoryScreen.tscn");
+        SceneFlow.ChangeScene(this, "res://scenes/menu/VictoryScreen.tscn");
     }
 }
 

@@ -85,7 +85,11 @@ public partial class MultiplayerLobby : Control
 	// Godot lifecycle
 	// ══════════════════════════════════════════════════════════════════════════
 
-	public override void _Ready()
+	// Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
+	// surfacing rather than a silent console line.
+	public override void _Ready() => Guard.Try(ReadyInternal, "MultiplayerLobby._Ready");
+
+	private void ReadyInternal()
 	{
 		DebugUtilities.PrintPeerFinest("MultiplayerLobby: Ready");
 		
@@ -306,7 +310,7 @@ public partial class MultiplayerLobby : Control
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
 		};
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(list);
-		GetTree().ChangeSceneToFile("res://scenes/Game.tscn");
+		SceneFlow.ChangeScene(this, "res://scenes/Game.tscn");
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -487,7 +491,7 @@ public partial class MultiplayerLobby : Control
 			.ToList();
 
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(playerFactionAssignments);
-		GetTree().ChangeSceneToFile("res://scenes/Game.tscn");
+		SceneFlow.ChangeScene(this, "res://scenes/Game.tscn");
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════

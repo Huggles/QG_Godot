@@ -12,10 +12,26 @@ public partial class DrawStepHandlerDefault : GodotObject, IDrawStepHandler
     public void Start(Faction faction)
     {
         this.faction = faction;
-        _ = ProcessDrawStep();
+        Guard.FireAndForget(ProcessDrawStep, "DrawStep", faction);
     }
 
     private async Task ProcessDrawStep()
+    {
+        // See SupplyStepHandlerDefault: a player skip completes the step, any other failure is left
+        // for Guard to report and does not fire DrawStepFinished.
+        try
+        {
+            await ProcessDrawStepInternal();
+        }
+        catch (StepSkippedException)
+        {
+            DebugUtilities.PrintPeer("Draw step selection skipped");
+        }
+
+        DrawStepFinished?.Invoke();
+    }
+
+    private async Task ProcessDrawStepInternal()
     {
         DeckState deckState = DeckState.ForFaction(faction);
         int currentHandSize = deckState.HandCardIds.Count;
@@ -34,7 +50,5 @@ public partial class DrawStepHandlerDefault : GodotObject, IDrawStepHandler
             // No cards to draw
             await Task.Delay(GameSettings.DurationShort);
         }
-
-        DrawStepFinished?.Invoke();
     }
 }

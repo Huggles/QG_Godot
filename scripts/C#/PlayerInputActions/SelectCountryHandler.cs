@@ -28,13 +28,26 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
         EventBus.Instance.CountryClicked += onCountry;
         EventBus.Instance.SelectionSkipped += onSkip;
 
-        int countryId = await tcs.Task;
-
-        EventBus.Instance.CountryClicked -= onCountry;
-        EventBus.Instance.SelectionSkipped -= onSkip;
-        SelectionSkipButton.Current?.Hide();
-        CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
-        InputManager.Current.DisableRayTraceCasting();
+        // Registered so error recovery can release this selection — the TCS is otherwise only ever
+        // completed by a player click, so an aborted step would leave the board stuck as clickable.
+        int countryId;
+        using (PendingLocalInput.Register(onSkip))
+        {
+            try
+            {
+                countryId = await tcs.Task;
+            }
+            finally
+            {
+                // In a finally: previously a throw here permanently leaked Tag.Clickable, ray-trace
+                // casting, the skip button and both event subscriptions.
+                EventBus.Instance.CountryClicked -= onCountry;
+                EventBus.Instance.SelectionSkipped -= onSkip;
+                SelectionSkipButton.Current?.Hide();
+                CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
+                InputManager.Current.DisableRayTraceCasting();
+            }
+        }
 
         if (countryId == -1)
         {

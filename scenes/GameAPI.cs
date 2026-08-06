@@ -121,7 +121,8 @@ public partial class GameAPI : Node
         CountryState countryState = GameState.CountryStateById[countryId];
 
         int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
-        if(unitId == -1) throw new Exception($"No available units of type {unitType} for faction {faction}");
+        // Same category as GameAPIException below: a rules mismatch, thrown before any mutation.
+        if(unitId == -1) throw new GameAPIException($"No available units of type {unitType} for faction {faction}");
         UnitState unitState = UnitState.ForId(unitId);
 
         bool deployable = deployType == DeployType.BUILD ? countryState.Tags.Has(Tag.Buildable, faction) : countryState.Tags.Has(Tag.Recruitable, faction);
@@ -201,7 +202,12 @@ public partial class GameAPI : Node
         EventBus.Emit(EventBus.SignalName.FactionScoredPoints, (int)vpTurnSummary.Faction, factionState.Score);
     }
 
-    public class GameAPIException : Exception
+    /// <summary>
+    /// A card step asked for something the rules do not allow. Derives from
+    /// <see cref="GameRuleException"/> so ErrorReporter can classify it as a rules/authoring bug
+    /// (thrown before any state mutation, therefore always recoverable) without matching on messages.
+    /// </summary>
+    public class GameAPIException : GameRuleException
     {
         public GameAPIException(string message) : base(message) { }
     }

@@ -7,7 +7,11 @@ public partial class GameModeSelectionScreen : Control
 	private RichTextLabel _descriptionLabel;
 	private MenuPanelButton _startGameButton;
 
-	public override void _Ready()
+	// Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
+	// surfacing rather than a silent console line.
+	public override void _Ready() => Guard.Try(ReadyInternal, "GameModeSelectionScreen._Ready");
+
+	private void ReadyInternal()
 	{
 		_scenarioPicker   = GetNode<OptionButton>("ButtonContainer/ScenarioOptionButton");
 		_descriptionLabel = GetNodeOrNull<RichTextLabel>("ButtonContainer/DescriptionPanel/ScenarioDescriptionLabel");
@@ -88,6 +92,6 @@ public partial class GameModeSelectionScreen : Control
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
 		};
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
-		GetTree().ChangeSceneToFile("res://scenes/Game.tscn");
+		SceneFlow.ChangeScene(this, "res://scenes/Game.tscn");
 	}
 }

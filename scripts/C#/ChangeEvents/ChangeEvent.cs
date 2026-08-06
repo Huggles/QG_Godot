@@ -93,6 +93,41 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
     public virtual async Task<bool> ApplyChange()
     {
+        // Mutation tracking for error classification. A throw between ExecuteAsync() (which mutates
+        // server state) and BroadCast() (which tells the clients) leaves the peers already divergent,
+        // and the resync repair in NetworkApi.RequestResync is commented out — so recovery cannot be
+        // offered for that window. MutationDepth/BroadcastSent is how ErrorReporter detects it.
+        int capturedEpoch = ErrorReporter.GameLoopEpoch;
+        ErrorReporter.MutationDepth++;
+        bool broadcastSentOnEntry = ErrorReporter.BroadcastSent;
+        ErrorReporter.BroadcastSent = false;
+        try
+        {
+            return await ApplyChangeInternal(capturedEpoch);
+        }
+        catch (Exception e)
+        {
+            // Tag the exception here rather than letting ErrorReporter read MutationDepth at report
+            // time: this finally block unwinds the counters as the stack unwinds, so by the time the
+            // Guard catch at the top of the loop sees the exception, the state that identified the
+            // divergence window is already gone. The marker travels with the exception instead.
+            if (!ErrorReporter.BroadcastSent)
+                ErrorReporter.MarkDiverged(e);
+            throw;
+        }
+        finally
+        {
+            ErrorReporter.MutationDepth--;
+            ErrorReporter.BroadcastSent = broadcastSentOnEntry;
+        }
+    }
+
+    private async Task<bool> ApplyChangeInternal(int capturedEpoch)
+    {
+        // If the loop was recovered while this was in flight, unwind instead of mutating state
+        // alongside the resumed loop.
+        ErrorReporter.ThrowIfStaleEpoch(capturedEpoch);
+
         EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
         DebugUtilities.PrintPeer($"Doing change event {ScriptName} (Id: {Id}) with source card {SourceCardId} and triggering faction {TriggeringFaction}");           
         if(CardPlayRound.Current != null)
@@ -112,13 +147,21 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
         }
         DebugUtilities.PrintPeer($"Execute Async");           
         await ExecuteAsync();
+        // Armed after the mutation but before BroadCast() — the tier 3 divergence window.
+        ErrorInjection.MaybeThrow(ErrorInjection.Site.MidMutation, ScriptName);
         // Broadcast this change event to clients BEFORE recalculating tags, so the tags snapshot
         // that CalculateAll() broadcasts (as a RecalculateTagsChangeEvent) is enqueued on clients
         // right behind this event and always applies to post-change state — never before it.
-        if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
+        bool isServer = MultiplayerSession.Instance?.Multiplayer.IsServer() == true;
+        if (isServer)
         {
             await BroadCast();
         }
+        // From here on the clients have the change, so a later failure is recoverable: the remaining
+        // work is a tag recalculation and animations, and tags are not part of the replicated hash.
+        // On a client there is nothing to broadcast — it is replaying an event the server already
+        // sent — so the divergence window does not apply and this is set unconditionally.
+        ErrorReporter.BroadcastSent = true;
         GameStateCalculator.CalculateAll();
         EmitSignal(SignalName.ChangeEventApplied, Id);
         if (PlayAnimations && !GameContext.IsHeadless)

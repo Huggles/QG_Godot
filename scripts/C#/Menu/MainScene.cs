@@ -3,7 +3,11 @@ using System.Linq;
 
 public partial class MainScene : Node
 {
-    public override void _Ready()
+    // Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
+    // surfacing rather than a silent console line.
+    public override void _Ready() => Guard.Try(ReadyInternal, "MainScene._Ready");
+
+    private void ReadyInternal()
     {
         var userArgs = OS.GetCmdlineUserArgs();
 

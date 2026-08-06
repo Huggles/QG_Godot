@@ -37,7 +37,11 @@ public partial class JoinGameScreen : Control
 	// Godot lifecycle
 	// ══════════════════════════════════════════════════════════════════════════
 
-	public override void _Ready()
+	// Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
+	// surfacing rather than a silent console line.
+	public override void _Ready() => Guard.Try(ReadyInternal, "JoinGameScreen._Ready");
+
+	private void ReadyInternal()
 	{
 		_ipInput     = GetNode<LineEdit>("%IpInput");
 		_portInput   = GetNode<LineEdit>("%PortInput");
@@ -132,7 +136,7 @@ public partial class JoinGameScreen : Control
 	private void OnLeavePressed()
 	{
 		DebugUtilities.PrintPeer("JoinGameScreen: leaving");
-		GetTree().ChangeSceneToFile(MenuScenePath);
+		SceneFlow.ChangeScene(this, MenuScenePath, leaveSession: true);
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -146,7 +150,7 @@ public partial class JoinGameScreen : Control
 
 		// Deferred: we are inside the multiplayer poll callback, so the scene swap has to wait
 		// until the end of the frame (same reason as MainScene and MultiplayerSession).
-		GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, LobbyScenePath);
+		SceneFlow.ChangeScene(this, LobbyScenePath);
 	}
 
 	private void OnConnectionFailed()

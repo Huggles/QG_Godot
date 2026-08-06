@@ -85,6 +85,7 @@ public partial class CardStep : ITaggable
             {
                 DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName}");
                 NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), ActionGuidance, -1, (int)TriggeringFaction);
+                ErrorInjection.MaybeThrow(ErrorInjection.Site.CardStep, CardLogic?.CardState?.CardName);
                 result = await StepLogic.Invoke();
             }
             catch (StepSkippedException)
@@ -97,7 +98,11 @@ public partial class CardStep : ITaggable
             }
             catch (Exception e)
             {
-                DebugUtilities.PrintPeer(e.Message);
+                // Tier 1 recovery: StepFinished was already set true above, and result stays null, so
+                // DoCard advances to the card's next step and the turn step still completes. That was
+                // already correct — the problem was that this only printed e.Message, in green, with
+                // no stack trace, so a real bug looked like ordinary log noise.
+                ErrorReporter.ReportRecovered(e, $"CardStep \"{CardLogic?.CardState?.CardName}\" #{Id}", TriggeringFaction);
             }
         }
         
