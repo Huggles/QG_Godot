@@ -8,7 +8,7 @@ public partial class StatusAircraftCarriers : StatusCardLogic
 {
     private BattleCountryChangeEvent LastSeaBattle =>
         CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-            .LastOrDefault(ce => ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.SEA);
+            .LastOrDefault(ce => ce.IsBattle && ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.SEA);
 
     protected override List<Condition> CardTriggers()
     {

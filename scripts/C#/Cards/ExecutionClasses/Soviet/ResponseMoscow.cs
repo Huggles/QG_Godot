@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
@@ -11,12 +10,8 @@ public partial class ResponseMoscow : ResponseCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
-            Condition.Build(new Condition.CustomCondition(()=>{
-                if(CardPlayPool.LastNoneNewCardChangeEvent is BattleUnitChangeEvent battleUnitChangeEvent){
-                    return battleUnitChangeEvent.UnitState.Faction == Faction.SOVIET && targetCountries.Contains(battleUnitChangeEvent.CountryId);
-                }
-                return false;
-            }), this),
+            Condition.Build(new Condition.UnitAboutToBeRemoved(Faction.SOVIET, UnitType.ARMY)
+                .WithCountries(targetCountries), this),
         };
     }
 
@@ -25,16 +20,15 @@ public partial class ResponseMoscow : ResponseCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async ()=>{
-                if(CardPlayPool.LastNoneNewCardChangeEvent is BattleUnitChangeEvent battleUnitChangeEvent){
-                    battleUnitChangeEvent.IsBlocked = true;
-                    battleUnitChangeEvent.UnitState.ImmuneForTurn = true;
-                    PresentationServices.Notification.ShowActionText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the land battle on his army in {CountryState.ForId(targetCountries[0])}", Faction);
+                if(CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent){
+                    removeEvent.IsBlocked = true;
+                    removeEvent.UnitState.ImmuneForTurn = true;
+                    PresentationServices.Notification.ShowActionText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
-                    return null;
-                } else {
-                    throw new Exception("Reaction should be to a battle unit change event");
                 }
+                return null;
             })
+            .WithGuidance("Do not remove your Army in Moscow this turn")
         };
     }
 }

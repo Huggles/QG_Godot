@@ -322,7 +322,8 @@ public abstract partial class InputRequest
         public override async Task Handle()
         {
             await Task.Delay(GameSettings.DurationMedium);
-            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction);
+            // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
+            PlayerScene.Current.InputManager.SetCardSelectionActive(TargetFaction, TargetCardIds ?? new List<int>());
             if (TriggerCardId > -1)
                 FactionHandDisplay.Current?.ShowTriggerContext(TriggerCardId, TriggerSummaryText);
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");

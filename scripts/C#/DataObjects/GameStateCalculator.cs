@@ -10,6 +10,9 @@ public class GameStateCalculator
     /// Tags computed by this calculator that are replicated to clients.
     /// CardStep.IsExecutable is intentionally excluded — it is server-internal execution state.
     /// Tags.Clickable is excluded — it is set by input handlers locally.
+    /// Tag.IsBlockReaction is excluded — it is server-internal. The block-eligible card ids are sent
+    /// to the controlling peer explicitly as InputRequest.TargetCardIds by CardPlayRound.RequestBlock,
+    /// so replicating the tag would be redundant. Do not add it here.
     /// </summary>
     public static readonly HashSet<Tag> ReplicatedTags = new()
     {
@@ -140,7 +143,23 @@ public class GameStateCalculator
                 cardState.AddTag(Tag.IsAfterReaction, faction);
         });
 
-        
+
+    }
+
+    /// <summary>
+    /// Mirror of <see cref="CalculateAfterReactionCardsForFaction"/> for block reactions: an activatable
+    /// card whose triggers include <see cref="Condition.IsBlockRequest"/>. Consumed server-side by
+    /// CardPlayRound.GetBlockReactionOptions — block cards are excluded from Tag.IsAfterReaction, so
+    /// without this tag they have no route to ever be offered.
+    /// </summary>
+    private static void CalculateBlockReactionCardsForFaction(Faction faction)
+    {
+        ClearTagsForFaction(faction, Tag.IsBlockReaction);
+        CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
+        {
+            if (cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == true)
+                cardState.AddTag(Tag.IsBlockReaction, faction);
+        });
     }
 
     private static void CalculatePlayableCardsForFaction(Faction faction)
@@ -378,7 +397,8 @@ public class GameStateCalculator
 
         CalculateExecutableStepsForFaction(faction);
         CalculateActivatableCardsForFaction(faction);
-        CalculateAfterReactionCardsForFaction(faction);        
+        CalculateAfterReactionCardsForFaction(faction);
+        CalculateBlockReactionCardsForFaction(faction);
         CalculatePlayableCardsForFaction(faction);
 
         return calculator;

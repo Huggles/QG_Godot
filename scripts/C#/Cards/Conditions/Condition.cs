@@ -240,7 +240,7 @@ public abstract class Condition
 
         public override bool IsMatch(ChangeEvent ce)
         {
-            if (ce is not BattleCountryChangeEvent bce) return false;
+            if (ce is not BattleCountryChangeEvent bce || !bce.IsBattle) return false;
             if (Faction != Faction.NONE && bce.TriggeringFaction != Faction) return false;
             if (this.FactionTeam != FactionTeam.NONE && StaticGameData.FactionTeamForFaction(bce.TriggeringFaction) != this.FactionTeam) return false;
             if (TargetFaction != Faction.NONE)
@@ -590,14 +590,14 @@ public abstract class Condition
     {
         public HasBattledOnLand(Faction faction) { this.Faction = faction; }
         public override bool IsMatch(ChangeEvent ce)
-            => ce is BattleCountryChangeEvent bce && bce.TriggeringFaction == Faction && bce.CountryState.Type == CountryType.LAND;
+            => ce is BattleCountryChangeEvent bce && bce.IsBattle && bce.TriggeringFaction == Faction && bce.CountryState.Type == CountryType.LAND;
     }
 
     public class HasBattledAtSea : EventCondition
     {
         public HasBattledAtSea(Faction faction) { this.Faction = faction; }
         public override bool IsMatch(ChangeEvent ce)
-            => ce is BattleCountryChangeEvent bce && bce.TriggeringFaction == Faction && bce.CountryState.Type == CountryType.SEA;
+            => ce is BattleCountryChangeEvent bce && bce.IsBattle && bce.TriggeringFaction == Faction && bce.CountryState.Type == CountryType.SEA;
     }
 
     public class HasPlayedCardThisTurnStep : Condition
@@ -630,7 +630,18 @@ public abstract class Condition
     public class CustomCondition : Condition
     {
         Func<bool> Condition;
+        private bool _requiresEventContext;
+
         public CustomCondition(Func<bool> condition) => this.Condition = condition;
+
+        /// <summary>
+        /// Marks this predicate as event-scoped: it inspects <c>CardPlayPool.CurrentReactionTrigger</c>
+        /// or the change-event pool, so the card may activate inside a reaction chain.
+        /// Without it, <see cref="CardLogic.CanBeActivated"/> rejects the card whenever ReactionDepth &gt; 0.
+        /// </summary>
+        public CustomCondition InReactionWindow() { _requiresEventContext = true; return this; }
+
+        public override bool RequiresEventContext => _requiresEventContext;
         public override bool MeetCondition() => Condition.Invoke();
     }
 

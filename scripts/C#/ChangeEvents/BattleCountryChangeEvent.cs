@@ -14,6 +14,17 @@ public partial class BattleCountryChangeEvent : ChangeEvent
         CountryId = countryId;
     }
 
+    /// <summary>
+    /// True when this event actually represents a battle.
+    /// <para>
+    /// RemoveUnitChangeEvent derives from this class, so a bare <c>is BattleCountryChangeEvent</c>
+    /// test (or <c>GetChangeEvents&lt;BattleCountryChangeEvent&gt;()</c>) also matches eliminations
+    /// and supply attrition. Always gate on this when you mean "a battle occurred" — otherwise
+    /// cards like Frontal Assault trigger off a Rasputitsa elimination.
+    /// </para>
+    /// </summary>
+    public bool IsBattle => this is not RemoveUnitChangeEvent removal || removal.Reason == UnitRemovalReason.BATTLE;
+
     protected override List<ChangeEventAnimation> BeforeAnimations => new()
     {
         new ZoomToCountryAnimation(CountryId),

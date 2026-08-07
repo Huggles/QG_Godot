@@ -249,6 +249,17 @@ public partial class CardPlayRound : GodotObject
         CurrentBlockTrigger = changeEvent;
         try
         {
+            // DoChangeEvent registers the event into the pool immediately before this call, so tags
+            // computed earlier (in CardStep.Execute, before registration) predate it. Recalculate so
+            // block conditions reading CardPlayPool.LastNoneNewCardChangeEvent see the event they are
+            // being asked to block. Mirrors the per-pass recalculation in RequestAfterReactions.
+            // Introduction events are exempt: ProcessIntroductionEvent applies the change (which
+            // recalculates) immediately before calling us, so tags are already current there.
+            // One call suffices: a block card played below re-enters DoCard -> ApplyChange -> CalculateAll.
+            bool isIntroductionEvent = changeEvent is PlayCardChangeEvent || changeEvent is ActivateReactionChangeEvent;
+            if (!isIntroductionEvent)
+                GameStateCalculator.CalculateAll();
+
             foreach (Faction faction in RequestOrder)
             {
                 if (faction == changeEvent.TriggeringFaction)
@@ -411,23 +422,25 @@ public partial class CardPlayRound : GodotObject
         if (LastChangeEvent?.TriggeringFaction == faction)
             return -1;
 
-        bool hasBlockOptions = GameSession.Current.GameState.CardStatesById.Values
-            .Any(cs => cs.Tags.Has(Tag.IsBlockReaction, faction));
+        List<int> blockOptions = GetBlockReactionOptions(faction);
 
-        if (!hasBlockOptions)
+        if (blockOptions.Count == 0)
         {
             DebugUtilities.PrintPeer($"{faction} has no block reactions available");
             await Task.Delay(10);
             return -1;
         }
 
-        DebugUtilities.PrintPeer($"{faction} has block reaction options");
+        DebugUtilities.PrintPeer($"{faction} has block reaction options: {string.Join(",", blockOptions)}");
 
         // Route through the network seam (like RequestPlay) so the authoritative host — which may
         // be a faction-less headless server — awaits the controlling peer's response instead of a
         // local UI click. The client's Handle() runs the actual card-selection UI.
         InputRequest.BlockReactionRequestHandler request = new InputRequest.BlockReactionRequestHandler(faction)
         {
+            // Sent explicitly so the client prompt offers only block-eligible cards rather than
+            // everything tagged IsActivatable. Tag.IsBlockReaction itself stays server-internal.
+            TargetCardIds = blockOptions,
             TriggerCardId = GetTriggerCardId(CurrentBlockTrigger),
             TriggerSummaryText = CurrentBlockTrigger?.SummaryText()
         };
@@ -446,6 +459,9 @@ public partial class CardPlayRound : GodotObject
 
     /// <summary>Card IDs of after-reactions (non-block) available to the faction.</summary>
     public List<int> GetAfterReactionOptions(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsAfterReaction, faction)).Select(cs => cs.Id).ToList();
+
+    /// <summary>Card IDs of block reactions available to the faction.</summary>
+    public List<int> GetBlockReactionOptions(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsBlockReaction, faction)).Select(cs => cs.Id).ToList();
 
     public List<T> GetChangeEvents<T>() where T : ChangeEvent
     {

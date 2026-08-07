@@ -13,7 +13,7 @@ public partial class ResponseRomanianReinforcements : ResponseCardLogic
                         && removeEvent.UnitState.Type == UnitType.ARMY
                         && removeEvent.WasInSupply;
                 return false;
-            }), this),
+            }).InReactionWindow(), this),
         };
     }
 

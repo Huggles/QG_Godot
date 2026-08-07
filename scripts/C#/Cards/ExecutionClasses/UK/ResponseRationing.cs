@@ -12,7 +12,7 @@ public partial class ResponseRationing : ResponseCardLogic
                 CardPlayPool.GetChangeEvents<PlayCardChangeEvent>().Any(ce =>
                     ce.TriggeringFaction == Faction &&
                     DeckState.ForFaction(Faction).DiscardedCardIds.Contains(ce.SourceCardId))
-            ), this)
+            ).InReactionWindow(), this)
         };
     }
 

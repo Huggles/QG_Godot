@@ -17,7 +17,7 @@ public partial class ResponseRasputitsa : ResponseCardLogic
                 var moscowCountry = CountryState.ForEnum(Country.Moscow);
                 return trigger.CountryState.Country == Country.Moscow ||
                        moscowCountry.ConnectedCountryStates.Any(cs => cs.Country == trigger.CountryState.Country);
-            }), this),
+            }).InReactionWindow(), this),
         };
     }
 

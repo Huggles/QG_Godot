@@ -7,7 +7,7 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
 {
     private BattleCountryChangeEvent LastLandBattle =>
         CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
-            .LastOrDefault(ce => ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.LAND);
+            .LastOrDefault(ce => ce.IsBattle && ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.LAND);
 
     private bool HasAdjacentSuppliedUSNavy =>
         LastLandBattle != null && CountryState.ForId(LastLandBattle.CountryId).ConnectedCountryStates

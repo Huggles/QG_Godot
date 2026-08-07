@@ -15,7 +15,7 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
                 return StaticGameData.FactionTeamForFaction(deployEvent.TriggeringFaction) == FactionTeam.AXIS
                     && deployEvent.UnitType == UnitType.ARMY
                     && TargetCountries.Contains(deployEvent.CountryState.Country);
-            }), this)
+            }).InReactionWindow(), this)
         };
     }
 

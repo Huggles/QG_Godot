@@ -39,6 +39,16 @@ public partial class InputManager : Node2D
             cardIds = cardIds.Distinct().ToList();
         }
         
+        return SetCardSelectionActive(faction, cardIds);
+    }
+
+    /// <summary>
+    /// Activates card selection over an explicit set of card ids. Used when the caller already knows
+    /// which cards are eligible (e.g. a block-reaction request, where only block cards may be chosen)
+    /// rather than deriving the list from Tag.IsActivatable.
+    /// </summary>
+    public InputHandlerPlayCard SetCardSelectionActive(Faction faction, List<int> cardIds)
+    {
         PlayerActionLabel.ShowText("Choose a card", faction);
         FactionHandDisplay.Current.Show(cardIds);
         FactionHandDisplay.Current.CardSelected += HandleItemSelected;
