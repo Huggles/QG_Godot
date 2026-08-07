@@ -13,7 +13,7 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
     public void Start(Faction faction)
     {
         this.faction = faction;
-        Guard.FireAndForget(ProcessSupplyStep, "SupplyStep", faction);
+        Guard.FireAndForget(ProcessSupplyStep, "SupplyStep", faction, stallsLoop: true);
     }
 
     private async Task ProcessSupplyStep()
@@ -37,6 +37,7 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
     private async Task ProcessSupplyStepInternal()
     {
         ErrorInjection.MaybeThrow(ErrorInjection.Site.SupplyStep);
+        ErrorInjection.MaybeReportAndRethrow(ErrorInjection.Site.ReportedRethrow);
 
         // Recalculate supply for all units
         GameStateCalculator.CalculateAll();

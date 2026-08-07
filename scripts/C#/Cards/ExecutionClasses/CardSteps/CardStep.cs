@@ -98,11 +98,19 @@ public partial class CardStep : ITaggable
             }
             catch (Exception e)
             {
-                // Tier 1 recovery: StepFinished was already set true above, and result stays null, so
-                // DoCard advances to the card's next step and the turn step still completes. That was
-                // already correct — the problem was that this only printed e.Message, in green, with
-                // no stack trace, so a real bug looked like ordinary log noise.
-                ErrorReporter.ReportRecovered(e, $"CardStep \"{CardLogic?.CardState?.CardName}\" #{Id}", TriggeringFaction);
+                // Report here, where the card and step are known, then RETHROW.
+                //
+                // This used to swallow the exception and let DoCard move to the card's next step. That
+                // looked like a recovery but is not one: the player's action silently does not happen
+                // and the board no longer matches what the card said it would do. Letting it escape to
+                // the Guard on the turn step halts the loop and puts the decision in the player's
+                // hands via the popup's Continue button, which is the honest outcome.
+                //
+                // Marked as reported so the Guard above does not report the same failure twice — the
+                // context here (card name + step id) is richer than anything it could reconstruct.
+                ErrorReporter.Report(e, $"CardStep \"{CardLogic?.CardState?.CardName}\" #{Id}", TriggeringFaction);
+                ErrorReporter.MarkReported(e);
+                throw;
             }
         }
         

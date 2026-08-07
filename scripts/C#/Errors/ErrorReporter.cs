@@ -46,7 +46,8 @@ public partial class ErrorReporter : Node
 
     // ── Internals ────────────────────────────────────────────────────────────
 
-    private const int MaxQueuedErrors = 20;
+    /// <summary>How many errors the in-game history keeps. Oldest are evicted past this.</summary>
+    private const int HistoryLimit = 10;
 
     private ErrorPopup _popup;
     private bool _reporting;                                   // re-entrancy guard
@@ -58,8 +59,19 @@ public partial class ErrorReporter : Node
     /// </summary>
     private int? _counterAtReport;
 
-    /// <summary>Severity of the newest error, so Continue can refuse to advance for a Soft one.</summary>
-    private ErrorSeverity _newestSeverity = ErrorSeverity.Recoverable;
+    /// <summary>
+    /// The error that stopped the turn loop and has not been acted on yet, or null when nothing is
+    /// waiting. This — not "the newest error" — is what decides whether the popup offers Continue,
+    /// which is what makes opening the history by hotkey safe: with no pending stall there is no
+    /// Continue button, so browsing cannot skip a turn step.
+    /// </summary>
+    private GameError _pendingStall;
+
+    /// <summary>True when a failure is waiting on the player's decision.</summary>
+    public bool HasPendingStall => _pendingStall != null;
+
+    /// <summary>Severity of the pending stall, used to pick between Continue and a disabled Continue.</summary>
+    public ErrorSeverity PendingSeverity => _pendingStall?.Severity ?? ErrorSeverity.Soft;
 
     private int _suppressedCount;
 
@@ -86,11 +98,15 @@ public partial class ErrorReporter : Node
         }
         set => _showRecovered = value;
     }
-    private readonly List<GameError> _queue = new();
+    private readonly List<GameError> _history = new();
     private readonly Dictionary<string, GameError> _seen = new();
 
-    /// <summary>Errors reported this session, newest last. Capped at <see cref="MaxQueuedErrors"/>.</summary>
-    public IReadOnlyList<GameError> Queue => _queue;
+    /// <summary>
+    /// The last <see cref="HistoryLimit"/> errors this session, newest last. Survives dismissal —
+    /// closing the popup acknowledges the errors, it does not forget them. Includes self-recovered
+    /// (Soft) failures, which never raise a popup, so this is the only place to see them in game.
+    /// </summary>
+    public IReadOnlyList<GameError> History => _history;
 
     public override void _Ready()
     {
@@ -105,6 +121,39 @@ public partial class ErrorReporter : Node
             if (node.GetParent() == GetTree().Root)
                 IsShuttingDown = false;
         };
+
+        if (!InputMap.HasAction(HistoryAction))
+            SafeLog($"ErrorReporter: InputMap action '{HistoryAction}' is missing — the error-history hotkey will not work.");
+
+        InstallTestHooks();
+    }
+
+    /// <summary>Command-line driven hooks so automated runs can exercise the hotkey and the ring buffer.</summary>
+    private void InstallTestHooks()
+    {
+        int flood = ErrorInjection.FloodCount;
+        if (flood > 0)
+            GetTree().CreateTimer(2.0).Timeout += () => ErrorInjection.Flood(flood);
+
+        foreach (double at in ErrorInjection.RepeatErrorAt)
+        {
+            GetTree().CreateTimer(at).Timeout += () =>
+            {
+                SafeLog($"[repeat_error_at] reporting the recurring error (t={at}s)");
+                ErrorInjection.ReportRepeat();
+            };
+        }
+
+        foreach (double at in ErrorInjection.AutoOpenHistoryAt)
+        {
+            GetTree().CreateTimer(at).Timeout += () =>
+            {
+                SafeLog($"[auto_open_history] firing {HistoryAction} (t={at}s)");
+                // A real action event through the normal input pipeline, so this validates the
+                // InputMap action name and _UnhandledInput, not just a direct method call.
+                Input.ParseInputEvent(new InputEventAction { Action = HistoryAction, Pressed = true });
+            };
+        }
     }
 
     public override void _Notification(int what)
@@ -123,6 +172,17 @@ public partial class ErrorReporter : Node
     /// <param name="target">Faction the failing work was being done for, when there is one.</param>
     public static void Report(Exception e, string context = null, Faction? target = null)
         => ReportInternal(e, context, target, allowBroadcast: true);
+
+    /// <summary>
+    /// Report a failure that escaped to the turn loop, so the loop is now stalled and the popup must
+    /// offer Continue. Called by <see cref="Guard"/> at the loop-driving call sites only.
+    ///
+    /// Being explicit matters: severity alone is not the signal. A cosmetic animation failure is
+    /// "Recoverable" but stalls nothing, and offering Continue for it would advance a turn step that
+    /// nothing was waiting on.
+    /// </summary>
+    public static void ReportLoopStalled(Exception e, string context = null, Faction? target = null)
+        => ReportInternal(e, context, target, allowBroadcast: true, stallsLoop: true);
 
     /// <summary>
     /// Report a failure that has ALREADY been recovered in place, so the popup is informational and
@@ -150,15 +210,78 @@ public partial class ErrorReporter : Node
         SafeLog($"(reported by {error.OriginLabel})\n{error.ToPlainText()}");
 
         if (Instance == null) return;
-        Instance.CallDeferred(MethodName.Ingest, error.ToJson(), false);
+        Instance.CallDeferred(MethodName.Ingest, error.ToJson(), false, false);
     }
 
-    /// <summary>Forget the reported errors so the next failure starts a fresh popup queue.</summary>
-    public void ClearQueue()
+    /// <summary>
+    /// Mark everything as seen by the player, WITHOUT forgetting the errors. Called when the popup
+    /// closes — the difference between "I have read this" and "this never happened", so the history
+    /// stays browsable by hotkey afterwards.
+    ///
+    /// Deliberately does NOT clear <see cref="_pendingStall"/>: closing the popup does not un-stall
+    /// the turn loop. Only actually resuming (or quitting) does. So if you close without choosing,
+    /// re-opening still offers Continue — and <c>RequestResume</c> still works, which it would not if
+    /// acknowledging had wiped the state it guards on.
+    /// </summary>
+    public void AcknowledgeAll()
     {
-        _queue.Clear();
-        _seen.Clear();
+        foreach (GameError error in _history)
+            error.Acknowledged = true;
     }
+
+    /// <summary>Drop the pending-stall state on leaving the game, where resuming is moot.</summary>
+    public void AbandonPendingStall() => _pendingStall = null;
+
+    /// <summary>Wipe the history entirely. Not on any production path; kept for a deliberate reset.</summary>
+    public void ClearHistory()
+    {
+        _history.Clear();
+        _seen.Clear();
+        _pendingStall = null;
+    }
+
+    /// <summary>
+    /// Open the error history, or close it if it is already open. Bound to the
+    /// <c>debug_error_history</c> action; see <see cref="_UnhandledInput"/>.
+    /// </summary>
+    public void ToggleHistory()
+    {
+        if (GameContext.IsHeadless) return;
+
+        if (_popup != null && IsInstanceValid(_popup) && _popup.Visible)
+        {
+            DebugUtilities.PrintPeer("ErrorReporter: closing error history");
+            _popup.CloseFromHotkey();
+            return;
+        }
+
+        EnsurePopup();
+        _popup?.PresentHistory();
+        string span = _history.Count > 0
+            ? $" — oldest \"{_history[0].Message}\", newest \"{_history[^1].Message}\""
+            : "";
+        DebugUtilities.PrintPeer(
+            $"ErrorReporter: opened error history ({_history.Count} error(s), " +
+            $"{_suppressedCount} self-recovered, loopStalled={HasPendingStall}){span}");
+    }
+
+    /// <summary>
+    /// The hotkey is handled here rather than through <c>InputManager.KeyClicked</c> for two reasons:
+    /// this is an autoload, so it exists in the menu and lobby where InputManager.Current is null;
+    /// and ErrorPopup disables InputManager's processing while it is open, so a KeyClicked binding
+    /// could open the popup but never close it. (KeyClicked also fires on key release.)
+    /// </summary>
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event.IsActionPressed(HistoryAction))
+        {
+            ToggleHistory();
+            GetViewport().SetInputAsHandled();
+        }
+    }
+
+    /// <summary>InputMap action that opens the history. Defined in project.godot, bound to F8.</summary>
+    public const string HistoryAction = "debug_error_history";
 
     /// <summary>
     /// Resume the turn loop after a reported failure. Releases every awaiter that the aborted step
@@ -171,11 +294,11 @@ public partial class ErrorReporter : Node
         if (Instance.Multiplayer?.MultiplayerPeer != null && !Instance.Multiplayer.IsServer())
             return;
 
-        // A Soft error already recovered in place, and the loop never stopped — advancing here would
-        // silently skip a whole turn step.
-        if (Instance._newestSeverity == ErrorSeverity.Soft)
+        // Nothing is stalled — either the failure self-recovered, or the popup was opened by hotkey
+        // to browse history. Advancing here would silently skip a whole turn step.
+        if (Instance._pendingStall == null)
         {
-            DebugUtilities.PrintPeer("ErrorReporter: error self-recovered, nothing to resume");
+            DebugUtilities.PrintPeer("ErrorReporter: nothing is stalled, nothing to resume");
             return;
         }
 
@@ -195,6 +318,7 @@ public partial class ErrorReporter : Node
         BumpEpoch();
         MutationDepth = 0;
         BroadcastSent = false;
+        Instance._pendingStall = null;
         CancelPendingAwaiters();
 
         try
@@ -211,6 +335,25 @@ public partial class ErrorReporter : Node
     {
         try { return GameFlow.Instance?.TurnStepCounter; }
         catch { return null; }
+    }
+
+    /// <summary>
+    /// Arm the stall for an error that was reported deeper in the stack and then rethrown, reaching a
+    /// loop-driving Guard. The history entry already exists; only the "loop is stopped" fact is new.
+    /// Deferred so it runs on the main thread alongside <see cref="Ingest"/>.
+    /// </summary>
+    private void MarkStalledFromRethrow()
+    {
+        if (_history.Count == 0) return;
+
+        _pendingStall = _history[^1];
+        _pendingStall.Acknowledged = false;
+        _counterAtReport = TryReadTurnStepCounter();
+
+        // The popup was raised by the original report; re-render so Continue appears now that the
+        // loop is known to be stopped.
+        if (_popup != null && IsInstanceValid(_popup) && _popup.Visible)
+            _popup.Refresh();
     }
 
     /// <summary>
@@ -267,6 +410,31 @@ public partial class ErrorReporter : Node
     /// <summary>Key used to tag an exception that escaped the mutate-then-broadcast divergence window.</summary>
     private const string DivergedKey = "QG.Diverged";
 
+    /// <summary>Key marking an exception already reported closer to the source, with better context.</summary>
+    private const string ReportedKey = "QG.Reported";
+
+    /// <summary>
+    /// Mark <paramref name="e"/> as already reported, so a catch further up the stack re-reports
+    /// nothing. Used where an inner frame knows more than an outer one — <c>CardStep</c> knows the
+    /// card and step id, the turn-step Guard only knows the step.
+    /// </summary>
+    public static void MarkReported(Exception e)
+    {
+        if (e == null) return;
+        try { e.Data[ReportedKey] = true; }
+        catch { /* some exception types have a read-only Data dictionary */ }
+    }
+
+    private static bool IsAlreadyReported(Exception e)
+    {
+        for (Exception current = e; current != null; current = current.InnerException)
+        {
+            try { if (current.Data.Contains(ReportedKey)) return true; }
+            catch { /* ignore and keep walking */ }
+        }
+        return false;
+    }
+
     /// <summary>
     /// Mark <paramref name="e"/> as having escaped <c>ChangeEvent.ApplyChange</c> after the state was
     /// mutated but before clients were told. Called from ApplyChange itself, because the counters that
@@ -305,12 +473,22 @@ public partial class ErrorReporter : Node
     // ── Report pipeline ──────────────────────────────────────────────────────
 
     private static void ReportInternal(Exception e, string context, Faction? target, bool allowBroadcast,
-                                       ErrorSeverity? forcedSeverity = null)
+                                       ErrorSeverity? forcedSeverity = null, bool stallsLoop = false)
     {
         if (e == null) return;
         if (IsBenign(e)) return;
 
         ErrorReporter reporter = Instance;
+
+        // Already reported closer to the source, with richer context (e.g. CardStep knows the card
+        // name). Do not duplicate it — but if it has now escaped to the turn loop, still arm the
+        // stall so the popup offers Continue.
+        if (IsAlreadyReported(e))
+        {
+            if (stallsLoop && reporter != null)
+                reporter.CallDeferred(MethodName.MarkStalledFromRethrow);
+            return;
+        }
 
         // Re-entrancy: a failure raised while reporting must not recurse. Log and drop.
         if (reporter != null && reporter._reporting)
@@ -339,7 +517,7 @@ public partial class ErrorReporter : Node
 
         // Report() can arrive on the finalizer thread (see the UnobservedTaskException backstop),
         // so everything that touches Godot objects is marshalled to the main thread.
-        reporter.CallDeferred(MethodName.Ingest, error.ToJson(), allowBroadcast);
+        reporter.CallDeferred(MethodName.Ingest, error.ToJson(), allowBroadcast, stallsLoop);
     }
 
     private static GameError Build(Exception e, string context, Faction? target, ErrorSeverity? forcedSeverity)
@@ -440,7 +618,7 @@ public partial class ErrorReporter : Node
     // ── Main-thread side ─────────────────────────────────────────────────────
 
     /// <summary>Main-thread entry point. Deferred target of <see cref="ReportInternal"/>.</summary>
-    private void Ingest(string errorJson, bool allowBroadcast)
+    private void Ingest(string errorJson, bool allowBroadcast, bool stallsLoop)
     {
         if (_reporting) return;
         _reporting = true;
@@ -449,44 +627,74 @@ public partial class ErrorReporter : Node
             GameError error = GameError.FromJson(errorJson);
             if (error == null) return;
 
-            // Dedupe: a fault inside a loop must not spawn hundreds of popups.
+            bool silent = error.Severity == ErrorSeverity.Soft && !ShowRecoveredErrors;
+
+            // Dedupe: a fault inside a loop must not spawn hundreds of popups. The map lives for the
+            // whole session so Occurrences accumulates honestly, which means a recurrence AFTER the
+            // player dismissed the popup lands here with the popup hidden — and Refresh() no-ops when
+            // hidden. Re-presenting in that case is what stops an acknowledged error from being
+            // silently swallowed on every later recurrence.
             if (_seen.TryGetValue(error.DedupeKey, out GameError existing))
             {
                 existing.Occurrences++;
-                _popup?.Refresh();
+
+                if (_popup != null && IsInstanceValid(_popup) && _popup.Visible)
+                {
+                    _popup.Refresh();
+                }
+                else if (existing.Acknowledged && !silent && !GameContext.IsHeadless && !IsShuttingDown)
+                {
+                    existing.Acknowledged = false;
+                    _counterAtReport = TryReadTurnStepCounter();
+                    if (stallsLoop) _pendingStall = existing;
+                    ShowPopup(existing);
+                }
+                else if (stallsLoop)
+                {
+                    // Popup is up showing something else, but the loop is now stalled on this one.
+                    _pendingStall = existing;
+                    _counterAtReport = TryReadTurnStepCounter();
+                }
                 return;
             }
+
             _seen[error.DedupeKey] = error;
+
+            // Ring eviction, not "drop the newest": a session that produces more than HistoryLimit
+            // errors must keep the RECENT ones, which are the ones you are debugging.
+            _history.Add(error);
+            while (_history.Count > HistoryLimit)
+            {
+                GameError evicted = _history[0];
+                _history.RemoveAt(0);
+                if (_seen.TryGetValue(evicted.DedupeKey, out GameError mapped) && ReferenceEquals(mapped, evicted))
+                    _seen.Remove(evicted.DedupeKey);
+            }
+
+            if (allowBroadcast && !IsShuttingDown)
+                Propagate(error);
 
             // Soft = the game already recovered on its own (CardStep abandoned the failed step, the
             // card and turn step carried on). Nothing is waiting on the player, so interrupting them
-            // is just noise — the full trace is already in the console either way.
+            // is just noise — but it IS recorded above, so the history is where you go to find what
+            // the game quietly papered over.
             //
             // Recoverable and Unrecoverable both still show: "Recoverable" does NOT mean the game
             // recovered by itself, it means the loop is STALLED and Continue is the only thing that
             // restarts it. Suppressing that popup would be a silent freeze.
-            if (error.Severity == ErrorSeverity.Soft && !ShowRecoveredErrors)
+            if (silent)
             {
                 _suppressedCount++;
+                error.Acknowledged = true;   // never pending; it is already in the history
                 DebugUtilities.PrintPeer(
                     $"ErrorReporter: recovered from {error.ExceptionType} in {error.Context} " +
-                    "(no popup — see the trace above; pass show_recovered_errors=true to surface these)");
-                if (allowBroadcast && !IsShuttingDown) Propagate(error);
+                    "(no popup — in the error history, or pass show_recovered_errors=true to surface these)");
                 return;
             }
 
-            if (_queue.Count >= MaxQueuedErrors)
-            {
-                SafeLog($"ErrorReporter: queue full ({MaxQueuedErrors}), dropping {error.ExceptionType}");
-                return;
-            }
-
-            _queue.Add(error);
             _counterAtReport = TryReadTurnStepCounter();
-            _newestSeverity = error.Severity;
-
-            if (allowBroadcast && !IsShuttingDown)
-                Propagate(error);
+            if (stallsLoop && error.Severity != ErrorSeverity.Soft)
+                _pendingStall = error;
 
             if (!GameContext.IsHeadless && !IsShuttingDown)
                 ShowPopup(error);
@@ -511,11 +719,13 @@ public partial class ErrorReporter : Node
     /// <summary>Deferred target for the auto_continue_errors test hook.</summary>
     private void AutoResume()
     {
-        ClearQueue();
+        // Acknowledge rather than clear, so history survives a headless verification run.
+        AcknowledgeAll();
         RequestResume();
     }
 
-    private void ShowPopup(GameError error)
+    /// <summary>Create the popup on first use. Shared by the reactive and hotkey paths.</summary>
+    private void EnsurePopup()
     {
         try
         {
@@ -524,6 +734,20 @@ public partial class ErrorReporter : Node
                 _popup = new ErrorPopup();
                 AddChild(_popup);
             }
+        }
+        catch (Exception ex)
+        {
+            SafeLog($"ErrorReporter: could not create popup: {ex}");
+        }
+    }
+
+    private void ShowPopup(GameError error)
+    {
+        try
+        {
+            EnsurePopup();
+            if (_popup == null) return;
+
             _popup.Present(error);
             DebugUtilities.PrintPeer(
                 $"ErrorReporter: popup shown (visible={_popup.Visible}, layer={_popup.Layer}, " +

@@ -25,7 +25,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
                     // InputRequest, GameAPI) went into an unobserved Task and the loop simply stalled
                     // forever with nothing logged. This is the single highest-leverage seam here.
                     Guard.FireAndForget(gameTurnStep.Handler,
-                        $"TurnStep {gameTurnStep.TurnStep}", CurrentFaction);
+                        $"TurnStep {gameTurnStep.TurnStep}", CurrentFaction, stallsLoop: true);
                 }
                 EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
             }
@@ -97,7 +97,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
             // Only fade the local (host) player's loading screen here.
             // Client loading screens are faded via GameSession.ReceiveGameStarted RPC.
-            Guard.FireAndForget(StartNewTurn, "GameFlow.StartNewTurn");
+            Guard.FireAndForget(StartNewTurn, "GameFlow.StartNewTurn", stallsLoop: true);
         }
         catch (Exception e)
         {
@@ -223,7 +223,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
         // [counter - 1], so a failure during TurnStep.END (counter 7) would make TurnStepCounter++
         // index [7] and throw ArgumentOutOfRangeException from inside the recovery path itself.
         if (TurnStepCounter >= gameTurnSteps.Count)
-            Guard.FireAndForget(StartNewTurn, "resume:StartNewTurn");
+            Guard.FireAndForget(StartNewTurn, "resume:StartNewTurn", stallsLoop: true);
         else
             TurnStepCounter++;
     }

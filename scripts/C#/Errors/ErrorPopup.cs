@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// In-game error overlay, built entirely in C# (same approach as DebugOverlay.BuildUI) so it needs
@@ -20,6 +21,14 @@ public partial class ErrorPopup : CanvasLayer
 
     private GameError _current;
     private int _index;
+
+    /// <summary>
+    /// True when the popup was opened by the history hotkey rather than raised by a failure. Only
+    /// affects presentation — whether Continue is offered is decided by
+    /// <c>ErrorReporter.HasPendingStall</c>, so opening history while the loop IS stalled still lets
+    /// you resume, and opening it when nothing is wrong cannot skip a turn step.
+    /// </summary>
+    private bool _historyMode;
 
     private Label _titleLabel;
     private Label _originLabel;
@@ -195,8 +204,8 @@ public partial class ErrorPopup : CanvasLayer
     {
         if (error == null) return;
 
-        int queueIndex = ErrorReporter.Instance?.Queue.Count - 1 ?? 0;
-        _index = Math.Max(queueIndex, 0);
+        _historyMode = false;
+        _index = Math.Max((ErrorReporter.Instance?.History.Count ?? 1) - 1, 0);
         _current = error;
 
         Render();
@@ -208,6 +217,30 @@ public partial class ErrorPopup : CanvasLayer
         }
     }
 
+    /// <summary>
+    /// Open on the newest recorded error and let the player browse back through the history. Entry
+    /// point for the <c>debug_error_history</c> hotkey.
+    /// </summary>
+    public void PresentHistory()
+    {
+        _historyMode = true;
+
+        IReadOnlyList<GameError> history = ErrorReporter.Instance?.History;
+        _index = Math.Max((history?.Count ?? 0) - 1, 0);
+        _current = history != null && history.Count > 0 ? history[_index] : null;
+
+        Render();
+
+        if (!Visible)
+        {
+            Show();
+            SetGameInputEnabled(false);
+        }
+    }
+
+    /// <summary>Close from the hotkey — same teardown as the Close button, without resuming anything.</summary>
+    public void CloseFromHotkey() => Dismiss();
+
     /// <summary>Re-render the current error — used when an occurrence count changes.</summary>
     public void Refresh()
     {
@@ -216,48 +249,78 @@ public partial class ErrorPopup : CanvasLayer
 
     private void Render()
     {
-        if (_current == null) return;
+        IReadOnlyList<GameError> history = ErrorReporter.Instance?.History;
+        int total = history?.Count ?? 0;
+
+        if (total == 0 || _current == null)
+        {
+            RenderEmpty();
+            return;
+        }
+
+        // Ring eviction can shift indices under an open popup, so re-resolve by identity rather than
+        // trusting the stored index; fall back to the newest if this entry has aged out.
+        int found = IndexOf(history, _current);
+        if (found < 0)
+        {
+            _index = total - 1;
+            _current = history[_index];
+        }
+        else
+        {
+            _index = found;
+        }
 
         bool isHost = IsHost();
-        bool recoverable = _current.Severity != ErrorSeverity.Unrecoverable;
+        bool stalled = ErrorReporter.Instance?.HasPendingStall ?? false;
+        bool canResume = ErrorReporter.Instance?.PendingSeverity != ErrorSeverity.Unrecoverable;
 
-        _titleLabel.Text = _current.Severity switch
-        {
-            ErrorSeverity.Soft => "An error occurred (recovered)",
-            ErrorSeverity.Unrecoverable => "An unrecoverable error occurred",
-            _ => "An error occurred"
-        };
+        _titleLabel.Text = _historyMode
+            ? $"Error history ({total})"
+            : _current.Severity switch
+            {
+                ErrorSeverity.Soft => "An error occurred (recovered)",
+                ErrorSeverity.Unrecoverable => "An unrecoverable error occurred",
+                _ => "An error occurred"
+            };
 
         string occurrences = _current.Occurrences > 1 ? $"  ×{_current.Occurrences}" : "";
-        int total = ErrorReporter.Instance?.Queue.Count ?? 1;
-        _counterLabel.Text = total > 1 ? $"{_index + 1}/{total}{occurrences}" : occurrences.TrimStart();
+        _counterLabel.Text = $"{_index + 1}/{total}{occurrences}";
 
-        _originLabel.Text = _current.OriginSummary;
+        // Make it obvious why a recorded error was never seen.
+        string recoveredNote = _current.Severity == ErrorSeverity.Soft
+            ? "RECOVERED · no popup was shown\n"
+            : "";
+        _originLabel.Text = recoveredNote + _current.OriginSummary;
+
         _contextLabel.Text = _current.Context;
         _messageLabel.Text = $"{_current.ExceptionType}\n{_current.Message}";
         _traceText.Text = _current.StackTrace ?? "";
+        _traceToggle.Visible = true;   // RenderEmpty hides it
 
+        // Always visible while browsing, so it is clear the list can be paged even at one entry.
+        _prevButton.Visible = _historyMode || total > 1;
+        _nextButton.Visible = _historyMode || total > 1;
         _prevButton.Disabled = _index <= 0;
         _nextButton.Disabled = _index >= total - 1;
-        _prevButton.Visible = total > 1;
-        _nextButton.Visible = total > 1;
 
-        // Only the server drives the turn loop, so only the host can actually resume it.
-        if (!isHost)
+        _quitButton.Visible = stalled;
+
+        if (!stalled)
+        {
+            // Nothing is waiting on the player — this is a browse, not a decision. Offering Continue
+            // here would advance the turn loop past a step that never failed.
+            _continueButton.Text = "Close";
+            _continueButton.Disabled = false;
+            _continueButton.TooltipText = "Closes this window. Nothing is waiting — the game is not paused.";
+        }
+        else if (!isHost)
         {
             _continueButton.Text = "Dismiss";
             _continueButton.Disabled = false;
             _continueButton.TooltipText = "Only the host can resume the turn loop.";
         }
-        else if (_current.Severity == ErrorSeverity.Soft)
-        {
-            // Already recovered in place — the loop never stopped, so there is nothing to resume and
-            // advancing would silently skip a turn step.
-            _continueButton.Text = "Dismiss";
-            _continueButton.Disabled = false;
-            _continueButton.TooltipText = "This step was abandoned but play continued — nothing to resume.";
-        }
-        else if (!recoverable)
+        else if (!canResume)
         {
             // Mid-mutation before the change reached clients: peers are already divergent and the
             // resync repair path in NetworkApi.RequestResync is commented out, so there is nothing
@@ -278,13 +341,45 @@ public partial class ErrorPopup : CanvasLayer
         _continueButton.GrabFocus();
     }
 
+    /// <summary>
+    /// Shown when the hotkey is pressed with nothing recorded. Without this the popup would render a
+    /// stale or blank panel and look broken.
+    /// </summary>
+    private void RenderEmpty()
+    {
+        _titleLabel.Text = "Error history";
+        _counterLabel.Text = "";
+        _originLabel.Text = "";
+        _contextLabel.Text = "";
+        _messageLabel.Text = "No errors recorded this session.";
+        _traceText.Text = "";
+
+        _traceToggle.Visible = false;
+        _traceScroll.Visible = false;
+        _prevButton.Visible = false;
+        _nextButton.Visible = false;
+        _quitButton.Visible = false;
+
+        _continueButton.Text = "Close";
+        _continueButton.Disabled = false;
+        _continueButton.TooltipText = "";
+        _continueButton.GrabFocus();
+    }
+
+    private static int IndexOf(IReadOnlyList<GameError> list, GameError target)
+    {
+        for (int i = 0; i < list.Count; i++)
+            if (ReferenceEquals(list[i], target)) return i;
+        return -1;
+    }
+
     private void Navigate(int delta)
     {
-        var queue = ErrorReporter.Instance?.Queue;
-        if (queue == null || queue.Count == 0) return;
+        IReadOnlyList<GameError> history = ErrorReporter.Instance?.History;
+        if (history == null || history.Count == 0) return;
 
-        _index = Math.Clamp(_index + delta, 0, queue.Count - 1);
-        _current = queue[_index];
+        _index = Math.Clamp(_index + delta, 0, history.Count - 1);
+        _current = history[_index];
         Render();
     }
 
@@ -302,14 +397,19 @@ public partial class ErrorPopup : CanvasLayer
 
     private void OnContinuePressed()
     {
+        // Read the stall state BEFORE dismissing — Dismiss acknowledges, which clears it.
+        bool wasStalled = ErrorReporter.Instance?.HasPendingStall ?? false;
+
         Dismiss();
-        if (IsHost())
+
+        if (wasStalled && IsHost())
             ErrorReporter.RequestResume();
     }
 
     private void OnQuitPressed()
     {
         Dismiss();
+        ErrorReporter.Instance?.AbandonPendingStall();   // leaving the game; resuming is moot
         ErrorReporter.IsShuttingDown = true;
 
         // Leave any multiplayer session cleanly so a fresh game can be hosted/joined — same
@@ -324,9 +424,13 @@ public partial class ErrorPopup : CanvasLayer
     {
         Hide();
         SetGameInputEnabled(true);
-        ErrorReporter.Instance?.ClearQueue();
+
+        // Acknowledge, do not clear: the errors stay in the history so the hotkey can bring them back.
+        ErrorReporter.Instance?.AcknowledgeAll();
+
         _current = null;
         _index = 0;
+        _historyMode = false;
     }
 
     // ── Input gating ─────────────────────────────────────────────────────────

@@ -56,6 +56,14 @@ public class GameError
     /// <summary>Bumped instead of queueing a duplicate. Shown as ×N in the popup.</summary>
     [JsonIgnore] public int Occurrences { get; set; } = 1;
 
+    /// <summary>
+    /// True once the player has closed the popup for this error. Local state, never sent over the
+    /// wire. Drives two things: the history entry is kept but no longer pending, and a later
+    /// recurrence of an acknowledged error re-opens the popup instead of only bumping
+    /// <see cref="Occurrences"/> into a hidden window.
+    /// </summary>
+    [JsonIgnore] public bool Acknowledged { get; set; }
+
     /// <summary>Identity used for deduplication: type + message + first stack frame.</summary>
     [JsonIgnore]
     public string DedupeKey

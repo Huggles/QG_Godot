@@ -78,7 +78,7 @@ public partial class AnimationQueue : SingletonNode<AnimationQueue>
                     }
                     catch (Exception e)
                     {
-                        ErrorReporter.Report(e, $"Animation {next?.ScriptName}");
+                        ErrorReporter.ReportRecovered(e, $"Animation {next?.ScriptName}");
                     }
                     finally
                     {
@@ -95,7 +95,7 @@ public partial class AnimationQueue : SingletonNode<AnimationQueue>
                     _ = next.Execute().ContinueWith(t =>
                     {
                         if (t.IsFaulted && t.Exception != null)
-                            ErrorReporter.Report(t.Exception.GetBaseException(), $"Animation {next?.ScriptName}");
+                            ErrorReporter.ReportRecovered(t.Exception.GetBaseException(), $"Animation {next?.ScriptName}");
                         next.Complete();
                     });
                 }

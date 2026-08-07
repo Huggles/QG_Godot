@@ -24,7 +24,7 @@ corner_radius_top_right = 200
 corner_radius_bottom_right = 200
 corner_radius_bottom_left = 200
 corner_detail = 20
-shadow_color = Color(0, 0, 0, 0.30588236)
+shadow_color = Color(0, 0, 0, 0.44705883)
 shadow_size = 50
 
 [node name="Unit" type="Node2D" unique_id=2044478517]
@@ -36,17 +36,16 @@ z_index = 65
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("2_3bedt")
 
-[node name="Panel" type="Panel" parent="UnitSprite2D" unique_id=733827477]
+[node name="Shadow" type="Panel" parent="UnitSprite2D" unique_id=733827477]
 z_index = -1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -450.0
-offset_top = -200.5
-offset_right = -50.0
-offset_bottom = -0.5
+offset_left = -500.0
+offset_top = -75.5
+offset_bottom = 24.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_n4c3c")

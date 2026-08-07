@@ -13,7 +13,7 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
     public void Start(Faction faction)
     {
         this.faction = faction;
-        Guard.FireAndForget(ProcessDiscardStep, "DiscardStep", faction);
+        Guard.FireAndForget(ProcessDiscardStep, "DiscardStep", faction, stallsLoop: true);
     }
 
     private async Task ProcessDiscardStep()

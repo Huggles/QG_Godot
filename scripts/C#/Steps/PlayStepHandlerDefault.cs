@@ -16,7 +16,7 @@ public partial class PlayStepHandlerDefault : GodotObject, IPlayStepHandler
         this.faction = faction;
         EventBus.Instance.CardPlayPoolFinished += OnRoundFinished;
         subscribed = true;
-        Guard.FireAndForget(() => CardPlayRound.Current.Start(faction), "PlayStep.CardPlayRound", faction);
+        Guard.FireAndForget(() => CardPlayRound.Current.Start(faction), "PlayStep.CardPlayRound", faction, stallsLoop: true);
     }
 
     private void OnRoundFinished()

@@ -12,7 +12,7 @@ public partial class DrawStepHandlerDefault : GodotObject, IDrawStepHandler
     public void Start(Faction faction)
     {
         this.faction = faction;
-        Guard.FireAndForget(ProcessDrawStep, "DrawStep", faction);
+        Guard.FireAndForget(ProcessDrawStep, "DrawStep", faction, stallsLoop: true);
     }
 
     private async Task ProcessDrawStep()

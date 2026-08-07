@@ -15,7 +15,7 @@ public partial class StartTurnStepHandler : GodotObject, IStartTurnStepHandler
         this.faction = faction;
         EventBus.Instance.CardPlayPoolFinished += OnRoundFinished;
         subscribed = true;
-        Guard.FireAndForget(() => CardPlayRound.Current.Start(faction), "StartTurnStep.CardPlayRound", faction);
+        Guard.FireAndForget(() => CardPlayRound.Current.Start(faction), "StartTurnStep.CardPlayRound", faction, stallsLoop: true);
     }
 
     private void OnRoundFinished()

@@ -22,15 +22,24 @@ public static class Guard
     /// </summary>
     /// <param name="context">Where this runs, e.g. "TurnStep SUPPLY".</param>
     /// <param name="target">Faction the work is being done for, when there is one.</param>
-    public static void FireAndForget(Func<Task> work, string context, Faction? target = null)
+    /// <param name="stallsLoop">
+    /// True at the call sites that DRIVE the turn loop (GameFlow's step dispatch and the step
+    /// handlers). A failure escaping one of those means the step's Finished event never fired, so the
+    /// loop is stopped and the popup must offer Continue. Leave false everywhere else: a queue or
+    /// animation failure is caught locally and stalls nothing, and offering Continue for it would
+    /// advance a turn step nothing was waiting on.
+    /// </param>
+    public static void FireAndForget(Func<Task> work, string context, Faction? target = null,
+                                     bool stallsLoop = false)
     {
-        _ = Observe(work, context, target);
+        _ = Observe(work, context, target, stallsLoop);
     }
 
     /// <summary>Await <paramref name="work"/>, reporting instead of propagating any failure.</summary>
-    public static async Task Run(Func<Task> work, string context, Faction? target = null)
+    public static async Task Run(Func<Task> work, string context, Faction? target = null,
+                                 bool stallsLoop = false)
     {
-        await Observe(work, context, target);
+        await Observe(work, context, target, stallsLoop);
     }
 
     /// <summary>
@@ -58,7 +67,7 @@ public static class Guard
         catch (Exception e) { ErrorReporter.Report(e, context, target); }
     }
 
-    private static async Task Observe(Func<Task> work, string context, Faction? target)
+    private static async Task Observe(Func<Task> work, string context, Faction? target, bool stallsLoop)
     {
         try
         {
@@ -67,7 +76,10 @@ public static class Guard
         }
         catch (Exception e)
         {
-            ErrorReporter.Report(e, context, target);
+            if (stallsLoop)
+                ErrorReporter.ReportLoopStalled(e, context, target);
+            else
+                ErrorReporter.Report(e, context, target);
         }
     }
 }
