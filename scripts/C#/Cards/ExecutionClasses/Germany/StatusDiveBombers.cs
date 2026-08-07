@@ -5,27 +5,58 @@ using System.Linq;
 
 public partial class StatusDiveBombers : StatusCardLogic
 {   
+    private CountryState BattledCountryState =>
+        (CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent)?.CountryState;
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionBattled(Faction), this).Immediately()
+            // "when you battle a land space" — FactionBattled matches sea battles too, which would
+            // then offer the sea space's adjacent LAND targets.
+            Condition.Build(new Condition.HasBattledOnLand(Faction), this).Immediately()
         };
     }
-    
+
+    /// <summary>
+    /// "the same or adjacent land space to the one battled" — mirrors <see cref="StatusFrontalAssault"/>,
+    /// which implements the identical card text.
+    /// </summary>
     public List<BattleTarget> battleTargets
     {
         get
         {
-            var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
-            if (trigger == null) return new List<BattleTarget>();
-            return CountryState.ForId(trigger.CountryId).AdjacentBattleTargets(Faction, CountryType.LAND).Distinct().ToList();
+            CountryState cs = BattledCountryState;
+            if (cs == null) return new List<BattleTarget>();
+
+            var targets = new List<BattleTarget>();
+            // The battled space itself: empty spaces are a COUNTRY target, occupied ones a UNIT target.
+            if (cs.Tags.Has(Tag.Attackable, Faction))
+                targets.Add(new BattleTarget(cs.Id, TargetType.COUNTRY));
+            targets.AddRange(cs.Units.Values
+                .Where(unitId => UnitState.ForId(unitId).Tags.Has(Tag.Attackable, Faction))
+                .Select(unitId => new BattleTarget(unitId, TargetType.UNIT)));
+
+            targets.AddRange(cs.AdjacentBattleTargets(Faction, CountryType.LAND));
+            return targets.Distinct().ToList();
         }
     }
+
+    /// <summary>
+    /// Country ids for the step's executability gate. Deliberately NOT derived from
+    /// <see cref="battleTargets"/>: CountryIsAttackable inspects each country's units itself, so the
+    /// adjacent spaces must be listed whole. Filtering battleTargets to TargetType.COUNTRY dropped
+    /// every occupied space — AdjacentBattleTargets only emits COUNTRY targets for *empty* spaces —
+    /// so an adjacent enemy Army yielded an empty list and the card could never become activatable.
+    /// </summary>
     public List<int> battleTargetCountryIds
     {
         get
         {
-            List<int> ids = battleTargets.Where(bt => bt.Type == TargetType.COUNTRY).ToList().Map((bt) => bt.Id);
+            CountryState cs = BattledCountryState;
+            if (cs == null) return new List<int>();
+
+            var ids = new List<int> { cs.Id };
+            ids.AddRange(cs.ConnectedCountryStates.Where(adj => adj.Type == CountryType.LAND).Select(adj => adj.Id));
             return ids;
         }
     }

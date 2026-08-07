@@ -35,9 +35,6 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationServices.Notification.ShowModal(presentationItems, "Discarded cards");
-
                 int countryId = LastLandBattle.CountryId;
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;

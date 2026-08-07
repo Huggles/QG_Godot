@@ -14,11 +14,11 @@
         { "name": "StatusAbundantResources" },
         { "name": "StatusSyntheticFuel" },
         { "name": "StatusAtlanticWall" },
+        { "name": "StatusDiveBombers" },
         { "name": "StatusVolksturm" }
       ],
       "initialHandCards": [
         { "name": "StatusBiasForAction" },
-        { "name": "StatusDiveBombers" },
         { "name": "StatusWolfPacks" },
         { "name": "EWSubmarinesRaidMurmanskConvoy" }
       ],
@@ -63,7 +63,8 @@
         { "countryName": "EASTERN_EUROPE" },
         { "countryName": "SZECHUAN" },
         { "countryName": "KAZAKHSTAN" },
-        { "countryName": "SOUTH_EAST_ASIA" }
+        { "countryName": "SOUTH_EAST_ASIA" },
+        { "countryName": "BALKANS" }
       ],
       "initialCards": [
         { "name": "ResponseLeningrad" }

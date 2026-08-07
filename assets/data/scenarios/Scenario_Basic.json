@@ -9,7 +9,8 @@
       "unitDeployments": [
         { "countryName": "GERMANY" }
       ],
-      "initialCards": [],
+      "initialCards": [
+      ],
       "initialHandCards": [],
       "startingVP": 0
     },

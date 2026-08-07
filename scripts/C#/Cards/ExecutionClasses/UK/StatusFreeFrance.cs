@@ -26,9 +26,6 @@ public partial class StatusFreeFrance : StatusCardLogic
                 discardEvent.IsTrigger = false;
                 await discardEvent.ApplyChange();
 
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationServices.Notification.ShowModal(presentationItems, "Discarded cards");
-
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
                     new DeployUnitChangeEvent(Faction, (int)Country.WesternEurope, DeployType.BUILD));
                 deployEvent.IsTrigger = true;

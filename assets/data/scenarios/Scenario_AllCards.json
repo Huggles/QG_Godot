@@ -23,7 +23,9 @@
         { "name": "StatusWolfPacks" },
         { "name": "StatusVolksturm" }
       ],
-      "initialHandCards": [],
+      "initialHandCards": [
+        { "name": "EventArdennesOffensive" }
+      ],
       "startingVP": 0
     },
     "UNITED_KINGDOM": {

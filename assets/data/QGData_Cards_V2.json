@@ -1105,5 +1105,15 @@
         "Label":  "Occupation Of Czechoslovakia",
         "Text":  "During your Victory step, gain +1 Victory Point if you did not perform a land battle or eliminated a unit. ",
         "MultipleActivationsPerTurn":  false
+    },
+    {
+        "UniqueName":  "EventArdennesOffensive",
+        "Number":  "145",
+        "Type":  "EVENT",
+        "ExecutionClass":  "EventArdennesOffensive",
+        "Label":  "Ardennes Offensive",
+        "Text":  "Battle in Western Europe. Then build an army in Western Europe.",
+        "MultipleActivationsPerTurn":  false
     }
+
 ]

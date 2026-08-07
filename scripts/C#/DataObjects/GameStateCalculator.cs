@@ -133,17 +133,11 @@ public class GameStateCalculator
         ClearTagsForFaction(faction, Tag.IsAfterReaction);
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
-            if(cardState.CardName == "Enigma Code Cracked")
-            {
-                DebugUtilities.PrintPeer($"[DIAG]   {cardState.CardData?.UniqueName ?? "?"} skipped - ResponseEnigmaCodeCracked is not after-reaction");
-                int i = 0;
-            }
-            
-            if (cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
+            // IsPlayed: a card can only be used as a reaction once it is on the table. A hand card
+            // tagged IsActivatable is offering a *play*, not a reaction.
+            if (cardState.IsPlayed && cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
                 cardState.AddTag(Tag.IsAfterReaction, faction);
         });
-
-
     }
 
     /// <summary>
@@ -157,7 +151,7 @@ public class GameStateCalculator
         ClearTagsForFaction(faction, Tag.IsBlockReaction);
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
-            if (cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == true)
+            if (cardState.IsPlayed && cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == true)
                 cardState.AddTag(Tag.IsBlockReaction, faction);
         });
     }
@@ -214,15 +208,9 @@ public class GameStateCalculator
         CardStep.All.ForEach(step => step.Tags.Remove(Tag.IsExecutable, faction));
         CardStep.All.ForEach(step =>
         {
-            bool stepFinished = step.StepFinished;
-            bool meetConditions = step.MeetAllConditions;
-            bool isExecutable = !stepFinished && step.MeetAllConditions;
+            bool isExecutable = !step.StepFinished && step.MeetAllConditions;
 
-            if (step.CardLogic.CardState.CardName == "EventTransSiberianRailroad")
-            {
-                DebugUtilities.PrintPeer($"[DIAG]   {step.CardLogic.CardState.CardData?.UniqueName ?? "?"} skipped - TransSiberianRailroad is not activatable on turn 1");
-            }
-            if (isExecutable) 
+            if (isExecutable)
                 step.Tags.Add(Tag.IsExecutable, faction);
         });
     }

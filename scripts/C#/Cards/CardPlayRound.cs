@@ -135,6 +135,12 @@ public partial class CardPlayRound : GodotObject
         ReactionDepth++;
         bool isInitialPlay = ReactionDepth == 1;
 
+        // Captured BEFORE the introduction event: PlayCardChangeEvent -> DeckState.PlayCard moves
+        // the card into the Status/Response pile, which flips IsPlayed.
+        // Playing a Status/Response card onto the table IS the play — it has no immediate effect.
+        // Its CardSteps are the activation effect and must wait for the card's trigger to fire.
+        bool isTableCardPlay = cardLogic.IsTableCardInHand;
+
         // Step 1: Introduction event (may be blocked)
         bool introWasBlocked = false;
         ChangeEvent introEvent;
@@ -173,13 +179,18 @@ public partial class CardPlayRound : GodotObject
             _afterReactionPassedFactions.Clear();
             await RequestAfterReactions(introEvent);
 
-            List<CardStep> allSteps = cardLogic.CardSteps;
-            while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0)
+            // A Status/Response card just played from hand stops here: it sits on the table until
+            // its trigger fires, at which point it re-enters DoCard on the activation branch.
+            if (!isTableCardPlay)
             {
-                List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
-                ChangeEvent stepResult = await nextSteps[0].Execute();
-                if (stepResult != null)
-                    await DoChangeEvent(stepResult);
+                List<CardStep> allSteps = cardLogic.CardSteps;
+                while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0)
+                {
+                    List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
+                    ChangeEvent stepResult = await nextSteps[0].Execute();
+                    if (stepResult != null)
+                        await DoChangeEvent(stepResult);
+                }
             }
         }
 
@@ -388,7 +399,11 @@ public partial class CardPlayRound : GodotObject
         int selectedId = -1;
         if(DeckState.ForFaction(faction).ActivatableCardIds.Count > 0)
         {
-            bool hasPlayedHandCardThisTurnStep = GameFlow.Instance.CardsPlayedThisTurnStep.Values.Sum() > 0;
+            // Only this faction's own plays consume its hand-card play for the turn step; another
+            // faction playing must not hide this faction's hand cards.
+            bool hasPlayedHandCardThisTurnStep =
+                GameFlow.Instance.CardsPlayedThisTurnStep.TryGetValue(faction, out int cardsPlayedByFaction)
+                && cardsPlayedByFaction > 0;
             bool isStartTurnStep = GameFlow.Instance.TurnStep == TurnStep.START;
             InputRequest request = hasPlayedHandCardThisTurnStep || isStartTurnStep
                 ? new InputRequest.ActivateCardRequestHandler(faction)

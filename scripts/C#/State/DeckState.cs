@@ -54,9 +54,9 @@ public partial class DeckState : StateObject
     public List<int> DiscardTopCards(int number)
     {
         int overdraw = Math.Max(number - DeckCardIds.Count, 0);
-        if (overdraw < 0)
+        if (overdraw > 0)
         {
-            DebugUtilities.PrintPeerError($"Deck is empty for: {FactionLabel}");
+            DebugUtilities.PrintPeerError($"Deck has only {DeckCardIds.Count} of {number} cards to discard for: {FactionLabel}");
         }
         int actualDraw = number - overdraw;
         

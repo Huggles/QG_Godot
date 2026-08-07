@@ -19,11 +19,11 @@ public partial class StatusVolksturm : StatusCardLogic
             new CardStep(this, async() => {
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
                 discardEvent.IsTrigger = false;
+                // No ShowModal here: ForceDiscardCardsChangeEvent.AfterAnimations already queues a
+                // ShowDiscardModalAnimation for the same cards, and ApplyChange awaits the animation
+                // queue — so showing it again here displayed the discard modal twice.
                 await discardEvent.ApplyChange();
 
-                List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-                await PresentationServices.Notification.ShowModal(presentationItems, "Discarded cards");
-                
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int>{(int)Country.Germany}).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;

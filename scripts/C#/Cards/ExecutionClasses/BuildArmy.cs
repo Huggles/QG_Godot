@@ -10,7 +10,6 @@ public partial class BuildArmy : CardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async() => {         
-                throw new Exception("BuildArmy card should not be activated directly. It should be triggered by a BuildUnitChangeEvent.");       
                 var targetableCountries = CountryState.BuildableLand(Faction);
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, targetableCountries.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));

@@ -31,9 +31,26 @@ public abstract partial class CardLogic : GodotObject
     public List<CardStep> CardSteps = new();
     public abstract List<CardStep> OnActivate();
     
+    // A Status/Response card still in hand is being PLAYED onto the table, not activated.
+    // Its CardSteps are the later activation effect, so their executability must not gate the play.
+    public bool IsTableCardInHand => (IsStatus || IsResponse) && !CardState.IsPlayed;
+
     public bool CanBeActivated()
     {
-        if (IsActivationFinished || !TriggerConditionsMet || !HasExecutableCardSteps)
+        // For an unplayed card TriggerConditionsMet resolves to _defaultPlayConditions, which is
+        // the correct gate for a play.
+        if (IsActivationFinished || !TriggerConditionsMet)
+            return false;
+
+        if (IsTableCardInHand)
+        {
+            // Playing it onto the table is a Play-step action, never a reaction from hand.
+            // HasEventBasedTrigger is deliberately not consulted: it reads CardTriggers(), which
+            // describes the later activation and is meaningless while the card is in hand.
+            return (CardPlayRound.Current?.ReactionDepth ?? 0) == 0;
+        }
+
+        if (!HasExecutableCardSteps)
             return false;
 
         // "Once per turn" cards (MultipleActivationsPerTurn = false) may not activate
