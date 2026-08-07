@@ -1484,13 +1484,13 @@
             "ControlledCountry2": "SOUTH_EAST_PACIFIC",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 0.2,
-                "XPosition": -13,
-                "YPosition": 30,
+                "Scale": 0.3,
+                "XPosition": -120,
+                "YPosition": -300,
                 "ZPosition": 0,
-                "x_rotation": 0,
-                "y_rotation": 0,
-                "z_rotation": 25
+                "XRotation": 0,
+                "YRotation": 0,
+                "ZRotation": -25
             }
         },
         "WorldTransformData": {
@@ -1689,13 +1689,13 @@
             "ControlledCountry2": "BAY_OF_BENGAL",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 0.2,
-                "XPosition": -20,
-                "YPosition": 0,
+                "Scale": 0.4,
+                "XPosition": -240,
+                "YPosition": -20,
                 "ZPosition": 0,
-                "x_rotation": 0,
-                "y_rotation": 0,
-                "z_rotation": -40
+                "XRotation": 0,
+                "YRotation": 0,
+                "ZRotation": 50
             }
         },
         "WorldTransformData": {
@@ -2024,13 +2024,13 @@
             "ControlledCountry2": "MEDITERRANEAN_SEA",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 0.2,
-                "XPosition": -30,
-                "YPosition": 17,
+                "Scale": 0.3,
+                "XPosition": -380,
+                "YPosition": -225,
                 "ZPosition": 0,
-                "x_rotation": 0,
-                "y_rotation": 0,
-                "z_rotation": 0
+                "XRotation": 0,
+                "YRotation": 0,
+                "ZRotation": 0
             }
         },
         "WorldTransformData": {
@@ -2501,13 +2501,13 @@
             "ControlledCountry2": "BALTIC_SEA",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 0.2,
-                "XPosition": -7,
-                "YPosition": -5,
+                "Scale": 0.3,
+                "XPosition": -90,
+                "YPosition": 50,
                 "ZPosition": 0,
-                "x_rotation": 0,
-                "y_rotation": 0,
-                "z_rotation": 0
+                "XRotation": 0,
+                "YRotation": 0,
+                "ZRotation": 0
             }
         },
         "WorldTransformData": {
@@ -2845,13 +2845,13 @@
             "ControlledCountry2": "SOUTH_CHINA_SEA",
             "StraightTransform": {
                 "DataClass": "TransformData",
-                "Scale": 0.2,
+                "Scale": 0.3,
                 "XPosition": 0,
                 "YPosition": 0,
                 "ZPosition": 0,
-                "x_rotation": 0,
-                "y_rotation": 0,
-                "z_rotation": 0
+                "XRotation": 0,
+                "YRotation": 0,
+                "ZRotation": 0
             }
         },
         "WorldTransformData": {

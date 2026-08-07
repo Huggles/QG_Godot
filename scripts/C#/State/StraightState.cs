@@ -69,7 +69,7 @@ public partial class StraightState : StateObject
 
         var t = StaticStraightData.StraightTransform;
         sprite.Position = new Vector2(t.XPosition, t.YPosition);
-        sprite.RotationDegrees = 0;
+        sprite.RotationDegrees = t.ZRotation;
         sprite.Scale = new Vector2(t.Scale, t.Scale);
     }
 

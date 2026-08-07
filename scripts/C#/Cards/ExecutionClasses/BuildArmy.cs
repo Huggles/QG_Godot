@@ -9,12 +9,7 @@ public partial class BuildArmy : CardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                if(true)
-                {
-                    throw new Exception("BuildArmy is deprecated. Use BuildArmyWithInputRequest instead.");
-                }
-                
+            new CardStep(this, async() => {                
                 var targetableCountries = CountryState.BuildableLand(Faction);
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, targetableCountries.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
