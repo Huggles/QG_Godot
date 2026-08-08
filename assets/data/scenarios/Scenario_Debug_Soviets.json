@@ -1,0 +1,79 @@
+{
+  "title": "Debug Scenario SOVIETS",
+  "description": "",
+  "startingFaction": "SOVIET",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [
+        { "countryName": "GERMANY" },
+        { "countryName": "ITALY" }
+      ],
+      "initialCards": [
+      ],
+      "initialHandCards": [
+      ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [
+      ],
+      "initialCards": [
+        { "name": "ResponseEnigmaCodeCracked" }
+      ],
+      "initialHandCards": [
+        { "name": "EWMaltaSubmarines" }
+      ],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [
+      ],
+      "initialCards": [
+      ],
+      "initialHandCards": [
+      ],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [
+        { "countryName": "MOSCOW" },
+        { "countryName": "RUSSIA" },
+        { "countryName": "EASTERN_EUROPE" },
+        { "countryName": "BALKANS" },
+        { "countryName": "SZECHUAN" },
+        { "countryName": "KAZAKHSTAN" },
+        { "countryName": "SOUTH_EAST_ASIA" }
+      ],
+      "initialCards": [
+        { "name": "StatusStavkaFormsArtilleryCorps" },
+        { "name": "StatusFrontalAssault" }
+      ],
+      "initialHandCards": [
+        { "name": "EventTransSiberianRailroad" }
+      ],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [
+        { "countryName": "ITALY" }
+      ],
+      "initialCards": [
+        { "name": "ResponseSkilledPilots" }
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [
+        { "countryName": "US_EAST" },
+        { "countryName": "CHINA" },
+        { "countryName": "VLADIVOSTOK" }
+      ],
+      "initialCards": [],
+      "initialHandCards": [],
+      "startingVP": 0
+    }
+  }
+}

@@ -19,7 +19,7 @@ public partial class EWSubmarinesoftheMonsoonGroup : EWCardLogic
                 discardEvent.IsTrigger = true;
                 
                 // Score 2 VP
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(2, "2 VP for Submarines of the Monsoon Group."), Faction));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(2, "Submarines of the Monsoon Group"), Faction));
                 
                 return discardEvent;
             })

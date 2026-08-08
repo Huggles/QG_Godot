@@ -16,7 +16,7 @@ public partial class EWRegiaMarinaClosesShippingLanes : EWCardLogic
 
                 int count = italianNavies.Count;
 
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, $"{count} VP for Italian Navies on the board."), Faction));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, "Italian Navies on the board"), Faction));
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count));
                 discardEvent.IsTrigger = true;

@@ -10,6 +10,12 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
     public List<int> DiscardedCardIds { get; private set; } = new();
 
     /// <summary>
+    /// Cards the target was required to discard but could not, because its draw deck ran out.
+    /// Each one costs the target 1 VP — see <see cref="ExecuteAsync"/>.
+    /// </summary>
+    public int UndischargedCards { get; private set; } = 0;
+
+    /// <summary>
     /// True when NumberOfCards is already the final, post-modifier count — set by ChangeEvent.FromDto,
     /// because ToDto() runs after ExecuteAsync() and therefore ships the modified number. Without this
     /// the client re-ran ApplyDiscardModifiers() on top of the server's result and applied every delta
@@ -36,16 +42,38 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
     {
         if (!ModifiersApplied)
             ApplyDiscardModifiers();
-        DeckState deckState = DeckState.ForFaction(TargetFaction); 
+        DeckState deckState = DeckState.ForFaction(TargetFaction);
         DiscardedCardIds = deckState.DiscardTopCards(NumberOfCards);
+
+        // A card that cannot be discarded because the deck ran out costs the target 1 VP instead.
+        // Applied here rather than as a nested ScorePointsChangeEvent: clients replay this
+        // ExecuteAsync from the DTO, so a nested ApplyChange would be both broadcast and replayed,
+        // deducting twice. Recomputing the shortfall locally keeps the deduction inside the same
+        // hashed mutation, exactly like ForceDiscardHandCardsChangeEvent calling GameAPI directly.
+        UndischargedCards = NumberOfCards - DiscardedCardIds.Count;
+        if (UndischargedCards > 0)
+        {
+            VPTurnSummary penalty = new VPTurnSummary(GameFlow.Instance.GameTurn, TargetFaction);
+            penalty.AddScore(new VPEntry(-UndischargedCards, $"{UndischargedCards} card(s) that could not be discarded from an empty deck"));
+            GameAPI.ScorePoints(penalty);
+        }
         return true;
     }
 
-    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    protected override List<ChangeEventAnimation> AfterAnimations
     {
-        new ShowNotificationLabelAnimation($"{TriggeringFaction} makes {TargetFaction} discard {NumberOfCards} cards", TriggeringFaction),
-        new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards", TargetFaction)
-    };
+        get
+        {
+            List<ChangeEventAnimation> animations = new()
+            {
+                new ShowNotificationLabelAnimation($"{TriggeringFaction} makes {TargetFaction} discard {NumberOfCards} cards", TriggeringFaction),
+                new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards", TargetFaction)
+            };
+            if (UndischargedCards > 0)
+                animations.Add(new ShowNotificationLabelAnimation($"{TargetFaction} loses {UndischargedCards} VP for {UndischargedCards} card(s) it could not discard", TargetFaction));
+            return animations;
+        }
+    }
 
     private void ApplyDiscardModifiers()
     {
@@ -58,5 +86,7 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         ModifiersApplied = true;
     }
 
-    public override string SummaryText() => $"{TargetFaction} was forced to discard {NumberOfCards} cards by {TriggeringFaction}";
+    public override string SummaryText() => UndischargedCards > 0
+        ? $"{TargetFaction} was forced to discard {NumberOfCards} cards by {TriggeringFaction}, but only had {DiscardedCardIds.Count} left and lost {UndischargedCards} VP"
+        : $"{TargetFaction} was forced to discard {NumberOfCards} cards by {TriggeringFaction}";
 }

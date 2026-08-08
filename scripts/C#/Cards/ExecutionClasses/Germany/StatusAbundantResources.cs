@@ -9,7 +9,7 @@ public partial class StatusAbundantResources : StatusCardLogic, IVPModifier
     {
         List<Country> countries = [Country.Ukraine, Country.Kazakhstan, Country.Russia];
         int score = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum();
-        return new VPEntry(score, $"{score} victory points for armies on Ukraine, Kazakhstan and/or Russia.");
+        return new VPEntry(score, "armies on Ukraine, Kazakhstan and/or Russia");
     }
 
     protected override List<Condition> CardTriggers()

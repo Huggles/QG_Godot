@@ -13,7 +13,7 @@ public partial class ScorePointsChangeEvent : ChangeEvent
 
     public ScorePointsChangeEvent(VPEntry vpEntry, Faction faction) : base(faction)
     {
-        var summary = new VPTurnSummary(GameFlow.Instance.GameTurn);
+        var summary = new VPTurnSummary(GameFlow.Instance.GameTurn, faction);
         summary.AddScore(vpEntry);
         VPTurnSummary = summary;
     }

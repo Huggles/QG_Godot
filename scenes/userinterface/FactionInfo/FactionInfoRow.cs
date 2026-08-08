@@ -164,12 +164,15 @@ public partial class FactionInfoRow : Control
         var textRows = new List<string>();
         var vpSummaries = GameFlow.Instance.VictoryPointSummaries.GetValueOrDefault(Faction, new List<VPTurnSummary>());
 
-        foreach (VPTurnSummary summary in vpSummaries)
+        // Grouped by round, not by turn: a faction can pick up points outside its own turn (a card
+        // scoring on a reaction, or the empty-deck discard penalty during the attacker's turn), so
+        // one round can hold several summaries. Rounds are what the end-of-game screen reports too.
+        foreach (IGrouping<int, VPTurnSummary> round in vpSummaries.GroupBy(s => s.Round).OrderBy(g => g.Key))
         {
-            textRows.Add($"Turn: {summary.TurnNumber}");
-            foreach (VPEntry victoryPointEntry in summary.victoryPointEntries)
+            textRows.Add($"Round {round.Key} — {round.Sum(s => s.TotalScore)} VP");
+            foreach (VPEntry victoryPointEntry in round.SelectMany(s => s.victoryPointEntries))
             {
-                textRows.Add($"{victoryPointEntry.VictoryPoints} points for {victoryPointEntry.Reason}");
+                textRows.Add(victoryPointEntry.Description);
             }
         }
 

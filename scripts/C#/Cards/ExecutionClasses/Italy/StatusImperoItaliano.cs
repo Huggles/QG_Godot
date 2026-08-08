@@ -11,7 +11,7 @@ public partial class StatusImperoItaliano : StatusCardLogic, IVPModifier
         List<Faction> factions = [Faction.GERMANY, Faction.JAPAN, Faction.ITALY];
         int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates()
             .Count(unitState => countries.Contains(unitState.CountryState.Country) && unitState.Type == UnitType.ARMY));
-        return new VPEntry(score, $"{score} victory points for axis armies in {CountryState.ForEnum(countries[0]).Label},  {CountryState.ForEnum(countries[1]).Label}, and {CountryState.ForEnum(countries[2]).Label}");
+        return new VPEntry(score, $"axis armies in {CountryState.ForEnum(countries[0]).Label}, {CountryState.ForEnum(countries[1]).Label} and {CountryState.ForEnum(countries[2]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

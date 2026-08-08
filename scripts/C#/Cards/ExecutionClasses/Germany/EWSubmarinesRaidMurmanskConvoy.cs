@@ -21,7 +21,7 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
                 
                 int count = germanUnits.Count;
                 
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, $"{count} VP for German units in or adjacent to Scandinavia."), Faction));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, "German units in or adjacent to Scandinavia"), Faction));
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.SOVIET, count * 2));
                 discardEvent.IsTrigger = true;

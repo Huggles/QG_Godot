@@ -9,7 +9,7 @@ public partial class StatusMareNostrum : StatusCardLogic, IVPModifier
     {
         int score = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
             .Count(unitState => unitState.Type == UnitType.NAVY);
-        return new VPEntry(score, $"{score} victory points for all {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} navies on the board.");
+        return new VPEntry(score, $"all {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} navies on the board");
     }
 
     protected override List<Condition> CardTriggers()

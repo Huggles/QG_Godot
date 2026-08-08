@@ -13,7 +13,7 @@ public partial class StatusUnimpededMerchantShipping : StatusCardLogic, IVPModif
             FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates()
                 .Any(u => countries.Contains(u.CountryState.Country)));
         int score = alliedArmyInHawaii ? 0 : 1;
-        return new VPEntry(score, $"{score} victory points for no Allied army in {CountryState.ForEnum(countries[0]).Label}.");
+        return new VPEntry(score, $"no Allied army in {CountryState.ForEnum(countries[0]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

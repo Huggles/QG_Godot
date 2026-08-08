@@ -1,5 +1,5 @@
 {
-  "title": "Debug Scenario",
+  "title": "Debug Scenario 3",
   "description": "Germany starts with pre-loaded status cards, making it easier to test card effects without full deployments.",
   "startingFaction": "GERMANY",
   "startingRound": 1,

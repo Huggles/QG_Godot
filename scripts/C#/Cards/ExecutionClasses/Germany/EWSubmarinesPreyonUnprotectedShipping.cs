@@ -25,7 +25,7 @@ public partial class EWSubmarinesPreyonUnprotectedShipping : EWCardLogic
                 discardEvent.IsTrigger = true;
                 
                 // Score 1 VP
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "1 VP for Submarines Prey on Unprotected Shipping."), Faction));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "Submarines Prey on Unprotected Shipping"), Faction));
                 
                 return discardEvent;
             })

@@ -26,7 +26,7 @@ public partial class EWIndianOceanPatrols : EWCardLogic
                 {
                     // Score 2 VP per navy through the ChangeEvent pipeline
                     await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(
-                        new VPEntry(count * 2, $"{count * 2} VP for Japanese Navies in or adjacent to Bay of Bengal."),
+                        new VPEntry(count * 2, "Japanese Navies in or adjacent to Bay of Bengal"),
                         Faction));
                     
                     // UK discards 2 cards per navy

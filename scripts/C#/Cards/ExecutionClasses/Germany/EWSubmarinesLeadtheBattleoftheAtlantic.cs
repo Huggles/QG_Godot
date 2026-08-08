@@ -17,7 +17,7 @@ public partial class EWSubmarinesLeadtheBattleoftheAtlantic : EWCardLogic
                 
                 int count = germanNavies.Count;
 
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, $"{count} VP for German Navies on the board."), Faction));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, "German Navies on the board"), Faction));
                 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count * 2));
                 discardEvent.IsTrigger = true;

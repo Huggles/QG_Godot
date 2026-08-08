@@ -10,7 +10,7 @@ public partial class StatusSwedishIronOre : StatusCardLogic, IVPModifier
         int score = 0;
         if (FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates().Any(u => u.CountryState.Country == Country.BalticSea && u.Type == UnitType.NAVY)) score++;
         if (FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates().Any(u => u.CountryState.Country == Country.Scandinavia && u.Type == UnitType.ARMY)) score++;
-        return new VPEntry(score, $"{score} victory points for a navy in the Baltic Sea and army in Scandinavia.");
+        return new VPEntry(score, "a navy in the Baltic Sea and army in Scandinavia");
     }
 
     protected override List<Condition> CardTriggers()

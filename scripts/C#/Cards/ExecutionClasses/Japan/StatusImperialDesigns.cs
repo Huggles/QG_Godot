@@ -11,7 +11,7 @@ public partial class StatusImperialDesigns : StatusCardLogic, IVPModifier
         List<Faction> factions = [Faction];
         int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum());
         score = Math.Min(score, 1);
-        return new VPEntry(score, $"{score} victory points for {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} army in {CountryState.ForEnum(countries[0]).Label} or {CountryState.ForEnum(countries[1]).Label}.");
+        return new VPEntry(score, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} army in {CountryState.ForEnum(countries[0]).Label} or {CountryState.ForEnum(countries[1]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

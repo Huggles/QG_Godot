@@ -20,7 +20,7 @@ public partial class EWSubmarinesEnforceBlockade : EWCardLogic
                 
                 int count = germanArmies.Count;
 
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, $"{count} VP for German Armies adjacent to North Sea."), Faction));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, "German Armies adjacent to North Sea"), Faction));
                 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count * 2));
                 discardEvent.IsTrigger = true;

@@ -33,7 +33,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     [Export] public TurnStep TurnStep { get; set; } = 0;
     [Export] public int MaxRound { get; set; } = 20;
 
-    public int Round => ((GameTurn - 1) / StaticGameData.PlayableFactions.Count) + 1;
+    public int Round => StaticGameData.RoundForTurn(GameTurn);
     public Faction CurrentFaction => GameTurn > 0 ? StaticGameData.PlayableFactions[(GameTurn - 1) % StaticGameData.PlayableFactions.Count] : Faction.GERMANY;
     private MultiplayerGameState gameState => GameSession.Current.GameState;
     public FactionState CurrentFactionState => FactionState.ForEnum(CurrentFaction);
@@ -161,7 +161,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             List<VPTurnSummary> summaries = VictoryPointSummaries.GetValueOrDefault(faction, new List<VPTurnSummary>());
 
             List<RoundScore> perRound = summaries
-                .GroupBy(s => ((s.TurnNumber - 1) / StaticGameData.PlayableFactions.Count) + 1)
+                .GroupBy(s => s.Round)
                 .OrderBy(g => g.Key)
                 .Select(g => new RoundScore { Round = g.Key, Points = g.Sum(s => s.TotalScore) })
                 .ToList();

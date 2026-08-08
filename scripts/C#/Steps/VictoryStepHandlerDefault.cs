@@ -27,6 +27,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     public async Task ProcessVictoryStep(Faction faction)
     {
         Faction = faction;
+        vpTurnSummary.Faction = faction;
 
         ScoreSupplyCountryVPs();
         HandleStatusCardVictoryPoints();
@@ -42,7 +43,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
             if (cs.IsSupply)
             {
                 int score = Math.Max(3 - cs.Units.Keys.Count, 1);
-                VPEntry vPEntry = new VPEntry(score, $"{score} VP for supply star on {cs.StaticCountryData.Label}");
+                VPEntry vPEntry = new VPEntry(score, $"supply star on {cs.StaticCountryData.Label}");
                 vpTurnSummary.AddScore(vPEntry);                
             }
         }
@@ -57,7 +58,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
 
     private async Task ShowVictoryPointEntry(VPEntry vPEntry)
     {
-        PresentationServices.Notification.ShowActionText(vPEntry.Reason, Faction);
+        PresentationServices.Notification.ShowActionText(vPEntry.Description, Faction);
         await Task.Delay(GameSettings.DurationLong);
         PresentationServices.Notification.HideActionText();
     }

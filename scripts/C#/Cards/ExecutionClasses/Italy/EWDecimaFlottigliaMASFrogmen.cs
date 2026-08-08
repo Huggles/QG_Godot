@@ -17,7 +17,7 @@ public partial class EWDecimaFlottigliaMASFrogmen : EWCardLogic
 
                 int totalDiscards = 1 + (noAlliedNavyInMediterranean ? 1 : 0);
 
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "1 VP for Decima Flottiglia MAS Frogmen."), Faction));
+                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "Decima Flottiglia MAS Frogmen"), Faction));
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, totalDiscards));
                 discardEvent.IsTrigger = true;

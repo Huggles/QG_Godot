@@ -1,0 +1,84 @@
+{
+  "title": "Debug Empty Deck",
+  "description": "Italy's draw deck is drained to 2 cards and the US opens with B-24 Liberator (Italy discards 4). Expect 2 cards discarded and -2 VP for Italy.",
+  "startingFaction": "UNITED_STATES",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [
+        { "countryName": "GERMANY" }
+      ],
+      "initialCards": [],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [
+        { "countryName": "UNITED_KINGDOM" }
+      ],
+      "initialCards": [],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [
+        { "countryName": "JAPAN" }
+      ],
+      "initialCards": [],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [
+        { "countryName": "MOSCOW" }
+      ],
+      "initialCards": [],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [
+        { "countryName": "ITALY" }
+      ],
+      "initialCards": [],
+      "initialHandCards": [
+        { "name": "BuildNavy" },
+        { "name": "BuildNavy" },
+        { "name": "LandBattle" },
+        { "name": "LandBattle" },
+        { "name": "SeaBattle" },
+        { "name": "SeaBattle" },
+        { "name": "EventAfrikaKorps" },
+        { "name": "EventDivisionAzul" },
+        { "name": "EventGermanAidinGreece" },
+        { "name": "EventItalianEastAfrica" },
+        { "name": "EventItalyAttacksCommunists" },
+        { "name": "EventPlunder_Italy" },
+        { "name": "EWDecimaFlottigliaMASFrogmen" },
+        { "name": "EWRegiaMarinaClosesShippingLanes" },
+        { "name": "ResponseGermanReinforcementsCounterattack" },
+        { "name": "ResponseMonteCassino" },
+        { "name": "ResponseRomanianReinforcements" },
+        { "name": "ResponseSkilledPilots" },
+        { "name": "StatusAntiCommunistSentiment" },
+        { "name": "StatusBalkanResources" },
+        { "name": "StatusBravado" },
+        { "name": "StatusImperoItaliano" },
+        { "name": "StatusMareNostrum" }
+      ],
+      "startingVP": 10
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [
+        { "countryName": "US_EAST" },
+        { "countryName": "WESTERN_EUROPE" }
+      ],
+      "initialCards": [],
+      "initialHandCards": [
+        { "name": "EWB24Liberator" }
+      ],
+      "startingVP": 0
+    }
+  }
+}

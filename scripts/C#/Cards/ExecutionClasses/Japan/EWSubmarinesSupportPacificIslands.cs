@@ -26,7 +26,7 @@ public partial class EWSubmarinesSupportPacificIslands : EWCardLogic
                 {
                     // Score 2 VP per navy through the ChangeEvent pipeline
                     await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(
-                        new VPEntry(count * 2, $"{count * 2} VP for Japanese Navies in or adjacent to East Pacific."),
+                        new VPEntry(count * 2, "Japanese Navies in or adjacent to East Pacific"),
                         Faction));
                     
                     // US discards 2 cards per navy
