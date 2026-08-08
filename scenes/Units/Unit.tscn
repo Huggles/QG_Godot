@@ -48,6 +48,7 @@ offset_top = -75.5
 offset_bottom = 24.5
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_n4c3c")
 
 [node name="OutOfSupplyIcon" type="Sprite2D" parent="." unique_id=1133449168]
