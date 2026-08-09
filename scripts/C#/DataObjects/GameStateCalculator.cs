@@ -87,6 +87,10 @@ public class GameStateCalculator
         List<CardState> cardPlayedThisTurn = CardState.AllForFaction(faction).Values.Where(cs => cs.PlayedInTurn.Contains(GameFlow.Instance.GameTurn)).ToList();
         candidates.AddRange(cardPlayedThisTurn);
 
+        // Activatable scenario mutators are in no DeckState pile and are never "played", so none of the
+        // sources above can reach them. Everything downstream of Tag.IsActivatable then applies as-is.
+        candidates.AddRange(CardState.AllForFaction(faction).Values.Where(cs => cs.CardLogic is ActivatableMutator));
+
         candidates = candidates.Distinct().ToList();
         
 

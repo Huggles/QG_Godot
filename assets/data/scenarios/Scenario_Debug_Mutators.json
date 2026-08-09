@@ -1,6 +1,6 @@
 {
   "title": "Debug: Step Mutators",
-  "description": "Exercises the step mutator system. Attrition removes a unit after every play step; Germany and Italy score bonus VP in rounds 2-3. UK starts with Rationing in hand.",
+  "description": "Exercises the mutator system. Attrition removes a unit after every play step; Germany and Italy score bonus VP in rounds 2-3; every faction may activate Synthetic Fuel when it builds an Army. UK starts with Rationing in hand.",
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 3,
@@ -15,6 +15,9 @@
       "fromRound": 2,
       "toRound": 3,
       "order": 20
+    },
+    {
+      "name": "MutatorSyntheticFuelAnyFaction"
     }
   ],
   "factions": {

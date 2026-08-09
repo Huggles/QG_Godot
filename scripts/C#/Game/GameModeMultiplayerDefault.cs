@@ -187,29 +187,31 @@ public partial class GameModeMultiplayerDefault : IGameMode
         await PlaceCards(initialStateData);
         await ApplyStartingVictoryPoints(initialStateData);
         await SetStartingFaction(initialStateData);
-        RegisterMutators(initialStateData);
+        await RegisterMutators(initialStateData);
         GameStateCalculator.Enabled = true;
         await Task.Delay(100);
     }
 
     /// <summary>
-    /// Instantiate the scenario's step mutators and register them. Runs before any card is played, so
-    /// scenario mutators sit ahead of card mutators in the registry — which is the tie-break when two
-    /// mutators share an Order. See StepMutatorRunner for the full ordering rule.
+    /// Instantiate the scenario's mutators. Two kinds share the "mutators" array and are told apart by
+    /// the type they extend:
     ///
-    /// Host-only, like the rest of setup: mutators are evaluated server-side and their effects reach
-    /// clients as replicated ChangeEvents.
+    /// - <see cref="StepMutator"/> runs automatically at a step boundary and is registered with
+    ///   ModifierRegistry. Runs before any card is played, so scenario mutators sit ahead of card
+    ///   mutators in the registry — which is the tie-break when two mutators share an Order. See
+    ///   StepMutatorRunner for the full ordering rule.
+    /// - <see cref="ActivatableMutator"/> is activated by the player and gets one Bulletin
+    ///   (a BulletinCardState) per eligible faction instead.
+    ///
+    /// Host-only, like the rest of setup: step mutators are evaluated server-side and their effects
+    /// reach clients as replicated ChangeEvents, and the activatable ones reach clients as the
+    /// RegisterBulletinCardChangeEvents emitted here.
     /// </summary>
-    private void RegisterMutators(InitialGameStateData initialStateData)
+    private async Task RegisterMutators(InitialGameStateData initialStateData)
     {
         foreach (MutatorScenarioData entry in initialStateData.Mutators)
         {
             Type mutatorType = Type.GetType(entry.Name);
-            if (mutatorType == null || !typeof(StepMutator).IsAssignableFrom(mutatorType))
-                throw new Exception(
-                    $"Mutator '{entry.Name}' in {GameManager.PendingScenarioPath} was not found or does not extend StepMutator.");
-
-            StepMutator mutator = (StepMutator)Activator.CreateInstance(mutatorType);
 
             List<Faction> factionFilter = new List<Faction>();
             foreach (string factionKey in entry.Factions)
@@ -219,6 +221,18 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 factionFilter.Add(faction);
             }
 
+            if (mutatorType != null && typeof(ActivatableMutator).IsAssignableFrom(mutatorType))
+            {
+                await RegisterActivatableMutator(entry, factionFilter);
+                continue;
+            }
+
+            if (mutatorType == null || !typeof(StepMutator).IsAssignableFrom(mutatorType))
+                throw new Exception(
+                    $"Mutator '{entry.Name}' in {GameManager.PendingScenarioPath} was not found or does not extend StepMutator or ActivatableMutator.");
+
+            StepMutator mutator = (StepMutator)Activator.CreateInstance(mutatorType);
+
             mutator.FactionFilter = factionFilter;
             mutator.FromRound = entry.FromRound;
             mutator.ToRound = entry.ToRound;
@@ -227,6 +241,31 @@ public partial class GameModeMultiplayerDefault : IGameMode
             ModifierRegistry.Register(mutator);
             DebugUtilities.PrintPeer(
                 $"Registered scenario mutator {entry.Name} ({mutator.Timing} {mutator.Step}, order {mutator.Order})");
+        }
+    }
+
+    /// <summary>
+    /// Give every eligible faction its own Bulletin for an activatable mutator — an empty faction list
+    /// means all playable factions. One Bulletin per faction is what lets the whole existing card
+    /// activation pipeline apply unchanged: CardLogic.Faction is then always the faction that may
+    /// activate it, so the mutator's triggers and effect can use Faction directly.
+    ///
+    /// entry.Order is ignored: it is the tie-break for automatic step-boundary ordering, and an
+    /// activatable mutator has no automatic run window.
+    /// </summary>
+    private async Task RegisterActivatableMutator(MutatorScenarioData entry, List<Faction> factionFilter)
+    {
+        List<Faction> targetFactions = factionFilter.Count > 0 ? factionFilter : StaticGameData.PlayableFactions;
+
+        // Ids continue past the deck cards built in InstantiateFactionStates and are carried on the
+        // wire, so the client uses the host's id rather than recomputing one.
+        int nextCardId = gameState.CardStates.Max(cardState => cardState.Id) + 1;
+
+        foreach (Faction faction in targetFactions)
+        {
+            await new RegisterBulletinCardChangeEvent(faction, nextCardId, entry.Name, entry.FromRound, entry.ToRound)
+                { IsTrigger = false }.ApplyChange();
+            nextCardId++;
         }
     }
 

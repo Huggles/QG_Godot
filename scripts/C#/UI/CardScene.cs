@@ -64,7 +64,7 @@ public partial class CardScene : Control
         CardId = cardId;
         if (CardId > -1)
         {            
-            cardTextureNode.Texture = FactionState.FactionData.CardFrontTextures[CardState.CardData.CardType];
+            cardTextureNode.Texture = CardState.FrontTexture;
             if (!string.IsNullOrEmpty(CardState.CardData.Text))
             {
                 textContainerNode.Visible = true;
