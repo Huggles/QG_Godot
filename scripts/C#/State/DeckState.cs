@@ -155,7 +155,8 @@ public partial class DeckState : StateObject
         {
             StatusCardIds.Remove(cardId);
             CardState statusCard = CardState.ForId(cardId);
-            if (statusCard.CardLogic is IModifier modifier)
+            // Persistent modifiers are meant to outlive their card — see IPersistentModifier.
+            if (statusCard.CardLogic is IModifier modifier and not IPersistentModifier)
                 ModifierRegistry.Unregister(modifier);
         }
         else if (ResponseCardIds.Contains(cardId))

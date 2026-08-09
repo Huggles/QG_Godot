@@ -37,6 +37,14 @@ public abstract partial class CardLogic : GodotObject
 
     public bool CanBeActivated()
     {
+        // A card in the discard pile is out of play. This cannot be inferred from Tag.IsPlayed, which
+        // stays set once a card is discarded (GameStateCalculator.CalculatePlayedCardsForFaction), so
+        // without this check a spent Response card would still be offered as a reaction next turn.
+        // CanBeActivated feeds Tag.IsActivatable, so this one gate covers plays, after-reactions and
+        // block reactions alike.
+        if (CardState.IsDiscarded)
+            return false;
+
         // For an unplayed card TriggerConditionsMet resolves to _defaultPlayConditions, which is
         // the correct gate for a play.
         if (IsActivationFinished || !TriggerConditionsMet)

@@ -22,6 +22,11 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
     public async Task Init(){
         DebugUtilities.PrintPeerFinest("Init Game Mode => Multiplayer Default");
+
+        // The registry is static and survives returning to the menu, so a second game in the same
+        // process would otherwise inherit the previous game's modifiers.
+        ModifierRegistry.Clear();
+
         LoadDataFiles();
         InstantiateCountryStates();
         InstantiateUnitStates();
@@ -182,8 +187,47 @@ public partial class GameModeMultiplayerDefault : IGameMode
         await PlaceCards(initialStateData);
         await ApplyStartingVictoryPoints(initialStateData);
         await SetStartingFaction(initialStateData);
+        RegisterMutators(initialStateData);
         GameStateCalculator.Enabled = true;
         await Task.Delay(100);
+    }
+
+    /// <summary>
+    /// Instantiate the scenario's step mutators and register them. Runs before any card is played, so
+    /// scenario mutators sit ahead of card mutators in the registry — which is the tie-break when two
+    /// mutators share an Order. See StepMutatorRunner for the full ordering rule.
+    ///
+    /// Host-only, like the rest of setup: mutators are evaluated server-side and their effects reach
+    /// clients as replicated ChangeEvents.
+    /// </summary>
+    private void RegisterMutators(InitialGameStateData initialStateData)
+    {
+        foreach (MutatorScenarioData entry in initialStateData.Mutators)
+        {
+            Type mutatorType = Type.GetType(entry.Name);
+            if (mutatorType == null || !typeof(StepMutator).IsAssignableFrom(mutatorType))
+                throw new Exception(
+                    $"Mutator '{entry.Name}' in {GameManager.PendingScenarioPath} was not found or does not extend StepMutator.");
+
+            StepMutator mutator = (StepMutator)Activator.CreateInstance(mutatorType);
+
+            List<Faction> factionFilter = new List<Faction>();
+            foreach (string factionKey in entry.Factions)
+            {
+                if (!Enum.TryParse<Faction>(factionKey, out Faction faction))
+                    throw new Exception($"Mutator '{entry.Name}' names unknown faction '{factionKey}'.");
+                factionFilter.Add(faction);
+            }
+
+            mutator.FactionFilter = factionFilter;
+            mutator.FromRound = entry.FromRound;
+            mutator.ToRound = entry.ToRound;
+            mutator.Order = entry.Order;
+
+            ModifierRegistry.Register(mutator);
+            DebugUtilities.PrintPeer(
+                $"Registered scenario mutator {entry.Name} ({mutator.Timing} {mutator.Step}, order {mutator.Order})");
+        }
     }
 
     private async Task ApplyStartingVictoryPoints(InitialGameStateData initialStateData)

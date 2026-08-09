@@ -19,6 +19,13 @@ public partial class CardState : StateObject
 
     public bool IsPlayed => this.HasTag(Tag.IsPlayed, Faction);
 
+    /// <summary>
+    /// In its owner's discard pile. Deliberately not derived from Tag.IsPlayed — discarded cards keep
+    /// that tag (see GameStateCalculator.CalculatePlayedCardsForFaction), so "played" and "discarded"
+    /// cannot be told apart by tag alone.
+    /// </summary>
+    public bool IsDiscarded => DeckState.ForFaction(Faction).DiscardedCardIds.Contains(Id);
+
     // Constructor
     public CardState(CardData cardData)
     {

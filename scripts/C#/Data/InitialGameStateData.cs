@@ -25,6 +25,35 @@ public class InitialGameStateData
 
     [JsonPropertyName("randomStartingVPMax")]
     public int RandomStartingVPMax { get; set; } = 20;
+
+    // Step mutators active for this scenario. Empty by default, so a scenario that declares none
+    // has none — the turn flow behaves exactly as it did before mutators existed.
+    [JsonPropertyName("mutators")]
+    public List<MutatorScenarioData> Mutators { get; set; } = new List<MutatorScenarioData>();
+}
+
+/// <summary>
+/// One scenario-declared mutator. Name is a C# class extending StepMutator, resolved by reflection
+/// the same way CardData.ExecutionClass resolves card logic.
+/// </summary>
+public class MutatorScenarioData
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+
+    // Empty means every faction's turn.
+    [JsonPropertyName("factions")]
+    public List<string> Factions { get; set; } = new List<string>();
+
+    [JsonPropertyName("fromRound")]
+    public int FromRound { get; set; } = 1;
+
+    [JsonPropertyName("toRound")]
+    public int ToRound { get; set; } = int.MaxValue;
+
+    // Lower runs first within a (step, timing) window; ties fall back to registration order.
+    [JsonPropertyName("order")]
+    public int Order { get; set; } = 0;
 }
 
 public class FactionScenarioData

@@ -18,5 +18,11 @@ public static class ModifierRegistry
 
     public static void Unregister(IModifier modifier) => _modifiers.Remove(modifier);
 
+    /// <summary>
+    /// Drop every modifier. The backing list is static, so without this a second game started in the
+    /// same process would inherit the previous game's modifiers. Called from game-mode Init().
+    /// </summary>
+    public static void Clear() => _modifiers.Clear();
+
     public static IEnumerable<T> GetAll<T>() where T : IModifier => _modifiers.OfType<T>();
 }

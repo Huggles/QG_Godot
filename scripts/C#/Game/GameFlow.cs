@@ -204,6 +204,44 @@ public partial class GameFlow : SingletonNode<GameFlow>
     }
 
     /// <summary>
+    /// Open a turn step: apply its ChangeStepChangeEvent (which sets TurnStep and starts a fresh
+    /// CardPlayRound), then run any BEFORE mutators. Ordering matters — the mutators need the new
+    /// round to exist so their change events can go through the reaction pipeline.
+    /// </summary>
+    private async Task BeginStep(TurnStep step)
+    {
+        await new ChangeStepChangeEvent(step).ApplyChange();
+        await StepMutatorRunner.Run(step, MutatorTiming.BEFORE, CurrentFaction);
+    }
+
+    /// <summary>
+    /// A step has completed: run its AFTER mutators, then advance.
+    ///
+    /// Separate from <see cref="StartNextStep"/> for two reasons. The completed step is only known at
+    /// the callback, since five of the six steps finish through an event rather than an awaited Task.
+    /// And StartNewTurn also calls StartNextStep for the turn rollover — routing that through here
+    /// would re-run the DRAW step's AFTER mutators, because TurnStep still reads DRAW at that point
+    /// (TurnStep.END emits no ChangeStepChangeEvent).
+    /// </summary>
+    private void FinishStep(TurnStep completed)
+    {
+        // Same stale-epoch gate as StartNextStep: an aborted step can leave a live subscription
+        // behind, and we must not run its mutators against the resumed loop.
+        if (stepEpoch != ErrorReporter.GameLoopEpoch)
+        {
+            DebugUtilities.PrintPeer(
+                $"Ignoring FinishStep({completed}) from stale epoch {stepEpoch} (current {ErrorReporter.GameLoopEpoch})");
+            return;
+        }
+
+        Guard.FireAndForget(async () =>
+        {
+            await StepMutatorRunner.Run(completed, MutatorTiming.AFTER, CurrentFaction);
+            StartNextStep();
+        }, $"AfterMutators {completed}", CurrentFaction, stallsLoop: true);
+    }
+
+    /// <summary>
     /// Resume the turn loop after a reported failure, abandoning the rest of the failed step.
     /// Called from the error popup's Continue button via <c>ErrorReporter.RequestResume</c>, after
     /// the awaiter-cancel sweep has run and the epoch has been bumped.
@@ -265,7 +303,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     private async Task StartTurnStep()
     {
-        await new ChangeStepChangeEvent(TurnStep.START).ApplyChange();
+        await BeginStep(TurnStep.START);
         DebugUtilities.PrintPeer("StartTurnStep");
         startTurnStepHandler = new StartTurnStepHandler();
         startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;
@@ -275,12 +313,12 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public void StartTurnStepFinishedHandler()
     {
         startTurnStepHandler.StartTurnStepFinished -= StartTurnStepFinishedHandler;
-        StartNextStep();
+        FinishStep(TurnStep.START);
     }
 
     private async Task PlayCardStep()
     {
-        await new ChangeStepChangeEvent(TurnStep.PLAY_CARD).ApplyChange();
+        await BeginStep(TurnStep.PLAY_CARD);
         DebugUtilities.PrintPeer("PlayCardStep");
         playStepHandlerDefault = new PlayStepHandlerDefault();
         playStepHandlerDefault.PlayStepFinished += PlayCardStepFinishedHandler;
@@ -290,12 +328,12 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public void PlayCardStepFinishedHandler()
     {
         playStepHandlerDefault.PlayStepFinished -= PlayCardStepFinishedHandler;
-        StartNextStep();
+        FinishStep(TurnStep.PLAY_CARD);
     }
 
     private async Task SupplyStep()
     {
-        await new ChangeStepChangeEvent(TurnStep.SUPPLY).ApplyChange();
+        await BeginStep(TurnStep.SUPPLY);
         DebugUtilities.PrintPeer("SupplyStep");
         supplyStepHandler = new SupplyStepHandlerDefault();
         supplyStepHandler.SupplyStepFinished += SupplyStepFinishedHandler;
@@ -305,20 +343,20 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public void SupplyStepFinishedHandler()
     {
         supplyStepHandler.SupplyStepFinished -= SupplyStepFinishedHandler;
-        StartNextStep();
+        FinishStep(TurnStep.SUPPLY);
     }
 
     private async Task VictoryPointStep()
     {
-        await new ChangeStepChangeEvent(TurnStep.VICTORY_POINT).ApplyChange();
+        await BeginStep(TurnStep.VICTORY_POINT);
         DebugUtilities.PrintPeer("VictoryPointStep");
         await vpStepHandler.ProcessVictoryStep(CurrentFaction);
-        StartNextStep();
+        FinishStep(TurnStep.VICTORY_POINT);
     }
 
     private async Task DiscardStep()
     {
-        await new ChangeStepChangeEvent(TurnStep.DISCARD).ApplyChange();
+        await BeginStep(TurnStep.DISCARD);
         DebugUtilities.PrintPeer("DiscardStep");
         discardStepHandler = new DiscardStepHandlerDefault();
         discardStepHandler.DiscardStepFinished += DiscardStepFinishedHandler;
@@ -328,12 +366,12 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public void DiscardStepFinishedHandler()
     {
         discardStepHandler.DiscardStepFinished -= DiscardStepFinishedHandler;
-        StartNextStep();
+        FinishStep(TurnStep.DISCARD);
     }
 
     private async Task DrawStep()
     {
-        await new ChangeStepChangeEvent(TurnStep.DRAW).ApplyChange();
+        await BeginStep(TurnStep.DRAW);
         DebugUtilities.PrintPeer("DrawStep");
         drawStepHandler = new DrawStepHandlerDefault();
         drawStepHandler.DrawStepFinished += DrawStepFinishedHandler;
@@ -343,7 +381,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public void DrawStepFinishedHandler()
     {
         drawStepHandler.DrawStepFinished -= DrawStepFinishedHandler;
-        StartNextStep();
+        FinishStep(TurnStep.DRAW);
     }
 
     public class GameTurnStep
