@@ -27,7 +27,7 @@ public partial class StatusWartimeProduction : StatusCardLogic
             new CardStep(this, async() => {
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));

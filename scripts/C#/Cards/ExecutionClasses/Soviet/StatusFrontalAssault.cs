@@ -57,7 +57,7 @@ public partial class StatusFrontalAssault : StatusCardLogic
             new CardStep(this, async () => {
                 ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, SameOrAdjacentTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0

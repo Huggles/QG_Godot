@@ -20,6 +20,6 @@ public static class StepMutatorExtensions
         if (isTrigger)
             await CardPlayPool.DoChangeEvent(changeEvent);
         else
-            await changeEvent.ApplyChange();
+            await changeEvent.Apply();
     }
 }

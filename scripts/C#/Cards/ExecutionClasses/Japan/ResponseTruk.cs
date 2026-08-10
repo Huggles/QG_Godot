@@ -32,7 +32,7 @@ public partial class ResponseTruk : ResponseCardLogic
                 {
                     GrantSupplyChangeEvent grantEvent = BuildChangeEvent(new GrantSupplyChangeEvent(Faction, unitIds));
                     grantEvent.IsTrigger = false;
-                    await grantEvent.ApplyChange();
+                    await grantEvent.Apply();
                 }
 
                 PresentationServices.Notification.ShowActionText("Truk: Japanese pieces in or adjacent to the Central Pacific are in supply this turn.", Faction);

@@ -26,7 +26,7 @@ public partial class ErrorReporter : Node
     public static int GameLoopEpoch { get; private set; } = 0;
 
     /// <summary>
-    /// Depth of in-flight <c>ChangeEvent.ApplyChange</c> calls. Non-zero means state may be
+    /// Depth of in-flight <c>ChangeEvent.Apply</c> calls. Non-zero means state may be
     /// half-mutated, which (combined with <see cref="BroadcastSent"/>) decides severity.
     /// </summary>
     public static int MutationDepth { get; set; } = 0;
@@ -436,8 +436,8 @@ public partial class ErrorReporter : Node
     }
 
     /// <summary>
-    /// Mark <paramref name="e"/> as having escaped <c>ChangeEvent.ApplyChange</c> after the state was
-    /// mutated but before clients were told. Called from ApplyChange itself, because the counters that
+    /// Mark <paramref name="e"/> as having escaped <c>ChangeEvent.Apply</c> after the state was
+    /// mutated but before clients were told. Called from Apply itself, because the counters that
     /// identify that window are unwound by its finally block long before the exception reaches the
     /// Guard catch at the top of the turn loop.
     /// </summary>

@@ -252,7 +252,7 @@ public class GameStateCalculator
         }
 
         // Tag calculation is server-authoritative. Clients receive computed tags via the
-        // RecalculateTagsChangeEvent broadcast after each ChangeEvent and never recalculate independently.
+        // RecalculateTagsMessage broadcast after each ChangeEvent and never recalculate independently.
         if (MultiplayerSession.Instance != null && !MultiplayerSession.Instance.Multiplayer.IsServer())
         {
             DebugUtilities.PrintPeer("[SKIP] GameStateCalculator.CalculateAll is server-only — awaiting tags from server");
@@ -274,7 +274,7 @@ public class GameStateCalculator
             CalculateStraightControlForFaction();
 
             // Build the snapshot, apply it locally, and replicate it to clients as an ordered
-            // RecalculateTagsChangeEvent. Because ChangeEvent.ApplyChange() broadcasts the change
+            // RecalculateTagsMessage. Because ChangeEvent.Apply() broadcasts the change
             // event BEFORE calling CalculateAll(), this tags message is enqueued on clients right
             // behind that change event and always applies to post-change state in queue order.
             var snapshot = BuildTagsSnapshot();
@@ -282,7 +282,7 @@ public class GameStateCalculator
 
             if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
             {
-                _ = new RecalculateTagsChangeEvent(snapshot).BroadCast();
+                _ = new RecalculateTagsMessage(snapshot).BroadCast();
             }
 
             stopwatch.Stop();
@@ -328,7 +328,7 @@ public class GameStateCalculator
 
     /// <summary>
     /// Clears all replicated tags from all state objects and re-applies them from the snapshot.
-    /// Called on the server (after CalculateAll), on clients (via RecalculateTagsChangeEvent), and on resync.
+    /// Called on the server (after CalculateAll), on clients (via RecalculateTagsMessage), and on resync.
     /// Emits GameStateRecalculated when done.
     /// </summary>
     public static void ApplyComputedTags(ComputedTagsSnapshot snapshot)

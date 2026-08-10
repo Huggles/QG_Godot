@@ -64,7 +64,7 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
                     UnitRemovalReason.SUPPLY
                 );
                 DebugUtilities.PrintPeer($"  - Removing {unit.Faction} {unit.Type} from {CountryState.ForId(unit.CountryId).Label}");
-                await removeEvent.ApplyChange();
+                await removeEvent.Apply();
             }
             
             // Give player time to see the changes

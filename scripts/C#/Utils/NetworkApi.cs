@@ -98,46 +98,57 @@ public partial class NetworkApi : Node
     }
 
     /// <summary>
-    /// Called on all clients by the server after a ChangeEvent is applied.
-    /// Clients reconstruct the event, apply it locally, then verify the state hash.
+    /// Called on all clients by the server after a GameMessage is applied.
+    /// Clients reconstruct the message, queue it for replay in wire order, and — for a state mutation —
+    /// verify the state hash once it has been applied.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void ReceiveChangeEvent(string dtoJson)
+    public void ReceiveGameMessage(string dtoJson)
     {
         // Was `async void` with no catch (it never actually awaited): a malformed payload or an
-        // unregistered DTO type (ChangeEvent.FromDto throws NotSupportedException) killed the client
+        // unregistered DTO type (GameMessage.FromDto throws NotSupportedException) killed the client
         // process outright.
         try
         {
-            ReceiveChangeEventInternal(dtoJson);
+            ReceiveGameMessageInternal(dtoJson);
         }
         catch (Exception e)
         {
-            ErrorReporter.Report(e, "Rpc ReceiveChangeEvent");
+            ErrorReporter.Report(e, "Rpc ReceiveGameMessage");
         }
     }
 
-    private void ReceiveChangeEventInternal(string dtoJson)
+    private void ReceiveGameMessageInternal(string dtoJson)
     {
-        ChangeEventDto dto = JsonSerializer.Deserialize<ChangeEventDto>(dtoJson);
-        ChangeEvent ev     = ChangeEvent.FromDto(dto);
-        DebugUtilities.PrintPeer($"[color={"blue"}]ReceiveChangeEvent ({ev.Id}): {dto.GetType().Name}");
+        GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(dtoJson);
+        GameMessage    msg = GameMessage.FromDto(dto);
+        DebugUtilities.PrintPeer($"[color={"blue"}]ReceiveGameMessage ({msg.Id}): {dto.GetType().Name}");
         DebugUtilities.PrintPeerFinest($"{dtoJson}");
-        ev.ChangeEventApplied += (id) => {
-            string actualHash = MultiplayerSession.Instance.GameState.ComputeHash();            
-            if (actualHash != ev.HashAfterApplication)
-            {
-                DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
-                DebugUtilities.PrintPeerError($"DESYNC DETECTED after applying {dto.GetType().Name}!");
-                DebugUtilities.PrintPeerError($"Hash mismatch after {dto.GetType().Name}: expected {ev.HashAfterApplication}, got {actualHash}. Requesting resync.");            
-                DebugUtilities.PrintPeerError($"EventId: {ev.Id}, LatestAppliedId: {ChangeEvent.LatestAppliedId}");
-                DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
-                DebugUtilities.PrintPeerError($"{JsonSerializer.Serialize(MultiplayerSession.Instance.GameState)}");
-                RpcId(1, nameof(RequestResync));
-                return;
-            }            
-        };
-        ChangeEventQueue.Instance.Enqueue(ev);
+
+        // Only a state mutation has a hash worth comparing. Gating on the type rather than on
+        // "HashAfterApplication != null" is deliberate: a PresentationEvent has no such field at all,
+        // so there is nothing to forget to stamp and nothing to accidentally compare — while every real
+        // ChangeEvent still gets checked, because every ChangeEvent still has the field.
+        if (msg is ChangeEvent ev)
+            ev.ChangeEventApplied += (id) => VerifyReplicatedHash(ev, dto);
+
+        ChangeEventQueue.Instance.Enqueue(msg);
+    }
+
+    private void VerifyReplicatedHash(ChangeEvent ev, GameMessageDto dto)
+    {
+        string actualHash = MultiplayerSession.Instance.GameState.ComputeHash();
+        if (actualHash != ev.HashAfterApplication)
+        {
+            DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
+            DebugUtilities.PrintPeerError($"DESYNC DETECTED after applying {dto.GetType().Name}!");
+            DebugUtilities.PrintPeerError($"Hash mismatch after {dto.GetType().Name}: expected {ev.HashAfterApplication}, got {actualHash}. Requesting resync.");
+            DebugUtilities.PrintPeerError($"EventId: {ev.Id}, LatestAppliedId: {ChangeEvent.LatestAppliedId}");
+            DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
+            DebugUtilities.PrintPeerError($"{JsonSerializer.Serialize(MultiplayerSession.Instance.GameState)}");
+            RpcId(1, nameof(RequestResync));
+            return;
+        }
     }
 
     // ── Input-request rendezvous ─────────────────────────────────────────────
@@ -145,7 +156,7 @@ public partial class NetworkApi : Node
     // This used to be `await EventBus.ToSignal(InputRequestResponseReceived)`: untimed and, worse,
     // UNCORRELATED — a bare global signal carrying no request id. An abandoned awaiter from a failed
     // step stayed registered, so a later response resumed the DEAD continuation and walked the old
-    // card pipeline concurrently with the recovered loop (double ApplyChange, double Rpc, guaranteed
+    // card pipeline concurrently with the recovered loop (double Apply, double Rpc, guaranteed
     // desync). It is now a TaskCompletionSource keyed on InputRequest.Id, with a bounded wait so a
     // client that cannot reply at all (e.g. FromJson threw, so it cannot even tell whether the
     // request was for it) does not hang the host forever.
@@ -414,14 +425,11 @@ public partial class NetworkApi : Node
         }
     }
 
-    /// <summary>
-    /// Broadcasts a PlayerActionLabel message from the server to all peers.
-    /// </summary>
-    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void ShowPlayerActionLabel(string text, int duration, int faction)
-    {
-        PresentationServices.Notification.ShowActionText(text, duration, (Faction)faction);
-    }
+    // ShowPlayerActionLabel used to live here: an Rpc that broadcast a label to every peer. It ran
+    // immediately in the receiving frame while replicated messages sat deferred in ChangeEventQueue, so
+    // the label regularly appeared ahead of the effects it described. Its callers now use
+    // ShowActionLabelPresentationEvent, which rides the ordered stream instead. Broadcast a label by
+    // applying one of those, not by adding an Rpc back.
 
     /// <summary>Client → server: request a full state snapshot due to hash mismatch.</summary>
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

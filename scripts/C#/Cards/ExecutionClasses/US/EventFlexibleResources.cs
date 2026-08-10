@@ -16,7 +16,7 @@ public partial class EventFlexibleResources : EventCardLogic
                 RecycleCardChangeEvent recycleEvent = BuildChangeEvent(
                     new RecycleCardChangeEvent(Faction, Faction, selectedCardId, RecycleDestination.Hand));
                 recycleEvent.IsTrigger = false;
-                await recycleEvent.ApplyChange();
+                await recycleEvent.Apply();
 
                 await CardPlayPool.DoCard(selectedCardId);
                 return null;

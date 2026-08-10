@@ -222,7 +222,7 @@ public partial class CardPlayRound : GodotObject
         {
             LastChangeEvent = changeEvent;
             DebugUtilities.PrintPeer($"Applying change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
-            await changeEvent.ApplyChange();
+            await changeEvent.Apply();
             DebugUtilities.PrintPeer($"Finished applying change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
         }
 
@@ -240,7 +240,7 @@ public partial class CardPlayRound : GodotObject
 
     private async Task ProcessIntroductionEvent(ChangeEvent introEvent)
     {        
-        await introEvent.ApplyChange();
+        await introEvent.Apply();
         await RequestBlockReactions(introEvent);        
     }
 
@@ -266,7 +266,7 @@ public partial class CardPlayRound : GodotObject
             // being asked to block. Mirrors the per-pass recalculation in RequestAfterReactions.
             // Introduction events are exempt: ProcessIntroductionEvent applies the change (which
             // recalculates) immediately before calling us, so tags are already current there.
-            // One call suffices: a block card played below re-enters DoCard -> ApplyChange -> CalculateAll.
+            // One call suffices: a block card played below re-enters DoCard -> Apply -> CalculateAll.
             bool isIntroductionEvent = changeEvent is PlayCardChangeEvent || changeEvent is ActivateReactionChangeEvent;
             if (!isIntroductionEvent)
                 GameStateCalculator.CalculateAll();

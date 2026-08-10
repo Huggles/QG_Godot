@@ -24,11 +24,11 @@ public partial class StatusConscription : StatusCardLogic
             new CardStep(this, async() => {
                 SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
                 spendEvent.IsTrigger = false;
-                await spendEvent.ApplyChange();
+                await spendEvent.Apply();
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildableLandCountries()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));

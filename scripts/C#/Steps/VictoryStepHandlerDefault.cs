@@ -32,7 +32,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
         ScoreSupplyCountryVPs();
         HandleStatusCardVictoryPoints();
 
-        await new ScorePointsChangeEvent(vpTurnSummary).ApplyChange();
+        await new ScorePointsChangeEvent(vpTurnSummary).Apply();
     }
 
     public void ScoreSupplyCountryVPs()

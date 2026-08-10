@@ -28,7 +28,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
 
                 RecycleCardChangeEvent recycleEvent = BuildChangeEvent(new RecycleCardChangeEvent(Faction, Faction, playEvent.SourceCardId, RecycleDestination.TopOfDeck));
                 recycleEvent.IsTrigger = false;
-                await recycleEvent.ApplyChange();
+                await recycleEvent.Apply();
                 return null;
             })
             .WithGuidance("Place Build Army card on top of draw deck")

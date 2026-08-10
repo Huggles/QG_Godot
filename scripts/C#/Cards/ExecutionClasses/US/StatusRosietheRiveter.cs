@@ -28,14 +28,14 @@ public partial class StatusRosietheRiveter : StatusCardLogic
                 DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(
                     new DiscardHandCardsChangeEvent(Faction, Faction, selectedIds)).WithoutAnimations();
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 foreach (int cardId in selectedIds)
                 {
                     RecycleCardChangeEvent recycleEvent = BuildChangeEvent(
                         new RecycleCardChangeEvent(Faction, Faction, cardId, RecycleDestination.BottomOfDeck));
                     recycleEvent.IsTrigger = false;
-                    await recycleEvent.ApplyChange();
+                    await recycleEvent.Apply();
                 }
 
                 PresentationServices.Notification.ShowActionText($"{FactionState.ForEnum(Faction).FactionData.Label} placed {selectedIds.Count} card(s) on the bottom of their deck.", Faction);

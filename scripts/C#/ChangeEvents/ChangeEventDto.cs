@@ -1,58 +1,31 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 /// <summary>
-/// Polymorphic DTO hierarchy used to serialize ChangeEvents for multiplayer replication.
-/// Only constructor parameters are included — never GodotObject references or derived state.
-/// Register every new ChangeEvent subclass here with a unique string discriminator.
+/// Wire format for a <see cref="ChangeEvent"/> — the state-mutating branch of the game-message stream.
+/// Only constructor parameters are included, never GodotObject references or derived state.
+///
+/// The polymorphic registry lives one level up, on <see cref="GameMessageDto"/>: there is a single
+/// [JsonPolymorphic] root for all three branches so that System.Text.Json has exactly one
+/// configuration to resolve. Register a new ChangeEvent's discriminator there, not here.
+///
+/// The fields below are the ones only a mutation needs — a hash to verify against, and the reaction-
+/// chain flags. Everything the channel itself needs (Id, factions, animation knobs) is on the base.
 /// </summary>
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-[JsonDerivedType(typeof(DeployUnitChangeEventDto),       "DeployUnit")]
-[JsonDerivedType(typeof(BattleCountryChangeEventDto),    "BattleCountry")]
-[JsonDerivedType(typeof(RemoveUnitChangeEventDto),       "RemoveUnit")]
-[JsonDerivedType(typeof(BattleUnitChangeEventDto),       "BattleUnit")]
-[JsonDerivedType(typeof(PlayCardChangeEventDto),         "PlayCard")]
-[JsonDerivedType(typeof(ActivateReactionChangeEventDto), "ActivateReaction")]
-[JsonDerivedType(typeof(ForceDiscardCardsChangeEventDto),     "DiscardCards")]
-[JsonDerivedType(typeof(DrawCardsChangeEventDto),        "DrawCards")]
-[JsonDerivedType(typeof(ScorePointsChangeEventDto),      "ScorePoints")]
-[JsonDerivedType(typeof(SetStartingScoreChangeEventDto), "SetStartingScore")]
-[JsonDerivedType(typeof(DiscardHandCardsChangeEventDto), "VoluntaryDiscardCards")]
-[JsonDerivedType(typeof(ForceDiscardHandCardsChangeEventDto), "ForceDiscardHandCards")]
-[JsonDerivedType(typeof(DrawCardByNameChangeEventDto),   "DrawCardByName")]
-[JsonDerivedType(typeof(ChangeStepChangeEventDto),       "ChangeStep")]
-[JsonDerivedType(typeof(ChangeRoundChangeEventDto),      "ChangeRound")]
-[JsonDerivedType(typeof(RecycleCardChangeEventDto),      "RecycleCard")]
-[JsonDerivedType(typeof(SpendPlayActionChangeEventDto),  "SpendPlayAction")]
-[JsonDerivedType(typeof(ReorderDeckChangeEventDto),      "ReorderDeck")]
-[JsonDerivedType(typeof(GrantSupplyChangeEventDto),       "GrantSupply")]
-[JsonDerivedType(typeof(RecalculateTagsChangeEventDto),   "RecalculateTags")]
-[JsonDerivedType(typeof(RegisterBulletinCardChangeEventDto), "RegisterBulletinCard")]
-[JsonDerivedType(typeof(ShowBulletinChangeEventDto),      "ShowBulletin")]
-public abstract class ChangeEventDto
+public abstract class ChangeEventDto : GameMessageDto
 {
-    public int Id { get; set; }
-    public string HashAfterApplication { get; set; }
-    public Faction TriggeringFaction    { get; set; }
+    public string  HashAfterApplication { get; set; }
     public int     SourceCardId         { get; set; } = -1;
     public bool    IsTrigger            { get; set; } = true;
     public bool    SuppressGameProgress { get; set; } = false;
-    public bool    PlayAnimations        { get; set; } = true;
-    public bool    BlockAnimationQueue   { get; set; } = true;
-    public Faction TargetFaction { get; set; }
 
     public static T Build<T>(ChangeEvent handler, int Id) where T : ChangeEventDto, new()
     {
         T dto = new T();
-        dto.Id = Id;
+        Fill(dto, handler, Id);
         dto.HashAfterApplication = handler.HashAfterApplication;
-        dto.TriggeringFaction = handler.TriggeringFaction;        
-        dto.TargetFaction = handler.TargetFaction;
         dto.SourceCardId = handler.SourceCardId;
         dto.IsTrigger = handler.IsTrigger;
         dto.SuppressGameProgress = handler.SuppressGameProgress;
-        dto.PlayAnimations = handler.PlayAnimations;
-        dto.BlockAnimationQueue = handler.BlockAnimationQueue;
         return dto;
     }
 }
@@ -153,21 +126,10 @@ public class GrantSupplyChangeEventDto : ChangeEventDto
     public List<int> UnitIds { get; set; }
 }
 
-public class RecalculateTagsChangeEventDto : ChangeEventDto
-{
-    public ComputedTagsSnapshot Snapshot { get; set; }
-}
-
 public class RegisterBulletinCardChangeEventDto : ChangeEventDto
 {
     public int    CardId           { get; set; }
     public string MutatorClassName { get; set; }
     public int    FromRound        { get; set; }
     public int    ToRound          { get; set; }
-}
-
-public class ShowBulletinChangeEventDto : ChangeEventDto
-{
-    public string Label        { get; set; }
-    public string BulletinText { get; set; }
 }

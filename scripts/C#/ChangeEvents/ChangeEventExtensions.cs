@@ -1,3 +1,9 @@
+/// <summary>
+/// Fluent setters for message flags. The animation and targeting knobs are constrained to
+/// <see cref="GameMessage"/> because they live on the channel and apply to a PresentationEvent just as
+/// well; the reaction-chain and card-source setters stay on <see cref="ChangeEvent"/>, where those
+/// concepts exist.
+/// </summary>
 public static class ChangeEventExtensions
 {
     public static T NoTrigger<T>(this T ev) where T : ChangeEvent
@@ -12,13 +18,13 @@ public static class ChangeEventExtensions
         return ev;
     }
 
-    public static T WithoutAnimations<T>(this T ev) where T : ChangeEvent
+    public static T WithoutAnimations<T>(this T ev) where T : GameMessage
     {
         ev.PlayAnimations = false;
         return ev;
     }
 
-    public static T WithoutBlocking<T>(this T ev) where T : ChangeEvent
+    public static T WithoutBlocking<T>(this T ev) where T : GameMessage
     {
         ev.BlockAnimationQueue = false;
         return ev;
@@ -36,7 +42,7 @@ public static class ChangeEventExtensions
         return ev;
     }
 
-    public static T Targeting<T>(this T ev, Faction targetFaction) where T : ChangeEvent
+    public static T Targeting<T>(this T ev, Faction targetFaction) where T : GameMessage
     {
         ev.TargetFaction = targetFaction;
         return ev;

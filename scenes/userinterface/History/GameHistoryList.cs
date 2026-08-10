@@ -53,10 +53,10 @@ public partial class GameHistoryList : VBoxContainer
         Callable.From(() => { ScrollContainer.ScrollVertical = (int)ScrollContainer.GetVScrollBar().MaxValue; }).CallDeferred();
     }
 
-    private List<ChangeEvent> GetUnprocessedChangeEvents()
+    private List<GameMessage> GetUnprocessedChangeEvents()
     {
-        List<ChangeEvent> unprocessed = new();
-        foreach (ChangeEvent ev in MultiplayerSession.Instance.GameState.GameChangeEvents)
+        List<GameMessage> unprocessed = new();
+        foreach (GameMessage ev in MultiplayerSession.Instance.GameState.GameMessages)
         {
             if (!DisplayedChangeEventIds.Contains(ev.Id) && ev.ToHistoryItem)
             {

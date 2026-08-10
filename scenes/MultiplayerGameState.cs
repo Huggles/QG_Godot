@@ -22,7 +22,7 @@ public class MultiplayerGameState
     public List<StraightState>             StraightStates { get; set; } = new();
     public List<FactionState>              FactionStates  { get; set; } = new();
     
-    public List<ChangeEvent>               GameChangeEvents { get; set; } = new();
+    public List<GameMessage>               GameMessages { get; set; } = new();
     public List<CardStep>                  CardSteps    { get; set; } = new();
 
     // -------------------------------------------------------------------------

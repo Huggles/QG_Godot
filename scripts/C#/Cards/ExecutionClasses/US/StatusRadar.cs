@@ -20,7 +20,7 @@ public partial class StatusRadar : StatusCardLogic
             new CardStep(this, async () => {
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;

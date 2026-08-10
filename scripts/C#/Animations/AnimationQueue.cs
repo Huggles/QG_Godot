@@ -24,7 +24,7 @@ public partial class AnimationQueue : SingletonNode<AnimationQueue>
 
         // Subscribe BEFORE pumping. Previously this started ProcessQueue and only then awaited
         // QueueEmpty — a short queue could drain and emit the signal before the await subscribed,
-        // hanging every ChangeEvent.ApplyChange (which awaits this on every event).
+        // hanging every ChangeEvent.Apply (which awaits this on every event).
         SignalAwaiter drained = ToSignal(this, SignalName.QueueEmpty);
 
         if (!_isProcessing)
@@ -104,7 +104,7 @@ public partial class AnimationQueue : SingletonNode<AnimationQueue>
         finally
         {
             // Must always run. Previously a throw left _isProcessing stuck true, so the pump never
-            // restarted and every awaiter of QueueEmpty — including ChangeEvent.ApplyChange — hung.
+            // restarted and every awaiter of QueueEmpty — including ChangeEvent.Apply — hung.
             _isProcessing = false;
             EmitSignal(SignalName.QueueEmpty);
         }

@@ -70,7 +70,7 @@ public static class CardPlayPool
             return CardPlayRound.Current.DoChangeEvent(changeEvent);
 
         // No active round — apply directly without reaction chain
-        return changeEvent.ApplyChange().ContinueWith(_ => { });
+        return changeEvent.Apply().ContinueWith(_ => { });
     }
 
     public static Task<int> RequestCardPlay(Faction faction) =>

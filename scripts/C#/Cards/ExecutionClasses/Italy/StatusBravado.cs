@@ -30,11 +30,11 @@ public partial class StatusBravado : StatusCardLogic
             new CardStep(this, async () => {
                 SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
                 spendEvent.IsTrigger = false;
-                await spendEvent.ApplyChange();
+                await spendEvent.Apply();
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, LandBattleTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0

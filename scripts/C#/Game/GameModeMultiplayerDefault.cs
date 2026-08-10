@@ -264,7 +264,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
         foreach (Faction faction in targetFactions)
         {
             await new RegisterBulletinCardChangeEvent(faction, nextCardId, entry.Name, entry.FromRound, entry.ToRound)
-                { IsTrigger = false }.ApplyChange();
+                { IsTrigger = false }.Apply();
             nextCardId++;
         }
     }
@@ -284,7 +284,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
             {
                 int vp = rng.RandiRange(min, max);
                 DebugUtilities.PrintPeer($"Random starting VP for {faction}: {vp} (range {min}-{max})");
-                await new SetStartingScoreChangeEvent(faction, vp) { IsTrigger = false }.ApplyChange();
+                await new SetStartingScoreChangeEvent(faction, vp) { IsTrigger = false }.Apply();
             }
             return;
         }
@@ -300,7 +300,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
             }
 
             DebugUtilities.PrintPeer($"Setting starting VP for {faction} to {factionData.StartingVictoryPoints}");
-            await new SetStartingScoreChangeEvent(faction, factionData.StartingVictoryPoints) { IsTrigger = false }.ApplyChange();
+            await new SetStartingScoreChangeEvent(faction, factionData.StartingVictoryPoints) { IsTrigger = false }.Apply();
         }
     }
     private async Task DeployUnits(InitialGameStateData initialStateData)
@@ -329,7 +329,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
                     countryState.Id, 
                     DeployType.RECRUIT
                 ) { IsTrigger = false, BlockAnimationQueue = false, PlayAnimations = false }; // prevent animations during initial setup
-                await deployUnitChangeEvent.ApplyChange();
+                await deployUnitChangeEvent.Apply();
             }
         }
     }
@@ -344,7 +344,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
             {            
                 CardState cs = CardState.ForName(card.Name);
                 if(cs == null) throw new Exception($"Card '{card.Name}' not found in initial game state config. Ensure name matches the Name field in QGData_Cards_V2.json.");
-                await new PlayCardChangeEvent(cs.Id) {  IsTrigger = false }.ApplyChange();
+                await new PlayCardChangeEvent(cs.Id) {  IsTrigger = false }.Apply();
             }
 
             // Move specified cards to the top of each faction's hand
@@ -352,7 +352,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
             foreach (InitialHandCardEntry handCard in factionData.InitialHandCards)
             {
                 var drawEvent = new DrawCardByNameChangeEvent(Faction.NONE, faction, handCard.Name) { IsTrigger = false };
-                await drawEvent.ApplyChange();
+                await drawEvent.Apply();
             }
         }
     }

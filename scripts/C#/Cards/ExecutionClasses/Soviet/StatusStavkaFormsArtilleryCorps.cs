@@ -50,7 +50,7 @@ public partial class StatusStavkaFormsArtilleryCorps : StatusCardLogic
             new CardStep(this, async () => {
                 ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 1));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, SameSpaceTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0

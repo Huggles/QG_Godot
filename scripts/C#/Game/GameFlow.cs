@@ -21,7 +21,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
                 if(Multiplayer.IsServer())
                 {
                     // Guard, not a bare call: Handler is a Func<Task> and the returned Task used to
-                    // be discarded, so any exception below it (card steps, ChangeEvent.ApplyChange,
+                    // be discarded, so any exception below it (card steps, ChangeEvent.Apply,
                     // InputRequest, GameAPI) went into an unobserved Task and the loop simply stalled
                     // forever with nothing logged. This is the single highest-leverage seam here.
                     Guard.FireAndForget(gameTurnStep.Handler,
@@ -129,7 +129,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             }
         }
 
-        await new ChangeRoundChangeEvent(GameTurn + 1).ApplyChange();
+        await new ChangeRoundChangeEvent(GameTurn + 1).Apply();
         TurnStepCounter = 0;
         DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
         EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
@@ -210,7 +210,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     private async Task BeginStep(TurnStep step)
     {
-        await new ChangeStepChangeEvent(step).ApplyChange();
+        await new ChangeStepChangeEvent(step).Apply();
         await StepMutatorRunner.Run(step, MutatorTiming.BEFORE, CurrentFaction);
     }
 

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// Smoothly returns the camera to the position and zoom it had when this animation was constructed.
-/// Because ApplyChange evaluates BeforeAnimations and AfterAnimations upfront (before any animation
+/// Because Apply evaluates BeforeAnimations and AfterAnimations upfront (before any animation
 /// runs), constructing this in AfterAnimations captures the pre-zoom state automatically.
 /// </summary>
 public class ReturnCameraAnimation : ChangeEventAnimation

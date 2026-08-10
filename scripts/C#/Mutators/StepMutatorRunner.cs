@@ -57,9 +57,18 @@ public static class StepMutatorRunner
                 // Announce the mutator as a Bulletin card on every peer. Replaces the old
                 // ShowPlayerActionLabel RPC, which was a single line of text that nothing cleared and
                 // that any client-side input round-trip wiped (see NetworkApi.ReceiveInputResponse).
-                await new ShowBulletinChangeEvent(activeFaction, mutator.Description, mutator.BulletinText)
-                    { IsTrigger = false }.ApplyChange();
+                //
+                // A PresentationEvent, so it costs no state hash, no tag recalculation and no reach into
+                // the reaction chain — it only needs its position in the replicated stream, so that the
+                // modal lands with the effects it announces rather than racing them.
+                await new ShowBulletinPresentationEvent(activeFaction, mutator.Description, mutator.BulletinText).Apply();
 
+                // Load-bearing, and it used to be redundant: the announcement was a ChangeEvent, so its
+                // own Apply() recalculated too and this was the second pass of two. As a PresentationEvent
+                // it recalculates nothing, so this is now the only thing guaranteeing scenario code reads
+                // fresh tags — and mutators do read them. RemoveUnitChangeEvent captures WasInSupply from
+                // the tag-derived UnitState.InSupply in its constructor, which MutatorRemoveUnitAfterPlayCard
+                // builds inside Run() below.
                 GameStateCalculator.CalculateAll();
 
                 RunningBulletin = (mutator.Description, mutator.BulletinText);

@@ -47,7 +47,7 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
 
         // A card that cannot be discarded because the deck ran out costs the target 1 VP instead.
         // Applied here rather than as a nested ScorePointsChangeEvent: clients replay this
-        // ExecuteAsync from the DTO, so a nested ApplyChange would be both broadcast and replayed,
+        // ExecuteAsync from the DTO, so a nested Apply would be both broadcast and replayed,
         // deducting twice. Recomputing the shortfall locally keeps the deduction inside the same
         // hashed mutation, exactly like ForceDiscardHandCardsChangeEvent calling GameAPI directly.
         UndischargedCards = NumberOfCards - DiscardedCardIds.Count;

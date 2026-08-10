@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 /// ShowDiscardModalAnimation, except ForFactions is left at its default (every playable faction), so
 /// ForMyFaction is true on every GUI peer and all players see it — not just a target.
 ///
-/// Reaching every peer needs no RPC: the owning ShowBulletinChangeEvent is replicated, so each peer
-/// runs its own ApplyChange and therefore its own copy of this animation.
+/// Reaching every peer needs no RPC: the owning ShowBulletinPresentationEvent is replicated, so each
+/// peer replays it and runs its own copy of this animation.
 /// </summary>
 public class ShowBulletinModalAnimation : ChangeEventAnimation
 {

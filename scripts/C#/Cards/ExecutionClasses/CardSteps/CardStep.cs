@@ -68,7 +68,7 @@ public partial class CardStep : ITaggable
         {
             //Should skip step
             DebugUtilities.PrintPeer("SKIPPING STEP");
-            NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), "Unable to: " + ActionGuidance, -1, (int)TriggeringFaction);
+            await new ShowActionLabelPresentationEvent(TriggeringFaction, "Unable to: " + ActionGuidance).Apply();
             await Task.Delay(GameSettings.DurationLong);
             if (NextCardStep != null)
             {
@@ -84,7 +84,7 @@ public partial class CardStep : ITaggable
             try
             {
                 DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName}");
-                NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), ActionGuidance, -1, (int)TriggeringFaction);
+                await new ShowActionLabelPresentationEvent(TriggeringFaction, ActionGuidance).Apply();
                 ErrorInjection.MaybeThrow(ErrorInjection.Site.CardStep, CardLogic?.CardState?.CardName);
                 result = await StepLogic.Invoke();
             }
@@ -94,7 +94,7 @@ public partial class CardStep : ITaggable
                 // abandoned (result stays null so no change event fires); StepFinished is
                 // already true, so DoCard advances to the card's next step (if any).
                 DebugUtilities.PrintPeer("Player skipped step");
-                NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel), "Skipped: " + ActionGuidance, -1, (int)TriggeringFaction);
+                await new ShowActionLabelPresentationEvent(TriggeringFaction, "Skipped: " + ActionGuidance).Apply();
             }
             catch (Exception e)
             {
@@ -115,7 +115,7 @@ public partial class CardStep : ITaggable
         }
         
         // Recalculate game state after step completes
-        // Note: ChangeEvent.ApplyChange() also recalculates, but this ensures tags are fresh
+        // Note: ChangeEvent.Apply() also recalculates, but this ensures tags are fresh
         // for any immediate condition checks or UI updates
         GameStateCalculator.CalculateAll();
         

@@ -36,11 +36,11 @@ public partial class StatusResistance : StatusCardLogic
             new CardStep(this, async () => {
                 SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
                 spendEvent.IsTrigger = false;
-                await spendEvent.ApplyChange();
+                await spendEvent.Apply();
 
                 ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0

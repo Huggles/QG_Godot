@@ -19,7 +19,7 @@ public interface IAnimationSink
     /// <summary>Queue an animation. Fire-and-forget at the call sites; the returned task completes when the animation does.</summary>
     Task Enqueue(ChangeEventAnimation animation);
 
-    /// <summary>Ensure the queue is draining (no-op if empty/already running). Awaited by ChangeEvent.ApplyChange.</summary>
+    /// <summary>Ensure the queue is draining (no-op if empty/already running). Awaited by ChangeEvent.Apply.</summary>
     Task Start();
 }
 

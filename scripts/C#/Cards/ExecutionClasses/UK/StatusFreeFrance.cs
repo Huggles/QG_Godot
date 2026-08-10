@@ -20,11 +20,11 @@ public partial class StatusFreeFrance : StatusCardLogic
             new CardStep(this, async () => {
                 SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
                 spendEvent.IsTrigger = false;
-                await spendEvent.ApplyChange();
+                await spendEvent.Apply();
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
                     new DeployUnitChangeEvent(Faction, (int)Country.WesternEurope, DeployType.BUILD));

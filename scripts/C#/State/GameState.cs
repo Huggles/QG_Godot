@@ -6,7 +6,7 @@ public partial class GameState : StateObject
 {   
     public IGameMode GameMode { get; set; }
     public Dictionary<Faction, FactionState> FactionStates { get; set; }    
-    public List<ChangeEvent> GameChangeEvents { get; set; }
+    public List<GameMessage> GameMessages { get; set; }
     public CardState ActivePlayerCard { get; set; }
 
     public List<CountryState> CountryStates { get; set; }

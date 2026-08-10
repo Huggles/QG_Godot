@@ -26,11 +26,11 @@ public partial class StatusGuards : StatusCardLogic
             new CardStep(this, async () => {
                 SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
                 spendEvent.IsTrigger = false;
-                await spendEvent.ApplyChange();
+                await spendEvent.Apply();
 
                 ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
-                await discardEvent.ApplyChange();
+                await discardEvent.Apply();
 
                 // Play a BuildArmy card from discard so that reaction cards (e.g. Women Conscripts)
                 // trigger correctly on the resulting PlayCardChangeEvent.
@@ -39,7 +39,7 @@ public partial class StatusGuards : StatusCardLogic
                 RecycleCardChangeEvent recycleEvent = BuildChangeEvent(
                     new RecycleCardChangeEvent(Faction, Faction, buildArmyCardId, RecycleDestination.Hand));
                 recycleEvent.IsTrigger = false;
-                await recycleEvent.ApplyChange();
+                await recycleEvent.Apply();
                 await CardPlayPool.DoCard(buildArmyCardId);
                 return null;
             })
