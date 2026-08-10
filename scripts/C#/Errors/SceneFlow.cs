@@ -28,15 +28,34 @@ public static class SceneFlow
     {
         ErrorReporter.IsShuttingDown = true;
 
-        // Raise the cover here, before the outgoing scene is freed, so the transition itself and the
-        // whole game build behind it are covered. No-op headless, so the CLI path is unaffected.
-        if (scenePath == GameScenePath)
-            GameManager.Instance?.ShowLoadingScreen();
-
         if (leaveSession && from.Multiplayer?.MultiplayerPeer != null)
             from.Multiplayer.MultiplayerPeer = null;
 
-        from.GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, scenePath);
+        SceneTree tree = from.GetTree();
+
+        // Entering the game: raise the cover and let it actually be PRESENTED before handing over.
+        // Adding the overlay is not enough on its own — ChangeSceneToFile loads Game.tscn
+        // synchronously and Godot keeps showing the last drawn frame while it does, so a cover that
+        // was added but never drawn leaves the player staring at the old menu for the whole load and
+        // then flashing the cover once the game is already up. Waiting for one FramePostDraw is what
+        // makes the cover span the load instead of trailing it. Skipped headless: there is nothing to
+        // present, and the dummy renderer must never be relied on to tick this signal.
+        if (scenePath == GameScenePath && !GameContext.IsHeadless && GameManager.Instance != null)
+        {
+            GameManager gameManager = GameManager.Instance; // outlives the scene change; `from` does not
+            gameManager.ShowLoadingScreen();
+
+            Guard.FireAndForget(async () =>
+            {
+                await gameManager.ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+                // Still deferred, so the blocking load runs in normal idle processing rather than
+                // inside the render callback we just woke up on.
+                tree.CallDeferred(SceneTree.MethodName.ChangeSceneToFile, scenePath);
+            }, "SceneFlow.ChangeScene");
+            return;
+        }
+
+        tree.CallDeferred(SceneTree.MethodName.ChangeSceneToFile, scenePath);
     }
 
     /// <summary>
