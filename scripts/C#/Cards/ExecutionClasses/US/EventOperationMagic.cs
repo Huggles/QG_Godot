@@ -11,7 +11,7 @@ public partial class EventOperationMagic : EventCardLogic
         {
             new CardStep(this, async () => {
                 var japaneseResponseCardIds = DeckState.ForFaction(Faction.JAPAN).ResponseCardIds;
-                int randomIndex = new Random().Next(japaneseResponseCardIds.Count);
+                int randomIndex = GameRandom.Next(japaneseResponseCardIds.Count);
                 int randomCardId = japaneseResponseCardIds[randomIndex];
 
                 DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(

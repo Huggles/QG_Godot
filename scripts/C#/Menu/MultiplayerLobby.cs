@@ -160,7 +160,9 @@ public partial class MultiplayerLobby : Control
 		int instance   = GetInstanceNumber();
 
 		// Dedicated/headless server: auto-host and wait for clients. It controls no faction.
-		if (GameContext.IsHeadless)
+		// Gated on IsDedicatedServer, not IsHeadless: a CLI run is also headless but never reaches
+		// here (MainScene routes it to CliBootstrap), and must not auto-host.
+		if (GameContext.IsDedicatedServer)
 		{
 			_dedicatedServer = true;
 			_requiredPlayers = GetIntArg("players", 2);

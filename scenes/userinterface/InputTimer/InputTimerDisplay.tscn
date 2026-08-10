@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://blt1inptmr001"]
+
+[ext_resource type="Script" uid="uid://dnwigqplmxlor" path="res://scripts/C#/UI/InputTimerDisplay.cs" id="1_itmr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_itmr"]
+bg_color = Color(0, 0, 0, 0.470588)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="InputTimerDisplay" type="Control" unique_id=383526407]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_itmr")
+
+[node name="InputTimerPanel" type="Panel" parent="." unique_id=505206772]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -250.0
+offset_top = 25.0
+offset_right = -20.0
+offset_bottom = 90.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_itmr")
+
+[node name="InputTimerTitle" type="Label" parent="InputTimerPanel" unique_id=122252667]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 10.0
+offset_top = 6.0
+offset_right = -10.0
+offset_bottom = 28.0
+theme_override_font_sizes/font_size = 14
+text = "Waiting for input"
+horizontal_alignment = 1
+
+[node name="InputTimerValue" type="Label" parent="InputTimerPanel" unique_id=369335130]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 10.0
+offset_top = 28.0
+offset_right = -10.0
+offset_bottom = 58.0
+theme_override_font_sizes/font_size = 24
+text = "0:00"
+horizontal_alignment = 1

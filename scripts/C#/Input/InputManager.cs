@@ -64,6 +64,15 @@ public partial class InputManager : Node2D
         HandleItemSelected(-1);
     }
 
+    /// <summary>
+    /// Release an active card-selection prompt as a pass without the player clicking anything. Registered
+    /// with <see cref="PendingLocalInput"/> by the requests that await the CardSelected signal, so the
+    /// host abandoning a request (input timeout, error recovery) tears the prompt down through exactly
+    /// the same path as the Skip button — including emitting CardSelected, which is what releases the
+    /// awaiting handler. Without it those three prompts stayed live and clickable on a dead request.
+    /// </summary>
+    public void CancelCardSelection() => HandleItemSelected(-1);
+
     private void HandleItemSelected(int cardId)
     {
         FactionHandDisplay.Current.CardSelected -= HandleItemSelected;

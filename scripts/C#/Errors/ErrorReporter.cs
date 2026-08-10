@@ -73,6 +73,18 @@ public partial class ErrorReporter : Node
     /// <summary>Severity of the pending stall, used to pick between Continue and a disabled Continue.</summary>
     public ErrorSeverity PendingSeverity => _pendingStall?.Severity ?? ErrorSeverity.Soft;
 
+    /// <summary>
+    /// Set while <c>NetworkApi.SendInputRequest</c> is holding a timed-out request open, waiting for the
+    /// host to choose Retry or Skip. Distinct from <see cref="_pendingStall"/> on purpose: the loop is
+    /// parked by that live await, NOT by a failed step, so Continue must resolve this instead of calling
+    /// <see cref="RequestResume"/> — resuming would bump the epoch and advance a step that is already
+    /// being held, i.e. the very double-advance this whole change exists to remove.
+    /// </summary>
+    private TaskCompletionSource<bool> _pendingInputDecision;
+
+    /// <summary>True when a timed-out input request is waiting on the host's Retry / Skip decision.</summary>
+    public bool HasPendingInputDecision => _pendingInputDecision != null;
+
     private int _suppressedCount;
 
     /// <summary>
@@ -230,7 +242,16 @@ public partial class ErrorReporter : Node
     }
 
     /// <summary>Drop the pending-stall state on leaving the game, where resuming is moot.</summary>
-    public void AbandonPendingStall() => _pendingStall = null;
+    public void AbandonPendingStall()
+    {
+        _pendingStall = null;
+
+        // Dropped, deliberately NOT resolved. Resolving would return "skip" into a step that would then
+        // try to apply ChangeEvents against a torn-down scene and a null MultiplayerPeer. Leaving the
+        // awaiter pending means no gameplay code runs at all, which is what we want while quitting; the
+        // whole GameFlow is about to be freed with it.
+        _pendingInputDecision = null;
+    }
 
     /// <summary>Wipe the history entirely. Not on any production path; kept for a deliberate reset.</summary>
     public void ClearHistory()
@@ -368,6 +389,84 @@ public partial class ErrorReporter : Node
         Guard.Try(() => NetworkApi.Instance?.AbortRemoteInput(), "cancel:remoteInput");
         Guard.Try(() => AnimationQueue.Instance?.CancelAll(), "cancel:animationQueue");
         Guard.Try(() => PresentationModal.Current?.CancelPending(), "cancel:presentationModal");
+
+        // A timed-out request still awaiting Retry/Skip is one more dangling awaiter. Resolve it as
+        // Skip: the recovery path is restarting the loop from the step boundary, so re-sending the
+        // request would put a prompt back on screen for a step that is being abandoned.
+        Guard.Try(() => ResolveInputDecision(retry: false), "cancel:inputDecision");
+    }
+
+    // ── Timed-out input: Retry / Skip ────────────────────────────────────────
+
+    /// <summary>
+    /// Report that <paramref name="request"/> went unanswered for the whole backstop window, and return
+    /// the host's decision: true to re-send the same request, false to give up and let the step continue
+    /// as if the player had passed.
+    ///
+    /// The caller keeps the step's await alive for as long as this task is pending — that, and not any
+    /// stall bookkeeping, is what stops the turn loop from moving on. Reported WITHOUT
+    /// <c>stallsLoop</c> for the same reason: arming <see cref="_pendingStall"/> would make the popup's
+    /// Continue call <see cref="RequestResume"/>, which advances the step the caller is still holding.
+    /// </summary>
+    public static Task<bool> ReportInputTimeoutAndAwaitDecision(InputRequest request)
+    {
+        ErrorReporter reporter = Instance;
+
+        // No reporter (or no UI to decide with) means there is nobody to ask — fall back to the old
+        // behaviour and let the caller skip, rather than parking the loop with no way out.
+        if (reporter == null || GameContext.IsHeadless || IsShuttingDown)
+            return Task.FromResult(false);
+
+        // Only one input request is ever in flight, so an existing decision means a previous popup was
+        // never answered. Release it as Skip rather than losing its awaiter.
+        ResolveInputDecision(retry: false);
+
+        TaskCompletionSource<bool> decision = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        reporter._pendingInputDecision = decision;
+
+        // Set before reporting: ReportInternal defers to Ingest, which shows the popup, whose button
+        // state reads HasPendingInputDecision to decide whether Retry appears.
+        //
+        // Local only, unlike every other report here. Propagating it would raise a popup on the client
+        // too, and ErrorPopup disables that client's InputManager while it is open — so a Retry would
+        // arrive at a peer that cannot click the board until it dismisses a popup about a decision it
+        // does not own. Its prompt has already been released by AbortRemoteInput, and the countdown
+        // reappearing is the explanation it actually needs.
+        ReportLocalOnly(BuildInputTimeout(request), "InputTimeout", request?.TargetFaction);
+
+        return decision.Task;
+    }
+
+    /// <summary>
+    /// The Id is part of the message on purpose: <c>GameError.DedupeKey</c> is built from the message,
+    /// and each attempt gets a fresh Id, so a second timeout on the same request type is a distinct
+    /// entry that raises its own popup instead of quietly incrementing an occurrence counter.
+    /// </summary>
+    private static InputTimeoutException BuildInputTimeout(InputRequest request)
+    {
+        string bulletin = string.IsNullOrEmpty(request?.TriggerBulletinLabel)
+            ? ""
+            : $" for Bulletin \"{request.TriggerBulletinLabel}\"";
+
+        return new InputTimeoutException(
+            $"{request?.TargetFaction} did not answer {request?.GetType().Name}{bulletin} " +
+            $"within {NetworkApi.InputResponseTimeoutMinutes} minutes (Id {request?.Id}). " +
+            "The turn loop is holding here — Retry asks again, Skip continues as if the player passed.");
+    }
+
+    /// <summary>
+    /// Hand the caller of <see cref="ReportInputTimeoutAndAwaitDecision"/> its answer. Safe to call
+    /// when nothing is pending. Called by the popup's Retry / Skip buttons and by the recovery sweep.
+    /// </summary>
+    public static void ResolveInputDecision(bool retry)
+    {
+        ErrorReporter reporter = Instance;
+        TaskCompletionSource<bool> decision = reporter?._pendingInputDecision;
+        if (decision == null) return;
+
+        reporter._pendingInputDecision = null;
+        DebugUtilities.PrintPeer($"ErrorReporter: timed-out input resolved as {(retry ? "Retry" : "Skip")}");
+        decision.TrySetResult(retry);
     }
 
     /// <summary>
@@ -618,6 +717,13 @@ public partial class ErrorReporter : Node
     // ── Main-thread side ─────────────────────────────────────────────────────
 
     /// <summary>Main-thread entry point. Deferred target of <see cref="ReportInternal"/>.</summary>
+    /// <summary>
+    /// Raised for every ingested error. Exists because the popup — the only other way an error
+    /// becomes visible — is suppressed when headless, so a scripted or CLI run would otherwise fail
+    /// completely silently. Subscribers must not throw.
+    /// </summary>
+    public static event Action<GameError> ErrorIngested;
+
     private void Ingest(string errorJson, bool allowBroadcast, bool stallsLoop)
     {
         if (_reporting) return;
@@ -626,6 +732,10 @@ public partial class ErrorReporter : Node
         {
             GameError error = GameError.FromJson(errorJson);
             if (error == null) return;
+
+            // Before the dedupe/popup logic: a scripted consumer wants every occurrence, and must
+            // still hear about an error that is deduped away from the UI.
+            try { ErrorIngested?.Invoke(error); } catch { /* never let a listener break reporting */ }
 
             bool silent = error.Severity == ErrorSeverity.Soft && !ShowRecoveredErrors;
 

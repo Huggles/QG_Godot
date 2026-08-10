@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 public partial class NetworkApi : Node
@@ -165,8 +166,25 @@ public partial class NetworkApi : Node
     /// Backstop only, for the case where the controlling peer can never reply at all — deliberately
     /// long, because a real player is allowed to deliberate. A peer that drops is unblocked
     /// immediately by <see cref="OnPeerDisconnectedDuringInput"/> instead of waiting this out.
+    ///
+    /// Expiring does NOT decide anything by itself: it releases the client's prompt and hands the host a
+    /// Retry / Skip choice, while this method keeps holding the step's await. It used to mark the request
+    /// skipped and return, which silently advanced the turn step out from under a player who was still
+    /// being asked — including past a MANDATORY discard, leaving the hand over the limit.
+    ///
+    /// Replicated to the client as <c>InputRequest.TimeoutSeconds</c> so it can show the countdown; a
+    /// deadline the player cannot see is a deadline they cannot act on.
     /// </summary>
-    private const int InputResponseTimeoutMs = 15 * 60 * 1000;
+    ///
+    /// Effectively disabled in CLI mode. The backstop assumes a human who will eventually click, and
+    /// ErrorReporter.ReportInputTimeoutAndAwaitDecision returns "skip" immediately when headless (no
+    /// popup to ask with) — so a developer thinking at a terminal for 15 minutes would silently lose
+    /// the turn step, with no way to tell that from the game having moved on.
+    private static int InputResponseTimeoutMs
+        => GameContext.IsCli ? int.MaxValue : 15 * 60 * 1000;
+
+    /// <summary>The same window in minutes, for the message on the timeout popup.</summary>
+    public static int InputResponseTimeoutMinutes => InputResponseTimeoutMs / 60000;
 
     private TaskCompletionSource<string> _pendingInputTcs;
     private string _pendingInputId = null;
@@ -185,32 +203,70 @@ public partial class NetworkApi : Node
     public async Task<InputRequest> SendInputRequest(InputRequest inputRequest)
     {
         DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");
-        string payload = inputRequest.ToJson();
-        DebugUtilities.PrintPeerFinest($"{payload}");
 
-        // Create the awaiter BEFORE the Rpc — the same ordering StartMultiplayerSession uses, and
-        // the reason it is the one rendezvous in this file without a check-then-await race.
-        TaskCompletionSource<string> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        _pendingInputTcs = tcs;
-        _pendingInputId = inputRequest.Id;
-        _pendingInputPeer = SafeTargetPeer(inputRequest);
-        _pendingInputRequest = inputRequest;
+        // Stamp the legal move set onto the request before it goes on the wire, so it is
+        // self-describing to a scripted/CLI peer. Here rather than in InputRequest.BroadCast because
+        // CardPlayRound.RequestPlay and RequestBlock call this method directly, bypassing BroadCast —
+        // and those build the very requests (HandCardPlay, ActivateCard) that need it. Outside the
+        // retry loop: the option set must not shift between attempts at the same prompt.
+        inputRequest.PopulateTargets();
 
-        Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);
-
-        Task completed = await Task.WhenAny(tcs.Task, Task.Delay(InputResponseTimeoutMs));
-        if (completed != tcs.Task)
+        // Loop so Retry re-sends THIS request. Nothing unwinds between attempts: the caller's await is
+        // still parked here, which is exactly what keeps the turn loop from advancing while the host
+        // decides. Retrying at the step level instead would replay non-idempotent work — a mutator that
+        // already removed a unit would remove a second one.
+        while (true)
         {
+            // A fresh Id per attempt. Aborting the previous attempt makes the client's handler complete
+            // as skipped and reply; that reply carries the OLD Id, so ReceiveInputResponse's staleness
+            // check drops it instead of instantly resolving the retry we are about to open.
+            inputRequest.Id = Guid.NewGuid().ToString();
+            inputRequest.TimeoutSeconds = InputResponseTimeoutMs / 1000;
+
+            string payload = inputRequest.ToJson();
+            DebugUtilities.PrintPeerFinest($"{payload}");
+
+            // Create the awaiter BEFORE the Rpc — the same ordering StartMultiplayerSession uses, and
+            // the reason it is the one rendezvous in this file without a check-then-await race.
+            TaskCompletionSource<string> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            _pendingInputTcs = tcs;
+            _pendingInputId = inputRequest.Id;
+            _pendingInputPeer = SafeTargetPeer(inputRequest);
+            _pendingInputRequest = inputRequest;
+
+            Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);
+
+            // Cancelled on the normal path so a long game does not accumulate one live 15-minute timer
+            // per input request; the old bare Task.Delay was never cancelled.
+            using CancellationTokenSource timeoutCts = new();
+            Task completed = await Task.WhenAny(tcs.Task, Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
+            timeoutCts.Cancel();
+
+            if (completed == tcs.Task)
+            {
+                ClearPendingInput(tcs);
+                return InputRequest.FromJson(await tcs.Task);
+            }
+
             DebugUtilities.PrintPeerErrorRaw(
                 $"No input response for {inputRequest.GetType().Name} (Id {inputRequest.Id}) after " +
-                $"{InputResponseTimeoutMs / 60000} minutes — treating as skipped so the turn loop can continue.");
+                $"{InputResponseTimeoutMinutes} minutes — holding the turn loop for a Retry / Skip decision.");
+
+            // Order matters: drop the awaiter FIRST, then abort. AbortRemoteInput makes the client reply
+            // straight away, and with the awaiter already cleared that reply is ignored ("no request
+            // pending") rather than resolving a wait we may be about to re-open.
             ClearPendingInput(tcs);
+            AbortRemoteInput();
+            GameFlow.Instance?.ClearCurrentInputRequest();
+
+            if (await ErrorReporter.ReportInputTimeoutAndAwaitDecision(inputRequest)) continue;
+
+            // Skip: unchanged from the old behaviour, but now a deliberate choice rather than a silent
+            // one. BroadCast turns this into StepSkippedException, which the step handlers already treat
+            // as the player passing.
             inputRequest.WasSkipped = true;
             return inputRequest;
         }
-
-        ClearPendingInput(tcs);
-        return InputRequest.FromJson(await tcs.Task);
     }
 
     private static int SafeTargetPeer(InputRequest inputRequest)
@@ -279,7 +335,13 @@ public partial class NetworkApi : Node
     /// </summary>
     public void AbortRemoteInput()
     {
-        if (Multiplayer?.MultiplayerPeer == null) return;
+        // No session at all (single process, or the peer already torn down): there is nobody to Rpc, but
+        // this process may still be sitting on its own prompt, so release it directly.
+        if (Multiplayer?.MultiplayerPeer == null)
+        {
+            AbortInputRequest();
+            return;
+        }
         if (!Multiplayer.IsServer()) return;
         Rpc(nameof(AbortInputRequest));
     }
@@ -290,6 +352,24 @@ public partial class NetworkApi : Node
     {
         PendingLocalInput.CancelAll();
         PresentationModal.Current?.CancelPending();
+
+        // Covers the peers that were only watching: their Execute() took the "Waiting on X" branch and
+        // returned, so nothing local will ever clear their countdown.
+        InputTimerDisplay.Current?.Hide();
+    }
+
+    /// <summary>
+    /// Server → all peers: the pending input has been answered, so stop the countdown everywhere.
+    ///
+    /// Needed because the answering peer's <c>ReceiveInputResponse</c> does not reach the other clients —
+    /// an AnyPeer Rpc from a client only reaches the server (see <see cref="ReportErrorToServer"/> for the
+    /// same asymmetry). Without this, every peer that was merely watching would count its countdown down
+    /// to 0:00 and leave it stranded there while play carried on.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void InputRequestAnswered()
+    {
+        InputTimerDisplay.Current?.Hide();
     }
 
     // ── Error propagation ────────────────────────────────────────────────────
@@ -393,11 +473,11 @@ public partial class NetworkApi : Node
             if (!Multiplayer.IsServer())
             {
                 PlayerActionLabel.HideText();
+                InputTimerDisplay.Current?.Hide();
                 return;
             }
 
             InputRequest response = InputRequest.FromJson(dtoJson);
-            GameFlow.Instance.CurrentInputRequest = response;
 
             // Drop responses that belong to a request we are no longer waiting on, so a late reply
             // from an aborted step cannot resume a dead continuation.
@@ -413,6 +493,17 @@ public partial class NetworkApi : Node
                     $"Ignoring stale input response (Id {response.Id}, waiting on {_pendingInputId})");
                 return;
             }
+
+            // Assigned only once the response is known to be the one we are waiting on. It used to be
+            // set above the guards, so a late reply to a timed-out request still overwrote the slot.
+            GameFlow.Instance.CurrentInputRequest = response;
+
+            // Clear the countdown on every peer, not just here. Below the guards on purpose: doing it for
+            // a stale reply would wipe the live countdown of a retry already in progress.
+            if (Multiplayer?.MultiplayerPeer != null)
+                Rpc(nameof(InputRequestAnswered));
+            else
+                InputRequestAnswered();
 
             tcs.TrySetResult(dtoJson);
 

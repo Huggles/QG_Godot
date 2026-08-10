@@ -42,6 +42,7 @@ public partial class ErrorPopup : CanvasLayer
     private Button _nextButton;
     private Button _continueButton;
     private Button _quitButton;
+    private Button _retryButton;
 
     private bool _inputWasEnabled;
 
@@ -195,6 +196,13 @@ public partial class ErrorPopup : CanvasLayer
         _continueButton = new Button { Text = "Continue" };
         _continueButton.Pressed += OnContinuePressed;
         buttonRow.AddChild(_continueButton);
+
+        // Last, so it sits rightmost where the primary action goes. Only ever visible for a timed-out
+        // input request, where the request itself is still holding the turn loop and can therefore be
+        // asked again — an ordinary failure has already unwound its step, leaving nothing to re-send.
+        _retryButton = new Button { Text = "Retry" };
+        _retryButton.Pressed += OnRetryPressed;
+        buttonRow.AddChild(_retryButton);
     }
 
     // ── Presentation ─────────────────────────────────────────────────────────
@@ -275,6 +283,10 @@ public partial class ErrorPopup : CanvasLayer
         bool stalled = ErrorReporter.Instance?.HasPendingStall ?? false;
         bool canResume = ErrorReporter.Instance?.PendingSeverity != ErrorSeverity.Unrecoverable;
 
+        // Not gated on _historyMode, matching how `stalled` is not: opening the history by hotkey while a
+        // decision is genuinely outstanding must still let you make it.
+        bool awaitingInput = (ErrorReporter.Instance?.HasPendingInputDecision ?? false) && isHost;
+
         _titleLabel.Text = _historyMode
             ? $"Error history ({total})"
             : _current.Severity switch
@@ -304,9 +316,26 @@ public partial class ErrorPopup : CanvasLayer
         _prevButton.Disabled = _index <= 0;
         _nextButton.Disabled = _index >= total - 1;
 
-        _quitButton.Visible = stalled;
+        _quitButton.Visible = stalled || awaitingInput;
+        _retryButton.Visible = awaitingInput;
 
-        if (!stalled)
+        if (awaitingInput)
+        {
+            // Checked before `stalled` on purpose. The loop is being held by a live await inside
+            // SendInputRequest, so the actionable choice is about that request; Continue must resolve it
+            // rather than call RequestResume, which would advance the very step still being held.
+            _continueButton.Text = "Skip input";
+            _continueButton.Disabled = false;
+            _continueButton.TooltipText =
+                "Gives up on the input and continues the step as if the player had passed. " +
+                "A required choice (e.g. discarding down to the hand limit) will not happen at all.";
+            string who = _current?.TargetFaction.HasValue == true
+                ? _current.TargetFaction.Value.ToString()
+                : "the player";
+            _retryButton.TooltipText =
+                $"Asks {who} for the same input again, with a fresh timer. Nothing has been skipped yet.";
+        }
+        else if (!stalled)
         {
             // Nothing is waiting on the player — this is a browse, not a decision. Offering Continue
             // here would advance the turn loop past a step that never failed.
@@ -338,7 +367,10 @@ public partial class ErrorPopup : CanvasLayer
                 "Skips the rest of the failed step and resumes play. The game state may be inconsistent.";
         }
 
-        _continueButton.GrabFocus();
+        // Retry is the default for a timed-out input: it is the only choice that loses nothing, and Enter
+        // must not be the key that silently skips a mandatory discard.
+        if (awaitingInput) _retryButton.GrabFocus();
+        else _continueButton.GrabFocus();
     }
 
     /// <summary>
@@ -359,6 +391,7 @@ public partial class ErrorPopup : CanvasLayer
         _prevButton.Visible = false;
         _nextButton.Visible = false;
         _quitButton.Visible = false;
+        _retryButton.Visible = false;
 
         _continueButton.Text = "Close";
         _continueButton.Disabled = false;
@@ -395,14 +428,35 @@ public partial class ErrorPopup : CanvasLayer
         DisplayServer.ClipboardSet(_current.ToPlainText());
     }
 
+    /// <summary>
+    /// Re-send the timed-out input request. The awaiting step never unwound, so this resumes exactly
+    /// where it was rather than replaying anything.
+    /// </summary>
+    private void OnRetryPressed()
+    {
+        Dismiss();
+        ErrorReporter.ResolveInputDecision(retry: true);
+    }
+
     private void OnContinuePressed()
     {
-        // Read the stall state BEFORE dismissing — Dismiss acknowledges, which clears it.
+        // Read both states BEFORE dismissing — Dismiss acknowledges, which clears the stall.
         bool wasStalled = ErrorReporter.Instance?.HasPendingStall ?? false;
+        bool awaitingInput = ErrorReporter.Instance?.HasPendingInputDecision ?? false;
 
         Dismiss();
 
-        if (wasStalled && IsHost())
+        if (!IsHost()) return;
+
+        // "Skip input": the step is still live inside SendInputRequest, so resolving its decision is the
+        // whole job. Calling RequestResume as well would advance that same step a second time.
+        if (awaitingInput)
+        {
+            ErrorReporter.ResolveInputDecision(retry: false);
+            return;
+        }
+
+        if (wasStalled)
             ErrorReporter.RequestResume();
     }
 

@@ -54,6 +54,14 @@ public abstract partial class InputRequest
     public string TriggerBulletinText { get; set; }
 
     /// <summary>
+    /// How long the host will wait for this attempt before releasing the prompt and asking for a
+    /// Retry / Skip decision. Stamped by <c>NetworkApi.SendInputRequest</c> per attempt, so a retry
+    /// restarts the countdown; drives <see cref="InputTimerDisplay"/> on every peer. Zero means
+    /// "no deadline to show" — the display stays hidden.
+    /// </summary>
+    public int TimeoutSeconds { get; set; }
+
+    /// <summary>
     /// Set by a selection handler's <see cref="Handle"/> when the player skipped the
     /// input instead of making a choice. Serialized so it survives the DTO round-trip;
     /// <see cref="BroadCast"/> throws <see cref="StepSkippedException"/> when it is true.
@@ -84,20 +92,31 @@ public abstract partial class InputRequest
                 showedBulletin = true;
             }
 
+            InputTimerDisplay.Current?.Start(TimeoutSeconds, "Your input");
+
             try
             {
-                await Handle();
+                // Through the seam rather than Handle() directly, so a headless/scripted peer can
+                // answer without the UI singletons Handle() reaches into. GodotInputProvider is a
+                // pass-through to Handle(), so the GUI path is unchanged.
+                await InputServices.Provider.Resolve(this);
             }
             finally
             {
                 // Also on skip and on throw — a stale Bulletin next to an unrelated prompt is worse
                 // than none.
                 if (showedBulletin) TriggerContextDisplay.Current?.Hide();
+                InputTimerDisplay.Current?.Hide();
             }
         }
         else
         {
             PresentationServices.Notification.ShowActionText($"Waiting on {TargetFaction} input...");
+
+            // No finally to hide it here: this branch returns immediately rather than awaiting anything,
+            // so the countdown is cleared where the waiting text already is — NetworkApi's
+            // ReceiveInputResponse (the answer arrived) and AbortInputRequest (the host gave up on it).
+            InputTimerDisplay.Current?.Start(TimeoutSeconds, $"Waiting on {TargetFaction}");
         }
     }
 
@@ -125,6 +144,36 @@ public abstract partial class InputRequest
 
     public abstract Task Handle();
 
+    /// <summary>
+    /// Fill the Target* fields with this request's legal move set, on the host, before the request
+    /// goes on the wire. Four subclasses computed their option list inside Handle() from live state
+    /// instead of carrying it, which left the request undescribable to anything but the local UI.
+    ///
+    /// Called from <c>NetworkApi.SendInputRequest</c> — NOT from <c>BroadCast</c>, because
+    /// <c>CardPlayRound.RequestPlay</c> and <c>RequestBlock</c> call SendInputRequest directly and
+    /// those are exactly the two paths that build the requests needing this.
+    ///
+    /// Additive only: the GUI Handle() implementations still recompute locally and ignore these
+    /// fields, so this cannot change GUI behaviour.
+    /// </summary>
+    public virtual void PopulateTargets() { }
+
+    /// <summary>
+    /// Await the CardSelected signal, releasing the prompt as a pass if the host abandons the request.
+    /// The three card-selection requests all used a bare <c>GetSignalAwaiter</c>, which nothing but a
+    /// real click could ever complete — so an aborted request left the hand live and clickable forever.
+    ///
+    /// Cancelling emits CardSelected(-1), the same value the Skip button produces, so every caller's
+    /// existing pass handling applies unchanged.
+    /// </summary>
+    protected static async Task<Variant[]> AwaitCardSelection()
+    {
+        using (PendingLocalInput.Register(() => InputManager.Current?.CancelCardSelection()))
+        {
+            return await EventBus.GetSignalAwaiter("CardSelected");
+        }
+    }
+
     public class SelectCountryRequestHandler : InputRequest
     {
         public SelectCountryRequestHandler(Faction targetFaction, List<int> targetCountryIds) : base(targetFaction)
@@ -148,10 +197,17 @@ public abstract partial class InputRequest
     {
         public HandCardPlayRequestHandler(Faction targetFaction) : base(targetFaction) {}
 
+        // Mirrors InputManager.SetPlayCardInputActive(faction, includeHandCards: true).
+        public override void PopulateTargets()
+        {
+            DeckState deck = DeckState.ForFaction(TargetFaction);
+            TargetCardIds = deck.ActivatableCardIds.Concat(deck.HandCardIds).Distinct().ToList();
+        }
+
         public override async Task Handle()
         {
-            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, true);            
-            Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
+            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, true);
+            Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0)
             {
                 ResponseCardIds.Add((int)results[0]);
@@ -163,13 +219,17 @@ public abstract partial class InputRequest
     {
         public ActivateCardRequestHandler(Faction targetFaction) : base(targetFaction) {}
 
+        // Mirrors InputManager.SetPlayCardInputActive(faction, includeHandCards: false).
+        public override void PopulateTargets()
+            => TargetCardIds = DeckState.ForFaction(TargetFaction).ActivatableCardIds;
+
         public override async Task Handle()
         {
             PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, false);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
             DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
-            Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
+            Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0)
             {
                 ResponseCardIds.Add((int)results[0]);
@@ -181,8 +241,12 @@ public abstract partial class InputRequest
     {
         public HandCardsDiscardRequestHandler(Faction targetFaction) : base(targetFaction) {}
 
+        // InputHandlerDiscardHand reads the hand itself; carry it so the request is self-describing.
+        public override void PopulateTargets()
+            => TargetCardIds = new List<int>(DeckState.ForFaction(TargetFaction).HandCardIds);
+
         public override async Task Handle()
-        {            
+        {
             InputHandlerDiscardHand inputHandler = new InputHandlerDiscardHand(TargetFaction);
             List<int> selectedCardIds = await inputHandler.GetSelectedCards();            
             ResponseCardIds = selectedCardIds;
@@ -216,6 +280,10 @@ public abstract partial class InputRequest
         {
             NumberOfCards = numberOfCards;
         }
+
+        // Handle() reads the hand directly; carry it so the request is self-describing.
+        public override void PopulateTargets()
+            => TargetCardIds = new List<int>(DeckState.ForFaction(TargetFaction).HandCardIds);
 
         public override async Task Handle()
         {
@@ -364,7 +432,7 @@ public abstract partial class InputRequest
             PlayerScene.Current.InputManager.SetCardSelectionActive(TargetFaction, TargetCardIds ?? new List<int>());
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
-            Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
+            Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0 && (int)results[0] > -1)
             {
                 ResponseCardIds.Add((int)results[0]);

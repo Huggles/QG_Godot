@@ -57,6 +57,13 @@ public partial class MultiplayerSession : Node
         try
         {
             DebugUtilities.PrintPeerFinest($"LoadGame called with config: {configuration}");
+
+            // Seed before any state is built. Here rather than at boot because a second game in the
+            // same process must not inherit the first game's stream. An unseeded run still records
+            // the seed it picked, so any session can be re-pinned afterwards.
+            GameRandom.Initialize(CliArgs.GetInt("seed", System.Environment.TickCount));
+            DebugUtilities.PrintPeer($"RNG seed: {GameRandom.Seed}");
+
             GameModeMultiplayerDefault gameMode = new GameModeMultiplayerDefault();
             await gameMode.Init();
             DebugUtilities.PrintPeerFinest("Game mode initialization complete, emitting MultiplayerSessionReady");

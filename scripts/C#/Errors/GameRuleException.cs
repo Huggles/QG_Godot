@@ -15,6 +15,22 @@ public class GameRuleException : Exception
 }
 
 /// <summary>
+/// Reported — never thrown — when the host's input backstop expires: the peer controlling the
+/// requested faction has not answered within <c>NetworkApi.InputResponseTimeoutMs</c>.
+///
+/// It is a report rather than a throw because <c>NetworkApi.SendInputRequest</c> keeps holding the
+/// step's await across the popup, which is what parks the turn loop and lets Retry re-send the SAME
+/// request. Throwing instead would unwind the step, and Retry would then have to replay a step that
+/// is not idempotent — a mutator that already removed a unit would remove a second one.
+///
+/// Nothing has mutated when this is built, so it is always recoverable.
+/// </summary>
+public class InputTimeoutException : Exception
+{
+    public InputTimeoutException(string message) : base(message) { }
+}
+
+/// <summary>
 /// Thrown by the epoch guards after a failure has been recovered, to make any continuation
 /// belonging to the aborted pipeline unwind harmlessly instead of mutating state alongside
 /// the resumed loop. Never reported.

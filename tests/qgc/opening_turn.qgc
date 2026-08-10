@@ -1,0 +1,22 @@
+# Germany opens by building an army, then the round is passed out.
+# Run:  tests/run-cli.sh tests/qgc/opening_turn.qgc scenario=Scenario_OneRound seed=42
+#
+# NOTE ON ORDERING: `assert` reads state the moment it runs, and the game boots asynchronously.
+# Only the answer commands (`prompt`, `play`, `select`, `pass`) wait for the game to reach a
+# prompt — so put a `prompt` first to synchronise, or your assertions read the pre-game state.
+
+prompt                      # blocks until the first prompt: turn 1, Germany, PLAY_CARD
+
+assert turn == 1
+assert faction == GERMANY
+assert step == PLAY_CARD
+assert handsize GERMANY == 7
+
+play 3                      # Build Army
+select 1                    # first legal country
+assert handsize GERMANY == 6
+
+# Nobody contests the rest of the round.
+auto 40
+assert round == 1
+quit

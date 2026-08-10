@@ -277,12 +277,12 @@ public partial class GameModeMultiplayerDefault : IGameMode
         {
             int min = initialStateData.RandomStartingVPMin;
             int max = initialStateData.RandomStartingVPMax;
-            var rng = new RandomNumberGenerator();
-            rng.Randomize();
 
             foreach (Faction faction in StaticGameData.PlayableFactions)
             {
-                int vp = rng.RandiRange(min, max);
+                // Through GameRandom rather than a freshly Randomize()d RandomNumberGenerator, so a
+                // seeded run reproduces its starting positions.
+                int vp = GameRandom.Range(min, max);
                 DebugUtilities.PrintPeer($"Random starting VP for {faction}: {vp} (range {min}-{max})");
                 await new SetStartingScoreChangeEvent(faction, vp) { IsTrigger = false }.Apply();
             }

@@ -24,9 +24,9 @@ public class MutatorRedeployAfterPlayCard : StepMutator
         // on an id that is not on the board. Nothing to redeploy when the faction has none deployed.
         if (unitIds.Count == 0) return;
 
+        // No empty-response check: BroadCast throws StepSkippedException rather than returning an empty
+        // selection, and StepMutatorRunner catches it to abandon just this mutator.
         InputRequest unitResponse = await new InputRequest.SelectUnitRequestHandler(activeFaction, unitIds).BroadCast();
-        if (unitResponse.ResponseUnitIds.Count == 0) return;
-
         int unitId = unitResponse.ResponseUnitIds[0];
 
         // Read the type before the removal. UnitState.Type survives it (only CountryId is cleared), but

@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
 [ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
+[ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -26,7 +27,9 @@ offset_bottom = -347.0
 
 [node name="FactionHandDisplay" parent="." unique_id=1158523193 instance=ExtResource("2_ntnkv")]
 
-[node name="TriggerContextDisplay" parent="." instance=ExtResource("16_trigctx")]
+[node name="TriggerContextDisplay" parent="." unique_id=1166491250 instance=ExtResource("16_trigctx")]
+
+[node name="InputTimerDisplay" parent="." unique_id=2116314957 instance=ExtResource("17_inptmr")]
 
 [node name="PresentationModal" parent="." unique_id=78458452 instance=ExtResource("3_oxwje")]
 z_index = 100
@@ -46,7 +49,6 @@ offset_top = -104.0
 offset_right = 625.0
 offset_bottom = 14.0
 grow_vertical = 0
-scale = Vector2(0.5, 0.5)
 script = ExtResource("15_skip")
 
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]

@@ -24,8 +24,9 @@ public class MutatorRemoveUnitAfterPlayCard : StepMutator
         // on an id that is not on the board. Nothing to do when the faction has no units deployed.
         if (unitIds.Count == 0) return;
 
+        // No empty-response check: BroadCast throws StepSkippedException rather than returning an empty
+        // selection, and StepMutatorRunner catches it to abandon just this mutator.
         InputRequest response = await new InputRequest.SelectUnitRequestHandler(activeFaction, unitIds).BroadCast();
-        if (response.ResponseUnitIds.Count == 0) return;
 
         await this.Do(new RemoveUnitChangeEvent(
             activeFaction, response.ResponseUnitIds[0], UnitRemovalReason.ELIMINATE));

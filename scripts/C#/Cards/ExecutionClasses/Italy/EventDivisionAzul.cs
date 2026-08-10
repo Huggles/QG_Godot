@@ -11,7 +11,7 @@ public partial class EventDivisionAzul : EventCardLogic
         {
             new CardStep(this, async () => {
                 var sovietResponseCardIds = DeckState.ForFaction(Faction.SOVIET).ResponseCardIds;
-                int randomIndex = new Random().Next(sovietResponseCardIds.Count);
+                int randomIndex = GameRandom.Next(sovietResponseCardIds.Count);
                 int randomCardId = sovietResponseCardIds[randomIndex];
 
                 DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(

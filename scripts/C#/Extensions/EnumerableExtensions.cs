@@ -6,9 +6,14 @@ using System.Linq;
 public static class EnumerableExtensions
 {
     
+    /// <summary>
+    /// Note this returns a NEW list; it does not shuffle in place. `list.Shuffle();` with the result
+    /// discarded is a no-op — see DeckState.ShuffleDeck.
+    /// </summary>
     public static IList<T> Shuffle<T>(this IEnumerable<T> sequence)
     {
-        return sequence.Shuffle(new Random());
+        // Seeded, so a run is reproducible from GameRandom.Seed.
+        return sequence.Shuffle(GameRandom.Raw);
     }
 
     public static IList<T> Shuffle<T>(this IEnumerable<T> sequence, Random randomNumberGenerator)

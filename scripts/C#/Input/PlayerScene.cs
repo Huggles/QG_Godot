@@ -63,10 +63,16 @@ public partial class PlayerScene : CharacterBody2D
         if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
         {
             Current = this;
-            _loadingCoverInterface = AssetRepository.LoadingCoverInterfaceScenePacked.Instantiate<CanvasLayer>();
-            _loadingCoverInterface.Name = "LoadingCoverInterface";
-            AddChild(_loadingCoverInterface);
-        } 
+            // Current must still be set headless — InputRequest.IsForCurrentPeer depends on it, and a
+            // CLI run DOES control factions (unlike a dedicated server, which has no PlayerScene at
+            // all and so never reached this branch). Only the visuals are skipped.
+            if (!GameContext.IsHeadless)
+            {
+                _loadingCoverInterface = AssetRepository.LoadingCoverInterfaceScenePacked.Instantiate<CanvasLayer>();
+                _loadingCoverInterface.Name = "LoadingCoverInterface";
+                AddChild(_loadingCoverInterface);
+            }
+        }
         DebugUtilities.PrintPeerFinest($"PlayerScene ready: {PlayerName}");
         GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
         
@@ -98,6 +104,10 @@ public partial class PlayerScene : CharacterBody2D
 
     public void FadeLoadingScreen()
     {
+        // No UI to build or fade headless. Without this a CLI run — where PlayerScene.Current is
+        // non-null, unlike on a dedicated server — would instantiate the whole user_interface.tscn.
+        if (GameContext.IsHeadless) return;
+
         if (!_uiLoaded)
         {
             LoadUI();     

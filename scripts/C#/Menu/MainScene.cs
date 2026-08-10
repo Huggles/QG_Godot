@@ -11,9 +11,17 @@ public partial class MainScene : Node
     {
         var userArgs = OS.GetCmdlineUserArgs();
 
-        // Go straight to the multiplayer lobby for: a dedicated/headless server (auto-hosts there),
+        // A CLI run bypasses the lobby entirely: it is a single process controlling every faction,
+        // so there is nothing to host and nobody to wait for.
+        if (GameContext.IsCli)
+        {
+            CliBootstrap.Start(this);
+            return;
+        }
+
+        // Go straight to the multiplayer lobby for: a dedicated server (auto-hosts there),
         // an auto-joining test client, or the F6 debug flow. Everything else opens the main menu.
-        bool toLobby = GameContext.IsHeadless
+        bool toLobby = GameContext.IsDedicatedServer
                        || userArgs.Contains("is_debug_multiplayer=true")
                        || userArgs.Contains("auto_join=true");
 
