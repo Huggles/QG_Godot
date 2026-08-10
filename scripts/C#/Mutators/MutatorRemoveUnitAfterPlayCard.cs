@@ -13,6 +13,8 @@ public class MutatorRemoveUnitAfterPlayCard : StepMutator
     public override TurnStep      Step        => TurnStep.PLAY_CARD;
     public override MutatorTiming Timing      => MutatorTiming.AFTER;
     public override string        Description => "Attrition: remove one of your units";
+    public override string        BulletinText =>
+        "After you play a card, the front consumes one of your armies. Remove a unit of your choice from the board.";
 
     public override async Task Run(Faction activeFaction)
     {

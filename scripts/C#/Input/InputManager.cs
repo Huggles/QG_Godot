@@ -70,6 +70,8 @@ public partial class InputManager : Node2D
         EventBus.Instance.SelectionSkipped -= OnPlayCardSkipped;
         SelectionSkipButton.Current?.Hide();
         FactionHandDisplay.Current.Hide();
+        // The trigger context is its own node now, so hiding the hand no longer takes it down with it.
+        TriggerContextDisplay.Current?.Hide();
         EventBus.Emit("CardSelected", cardId);
     }
 

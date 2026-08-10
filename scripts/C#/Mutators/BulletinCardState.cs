@@ -13,18 +13,13 @@ using Godot;
 /// </summary>
 public partial class BulletinCardState : CardState
 {
-    /// <summary>
-    /// Shared card face for every Bulletin, in place of a per-faction frame. Loaded lazily rather than
-    /// in a static initializer so a headless server — which skips card texture loading entirely, see
-    /// FactionData.LoadTextures — never touches it.
-    /// </summary>
-    private static Texture2D _frontTexture;
-    private static Texture2D FrontTextureShared =>
-        _frontTexture ??= GD.Load<Texture2D>("res://assets/textures/Other/Bulletin_Front.png");
-
     public BulletinCardState(CardData cardData, ActivatableMutator mutator) : base(cardData, mutator) { }
 
-    public override Texture2D FrontTexture => FrontTextureShared;
+    /// <summary>
+    /// The shared Bulletin face in place of a per-faction frame — the same art an automatic step
+    /// mutator draws through CardFace.Bulletin, which has no CardState to hang it off.
+    /// </summary>
+    public override Texture2D FrontTexture => BulletinArt.Front;
 
     /// <summary>
     /// Permanently on the table. Tag.IsPlayed is derived from the DeckState piles by

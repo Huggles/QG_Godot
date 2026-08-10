@@ -42,47 +42,65 @@ public partial class CardScene : Control
     {
         EmitSignal(SignalName.Selected, this.CardId);
     }
+    // Both handlers are null-guarded on Current: a CardScene can now be rendered outside the hand
+    // (a Bulletin in a modal or the trigger context), where FactionHandDisplay.Current may not exist.
+    // MouseExited in particular ignored triggersEmphasis, so TriggersEmphasis(false) was not enough.
     private void CardButton_MouseEntered()
-    {        
+    {
         if (triggersEmphasis)
         {
-            FactionHandDisplay.Current.ShowCardEmphasis(CardId);
+            FactionHandDisplay.Current?.ShowCardEmphasis(CardId);
         }
-        
+
     }
     private void CardButton_MouseExited()
     {
         DebugUtilities.PrintPeerFinest($"Mouse exited card with ID: {CardId}");
-        FactionHandDisplay.Current.HideCardEmphasis();        
+        FactionHandDisplay.Current?.HideCardEmphasis();
     }
 
     public void ShowCard(int cardId)
     {
+        if (cardId > -1)
+        {
+            // ShowFace clears CardId, so assign after it — CardId is what the Selected signal carries.
+            ShowFace(CardFace.ForCard(CardState.ForId(cardId)));
+            CardId = cardId;
+            return;
+        }
+
         Visible = true;
         MouseFilter = MouseFilterEnum.Stop;
-
         CardId = cardId;
-        if (CardId > -1)
-        {            
-            cardTextureNode.Texture = CardState.FrontTexture;
-            if (!string.IsNullOrEmpty(CardState.CardData.Text))
-            {
-                textContainerNode.Visible = true;
-                textBackgroundContainerNode.Visible = true;
-                titleNode.Text = CardState.CardData.Label;
-                textNode.Text = CardState.CardData.Text;
-            }
-            else
-            {
-                textContainerNode.Visible = false;
-                textBackgroundContainerNode.Visible = false;
-            }
+        titleNode.Text = "Card Not Found";
+        textNode.Text = $"Card Id = {CardId}";
+        SetClickable(false);
+        RecalculateSizes();
+    }
+
+    /// <summary>
+    /// Render an arbitrary card front. The render primitive ShowCard is built on, and the way anything
+    /// without a CardState — a Bulletin for an automatic step mutator — gets drawn as a card.
+    /// CardId is cleared so a leftover id from a previous ShowCard cannot be emitted by Selected.
+    /// </summary>
+    public void ShowFace(CardFace face)
+    {
+        Visible = true;
+        MouseFilter = MouseFilterEnum.Stop;
+        CardId = -1;
+
+        cardTextureNode.Texture = face.Front;
+        if (!string.IsNullOrEmpty(face.Text))
+        {
+            textContainerNode.Visible = true;
+            textBackgroundContainerNode.Visible = true;
+            titleNode.Text = face.Title;
+            textNode.Text = face.Text;
         }
         else
         {
-            titleNode.Text = "Card Not Found";
-            textNode.Text = $"Card Id = {CardId}";
-            SetClickable(false);
+            textContainerNode.Visible = false;
+            textBackgroundContainerNode.Visible = false;
         }
         RecalculateSizes();
     }

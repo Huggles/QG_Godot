@@ -28,6 +28,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(GrantSupplyChangeEventDto),       "GrantSupply")]
 [JsonDerivedType(typeof(RecalculateTagsChangeEventDto),   "RecalculateTags")]
 [JsonDerivedType(typeof(RegisterBulletinCardChangeEventDto), "RegisterBulletinCard")]
+[JsonDerivedType(typeof(ShowBulletinChangeEventDto),      "ShowBulletin")]
 public abstract class ChangeEventDto
 {
     public int Id { get; set; }
@@ -163,4 +164,10 @@ public class RegisterBulletinCardChangeEventDto : ChangeEventDto
     public string MutatorClassName { get; set; }
     public int    FromRound        { get; set; }
     public int    ToRound          { get; set; }
+}
+
+public class ShowBulletinChangeEventDto : ChangeEventDto
+{
+    public string Label        { get; set; }
+    public string BulletinText { get; set; }
 }

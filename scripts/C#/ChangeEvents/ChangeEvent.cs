@@ -34,6 +34,15 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
     public virtual bool ToHistoryItem => true; // whether this event should be converted to a GameHistoryItem and displayed in the game history UI
 
+    /// <summary>
+    /// Whether ApplyChange adds this event to the active CardPlayRound. Almost always yes — the pool is
+    /// what Condition.EventCondition scans. Override to false for an event that mutates nothing and
+    /// exists only to present something: registering sets CardPlayRound.LastChangeEvent, which decides
+    /// RequestOrder (which team is offered reactions first) and the self-block guard in RequestBlock,
+    /// so an inert announcement would otherwise steer the reaction chain.
+    /// </summary>
+    protected virtual bool RegisterInCardPlayPool => true;
+
     // Signal
     [Signal] public delegate void ChangeEventAppliedEventHandler(int changeEventId);
 
@@ -81,6 +90,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
             GrantSupplyChangeEventDto d         => new GrantSupplyChangeEvent(d.TriggeringFaction, d.UnitIds),
             RecalculateTagsChangeEventDto d     => new RecalculateTagsChangeEvent(d.Snapshot),
             RegisterBulletinCardChangeEventDto d => new RegisterBulletinCardChangeEvent(d.TargetFaction, d.CardId, d.MutatorClassName, d.FromRound, d.ToRound),
+            ShowBulletinChangeEventDto d        => new ShowBulletinChangeEvent(d.TriggeringFaction, d.Label, d.BulletinText),
             _ => throw new NotSupportedException($"Unknown ChangeEventDto type: {dto.GetType().Name}")
         };
         ev.Id                   = dto.Id;
@@ -133,7 +143,7 @@ public abstract partial class ChangeEvent : GodotObject, IChangeEvent
 
         EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
         DebugUtilities.PrintPeer($"Doing change event {ScriptName} (Id: {Id}) with source card {SourceCardId} and triggering faction {TriggeringFaction}");           
-        if(CardPlayRound.Current != null)
+        if(CardPlayRound.Current != null && RegisterInCardPlayPool)
         {
             DebugUtilities.PrintPeer($"Registering change event {ScriptName} (Id: {Id}) with current CardPlayRound");
             CardPlayRound.Current.RegisterChangeEvent(this);

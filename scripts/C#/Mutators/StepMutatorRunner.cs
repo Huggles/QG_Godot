@@ -11,6 +11,14 @@ using System.Threading.Tasks;
 /// </summary>
 public static class StepMutatorRunner
 {
+    /// <summary>
+    /// The Bulletin of the mutator currently executing, or null outside a mutator's Run(). Read by
+    /// InputRequest.BroadCast so any input a mutator asks for carries its Bulletin to the player, which
+    /// is what makes "why am I being asked to pick a unit?" answerable. Ambient rather than threaded
+    /// through, mirroring CardPlayRound.CurrentReactionTrigger; server-side only, like the runner.
+    /// </summary>
+    public static (string Label, string Text)? RunningBulletin { get; private set; }
+
     public static async Task Run(TurnStep step, MutatorTiming timing, Faction activeFaction)
     {
         // Retire finished mutators first. ToList() before unregistering: GetAll is a lazy OfType
@@ -45,10 +53,16 @@ public static class StepMutatorRunner
             {
                 ErrorReporter.ThrowIfStaleEpoch(epoch);
                 DebugUtilities.PrintPeer($"Mutator {mutator.GetType().Name} ({timing} {step})");
-                NetworkApi.Instance?.Rpc(nameof(NetworkApi.ShowPlayerActionLabel),
-                    mutator.Description, -1, (int)activeFaction);
+
+                // Announce the mutator as a Bulletin card on every peer. Replaces the old
+                // ShowPlayerActionLabel RPC, which was a single line of text that nothing cleared and
+                // that any client-side input round-trip wiped (see NetworkApi.ReceiveInputResponse).
+                await new ShowBulletinChangeEvent(activeFaction, mutator.Description, mutator.BulletinText)
+                    { IsTrigger = false }.ApplyChange();
+
                 GameStateCalculator.CalculateAll();
 
+                RunningBulletin = (mutator.Description, mutator.BulletinText);
                 try
                 {
                     await mutator.Run(activeFaction);
@@ -59,10 +73,19 @@ public static class StepMutatorRunner
                     // the rest of the window still runs, and the turn loop continues.
                     DebugUtilities.PrintPeer($"Mutator {mutator.GetType().Name} skipped by player");
                 }
+                finally
+                {
+                    // Must clear on skip and on any throw too, or the next unrelated input request
+                    // would show a stale Bulletin beside it.
+                    RunningBulletin = null;
+                }
             }
         }
         finally
         {
+            // Belt to the per-mutator finally's braces: the stale-epoch check at the top of the loop
+            // throws past it, and nothing outside this runner should ever observe a Bulletin as running.
+            RunningBulletin = null;
             if (createdRound) CardPlayRound.Current?.ClearPool();
         }
     }

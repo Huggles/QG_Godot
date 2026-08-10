@@ -6,24 +6,17 @@
   "maxRounds": 3,
   "mutators": [
     {
-      "name": "MutatorRemoveUnitAfterPlayCard",
-      "order": 10
-    },
-    {
-      "name": "MutatorBonusVictoryPoints",
-      "factions": ["GERMANY", "ITALY"],
-      "fromRound": 2,
-      "toRound": 3,
-      "order": 20
-    },
-    {
-      "name": "MutatorSyntheticFuelAnyFaction"
+      "name": "MutatorRedeployAfterPlayCard",
+      "order": 30
     }
   ],
   "factions": {
     "GERMANY": {
       "unitDeployments": [
-        { "countryName": "GERMANY" }
+        { "countryName": "GERMANY" },
+        { "countryName": "WESTERN_EUROPE" },
+        { "countryName": "EASTERN_EUROPE" },
+        { "countryName": "BALKANS" }
       ],
       "initialCards": [],
       "initialHandCards": [],

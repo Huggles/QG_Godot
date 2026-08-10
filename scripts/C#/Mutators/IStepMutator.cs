@@ -16,8 +16,15 @@ public interface IStepMutator : IModifier
     TurnStep      Step   { get; }
     MutatorTiming Timing { get; }
 
-    /// <summary>Shown to all players as the action label while this mutator runs.</summary>
+    /// <summary>
+    /// Shown to all players as the title of this mutator's Bulletin card when it fires, and as the
+    /// action label beside any input it asks for. Keep it a readable sentence — StepMutator defaults it
+    /// to the class name, which reads badly on a card.
+    /// </summary>
     string Description { get; }
+
+    /// <summary>Body text of the Bulletin card. Empty hides the card's text box entirely.</summary>
+    string BulletinText => string.Empty;
 
     Task Run(Faction activeFaction);
 

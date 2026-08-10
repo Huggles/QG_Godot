@@ -18,6 +18,11 @@ public abstract class StepMutator : IStepMutator
 
     public virtual string Description => GetType().Name;
 
+    // Re-declared here rather than inherited as IStepMutator's default: a subclass cannot override a
+    // default interface member, and every scenario mutator wants to fill this in. Same shape as
+    // Description above.
+    public virtual string BulletinText => string.Empty;
+
     // Populated from the scenario entry at registration time; left at defaults for detached mutators.
     public List<Faction> FactionFilter { get; set; } = new();
     public int FromRound { get; set; } = 1;

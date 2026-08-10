@@ -45,6 +45,15 @@ public abstract partial class InputRequest
     public string TriggerSummaryText { get; set; }
 
     /// <summary>
+    /// Set by <see cref="BroadCast"/> when this request is raised from inside a scenario mutator's
+    /// Run(), so the player being asked to pick a unit or a country can see which Bulletin is asking.
+    /// Null for every other request. Serialized with the rest of the request — the base class carries
+    /// the [JsonPolymorphic] attribute, so properties added here round-trip with no registration.
+    /// </summary>
+    public string TriggerBulletinLabel { get; set; }
+    public string TriggerBulletinText { get; set; }
+
+    /// <summary>
     /// Set by a selection handler's <see cref="Handle"/> when the player skipped the
     /// input instead of making a choice. Serialized so it survives the DTO round-trip;
     /// <see cref="BroadCast"/> throws <see cref="StepSkippedException"/> when it is true.
@@ -64,8 +73,28 @@ public abstract partial class InputRequest
     {
         if(IsForCurrentPeer)
         {
-            await Handle();
-        } 
+            // Showing the Bulletin here rather than in each Handle() covers every request subclass at
+            // once — including the unit and country selections a mutator actually raises, which have
+            // never had any trigger context of their own.
+            bool showedBulletin = false;
+            if (!string.IsNullOrEmpty(TriggerBulletinLabel))
+            {
+                TriggerContextDisplay.Current?.ShowBulletin(
+                    CardFace.Bulletin(TriggerBulletinLabel, TriggerBulletinText), TriggerBulletinLabel);
+                showedBulletin = true;
+            }
+
+            try
+            {
+                await Handle();
+            }
+            finally
+            {
+                // Also on skip and on throw — a stale Bulletin next to an unrelated prompt is worse
+                // than none.
+                if (showedBulletin) TriggerContextDisplay.Current?.Hide();
+            }
+        }
         else
         {
             PresentationServices.Notification.ShowActionText($"Waiting on {TargetFaction} input...");
@@ -75,6 +104,15 @@ public abstract partial class InputRequest
     public async Task<InputRequest> BroadCast()
     {
         DebugUtilities.PrintPeer($"Broadcasting input request {GetType().Name} to {TargetFaction}");
+
+        // Stamp the running mutator's Bulletin on the way out. BroadCast is the single chokepoint every
+        // request passes through, and TriggerCardId taking precedence keeps card reactions unchanged.
+        if (TriggerCardId == -1 && StepMutatorRunner.RunningBulletin is { } bulletin)
+        {
+            TriggerBulletinLabel = bulletin.Label;
+            TriggerBulletinText = bulletin.Text;
+        }
+
         InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(this);
         if (responseDto.WasSkipped)
         {
@@ -129,7 +167,7 @@ public abstract partial class InputRequest
         {
             PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, false);
             if (TriggerCardId > -1)
-                FactionHandDisplay.Current?.ShowTriggerContext(TriggerCardId, TriggerSummaryText);
+                TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
             DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
             if (results != null && results.Length > 0)
@@ -325,7 +363,7 @@ public abstract partial class InputRequest
             // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
             PlayerScene.Current.InputManager.SetCardSelectionActive(TargetFaction, TargetCardIds ?? new List<int>());
             if (TriggerCardId > -1)
-                FactionHandDisplay.Current?.ShowTriggerContext(TriggerCardId, TriggerSummaryText);
+                TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
             Variant[] results = await EventBus.GetSignalAwaiter("CardSelected");
             if (results != null && results.Length > 0 && (int)results[0] > -1)
             {

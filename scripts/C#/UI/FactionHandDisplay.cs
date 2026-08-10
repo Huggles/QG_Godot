@@ -12,9 +12,6 @@ public partial class FactionHandDisplay : Control
 	private Panel CardPreviewContainer => GetNode<Panel>("%CardPreviewContainer");
 	private CardScene CardPreview => GetNode<CardScene>("%CardPreview");
 	private Button TestButton => GetNode<Button>("%TestButton");
-	private Panel TriggerContextPanel => GetNode<Panel>("%TriggerContextPanel");
-	private CardScene TriggerCardScene => GetNode<CardScene>("%TriggerCard");
-	private RichTextLabel TriggerLabel => GetNode<RichTextLabel>("%TriggerLabel");
 
 	private List<CardScene> CardScenes = new List<CardScene>();
 	private Faction showingFaction;
@@ -49,10 +46,6 @@ public partial class FactionHandDisplay : Control
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
 		EventBus.Instance.CardsDrawn += OnCardsDrawn;
 		EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
-
-		TriggerCardScene.TriggersEmphasis(false);
-		TriggerCardScene.SetClickable(false);
-		
 
 		// Unsubscribe first to prevent duplicate connections
 		UnsubscribeFromEvents();
@@ -156,8 +149,10 @@ public partial class FactionHandDisplay : Control
 	public new void Hide()
 	{
 		Visible = false;
-		HideTriggerContext();
-		
+		// The trigger context is no longer a child of this node and is deliberately NOT cleared here:
+		// a mutator's Bulletin has to outlive the hand display, which every step transition hides.
+		// InputManager.HandleItemSelected clears it for card prompts, InputRequest.Execute for the rest.
+
 		// Only access CardsContainer if it's been initialized (in LoadUI)
 		if (CardsContainer != null)
 		{
@@ -257,31 +252,6 @@ public partial class FactionHandDisplay : Control
 			CardPreview.Visible = false;
 			CardPreview.MouseFilter = MouseFilterEnum.Ignore;
 		}
-	}
-
-	public void ShowTriggerContext(int cardId, string summaryText)
-	{
-		if (TriggerContextPanel == null) return;
-
-		if (cardId > -1)
-		{
-			TriggerCardScene.Visible = true;
-			TriggerCardScene.ShowCard(cardId);
-			TriggerCardScene.SetActivatable(true);
-		}
-		else
-		{
-			TriggerCardScene.Visible = false;
-		}
-
-		TriggerLabel.Text = $"[b]Reacting to:[/b]\n{summaryText ?? string.Empty}";
-		TriggerContextPanel.Visible = true;
-	}
-
-	public void HideTriggerContext()
-	{
-		if (TriggerContextPanel != null)
-			TriggerContextPanel.Visible = false;
 	}
 
 	private void UnsubscribeFromEvents()

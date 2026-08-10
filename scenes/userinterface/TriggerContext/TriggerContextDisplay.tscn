@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://blt1trgctx001"]
+
+[ext_resource type="Script" path="res://scripts/C#/UI/TriggerContextDisplay.cs" id="1_tctx"]
+[ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_tccard"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tctx"]
+
+[node name="TriggerContextDisplay" type="Control"]
+custom_minimum_size = Vector2(0, 1080)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_tctx")
+
+[node name="TriggerContextPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -620.0
+offset_top = 190.0
+offset_right = -370.0
+offset_bottom = 680.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_tctx")
+
+[node name="TriggerCard" parent="TriggerContextPanel" instance=ExtResource("2_tccard")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 350.0
+
+[node name="TriggerLabel" type="RichTextLabel" parent="TriggerContextPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_top = 360.0
+offset_bottom = 490.0
+fit_content = true
+scroll_active = false
+bbcode_enabled = true

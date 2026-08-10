@@ -33,6 +33,8 @@ public class MutatorRecycleAfterStep : StepMutator
     public override TurnStep      Step        => _step;
     public override MutatorTiming Timing      => MutatorTiming.AFTER;
     public override string        Description => "Rationing: shuffle the played card into the draw deck";
+    public override string        BulletinText =>
+        "Nothing is wasted. The card just played is shuffled back into its owner's draw deck instead of staying discarded.";
 
     /// <summary>
     /// Retires once fired. The turn check is the backstop for a step abandoned by error recovery —

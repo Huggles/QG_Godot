@@ -14,6 +14,8 @@ public class MutatorBonusVictoryPoints : StepMutator
     public override TurnStep      Step        => TurnStep.VICTORY_POINT;
     public override MutatorTiming Timing      => MutatorTiming.AFTER;
     public override string        Description => "Scenario bonus victory points";
+    public override string        BulletinText =>
+        $"Home-front production is ahead of schedule. Score an extra {BonusPoints} victory points this turn.";
 
     public override Task Run(Faction activeFaction) =>
         this.Do(new ScorePointsChangeEvent(new VPEntry(BonusPoints, "scenario bonus"), activeFaction));

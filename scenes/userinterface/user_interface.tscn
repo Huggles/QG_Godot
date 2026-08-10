@@ -15,6 +15,7 @@
 [ext_resource type="Script" uid="uid://b0yaf6jd2tqqi" path="res://scripts/C#/UI/AutoDismissControl.cs" id="13_autodismiss"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
+[ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -24,6 +25,8 @@ offset_left = 1494.0
 offset_bottom = -347.0
 
 [node name="FactionHandDisplay" parent="." unique_id=1158523193 instance=ExtResource("2_ntnkv")]
+
+[node name="TriggerContextDisplay" parent="." instance=ExtResource("16_trigctx")]
 
 [node name="PresentationModal" parent="." unique_id=78458452 instance=ExtResource("3_oxwje")]
 z_index = 100
