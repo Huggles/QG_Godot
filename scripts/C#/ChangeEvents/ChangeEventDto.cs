@@ -111,6 +111,12 @@ public class RecycleCardChangeEventDto : ChangeEventDto
 {
     public int CardId { get; set; }
     public RecycleDestination Destination { get; set; }
+
+    /// <summary>
+    /// Host-computed deck order for a ShuffleIntoDeck recycle; null otherwise. Restored by
+    /// RecycleCardChangeEvent.ApplyDtoFields, not by the constructor.
+    /// </summary>
+    public List<int> ShuffledOrder { get; set; }
 }
 
 /// <summary>No extra fields needed — TriggeringFaction is sufficient.</summary>

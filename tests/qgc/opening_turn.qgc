@@ -1,5 +1,7 @@
+#!args scenario=Scenario_OneRound seed=42
+#
 # Germany opens by building an army, then the round is passed out.
-# Run:  tests/run-cli.sh tests/qgc/opening_turn.qgc scenario=Scenario_OneRound seed=42
+# Run:  tests/run-cli.sh tests/qgc/opening_turn.qgc
 #
 # NOTE ON ORDERING: `assert` reads state the moment it runs, and the game boots asynchronously.
 # Only the answer commands (`prompt`, `play`, `select`, `pass`) wait for the game to reach a

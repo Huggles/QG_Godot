@@ -14,6 +14,18 @@ public partial class RecycleCardChangeEvent : ChangeEvent
     public int CardId { get; set; }
     public RecycleDestination Destination { get; set; }
 
+    /// <summary>
+    /// The deck order the host produced for a <see cref="RecycleDestination.ShuffleIntoDeck"/>, and
+    /// the client's instruction to match it. Null for every other destination.
+    ///
+    /// Needed because ExecuteAsync runs on both peers and the state hash covers deck *counts* but not
+    /// order, so two independent shuffles would diverge undetected. It is not a constructor parameter,
+    /// so it round-trips via ToDto/ApplyDtoFields — the same shape as
+    /// ForceDiscardCardsChangeEvent.ModifiersApplied, and for the same reason: a field the client must
+    /// be told rather than recompute.
+    /// </summary>
+    public List<int> ShuffledOrder { get; set; }
+
     public RecycleCardChangeEvent(Faction triggeringFaction, Faction targetFaction, int cardId, RecycleDestination destination) : base(triggeringFaction)
     {
         TargetFaction = targetFaction;
@@ -26,13 +38,35 @@ public partial class RecycleCardChangeEvent : ChangeEvent
         RecycleCardChangeEventDto dto = ChangeEventDto.Build<RecycleCardChangeEventDto>(this, Id);
         dto.CardId = CardId;
         dto.Destination = Destination;
+        // Safe to read here: BroadCast (and so ToDto) runs after ExecuteAsync has set it.
+        dto.ShuffledOrder = ShuffledOrder;
         return dto;
+    }
+
+    protected override void ApplyDtoFields(GameMessageDto dto)
+    {
+        base.ApplyDtoFields(dto);
+        if (dto is RecycleCardChangeEventDto d) ShuffledOrder = d.ShuffledOrder;
     }
 
     protected override async Task<bool> ExecuteAsync()
     {
         DeckState deckState = DeckState.ForFaction(TargetFaction);
-        deckState.DiscardedCardIds.Remove(CardId);
+
+        // Recycling MOVES the card, so it has to leave wherever it currently is. This used to be
+        // `DiscardedCardIds.Remove(CardId)` — right for every in-game caller, all of which recycle out
+        // of the discard pile, but a silent duplication for any other source: the card was added to the
+        // destination while the original copy stayed put, and it then existed in two piles at once
+        // (hand *and* draw deck, say). See DeckState.RemoveCardFromAnyPile for why that reads as two
+        // separate cards to the rest of the game.
+        if (!deckState.RemoveCardFromAnyPile(CardId))
+        {
+            // Not in any of this faction's piles: adding it to the destination would conjure a card
+            // that was never theirs. Both peers see the same state here, so both skip identically.
+            DebugUtilities.PrintPeerError($"Cannot recycle card {CardId}: not in any pile of {TargetFaction}");
+            return false;
+        }
+
         switch (Destination)
         {
             case RecycleDestination.TopOfDeck:
@@ -40,7 +74,9 @@ public partial class RecycleCardChangeEvent : ChangeEvent
                 break;
             case RecycleDestination.ShuffleIntoDeck:
                 deckState.DeckCardIds.Add(CardId);
-                deckState.ShuffleDeck();
+                // Host shuffles and records the order; the client replays that exact order rather
+                // than shuffling for itself. See DeckState.ShuffleDeck.
+                ShuffledOrder = deckState.ShuffleDeck(IsServer ? null : ShuffledOrder);
                 break;
             case RecycleDestination.Hand:
                 deckState.HandCardIds.Add(CardId);

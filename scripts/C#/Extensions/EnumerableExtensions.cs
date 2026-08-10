@@ -7,8 +7,9 @@ public static class EnumerableExtensions
 {
     
     /// <summary>
-    /// Note this returns a NEW list; it does not shuffle in place. `list.Shuffle();` with the result
-    /// discarded is a no-op — see DeckState.ShuffleDeck.
+    /// Returns a NEW shuffled list — it does NOT shuffle in place. `list.Shuffle();` with the result
+    /// discarded is a silent no-op, which is exactly the bug DeckState.ShuffleDeck used to have.
+    /// To shuffle a list you already hold, use <c>GameRandom.Shuffle(list)</c>.
     /// </summary>
     public static IList<T> Shuffle<T>(this IEnumerable<T> sequence)
     {

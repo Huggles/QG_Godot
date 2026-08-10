@@ -141,29 +141,49 @@ public partial class DeckState : StateObject
     }
 
 
+    /// <summary>
+    /// This was a Contains/Remove chain over hand, deck, status and response that ended in an
+    /// unconditional Add. Removing from every pile instead also covers the case the chain fell all the
+    /// way through: a card already in DiscardedCardIds got appended a second time. That is a live path,
+    /// not a hypothetical — see the IsDiscarded guard in ActivateReactionChangeEvent, which exists to
+    /// keep multi-step Response cards away from it.
+    /// </summary>
     public void DiscardCard(int cardId)
     {
-        if (HandCardIds.Contains(cardId))
+        RemoveCardFromAnyPile(cardId);
+        DiscardedCardIds.Add(cardId);
+    }
+
+    /// <summary>
+    /// Take a card out of every pile it could be sitting in, and report whether any of them held it.
+    ///
+    /// A card id must appear in exactly one of the five pile lists. Nothing enforces that structurally
+    /// — AllCardIds is a plain Concat, ComputeHash folds in the deck count and the hand/status/response
+    /// id lists, and every hand/deck size condition counts a list — so a card in two piles reads as two
+    /// cards everywhere. Any code that *moves* a card must therefore take it out of its current pile
+    /// rather than assume which pile that is; RecycleCardChangeEvent assumed "discard pile" and
+    /// duplicated the card whenever it was not there.
+    ///
+    /// A status card leaving the board takes its modifier registration with it — otherwise the modifier
+    /// stays live with nothing in play behind it.
+    /// </summary>
+    public bool RemoveCardFromAnyPile(int cardId)
+    {
+        // Non-short-circuiting `|`: every pile gets cleared, not just the first one that matches.
+        bool removed = HandCardIds.Remove(cardId)
+                     | DeckCardIds.Remove(cardId)
+                     | DiscardedCardIds.Remove(cardId)
+                     | ResponseCardIds.Remove(cardId);
+
+        if (StatusCardIds.Remove(cardId))
         {
-            HandCardIds.Remove(cardId);
-        }
-        else if (DeckCardIds.Contains(cardId))
-        {
-            DeckCardIds.Remove(cardId);
-        }
-        else if (StatusCardIds.Contains(cardId))
-        {
-            StatusCardIds.Remove(cardId);
+            removed = true;
             CardState statusCard = CardState.ForId(cardId);
             // Persistent modifiers are meant to outlive their card — see IPersistentModifier.
             if (statusCard.CardLogic is IModifier modifier and not IPersistentModifier)
                 ModifierRegistry.Unregister(modifier);
         }
-        else if (ResponseCardIds.Contains(cardId))
-        {
-            ResponseCardIds.Remove(cardId);
-        }
-        DiscardedCardIds.Add(cardId);
+        return removed;
     }
 
     public void DebugHand()
@@ -184,9 +204,33 @@ public partial class DeckState : StateObject
         }
     }
 
-    public void ShuffleDeck()
-    {        
-        DeckCardIds.Shuffle();
+    /// <summary>
+    /// Shuffle the draw deck and return the resulting order.
+    ///
+    /// This used to be <c>DeckCardIds.Shuffle();</c>, which was a silent no-op: the Shuffle extension
+    /// returns a NEW list and does not mutate, so the result was discarded and the deck was left
+    /// untouched. Its only caller is RecycleCardChangeEvent's ShuffleIntoDeck branch, which therefore
+    /// appended to the bottom of the deck and called it shuffled.
+    ///
+    /// <paramref name="authoritativeOrder"/> is the host/client split. That branch runs on BOTH peers
+    /// (it rides the replicated ChangeEvent stream), and ComputeHash covers deck *counts* but not
+    /// order — so if each peer shuffled for itself they would diverge with nothing to detect it until
+    /// a mismatched hand surfaced several draws later. The host shuffles and puts the resulting order
+    /// on the wire; the client applies it verbatim. Same pattern as ReorderDeckChangeEvent.
+    /// </summary>
+    public List<int> ShuffleDeck(List<int> authoritativeOrder = null)
+    {
+        if (authoritativeOrder != null)
+        {
+            // Mutated in place, never reassigned: DeckState lists are live objects other code holds.
+            DeckCardIds.Clear();
+            DeckCardIds.AddRange(authoritativeOrder);
+        }
+        else
+        {
+            GameRandom.Shuffle(DeckCardIds);
+        }
+        return new List<int>(DeckCardIds);
     }
 
     public static DeckState ForFaction(Faction faction)

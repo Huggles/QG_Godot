@@ -161,6 +161,11 @@ public sealed class CliInputProvider : IInputProvider
 
     private void Release()
     {
+        // The answer is about to resume the game loop, so state is in motion again even though
+        // nothing has been enqueued yet. Without this the settle window would still be counting down
+        // from before the prompt and a following `assert` could read pre-answer state.
+        CliSession.Instance?.MarkBusy();
+
         TaskCompletionSource<bool> pending = _pending;
         _pending = null;
         _request = null;

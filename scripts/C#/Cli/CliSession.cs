@@ -58,6 +58,7 @@ public partial class CliSession : Node
 
         SubscribeOnce();
         AnnounceStartOnce();
+        _quietFrames++;
 
         // Drain the reader thread's queue on the main thread. Everything downstream — command
         // handlers, prompt answers, ChangeEvent application — runs here, same as the rest of the game.
@@ -94,6 +95,21 @@ public partial class CliSession : Node
 
     private string _held;
     private bool _announced;
+    private int _quietFrames;
+
+    /// <summary>
+    /// True when game state is safe to read: either the game is parked on a prompt (it is genuinely
+    /// doing nothing), or nothing has been applied for a few frames.
+    ///
+    /// Queue-idle alone is NOT enough, and assuming it was produced silently wrong assertions.
+    /// Answering a prompt resumes an async continuation that has not enqueued its ChangeEvent yet, so
+    /// for a frame or two afterwards the queue looks idle while the answer's consequences have not
+    /// landed — an `assert` there reads pre-answer state and "passes" against the wrong world.
+    /// </summary>
+    public bool IsSettled => _input.HasOpenPrompt || _quietFrames >= 3;
+
+    /// <summary>Reset the quiet counter — something happened, so state is in motion again.</summary>
+    public void MarkBusy() => _quietFrames = 0;
 
     /// <summary>
     /// Report the scenario once the game exists. Not in _Ready: this autoload starts before
@@ -145,6 +161,8 @@ public partial class CliSession : Node
     /// </summary>
     private void OnChangeEventAfter(string changeEventName)
     {
+        MarkBusy();
+
         List<GameMessage> messages = MultiplayerSession.Instance?.GameState?.GameMessages;
         GameMessage last = messages != null && messages.Count > 0 ? messages[^1] : null;
         string summary = last?.SummaryText() ?? changeEventName;

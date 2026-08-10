@@ -69,13 +69,14 @@ public sealed class CliCommands
         if (verb == null) return Readiness.Run;                      // blank/comment: consume it
         if (AnswerVerbs.Contains(verb)) return _input.HasOpenPrompt
             ? Readiness.Run : Readiness.WaitForPrompt;
-        // Also wait for the change-event pump to drain. Effects are applied asynchronously, so a
-        // `board` or `assert` issued straight after an answer would otherwise read state from before
-        // the answer's consequences landed — the classic flaky-test shape. This is the same
-        // quiescence barrier NetworkApi.ReceiveInputRequest uses before dispatching a prompt.
+        // Wait for the game to actually settle, not merely for the queue to look idle. See
+        // CliSession.IsSettled: straight after an answer the queue is briefly idle while the answer's
+        // continuation has yet to enqueue anything, and reading state there silently yields
+        // pre-answer values.
         if (GameVerbs.Contains(verb)) return CliStateView.Ready
                                             && _inFlight == 0
                                             && (ChangeEventQueue.Instance?.IsIdle ?? true)
+                                            && _session.IsSettled
             ? Readiness.Run : Readiness.WaitForGame;
         return Readiness.Run;                                        // json / help / quit / unknown
     }
@@ -238,12 +239,18 @@ public sealed class CliCommands
                                  RequireFaction(named, "target", fallbackKey: "faction"),
                                  RequireInt(named, "n")),
             "playcard"    => new PlayCardChangeEvent(RequireCard(named, "card")),
+            "recyclecard" => new RecycleCardChangeEvent(
+                                 RequireFaction(named, "faction"),
+                                 RequireFaction(named, "target", fallbackKey: "faction"),
+                                 RequireCard(named, "card"),
+                                 ParseEnum(named.GetValueOrDefault("destination"), RecycleDestination.ShuffleIntoDeck)),
             _             => null,
         };
 
         if (changeEvent == null)
         {
-            _out.Error($"unknown effect '{effect}'. Known: deployUnit, removeUnit, battle, battleUnit, drawCards, playCard");
+            _out.Error($"unknown effect '{effect}'. Known: deployUnit, removeUnit, battle, battleUnit, " +
+                       "drawCards, playCard, recycleCard");
             return;
         }
 
@@ -402,11 +409,13 @@ public sealed class CliCommands
         "INJECT   api deployUnit --faction F --country C [--deploy RECRUIT]",
         "         api removeUnit --faction F --unit N | api battle --faction F --country C",
         "         api drawCards --faction F --n N | api playCard --card <name|id>",
+        "         api recycleCard --faction F --card <name|id> [--destination ShuffleIntoDeck]",
         "         (api = reactions offered;  force = same args, applied directly, no reactions)",
-        "TEST     assert <subject> [args] <op> <expected>     op: == != > >= < <=",
+        "TEST     assert <subject> [args] <op> <expected>     op: == != > >= < <= in !in",
         "         subjects: turn round step faction hash errors rngdraws seed",
         "                   score <F> | vp <TEAM> | units <country> [faction] | occupant <country>",
-        "                   handsize <F> | decksize <F> | card <name|id>  (-> hand/deck/discard/...)",
+        "                   handsize <F> | decksize <F> | decktop <F> | deckorder <F>",
+        "                   card <name|id>  (-> hand/deck/discard/status/response/nowhere)",
         "CONTROL  auto <n> | run <n>   auto-pass n prompts",
         "         json on|off | continue | quit [code] | help",
         "EXIT     0 pass · 1 assertion failed · 2 game error · 5 malformed assertion",

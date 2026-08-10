@@ -58,8 +58,12 @@ public static class CliAssert
         return $"assert {string.Join(" ", subject)} {op} {expected}  —  actual: {actual}";
     }
 
+    /// <summary>
+    /// `in` / `!in` are aliases for `==` / `!=`, so the pile assertions read naturally
+    /// (`assert card 0 in deck`). They compare the same single value — a subject never yields a set.
+    /// </summary>
     private static bool IsOperator(string token)
-        => token is "==" or "!=" or ">" or ">=" or "<" or "<=";
+        => token is "==" or "!=" or ">" or ">=" or "<" or "<=" or "in" or "!in";
 
     private static string Read(List<string> subject)
     {
@@ -108,6 +112,16 @@ public static class CliAssert
             case "handsize": return DeckState.ForFaction(ParseFaction(arg1)).HandCardIds.Count.ToString();
             case "decksize": return DeckState.ForFaction(ParseFaction(arg1)).DeckCardIds.Count.ToString();
 
+            // Deck ORDER, which the state hash deliberately does not cover (it hashes only the deck
+            // count). These are the only assertions that can catch a shuffle that silently did
+            // nothing, or a client whose deck order drifted from the host's.
+            case "decktop":
+            {
+                DeckState deck = DeckState.ForFaction(ParseFaction(arg1));
+                return deck.DeckCardIds.Count == 0 ? "empty" : deck.DeckCardIds[0].ToString();
+            }
+            case "deckorder": return string.Join("-", DeckState.ForFaction(ParseFaction(arg1)).DeckCardIds);
+
             // assert card <name|id> in hand|deck|discard|status|response
             case "card":
             {
@@ -127,6 +141,9 @@ public static class CliAssert
 
     private static bool Compare(string actual, string op, string expected)
     {
+        if (op == "in")  op = "==";
+        if (op == "!in") op = "!=";
+
         if (int.TryParse(actual, out int a) && int.TryParse(expected, out int b))
             return op switch
             {

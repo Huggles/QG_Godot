@@ -1,0 +1,32 @@
+#!args scenario=Scenario_OneRound seed=42
+#
+# Regression: RecycleCardChangeEvent must MOVE the card, never copy it.
+#
+# ExecuteAsync used to only do `DiscardedCardIds.Remove(CardId)` before adding the card to its
+# destination. Every in-game caller recycles out of the discard pile, so that read as correct — but
+# for any other source the original copy stayed where it was and the card ended up in two piles at
+# once (here: hand AND draw deck). Nothing structurally forbids that, and a card in two piles counts
+# as two cards everywhere — handsize/decksize conditions, ComputeHash, the card fans.
+#
+# `handsize` is what catches it: with the bug the deck grows and the hand never shrinks.
+# `assert card 0 in deck` catches it too, because that subject reports the FIRST pile holding the
+# card and checks hand before deck (see CliAssert.Read) — a duplicate still in hand reads as "hand".
+#
+# Values below are pinned to the seed in the #!args line above; they are deterministic given it.
+# Run:  tests/run-cli.sh tests/qgc/recycle_moves_card.qgc
+
+prompt                                  # turn 1, Germany, PLAY_CARD
+
+assert card 0 in hand
+assert handsize GERMANY == 7
+assert decksize GERMANY == 26
+
+# Deliberately recycling a card that is NOT in the discard pile — the case the old code duplicated.
+api recycleCard --faction GERMANY --card 0 --destination TopOfDeck
+
+assert card 0 in deck                   # FAILS ("hand") if the hand copy was left behind
+assert handsize GERMANY == 6            # FAILS (7) if the hand copy was left behind
+assert decksize GERMANY == 27
+assert decktop GERMANY == 0
+
+quit

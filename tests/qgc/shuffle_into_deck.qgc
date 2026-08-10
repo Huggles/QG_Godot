@@ -1,0 +1,35 @@
+#!args scenario=Scenario_OneRound seed=42
+#
+# Regression: RecycleDestination.ShuffleIntoDeck must actually shuffle the draw deck.
+#
+# DeckState.ShuffleDeck() used to be `DeckCardIds.Shuffle();`. The Shuffle extension returns a NEW
+# list and does not mutate, so the result was discarded and the deck was left in its original order:
+# the recycled card was appended to the bottom and the deck was called shuffled.
+#
+# `decktop` is what catches it. With the bug the top card cannot move, because appending to the
+# bottom never touches it. The replicated state hash cannot catch this at all — it covers the deck
+# COUNT, not the order (see MultiplayerGameState.ComputeHash, `d{deck.DeckCardIds.Count}`), which is
+# also why the fix has to put the host's shuffled order on the wire instead of letting each peer
+# shuffle for itself.
+#
+# Values below are pinned to the seed in the #!args line above; they are deterministic given it.
+# Run:  tests/run-cli.sh tests/qgc/shuffle_into_deck.qgc
+
+prompt                                  # turn 1, Germany, PLAY_CARD
+pass
+prompt                                  # DISCARD step
+discard 1                               # discard Guns and Butter (card 0)
+
+# Recycling out of the discard pile is what every in-game caller does, so that is the path pinned
+# here. Recycling from elsewhere is covered by recycle_moves_card.qgc.
+assert card 0 in discard
+assert decksize GERMANY == 25
+assert decktop GERMANY == 8
+
+api recycleCard --faction GERMANY --card 0 --destination ShuffleIntoDeck
+
+assert card 0 in deck
+assert decksize GERMANY == 26
+assert decktop GERMANY != 8             # FAILS if the shuffle is a no-op
+
+quit
