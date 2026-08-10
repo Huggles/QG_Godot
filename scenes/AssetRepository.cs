@@ -7,7 +7,6 @@ public partial class AssetRepository : Node
     public const string NavySpritePath = "res://assets/textures/Units/QGNavyDetailed.png";
 
     public static readonly PackedScene UserInterfaceScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/user_interface.tscn");
-    public static readonly PackedScene LoadingCoverInterfaceScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/loading_cover_interface.tscn");
     public static readonly PackedScene FactionInfoRowScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/FactionInfo/FactionInfoRow.tscn");
     public static readonly PackedScene multiplayerSessionScenePacked = GD.Load<PackedScene>("res://scenes/network/MultiplayerSession.tscn");
     public static readonly PackedScene PlayerScenePackged = GD.Load<PackedScene>("res://scenes/Player/Player.tscn");

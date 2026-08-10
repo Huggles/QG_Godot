@@ -12,6 +12,10 @@ using Godot;
 /// </summary>
 public static class SceneFlow
 {
+    /// <summary>The in-game scene. A constant because <see cref="ChangeScene"/> keys the loading
+    /// screen off it — a drifting literal at a call site would silently skip the cover.</summary>
+    public const string GameScenePath = "res://scenes/Game.tscn";
+
     /// <summary>
     /// Change to <paramref name="scenePath"/>, deferred so it is safe to call from a signal handler
     /// or button callback.
@@ -23,6 +27,11 @@ public static class SceneFlow
     public static void ChangeScene(Node from, string scenePath, bool leaveSession = false)
     {
         ErrorReporter.IsShuttingDown = true;
+
+        // Raise the cover here, before the outgoing scene is freed, so the transition itself and the
+        // whole game build behind it are covered. No-op headless, so the CLI path is unaffected.
+        if (scenePath == GameScenePath)
+            GameManager.Instance?.ShowLoadingScreen();
 
         if (leaveSession && from.Multiplayer?.MultiplayerPeer != null)
             from.Multiplayer.MultiplayerPeer = null;

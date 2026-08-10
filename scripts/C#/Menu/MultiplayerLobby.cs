@@ -312,7 +312,7 @@ public partial class MultiplayerLobby : Control
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
 		};
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(list);
-		SceneFlow.ChangeScene(this, "res://scenes/Game.tscn");
+		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -493,7 +493,7 @@ public partial class MultiplayerLobby : Control
 			.ToList();
 
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(playerFactionAssignments);
-		SceneFlow.ChangeScene(this, "res://scenes/Game.tscn");
+		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════

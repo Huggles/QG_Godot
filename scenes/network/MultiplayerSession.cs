@@ -76,14 +76,44 @@ public partial class MultiplayerSession : Node
             }
 
 
-            //NodeUtilities.Instance.PlayersNode.GetChildren().ToList().ForEach(playerScene => (playerScene as PlayerScene).FadeLoadingScreen());
+            // Build the local HUD underneath the loading cover, which is still up.
             // Null on a dedicated/headless server (it controls no faction, so has no local PlayerScene).
-            PlayerScene.Current?.FadeLoadingScreen();
+            PlayerScene.Current?.EnsureUiLoaded();
             EventBus.Emit(EventBus.SignalName.GameSessionStarted);
+
+            // Drop the cover on every peer, each once its own queue has caught up.
+            if (Multiplayer.IsServer())
+                Rpc(nameof(HideLoadingScreenWhenReady));
         }
         catch (Exception e)
         {
             ErrorReporter.Report(e, "MultiplayerSession.StartSession");
+        }
+    }
+
+    /// <summary>
+    /// Fades out this peer's loading cover, but only once its ChangeEventQueue has drained, so the
+    /// setup event burst is fully applied before the board becomes visible. Broadcast by the host at
+    /// the end of session start. A bare Rpc is safe here precisely because it awaits the drain rather
+    /// than acting in the receiving frame — the same shape as NetworkApi.ReceiveInputRequest.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public async void HideLoadingScreenWhenReady()
+    {
+        try
+        {
+            // Returns immediately on the host: ReceiveGameMessage is CallLocal = false, so the host
+            // never queues its own messages. The wait is what a client needs.
+            await ChangeEventQueue.Instance.WhenDrained();
+        }
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "MultiplayerSession.HideLoadingScreenWhenReady");
+        }
+        finally
+        {
+            // In finally: a failed drain must never strand the player behind an opaque cover.
+            GameManager.Instance?.HideLoadingScreen();
         }
     }
 

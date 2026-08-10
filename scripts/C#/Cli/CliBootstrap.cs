@@ -40,7 +40,7 @@ public static class CliBootstrap
         };
         from.GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
 
-        SceneFlow.ChangeScene(from, "res://scenes/Game.tscn");
+        SceneFlow.ChangeScene(from, SceneFlow.GameScenePath);
     }
 
     /// <summary>

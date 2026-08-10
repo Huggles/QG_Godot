@@ -18,7 +18,11 @@ public partial class GameManager : Node
 
     private MultiplayerSpawner multiplayerSpawner = new MultiplayerSpawner();
 
-    private Node3D _gameLoadTransitionScreenInstance;    
+    /// <summary>The active full-screen loading overlay (LoadingScreen.png). Lives on this autoload so
+    /// it survives the scene change into Game.tscn and renders above everything.</summary>
+    private CanvasLayer _loadingScreenInstance;
+
+    public static GameManager Instance { get; private set; }
 
     public GameSession GameSession;
 
@@ -50,9 +54,10 @@ public partial class GameManager : Node
 
     public override void _Ready()
     {
+        Instance = this;
         DebugUtilities.PrintPeerFinest("GameManager Ready");
         LoadAvailableScenarios();
-        
+
         // Listen for scene changes
         GetTree().NodeAdded += OnNodeAdded;
     }
@@ -60,6 +65,8 @@ public partial class GameManager : Node
     public override void _ExitTree()
     {
         GetTree().NodeAdded -= OnNodeAdded;
+        if (Instance == this)
+            Instance = null;
     }
 
     private void LoadAvailableScenarios()
@@ -181,5 +188,44 @@ public partial class GameManager : Node
         DebugUtilities.PrintPeerFinest("Multiplayer session initialization complete - waiting for UI elements to load");
 
         MultiplayerSession.Instance.StartNew(JsonSerializer.Serialize(playerFactionAssignments));
+    }
+
+    // ── Loading screen overlay (LoadingScreen.png) ──────────────────────────────
+    // Raised before entering Game.tscn and dropped only once this peer has applied every setup
+    // ChangeEvent, so the build churn is never visible. Owned by this autoload so it persists across
+    // the scene change (the old cover lived on PlayerScene, which is spawned too late to cover its
+    // own creation) and renders above everything.
+
+    public void ShowLoadingScreen()
+    {
+        if (GameContext.IsHeadless) return;         // no display — a CLI run must not build the overlay
+        if (_loadingScreenInstance != null) return; // idempotent
+
+        _loadingScreenInstance = GameLoadTransitionScene.Instantiate<CanvasLayer>();
+        AddChild(_loadingScreenInstance);
+        DebugUtilities.PrintPeerFinest("Loading screen shown");
+    }
+
+    public void HideLoadingScreen()
+    {
+        if (_loadingScreenInstance == null) return;
+
+        CanvasLayer overlay = _loadingScreenInstance;
+        _loadingScreenInstance = null; // cleared before the tween, so a re-entrant Hide is a no-op
+
+        Control cover = overlay.GetNodeOrNull<Control>("Cover");
+        if (cover == null)
+        {
+            DebugUtilities.PrintPeerError("Loading screen has no Cover node — freeing without a fade");
+            overlay.QueueFree();
+            return;
+        }
+
+        Tween tween = CreateTween();
+        tween.TweenProperty(cover, "modulate:a", 0.0, GameSettings.DurationMediumSeconds)
+            .SetTrans(Tween.TransitionType.Sine)
+            .SetEase(Tween.EaseType.InOut);
+        tween.Finished += () => overlay.QueueFree();
+        DebugUtilities.PrintPeerFinest("Loading screen fading out");
     }
 }

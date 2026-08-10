@@ -12,9 +12,7 @@ public partial class PlayerScene : CharacterBody2D
     private Camera2D _camera => GetNode<Camera2D>("Camera2D");
     private Node _rootNode => GetNode("."); 
 
-    private CanvasLayer _loadingCoverInterface;
-
-    private CanvasLayer _interfaceLayer => GetNodeOrNull<CanvasLayer>("Interface");     
+    private CanvasLayer _interfaceLayer => GetNodeOrNull<CanvasLayer>("Interface");
     private bool _uiLoaded => GetChildren().ToList().Find(c => c.Name == "Interface") != null;
 
     private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
@@ -63,15 +61,6 @@ public partial class PlayerScene : CharacterBody2D
         if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
         {
             Current = this;
-            // Current must still be set headless — InputRequest.IsForCurrentPeer depends on it, and a
-            // CLI run DOES control factions (unlike a dedicated server, which has no PlayerScene at
-            // all and so never reached this branch). Only the visuals are skipped.
-            if (!GameContext.IsHeadless)
-            {
-                _loadingCoverInterface = AssetRepository.LoadingCoverInterfaceScenePacked.Instantiate<CanvasLayer>();
-                _loadingCoverInterface.Name = "LoadingCoverInterface";
-                AddChild(_loadingCoverInterface);
-            }
         }
         DebugUtilities.PrintPeerFinest($"PlayerScene ready: {PlayerName}");
         GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
@@ -102,31 +91,16 @@ public partial class PlayerScene : CharacterBody2D
         DebugUtilities.PrintPeerFinest("Entered tree player");
     }
 
-    public void FadeLoadingScreen()
+    /// <summary>Instantiates the in-game HUD once (idempotent). The full-screen cover is owned by
+    /// <see cref="GameManager"/> and dropped separately, once every setup ChangeEvent has applied.</summary>
+    public void EnsureUiLoaded()
     {
-        // No UI to build or fade headless. Without this a CLI run — where PlayerScene.Current is
-        // non-null, unlike on a dedicated server — would instantiate the whole user_interface.tscn.
+        // No UI to build headless. Without this a CLI run — where PlayerScene.Current is non-null,
+        // unlike on a dedicated server — would instantiate the whole user_interface.tscn.
         if (GameContext.IsHeadless) return;
 
         if (!_uiLoaded)
-        {
-            LoadUI();     
-            if (_loadingCoverInterface != null)
-            {
-                var loadingCover = _loadingCoverInterface.GetNodeOrNull<Control>("LoadingCover");
-
-                var tween = GetTree().CreateTween();   
-                PropertyTweener propertyTweener1 = tween.TweenProperty(loadingCover, "modulate:a", 0.0, GameSettings.DurationMediumSeconds)
-                    .SetTrans(Tween.TransitionType.Sine)
-                    .SetEase(Tween.EaseType.InOut);
-                propertyTweener1.Finished += () => {
-                    DebugUtilities.PrintPeerFinest("Removing loading cover");
-                    RemoveChild(_loadingCoverInterface);
-                };
-            } else {
-                DebugUtilities.PrintPeerError("LoadingCover not found on PlayerScene");
-            }    
-        }   
+            LoadUI();
     }
 
     public void LoadUI()

@@ -92,6 +92,6 @@ public partial class GameModeSelectionScreen : Control
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
 		};
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
-		SceneFlow.ChangeScene(this, "res://scenes/Game.tscn");
+		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
 	}
 }

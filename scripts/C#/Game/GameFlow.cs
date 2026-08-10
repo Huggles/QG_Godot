@@ -95,8 +95,6 @@ public partial class GameFlow : SingletonNode<GameFlow>
             GameStarted = true;
 
 
-            // Only fade the local (host) player's loading screen here.
-            // Client loading screens are faded via GameSession.ReceiveGameStarted RPC.
             Guard.FireAndForget(StartNewTurn, "GameFlow.StartNewTurn", stallsLoop: true);
         }
         catch (Exception e)
