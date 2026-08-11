@@ -1,5 +1,5 @@
 # Quick Launch (Swapped Teams) - Both instances at once
-# Optimized for running from VSCode task (F8)
+# Optimized for running from VSCode task (F7)
 # HOST = ALLIES, CLIENT = AXIS
 
 Write-Host "Building project..." -ForegroundColor Cyan
