@@ -97,6 +97,30 @@ text = "[color=#bbbbbb]Select a scenario to see its description.[/color]"
 scroll_active = false
 theme_override_font_sizes/normal_font_size = 22
 
+[node name="SeedRow" type="HBoxContainer" parent="ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="SeedLabel" type="Label" parent="ButtonContainer/SeedRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Seed"
+
+[node name="SeedInput" type="LineEdit" parent="ButtonContainer/SeedRow"]
+custom_minimum_size = Vector2(240, 56)
+layout_mode = 2
+placeholder_text = "random"
+alignment = 1
+
+[node name="RandomizeSeedButton" type="Button" parent="ButtonContainer/SeedRow"]
+custom_minimum_size = Vector2(180, 56)
+layout_mode = 2
+text = "Randomize"
+
 [node name="StartGameButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2

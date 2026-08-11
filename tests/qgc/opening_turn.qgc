@@ -14,7 +14,9 @@ assert faction == GERMANY
 assert step == PLAY_CARD
 assert handsize GERMANY == 7
 
-play 3                      # Build Army
+# Hand contents depend on the start-of-game deck shuffle, so this index is pinned to the seed in
+# the #!args line above. Under seed=42 the prompt lists Build Army first.
+play 1                      # Build Army
 select 1                    # first legal country
 assert handsize GERMANY == 6
 

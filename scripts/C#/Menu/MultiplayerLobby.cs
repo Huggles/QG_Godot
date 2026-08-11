@@ -61,6 +61,8 @@ public partial class MultiplayerLobby : Control
 	private LineEdit      _ipAddressInput;
 	private OptionButton  _scenarioPicker;
 	private RichTextLabel _scenarioDescriptionLabel;
+	private LineEdit      _seedInput;
+	private Button        _randomizeSeedButton;
 
 	// ── Runtime state ─────────────────────────────────────────────────────────
 	private bool _isHost        = false;
@@ -103,6 +105,8 @@ public partial class MultiplayerLobby : Control
 		_ipAddressInput      = GetNode<LineEdit>("%IpAddressInput");
 		_scenarioPicker      = GetNode<OptionButton>("%ScenarioOptionButton");
 		_scenarioDescriptionLabel = GetNode<RichTextLabel>("%ScenarioDescriptionLabel");
+		_seedInput           = GetNode<LineEdit>("%SeedInput");
+		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
 		
 		_ipAddressInput.Text     = DEFAULT_SERVER_IP;
 		_startGameButton.Visible = false;
@@ -140,11 +144,17 @@ public partial class MultiplayerLobby : Control
 		_scenarioPicker.Disabled = true;
 		_scenarioPicker.ItemSelected += OnScenarioSelected;
 
+		// Only the host's seed is ever used (MultiplayerSession.StartNew reads it on the server and
+		// RPCs the value to every peer), so the box is locked alongside the scenario picker until
+		// this peer turns out to be the host. Clients still see the field, greyed out.
+		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
+		SetSeedFieldEnabled(false);
+
 		// Arrived from JoinGameScreen, which already established the client connection.
 		// Adopt it rather than creating a second peer.
 		if (Multiplayer.MultiplayerPeer != null
-		    && Multiplayer.MultiplayerPeer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Connected
-		    && !Multiplayer.IsServer())
+			&& Multiplayer.MultiplayerPeer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Connected
+			&& !Multiplayer.IsServer())
 		{
 			int me = Multiplayer.GetUniqueId();
 			UpdateStatusLabel("Connected – waiting for lobby data...");
@@ -265,6 +275,7 @@ public partial class MultiplayerLobby : Control
 		_hostButton.Disabled      = true;
 		_joinButton.Disabled      = true;
 		_scenarioPicker.Disabled  = false;
+		SetSeedFieldEnabled(true);
 	}
 
 	private void OnJoinButtonPressed()
@@ -301,12 +312,16 @@ public partial class MultiplayerLobby : Control
 			return;
 		}
 		DebugUtilities.PrintPeer("Host starting game...");
+		// Only the host's field is read: the seed travels to the clients on the StartSession RPC,
+		// so a client's own box never affects its game.
+		MenuSeedField.Commit(_seedInput);
 		Rpc(nameof(StartGame));
 	}
 
 	private void OnDebugSoloButtonPressed()
 	{
 		DebugUtilities.PrintPeer("Starting debug solo game...");
+		MenuSeedField.Commit(_seedInput);
 		var list = new List<PlayerFactionAssignment>
 		{
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
@@ -778,6 +793,13 @@ public partial class MultiplayerLobby : Control
 		gameManager.SetSelectedScenarioByIndex(index);
 		UpdateScenarioDescription(gameManager.AvailableScenarios[index].Description);
 		Rpc(nameof(SyncScenarioSelection), gameManager.SelectedScenario.Path);
+	}
+
+	/// <summary>Seed entry follows the scenario picker: host-editable, read-only for everyone else.</summary>
+	private void SetSeedFieldEnabled(bool enabled)
+	{
+		_seedInput.Editable = enabled;
+		_randomizeSeedButton.Disabled = !enabled;
 	}
 
 	private void UpdateScenarioDescription(string description)

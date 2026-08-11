@@ -35,6 +35,14 @@ public partial class GameManager : Node
     /// <summary>Scenario data file to load when the game starts. Set before navigating to Game.tscn.</summary>
     public static string PendingScenarioPath { get; set; } = "res://assets/data/scenarios/Scenario_Basic.json";
 
+    /// <summary>
+    /// RNG seed chosen in the menus for the next game, or null to roll a fresh one at session start.
+    /// Read by the host only (MultiplayerSession.StartNew), which then tells every peer — a client's
+    /// own menu state never reaches its game. A CLI `seed=` argument still wins, so headless replays
+    /// are unaffected by whatever the menu last held.
+    /// </summary>
+    public static int? PendingSeed { get; set; } = null;
+
     public List<ScenarioInfo> AvailableScenarios { get; private set; } = new();
     public ScenarioInfo SelectedScenario { get; private set; }
 

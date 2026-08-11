@@ -183,6 +183,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
         GameStateCalculator.CalculateAll();
         GameStateCalculator.Enabled = false;
+        await ShuffleDecks();
         await DeployUnits(initialStateData);
         await PlaceCards(initialStateData);
         await ApplyStartingVictoryPoints(initialStateData);
@@ -333,6 +334,39 @@ public partial class GameModeMultiplayerDefault : IGameMode
             }
         }
     }
+    /// <summary>
+    /// Randomise every faction's draw deck before the opening hands are dealt.
+    ///
+    /// InstantiateFactionStates builds each deck in QGData_Decks.json declaration order and nothing
+    /// used to disturb it, so every game dealt the same opening seven — card ids 0-6 for the first
+    /// faction, and so on.
+    ///
+    /// Host-only by construction (SetupInitialGameState runs behind the IsServer guard in
+    /// MultiplayerSession.StartSession). Clients build their decks in declaration order in Init() and
+    /// receive the shuffled order through the replicated ReorderDeckChangeEvent. That indirection is
+    /// required, not stylistic: ComputeHash covers deck *count* but not deck *order*, so a peer that
+    /// shuffled for itself would diverge with nothing to catch it until a mismatched hand surfaced
+    /// several draws later. Same pattern as RecycleCardChangeEvent's ShuffledOrder.
+    ///
+    /// Runs before PlaceCards, which is safe because scenario initialHandCards are pulled by name
+    /// (DeckState.DrawCardByName), not by position.
+    /// </summary>
+    private async Task ShuffleDecks()
+    {
+        foreach (Faction faction in StaticGameData.PlayableFactions)
+        {
+            DeckState deckState = DeckState.ForFaction(faction);
+            if (deckState.DeckCardIds.Count == 0) continue;
+
+            // A copy rather than deckState.ShuffleDeck(): the ChangeEvent is the mutation, here as on
+            // the client, so the host does not reorder its live list ahead of the replicated event.
+            List<int> shuffledOrder = new List<int>(deckState.DeckCardIds);
+            GameRandom.Shuffle(shuffledOrder);
+
+            await new ReorderDeckChangeEvent(faction, shuffledOrder) { IsTrigger = false }.Apply();
+        }
+    }
+
     private async Task PlaceCards(InitialGameStateData initialStateData)
     {
         DebugUtilities.PrintPeer($"Placing initial cards");

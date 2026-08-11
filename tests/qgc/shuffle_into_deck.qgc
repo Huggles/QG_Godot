@@ -13,23 +13,25 @@
 # shuffle for itself.
 #
 # Values below are pinned to the seed in the #!args line above; they are deterministic given it.
+# Which card sits where in hand and deck is decided by the start-of-game shuffle, so re-derive them
+# after any change to it.
 # Run:  tests/run-cli.sh tests/qgc/shuffle_into_deck.qgc
 
 prompt                                  # turn 1, Germany, PLAY_CARD
 pass
 prompt                                  # DISCARD step
-discard 1                               # discard Guns and Butter (card 0)
+discard 1                               # discard Abundant Resources (card 14)
 
 # Recycling out of the discard pile is what every in-game caller does, so that is the path pinned
 # here. Recycling from elsewhere is covered by recycle_moves_card.qgc.
-assert card 0 in discard
+assert card 14 in discard
 assert decksize GERMANY == 25
-assert decktop GERMANY == 8
+assert decktop GERMANY == 9
 
-api recycleCard --faction GERMANY --card 0 --destination ShuffleIntoDeck
+api recycleCard --faction GERMANY --card 14 --destination ShuffleIntoDeck
 
-assert card 0 in deck
+assert card 14 in deck
 assert decksize GERMANY == 26
-assert decktop GERMANY != 8             # FAILS if the shuffle is a no-op
+assert decktop GERMANY != 9             # FAILS if the shuffle is a no-op
 
 quit

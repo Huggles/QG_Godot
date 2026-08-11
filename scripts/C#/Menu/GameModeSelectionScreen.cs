@@ -6,6 +6,8 @@ public partial class GameModeSelectionScreen : Control
 	private OptionButton _scenarioPicker;
 	private RichTextLabel _descriptionLabel;
 	private MenuPanelButton _startGameButton;
+	private LineEdit _seedInput;
+	private Button _randomizeSeedButton;
 
 	// Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
 	// surfacing rather than a silent console line.
@@ -25,6 +27,10 @@ public partial class GameModeSelectionScreen : Control
 		}
 
 		_startGameButton  = GetNode<MenuPanelButton>("ButtonContainer/StartGameButton");
+
+		_seedInput           = GetNode<LineEdit>("ButtonContainer/SeedRow/SeedInput");
+		_randomizeSeedButton = GetNode<Button>("ButtonContainer/SeedRow/RandomizeSeedButton");
+		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
 
 		_startGameButton.CustomMinimumSize = new Vector2(600, 180);
 		_startGameButton.ButtonText = "[b][font_size=28]Start Game[/font_size][/b]";
@@ -86,6 +92,7 @@ public partial class GameModeSelectionScreen : Control
 	private void StartGame(string scenarioPath)
 	{
 		GameManager.PendingScenarioPath = scenarioPath;
+		MenuSeedField.Commit(_seedInput);
 
 		var assignments = new List<PlayerFactionAssignment>
 		{

@@ -45,11 +45,19 @@ public partial class MultiplayerSession : Node
     {
         if (!Multiplayer.IsServer()) return;
 
-        Rpc(nameof(StartSession), configuration);
+        // The host picks the seed and every peer is told it. Read here rather than in StartSession
+        // because that method runs on every peer: each one would otherwise resolve its own command
+        // line (and its own Environment.TickCount) and hold a different stream.
+        //
+        // Precedence: a CLI `seed=` argument (headless replays must reproduce regardless of menu
+        // state), then whatever the menus put in GameManager.PendingSeed, then a fresh roll.
+        int seed = CliArgs.GetInt("seed", GameManager.PendingSeed ?? System.Environment.TickCount);
+
+        Rpc(nameof(StartSession), configuration, seed);
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void StartSession(string configuration)
+    public async void StartSession(string configuration, int seed)
     {
         // async void: an uncaught throw here goes to the synchronization context and kills the
         // process. A failure during session init is not recoverable (the readiness barrier will
@@ -61,7 +69,11 @@ public partial class MultiplayerSession : Node
             // Seed before any state is built. Here rather than at boot because a second game in the
             // same process must not inherit the first game's stream. An unseeded run still records
             // the seed it picked, so any session can be re-pinned afterwards.
-            GameRandom.Initialize(CliArgs.GetInt("seed", System.Environment.TickCount));
+            //
+            // The value comes from the host (see StartNew) so all peers share one stream. Deck order
+            // is still replicated explicitly rather than re-derived from the seed — the shared seed
+            // is a safety net, not the sync mechanism.
+            GameRandom.Initialize(seed);
             DebugUtilities.PrintPeer($"RNG seed: {GameRandom.Seed}");
 
             GameModeMultiplayerDefault gameMode = new GameModeMultiplayerDefault();

@@ -97,6 +97,7 @@ public class RecalculateTagsMessageDto : GameMessageDto
     {
         RecalculateTagsMessageDto dto = new RecalculateTagsMessageDto();
         Fill(dto, message, Id);
+        dto.Snapshot = message.Snapshot;
         return dto;
     }
 }

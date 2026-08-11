@@ -1,0 +1,33 @@
+#!args scenario=Scenario_OneRound seed=42
+#
+# Regression: every faction's deck must be shuffled before the opening hands are dealt.
+#
+# InstantiateFactionStates builds each deck straight out of QGData_Decks.json in declaration order
+# and hands out card ids sequentially in that same order, and nothing used to disturb it — so the
+# opening seven was literally ids 0-6 for Germany and 33-39 for the UK, in every game ever played.
+# GameModeMultiplayerDefault.ShuffleDecks now shuffles each deck through GameRandom and replicates
+# the result as a ReorderDeckChangeEvent (clients build their decks unshuffled in Init(), and
+# ComputeHash covers deck count but not order, so the order has to travel explicitly).
+#
+# The assertions are pinned to the seed in the #!args line above, but what they are really checking
+# is that the ids are NOT the declaration-order run: with the bug, decktop GERMANY is 7 and cards
+# 0-6 are all in hand.
+# Run:  tests/run-cli.sh tests/qgc/decks_shuffled_at_start.qgc
+
+prompt                                  # turn 1, Germany, PLAY_CARD
+
+assert handsize GERMANY == 7
+assert decksize GERMANY == 26
+
+# Germany: unshuffled this is card 0 in hand and card 7 on top of the deck.
+assert card 0 in deck
+assert card 14 in hand
+assert decktop GERMANY == 17
+
+# A second faction, because ShuffleDecks has to cover every playable faction and not just the first.
+# Unshuffled this is card 33 in hand and card 40 on top of the deck.
+assert card 33 in deck
+assert card 43 in hand
+assert decktop UNITED_KINGDOM == 45
+
+quit

@@ -74,6 +74,7 @@ public partial class JoinGameScreen : Control
 	{
 		Multiplayer.ConnectedToServer -= OnConnectedToServer;
 		Multiplayer.ConnectionFailed  -= OnConnectionFailed;
+		_attempt++; // a pending timeout guard must not outlive the screen
 		// The peer is deliberately left in place: on the success path MultiplayerLobby adopts it.
 	}
 
@@ -168,6 +169,11 @@ public partial class JoinGameScreen : Control
 		int attempt = ++_attempt;
 		GetTree().CreateTimer(ConnectTimeoutSeconds).Timeout += () =>
 		{
+			// The timer belongs to the SceneTree, not to this node, so it keeps ticking after the
+			// screen is freed — on the success path we are already in the lobby when it fires. The
+			// captured `this` is then a disposed wrapper whose plain C# fields still read as if the
+			// attempt were live, so validity has to be checked before anything touches a control.
+			if (!IsInstanceValid(this)) return;
 			if (attempt != _attempt || !_connecting) return; // superseded or already resolved
 			DebugUtilities.PrintPeerError("JoinGameScreen: connection attempt timed out");
 			AbortAttempt("Connection timed out — is the host running and the port reachable?");

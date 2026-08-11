@@ -137,6 +137,29 @@ theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 bbcode_enabled = true
 text = "Select a scenario to preview details."
 
+[node name="SeedRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SeedLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Seed"
+
+[node name="SeedInput" type="LineEdit" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "random"
+alignment = 1
+
+[node name="RandomizeSeedButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Randomize"
+
 [node name="HSeparator2" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
