@@ -17,6 +17,18 @@ public partial class PlayCardChangeEvent : ChangeEvent
         return dto;
     }
 
+    /// <summary>
+    /// Announce the played card to every player. Enqueued from Apply(), which ProcessIntroductionEvent
+    /// runs before block reactions are requested — so the card is shown as it hits the table, even if a
+    /// block cancels it a moment later.
+    /// </summary>
+    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    {
+        new ShowCardsModalAnimation(
+            new List<int> { SourceCardId },
+            $"{FactionState.ForEnum(TriggeringFaction).FactionData.Label} plays {SourceCardState.CardName}")
+    };
+
     protected override async Task<bool> ExecuteAsync(){
         DeckState.ForFaction(SourceCardState.Faction).PlayCard(SourceCardState.Id);
         

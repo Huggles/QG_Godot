@@ -378,7 +378,10 @@ public partial class GameModeMultiplayerDefault : IGameMode
             {            
                 CardState cs = CardState.ForName(card.Name);
                 if(cs == null) throw new Exception($"Card '{card.Name}' not found in initial game state config. Ensure name matches the Name field in QGData_Cards_V2.json.");
-                await new PlayCardChangeEvent(cs.Id) {  IsTrigger = false }.Apply();
+                // PlayAnimations = false: a scenario placing a card on the table is not a player
+                // playing it, so it must not raise PlayCardChangeEvent's "X plays Y" modal — otherwise
+                // setup opens one per pre-placed card. Same reasoning as the initial deploys above.
+                await new PlayCardChangeEvent(cs.Id) {  IsTrigger = false, BlockAnimationQueue = false, PlayAnimations = false }.Apply();
             }
 
             // Move specified cards to the top of each faction's hand

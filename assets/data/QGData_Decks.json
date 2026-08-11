@@ -4,9 +4,9 @@
 		"Cards": [
 			{"CardName":"EventGunsAndButter","Number":1},
 			{"CardName":"StatusOccupationOfCzechoslovakia","Number":1},
-			{"CardName":"BuildArmy","Number":2},
+			{"CardName":"BuildArmy","Number":6},
 			{"CardName":"BuildNavy","Number":2},
-			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"LandBattle","Number":7},			
 			{"CardName":"SeaBattle","Number":2},
 			{"CardName":"StatusBlitzkrieg","Number":1},
 			{"CardName":"StatusSyntheticFuel","Number":1},
@@ -38,10 +38,10 @@
 		"FactionIndex" : 2,
 		"Cards": [
 			{"CardName":"EWBomberCommand","Number":1},
-			{"CardName":"BuildArmy","Number":2},
-			{"CardName":"BuildNavy","Number":2},
-			{"CardName":"LandBattle","Number":2},			
-			{"CardName":"SeaBattle","Number":2},
+			{"CardName":"BuildArmy","Number":5},
+			{"CardName":"BuildNavy","Number":5},
+			{"CardName":"LandBattle","Number":4},			
+			{"CardName":"SeaBattle","Number":5},
 			{"CardName":"EventGeneralSmutsStrengthensTiestoUK","Number":1},
 			{"CardName":"EventIncreasedCommonwealthSupport","Number":1},
 			{"CardName":"EventKingPeterEnthronedinYugoslavia","Number":1},
@@ -66,10 +66,10 @@
 	{
 		"FactionIndex" : 3,
 		"Cards": [
-			{"CardName":"BuildArmy","Number":2},
-			{"CardName":"BuildNavy","Number":2},
-			{"CardName":"LandBattle","Number":2},			
-			{"CardName":"SeaBattle","Number":2},
+			{"CardName":"BuildArmy","Number":4},
+			{"CardName":"BuildNavy","Number":6},
+			{"CardName":"LandBattle","Number":3},			
+			{"CardName":"SeaBattle","Number":4},
 			{"CardName":"EWIndianOceanPatrols","Number":1},
 			{"CardName":"EWSubmarinesSupportPacificIslands","Number":1},
 			{"CardName":"ResponseBanzaiCharge","Number":1},
@@ -92,9 +92,9 @@
 	{
 		"FactionIndex" : 4,
 		"Cards": [
-			{"CardName":"BuildArmy","Number":2},
-			{"CardName":"BuildNavy","Number":2},
-			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"BuildArmy","Number":8},
+			{"CardName":"BuildNavy","Number":1},
+			{"CardName":"LandBattle","Number":6},			
 			{"CardName":"SeaBattle","Number":2},
 			{"Number":1, "CardName":"EventGeneralWinter"},
 			{"Number":1, "CardName":"EventGermanSovietTreatyofFriendshipCooperationandDemarcation"},
@@ -118,9 +118,9 @@
 	{
 		"FactionIndex" : 5,
 		"Cards": [
-			{"CardName":"BuildArmy","Number":2},
-			{"CardName":"BuildNavy","Number":2},
-			{"CardName":"LandBattle","Number":2},			
+			{"CardName":"BuildArmy","Number":4},
+			{"CardName":"BuildNavy","Number":3},
+			{"CardName":"LandBattle","Number":4},			
 			{"CardName":"SeaBattle","Number":2},
 			{"Number":1, "CardName":"EventAfrikaKorps"},
 			{"Number":1, "CardName":"EventDivisionAzul"},
@@ -144,10 +144,10 @@
 	{
 		"FactionIndex" : 6,
 		"Cards": [
-			{"CardName":"BuildArmy","Number":2},
-			{"CardName":"BuildNavy","Number":2},
-			{"CardName":"LandBattle","Number":2},			
-			{"CardName":"SeaBattle","Number":2},
+			{"CardName":"BuildArmy","Number":5},
+			{"CardName":"BuildNavy","Number":5},
+			{"CardName":"LandBattle","Number":4},			
+			{"CardName":"SeaBattle","Number":4},
 			{"Number":1, "CardName":"EventArsenalofDemocracy"},
 			{"Number":1, "CardName":"EventFleetDeployedtoPearlHarbor"},
 			{"Number":1, "CardName":"EventFlexibleResources"},

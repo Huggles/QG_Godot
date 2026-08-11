@@ -58,6 +58,12 @@ public class ActivateReactionChangeEventDto : ChangeEventDto
 {
     /// <summary>Id of the ChangeEvent being reacted to. Looked up via ChangeEvent.ForId() on the client.</summary>
     public int SourceChangeEventId { get; set; }
+
+    /// <summary>
+    /// Whether this activation is the card's first step. Carried on the wire rather than recomputed:
+    /// only the server runs CardStep.Execute, so a client cannot tell a resumed step from a first one.
+    /// </summary>
+    public bool IsFirstStep { get; set; } = true;
 }
 
 public class ForceDiscardCardsChangeEventDto : ChangeEventDto
