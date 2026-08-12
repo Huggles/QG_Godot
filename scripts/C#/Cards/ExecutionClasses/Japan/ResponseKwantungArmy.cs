@@ -18,7 +18,7 @@ public partial class ResponseKwantungArmy : ResponseCardLogic
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
             Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.LastNoneNewCardChangeEvent is not RemoveUnitChangeEvent removeEvent) return false;
+                if (CardPlayPool.CurrentBlockTrigger is not RemoveUnitChangeEvent removeEvent) return false;
                 return removeEvent.UnitState.Faction == Faction
                     && removeEvent.UnitState.Type == UnitType.ARMY
                     && removeEvent.UnitState.InSupply
@@ -31,7 +31,7 @@ public partial class ResponseKwantungArmy : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
+                if (ActivationTrigger is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
                     PresentationServices.Notification.ShowActionText("Kwantung Army: Japanese Army will not be removed this turn", Faction);

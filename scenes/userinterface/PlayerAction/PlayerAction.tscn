@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://b6hfp06nmb2ux"]
+[gd_scene format=3 uid="uid://b6hfp06nmb2ux"]
 
 [ext_resource type="Script" uid="uid://dee08ewurrpis" path="res://scripts/C#/UI/PlayerActionLabel.cs" id="1_gvner"]
 
@@ -15,7 +15,7 @@ corner_radius_top_right = 50
 corner_radius_bottom_right = 50
 corner_radius_bottom_left = 50
 
-[node name="PlayerAction" type="Control"]
+[node name="PlayerAction" type="Control" unique_id=2012666353]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,7 +24,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ContainerPanel" type="Panel" parent="."]
+[node name="ContainerPanel" type="Panel" parent="." unique_id=2014546276]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 5
@@ -37,7 +37,7 @@ offset_bottom = 136.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gvner")
 
-[node name="PlayerActionMessage" type="RichTextLabel" parent="ContainerPanel"]
+[node name="PlayerActionMessage" type="RichTextLabel" parent="ContainerPanel" unique_id=2006746535]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15

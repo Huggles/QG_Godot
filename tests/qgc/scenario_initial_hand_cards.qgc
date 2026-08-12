@@ -1,0 +1,39 @@
+#!args scenario=Scenario_Debug_USA seed=42
+#
+# Regression: a scenario's `initialHandCards` must actually reach that faction's opening hand, and
+# must count towards the seven rather than be dealt on top of it.
+#
+# Two separate bugs, both surfaced by ShuffleDecks:
+#
+#   1. DeckState.DrawCardByName ran FindIndex over DeckCardStates and fed the result into
+#      DeckCardIds[index]. DeckCardStates is CardState.ForIds(DeckCardIds), which filters the master
+#      CardStatesById dictionary and so comes back in card-id order, not deck order. That only ever
+#      worked because ids were handed out in deck declaration order and nothing reordered the deck;
+#      ShuffleDecks now permutes DeckCardIds just before PlaceCards, so the index pointed at an
+#      unrelated card. The id was still valid, so the -1 "not found" path never fired and nothing was
+#      logged: the named card quietly stayed in the deck and a random one went to hand instead.
+#
+#   2. GameFlow.StartGame drew a flat 7 after the scenario cards were already in hand, so a faction
+#      opened with 7 + N and had to dump the surplus at its first DISCARD step. It now draws *to* 7,
+#      the same as DrawStepHandlerDefault does every later turn.
+#
+# Scenario_Debug_USA gives GERMANY two initialHandCards and every other faction none.
+#
+# The ids below are pinned to the seed in the #!args line — with the deck shuffled, which copy of a
+# duplicated card (Germany holds several Sea Battles) DrawCardByName reaches first is seed-dependent.
+# What they are really checking is that these two specific cards are in hand at all: with bug 1 both
+# sit in the deck, and with bug 2 the hand is 9.
+# Run:  tests/run-cli.sh tests/qgc/scenario_initial_hand_cards.qgc
+
+prompt                                  # turn 1, Germany, PLAY_CARD
+
+# Drawn TO seven, not seven on top of the two scenario cards. FAILS (9) with bug 2.
+assert handsize GERMANY == 7
+
+assert card 41 in hand                  # Ardennes Offensive  — FAILS ("deck") with bug 1
+assert card 18 in hand                  # Sea Battle          — FAILS ("deck") with bug 1
+
+# A faction with an empty initialHandCards list is unaffected: still a plain opening seven.
+assert handsize UNITED_KINGDOM == 7
+
+quit

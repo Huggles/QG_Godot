@@ -77,9 +77,21 @@ public partial class DeckState : StateObject
         return DeckCardStates.Any(card => card.CardData.UniqueName == cardName);
     }
 
+    /// <summary>
+    /// Pull a named card out of the draw deck and into hand, wherever it is sitting in the deck.
+    ///
+    /// The search MUST run over DeckCardIds and not over DeckCardStates. DeckCardStates is
+    /// CardState.ForIds(DeckCardIds), and ForIds filters the master CardStatesById dictionary — so it
+    /// comes back in card-id order, not deck order. This used to be a FindIndex over DeckCardStates
+    /// fed into DeckCardIds[index], which was only ever correct because ids were handed out in deck
+    /// declaration order and nothing reordered the deck. ShuffleDecks now permutes DeckCardIds before
+    /// the opening hands are dealt, so that index pointed at an unrelated card and returned it
+    /// silently (the id is valid, so the -1 "not found" path never fired): scenario initialHandCards
+    /// stayed in the deck and a random card went to hand instead.
+    /// </summary>
     public int DrawCardByName(string cardName)
     {
-        int index = DeckCardStates.FindIndex(card => card.CardData.UniqueName == cardName);
+        int index = DeckCardIds.FindIndex(id => CardState.ForId(id)?.CardData.UniqueName == cardName);
         if (index == -1)
             return -1;
 

@@ -10,7 +10,7 @@ public partial class ResponseMonteCassino : ResponseCardLogic
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
             Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.LastNoneNewCardChangeEvent is not RemoveUnitChangeEvent removeEvent) return false;
+                if (CardPlayPool.CurrentBlockTrigger is not RemoveUnitChangeEvent removeEvent) return false;
                 return StaticGameData.FactionTeamForFaction(removeEvent.UnitState.Faction) == FactionTeam.AXIS
                     && removeEvent.UnitState.Type == UnitType.ARMY
                     && removeEvent.CountryId == (int)Country.Italy;
@@ -22,7 +22,7 @@ public partial class ResponseMonteCassino : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
+                if (ActivationTrigger is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
                     PresentationServices.Notification.ShowActionText("Monte Cassino: Axis Army in Italy will not be removed this turn", Faction);

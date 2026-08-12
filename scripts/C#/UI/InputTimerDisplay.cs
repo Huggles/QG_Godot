@@ -29,6 +29,13 @@ public partial class InputTimerDisplay : Control, LoadableUI
 	private Label TimeLabel => GetNode<Label>("%InputTimerValue");
 
 	/// <summary>
+	/// Expires the countdown now instead of waiting it out. Host-only, and hidden on every other peer:
+	/// the backstop wait lives in the host's <c>NetworkApi.SendInputRequest</c>, and the Retry / Skip
+	/// decision that follows is the host's to make, so the button would do nothing on a client.
+	/// </summary>
+	private Button ForceTimeoutButton => GetNodeOrNull<Button>("%InputTimerForceTimeout");
+
+	/// <summary>
 	/// Seconds left, counted down in _Process rather than compared against a wall-clock deadline: the
 	/// client has no synchronised clock with the host, and the value it is given is a duration ("you have
 	/// 15 minutes"), not a timestamp. Negative means nothing is being timed.
@@ -42,6 +49,16 @@ public partial class InputTimerDisplay : Control, LoadableUI
 		if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
 		{
 			Current = this;
+
+			if (ForceTimeoutButton is { } button)
+			{
+				// Here rather than in LoadUI() so a second LoadUI() cannot double-subscribe. Visibility
+				// is settled once: whether this peer is the host cannot change for the life of a
+				// session, and Start() only ever runs on a request already in flight.
+				button.Pressed += OnForceTimeoutPressed;
+				button.Visible = IsHost();
+			}
+
 			LoadUI();
 		}
 	}
@@ -50,6 +67,28 @@ public partial class InputTimerDisplay : Control, LoadableUI
 	{
 		Panel.Visible = false;
 		SetProcess(false);
+	}
+
+	/// <summary>
+	/// Cut the wait short: this drives the host down the same path its 15-minute backstop takes —
+	/// release the client's prompt and raise the host's Retry / Skip decision — rather than deciding
+	/// the request itself. Nothing is hidden here; the countdown clears when
+	/// <c>NetworkApi.AbortInputRequest</c> arrives, exactly as on a real expiry.
+	/// </summary>
+	private void OnForceTimeoutPressed()
+	{
+		NetworkApi.Instance?.ForceInputTimeout();
+	}
+
+	/// <summary>Mirrors <c>ErrorPopup.IsHost()</c> — no session at all still means the local player decides.</summary>
+	private bool IsHost()
+	{
+		try
+		{
+			if (Multiplayer?.MultiplayerPeer == null) return true;   // single process, no session
+			return Multiplayer.IsServer();
+		}
+		catch { return false; }
 	}
 
 	/// <summary>

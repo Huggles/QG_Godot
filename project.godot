@@ -31,9 +31,11 @@ NetworkApi="*res://scripts/C#/Utils/NetworkApi.cs"
 ChangeEventQueue="*res://scenes/network/ChangeEventQueue.cs"
 AnimationQueue="*res://scripts/C#/Animations/AnimationQueue.cs"
 CliSession="*res://scripts/C#/Cli/CliSession.cs"
+SteamworksApi="*uid://cslwf8xf6it86"
 
 [debug]
 
+file_logging/enable_file_logging=true
 gdscript/warnings/unused_signal=0
 
 [debug_draw_3d]
@@ -53,6 +55,10 @@ project/assembly_name="Quartermaster General"
 [editor]
 
 run/main_run_args="--is_debug=1 --game_mode=default"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/csharp_wrapper_generator_for_gdextension/plugin.cfg", "res://addons/godotsteam/plugin.cfg", "res://addons/godotsteam_csharpbindings/plugin.cfg")
 
 [input]
 
@@ -122,3 +128,13 @@ debug_error_history={
 
 textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(1, 1, 1, 1)
+
+[steam]
+
+initialization/app_data/app_type=2
+initialization/app_data/app_id=480
+initialization/app_data/demo_id=480
+initialization/app_data/playtest_id=480
+initialization/app_data/tool_id=480
+initialization/processes/initialize_on_startup=true
+initialization/processes/embed_callbacks=true

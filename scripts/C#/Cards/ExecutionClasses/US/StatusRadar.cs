@@ -18,16 +18,19 @@ public partial class StatusRadar : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
+                // Resolved before the discard, and from ActivationTrigger rather than the pool:
+                // discardEvent.Apply() registers itself into the round's ChangeEventsPool, which
+                // would move LastNoneNewCardChangeEvent off the removal this card is blocking.
+                if (ActivationTrigger is not RemoveUnitChangeEvent removeEvent) return null;
+
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
                 discardEvent.IsTrigger = false;
                 await discardEvent.Apply();
 
-                if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
-                    removeEvent.IsBlocked = true;
-                    removeEvent.UnitState.ImmuneForTurn = true;
-                    PresentationServices.Notification.ShowActionText("Radar: US Navy will not be removed this turn", Faction);
-                    await Task.Delay(GameSettings.DurationMedium);
-                }
+                removeEvent.IsBlocked = true;
+                removeEvent.UnitState.ImmuneForTurn = true;
+                PresentationServices.Notification.ShowActionText("Radar: US Navy will not be removed this turn", Faction);
+                await Task.Delay(GameSettings.DurationMedium);
                 return null;
             })
             .WithGuidance("Discard top 2 deck cards to prevent your Navy from being removed")

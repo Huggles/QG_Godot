@@ -382,8 +382,13 @@ public abstract class Condition
     }
 
     /// <summary>
-    /// Block-reaction condition: the pending change event is a RemoveUnitChangeEvent
+    /// Block-reaction condition: the change event being offered for block is a RemoveUnitChangeEvent
     /// matching optional faction, unit type, supply, and country filters.
+    ///
+    /// Matches only while a block window is open. It deliberately reads CurrentBlockTrigger rather
+    /// than LastNoneNewCardChangeEvent: that property skips PlayCardChangeEvent and
+    /// ActivateReactionChangeEvent, so inside a card play's or reaction activation's block window it
+    /// reports the earlier removal and every removal-blocker matched against a card being played.
     /// </summary>
     public class UnitAboutToBeRemoved : Condition
     {
@@ -414,7 +419,7 @@ public abstract class Condition
 
         public override bool MeetCondition()
         {
-            if (CardPlayPool.LastNoneNewCardChangeEvent is not RemoveUnitChangeEvent removeEvent)
+            if (CardPlayPool.CurrentBlockTrigger is not RemoveUnitChangeEvent removeEvent)
                 return false;
             if (TargetFactions?.Count > 0 && !TargetFactions.Contains(removeEvent.UnitState.Faction))
                 return false;

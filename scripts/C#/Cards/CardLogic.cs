@@ -30,6 +30,22 @@ public abstract partial class CardLogic : GodotObject
     
     public List<CardStep> CardSteps = new();
     public abstract List<CardStep> OnActivate();
+
+    /// <summary>
+    /// The ChangeEvent this activation is reacting to — the event being offered for block, or the
+    /// event that opened the after-reaction window. Bound by <see cref="CardPlayRound.DoCard"/> at
+    /// activation and released once the card's steps are done, so step logic resolves against the
+    /// event that triggered the card.
+    ///
+    /// Step logic must use this rather than re-reading CardPlayPool.LastNoneNewCardChangeEvent: that
+    /// is a live pool read, and every ChangeEvent.Apply() self-registers into the pool (see
+    /// ChangeEvent.ApplyMutation), so a prerequisite event applied inside the step — or a reaction
+    /// played in the activation window DoCard opens before the steps run — silently retargets it.
+    ///
+    /// Null for a card played from hand outside a reaction. Trigger conditions (CardTriggers) run
+    /// before activation and so cannot use this; they still read the pool directly.
+    /// </summary>
+    public ChangeEvent ActivationTrigger { get; set; }
     
     // A Status/Response card still in hand is being PLAYED onto the table, not activated.
     // Its CardSteps are the later activation effect, so their executability must not gate the play.
@@ -115,6 +131,10 @@ public abstract partial class CardLogic : GodotObject
     {
         if (IsStatus)
             CardSteps.ForEach(step => step.StepFinished = false);
+
+        // Safety net: DoCard releases the binding when the card's steps finish, but an activation
+        // abandoned mid-way (exception, aborted epoch) would otherwise leave it dangling.
+        ActivationTrigger = null;
     }
 
     public virtual string PlayActionGuidance() =>

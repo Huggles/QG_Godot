@@ -200,6 +200,32 @@ public partial class NetworkApi : Node
     /// </summary>
     private InputRequest _pendingInputRequest;
 
+    /// <summary>
+    /// Completing this expires the current attempt's wait ahead of its deadline — the host's
+    /// "time out now" button on <see cref="InputTimerDisplay"/>. A TCS raced in the same
+    /// <c>Task.WhenAny</c> as the backstop delay rather than a shortcut around it, so a forced timeout
+    /// and a real one take byte-for-byte the same path: release the prompt, then Retry / Skip.
+    ///
+    /// Replaced per attempt alongside <see cref="_pendingInputTcs"/>, so pressing the button during
+    /// attempt 2 cannot resolve a stale signal left over from attempt 1.
+    /// </summary>
+    private TaskCompletionSource<bool> _forceTimeoutTcs;
+
+    /// <summary>
+    /// Host-only: expire the in-flight input request now instead of waiting out the backstop. No-op on
+    /// a client (the wait it would need to expire is on the host) and when nothing is in flight.
+    /// </summary>
+    public void ForceInputTimeout()
+    {
+        if (Multiplayer?.MultiplayerPeer != null && !Multiplayer.IsServer()) return;
+
+        TaskCompletionSource<bool> force = _forceTimeoutTcs;
+        if (force == null || force.Task.IsCompleted) return;
+
+        DebugUtilities.PrintPeer($"Host forced a timeout on the pending input request (Id {_pendingInputId})");
+        force.TrySetResult(true);
+    }
+
     public async Task<InputRequest> SendInputRequest(InputRequest inputRequest)
     {
         DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");
@@ -229,17 +255,20 @@ public partial class NetworkApi : Node
             // Create the awaiter BEFORE the Rpc — the same ordering StartMultiplayerSession uses, and
             // the reason it is the one rendezvous in this file without a check-then-await race.
             TaskCompletionSource<string> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource<bool> forceTimeout = new(TaskCreationOptions.RunContinuationsAsynchronously);
             _pendingInputTcs = tcs;
             _pendingInputId = inputRequest.Id;
             _pendingInputPeer = SafeTargetPeer(inputRequest);
             _pendingInputRequest = inputRequest;
+            _forceTimeoutTcs = forceTimeout;
 
             Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);
 
             // Cancelled on the normal path so a long game does not accumulate one live 15-minute timer
             // per input request; the old bare Task.Delay was never cancelled.
             using CancellationTokenSource timeoutCts = new();
-            Task completed = await Task.WhenAny(tcs.Task, Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
+            Task completed = await Task.WhenAny(
+                tcs.Task, forceTimeout.Task, Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
             timeoutCts.Cancel();
 
             if (completed == tcs.Task)
@@ -248,9 +277,12 @@ public partial class NetworkApi : Node
                 return InputRequest.FromJson(await tcs.Task);
             }
 
-            DebugUtilities.PrintPeerErrorRaw(
-                $"No input response for {inputRequest.GetType().Name} (Id {inputRequest.Id}) after " +
-                $"{InputResponseTimeoutMinutes} minutes — holding the turn loop for a Retry / Skip decision.");
+            bool wasForced = completed == forceTimeout.Task;
+            DebugUtilities.PrintPeerErrorRaw(wasForced
+                ? $"Host timed out {inputRequest.GetType().Name} (Id {inputRequest.Id}) by hand — " +
+                  "holding the turn loop for a Retry / Skip decision."
+                : $"No input response for {inputRequest.GetType().Name} (Id {inputRequest.Id}) after " +
+                  $"{InputResponseTimeoutMinutes} minutes — holding the turn loop for a Retry / Skip decision.");
 
             // Order matters: drop the awaiter FIRST, then abort. AbortRemoteInput makes the client reply
             // straight away, and with the awaiter already cleared that reply is ignored ("no request
@@ -259,7 +291,7 @@ public partial class NetworkApi : Node
             AbortRemoteInput();
             GameFlow.Instance?.ClearCurrentInputRequest();
 
-            if (await ErrorReporter.ReportInputTimeoutAndAwaitDecision(inputRequest)) continue;
+            if (await ErrorReporter.ReportInputTimeoutAndAwaitDecision(inputRequest, wasForced)) continue;
 
             // Skip: unchanged from the old behaviour, but now a deliberate choice rather than a silent
             // one. BroadCast turns this into StepSkippedException, which the step handlers already treat
@@ -326,6 +358,9 @@ public partial class NetworkApi : Node
             _pendingInputId = null;
             _pendingInputPeer = 0;
             _pendingInputRequest = null;
+            // Dropped with the rest: with no request in flight the host's "time out now" button has
+            // nothing to expire, and leaving a live TCS here would let a press arm the NEXT attempt.
+            _forceTimeoutTcs = null;
         }
     }
 

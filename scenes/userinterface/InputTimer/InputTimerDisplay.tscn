@@ -10,6 +10,7 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [node name="InputTimerDisplay" type="Control" unique_id=383526407]
+top_level = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,6 +46,26 @@ offset_bottom = 28.0
 theme_override_font_sizes/font_size = 14
 text = "Waiting for input"
 horizontal_alignment = 1
+
+[node name="InputTimerForceTimeout" type="Button" parent="InputTimerPanel" unique_id=911764203]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 22)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_top = -26.0
+offset_right = -6.0
+offset_bottom = -4.0
+grow_horizontal = 0
+grow_vertical = 0
+tooltip_text = "Host only: time out this input request now"
+focus_mode = 0
+theme_override_font_sizes/font_size = 12
+text = "»"
 
 [node name="InputTimerValue" type="Label" parent="InputTimerPanel" unique_id=369335130]
 unique_name_in_owner = true

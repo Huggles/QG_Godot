@@ -1,0 +1,47 @@
+#!args scenario=Scenario_AllCards seed=42
+#
+# Regression: a block reaction that pays a cost must still block.
+#
+# StatusRadar ("discard the top 2 cards of your draw deck and do not remove that Navy") applied its
+# ForceDiscardCardsChangeEvent and *then* looked up its block target via
+# CardPlayPool.LastNoneNewCardChangeEvent. But ChangeEvent.ApplyMutation registers every applied
+# event into the round's ChangeEventsPool — IsTrigger=false suppresses the reaction chain, not the
+# registration — so that read landed on the discard, the `is RemoveUnitChangeEvent` pattern failed
+# silently, IsBlocked was never set, and the player paid 2 cards while the Navy was still removed.
+#
+# Step logic now reads CardLogic.ActivationTrigger, which DoCard pins to the event the card was
+# activated against for the whole activation. The two assertions below are the two halves of the
+# card: the cost IS paid (decksize 25 -> 23) AND the removal IS blocked (the Navy is still there).
+# Without the fix the first holds and the second does not.
+#
+# This is the only test covering the block-reaction path at all.
+#
+# Run:  tests/run-cli.sh tests/qgc/block_reaction_prevents_removal.qgc
+
+prompt                                  # turn 1, Germany — synchronise with the running game
+
+# Scenario_AllCards already has StatusRadar in play for the US, but the US only starts with an Army
+# in US East. Give it a Navy in the adjacent sea so Radar's "supplied Navy" trigger can match.
+# `force` (IsTrigger=false) keeps the setup itself out of the reaction chain.
+force deployUnit --faction UNITED_STATES --country NORTH_ATLANTIC --deploy BUILD
+assert units NORTH_ATLANTIC UNITED_STATES == 1
+
+# Deck composition, so re-derive after any change to QGData_Decks.json. Unit id 110 comes from the
+# scenario's deployments and is not affected by the decks.
+assert decksize UNITED_STATES == 25
+
+api removeUnit --faction JAPAN --unit 110 --reason BATTLE
+pass                                    # UK declines Destroyers on the removal — this offer is correct
+play 1                                  # US plays Radar
+
+# Deliberately NO answer command here. Radar's activation opens its own block window, and the UK
+# used to be offered Destroyers again inside it — a removal-blocker matching a card activation,
+# because UnitAboutToBeRemoved read LastNoneNewCardChangeEvent (which skips ActivateReactionChangeEvent
+# and so still reported the removal). Block triggers now match CurrentBlockTrigger, so no prompt is
+# raised and the asserts below run straight through. If that offer ever returns, this test HANGS
+# waiting for input and the runner reports a hard timeout. Do not "fix" that with an `auto` line.
+
+assert units NORTH_ATLANTIC UNITED_STATES == 1   # FAILS (0) if the block was lost
+assert decksize UNITED_STATES == 23              # the cost was still paid
+
+quit

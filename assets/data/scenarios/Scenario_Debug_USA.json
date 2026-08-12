@@ -1,0 +1,138 @@
+{
+  "title": "Debug Scenario USA",
+  "description": "This scenario is for debugging purposes. It starts with all factions deployed to their home territories and pre-loaded with cards.",
+  "startingFaction": "UNITED_STATES",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [
+        { "countryName": "GERMANY" },
+        { "countryName": "WESTERN_EUROPE" }
+      ],
+      "initialCards": [
+        { "name": "StatusOccupationOfCzechoslovakia" },
+        { "name": "StatusBlitzkrieg" },
+        { "name": "StatusSyntheticFuel" },
+        { "name": "StatusBiasForAction" },
+        { "name": "StatusDiveBombers" },
+        { "name": "StatusAbundantResources" },
+        { "name": "StatusAtlanticWall" },
+        { "name": "StatusConscription" },
+        { "name": "StatusSuperiorPlanning" },
+        { "name": "StatusJetFighters" },
+        { "name": "StatusWolfPacks" },
+        { "name": "StatusVolksturm" }
+      ],
+      "initialHandCards": [
+        { "name": "EventArdennesOffensive" },
+        { "name": "SeaBattle" }
+      ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [
+        { "countryName": "UNITED_KINGDOM" }
+      ],
+      "initialCards": [
+        { "name": "ResponseASWTactics" },
+        { "name": "ResponseDefensivePosture" },
+        { "name": "ResponseDestroyers" },
+        { "name": "ResponseEnigmaCodeCracked" },
+        { "name": "ResponseLoyaltotheCrown" },
+        { "name": "ResponseRAF" },
+        { "name": "ResponseRationing" },
+        { "name": "StatusAustraliaFormstheDirectorateofManpower" },
+        { "name": "StatusFreeFrance" },
+        { "name": "StatusLordLinlithgowDeclaresIndiatoBeatWar" },
+        { "name": "StatusMackenzieKingDraftstheNationalResourcesMobilizationAct" },
+        { "name": "StatusResistance" },
+        { "name": "StatusTheRoyalNavy" }
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [
+        { "countryName": "JAPAN" }
+      ],
+      "initialCards": [
+        { "name": "ResponseBanzaiCharge" },
+        { "name": "ResponseBattleshipRepair" },
+        { "name": "ResponseChinaOffensive" },
+        { "name": "ResponseDestroyerTransport" },
+        { "name": "ResponseFallOfSingapore" },
+        { "name": "ResponseKamikaze" },
+        { "name": "ResponseKwantungArmy" },
+        { "name": "ResponseMobileForce" },
+        { "name": "ResponseSpecialNavalLandingForces" },
+        { "name": "ResponseSurpriseAttack" },
+        { "name": "ResponseTruk" },
+        { "name": "StatusForwardBases" },
+        { "name": "StatusGreaterEastAsiaCoProsperitySphere" },
+        { "name": "StatusImperialDesigns" },
+        { "name": "StatusUnimpededMerchantShipping" }
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [
+        { "countryName": "MOSCOW" }
+      ],
+      "initialCards": [
+        { "name": "ResponseDefenseoftheMotherland" },
+        { "name": "ResponseLeningrad" },
+        { "name": "ResponseMoscow" },
+        { "name": "ResponseRasputitsa" },
+        { "name": "ResponseStalingrad" },
+        { "name": "StatusFrontalAssault" },
+        { "name": "StatusGuards" },
+        { "name": "StatusScorchedEarth" },
+        { "name": "StatusShverniksEvacuationCouncil" },
+        { "name": "StatusStavkaFormsArtilleryCorps" },
+        { "name": "StatusWomenConscripts" }
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [
+        { "countryName": "ITALY" }
+      ],
+      "initialCards": [
+        { "name": "ResponseGermanReinforcementsCounterattack" },
+        { "name": "ResponseMonteCassino" },
+        { "name": "ResponseRomanianReinforcements" },
+        { "name": "ResponseSkilledPilots" },
+        { "name": "StatusAntiCommunistSentiment" },
+        { "name": "StatusBalkanResources" },
+        { "name": "StatusBravado" },
+        { "name": "StatusImperoItaliano" },
+        { "name": "StatusMareNostrum" }
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [
+        { "countryName": "US_EAST" },
+        { "countryName": "US_WEST" },
+        { "countryName": "NORTH_ATLANTIC" },
+        { "countryName": "NORTH_SEA" }
+      ],
+      "initialCards": [
+        { "name": "StatusAircraftCarriers" },
+        { "name": "StatusAmericanVolunteerGroupExpands" },
+        { "name": "StatusAmphibiousLandings" },
+        { "name": "StatusFlyingFortresses" },
+        { "name": "StatusRadar" },
+        { "name": "StatusRosietheRiveter" },
+        { "name": "StatusSuperiorShipyards" },
+        { "name": "StatusWartimeProduction" }
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    }
+  }
+}

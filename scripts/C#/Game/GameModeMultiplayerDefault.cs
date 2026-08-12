@@ -348,8 +348,10 @@ public partial class GameModeMultiplayerDefault : IGameMode
     /// shuffled for itself would diverge with nothing to catch it until a mismatched hand surfaced
     /// several draws later. Same pattern as RecycleCardChangeEvent's ShuffledOrder.
     ///
-    /// Runs before PlaceCards, which is safe because scenario initialHandCards are pulled by name
-    /// (DeckState.DrawCardByName), not by position.
+    /// Runs before PlaceCards, which is safe because DrawCardByName scans DeckCardIds itself and so
+    /// finds a scenario's initialHandCards wherever the shuffle left them. It scans DeckCardIds
+    /// rather than the DeckCardStates projection for exactly that reason — see the note on
+    /// DeckState.DrawCardByName.
     /// </summary>
     private async Task ShuffleDecks()
     {

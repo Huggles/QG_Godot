@@ -20,7 +20,7 @@ public partial class ResponseMoscow : ResponseCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async ()=>{
-                if(CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent){
+                if(ActivationTrigger is RemoveUnitChangeEvent removeEvent){
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
                     PresentationServices.Notification.ShowActionText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);

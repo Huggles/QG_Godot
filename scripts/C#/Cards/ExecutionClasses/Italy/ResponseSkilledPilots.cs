@@ -12,7 +12,7 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
             Condition.Build(new Condition.CustomCondition(()=>{
-                if(CardPlayPool.LastNoneNewCardChangeEvent is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
+                if(CardPlayPool.CurrentBlockTrigger is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
                     bool isEW = ForceDiscardCardsChangeEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE;
                     bool targetIsMe = ForceDiscardCardsChangeEvent.TargetFaction == Faction;
                     return isEW && targetIsMe;
@@ -27,7 +27,7 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async ()=>{
-                if(CardPlayPool.LastNoneNewCardChangeEvent is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
+                if(ActivationTrigger is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
                     int newNumberOfCards = Math.Max(ForceDiscardCardsChangeEvent.NumberOfCards - this.NumberOfCardsReduction, 0);
                     ForceDiscardCardsChangeEvent.NumberOfCards = newNumberOfCards;
                     PresentationServices.Notification.ShowActionText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);

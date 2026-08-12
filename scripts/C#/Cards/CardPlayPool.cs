@@ -41,6 +41,15 @@ public static class CardPlayPool
     public static ChangeEvent CurrentReactionTrigger =>
         CardPlayRound.Current?.CurrentReactionTrigger;
 
+    /// <summary>
+    /// The event currently being offered for block, or null when no block window is open.
+    /// Block trigger conditions must match against this rather than <see cref="LastNoneNewCardChangeEvent"/>,
+    /// which by construction skips the introduction events and so reports a stale earlier event
+    /// inside a card play's or activation's block window.
+    /// </summary>
+    public static ChangeEvent CurrentBlockTrigger =>
+        CardPlayRound.Current?.CurrentBlockTrigger;
+
     public static List<Faction> RequestOrder =>
         CardPlayRound.Current?.RequestOrder ?? CardPlayRound.AxisFirstOrder;
 

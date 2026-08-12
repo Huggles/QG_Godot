@@ -152,6 +152,31 @@ The change event that opened the currently-active reaction window. Card step log
 - Nested windows work correctly: the inner window overwrites the value, the outer window gets it back when the inner window finishes
 - During `ContinueWithNextSteps`, the trigger is the restored outer value — subsequent steps that rely on `SourceCardId` (not `CurrentReactionTrigger`) are unaffected
 
+#### `ActivationTrigger` (property on `CardLogic`)
+The change event **this card's activation is reacting to** — the event offered for block, or the event that opened the after-reaction window. This is what card *step logic* should read.
+
+- `DoCard(int cardId, ChangeEvent activationTrigger = null)` binds it before the introduction event, and releases it once every step of the card is finished (so a card resumed by `ContinueWithNextSteps` keeps the event it originally reacted to)
+- Passed explicitly by `RequestBlockReactions` (the event being blocked) and `RequestAfterReactions` (the window's trigger). Not inferred from `CurrentBlockTrigger`/`CurrentReactionTrigger`: inside an after-reaction window nested in a block window both are set
+- Null for a card played from hand outside a reaction, and never bound for a Status/Response card being played *onto the table* — that is not an activation
+- Save/restore is stack-safe for nested activations of the same `CardLogic`; `OnNewTurnStarted` and `ClearPool()` clear it as a safety net
+
+**Prefer this over `CardPlayPool.LastNoneNewCardChangeEvent` in step logic.** That property is a live pool read, and *every* `ChangeEvent.Apply()` self-registers into `ChangeEventsPool` (see `ChangeEvent.ApplyMutation`). So a prerequisite event applied inside the step — or a reaction played in the activation window `DoCard` opens before the steps run — silently retargets it at a different event. This is what made `StatusRadar` discard its 2 cards and then fail to block the Navy removal.
+
+`CardTriggers()` cannot use this — trigger conditions are evaluated *before* activation, when nothing is bound yet. Block triggers use `CurrentBlockTrigger` instead; see below.
+
+#### `CurrentBlockTrigger` (property on `CardPlayRound` / `CardPlayPool`)
+The change event currently being **offered for block**, or null when no block window is open. This is what a **block reaction's `CardTriggers()`** must match against.
+
+- Set at the start of `RequestBlockReactions`, restored (stack-safe) in the `finally` — a block card's own introduction event opens a nested window, and the outer window's remaining factions need their trigger identity back
+- `RequestBlockReactions` recalculates tags *inside* its loop, after `CurrentBlockTrigger` is set and again after any block card resolves, so conditions are always evaluated against the open window
+- Also drives the block prompt's trigger label and the "cannot block your own action" guard in `RequestBlock`
+
+**Never match a block trigger against `CardPlayPool.LastNoneNewCardChangeEvent`.** That property deliberately skips `PlayCardChangeEvent` and `ActivateReactionChangeEvent`, so inside the block window opened for a card play or a reaction activation it reports the *earlier* event. That is what made every removal-blocker (e.g. UK's Destroyers) offer itself against StatusRadar being activated — a card activation is not a unit removal, and no card in the game blocks a card play at all.
+
+So the rule is symmetric: **step logic reads `ActivationTrigger`, block trigger conditions read `CurrentBlockTrigger`** — neither re-reads the live pool.
+
+One consequence to expect: a block card only claims `Tag.IsActivatable` while its block window is open. That is correct — block cards are offered solely through `GetBlockReactionOptions` inside `RequestBlock`.
+
 #### `ContinueWithNextSteps()`
 Checks all cards in the pool for executable next steps:
 - **Only called if `RequestAfterReactions` returned `true`** — if everyone skipped/had no options, the pipeline stops immediately and the round ends
@@ -260,12 +285,16 @@ public override List<CardStep> InitializePlayCardSteps()
 
 ### Block Reaction Card
 
+`IsBlockRequest` is only a marker — its `MeetCondition()` returns an unconditional `true`. The *second* condition is what decides which event this card can block, and it must test `CurrentBlockTrigger`. Without that test the card is offered against every event that opens a block window, including card plays and reaction activations.
+
 ```csharp
 protected override List<Condition> CardTriggers()
 {
     return new List<Condition> {
         Condition.Build(new Condition.IsBlockRequest(), this),  // Marks as block reaction
-        Condition.Build(new Condition.FactionTeamUnitIsAttacked(FactionTeam.ALLIES), this)
+        // Scoped to the offered event. UnitAboutToBeRemoved reads CurrentBlockTrigger internally;
+        // a hand-rolled CustomCondition must do the same.
+        Condition.Build(new Condition.UnitAboutToBeRemoved(Faction.UNITED_KINGDOM, UnitType.NAVY), this)
     };
 }
 
@@ -273,8 +302,13 @@ public override List<CardStep> InitializeReactCardSteps()
 {
     return new List<CardStep> {
         new CardStep(this, async() => {
-            // Block the attack by marking the last change event as blocked
-            CardPlayPool.LastChangeEvent.IsBlocked = true;
+            // Block by marking the event THIS activation was offered to block. Read it from
+            // ActivationTrigger, never from CardPlayPool.LastChangeEvent /
+            // LastNoneNewCardChangeEvent — those are live pool reads that any intervening
+            // Apply() retargets. Always type-check: it is null for a non-reaction play.
+            if (ActivationTrigger is not BattleCountryChangeEvent battleEvent) return null;
+
+            battleEvent.IsBlocked = true;
             await Task.CompletedTask;
             return null;  // No follow-up change event
         })
@@ -354,7 +388,9 @@ new CardStep(this, async() => {
 
 ### Prerequisite Change Events Within a Step
 
-Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `ApplyChange()` directly — no need to split into two steps or go through `CardPlayPool`.
+Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `Apply()` directly — no need to split into two steps or go through `CardPlayPool.DoChangeEvent`.
+
+> **`Apply()` always registers the event into the round's `ChangeEventsPool`** (`ChangeEvent.ApplyMutation`). `IsTrigger = false` suppresses the block/reaction chain, *not* the registration. So after a prerequisite `Apply()`, `CardPlayPool.LastNoneNewCardChangeEvent` and `LastChangeEvent` point at the prerequisite. Resolve anything you need from `ActivationTrigger` (or capture it into a local) **before** applying the prerequisite.
 
 ```csharp
 new CardStep(this, async() => {
@@ -375,7 +411,8 @@ new CardStep(this, async() => {
 
 **Rules for prerequisite change events:**
 - Set `IsTrigger = false` so no block/reaction chain is triggered
-- Call `ApplyChange()` directly (not `CardPlayPool.DoChangeEvent`) — no need to register in the pool unless other cards need to query it
+- Call `Apply()` directly (not `CardPlayPool.DoChangeEvent`) — no block/after-reaction chain is opened
+- **Resolve `ActivationTrigger` (or any pool read) into a local BEFORE the `Apply()`** — `Apply()` registers the event into `ChangeEventsPool` and moves `LastNoneNewCardChangeEvent`/`LastChangeEvent` onto it
 - Any runtime results (e.g. `DiscardedCardIds`) are available on the local instance immediately after `await`
 
 ## Key Design Principles
@@ -390,6 +427,7 @@ new CardStep(this, async() => {
 8. **Round Ends on All-Skip**: If no faction plays a reaction (everyone skips or has no options), `ContinueWithNextSteps` is skipped and `Finish()` is called at the top-level `DoCard`
 9. **`Finish()` is Unconditional at Top Level**: `DoCard` calls `Finish()` whenever `reactionDepth` returns to 0 for the initial play — the old `hasRemainingActions` guard was wrong because skipped reactions don't consume their tags
 10. **Reaction Windows are Trigger-Scoped**: `CurrentReactionTrigger` identifies which specific event opened the active window. Cards that can react to multiple different events (e.g. a card reacting to *any* sea battle in the pool) must use `CurrentReactionTrigger` to scope their targets to the correct event — not scan all matching events in the pool
+11. **Activations Bind Their Trigger**: `DoCard` pins the triggering event onto the `CardLogic` as `ActivationTrigger` for the whole activation. Step logic reads that, not the pool — a live pool read is retargeted by any `Apply()` that lands in between
 
 ## Common Pitfalls
 
@@ -400,3 +438,5 @@ new CardStep(this, async() => {
 5. **Step prerequisites**: Make sure prerequisite steps are properly set for multi-step cards
 6. **Double-ask bug**: `RequestAfterReactions` is called at every `DoChangeEvent` level. Without `_afterReactionPassedFactions`, a faction could be asked inside a nested reaction window AND again in the outer loop restart. Always use the shared pass-tracking set.
 7. **Stale `hasRemainingActions` check**: Checking for remaining reaction tags to decide whether to `Finish()` is incorrect — a skipped faction still holds the tag. `Finish()` must always fire when returning to `reactionDepth == 0`.
+8. **Matching a block trigger against the pool**: a block card's `CardTriggers()` must test `CardPlayPool.CurrentBlockTrigger`. Testing `LastNoneNewCardChangeEvent` matches inside *every* block window — including the one opened for a card play or reaction activation, which that property filters out — so the card gets offered against events it has nothing to do with.
+9. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.

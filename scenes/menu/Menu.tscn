@@ -1,14 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://cnggx6v2smwxk"]
+[gd_scene format=3 uid="uid://cnggx6v2smwxk"]
 
 [ext_resource type="PackedScene" uid="uid://mkqa1n4o3kva" path="res://scenes/menu/MainMenu.tscn" id="1_it6ho"]
 
-[node name="Menu" type="Node2D"]
+[node name="Menu" type="Node2D" unique_id=828288891]
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1931736309]
 anchor_mode = 0
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1885760230]
 
-[node name="MainMenu" parent="CanvasLayer" instance=ExtResource("1_it6ho")]
+[node name="MainMenu" parent="CanvasLayer" unique_id=1195186133 instance=ExtResource("1_it6ho")]
 size_flags_horizontal = 3
 size_flags_vertical = 3

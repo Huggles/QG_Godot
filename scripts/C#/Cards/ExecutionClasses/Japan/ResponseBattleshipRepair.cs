@@ -17,7 +17,7 @@ public partial class ResponseBattleshipRepair : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                if (CardPlayPool.LastNoneNewCardChangeEvent is RemoveUnitChangeEvent removeEvent) {
+                if (ActivationTrigger is RemoveUnitChangeEvent removeEvent) {
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
                     PresentationServices.Notification.ShowActionText("Battleship Repair: Japanese Navy will not be removed this turn", Faction);

@@ -117,7 +117,15 @@ public partial class CardPlayRound : GodotObject
     /// Resolves the card's next executable step internally, handles the introduction event
     /// (PlayCard / ActivateReaction), and processes the resulting change event.
     /// </summary>
-    public async Task DoCard(int cardId)
+    /// <param name="activationTrigger">
+    /// The event this activation is reacting to — the event being offered for block, or the event
+    /// that opened the after-reaction window. Bound onto the CardLogic for the duration of the
+    /// activation so step logic has a stable handle on it (see CardLogic.ActivationTrigger).
+    /// Passed explicitly rather than inferred from CurrentBlockTrigger/CurrentReactionTrigger:
+    /// inside an after-reaction window nested in a block window both are set, and neither
+    /// precedence rule is reliably correct. Null for a card played from hand outside a reaction.
+    /// </param>
+    public async Task DoCard(int cardId, ChangeEvent activationTrigger = null)
     {
         // If the loop was recovered while this call was queued behind an await, this continuation
         // belongs to an aborted pipeline. Unwind rather than run alongside the resumed loop.
@@ -141,57 +149,77 @@ public partial class CardPlayRound : GodotObject
         // Its CardSteps are the activation effect and must wait for the card's trigger to fire.
         bool isTableCardPlay = cardLogic.IsTableCardInHand;
 
-        // Step 1: Introduction event (may be blocked)
-        bool introWasBlocked = false;
-        ChangeEvent introEvent;
+        // Bind the trigger BEFORE the introduction event: that event opens its own block and
+        // after-reaction windows, and anything played in them registers change events onto the pool.
+        // Skipped for a table-card play — putting a Status/Response card down is not an activation;
+        // its steps run later, when its trigger actually fires, and must bind then.
+        // Saved/restored rather than assigned so a nested activation of the same CardLogic instance
+        // cannot clobber an outer binding.
+        ChangeEvent previousActivationTrigger = cardLogic.ActivationTrigger;
+        if (activationTrigger != null && !isTableCardPlay)
+            cardLogic.ActivationTrigger = activationTrigger;
 
-        if (!cardState.IsPlayed)
+        try
         {
-            var evt = new PlayCardChangeEvent(cardState.Id);
-            evt.IsTrigger = true;
-            introEvent = evt;
-            await ProcessIntroductionEvent(evt);
-            introWasBlocked = evt.IsBlocked;
-        }
-        else
-        {
-            var evt = new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, null);
-            evt.IsTrigger = true;
-            introEvent = evt;
-            await ProcessIntroductionEvent(evt);
-            introWasBlocked = evt.IsBlocked;
-        }
+            // Step 1: Introduction event (may be blocked)
+            bool introWasBlocked = false;
+            ChangeEvent introEvent;
 
-        // Step 2: Execute the card's next unfinished step if not blocked.
-        // We use all unfinished steps (not just executable ones) so that Execute() can
-        // show the "Unable to" skip message for steps whose conditions fail before
-        // automatically cascading to the next step.
-        if (!introWasBlocked)
-        {
-            // Activation window: fires immediately after the card is activated/played and
-            // block reactions resolve, before its own steps execute. CurrentReactionTrigger
-            // is set to introEvent so .Immediately() conditions like CardActivated (e.g.
-            // ResponseEnigmaCodeCracked discarding the activated card) fire here, ahead of
-            // any reactions to the change events this card's own steps are about to produce.
-            // ContinueWithNextSteps is intentionally not called here: this card's own steps
-            // are resumed by the loop right below, and any change event a triggered reaction
-            // produces already gets its own continuation handling via its nested DoCard call.
-            _afterReactionPassedFactions.Clear();
-            await RequestAfterReactions(introEvent);
-
-            // A Status/Response card just played from hand stops here: it sits on the table until
-            // its trigger fires, at which point it re-enters DoCard on the activation branch.
-            if (!isTableCardPlay)
+            if (!cardState.IsPlayed)
             {
-                List<CardStep> allSteps = cardLogic.CardSteps;
-                while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0)
+                var evt = new PlayCardChangeEvent(cardState.Id);
+                evt.IsTrigger = true;
+                introEvent = evt;
+                await ProcessIntroductionEvent(evt);
+                introWasBlocked = evt.IsBlocked;
+            }
+            else
+            {
+                var evt = new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, null);
+                evt.IsTrigger = true;
+                introEvent = evt;
+                await ProcessIntroductionEvent(evt);
+                introWasBlocked = evt.IsBlocked;
+            }
+
+            // Step 2: Execute the card's next unfinished step if not blocked.
+            // We use all unfinished steps (not just executable ones) so that Execute() can
+            // show the "Unable to" skip message for steps whose conditions fail before
+            // automatically cascading to the next step.
+            if (!introWasBlocked)
+            {
+                // Activation window: fires immediately after the card is activated/played and
+                // block reactions resolve, before its own steps execute. CurrentReactionTrigger
+                // is set to introEvent so .Immediately() conditions like CardActivated (e.g.
+                // ResponseEnigmaCodeCracked discarding the activated card) fire here, ahead of
+                // any reactions to the change events this card's own steps are about to produce.
+                // ContinueWithNextSteps is intentionally not called here: this card's own steps
+                // are resumed by the loop right below, and any change event a triggered reaction
+                // produces already gets its own continuation handling via its nested DoCard call.
+                _afterReactionPassedFactions.Clear();
+                await RequestAfterReactions(introEvent);
+
+                // A Status/Response card just played from hand stops here: it sits on the table until
+                // its trigger fires, at which point it re-enters DoCard on the activation branch.
+                if (!isTableCardPlay)
                 {
-                    List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
-                    ChangeEvent stepResult = await nextSteps[0].Execute();
-                    if (stepResult != null)
-                        await DoChangeEvent(stepResult);
+                    List<CardStep> allSteps = cardLogic.CardSteps;
+                    while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0)
+                    {
+                        List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished).ToList();
+                        ChangeEvent stepResult = await nextSteps[0].Execute();
+                        if (stepResult != null)
+                            await DoChangeEvent(stepResult);
+                    }
                 }
             }
+        }
+        finally
+        {
+            // Released only once every step is done: a card whose remaining steps are resumed later
+            // by ContinueWithNextSteps must keep the event it originally reacted to.
+            if (cardLogic.CardSteps.All(s => s.StepFinished))
+                cardLogic.ActivationTrigger = previousActivationTrigger;
         }
 
         ReactionDepth--;
@@ -257,35 +285,45 @@ public partial class CardPlayRound : GodotObject
 
     private async Task RequestBlockReactions(ChangeEvent changeEvent)
     {
+        // Saved and restored rather than nulled, mirroring CurrentReactionTrigger. A block card
+        // played below opens a nested window via its own introduction event; when that returns,
+        // this window's remaining factions must get their trigger identity back — block trigger
+        // conditions, the self-block guard and the prompt's trigger label all read it.
+        ChangeEvent previousBlockTrigger = CurrentBlockTrigger;
         CurrentBlockTrigger = changeEvent;
         try
         {
-            // DoChangeEvent registers the event into the pool immediately before this call, so tags
-            // computed earlier (in CardStep.Execute, before registration) predate it. Recalculate so
-            // block conditions reading CardPlayPool.LastNoneNewCardChangeEvent see the event they are
-            // being asked to block. Mirrors the per-pass recalculation in RequestAfterReactions.
-            // Introduction events are exempt: ProcessIntroductionEvent applies the change (which
-            // recalculates) immediately before calling us, so tags are already current there.
-            // One call suffices: a block card played below re-enters DoCard -> Apply -> CalculateAll.
-            bool isIntroductionEvent = changeEvent is PlayCardChangeEvent || changeEvent is ActivateReactionChangeEvent;
-            if (!isIntroductionEvent)
-                GameStateCalculator.CalculateAll();
-
+            // Recalculated inside the loop rather than once before it. Block trigger conditions
+            // read CurrentBlockTrigger, so any tags computed before the assignment above describe
+            // a different window — and a block card played by an earlier faction runs its own
+            // nested windows and steps, each of which recalculates under a different trigger.
+            // tagsDirty keeps this at one call per window in the common case.
+            bool tagsDirty = true;
             foreach (Faction faction in RequestOrder)
             {
+                if (changeEvent.IsBlocked)
+                    break; // Already prevented — there is nothing left for anyone to block
+
                 if (faction == changeEvent.TriggeringFaction)
                     continue; // Factions cannot block their own actions
+
+                if (tagsDirty)
+                {
+                    GameStateCalculator.CalculateAll();
+                    tagsDirty = false;
+                }
 
                 int cardId = await RequestBlock(faction);
                 if (cardId != -1)
                 {
-                    await DoCard(cardId);
+                    await DoCard(cardId, changeEvent);
+                    tagsDirty = true;
                 }
             }
         }
         finally
         {
-            CurrentBlockTrigger = null;
+            CurrentBlockTrigger = previousBlockTrigger;
         }
     }
 
@@ -323,7 +361,7 @@ public partial class CardPlayRound : GodotObject
                         {
                             DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
                             _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
-                            await DoCard(cardId);
+                            await DoCard(cardId, triggerEvent);
                             anyEverPlayed = true;
                             anyPlayedThisPass = true;
                             break; // Restart with updated RequestOrder
@@ -433,8 +471,9 @@ public partial class CardPlayRound : GodotObject
             return -1;
         }
 
-        // Factions cannot block their own events
-        if (LastChangeEvent?.TriggeringFaction == faction)
+        // Factions cannot block their own events. Read from CurrentBlockTrigger, not LastChangeEvent:
+        // once a nested window has run, LastChangeEvent is no longer this window's event.
+        if (CurrentBlockTrigger?.TriggeringFaction == faction)
             return -1;
 
         List<int> blockOptions = GetBlockReactionOptions(faction);
@@ -494,6 +533,8 @@ public partial class CardPlayRound : GodotObject
 
     public void ClearPool()
     {
+        // The round's change events are about to go away, so no card may keep pointing at one.
+        CardPool.ForEach(cardState => { if (cardState.CardLogic != null) cardState.CardLogic.ActivationTrigger = null; });
         CardPool.Clear();
         ChangeEventsPool.Clear();
         LastChangeEvent = null;

@@ -403,12 +403,15 @@ public partial class ErrorReporter : Node
     /// the host's decision: true to re-send the same request, false to give up and let the step continue
     /// as if the player had passed.
     ///
+    /// <paramref name="forced"/> when the host ended the window early from the countdown's "time out now"
+    /// button, which only changes the wording — the decision it asks for is the same one.
+    ///
     /// The caller keeps the step's await alive for as long as this task is pending — that, and not any
     /// stall bookkeeping, is what stops the turn loop from moving on. Reported WITHOUT
     /// <c>stallsLoop</c> for the same reason: arming <see cref="_pendingStall"/> would make the popup's
     /// Continue call <see cref="RequestResume"/>, which advances the step the caller is still holding.
     /// </summary>
-    public static Task<bool> ReportInputTimeoutAndAwaitDecision(InputRequest request)
+    public static Task<bool> ReportInputTimeoutAndAwaitDecision(InputRequest request, bool forced = false)
     {
         ErrorReporter reporter = Instance;
 
@@ -432,7 +435,7 @@ public partial class ErrorReporter : Node
         // arrive at a peer that cannot click the board until it dismisses a popup about a decision it
         // does not own. Its prompt has already been released by AbortRemoteInput, and the countdown
         // reappearing is the explanation it actually needs.
-        ReportLocalOnly(BuildInputTimeout(request), "InputTimeout", request?.TargetFaction);
+        ReportLocalOnly(BuildInputTimeout(request, forced), "InputTimeout", request?.TargetFaction);
 
         return decision.Task;
     }
@@ -442,15 +445,20 @@ public partial class ErrorReporter : Node
     /// and each attempt gets a fresh Id, so a second timeout on the same request type is a distinct
     /// entry that raises its own popup instead of quietly incrementing an occurrence counter.
     /// </summary>
-    private static InputTimeoutException BuildInputTimeout(InputRequest request)
+    private static InputTimeoutException BuildInputTimeout(InputRequest request, bool forced = false)
     {
         string bulletin = string.IsNullOrEmpty(request?.TriggerBulletinLabel)
             ? ""
             : $" for Bulletin \"{request.TriggerBulletinLabel}\"";
 
+        string cause = forced
+            ? $"You timed out {request?.TargetFaction}'s {request?.GetType().Name}{bulletin} " +
+              $"early (Id {request?.Id})."
+            : $"{request?.TargetFaction} did not answer {request?.GetType().Name}{bulletin} " +
+              $"within {NetworkApi.InputResponseTimeoutMinutes} minutes (Id {request?.Id}).";
+
         return new InputTimeoutException(
-            $"{request?.TargetFaction} did not answer {request?.GetType().Name}{bulletin} " +
-            $"within {NetworkApi.InputResponseTimeoutMinutes} minutes (Id {request?.Id}). " +
+            $"{cause} " +
             "The turn loop is holding here — Retry asks again, Skip continues as if the player passed.");
     }
 
