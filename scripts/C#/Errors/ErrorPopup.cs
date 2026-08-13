@@ -471,6 +471,9 @@ public partial class ErrorPopup : CanvasLayer
         // signal processing.
         if (Multiplayer.MultiplayerPeer != null)
             Multiplayer.MultiplayerPeer = null;
+        // This path deliberately bypasses SceneFlow, so the Steam lobby release SceneFlow does for
+        // leaveSession has to be repeated here. No-op unless the session was Steam-hosted.
+        SteamworksApi.Instance?.LeaveCurrentLobby();
         GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/menu/MainMenu.tscn");
     }
 

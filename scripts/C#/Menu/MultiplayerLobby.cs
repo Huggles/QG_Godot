@@ -68,6 +68,13 @@ public partial class MultiplayerLobby : Control
 	private bool _isHost        = false;
 	private bool _lobbyOnlyMode = false;
 
+	/// <summary>True when this session rides on a Steam lobby rather than a direct ENet connection.</summary>
+	private bool _isSteamSession = false;
+	/// <summary>The Steam lobby backing this session; 0 for an ENet session.</summary>
+	private long _steamLobbyId   = 0;
+	/// <summary>Built in code and only shown to a Steam host — the .tscn has no slot for it.</summary>
+	private Button _inviteButton;
+
 	/// <summary>True when this instance is a dedicated/headless server: it auto-hosts, controls no
 	/// faction, and starts the game automatically once <see cref="_requiredPlayers"/> clients connect.</summary>
 	private bool _dedicatedServer = false;
@@ -115,6 +122,12 @@ public partial class MultiplayerLobby : Control
 		_joinButton.Pressed      += OnJoinButtonPressed;
 		_startGameButton.Pressed += OnStartGameButtonPressed;
 		_debugSoloButton.Pressed += OnDebugSoloButtonPressed;
+
+		// Added in code rather than to the .tscn: it is only ever relevant to a Steam host, and this
+		// keeps the scene identical for the unchanged ENet path.
+		_inviteButton = new Button { Text = "Invite Friends", Visible = false };
+		_inviteButton.Pressed += OnInviteFriendsPressed;
+		_hostButton.GetParent().AddChild(_inviteButton);
 		
 		Multiplayer.PeerConnected      += OnPeerConnected;
 		Multiplayer.PeerDisconnected   += OnPeerDisconnected;
@@ -152,13 +165,19 @@ public partial class MultiplayerLobby : Control
 
 		// Arrived from JoinGameScreen, which already established the client connection.
 		// Adopt it rather than creating a second peer.
+		// This branch is transport-agnostic: a connected SteamMultiplayerPeer satisfies it exactly as
+		// an ENet client peer does, so joining over Steam needs no separate case here.
 		if (Multiplayer.MultiplayerPeer != null
 			&& Multiplayer.MultiplayerPeer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Connected
 			&& !Multiplayer.IsServer())
 		{
+			_isSteamSession = MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.JoinSteam;
+			_steamLobbyId   = MainMenu.PendingSteamLobbyId;
+			MainMenu.ClearLobbyIntent();
+
 			int me = Multiplayer.GetUniqueId();
 			UpdateStatusLabel("Connected – waiting for lobby data...");
-			AddPlayerRow(me, $"Player {me} (You)");
+			AddPlayerRow(me, $"{LocalDisplayName()} (You)");
 			_hostButton.Disabled = true;
 			_joinButton.Disabled = true;
 			// Deferred so this node has finished entering the tree before the RPC goes out.
@@ -204,16 +223,69 @@ public partial class MultiplayerLobby : Control
 			_ipAddressInput.Text = DEFAULT_SERVER_IP;
 			OnJoinButtonPressed();
 		}
-		else if (MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.Host)
+		else if (MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.HostGodot)
 		{
 			MainMenu.ClearLobbyIntent();
 			OnHostButtonPressed();
+		}
+		else if (MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.HostSteam)
+		{
+			long lobbyId = MainMenu.PendingSteamLobbyId;
+			MainMenu.ClearLobbyIntent();
+			StartSteamHost(lobbyId);
 		}
 	}
 
 	private void RequestLobbyStateFromHost()
 	{
+		RpcId(1, nameof(ReportPlayerName), LocalDisplayName());
 		RpcId(1, nameof(RequestLobbyState));
+	}
+
+	/// <summary>
+	/// What to call this player in the lobby list. Kept transport-agnostic on purpose: reading the
+	/// Steam persona works for an ENet session too whenever Steam happens to be running, and the
+	/// lobby never has to ask the peer what kind of transport it is.
+	/// </summary>
+	private string LocalDisplayName()
+		=> SteamworksApi.IsAvailable
+			? SteamworksApi.Instance.LocalPersonaName
+			: $"Player {Multiplayer.GetUniqueId()}";
+
+	/// <summary>
+	/// Client → host, alongside RequestLobbyState. The host cannot work a client's persona name out
+	/// for itself, so each client reports its own and the host re-broadcasts the updated list.
+	/// </summary>
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+	private void ReportPlayerName(string displayName)
+	{
+		if (!Multiplayer.IsServer()) return;
+
+		int sender = Multiplayer.GetRemoteSenderId();
+		if (!_playerLabels.TryGetValue(sender, out Label label)) return;
+
+		label.Text = SanitisePlayerName(displayName, sender);
+		Rpc(nameof(SyncPlayerList), GetPlayerListData());
+	}
+
+	/// <summary>
+	/// The name arrives from another machine, so it is untrusted: cap the length and drop control
+	/// characters so one player cannot garble or blow out everyone else's lobby row.
+	/// </summary>
+	private static string SanitisePlayerName(string raw, int peerId)
+	{
+		if (string.IsNullOrWhiteSpace(raw)) return $"Player {peerId}";
+
+		var cleaned = new System.Text.StringBuilder(raw.Length);
+		foreach (char c in raw)
+		{
+			if (char.IsControl(c)) continue;
+			cleaned.Append(c);
+			if (cleaned.Length >= 32) break;
+		}
+
+		string result = cleaned.ToString().Trim();
+		return result.Length == 0 ? $"Player {peerId}" : result;
 	}
 
 	private static int GetInstanceNumber()
@@ -268,8 +340,44 @@ public partial class MultiplayerLobby : Control
 		_isHost                     = true;
 		DebugUtilities.PrintPeer($"Server started on port {DEFAULT_PORT}");
 		UpdateStatusLabel($"Hosting on port {DEFAULT_PORT}");
-		
-		AddPlayerRow(1, "Player 1 (Host)");
+
+		EnterHostUiState();
+	}
+
+	/// <summary>
+	/// Hosts on an already-created Steam lobby. The lobby is created back on the main menu, before
+	/// navigating here, because the peer requires this client to already own it.
+	/// </summary>
+	private void StartSteamHost(long lobbyId)
+	{
+		DebugUtilities.PrintPeer($"Starting Steam host on lobby {lobbyId}...");
+
+		MultiplayerPeer peer = SteamPeerFactory.CreateHost(lobbyId, out string error);
+		if (peer == null)
+		{
+			DebugUtilities.PrintPeerError($"Failed to host via Steam: {error}");
+			UpdateStatusLabel($"Failed to host via Steam — {error}");
+			// Deliberately leaves the buttons enabled: hosting over Godot is still one click away.
+			SteamworksApi.Instance?.LeaveCurrentLobby();
+			return;
+		}
+
+		Multiplayer.MultiplayerPeer = peer;
+		_isHost         = true;
+		_isSteamSession = true;
+		_steamLobbyId   = lobbyId;
+
+		DebugUtilities.PrintPeer($"Steam host started on lobby {lobbyId}");
+		UpdateStatusLabel($"Hosting via Steam as {LocalDisplayName()}");
+
+		EnterHostUiState();
+		_inviteButton.Visible = true;
+	}
+
+	/// <summary>Shared by both host paths, so the ENet flow keeps behaving exactly as it did.</summary>
+	private void EnterHostUiState()
+	{
+		AddPlayerRow(1, $"{LocalDisplayName()} (Host)");
 		_startGameButton.Visible  = true;
 		_startGameButton.Disabled = true; // unlocks once all 6 factions are assigned
 		_hostButton.Disabled      = true;
@@ -277,6 +385,8 @@ public partial class MultiplayerLobby : Control
 		_scenarioPicker.Disabled  = false;
 		SetSeedFieldEnabled(true);
 	}
+
+	private void OnInviteFriendsPressed() => SteamworksApi.Instance?.OpenInviteOverlay();
 
 	private void OnJoinButtonPressed()
 	{
@@ -619,7 +729,7 @@ public partial class MultiplayerLobby : Control
 		DebugUtilities.PrintPeer("Connected to server");
 		int me = Multiplayer.GetUniqueId();
 		UpdateStatusLabel("Connected – waiting for lobby data...");
-		AddPlayerRow(me, $"Player {me} (You)");
+		AddPlayerRow(me, $"{LocalDisplayName()} (You)");
 	}
 
 	private void OnConnectionFailed()
@@ -639,6 +749,16 @@ public partial class MultiplayerLobby : Control
 		_hostButton.Disabled     = false;
 		_joinButton.Disabled     = false;
 		_startGameButton.Visible = false;
+
+		// The session is over, so release the Steam lobby too — otherwise the next host attempt
+		// inherits a stale one and the peer refuses to host on it.
+		if (_isSteamSession)
+		{
+			SteamworksApi.Instance?.LeaveCurrentLobby();
+			_isSteamSession       = false;
+			_steamLobbyId         = 0;
+			_inviteButton.Visible = false;
+		}
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════

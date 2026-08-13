@@ -28,8 +28,17 @@ public static class SceneFlow
     {
         ErrorReporter.IsShuttingDown = true;
 
-        if (leaveSession && from.Multiplayer?.MultiplayerPeer != null)
-            from.Multiplayer.MultiplayerPeer = null;
+        if (leaveSession)
+        {
+            if (from.Multiplayer?.MultiplayerPeer != null)
+                from.Multiplayer.MultiplayerPeer = null;
+
+            // A Steam-hosted session rides on a Steam lobby, so dropping the peer without releasing
+            // the lobby would leave a stale entry in friends' lists and block the next host attempt
+            // (the peer refuses to host on a lobby it does not own outright). Harmless no-op when
+            // there is no lobby, which is every ENet session.
+            SteamworksApi.Instance?.LeaveCurrentLobby();
+        }
 
         SceneTree tree = from.GetTree();
 

@@ -31,7 +31,7 @@ NetworkApi="*res://scripts/C#/Utils/NetworkApi.cs"
 ChangeEventQueue="*res://scenes/network/ChangeEventQueue.cs"
 AnimationQueue="*res://scripts/C#/Animations/AnimationQueue.cs"
 CliSession="*res://scripts/C#/Cli/CliSession.cs"
-SteamworksApi="*uid://cslwf8xf6it86"
+SteamworksApi="*res://scripts/C#/Utils/SteamworksApi.cs"
 
 [debug]
 
