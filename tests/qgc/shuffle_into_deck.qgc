@@ -17,6 +17,9 @@
 # after any change to it.
 # Run:  tests/run-cli.sh tests/qgc/shuffle_into_deck.qgc
 
+# The six mandatory opening discards, auto-answered — see opening_turn.qgc.
+auto 6
+
 prompt                                  # turn 1, Germany, PLAY_CARD
 pass
 prompt                                  # DISCARD step

@@ -14,6 +14,9 @@
 # 0-6 are all in hand.
 # Run:  tests/run-cli.sh tests/qgc/decks_shuffled_at_start.qgc
 
+# The six mandatory opening discards, auto-answered — see opening_turn.qgc.
+auto 6
+
 prompt                                  # turn 1, Germany, PLAY_CARD
 
 assert handsize GERMANY == 7

@@ -38,7 +38,7 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
     {
         DeckState deckState = DeckState.ForFaction(faction);
         int handSize = deckState.HandCardIds.Count;
-        int maxHandSize = 7;
+        int maxHandSize = StaticGameData.HandSize;
 
         // Only need to discard if hand size exceeds maximum
         if (handSize > maxHandSize)

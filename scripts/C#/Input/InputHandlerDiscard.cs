@@ -22,22 +22,23 @@ public partial class InputHandlerDiscard
 
     public async Task<List<int>> GetSelectedCards()
     {
-        string title = required 
-            ? $"Select at least {minimumDiscards} card(s) to discard"
+        string title = required
+            ? $"Select {minimumDiscards} card(s) to discard"
             : "Select card(s) to discard (or skip)";
 
         PlayerActionLabel.ShowText(title, faction);
-        
+
         // Create presentation items for each card in hand
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(cardIds, true);
 
-        // Show modal with multi-select enabled
-        Variant[] response = await PresentationModal.Current.ShowModalMultiSelect(
-            presentationItems, 
-            title, 
-            minimumDiscards
-        );
-        List<int> selectedCardIds = response[0].As<PresentationModal.PresentationItemResponse>().SelectedItems;
-        return selectedCardIds;
+        // A required discard is for exactly this many cards — SelectMany leaves MaxSelections
+        // unlimited, which let a player discard more than they were asked for. The optional
+        // end-of-turn path keeps SelectMany: there the count really is open-ended.
+        ModalConfig config = required
+            ? ModalConfig.SelectExactly(title, presentationItems, minimumDiscards)
+            : ModalConfig.SelectMany(title, presentationItems, minimumDiscards);
+
+        ModalResult result = await PresentationModal.Current.Show(config);
+        return result.WasCancelled ? new List<int>() : result.SelectedItems;
     }
 }

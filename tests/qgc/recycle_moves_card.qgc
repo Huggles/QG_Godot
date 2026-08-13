@@ -17,6 +17,9 @@
 # seed — which card lands where is the shuffle's business, so re-derive these after any change to it.
 # Run:  tests/run-cli.sh tests/qgc/recycle_moves_card.qgc
 
+# The six mandatory opening discards, auto-answered — see opening_turn.qgc.
+auto 6
+
 prompt                                  # turn 1, Germany, PLAY_CARD
 
 assert card 14 in hand

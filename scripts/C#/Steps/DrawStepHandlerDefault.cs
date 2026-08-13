@@ -35,12 +35,12 @@ public partial class DrawStepHandlerDefault : GodotObject, IDrawStepHandler
     {
         DeckState deckState = DeckState.ForFaction(faction);
         int currentHandSize = deckState.HandCardIds.Count;
-        int targetHandSize = 7;
+        int targetHandSize = StaticGameData.HandSize;
         int cardsToDraw = targetHandSize - currentHandSize;
 
         if (cardsToDraw > 0)
         {
-            // Draw cards back to 7
+            // Draw cards back up to the steady-state hand size
             DrawCardsChangeEvent drawCardsChangeEvent = new DrawCardsChangeEvent(Faction.NONE, faction, cardsToDraw);
             drawCardsChangeEvent.IsTrigger = false;
             await CardPlayPool.DoChangeEvent(drawCardsChangeEvent);

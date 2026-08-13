@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -186,44 +187,69 @@ public partial class NetworkApi : Node
     /// <summary>The same window in minutes, for the message on the timeout popup.</summary>
     public static int InputResponseTimeoutMinutes => InputResponseTimeoutMs / 60000;
 
-    private TaskCompletionSource<string> _pendingInputTcs;
-    private string _pendingInputId = null;
-    private int _pendingInputPeer = 0;
-
     /// <summary>
-    /// The request we are waiting on. Kept so cancellation can complete the wait with a real
-    /// (empty, skipped) response instead of cancelling the task: an empty response is exactly how a
-    /// player "passes", so both callers unwind correctly — <c>RequestPlay</c> reads no card ids and
-    /// treats it as a pass, while <c>InputRequest.BroadCast</c> sees WasSkipped and raises
-    /// StepSkippedException, which CardStep already handles. Cancelling the task instead would
-    /// unwind the play step without ever firing CardPlayPoolFinished, stalling the turn loop.
+    /// One in-flight input request the host is parked on.
     /// </summary>
-    private InputRequest _pendingInputRequest;
+    private sealed class PendingInput
+    {
+        /// <summary>Resolved with the response JSON when the controlling peer answers.</summary>
+        public TaskCompletionSource<string> Tcs;
+
+        /// <summary>
+        /// Completing this expires this attempt's wait ahead of its deadline — the host's
+        /// "time out now" button on <see cref="InputTimerDisplay"/>. A TCS raced in the same
+        /// <c>Task.WhenAny</c> as the backstop delay rather than a shortcut around it, so a forced
+        /// timeout and a real one take byte-for-byte the same path: release the prompt, then
+        /// Retry / Skip. Replaced per attempt alongside <see cref="Tcs"/>, so pressing the button
+        /// during attempt 2 cannot resolve a stale signal left over from attempt 1.
+        /// </summary>
+        public TaskCompletionSource<bool> ForceTimeout;
+
+        /// <summary>The peer expected to answer, so a disconnect can release only its own waits.</summary>
+        public int Peer;
+
+        /// <summary>
+        /// The request we are waiting on. Kept so cancellation can complete the wait with a real
+        /// (empty, skipped) response instead of cancelling the task: an empty response is exactly how
+        /// a player "passes", so both callers unwind correctly — <c>RequestPlay</c> reads no card ids
+        /// and treats it as a pass, while <c>InputRequest.BroadCast</c> sees WasSkipped and raises
+        /// StepSkippedException, which CardStep already handles. Cancelling the task instead would
+        /// unwind the play step without ever firing CardPlayPoolFinished, stalling the turn loop.
+        /// </summary>
+        public InputRequest Request;
+    }
 
     /// <summary>
-    /// Completing this expires the current attempt's wait ahead of its deadline — the host's
-    /// "time out now" button on <see cref="InputTimerDisplay"/>. A TCS raced in the same
-    /// <c>Task.WhenAny</c> as the backstop delay rather than a shortcut around it, so a forced timeout
-    /// and a real one take byte-for-byte the same path: release the prompt, then Retry / Skip.
+    /// Every input request the host is currently parked on, keyed by <see cref="InputRequest.Id"/>.
     ///
-    /// Replaced per attempt alongside <see cref="_pendingInputTcs"/>, so pressing the button during
-    /// attempt 2 cannot resolve a stale signal left over from attempt 1.
+    /// A dictionary rather than the single slot this used to be, because the opening discard asks
+    /// every player at once (see <c>OpeningDiscard</c>) — with one slot the second request clobbered
+    /// the first and one of the two answers was dropped as stale. Normal play still only ever has one
+    /// entry here; nothing else in the game asks two players anything simultaneously.
+    ///
+    /// Keying on the request Id keeps the staleness guarantee free: SendInputRequest mints a fresh
+    /// Guid per attempt, so a late reply to an aborted attempt simply finds no entry.
     /// </summary>
-    private TaskCompletionSource<bool> _forceTimeoutTcs;
+    private readonly ConcurrentDictionary<string, PendingInput> _pendingInputs = new();
 
     /// <summary>
-    /// Host-only: expire the in-flight input request now instead of waiting out the backstop. No-op on
-    /// a client (the wait it would need to expire is on the host) and when nothing is in flight.
+    /// Host-only: expire the in-flight input requests now instead of waiting out the backstop. No-op
+    /// on a client (the wait it would need to expire is on the host) and when nothing is in flight.
+    /// Expires every pending request: <see cref="InputTimerDisplay"/> is a single display, so the
+    /// button means "give up on whatever we are waiting for", not on one particular peer.
     /// </summary>
     public void ForceInputTimeout()
     {
         if (Multiplayer?.MultiplayerPeer != null && !Multiplayer.IsServer()) return;
 
-        TaskCompletionSource<bool> force = _forceTimeoutTcs;
-        if (force == null || force.Task.IsCompleted) return;
+        foreach (KeyValuePair<string, PendingInput> entry in _pendingInputs)
+        {
+            TaskCompletionSource<bool> force = entry.Value.ForceTimeout;
+            if (force == null || force.Task.IsCompleted) continue;
 
-        DebugUtilities.PrintPeer($"Host forced a timeout on the pending input request (Id {_pendingInputId})");
-        force.TrySetResult(true);
+            DebugUtilities.PrintPeer($"Host forced a timeout on the pending input request (Id {entry.Key})");
+            force.TrySetResult(true);
+        }
     }
 
     public async Task<InputRequest> SendInputRequest(InputRequest inputRequest)
@@ -254,13 +280,18 @@ public partial class NetworkApi : Node
 
             // Create the awaiter BEFORE the Rpc — the same ordering StartMultiplayerSession uses, and
             // the reason it is the one rendezvous in this file without a check-then-await race.
-            TaskCompletionSource<string> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            TaskCompletionSource<bool> forceTimeout = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            _pendingInputTcs = tcs;
-            _pendingInputId = inputRequest.Id;
-            _pendingInputPeer = SafeTargetPeer(inputRequest);
-            _pendingInputRequest = inputRequest;
-            _forceTimeoutTcs = forceTimeout;
+            PendingInput pending = new()
+            {
+                Tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously),
+                ForceTimeout = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously),
+                Peer = SafeTargetPeer(inputRequest),
+                Request = inputRequest,
+            };
+            string pendingId = inputRequest.Id;
+            _pendingInputs[pendingId] = pending;
+
+            TaskCompletionSource<string> tcs = pending.Tcs;
+            TaskCompletionSource<bool> forceTimeout = pending.ForceTimeout;
 
             Rpc(nameof(NetworkApi.ReceiveInputRequest), payload);
 
@@ -273,7 +304,7 @@ public partial class NetworkApi : Node
 
             if (completed == tcs.Task)
             {
-                ClearPendingInput(tcs);
+                ClearPendingInput(pendingId, pending);
                 return InputRequest.FromJson(await tcs.Task);
             }
 
@@ -287,8 +318,12 @@ public partial class NetworkApi : Node
             // Order matters: drop the awaiter FIRST, then abort. AbortRemoteInput makes the client reply
             // straight away, and with the awaiter already cleared that reply is ignored ("no request
             // pending") rather than resolving a wait we may be about to re-open.
-            ClearPendingInput(tcs);
-            AbortRemoteInput();
+            //
+            // Aimed at this request's own peer rather than broadcast: with several requests in flight
+            // (the opening discard) a blanket abort would tear down the modal of every player still
+            // deciding, not just the one that timed out.
+            ClearPendingInput(pendingId, pending);
+            AbortRemoteInput(pending.Peer);
             GameFlow.Instance?.ClearCurrentInputRequest();
 
             if (await ErrorReporter.ReportInputTimeoutAndAwaitDecision(inputRequest, wasForced)) continue;
@@ -315,28 +350,40 @@ public partial class NetworkApi : Node
     private void OnPeerDisconnectedDuringInput(long peerId)
     {
         if (Multiplayer?.MultiplayerPeer == null || !Multiplayer.IsServer()) return;
-        if (_pendingInputTcs == null) return;
-        if (_pendingInputPeer != 0 && _pendingInputPeer != (int)peerId) return;
 
-        DebugUtilities.PrintPeerErrorRaw(
-            $"Peer {peerId} disconnected while we were waiting on its input — treating as skipped.");
-        CancelPendingInputRequest();
+        // Only this peer's own waits: another player may still be answering a concurrent request, and
+        // releasing theirs too would throw away an answer they are about to give.
+        foreach (KeyValuePair<string, PendingInput> entry in _pendingInputs)
+        {
+            if (entry.Value.Peer != 0 && entry.Value.Peer != (int)peerId) continue;
+
+            DebugUtilities.PrintPeerErrorRaw(
+                $"Peer {peerId} disconnected while we were waiting on its input — treating as skipped.");
+            CancelPendingInput(entry.Key, entry.Value);
+        }
     }
 
     /// <summary>
-    /// Complete the in-flight input request as skipped so the awaiting chain unwinds through the
-    /// existing StepSkippedException path. Called by the recovery sweep.
+    /// Complete every in-flight input request as skipped so the awaiting chains unwind through the
+    /// existing StepSkippedException path. Called by the recovery sweep, which is tearing the whole
+    /// step down — so it releases all of them, not just one.
     /// </summary>
     public void CancelPendingInputRequest()
     {
-        TaskCompletionSource<string> tcs = _pendingInputTcs;
+        foreach (KeyValuePair<string, PendingInput> entry in _pendingInputs)
+            CancelPendingInput(entry.Key, entry.Value);
+    }
+
+    private void CancelPendingInput(string id, PendingInput pending)
+    {
+        TaskCompletionSource<string> tcs = pending?.Tcs;
         if (tcs == null || tcs.Task.IsCompleted) return;
 
-        DebugUtilities.PrintPeer($"Cancelling pending input request (Id {_pendingInputId})");
+        DebugUtilities.PrintPeer($"Cancelling pending input request (Id {id})");
 
         // Complete with the request itself, marked skipped and carrying no responses — see the note on
-        // _pendingInputRequest for why this rather than TrySetCanceled.
-        InputRequest skipped = _pendingInputRequest;
+        // PendingInput.Request for why this rather than TrySetCanceled.
+        InputRequest skipped = pending.Request;
         if (skipped != null)
         {
             skipped.WasSkipped = true;
@@ -346,29 +393,32 @@ public partial class NetworkApi : Node
         {
             tcs.TrySetCanceled();
         }
-        ClearPendingInput(tcs);
+        ClearPendingInput(id, pending);
         GameFlow.Instance?.ClearCurrentInputRequest();
     }
 
-    private void ClearPendingInput(TaskCompletionSource<string> tcs)
+    /// <summary>
+    /// Drop the entry only if it is still the one <paramref name="pending"/> opened. The reference
+    /// check is what makes a retry safe: attempt 2 has already replaced the entry under a new Id, so
+    /// attempt 1 unwinding cannot remove it.
+    /// </summary>
+    private void ClearPendingInput(string id, PendingInput pending)
     {
-        if (ReferenceEquals(_pendingInputTcs, tcs))
-        {
-            _pendingInputTcs = null;
-            _pendingInputId = null;
-            _pendingInputPeer = 0;
-            _pendingInputRequest = null;
-            // Dropped with the rest: with no request in flight the host's "time out now" button has
-            // nothing to expire, and leaving a live TCS here would let a press arm the NEXT attempt.
-            _forceTimeoutTcs = null;
-        }
+        if (id == null || pending == null) return;
+        _pendingInputs.TryRemove(new KeyValuePair<string, PendingInput>(id, pending));
     }
 
     /// <summary>
     /// Tell every client to release any open board selection, so a client sitting on a
     /// SelectCountry/SelectUnit prompt for an aborted step does not stay stuck on it.
     /// </summary>
-    public void AbortRemoteInput()
+    /// <param name="targetPeer">
+    /// The one peer to release, or 0 for all of them. Aim it whenever only a single request is being
+    /// abandoned: a broadcast also tears down the prompts of players answering a concurrent request
+    /// (the opening discard asks everyone at once). The recovery sweep, which is abandoning the whole
+    /// step, passes 0 on purpose.
+    /// </param>
+    public void AbortRemoteInput(int targetPeer = 0)
     {
         // No session at all (single process, or the peer already torn down): there is nobody to Rpc, but
         // this process may still be sitting on its own prompt, so release it directly.
@@ -378,7 +428,15 @@ public partial class NetworkApi : Node
             return;
         }
         if (!Multiplayer.IsServer()) return;
-        Rpc(nameof(AbortInputRequest));
+        if (targetPeer == 0)
+        {
+            Rpc(nameof(AbortInputRequest));
+            return;
+        }
+        // RpcId does not call locally even for the host's own id, so the host releases its own prompt
+        // by hand — the same asymmetry CallLocal covers on the broadcast path.
+        if (targetPeer == Multiplayer.GetUniqueId()) AbortInputRequest();
+        else RpcId(targetPeer, nameof(AbortInputRequest));
     }
 
     /// <summary>Server → all peers: cancel any local board selection currently awaiting a click.</summary>
@@ -515,32 +573,36 @@ public partial class NetworkApi : Node
             InputRequest response = InputRequest.FromJson(dtoJson);
 
             // Drop responses that belong to a request we are no longer waiting on, so a late reply
-            // from an aborted step cannot resume a dead continuation.
-            TaskCompletionSource<string> tcs = _pendingInputTcs;
-            if (tcs == null)
-            {
-                DebugUtilities.PrintPeer($"Ignoring input response {response?.Id} — no request pending");
-                return;
-            }
-            if (response != null && _pendingInputId != null && response.Id != _pendingInputId)
+            // from an aborted step cannot resume a dead continuation. Looking the id up in
+            // _pendingInputs covers both of the old guards at once: "nothing pending" and "pending,
+            // but a different request" are the same miss, because each attempt is keyed by its own
+            // fresh Guid.
+            if (response?.Id == null || !_pendingInputs.TryRemove(response.Id, out PendingInput pending))
             {
                 DebugUtilities.PrintPeer(
-                    $"Ignoring stale input response (Id {response.Id}, waiting on {_pendingInputId})");
+                    $"Ignoring stale input response (Id {response?.Id}) — no matching request pending");
                 return;
             }
 
             // Assigned only once the response is known to be the one we are waiting on. It used to be
             // set above the guards, so a late reply to a timed-out request still overwrote the slot.
+            // Still a single slot with several requests in flight: it is diagnostic context for the
+            // timeout popup, so last-answered-wins is fine.
             GameFlow.Instance.CurrentInputRequest = response;
 
             // Clear the countdown on every peer, not just here. Below the guards on purpose: doing it for
-            // a stale reply would wipe the live countdown of a retry already in progress.
-            if (Multiplayer?.MultiplayerPeer != null)
-                Rpc(nameof(InputRequestAnswered));
-            else
-                InputRequestAnswered();
+            // a stale reply would wipe the live countdown of a retry already in progress — and only once
+            // nothing is left in flight, so the first player to answer a concurrent round of requests
+            // does not blank the countdown of everyone still choosing.
+            if (_pendingInputs.IsEmpty)
+            {
+                if (Multiplayer?.MultiplayerPeer != null)
+                    Rpc(nameof(InputRequestAnswered));
+                else
+                    InputRequestAnswered();
+            }
 
-            tcs.TrySetResult(dtoJson);
+            pending.Tcs.TrySetResult(dtoJson);
 
             // Kept for UI/debug listeners that were already observing this signal.
             EventBus.Emit(EventBus.SignalName.InputRequestResponseReceived, dtoJson);

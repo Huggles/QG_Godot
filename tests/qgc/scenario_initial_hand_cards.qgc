@@ -25,9 +25,18 @@
 # sit in the deck, and with bug 2 the hand is 9.
 # Run:  tests/run-cli.sh tests/qgc/scenario_initial_hand_cards.qgc
 
+# The mandatory opening discard, answered by hand for Germany rather than with `auto`.
+# PlaceCards runs before StartGame's top-up, so the two scenario cards are the first two in hand —
+# and auto-answering takes the first three, which would discard the very cards this test is about.
+# Options 8-10 are three of the drawn cards, so 41 and 18 survive to be asserted below.
+prompt                                  # Germany's opening discard
+discard 8 9 10
+auto 5                                  # the other five factions have nothing pinned here
+
 prompt                                  # turn 1, Germany, PLAY_CARD
 
-# Drawn TO seven, not seven on top of the two scenario cards. FAILS (9) with bug 2.
+# Drawn TO the opening hand size and cut back to seven, not seven on top of the two scenario cards.
+# FAILS (12) with bug 2.
 assert handsize GERMANY == 7
 
 assert card 41 in hand                  # Ardennes Offensive  — FAILS ("deck") with bug 1

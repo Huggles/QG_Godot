@@ -11,12 +11,16 @@
 #
 # Step logic now reads CardLogic.ActivationTrigger, which DoCard pins to the event the card was
 # activated against for the whole activation. The two assertions below are the two halves of the
-# card: the cost IS paid (decksize 25 -> 23) AND the removal IS blocked (the Navy is still there).
+# card: the cost IS paid (decksize 22 -> 20) AND the removal IS blocked (the Navy is still there).
 # Without the fix the first holds and the second does not.
 #
 # This is the only test covering the block-reaction path at all.
 #
 # Run:  tests/run-cli.sh tests/qgc/block_reaction_prevents_removal.qgc
+
+# The six mandatory opening discards, auto-answered — see opening_turn.qgc. This one is safe to
+# auto-answer; the deliberate absence of an answer command further down is not.
+auto 6
 
 prompt                                  # turn 1, Germany — synchronise with the running game
 
@@ -27,8 +31,10 @@ force deployUnit --faction UNITED_STATES --country NORTH_ATLANTIC --deploy BUILD
 assert units NORTH_ATLANTIC UNITED_STATES == 1
 
 # Deck composition, so re-derive after any change to QGData_Decks.json. Unit id 110 comes from the
-# scenario's deployments and is not affected by the decks.
-assert decksize UNITED_STATES == 25
+# scenario's deployments and is not affected by the decks. Three lower than it used to be: the
+# opening hand is dealt at OpeningHandSize rather than HandSize, and the three cards cut back come
+# off the hand into the discard pile, not back into the deck.
+assert decksize UNITED_STATES == 22
 
 api removeUnit --faction JAPAN --unit 110 --reason BATTLE
 pass                                    # UK declines Destroyers on the removal — this offer is correct
@@ -42,6 +48,6 @@ play 1                                  # US plays Radar
 # waiting for input and the runner reports a hard timeout. Do not "fix" that with an `auto` line.
 
 assert units NORTH_ATLANTIC UNITED_STATES == 1   # FAILS (0) if the block was lost
-assert decksize UNITED_STATES == 23              # the cost was still paid
+assert decksize UNITED_STATES == 20              # the cost was still paid
 
 quit

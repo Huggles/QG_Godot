@@ -9,6 +9,22 @@ public static partial class StaticGameData
 
     public static List<Faction> PlayableFactions = [Faction.GERMANY, Faction.UNITED_KINGDOM, Faction.JAPAN, Faction.SOVIET, Faction.ITALY, Faction.UNITED_STATES];
 
+    /// <summary>Steady-state hand size: the DRAW step's target and the DISCARD step's cap.</summary>
+    public const int HandSize = 7;
+
+    /// <summary>
+    /// Dealt once, in GameFlow.StartGame. Larger than <see cref="HandSize"/> on purpose: every
+    /// faction immediately discards <see cref="OpeningDiscardCount"/> of them, so the opening choice
+    /// is which seven to keep rather than which seven you were given.
+    /// </summary>
+    public const int OpeningHandSize = 10;
+
+    /// <summary>
+    /// Discarded by every faction before the first turn starts. OpeningHandSize - this must equal
+    /// <see cref="HandSize"/>, or turn one starts off the steady-state hand size.
+    /// </summary>
+    public const int OpeningDiscardCount = 3;
+
     /// <summary>
     /// The 1-based round a 1-based game turn belongs to — every faction takes one turn per round.
     /// </summary>

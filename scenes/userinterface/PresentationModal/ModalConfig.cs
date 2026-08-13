@@ -36,6 +36,16 @@ public class ModalConfig
     public static ModalConfig SelectMany(string title, List<PresentationItem> items, int min = 0, int max = -1)
         => new ModalConfig { Title = title, Items = items, Mode = ModalSelectionMode.MultiSelect, MinSelections = min, MaxSelections = max };
 
+    /// <summary>
+    /// Pick exactly <paramref name="count"/> items — no more, no fewer, and no Cancel.
+    ///
+    /// A mandatory discard used SelectMany(min: count), which leaves MaxSelections unlimited: the
+    /// player could select more than they were asked for and every one of them was discarded. The CLI
+    /// path (InputRequestSpec) has always clamped both ends; this is the GUI catching up.
+    /// </summary>
+    public static ModalConfig SelectExactly(string title, List<PresentationItem> items, int count)
+        => new ModalConfig { Title = title, Items = items, Mode = ModalSelectionMode.MultiSelect, MinSelections = count, MaxSelections = count };
+
     /// <summary>Place all items in a chosen order. Apply enabled only when all items are placed. No Cancel.</summary>
     public static ModalConfig Reorder(string title, List<PresentationItem> items)
         => new ModalConfig { Title = title, Items = items, Mode = ModalSelectionMode.Reorder, MinSelections = items.Count, MaxSelections = items.Count };

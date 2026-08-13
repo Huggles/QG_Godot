@@ -78,17 +78,18 @@ public partial class GameFlow : SingletonNode<GameFlow>
         {
             DebugUtilities.PrintPeer("GameFlow: Starting game");
             GameStateCalculator.Enabled = false;
-            // Draw *to* seven, not a flat seven. A scenario's initialHandCards are already in hand by
-            // now (SetupInitialGameState is awaited before StartGame in MultiplayerSession), so a flat
-            // draw dealt 7 + N and the faction had to dump the surplus at its first DISCARD step.
-            // Same shape as DrawStepHandlerDefault, which is the draw-to-7 every later turn uses.
+            // Draw *to* the opening hand size, not a flat deal. A scenario's initialHandCards are
+            // already in hand by now (SetupInitialGameState is awaited before StartGame in
+            // MultiplayerSession), so a flat draw dealt OpeningHandSize + N and the faction had to dump
+            // the surplus at its first DISCARD step. Same shape as DrawStepHandlerDefault, which is the
+            // draw-to-HandSize every later turn uses.
             //
             // Host-only by construction (StartGame runs behind the IsServer guard), so the count is
             // computed once against the authoritative hand and the resulting draws reach clients over
             // the replicated ChangeEvent stream.
             foreach (FactionState faction in gameState.PlayableFactionStates)
             {
-                int cardsToDraw = 7 - DeckState.ForFaction(faction.Faction).HandCardIds.Count;
+                int cardsToDraw = StaticGameData.OpeningHandSize - DeckState.ForFaction(faction.Faction).HandCardIds.Count;
                 if (cardsToDraw <= 0) continue; // scenario already placed a full hand or more
 
                 DrawCardsChangeEvent drawCardsChangeEvent =  new DrawCardsChangeEvent(Faction.NONE, faction.Faction, cardsToDraw, false);
@@ -97,6 +98,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
             }
             GameStateCalculator.Enabled = true;
             GameStateCalculator.CalculateAll();
+
+            // Everyone cuts down to HandSize before the first turn starts. After the recalculation
+            // above so the discard modal shows correctly-tagged cards, and before StartNewTurn so it
+            // lands ahead of Germany's TurnStep.START rather than inside it.
+            await OpeningDiscard.Run(StaticGameData.OpeningDiscardCount);
 
             foreach (Faction faction in StaticGameData.PlayableFactions)
             {

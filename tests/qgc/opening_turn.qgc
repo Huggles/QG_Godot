@@ -7,6 +7,11 @@
 # Only the answer commands (`prompt`, `play`, `select`, `pass`) wait for the game to reach a
 # prompt — so put a `prompt` first to synchronise, or your assertions read the pre-game state.
 
+# Every faction is dealt OpeningHandSize and must discard OpeningDiscardCount before the first turn
+# starts, so six mandatory discard prompts arrive ahead of anything else. Auto-answering takes the
+# first three cards of each hand (PassMode.NotAllowed), which is deterministic under the seed above.
+auto 6
+
 prompt                      # blocks until the first prompt: turn 1, Germany, PLAY_CARD
 
 assert turn == 1

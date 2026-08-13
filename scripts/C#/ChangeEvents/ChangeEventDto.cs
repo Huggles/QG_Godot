@@ -96,6 +96,13 @@ public class DiscardHandCardsChangeEventDto : ChangeEventDto
 public class ForceDiscardHandCardsChangeEventDto : ChangeEventDto
 {
     public int NumberOfCards { get; set; }
+
+    /// <summary>
+    /// The cards the target actually picked. On the wire because the client cannot work them out:
+    /// the choice is a player's, and re-running the input request on a replaying peer would send an
+    /// Authority-mode Rpc from a client. See ForceDiscardHandCardsChangeEvent.SelectionResolved.
+    /// </summary>
+    public List<int> DiscardedCardIds { get; set; }
 }
 
 public class DrawCardByNameChangeEventDto : ChangeEventDto
