@@ -393,7 +393,7 @@ public partial class MultiplayerLobby : Control
 		_openingDiscardCheckBox.Disabled = false;
 	}
 
-	private void OnInviteFriendsPressed() => SteamworksApi.Instance?.OpenInviteOverlay();
+	private void OnInviteFriendsPressed() => InviteFriendsDialog.Show(this);
 
 	private void JoinAt(string ip)
 	{
