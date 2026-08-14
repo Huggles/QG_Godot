@@ -121,7 +121,7 @@ public partial class MainMenu : Control
     {
         // An invite can arrive at any time, including mid-session. Joining then would tear down a
         // game in progress, so it is ignored unless we are idle on the menu.
-        if (Multiplayer.MultiplayerPeer != null)
+        if (InSession())
         {
             DebugUtilities.PrintPeer($"Ignoring Steam invite to {lobbyId}: already in a session");
             return;
@@ -139,7 +139,7 @@ public partial class MainMenu : Control
     /// </summary>
     private void OnSteamInviteReceived(ulong inviterSteamId, long lobbyId)
     {
-        if (Multiplayer.MultiplayerPeer != null)
+        if (InSession())
         {
             DebugUtilities.PrintPeer($"Ignoring Steam invite to {lobbyId}: already in a session");
             return;
@@ -155,6 +155,25 @@ public partial class MainMenu : Control
 
         _invitePromptOpen = true;
         Guard.FireAndForget(() => PromptInviteAsync(inviterSteamId, lobbyId), "MainMenu.SteamInvite");
+    }
+
+    /// <summary>
+    /// Whether this process is actually in a multiplayer session.
+    ///
+    /// Deliberately not the obvious <c>MultiplayerPeer != null</c>. Godot's MultiplayerAPI starts life
+    /// holding an <see cref="OfflineMultiplayerPeer"/>, which is non-null AND reports its connection
+    /// status as Connected, so the null check was already true on a freshly launched main menu — every
+    /// incoming Steam invite was being dropped as "already in a session". Same shape as the peer-adoption
+    /// check in <see cref="MultiplayerLobby"/>.
+    ///
+    /// Null is still a real state on this path: <see cref="SceneFlow.ChangeScene"/> with leaveSession
+    /// assigns null outright, and that does stick.
+    /// </summary>
+    private bool InSession()
+    {
+        MultiplayerPeer peer = Multiplayer?.MultiplayerPeer;
+        if (peer == null || peer is OfflineMultiplayerPeer) return false;
+        return peer.GetConnectionStatus() != MultiplayerPeer.ConnectionStatus.Disconnected;
     }
 
     private async Task PromptInviteAsync(ulong inviterSteamId, long lobbyId)
