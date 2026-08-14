@@ -15,6 +15,8 @@ public partial class BattleUnitChangeEvent : RemoveUnitChangeEvent
         return dto;
     }
 
-    public override string SummaryText() => $"{TriggeringFaction} battled {UnitState.Faction} unit in {CountryState.ForId(CountryId).Label}";
+    // The attacker is named with its player; the defending unit's faction is adjectival ("a Germany
+    // unit"), so it stays a plain label — naming both players makes this row unreadably long.
+    public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} battled {UnitState.Faction.Label()} unit in {CountryState.ForId(CountryId).Label}";
     public override string DebugText() => $"{Faction.GetNames(typeof(Faction))[(int)TriggeringFaction]} battled {UnitState.ForId(UnitId).Faction} in {CountryState.ForId(CountryId).Label}";
 }

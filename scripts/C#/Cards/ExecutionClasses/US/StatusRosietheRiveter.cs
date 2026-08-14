@@ -38,7 +38,7 @@ public partial class StatusRosietheRiveter : StatusCardLogic
                     await recycleEvent.Apply();
                 }
 
-                PresentationServices.Notification.ShowActionText($"{FactionState.ForEnum(Faction).FactionData.Label} placed {selectedIds.Count} card(s) on the bottom of their deck.", Faction);
+                PresentationServices.Notification.ShowActionText($"{Faction.WithPlayer()} placed {selectedIds.Count} card(s) on the bottom of their deck.", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
                 return null;
             })

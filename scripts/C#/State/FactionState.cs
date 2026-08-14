@@ -10,7 +10,8 @@ public partial class FactionState : StateObject
     private int _score { get; set; }
 
     public Faction Faction => FactionData.Faction;
-    public string FactionLabel => Faction.ToString();
+    /// <summary>Debug-log only (never on the wire — FactionStateDto does not carry it).</summary>
+    public string FactionLabel => Faction.Label();
     public bool Playable => StaticGameData.PlayableFactions.Contains(Faction) ? true : false;
 
     [JsonIgnore] private MultiplayerGameState GameState => GameSession.Current.GameState;

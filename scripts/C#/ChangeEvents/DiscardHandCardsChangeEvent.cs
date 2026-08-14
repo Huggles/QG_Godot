@@ -24,7 +24,7 @@ public partial class DiscardHandCardsChangeEvent : ChangeEvent
 
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
-        new ShowNotificationLabelAnimation($"{TriggeringFaction} makes {TargetFaction} discard {CardIds.Count} cards", TriggeringFaction),
+        new ShowNotificationLabelAnimation($"{TriggeringFaction.WithPlayer()} makes {TargetFaction.WithPlayer()} discard {CardIds.Count} cards", TriggeringFaction),
         new ShowDiscardModalAnimation(CardIds, "Discarded cards", TargetFaction)
     };
 

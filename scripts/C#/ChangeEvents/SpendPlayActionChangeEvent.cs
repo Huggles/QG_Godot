@@ -22,5 +22,5 @@ public partial class SpendPlayActionChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => $"{TriggeringFaction} spent their play action";
+    public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} spent their play action";
 }

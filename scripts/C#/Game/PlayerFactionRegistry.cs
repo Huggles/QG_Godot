@@ -143,6 +143,21 @@ public static class PlayerFactionRegistry
     }
 
     /// <summary>
+    /// The display name of the player controlling <paramref name="faction"/>, or null when nobody does
+    /// or they have no name.
+    ///
+    /// Deliberately NOT routed through <see cref="GetPeerIdForFaction"/>: that logs an error and falls
+    /// back to the host on a miss, which is right for input routing and wrong for a label — a history
+    /// row for Faction.NONE would spam the error log and then credit the host with it.
+    /// </summary>
+    public static string GetDisplayNameForFaction(Faction faction)
+    {
+        if (!_factionToPeerId.TryGetValue(faction, out int peerId)) return null;
+        if (!_peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene)) return null;
+        return string.IsNullOrWhiteSpace(playerScene.DisplayName) ? null : playerScene.DisplayName;
+    }
+
+    /// <summary>
     /// Get the PlayerScene that controls a specific faction
     /// </summary>
     public static PlayerScene GetPlayerSceneForFaction(Faction faction)

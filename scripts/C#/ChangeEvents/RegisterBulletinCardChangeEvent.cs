@@ -85,5 +85,5 @@ public partial class RegisterBulletinCardChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => $"{TargetFaction} gains the {MutatorClassName} Bulletin";
+    public override string SummaryText() => $"{TargetFaction.WithPlayer()} gains the {MutatorClassName} Bulletin";
 }

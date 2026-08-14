@@ -11,7 +11,8 @@ public partial class DeckState : StateObject
 
     public Faction Faction => FactionState.FactionData.Faction;
 
-    public string FactionLabel => Faction.ToString(); // Ensure Enum.Faction.GetKeys() returns a string list
+    /// <summary>Debug-log only (never on the wire — FactionStateDto does not carry it).</summary>
+    public string FactionLabel => Faction.Label();
 
     public List<int> AllCardIds =>
         DeckCardIds.Concat(HandCardIds)

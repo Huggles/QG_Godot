@@ -73,7 +73,12 @@ public partial class NetworkApi : Node
             
             PlayerScene player = AssetRepository.PlayerScenePackged.Instantiate<PlayerScene>();
             player.SetMultiplayerAuthority(peerId);
-            player.PlayerName = $"Player_{peerId}";
+
+            // PlayerName also becomes the Godot node Name, which is part of the NodePath RPCs resolve
+            // against — so it stays a deterministic identifier. The lobby name goes on DisplayName
+            // instead. Both set before AddChild so they are in place when _Ready runs.
+            player.PlayerName  = $"Player_{peerId}";
+            player.DisplayName = assignment.DisplayName;
 
             if (Multiplayer.IsServer())
             {

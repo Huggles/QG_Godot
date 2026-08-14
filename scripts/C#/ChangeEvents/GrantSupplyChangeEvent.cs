@@ -30,5 +30,5 @@ public partial class GrantSupplyChangeEvent : ChangeEvent
     }
 
     public override string SummaryText() =>
-        $"{TriggeringFaction} granted supply to {UnitIds.Count} unit(s) for this turn";
+        $"{TriggeringFaction.WithPlayer()} granted supply to {UnitIds.Count} unit(s) for this turn";
 }

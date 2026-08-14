@@ -23,7 +23,7 @@ public partial class ResponseMoscow : ResponseCardLogic
                 if(ActivationTrigger is RemoveUnitChangeEvent removeEvent){
                     removeEvent.IsBlocked = true;
                     removeEvent.UnitState.ImmuneForTurn = true;
-                    PresentationServices.Notification.ShowActionText($"{FactionState.ForEnum(Faction).FactionData.Label} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);
+                    PresentationServices.Notification.ShowActionText($"{Faction.WithPlayer()} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
                 return null;

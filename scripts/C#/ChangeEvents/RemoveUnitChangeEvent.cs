@@ -60,7 +60,7 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
 
     public override string SummaryText()
     {
-        return $"Removed {UnitState.Faction} unit from {CountryState.ForId(CountryId).Label}";
+        return $"Removed {UnitState.Faction.Label()} unit from {CountryState.ForId(CountryId).Label}";
     }
 
     public override string DebugText()

@@ -110,6 +110,6 @@ public partial class RecycleCardChangeEvent : ChangeEvent
             RecycleDestination.BottomOfDeck => "bottom of draw deck",
             _ => "draw deck"
         };
-        return $"{TriggeringFaction} recycled a card to {dest}";
+        return $"{TriggeringFaction.WithPlayer()} recycled a card to {dest}";
     }
 }

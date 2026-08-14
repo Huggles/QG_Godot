@@ -66,11 +66,11 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         {
             List<ChangeEventAnimation> animations = new()
             {
-                new ShowNotificationLabelAnimation($"{TriggeringFaction} makes {TargetFaction} discard {NumberOfCards} cards", TriggeringFaction),
+                new ShowNotificationLabelAnimation($"{TriggeringFaction.WithPlayer()} makes {TargetFaction.WithPlayer()} discard {NumberOfCards} cards", TriggeringFaction),
                 new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards", TargetFaction)
             };
             if (UndischargedCards > 0)
-                animations.Add(new ShowNotificationLabelAnimation($"{TargetFaction} loses {UndischargedCards} VP for {UndischargedCards} card(s) it could not discard", TargetFaction));
+                animations.Add(new ShowNotificationLabelAnimation($"{TargetFaction.WithPlayer()} loses {UndischargedCards} VP for {UndischargedCards} card(s) it could not discard", TargetFaction));
             return animations;
         }
     }
@@ -87,6 +87,6 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
     }
 
     public override string SummaryText() => UndischargedCards > 0
-        ? $"{TargetFaction} was forced to discard {NumberOfCards} cards by {TriggeringFaction}, but only had {DiscardedCardIds.Count} left and lost {UndischargedCards} VP"
-        : $"{TargetFaction} was forced to discard {NumberOfCards} cards by {TriggeringFaction}";
+        ? $"{TargetFaction.WithPlayer()} was forced to discard {NumberOfCards} cards by {TriggeringFaction.WithPlayer()}, but only had {DiscardedCardIds.Count} left and lost {UndischargedCards} VP"
+        : $"{TargetFaction.WithPlayer()} was forced to discard {NumberOfCards} cards by {TriggeringFaction.WithPlayer()}";
 }

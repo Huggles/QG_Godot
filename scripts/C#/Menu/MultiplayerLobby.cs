@@ -81,6 +81,17 @@ public partial class MultiplayerLobby : Control
 
 	/// <summary>peerId → name Label; text is also used as source for SyncPlayerList RPC.</summary>
 	private readonly Dictionary<int, Label>          _playerLabels    = new();
+	/// <summary>
+	/// peerId → the name that peer reported for itself, WITHOUT the " (You)"/" (Host)" decoration the
+	/// row label carries — which is why this cannot just read <see cref="_playerLabels"/>. Carried into
+	/// the game on <see cref="PlayerFactionAssignment.DisplayName"/> by <see cref="StartGame"/>.
+	///
+	/// Absent for a peer that has not reported one yet: the "Player N" that <see cref="OnPeerConnected"/>
+	/// puts in the row is a host-invented placeholder, not a name, and showing it in game would be a lie
+	/// about who is playing. Only the HOST's copy matters — StartMultiplayerSession and StartNew both
+	/// return early on a client, so only the host's list ever reaches LoadPlayers on any peer.
+	/// </summary>
+	private readonly Dictionary<int, string>         _playerNames     = new();
 	/// <summary>peerId → root PanelContainer of that player's row.</summary>
 	private readonly Dictionary<int, PanelContainer> _playerRowPanels = new();
 	/// <summary>peerId → { faction → TextureButton }.</summary>
@@ -172,7 +183,7 @@ public partial class MultiplayerLobby : Control
 
 			int me = Multiplayer.GetUniqueId();
 			UpdateStatusLabel("Connected – waiting for lobby data...");
-			AddPlayerRow(me, $"{LocalDisplayName()} (You)");
+			AddPlayerRow(me, $"{LocalDisplayName()} (You)", LocalDisplayName());
 			// Deferred so this node has finished entering the tree before the RPC goes out.
 			CallDeferred(nameof(RequestLobbyStateFromHost));
 			return;
@@ -255,7 +266,9 @@ public partial class MultiplayerLobby : Control
 		int sender = Multiplayer.GetRemoteSenderId();
 		if (!_playerLabels.TryGetValue(sender, out Label label)) return;
 
-		label.Text = SanitisePlayerName(displayName, sender);
+		string clean = SanitisePlayerName(displayName, sender);
+		label.Text            = clean;
+		_playerNames[sender]  = clean;
 		Rpc(nameof(SyncPlayerList), GetPlayerListData());
 	}
 
@@ -372,7 +385,7 @@ public partial class MultiplayerLobby : Control
 	/// <summary>Shared by both host paths, so the ENet flow keeps behaving exactly as it did.</summary>
 	private void EnterHostUiState()
 	{
-		AddPlayerRow(1, $"{LocalDisplayName()} (Host)");
+		AddPlayerRow(1, $"{LocalDisplayName()} (Host)", LocalDisplayName());
 		_startGameButton.Visible  = true;
 		_startGameButton.Disabled = true; // unlocks once all 6 factions are assigned
 		_scenarioPicker.Disabled  = false;
@@ -614,8 +627,11 @@ public partial class MultiplayerLobby : Control
 			byPeer[peerId].Add(faction);
 		}
 
+		// The name rides along so the game can print "Germany (Bob)" instead of just "Germany". Runs on
+		// every peer, but only the host's list is ever serialised onto the wire (StartMultiplayerSession
+		// returns early on a client), so a client's mostly-empty name dictionary is harmless here.
 		var playerFactionAssignments = byPeer
-			.Select(kv => new PlayerFactionAssignment(kv.Key, kv.Value))
+			.Select(kv => new PlayerFactionAssignment(kv.Key, kv.Value, _playerNames.GetValueOrDefault(kv.Key)))
 			.ToList();
 
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(playerFactionAssignments);
@@ -731,7 +747,14 @@ public partial class MultiplayerLobby : Control
 		DebugUtilities.PrintPeer("Connected to server");
 		int me = Multiplayer.GetUniqueId();
 		UpdateStatusLabel("Connected – waiting for lobby data...");
-		AddPlayerRow(me, $"{LocalDisplayName()} (You)");
+		AddPlayerRow(me, $"{LocalDisplayName()} (You)", LocalDisplayName());
+
+		// Same reason as the adopted-peer branch in ReadyInternal: the host cannot work a client's name
+		// out for itself, so this peer has to report it or the host is left with the "Player N"
+		// placeholder — and with no name to put on the assignment, nobody is named in game. This branch
+		// is the JoinAt path (F6/F7 debug multiplayer, auto_join), which used to miss the report
+		// entirely. Deferred for the same reason: the node has to exist on the far side first.
+		CallDeferred(nameof(RequestLobbyStateFromHost));
 	}
 
 	private void OnConnectionFailed()
@@ -763,7 +786,12 @@ public partial class MultiplayerLobby : Control
 	// Player row UI
 	// ══════════════════════════════════════════════════════════════════════════
 
-	private void AddPlayerRow(int peerId, string playerName)
+	/// <param name="reportedName">
+	/// The peer's own name, undecorated, for <see cref="_playerNames"/> — or null when
+	/// <paramref name="playerName"/> is a placeholder the host invented rather than a name the peer
+	/// reported. See the note on <see cref="_playerNames"/>.
+	/// </param>
+	private void AddPlayerRow(int peerId, string playerName, string reportedName = null)
 	{
 		if (_playerLabels.ContainsKey(peerId)) return;
 
@@ -836,6 +864,7 @@ public partial class MultiplayerLobby : Control
 		_playerListContainer.AddChild(panel);
 		_playerLabels[peerId]    = nameLabel;
 		_playerRowPanels[peerId] = panel;
+		if (reportedName != null) _playerNames[peerId] = reportedName;
 
 		// Initialise visual states for the new row based on current assignments.
 		foreach (var (f, b) in _factionButtons[peerId])
@@ -852,6 +881,7 @@ public partial class MultiplayerLobby : Control
 			_playerRowPanels.Remove(peerId);
 		}
 		_playerLabels.Remove(peerId);
+		_playerNames.Remove(peerId);
 		_factionButtons.Remove(peerId);
 		DebugUtilities.PrintPeer($"Removed player row: Peer {peerId}");
 	}
@@ -861,6 +891,7 @@ public partial class MultiplayerLobby : Control
 		foreach (var panel in _playerRowPanels.Values) panel.QueueFree();
 		_playerRowPanels.Clear();
 		_playerLabels.Clear();
+		_playerNames.Clear();
 		_factionButtons.Clear();
 	}
 

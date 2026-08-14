@@ -30,6 +30,6 @@ public partial class DrawCardsChangeEvent : ChangeEvent
 
     public override string SummaryText()
     {
-        return $"{TargetFaction} drew {NumberOfCards} card(s) from the deck";
+        return $"{TargetFaction.WithPlayer()} drew {NumberOfCards} card(s) from the deck";
     }
 }

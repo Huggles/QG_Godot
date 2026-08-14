@@ -31,8 +31,8 @@ public partial class PlayCardChangeEvent : ChangeEvent
         new ShowCardsModalAnimation(
             new List<int> { SourceCardId },
             SourceCardState.IsFaceVisibleToLocalPlayer
-                ? $"{FactionState.ForEnum(TriggeringFaction).FactionData.Label} plays {SourceCardState.CardName}"
-                : $"{FactionState.ForEnum(TriggeringFaction).FactionData.Label} plays a Response card")
+                ? $"{TriggeringFaction.WithPlayer()} plays {SourceCardState.CardName}"
+                : $"{TriggeringFaction.WithPlayer()} plays a Response card")
     };
 
     protected override async Task<bool> ExecuteAsync(){
@@ -55,6 +55,6 @@ public partial class PlayCardChangeEvent : ChangeEvent
 
     public override string SummaryText() => 
         SourceCardState.CardData.CardType == CardType.RESPONSE ? 
-        $"{TriggeringFaction} played a response card (hidden)" :
-        $"{TriggeringFaction} played {SourceCardState.CardData.CardType} card {SourceCardState.CardName}";
+        $"{TriggeringFaction.WithPlayer()} played a response card (hidden)" :
+        $"{TriggeringFaction.WithPlayer()} played {SourceCardState.CardData.CardType} card {SourceCardState.CardName}";
 }

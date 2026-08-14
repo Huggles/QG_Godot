@@ -111,12 +111,12 @@ public abstract partial class InputRequest
         }
         else
         {
-            PresentationServices.Notification.ShowActionText($"Waiting on {TargetFaction} input...");
+            PresentationServices.Notification.ShowActionText($"Waiting on {TargetFaction.WithPlayer()} input...");
 
             // No finally to hide it here: this branch returns immediately rather than awaiting anything,
             // so the countdown is cleared where the waiting text already is — NetworkApi's
             // ReceiveInputResponse (the answer arrived) and AbortInputRequest (the host gave up on it).
-            InputTimerDisplay.Current?.Start(TimeoutSeconds, $"Waiting on {TargetFaction}");
+            InputTimerDisplay.Current?.Start(TimeoutSeconds, $"Waiting on {TargetFaction.WithPlayer()}");
         }
     }
 

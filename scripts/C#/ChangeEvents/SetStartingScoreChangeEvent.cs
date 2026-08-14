@@ -30,5 +30,5 @@ public partial class SetStartingScoreChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => $"{TriggeringFaction} starts with {Score} VP";
+    public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} starts with {Score} VP";
 }

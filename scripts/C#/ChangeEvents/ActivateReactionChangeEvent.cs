@@ -50,7 +50,7 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         {
             new ShowCardsModalAnimation(
                 new List<int> { SourceCardId },
-                $"{FactionState.ForEnum(TriggeringFaction).FactionData.Label} activates {SourceCardState.CardName}")
+                $"{TriggeringFaction.WithPlayer()} activates {SourceCardState.CardName}")
         }
         : new();
 
@@ -78,5 +78,5 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => $"{TriggeringFaction} activated card {SourceCardState.CardName}";
+    public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} activated card {SourceCardState.CardName}";
 }

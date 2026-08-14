@@ -165,7 +165,9 @@ public partial class GameAPI : Node
             {
                 // Optionally show the cards that were drawn
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(drawnCardIds, false);
-                await PresentationServices.Notification.ShowModal(presentationItems, $"{faction} drew cards");
+                // Label(), not WithPlayer(): this branch is gated on LocalPlayerControls, so the modal is
+                // only ever shown to the faction's own controller — naming them back at themselves is noise.
+                await PresentationServices.Notification.ShowModal(presentationItems, $"{faction.Label()} drew cards");
             }
             else
             {
@@ -182,7 +184,7 @@ public partial class GameAPI : Node
         DeckState.ForFaction(faction).DiscardHandCards(cardIds);
         if(!PresentationServices.Notification.LocalPlayerControls(faction))
         {
-            string message = $"{faction} discarded {cardIds.Count} card(s)...";
+            string message = $"{faction.WithPlayer()} discarded {cardIds.Count} card(s)...";
             PresentationServices.Notification.ShowActionText(message, faction);
         }
         DebugUtilities.PrintPeer($"Faction {faction} discards {cardIds.Count} card(s) from hand");

@@ -27,5 +27,5 @@ public partial class ReorderDeckChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => $"{TargetFaction} reordered the top {ReorderedCardIds.Count} cards of their deck";
+    public override string SummaryText() => $"{TargetFaction.WithPlayer()} reordered the top {ReorderedCardIds.Count} cards of their deck";
 }

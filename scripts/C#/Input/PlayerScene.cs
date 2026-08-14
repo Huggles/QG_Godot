@@ -85,6 +85,19 @@ public partial class PlayerScene : CharacterBody2D
         }
     }
 
+    /// <summary>
+    /// The human name to show beside this player's factions ("Bob"), or null when there is none.
+    ///
+    /// Deliberately NOT folded into <see cref="PlayerName"/>: that setter also writes the Godot node
+    /// Name, which is part of the NodePath Godot resolves RPCs against (PeerReadinessComponent is
+    /// fetched as a child of this node), so it has to stay a deterministic, collision-free identifier.
+    /// A Steam persona is neither — it can hold spaces, unicode, and duplicates.
+    ///
+    /// Set identically on every peer: NetworkApi.LoadPlayers deserialises the host's assignment list
+    /// everywhere, so a name resolved on the host matches what a client would resolve locally.
+    /// </summary>
+    public string DisplayName { get; set; }
+
     public override void _EnterTree()
     {
         base._EnterTree();

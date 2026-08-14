@@ -32,7 +32,7 @@ public partial class ScorePointsChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => $"{TriggeringFaction} scored {VPTurnSummary.TotalScore} points";
+    public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} scored {VPTurnSummary.TotalScore} points";
 
     
 }
