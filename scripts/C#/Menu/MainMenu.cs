@@ -64,6 +64,12 @@ public partial class MainMenu : Control
     /// </summary>
     private bool _flowBusy;
 
+    /// <summary>
+    /// True while an invite prompt is on screen, so a friend spamming the invite button cannot stack a
+    /// pile of dialogs on top of each other.
+    /// </summary>
+    private bool _invitePromptOpen;
+
     // Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
     // surfacing rather than a silent console line.
     public override void _Ready() => Guard.Try(ReadyInternal, "MainMenu._Ready");
@@ -91,18 +97,25 @@ public partial class MainMenu : Control
         quit.Pressed            += OnQuitPressed;
 
         if (SteamworksApi.Instance != null)
-            SteamworksApi.Instance.JoinRequested += OnSteamJoinRequested;
+        {
+            SteamworksApi.Instance.JoinRequested  += OnSteamJoinRequested;
+            SteamworksApi.Instance.InviteReceived += OnSteamInviteReceived;
+        }
     }
 
     public override void _ExitTree()
     {
         if (SteamworksApi.Instance != null)
-            SteamworksApi.Instance.JoinRequested -= OnSteamJoinRequested;
+        {
+            SteamworksApi.Instance.JoinRequested  -= OnSteamJoinRequested;
+            SteamworksApi.Instance.InviteReceived -= OnSteamInviteReceived;
+        }
     }
 
     /// <summary>
-    /// The player accepted an invite or pressed "Join game" in the Steam overlay. Handled by handing
-    /// the lobby to the friends screen, which owns the join-then-connect sequence.
+    /// The player accepted an invite or pressed "Join game" in the Steam overlay. The decision is already
+    /// made, so this joins straight away, handing the lobby to the friends screen which owns the
+    /// join-then-connect sequence.
     /// </summary>
     private void OnSteamJoinRequested(long lobbyId)
     {
@@ -117,6 +130,55 @@ public partial class MainMenu : Control
         PendingInviteLobbyId = lobbyId;
         ClearLobbyIntent();
         SceneFlow.ChangeScene(this, SteamLobbiesScenePath);
+    }
+
+    /// <summary>
+    /// An invite arrived while the game is already open. Steam's own notification is a chat toast that is
+    /// easy to miss and drags the player through the overlay, so the invite is put up as a prompt here
+    /// instead — but only on the menu, and only when there is nothing else in flight to interrupt.
+    /// </summary>
+    private void OnSteamInviteReceived(ulong inviterSteamId, long lobbyId)
+    {
+        if (Multiplayer.MultiplayerPeer != null)
+        {
+            DebugUtilities.PrintPeer($"Ignoring Steam invite to {lobbyId}: already in a session");
+            return;
+        }
+
+        // Mid host/join flow the player is already several clicks into something. Interrupting that would
+        // also risk accepting while a lobby is halfway through being created, which would strand it.
+        if (_flowBusy || _invitePromptOpen)
+        {
+            DebugUtilities.PrintPeer($"Ignoring Steam invite to {lobbyId}: the menu is busy");
+            return;
+        }
+
+        _invitePromptOpen = true;
+        Guard.FireAndForget(() => PromptInviteAsync(inviterSteamId, lobbyId), "MainMenu.SteamInvite");
+    }
+
+    private async Task PromptInviteAsync(ulong inviterSteamId, long lobbyId)
+    {
+        try
+        {
+            string inviter = SteamworksApi.Instance.PersonaNameFor(inviterSteamId);
+
+            bool join = await MenuNotice.ShowConfirmAsync(this,
+                "Game invite",
+                $"{inviter} invited you to their game.",
+                "Join Game",
+                "Ignore");
+
+            if (!IsInstanceValid(this) || !join) return;
+
+            // Re-checked after the await: the player had all the time in the world to start something
+            // else while the prompt was up.
+            OnSteamJoinRequested(lobbyId);
+        }
+        finally
+        {
+            if (IsInstanceValid(this)) _invitePromptOpen = false;
+        }
     }
 
     private void OnSinglePlayerPressed()

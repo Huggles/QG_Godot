@@ -103,8 +103,19 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	public long CurrentLobbyId { get; private set; }
 	public bool IsLobbyOwner   { get; private set; }
 
-	/// <summary>Steam overlay "Join game" or an accepted invite. Carries the lobby to join.</summary>
+	/// <summary>
+	/// The player has already decided to join: they pressed "Join game" in the Steam overlay, or accepted
+	/// an invite from outside the running game. Carries the lobby to join, and needs no further asking.
+	/// </summary>
 	public event Action<long> JoinRequested;
+	/// <summary>
+	/// A friend invited us while the game was running — carries (inviter, lobby).
+	///
+	/// Deliberately separate from <see cref="JoinRequested"/>: nothing has been accepted here, so a
+	/// listener must ask the player first. Firing both from one event is what used to drag a player
+	/// straight out of the menu and into a lobby the moment an invite arrived.
+	/// </summary>
+	public event Action<ulong, long> InviteReceived;
 	/// <summary>A member joined or left <see cref="CurrentLobbyId"/>.</summary>
 	public event Action LobbyMembershipChanged;
 	/// <summary>Steam finished downloading a user's avatar. Carries the user it belongs to.</summary>
@@ -593,11 +604,15 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		AvatarUpdated?.Invoke((ulong)avatarId);
 	}
 
+	/// <summary>
+	/// Fires while the game is already running, which is exactly the case the Steam chat notification
+	/// handles badly — so this becomes an in-game prompt rather than an automatic join.
+	/// </summary>
 	private void OnLobbyInvite(long inviter, long lobby, long game)
 	{
 		if (game != AppId) return;
-		DebugUtilities.PrintPeer($"Steam: invited to lobby {lobby}");
-		JoinRequested?.Invoke(lobby);
+		DebugUtilities.PrintPeer($"Steam: {PersonaNameFor((ulong)inviter)} invited us to lobby {lobby}");
+		InviteReceived?.Invoke((ulong)inviter, lobby);
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
