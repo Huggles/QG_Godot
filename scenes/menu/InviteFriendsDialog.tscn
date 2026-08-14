@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://binvitefriends"]
+
+[ext_resource type="PackedScene" uid="uid://bqmodalshelf" path="res://scenes/menu/MenuModalShell.tscn" id="1_shell"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/InviteFriendsDialog.cs" id="2_script"]
+
+[node name="InviteFriendsDialog" instance=ExtResource("1_shell")]
+script = ExtResource("2_script")
+
+[node name="Title" parent="Root/Centre/Panel/Margin/Box" index="0"]
+text = "Invite Friends"
+
+[node name="StatusLabel" type="Label" parent="Root/Centre/Panel/Margin/Box" index="1"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Scroll" type="ScrollContainer" parent="Root/Centre/Panel/Margin/Box" index="2"]
+custom_minimum_size = Vector2(0, 380)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="FriendList" type="VBoxContainer" parent="Root/Centre/Panel/Margin/Box/Scroll" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="3"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RefreshButton" type="Button" parent="Root/Centre/Panel/Margin/Box/Buttons" index="0"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Refresh"
+
+[node name="Spacer" type="Control" parent="Root/Centre/Panel/Margin/Box/Buttons" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="Root/Centre/Panel/Margin/Box/Buttons" index="2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Close"

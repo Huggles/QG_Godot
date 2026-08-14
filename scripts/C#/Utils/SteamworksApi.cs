@@ -27,6 +27,29 @@ public sealed record FriendLobby(
 	public bool IsFull => MaxMembers > 0 && Members >= MaxMembers;
 }
 
+/// <summary>Friend presence, exposed so no menu code has to reference <see cref="Steam.PersonaState"/>.</summary>
+public enum SteamPresence
+{
+	Online,
+	LookingToPlay,
+	Away,
+	Busy,
+	Snooze,
+}
+
+/// <summary>
+/// One online friend, as shown in <c>InviteFriendsDialog</c>.
+///
+/// <see cref="InThisGame"/> is the closest thing Steam offers to "owns this game": the client API has no
+/// ownership query at all, only what a user is running right now.
+/// </summary>
+public sealed record SteamFriend(
+	ulong         SteamId,
+	string        Name,
+	SteamPresence Presence,
+	bool          InThisGame,
+	bool          AlreadyInLobby);
+
 /// <summary>
 /// The only place in the game that talks to Steamworks. Everything else asks
 /// <see cref="IsAvailable"/> and calls the async helpers here, so a missing or signed-out Steam
@@ -84,6 +107,8 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	public event Action<long> JoinRequested;
 	/// <summary>A member joined or left <see cref="CurrentLobbyId"/>.</summary>
 	public event Action LobbyMembershipChanged;
+	/// <summary>Steam finished downloading a user's avatar. Carries the user it belongs to.</summary>
+	public event Action<ulong> AvatarUpdated;
 
 	// ══════════════════════════════════════════════════════════════════════════
 	// Lifecycle
@@ -150,6 +175,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_steam.LobbyChatUpdateSignal += OnLobbyChatUpdate;
 		_steam.JoinRequestedSignal   += OnJoinRequested;
 		_steam.LobbyInviteSignal     += OnLobbyInvite;
+		_steam.AvatarLoadedSignal    += OnAvatarLoaded;
 
 		// Peer support is logged separately because it fails independently of Steam itself: the plain
 		// GodotSteam build initialises fine but ships no SteamMultiplayerPeer, and an export built
@@ -276,11 +302,21 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		IsLobbyOwner   = false;
 	}
 
-	/// <summary>Opens the Steam overlay invite dialog. Silently no-ops in the editor.</summary>
-	public void OpenInviteOverlay()
+	/// <summary>
+	/// Sends a lobby invite straight to a friend's Steam client, bypassing the overlay entirely — the
+	/// overlay does not render in the editor, which made the invite path untestable during development.
+	///
+	/// The invitee needs no new code: the invite arrives on their <c>LobbyInviteSignal</c>, which
+	/// <see cref="OnLobbyInvite"/> already turns into a <see cref="JoinRequested"/>. A friend who is online
+	/// but not running the game gets it as a Steam notification that launches the game.
+	///
+	/// Returns false when the invite could not be sent. Steam reports no callback for this, so a false
+	/// return is the only failure signal there is.
+	/// </summary>
+	public bool InviteToCurrentLobby(ulong friendSteamId)
 	{
-		if (!_available || CurrentLobbyId == 0) return;
-		_steam.ActivateGameOverlayInviteDialog(CurrentLobbyId);
+		if (!_available || CurrentLobbyId == 0 || friendSteamId == 0) return false;
+		return _steam.InviteUserToLobby(CurrentLobbyId, (long)friendSteamId);
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -378,6 +414,137 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
+	// Friends (invite list)
+	// ══════════════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// Every friend who is not offline, with the ones currently running this game first.
+	///
+	/// Synchronous on purpose: unlike <see cref="GetFriendLobbiesAsync"/>, which has to wait on
+	/// LobbyDataUpdateSignal for lobbies we are not a member of, every call below answers from the local
+	/// friends cache immediately.
+	///
+	/// The list is deliberately NOT filtered down to people who own the game: the client API has no
+	/// ownership query, and this build runs on app 480 (Spacewar) which every Steam user can launch. So
+	/// ownership is surfaced as the <see cref="SteamFriend.InThisGame"/> hint and the sort order instead,
+	/// which is exactly what Steam's own invite dialog does.
+	/// </summary>
+	public List<SteamFriend> GetOnlineFriends()
+	{
+		var friends = new List<SteamFriend>();
+		if (!_available) return friends;
+
+		// Anyone already here is shown as such rather than being invitable again.
+		var members = new HashSet<ulong>();
+		if (CurrentLobbyId != 0)
+		{
+			long memberCount = _steam.GetNumLobbyMembers(CurrentLobbyId);
+			for (long i = 0; i < memberCount; i++)
+				members.Add((ulong)_steam.GetLobbyMemberByIndex(CurrentLobbyId, i));
+		}
+
+		// FlagImmediate = actual friends. The default (FlagAll) would also include blocked users and
+		// pending requests, who must never be invitable.
+		const long flags = (long)Steam.FriendFlags.FlagImmediate;
+
+		long friendCount = _steam.GetFriendCount(flags);
+		for (long i = 0; i < friendCount; i++)
+		{
+			long friendId = _steam.GetFriendByIndex(i, flags);
+			if (friendId == 0 || (ulong)friendId == LocalSteamId) continue;
+
+			Steam.PersonaState state = _steam.GetFriendPersonaState(friendId);
+			if (state == Steam.PersonaState.Offline) continue;
+
+			bool inThisGame = false;
+			Godot.Collections.Dictionary played = _steam.GetFriendGamePlayed(friendId);
+			if (played != null && played.TryGetValue("id", out Variant playedApp))
+				inThisGame = playedApp.As<long>() == AppId;
+
+			friends.Add(new SteamFriend(
+				SteamId:        (ulong)friendId,
+				Name:           PersonaNameFor((ulong)friendId),
+				Presence:       ToPresence(state),
+				InThisGame:     inThisGame,
+				AlreadyInLobby: members.Contains((ulong)friendId)));
+		}
+
+		friends.Sort((a, b) =>
+		{
+			if (a.InThisGame != b.InThisGame) return a.InThisGame ? -1 : 1;
+			if (a.Presence   != b.Presence)   return a.Presence.CompareTo(b.Presence);
+			return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+		});
+
+		return friends;
+	}
+
+	/// <summary>
+	/// Invisible collapses onto Online: a friend showing as invisible to us is simply reachable, and there
+	/// is nothing useful to tell the player about it.
+	/// </summary>
+	private static SteamPresence ToPresence(Steam.PersonaState state) => state switch
+	{
+		Steam.PersonaState.Busy            => SteamPresence.Busy,
+		Steam.PersonaState.Away            => SteamPresence.Away,
+		Steam.PersonaState.Snooze          => SteamPresence.Snooze,
+		Steam.PersonaState.LookingToTrade  => SteamPresence.LookingToPlay,
+		Steam.PersonaState.LookingToPlay   => SteamPresence.LookingToPlay,
+		_                                  => SteamPresence.Online,
+	};
+
+	private readonly Dictionary<ulong, ImageTexture> _avatarCache = new();
+
+	/// <summary>
+	/// A user's small (32px) avatar, or null when Steam has not downloaded it yet —
+	/// <see cref="AvatarUpdated"/> fires for that user once it arrives, so callers can ask again.
+	/// Cached, so rebuilding a friends list does not re-decode every image.
+	/// </summary>
+	public ImageTexture SmallAvatarFor(ulong steamId)
+	{
+		if (!_available || steamId == 0) return null;
+		if (_avatarCache.TryGetValue(steamId, out ImageTexture cached)) return cached;
+
+		long handle = _steam.GetSmallFriendAvatar((long)steamId);
+		if (handle == 0)
+		{
+			// Not in the local cache. Asking for it starts the download; the answer comes back on
+			// AvatarLoadedSignal rather than from this call.
+			_steam.GetPlayerAvatar((long)Steam.AvatarSizes.Small, (long)steamId);
+			return null;
+		}
+
+		ImageTexture texture = BuildAvatarTexture(handle);
+		if (texture != null) _avatarCache[steamId] = texture;
+		return texture;
+	}
+
+	/// <summary>
+	/// Turns a Steam image handle into a texture. Every field is checked rather than assumed: these two
+	/// dictionaries come straight from the GDExtension, and a missing key would otherwise throw from
+	/// inside a UI rebuild.
+	/// </summary>
+	private ImageTexture BuildAvatarTexture(long handle)
+	{
+		Godot.Collections.Dictionary size = _steam.GetImageSize(handle);
+		Godot.Collections.Dictionary rgba = _steam.GetImageRgba(handle);
+		if (size == null || rgba == null) return null;
+
+		if (!size.TryGetValue("width",  out Variant widthValue))  return null;
+		if (!size.TryGetValue("height", out Variant heightValue)) return null;
+		if (!rgba.TryGetValue("buffer", out Variant bufferValue)) return null;
+
+		int    width  = widthValue.As<int>();
+		int    height = heightValue.As<int>();
+		byte[] buffer = bufferValue.As<byte[]>();
+
+		if (width <= 0 || height <= 0 || buffer == null || buffer.Length < width * height * 4) return null;
+
+		Image image = Image.CreateFromData(width, height, false, Image.Format.Rgba8, buffer);
+		return image == null ? null : ImageTexture.CreateFromImage(image);
+	}
+
+	// ══════════════════════════════════════════════════════════════════════════
 	// Steam callbacks
 	// ══════════════════════════════════════════════════════════════════════════
 
@@ -412,6 +579,18 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	{
 		DebugUtilities.PrintPeer($"Steam: join requested for lobby {lobbyId}");
 		JoinRequested?.Invoke(lobbyId);
+	}
+
+	/// <summary>
+	/// The signal's own payload is deliberately ignored. It carries the pixels as a
+	/// <c>Godot.Collections.Array</c>, whose element typing is the fragile part of the generated bindings;
+	/// re-reading the handle through <see cref="BuildAvatarTexture"/> takes the one path that is already
+	/// proven. All this does is invalidate the cache and tell listeners to ask again.
+	/// </summary>
+	private void OnAvatarLoaded(long avatarId, long size, Godot.Collections.Array data)
+	{
+		_avatarCache.Remove((ulong)avatarId);
+		AvatarUpdated?.Invoke((ulong)avatarId);
 	}
 
 	private void OnLobbyInvite(long inviter, long lobby, long game)
