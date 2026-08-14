@@ -4,6 +4,7 @@
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 1,
+  "openingDiscard": false,
   "randomizeStartingVP": true,
   "randomStartingVPMin": 0,
   "randomStartingVPMax": 20,

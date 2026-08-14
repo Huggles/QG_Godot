@@ -93,6 +93,11 @@ public partial class GameModeSelectionScreen : Control
 	{
 		GameManager.PendingScenarioPath = scenarioPath;
 		MenuSeedField.Commit(_seedInput);
+		// This screen offers no opening-discard toggle, so the scenario's own answer always wins.
+		// Explicit rather than relying on SetSelectedScenarioByIndex, which only runs if the player
+		// actually changed the picker — an override left over from a lobby session earlier in the
+		// same process would otherwise still be sitting in the static.
+		GameManager.PendingOpeningDiscard = null;
 
 		var assignments = new List<PlayerFactionAssignment>
 		{

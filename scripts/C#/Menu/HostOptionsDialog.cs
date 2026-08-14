@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 /// <summary>
 /// "Host Game" step one: host over plain Godot networking (ENet, exactly as before) or over Steam,
 /// and for Steam collect the lobby size and visibility.
+///
+/// Layout lives in <c>res://scenes/menu/HostOptionsDialog.tscn</c>, an inherited scene of
+/// <see cref="MenuModal"/>'s shell — see that class for how the pair fit together.
 /// </summary>
 public partial class HostOptionsDialog : MenuModal
 {
@@ -13,8 +16,8 @@ public partial class HostOptionsDialog : MenuModal
 
 	private static readonly Result CancelledResult = new(HostMode.Cancelled, 0, SteamLobbyPrivacy.FriendsOnly);
 
-	/// <summary>The lobby needs all six factions claimed before it will start, so six is the natural default.</summary>
-	private const int DefaultMaxPlayers = 6;
+	private static readonly PackedScene Scene =
+		GD.Load<PackedScene>("res://scenes/menu/HostOptionsDialog.tscn");
 
 	private readonly TaskCompletionSource<Result> _result = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -29,107 +32,54 @@ public partial class HostOptionsDialog : MenuModal
 	/// </summary>
 	public static Task<Result> PromptAsync(Node parent)
 	{
-		HostOptionsDialog dialog = new();
+		HostOptionsDialog dialog = Scene.Instantiate<HostOptionsDialog>();
 		parent.AddChild(dialog);
 		return dialog._result.Task;
 	}
 
+	// Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
+	// surfacing rather than a silent console line.
 	public override void _Ready()
 	{
 		base._Ready();
-		Guard.Try(BuildUi, "HostOptionsDialog._Ready");
+		Guard.Try(ReadyInternal, "HostOptionsDialog._Ready");
 	}
 
 	public override void _ExitTree() => _result.TrySetResult(CancelledResult);
 
-	private void BuildUi()
+	private void ReadyInternal()
 	{
-		VBoxContainer box = BuildShell("Host Game");
+		_steamOptions  = GetNode<VBoxContainer>("%SteamOptions");
+		_maxPlayers    = GetNode<SpinBox>("%MaxPlayers");
+		_privacy       = GetNode<OptionButton>("%Privacy");
+		_confirmButton = GetNode<Button>("%ConfirmButton");
 
-		// ── Transport choice ──────────────────────────────────────────────────
-		HBoxContainer choices = new();
-		choices.AddThemeConstantOverride("separation", 12);
-		choices.Alignment = BoxContainer.AlignmentMode.Center;
-		box.AddChild(choices);
-
-		MenuPanelButton godotButton = MakeMenuButton("Host via Godot", new Vector2(330, 130));
-		godotButton.Pressed += OnGodotPressed;
-		choices.AddChild(godotButton);
-
-		MenuPanelButton steamButton = MakeMenuButton("Host via Steam", new Vector2(330, 130));
+		GetNode<MenuPanelButton>("%GodotButton").Pressed += OnGodotPressed;
+		MenuPanelButton steamButton = GetNode<MenuPanelButton>("%SteamButton");
 		steamButton.Pressed += OnSteamPressed;
-		choices.AddChild(steamButton);
 
-		box.AddChild(MakeLabel(
-			"Godot hosting uses a direct connection over IP. Steam hosting connects through Steam, "
-			+ "so no port forwarding is needed.", 18, ColorHint));
+		GetNode<Button>("%CancelButton").Pressed += Cancel;
+		_confirmButton.Pressed += OnConfirmSteam;
+
+		// The %Privacy entries are authored in the scene, and their *ids* — not their order — are the
+		// SteamLobbyPrivacy values OnConfirmSteam reads back. Private is 0 and FriendsOnly is 1, so the
+		// ids run 1 then 0 down the list. Getting them the wrong way round would silently invert lobby
+		// visibility, hence the assertion rather than trust.
+		if (_privacy.GetItemId(0) != (int)SteamLobbyPrivacy.FriendsOnly
+			|| _privacy.GetItemId(1) != (int)SteamLobbyPrivacy.Private)
+			GD.PushError("HostOptionsDialog: %Privacy item ids do not match SteamLobbyPrivacy.");
 
 		// Steam can be perfectly available while the peer class is missing (that happens with the
 		// plain GodotSteam build), so both conditions are reported separately.
 		string unavailable = SteamUnavailableReason();
-		if (unavailable != null)
-		{
-			steamButton.Disabled = true;
-			steamButton.Modulate = new Color(1, 1, 1, 0.4f);
-			box.AddChild(MakeLabel(unavailable, 18, ColorWarning));
-		}
+		if (unavailable == null) return;
 
-		box.AddChild(new HSeparator());
+		steamButton.Disabled = true;
+		steamButton.Modulate = new Color(1, 1, 1, 0.4f);
 
-		// ── Steam-only options, revealed once Steam is chosen ─────────────────
-		_steamOptions = new VBoxContainer { Visible = false };
-		_steamOptions.AddThemeConstantOverride("separation", 10);
-		box.AddChild(_steamOptions);
-
-		HBoxContainer playersRow = new();
-		playersRow.AddThemeConstantOverride("separation", 12);
-		playersRow.AddChild(MakeLabel("Players", 20));
-		_maxPlayers = new SpinBox
-		{
-			MinValue = 2,
-			MaxValue = 6,
-			Step     = 1,
-			Value    = DefaultMaxPlayers,
-			CustomMinimumSize = new Vector2(120, 0),
-		};
-		playersRow.AddChild(_maxPlayers);
-		_steamOptions.AddChild(playersRow);
-
-		HBoxContainer privacyRow = new();
-		privacyRow.AddThemeConstantOverride("separation", 12);
-		privacyRow.AddChild(MakeLabel("Visibility", 20));
-		_privacy = new OptionButton { CustomMinimumSize = new Vector2(420, 0) };
-		_privacy.AddItem("Friends only", (int)SteamLobbyPrivacy.FriendsOnly);
-		_privacy.AddItem("Private (invite only)", (int)SteamLobbyPrivacy.Private);
-		_privacy.Selected = 0;
-		privacyRow.AddChild(_privacy);
-		_steamOptions.AddChild(privacyRow);
-
-		// Worth stating plainly: a private lobby is invisible in the friends list by design, so
-		// without this note an invite-only host looks broken to the people trying to join.
-		_steamOptions.AddChild(MakeLabel(
-			"Friends-only games appear in your friends' game list. Private games do not — "
-			+ "invite players from the lobby instead.", 18, ColorHint));
-
-		// ── Button row ────────────────────────────────────────────────────────
-		HBoxContainer buttons = new();
-		buttons.AddThemeConstantOverride("separation", 10);
-		box.AddChild(buttons);
-
-		Button cancel = new() { Text = "Cancel", CustomMinimumSize = new Vector2(160, 44) };
-		cancel.Pressed += Cancel;
-		buttons.AddChild(cancel);
-
-		buttons.AddChild(new Control { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill });
-
-		_confirmButton = new Button
-		{
-			Text = "Create Steam Lobby",
-			CustomMinimumSize = new Vector2(260, 44),
-			Visible = false,
-		};
-		_confirmButton.Pressed += OnConfirmSteam;
-		buttons.AddChild(_confirmButton);
+		Label warning = GetNode<Label>("%WarningLabel");
+		warning.Text    = unavailable;
+		warning.Visible = true;
 	}
 
 	/// <summary>Null when Steam hosting is possible, otherwise the reason to show the player.</summary>

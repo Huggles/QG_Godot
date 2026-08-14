@@ -17,6 +17,35 @@ public partial class CardState : StateObject
     public List<int> PlayedInTurn { get; set; } = new();
     public List<int> ActivatedInTurns { get; set; } = new();
 
+    /// <summary>
+    /// True once this card's face has been shown to every player, and false again as soon as it
+    /// returns to play. Only Response cards are ever hidden, so this only matters for them.
+    ///
+    /// Deliberately NOT derived from <see cref="ActivatedInTurns"/>: that list gates real rules
+    /// (CardData.MultipleActivationsPerTurn, Condition.CardHasNotBeenActivatedThisTurn), so clearing
+    /// it to re-hide a recycled card would also let the card be activated again in the same turn.
+    ///
+    /// Written only from ChangeEvent.ExecuteAsync bodies, so every peer derives the same value by
+    /// replaying the message stream. Like ActivatedInTurns it is deliberately outside ComputeHash — a
+    /// peer cannot get it wrong independently, it can only learn it from the wire.
+    /// </summary>
+    public bool IsRevealed { get; set; } = false;
+
+    /// <summary>
+    /// Whether this peer may see the card's face. A Response card is played face down and stays
+    /// secret until it is activated; every other card type is public. Purely a presentation rule —
+    /// the authoritative state is identical on every peer, only the render differs.
+    ///
+    /// Read only by the UI (CardFace.ForCard), so the headless-false answer from LocalPlayerControls
+    /// is never reached on a server. The card type check is first so a non-Response card never
+    /// touches PlayerScene.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsFaceVisibleToLocalPlayer =>
+        CardData.CardType != CardType.RESPONSE
+        || IsRevealed
+        || PresentationServices.Notification.LocalPlayerControls(Faction);
+
     public virtual bool IsPlayed => this.HasTag(Tag.IsPlayed, Faction);
 
     /// <summary>

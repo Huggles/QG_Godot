@@ -1,9 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://djinib8j6dupy"]
+[gd_scene format=3 uid="uid://djinib8j6dupy"]
 
 [ext_resource type="Script" uid="uid://c5fpt5gbmo0lv" path="res://scripts/C#/Menu/MultiplayerLobby.cs" id="1_lobby"]
 [ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="2_5rtyc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_description"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
 bg_color = Color(0, 0, 0, 0.65)
 border_width_left = 2
 border_width_top = 2
@@ -14,23 +18,19 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-content_margin_left = 10
-content_margin_top = 10
-content_margin_right = 10
-content_margin_bottom = 10
 
-[node name="GameRoot" type="Node"]
+[node name="GameRoot" type="Node" unique_id=470098949]
 
-[node name="MultiplayerLobby" type="Control" parent="."]
+[node name="MultiplayerLobby" type="Control" parent="." unique_id=2064669811]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_lobby")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="MultiplayerLobby"]
+[node name="CanvasLayer" type="CanvasLayer" parent="MultiplayerLobby" unique_id=238677946]
 
-[node name="TextureRect" type="TextureRect" parent="MultiplayerLobby/CanvasLayer"]
+[node name="TextureRect" type="TextureRect" parent="MultiplayerLobby/CanvasLayer" unique_id=1989378497]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -39,7 +39,7 @@ grow_vertical = 2
 texture = ExtResource("2_5rtyc")
 expand_mode = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="MultiplayerLobby/CanvasLayer"]
+[node name="MarginContainer" type="MarginContainer" parent="MultiplayerLobby/CanvasLayer" unique_id=1232402464]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -50,18 +50,18 @@ theme_override_constants/margin_top = 50
 theme_override_constants/margin_right = 50
 theme_override_constants/margin_bottom = 50
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer" unique_id=59874125]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="TitleLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1943808276]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 32
 text = "Quartermaster General - Multiplayer Lobby"
 horizontal_alignment = 1
 
-[node name="StatusLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="StatusLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1882174419]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
@@ -69,85 +69,48 @@ theme_override_font_sizes/font_size = 18
 text = "Waiting to host or join..."
 horizontal_alignment = 1
 
-[node name="HSeparator" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1595872299]
 layout_mode = 2
 
-[node name="ConnectionPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="IpLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Server IP Address:"
-
-[node name="IpAddressInput" type="LineEdit" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
-layout_mode = 2
-placeholder_text = "127.0.0.1"
-
-[node name="ButtonsHBox" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="HostButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer/ButtonsHBox"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Host Game"
-
-[node name="JoinButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ConnectionPanel/VBoxContainer/ButtonsHBox"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Join Game"
-
-[node name="ScenarioPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="ScenarioPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=22457610]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel" unique_id=461188769]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ScenarioLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+[node name="ScenarioLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=2132674987]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Scenario"
 
-[node name="ScenarioOptionButton" type="OptionButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+[node name="ScenarioOptionButton" type="OptionButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=749994739]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="DescriptionPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+[node name="DescriptionPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=1996894434]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_description")
 
-[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/DescriptionPanel"]
+[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/DescriptionPanel" unique_id=1330345905]
 unique_name_in_owner = true
-layout_mode = 2
 custom_minimum_size = Vector2(0, 80)
-theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+layout_mode = 2
 bbcode_enabled = true
 text = "Select a scenario to preview details."
 
-[node name="SeedRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer"]
+[node name="SeedRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=65703041]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="SeedLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow"]
+[node name="SeedLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow" unique_id=188894307]
 layout_mode = 2
-size_flags_vertical = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Seed"
 
-[node name="SeedInput" type="LineEdit" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow"]
+[node name="SeedInput" type="LineEdit" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow" unique_id=1221837146]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
@@ -155,49 +118,64 @@ size_flags_horizontal = 3
 placeholder_text = "random"
 alignment = 1
 
-[node name="RandomizeSeedButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow"]
+[node name="RandomizeSeedButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/SeedRow" unique_id=1900950696]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Randomize"
 
-[node name="HSeparator2" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="OpeningDiscardCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=344424219]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "On: deal 10 cards and every player immediately discards 3. Off: deal 7 and start."
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+button_pressed = true
+text = "Discard 3 cards at start"
+
+[node name="HSeparator2" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=137593439]
 layout_mode = 2
 
-[node name="PlayersPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="PlayersPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=408781976]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel" unique_id=403608767]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="PlayersLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer"]
+[node name="PlayersLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer" unique_id=599921257]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "Connected Players:"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer" unique_id=117382540]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PlayerListContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer/ScrollContainer"]
+[node name="PlayerListContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/PlayersPanel/VBoxContainer/ScrollContainer" unique_id=311634871]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 5
 
-[node name="HSeparator3" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="HSeparator3" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=574421845]
 layout_mode = 2
 
-[node name="StartGameButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="InviteButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Invite Friends"
+
+[node name="StartGameButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=313149031]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Start Game"
 
-[node name="DebugSoloButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="DebugSoloButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1176048974]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4

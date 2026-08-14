@@ -33,6 +33,17 @@ public partial class GameFlow : SingletonNode<GameFlow>
     [Export] public TurnStep TurnStep { get; set; } = 0;
     [Export] public int MaxRound { get; set; } = 20;
 
+    /// <summary>
+    /// Whether the game opens with the mandatory discard. True: deal OpeningHandSize and cut back to
+    /// HandSize before the first turn. False: deal HandSize and start.
+    ///
+    /// Set from the scenario (with an optional lobby override) in
+    /// GameModeMultiplayerDefault.SetupInitialGameState, which is awaited before StartGame. Host-only
+    /// and deliberately not on the GameFlowMultiplayerSynchronizer — it gates work whose whole effect
+    /// reaches clients as replicated ChangeEvents, exactly like MaxRound.
+    /// </summary>
+    public bool OpeningDiscardEnabled { get; set; } = true;
+
     public int Round => StaticGameData.RoundForTurn(GameTurn);
     public Faction CurrentFaction => GameTurn > 0 ? StaticGameData.PlayableFactions[(GameTurn - 1) % StaticGameData.PlayableFactions.Count] : Faction.GERMANY;
     private MultiplayerGameState gameState => GameSession.Current.GameState;
@@ -87,9 +98,14 @@ public partial class GameFlow : SingletonNode<GameFlow>
             // Host-only by construction (StartGame runs behind the IsServer guard), so the count is
             // computed once against the authoritative hand and the resulting draws reach clients over
             // the replicated ChangeEvent stream.
+            //
+            // The two halves of the opening-discard rule move together: deal the larger hand ONLY if
+            // the cut is coming. Dealing OpeningHandSize with the discard switched off would open
+            // every faction over the hand cap and dump the surplus at their first DISCARD step.
+            int openingHandSize = OpeningDiscardEnabled ? StaticGameData.OpeningHandSize : StaticGameData.HandSize;
             foreach (FactionState faction in gameState.PlayableFactionStates)
             {
-                int cardsToDraw = StaticGameData.OpeningHandSize - DeckState.ForFaction(faction.Faction).HandCardIds.Count;
+                int cardsToDraw = openingHandSize - DeckState.ForFaction(faction.Faction).HandCardIds.Count;
                 if (cardsToDraw <= 0) continue; // scenario already placed a full hand or more
 
                 DrawCardsChangeEvent drawCardsChangeEvent =  new DrawCardsChangeEvent(Faction.NONE, faction.Faction, cardsToDraw, false);
@@ -102,7 +118,8 @@ public partial class GameFlow : SingletonNode<GameFlow>
             // Everyone cuts down to HandSize before the first turn starts. After the recalculation
             // above so the discard modal shows correctly-tagged cards, and before StartNewTurn so it
             // lands ahead of Germany's TurnStep.START rather than inside it.
-            await OpeningDiscard.Run(StaticGameData.OpeningDiscardCount);
+            if (OpeningDiscardEnabled)
+                await OpeningDiscard.Run(StaticGameData.OpeningDiscardCount);
 
             foreach (Faction faction in StaticGameData.PlayableFactions)
             {

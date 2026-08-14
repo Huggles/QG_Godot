@@ -1,0 +1,77 @@
+#!args scenario=Scenario_AllCards seed=42
+#
+# A Response card is secret until it is activated, and secret again once it returns to play.
+#
+# Response cards are played FACE DOWN onto the table and only flipped when used as a reaction, so a
+# player who does not control the card's faction must see a card back instead of its face. That is a
+# per-peer render decision made by CardFace.ForCard via CardState.IsFaceVisibleToLocalPlayer, which
+# no headless run can exercise — but the replicated half of it, CardState.IsRevealed, is exactly what
+# this test pins.
+#
+# `cardrevealed` reads that raw flag. It is deliberately NOT the same question as "has this card ever
+# been activated": ActivatedInTurns is permanent (it gates CardData.MultipleActivationsPerTurn and
+# Condition.CardHasNotBeenActivatedThisTurn, so it must never be cleared), while a spent Response card
+# recycled back into a deck, a hand, or onto the table has to go face down again. Deriving visibility
+# from ActivatedInTurns instead would leave a recycled card revealed forever.
+#
+# The flag is meaningful only for Response cards — every other card type is public regardless of it,
+# which is why nothing here asserts on a Status card.
+#
+# Scenario_AllCards starts every Response card on the table, so no setup deals one. Destroyers ("use
+# when a supplied US or UK Navy is about to be removed") is the one Response card an existing test
+# already drives a block window for — see block_reaction_prevents_removal.qgc, which shares this
+# removal setup.
+#
+# Values below are pinned to the seed in the #!args line above. Unit 110 is the Navy built by the
+# force deployUnit line, not a scenario deployment; re-derive it if unit id allocation changes.
+# Run:  tests/run-cli.sh tests/qgc/response_card_reveal.qgc
+
+prompt                                  # turn 1, Germany, PLAY_CARD — synchronise with the game
+
+# On the table from the scenario, never activated: face down for everyone but the UK.
+assert card ResponseDestroyers in response
+assert cardrevealed ResponseDestroyers == false
+
+# The US only starts with an Army in US East. Give it a Navy in the adjacent sea so Destroyers'
+# "supplied Navy" trigger can match. `force` (IsTrigger=false) keeps the setup out of the reaction
+# chain.
+force deployUnit --faction UNITED_STATES --country NORTH_ATLANTIC --deploy BUILD
+
+# Removing that Navy opens the UK's block window and offers Destroyers.
+api removeUnit --faction JAPAN --unit 110 --reason BATTLE
+play 1                                  # UK activates Destroyers
+
+# Activated: flipped face up for every peer, and spent, so it moves to the discard pile.
+# ActivateReactionChangeEvent sets the flag inside ExecuteAsync, which ChangeEvent.ApplyMutation
+# awaits BEFORE it enqueues AfterAnimations — so the card is already revealed when the
+# "UK activates Destroyers" modal renders it. FAILS (false) if that write is lost or moved later.
+assert cardrevealed ResponseDestroyers == true
+assert card ResponseDestroyers in discard
+
+# Back to hand: face down again. FAILS (true) if the reveal is derived from ActivatedInTurns.
+force recycleCard --faction UNITED_KINGDOM --card ResponseDestroyers --destination Hand
+assert card ResponseDestroyers in hand
+assert cardrevealed ResponseDestroyers == false
+
+# Shuffled into the draw deck: still face down.
+force recycleCard --faction UNITED_KINGDOM --card ResponseDestroyers --destination ShuffleIntoDeck
+assert card ResponseDestroyers in deck
+assert cardrevealed ResponseDestroyers == false
+
+# Top of the draw deck: still face down.
+force recycleCard --faction UNITED_KINGDOM --card ResponseDestroyers --destination TopOfDeck
+assert card ResponseDestroyers in deck
+assert cardrevealed ResponseDestroyers == false
+
+# Back onto the table: a replayed Response card is face down like any other. DeckState.PlayCard
+# clears the flag on the RESPONSE branch, so this holds even if a future caller puts a revealed card
+# straight onto the table without recycling it through a hand or deck first.
+force playCard --card ResponseDestroyers
+assert card ResponseDestroyers in response
+assert cardrevealed ResponseDestroyers == false
+
+# A Response card that was never activated is untouched by any of the above.
+assert cardrevealed ResponseRAF == false
+assert card ResponseRAF in response
+
+quit

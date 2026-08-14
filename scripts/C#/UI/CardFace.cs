@@ -19,7 +19,17 @@ public readonly struct CardFace
     }
 
     public static CardFace ForCard(CardState cardState) =>
-        new(cardState.FrontTexture, cardState.CardData.Label, cardState.CardData.Text);
+        cardState.IsFaceVisibleToLocalPlayer
+            ? new(cardState.FrontTexture, cardState.CardData.Label, cardState.CardData.Text)
+            : Back(cardState.Faction);
+
+    /// <summary>
+    /// The owning faction's card back — what a face-down Response card looks like to a player who
+    /// does not control it. Title and Text are empty so CardScene.ShowFace hides the text block
+    /// entirely: a face-down card is art only.
+    /// </summary>
+    public static CardFace Back(Faction faction) =>
+        new(FactionState.ForEnum(faction).FactionData.CardBackTexture, "", "");
 
     public static CardFace Bulletin(string label, string text) =>
         new(BulletinArt.Front, label, text);

@@ -17,7 +17,11 @@ prompt                      # blocks until the first prompt: turn 1, Germany, PL
 assert turn == 1
 assert faction == GERMANY
 assert step == PLAY_CARD
+
+# Dealt OpeningHandSize and cut back to HandSize, the three cards landing in the discard pile.
+# opening_discard_disabled.qgc pins the other side of this branch.
 assert handsize GERMANY == 7
+assert discardsize GERMANY == 3
 
 # Hand contents depend on the start-of-game deck shuffle, so this index is pinned to the seed in
 # the #!args line above. Under seed=42 the prompt lists Build Army first.

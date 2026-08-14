@@ -7,15 +7,20 @@ using System.Threading.Tasks;
 ///
 /// Creating a Steam lobby involves a round trip that can take a second or two on a cold Steam
 /// connection, and a menu button that simply does nothing for that long reads as broken.
+///
+/// Layout lives in <c>res://scenes/menu/MenuNotice.tscn</c>; the message label and the OK row are
+/// authored hidden and revealed here, since which of the two forms this is depends on the caller.
 /// </summary>
 public partial class MenuNotice : MenuModal
 {
+	private static readonly PackedScene Scene =
+		GD.Load<PackedScene>("res://scenes/menu/MenuNotice.tscn");
+
 	private readonly TaskCompletionSource<bool> _dismissed = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 	private string _title    = "";
 	private string _message  = "";
 	private bool   _showOk;
-	private Label  _messageLabel;
 
 	/// <summary>
 	/// Opens a notice with no button. The caller keeps the reference and calls
@@ -23,7 +28,9 @@ public partial class MenuNotice : MenuModal
 	/// </summary>
 	public static MenuNotice ShowBusy(Node parent, string message)
 	{
-		MenuNotice notice = new() { _title = message, _showOk = false };
+		MenuNotice notice = Scene.Instantiate<MenuNotice>();
+		notice._title  = message;
+		notice._showOk = false;
 		parent.AddChild(notice);
 		return notice;
 	}
@@ -31,7 +38,10 @@ public partial class MenuNotice : MenuModal
 	/// <summary>Opens a message with an OK button and completes once it is dismissed.</summary>
 	public static Task ShowMessageAsync(Node parent, string title, string message)
 	{
-		MenuNotice notice = new() { _title = title, _message = message, _showOk = true };
+		MenuNotice notice = Scene.Instantiate<MenuNotice>();
+		notice._title   = title;
+		notice._message = message;
+		notice._showOk  = true;
 		parent.AddChild(notice);
 		return notice._dismissed.Task;
 	}
@@ -39,30 +49,26 @@ public partial class MenuNotice : MenuModal
 	public override void _Ready()
 	{
 		base._Ready();
-		Guard.Try(BuildUi, "MenuNotice._Ready");
+		Guard.Try(ReadyInternal, "MenuNotice._Ready");
 	}
 
 	public override void _ExitTree() => _dismissed.TrySetResult(true);
 
-	private void BuildUi()
+	private void ReadyInternal()
 	{
-		VBoxContainer box = BuildShell(_title, minWidth: 620f);
+		GetNode<Label>("%Title").Text = _title;
 
 		if (!string.IsNullOrEmpty(_message))
 		{
-			_messageLabel = MakeLabel(_message, 20, ColorHint);
-			_messageLabel.HorizontalAlignment = HorizontalAlignment.Center;
-			box.AddChild(_messageLabel);
+			Label messageLabel = GetNode<Label>("%MessageLabel");
+			messageLabel.Text    = _message;
+			messageLabel.Visible = true;
 		}
 
 		if (!_showOk) return;
 
-		HBoxContainer buttons = new() { Alignment = BoxContainer.AlignmentMode.Center };
-		box.AddChild(buttons);
-
-		Button ok = new() { Text = "OK", CustomMinimumSize = new Vector2(160, 44) };
-		ok.Pressed += Dismiss;
-		buttons.AddChild(ok);
+		GetNode<HBoxContainer>("%ButtonRow").Visible = true;
+		GetNode<Button>("%OkButton").Pressed += Dismiss;
 	}
 
 	/// <summary>Safe to call more than once, and after the node has already gone away.</summary>

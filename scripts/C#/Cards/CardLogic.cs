@@ -18,7 +18,6 @@ public abstract partial class CardLogic : GodotObject
     public bool IsActivatedThisTurn => CardState.ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
     public bool IsResponse => CardData.Type == "RESPONSE";
     public bool IsStatus => CardData.Type == "STATUS";
-    public bool IsPubliclyVisible => CardState.IsPlayed || (IsResponse && IsActivatedOnce);
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
     public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);    

@@ -181,6 +181,12 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
         GameFlow.Instance.MaxRound = initialStateData.MaxRounds;
 
+        // The scenario states the intended rule; the host may override it in the lobby. Read here
+        // rather than in StartGame because this is where the scenario is parsed, and SetupInitialGameState
+        // is awaited before StartGame runs (MultiplayerSession.StartSession). Host-only, like MaxRound:
+        // it gates work that reaches clients as replicated ChangeEvents, so it needs no synchronising.
+        GameFlow.Instance.OpeningDiscardEnabled = GameManager.PendingOpeningDiscard ?? initialStateData.OpeningDiscard;
+
         GameStateCalculator.CalculateAll();
         GameStateCalculator.Enabled = false;
         await ShuffleDecks();

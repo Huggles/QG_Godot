@@ -21,12 +21,18 @@ public partial class PlayCardChangeEvent : ChangeEvent
     /// Announce the played card to every player. Enqueued from Apply(), which ProcessIntroductionEvent
     /// runs before block reactions are requested — so the card is shown as it hits the table, even if a
     /// block cancels it a moment later.
+    ///
+    /// The title is redacted for a face-down Response card, matching what CardFace draws for it and the
+    /// split SummaryText() already makes below. Animations are never serialized — each peer builds its
+    /// own from this factory — so a per-peer title is safe.
     /// </summary>
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
         new ShowCardsModalAnimation(
             new List<int> { SourceCardId },
-            $"{FactionState.ForEnum(TriggeringFaction).FactionData.Label} plays {SourceCardState.CardName}")
+            SourceCardState.IsFaceVisibleToLocalPlayer
+                ? $"{FactionState.ForEnum(TriggeringFaction).FactionData.Label} plays {SourceCardState.CardName}"
+                : $"{FactionState.ForEnum(TriggeringFaction).FactionData.Label} plays a Response card")
     };
 
     protected override async Task<bool> ExecuteAsync(){

@@ -2,25 +2,10 @@
 
 [ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
-[ext_resource type="Script" path="res://scripts/C#/Menu/SteamFriendLobbiesScreen.cs" id="3_script"]
+[ext_resource type="Script" uid="uid://d0024psltfgg1" path="res://scripts/C#/Menu/SteamFriendLobbiesScreen.cs" id="3_script"]
+[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="3_u8f1o"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_list"]
-content_margin_left = 12.0
-content_margin_top = 8.0
-content_margin_right = 12.0
-content_margin_bottom = 8.0
-bg_color = Color(0.1, 0.1, 0.1, 0.75)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.5, 0.5, 0.5, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[node name="Control" type="Control"]
+[node name="Control" type="Control" unique_id=69016588]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_script")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1402509662]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,7 +24,7 @@ grow_vertical = 2
 texture = ExtResource("1_m2yvp")
 expand_mode = 3
 
-[node name="TitleLabel" type="RichTextLabel" parent="."]
+[node name="TitleLabel" type="RichTextLabel" parent="." unique_id=205470879]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -54,7 +39,7 @@ bbcode_enabled = true
 text = "[center][font_size=42][b]Friends' Games[/b][/font_size][/center]"
 scroll_active = false
 
-[node name="FormContainer" type="VBoxContainer" parent="."]
+[node name="FormContainer" type="VBoxContainer" parent="." unique_id=1286400782]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -70,39 +55,49 @@ grow_vertical = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="LobbyScroll" type="ScrollContainer" parent="FormContainer"]
+[node name="LobbyScroll" type="ScrollContainer" parent="FormContainer" unique_id=1252887917]
 custom_minimum_size = Vector2(940, 460)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_list")
+theme_override_styles/panel = ExtResource("3_u8f1o")
 horizontal_scroll_mode = 0
 
-[node name="LobbyList" type="VBoxContainer" parent="FormContainer/LobbyScroll"]
+[node name="LobbyList" type="VBoxContainer" parent="FormContainer/LobbyScroll" unique_id=1151945951]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(916, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="StatusLabel" type="RichTextLabel" parent="FormContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
+[node name="Panel" type="Panel" parent="FormContainer" unique_id=999876617]
 layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("3_u8f1o")
+
+[node name="StatusLabel" type="RichTextLabel" parent="FormContainer/Panel" unique_id=1666344429]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 0
+offset_right = 960.0
+offset_bottom = 76.0
 theme_override_font_sizes/normal_font_size = 24
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="ButtonRow" type="HBoxContainer" parent="FormContainer"]
+[node name="ButtonRow" type="HBoxContainer" parent="FormContainer" unique_id=1559598601]
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="RefreshButton" parent="FormContainer/ButtonRow" instance=ExtResource("2_btn")]
+[node name="RefreshButton" parent="FormContainer/ButtonRow" unique_id=461306054 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 100)
 layout_mode = 2
 
-[node name="LeaveButton" parent="FormContainer/ButtonRow" instance=ExtResource("2_btn")]
+[node name="LeaveButton" parent="FormContainer/ButtonRow" unique_id=863735121 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 100)
+layout_mode = 2
+
+[node name="Button" parent="FormContainer" unique_id=566933446 instance=ExtResource("2_btn")]
 layout_mode = 2

@@ -58,6 +58,13 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         DebugUtilities.PrintPeer($"Activating reaction card {SourceCardState.CardName} for faction {TriggeringFaction}");
         SourceCardState.ActivatedInTurns.Add(GameFlow.Instance.GameTurn);
 
+        // Flip the card face up for every peer. Set here rather than in AfterAnimations so it is
+        // already true when the "X activates Y" modal builds its CardScene: ChangeEvent.ApplyMutation
+        // awaits ExecuteAsync before it enqueues AfterAnimations, on the server and on each client
+        // replaying the event off ChangeEventQueue alike. Idempotent — a multi-step Response card
+        // emits a second ActivateReactionChangeEvent via CardPlayRound.ContinueWithNextSteps.
+        SourceCardState.IsRevealed = true;
+
         // A Response card is spent once activated and moves to the discard pile. Status cards stay on
         // the table (and stay registered as modifiers), so they are deliberately excluded.
         //

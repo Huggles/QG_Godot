@@ -85,6 +85,12 @@ public partial class RecycleCardChangeEvent : ChangeEvent
                 deckState.DeckCardIds.Add(CardId);
                 break;
         }
+
+        // Back in play means face down again: a Response card revealed by an earlier activation must
+        // not stay revealed once it returns to a deck or a hand. Placed after the RemoveCardFromAnyPile
+        // guard above, so a recycle that found nothing to move changes nothing here either.
+        CardState.ForId(CardId).IsRevealed = false;
+
         await Task.CompletedTask;
         return true;
     }

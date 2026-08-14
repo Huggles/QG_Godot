@@ -43,6 +43,17 @@ public partial class GameManager : Node
     /// </summary>
     public static int? PendingSeed { get; set; } = null;
 
+    /// <summary>
+    /// The host's lobby override for the opening discard, or null to use whatever the scenario file
+    /// says. Read by the host only (GameModeMultiplayerDefault.SetupInitialGameState), like
+    /// PendingSeed — a client's own menu state never reaches its game.
+    ///
+    /// Cleared by SetSelectedScenarioByIndex so picking a different scenario starts from that
+    /// scenario's own answer rather than silently inheriting the last one's override, and so the
+    /// single-player screen and CLI (which never write it) always get the scenario's value.
+    /// </summary>
+    public static bool? PendingOpeningDiscard { get; set; } = null;
+
     public List<ScenarioInfo> AvailableScenarios { get; private set; } = new();
     public ScenarioInfo SelectedScenario { get; private set; }
 
@@ -116,6 +127,12 @@ public partial class GameManager : Node
                 if (root.TryGetProperty("description", out JsonElement descriptionElement) && descriptionElement.ValueKind == JsonValueKind.String)
                     info.Description = descriptionElement.GetString();
 
+                // Absent means true — the same default InitialGameStateData carries, so a scenario
+                // file that predates the setting keeps the opening discard.
+                if (root.TryGetProperty("openingDiscard", out JsonElement openingDiscardElement)
+                    && (openingDiscardElement.ValueKind == JsonValueKind.True || openingDiscardElement.ValueKind == JsonValueKind.False))
+                    info.OpeningDiscard = openingDiscardElement.GetBoolean();
+
                 if (string.IsNullOrEmpty(info.Title))
                     info.Title = info.Name.Replace('_', ' ');
                 if (string.IsNullOrEmpty(info.Description))
@@ -148,6 +165,9 @@ public partial class GameManager : Node
 
         SelectedScenario = AvailableScenarios[index];
         PendingScenarioPath = SelectedScenario.Path;
+        // A new scenario brings its own opening-discard answer; drop any override held for the
+        // previous one. The lobby re-commits the checkbox when the host starts the game.
+        PendingOpeningDiscard = null;
     }
 
     private void OnNodeAdded(Node node)

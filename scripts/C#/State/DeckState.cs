@@ -147,7 +147,14 @@ public partial class DeckState : StateObject
                 ModifierRegistry.Register(modifier);
         }
         else if (cardState.CardData.CardType == CardType.RESPONSE)
+        {
+            // A Response card goes onto the table face down, whether this is its first play or a
+            // return after being recycled out of the discard pile. The guard above means a discarded
+            // card can only get here by being recycled to hand or deck first, but the rule belongs at
+            // the pile that owns it rather than depending on that.
+            cardState.IsRevealed = false;
             ResponseCardIds.Add(cardId);
+        }
         else
             DiscardCard(cardId);
     }

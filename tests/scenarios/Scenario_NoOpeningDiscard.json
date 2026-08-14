@@ -1,17 +1,16 @@
 {
-  "title": "Standard Game",
-  "description": "All factions begin deployed to home territories with no pre-loaded cards.",
+  "title": "Test: No Opening Discard",
+  "description": "Scenario_OneRound with openingDiscard off, so the opening hand is dealt straight at HandSize and play begins. Lives under tests/ rather than assets/data/scenarios/ so it stays out of the lobby's scenario list; .qgc scripts reach it by full res:// path.",
   "startingFaction": "GERMANY",
   "startingRound": 1,
-  "maxRounds": 20,
+  "maxRounds": 1,
   "openingDiscard": false,
   "factions": {
     "GERMANY": {
       "unitDeployments": [
         { "countryName": "GERMANY" }
       ],
-      "initialCards": [
-      ],
+      "initialCards": [],
       "initialHandCards": [],
       "startingVP": 0
     },

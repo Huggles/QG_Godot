@@ -1,0 +1,117 @@
+[gd_scene format=3 uid="uid://cqhostoptdlg"]
+
+[ext_resource type="PackedScene" uid="uid://bqmodalshelf" path="res://scenes/menu/MenuModalShell.tscn" id="1_shell"]
+[ext_resource type="Script" uid="uid://dmk5c70n8x41s" path="res://scripts/C#/Menu/HostOptionsDialog.cs" id="2_script"]
+[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="3_btn"]
+
+[node name="HostOptionsDialog" instance=ExtResource("1_shell")]
+script = ExtResource("2_script")
+
+[node name="Title" parent="Root/Centre/Panel/Margin/Box" index="0"]
+text = "Host Game"
+
+[node name="Choices" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="1"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="GodotButton" parent="Root/Centre/Panel/Margin/Box/Choices" index="0" instance=ExtResource("3_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 130)
+layout_mode = 2
+ButtonText = "Host via Godot"
+
+[node name="SteamButton" parent="Root/Centre/Panel/Margin/Box/Choices" index="1" instance=ExtResource("3_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 130)
+layout_mode = 2
+ButtonText = "Host via Steam"
+
+[node name="Hint" type="Label" parent="Root/Centre/Panel/Margin/Box" index="2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "Godot hosting uses a direct connection over IP. Steam hosting connects through Steam, so no port forwarding is needed."
+autowrap_mode = 3
+
+[node name="WarningLabel" type="Label" parent="Root/Centre/Panel/Margin/Box" index="3"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.54, 0.54, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="Separator" type="HSeparator" parent="Root/Centre/Panel/Margin/Box" index="4"]
+layout_mode = 2
+
+[node name="SteamOptions" type="VBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="5"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PlayersRow" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box/SteamOptions" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PlayersLabel" type="Label" parent="Root/Centre/Panel/Margin/Box/SteamOptions/PlayersRow" index="0"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Players"
+
+[node name="MaxPlayers" type="SpinBox" parent="Root/Centre/Panel/Margin/Box/SteamOptions/PlayersRow" index="1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+min_value = 2.0
+max_value = 6.0
+value = 6.0
+
+[node name="PrivacyRow" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box/SteamOptions" index="1"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PrivacyLabel" type="Label" parent="Root/Centre/Panel/Margin/Box/SteamOptions/PrivacyRow" index="0"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Visibility"
+
+[node name="Privacy" type="OptionButton" parent="Root/Centre/Panel/Margin/Box/SteamOptions/PrivacyRow" index="1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "Friends only"
+popup/item_0/id = 1
+popup/item_1/text = "Private (invite only)"
+popup/item_1/id = 0
+selected = 0
+
+[node name="PrivacyHint" type="Label" parent="Root/Centre/Panel/Margin/Box/SteamOptions" index="2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "Friends-only games appear in your friends' game list. Private games do not — invite players from the lobby instead."
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="6"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CancelButton" type="Button" parent="Root/Centre/Panel/Margin/Box/Buttons" index="0"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Cancel"
+
+[node name="Spacer" type="Control" parent="Root/Centre/Panel/Margin/Box/Buttons" index="1"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ConfirmButton" type="Button" parent="Root/Centre/Panel/Margin/Box/Buttons" index="2"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(260, 44)
+layout_mode = 2
+text = "Create Steam Lobby"

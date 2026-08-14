@@ -1,0 +1,33 @@
+#!args scenario=res://tests/scenarios/Scenario_NoOpeningDiscard.json seed=42
+#
+# The scenario switch that turns the opening discard off.
+#
+# With "openingDiscard": true (every shipped scenario, and the default when the key is absent) every
+# faction is dealt StaticGameData.OpeningHandSize and must immediately discard OpeningDiscardCount
+# before the first turn — see opening_turn.qgc, which pins the other side of this branch.
+#
+# With it false, GameFlow.StartGame deals straight at HandSize and goes to turn 1. Both halves of the
+# rule have to move together: dealing the larger hand without the cut would open every faction over
+# the hand cap and dump the surplus at their first DISCARD step.
+#
+# The absence of the six mandatory prompts is what this test is really about, and it is checked by
+# construction rather than by an assertion: there is no `auto` line here, so if the opening discard
+# ever fires again, the first `prompt` returns a ForceDiscardHandCards for Germany instead of
+# PLAY_CARD and every assertion below it fails.
+# Run:  tests/run-cli.sh tests/qgc/opening_discard_disabled.qgc
+
+prompt                      # turn 1, Germany, PLAY_CARD — NOT an opening discard
+
+assert turn == 1
+assert faction == GERMANY
+assert step == PLAY_CARD
+
+# Seven dealt, none discarded. FAILS (10 / 3) if the flag stopped being read.
+assert handsize GERMANY == 7
+assert discardsize GERMANY == 0
+
+# Every faction, not just the one whose turn it is.
+assert handsize UNITED_STATES == 7
+assert discardsize UNITED_STATES == 0
+
+quit

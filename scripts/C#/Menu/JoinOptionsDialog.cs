@@ -4,17 +4,23 @@ using System.Threading.Tasks;
 /// <summary>
 /// "Join Game" step one: connect by IP and port as before, or pick from the games our Steam friends
 /// are currently hosting.
+///
+/// Layout lives in <c>res://scenes/menu/JoinOptionsDialog.tscn</c>, an inherited scene of
+/// <see cref="MenuModal"/>'s shell.
 /// </summary>
 public partial class JoinOptionsDialog : MenuModal
 {
 	public enum JoinMode { Cancelled, DirectIp, SteamFriends }
+
+	private static readonly PackedScene Scene =
+		GD.Load<PackedScene>("res://scenes/menu/JoinOptionsDialog.tscn");
 
 	private readonly TaskCompletionSource<JoinMode> _result = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 	/// <summary>See <see cref="HostOptionsDialog.PromptAsync"/> — same contract.</summary>
 	public static Task<JoinMode> PromptAsync(Node parent)
 	{
-		JoinOptionsDialog dialog = new();
+		JoinOptionsDialog dialog = Scene.Instantiate<JoinOptionsDialog>();
 		parent.AddChild(dialog);
 		return dialog._result.Task;
 	}
@@ -22,48 +28,29 @@ public partial class JoinOptionsDialog : MenuModal
 	public override void _Ready()
 	{
 		base._Ready();
-		Guard.Try(BuildUi, "JoinOptionsDialog._Ready");
+		Guard.Try(ReadyInternal, "JoinOptionsDialog._Ready");
 	}
 
 	public override void _ExitTree() => _result.TrySetResult(JoinMode.Cancelled);
 
-	private void BuildUi()
+	private void ReadyInternal()
 	{
-		VBoxContainer box = BuildShell("Join Game");
+		GetNode<MenuPanelButton>("%DirectButton").Pressed += () => Resolve(JoinMode.DirectIp);
 
-		HBoxContainer choices = new();
-		choices.AddThemeConstantOverride("separation", 12);
-		choices.Alignment = BoxContainer.AlignmentMode.Center;
-		box.AddChild(choices);
-
-		MenuPanelButton directButton = MakeMenuButton("Join by IP", new Vector2(330, 130));
-		directButton.Pressed += () => Resolve(JoinMode.DirectIp);
-		choices.AddChild(directButton);
-
-		MenuPanelButton friendsButton = MakeMenuButton("Friends' Games", new Vector2(330, 130));
+		MenuPanelButton friendsButton = GetNode<MenuPanelButton>("%FriendsButton");
 		friendsButton.Pressed += OnFriendsPressed;
-		choices.AddChild(friendsButton);
 
-		box.AddChild(MakeLabel(
-			"Joining by IP needs the host's address. Friends' games are found through Steam.",
-			18, ColorHint));
+		GetNode<Button>("%CancelButton").Pressed += Cancel;
 
 		string unavailable = SteamUnavailableReason();
-		if (unavailable != null)
-		{
-			friendsButton.Disabled = true;
-			friendsButton.Modulate = new Color(1, 1, 1, 0.4f);
-			box.AddChild(MakeLabel(unavailable, 18, ColorWarning));
-		}
+		if (unavailable == null) return;
 
-		box.AddChild(new HSeparator());
+		friendsButton.Disabled = true;
+		friendsButton.Modulate = new Color(1, 1, 1, 0.4f);
 
-		HBoxContainer buttons = new();
-		box.AddChild(buttons);
-
-		Button cancel = new() { Text = "Cancel", CustomMinimumSize = new Vector2(160, 44) };
-		cancel.Pressed += Cancel;
-		buttons.AddChild(cancel);
+		Label warning = GetNode<Label>("%WarningLabel");
+		warning.Text    = unavailable;
+		warning.Visible = true;
 	}
 
 	private static string SteamUnavailableReason()

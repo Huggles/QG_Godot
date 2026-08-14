@@ -111,6 +111,7 @@ public static class CliAssert
 
             case "handsize": return DeckState.ForFaction(ParseFaction(arg1)).HandCardIds.Count.ToString();
             case "decksize": return DeckState.ForFaction(ParseFaction(arg1)).DeckCardIds.Count.ToString();
+            case "discardsize": return DeckState.ForFaction(ParseFaction(arg1)).DiscardedCardIds.Count.ToString();
 
             // Deck ORDER, which the state hash deliberately does not cover (it hashes only the deck
             // count). These are the only assertions that can catch a shuffle that silently did
@@ -134,6 +135,11 @@ public static class CliAssert
                 if (deck.ResponseCardIds.Contains(card.Id))  return "response";
                 return "nowhere";
             }
+
+            // assert cardrevealed <name|id> == true|false
+            // Whether a Response card's face is public. Not the same question as "has it ever been
+            // activated" (ActivatedInTurns): recycling a spent card back into play hides it again.
+            case "cardrevealed": return ParseCard(arg1).IsRevealed ? "true" : "false";
 
             default: return null;
         }

@@ -53,16 +53,16 @@ public partial class MultiplayerLobby : Control
 
 	// ── Scene node references ─────────────────────────────────────────────────
 	private VBoxContainer _playerListContainer;
-	private Button        _hostButton;
-	private Button        _joinButton;
 	private Button        _startGameButton;
 	private Button        _debugSoloButton;
+	/// <summary>Authored hidden in the .tscn: only a Steam host ever has anyone to invite.</summary>
+	private Button        _inviteButton;
 	private Label         _statusLabel;
-	private LineEdit      _ipAddressInput;
 	private OptionButton  _scenarioPicker;
 	private RichTextLabel _scenarioDescriptionLabel;
 	private LineEdit      _seedInput;
 	private Button        _randomizeSeedButton;
+	private CheckBox      _openingDiscardCheckBox;
 
 	// ── Runtime state ─────────────────────────────────────────────────────────
 	private bool _isHost        = false;
@@ -72,8 +72,6 @@ public partial class MultiplayerLobby : Control
 	private bool _isSteamSession = false;
 	/// <summary>The Steam lobby backing this session; 0 for an ENet session.</summary>
 	private long _steamLobbyId   = 0;
-	/// <summary>Built in code and only shown to a Steam host — the .tscn has no slot for it.</summary>
-	private Button _inviteButton;
 
 	/// <summary>True when this instance is a dedicated/headless server: it auto-hosts, controls no
 	/// faction, and starts the game automatically once <see cref="_requiredPlayers"/> clients connect.</summary>
@@ -104,31 +102,22 @@ public partial class MultiplayerLobby : Control
 		
 		// Get UI references
 		_playerListContainer = GetNode<VBoxContainer>("%PlayerListContainer");
-		_hostButton          = GetNode<Button>("%HostButton");
-		_joinButton          = GetNode<Button>("%JoinButton");
 		_startGameButton     = GetNode<Button>("%StartGameButton");
 		_debugSoloButton     = GetNode<Button>("%DebugSoloButton");
+		_inviteButton        = GetNode<Button>("%InviteButton");
 		_statusLabel         = GetNode<Label>("%StatusLabel");
-		_ipAddressInput      = GetNode<LineEdit>("%IpAddressInput");
 		_scenarioPicker      = GetNode<OptionButton>("%ScenarioOptionButton");
 		_scenarioDescriptionLabel = GetNode<RichTextLabel>("%ScenarioDescriptionLabel");
 		_seedInput           = GetNode<LineEdit>("%SeedInput");
 		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
-		
-		_ipAddressInput.Text     = DEFAULT_SERVER_IP;
+		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
+
 		_startGameButton.Visible = false;
-		
-		_hostButton.Pressed      += OnHostButtonPressed;
-		_joinButton.Pressed      += OnJoinButtonPressed;
+
 		_startGameButton.Pressed += OnStartGameButtonPressed;
 		_debugSoloButton.Pressed += OnDebugSoloButtonPressed;
+		_inviteButton.Pressed    += OnInviteFriendsPressed;
 
-		// Added in code rather than to the .tscn: it is only ever relevant to a Steam host, and this
-		// keeps the scene identical for the unchanged ENet path.
-		_inviteButton = new Button { Text = "Invite Friends", Visible = false };
-		_inviteButton.Pressed += OnInviteFriendsPressed;
-		_hostButton.GetParent().AddChild(_inviteButton);
-		
 		Multiplayer.PeerConnected      += OnPeerConnected;
 		Multiplayer.PeerDisconnected   += OnPeerDisconnected;
 		Multiplayer.ConnectedToServer  += OnConnectedToServer;
@@ -163,6 +152,12 @@ public partial class MultiplayerLobby : Control
 		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
 		SetSeedFieldEnabled(false);
 
+		// Same story again: host-only, and its starting value is whatever the selected scenario says.
+		// Set before subscribing, so seeding the box does not look like the host toggling it.
+		_openingDiscardCheckBox.ButtonPressed = gameManager.SelectedScenario?.OpeningDiscard ?? true;
+		_openingDiscardCheckBox.Disabled = true;
+		_openingDiscardCheckBox.Toggled += OnOpeningDiscardToggled;
+
 		// Arrived from JoinGameScreen, which already established the client connection.
 		// Adopt it rather than creating a second peer.
 		// This branch is transport-agnostic: a connected SteamMultiplayerPeer satisfies it exactly as
@@ -178,8 +173,6 @@ public partial class MultiplayerLobby : Control
 			int me = Multiplayer.GetUniqueId();
 			UpdateStatusLabel("Connected – waiting for lobby data...");
 			AddPlayerRow(me, $"{LocalDisplayName()} (You)");
-			_hostButton.Disabled = true;
-			_joinButton.Disabled = true;
 			// Deferred so this node has finished entering the tree before the RPC goes out.
 			CallDeferred(nameof(RequestLobbyStateFromHost));
 			return;
@@ -196,15 +189,14 @@ public partial class MultiplayerLobby : Control
 			_dedicatedServer = true;
 			_requiredPlayers = GetIntArg("players", 2);
 			DebugUtilities.PrintPeer($"Dedicated server: auto-hosting, waiting for {_requiredPlayers} client(s)...");
-			OnHostButtonPressed();
+			StartGodotHost();
 			return;
 		}
 
 		// GUI test client that should connect to a dedicated server without menu interaction.
 		if (OS.GetCmdlineUserArgs().Contains("auto_join=true"))
 		{
-			_ipAddressInput.Text = DEFAULT_SERVER_IP;
-			OnJoinButtonPressed();
+			JoinAt(DEFAULT_SERVER_IP);
 			return;
 		}
 
@@ -213,20 +205,19 @@ public partial class MultiplayerLobby : Control
 			DebugUtilities.PrintPeer(_lobbyOnlyMode
 				? "DebugMultiplayer Instance 1: auto-hosting (lobby only)..."
 				: "DebugMultiplayer Instance 1: auto-hosting...");
-			OnHostButtonPressed();
+			StartGodotHost();
 		}
 		else if (GameSettings.IsDebugMultiplayer && instance == 2)
 		{
 			DebugUtilities.PrintPeer(_lobbyOnlyMode
 				? "DebugMultiplayer Instance 2: auto-joining (lobby only)..."
 				: "DebugMultiplayer Instance 2: auto-joining...");
-			_ipAddressInput.Text = DEFAULT_SERVER_IP;
-			OnJoinButtonPressed();
+			JoinAt(DEFAULT_SERVER_IP);
 		}
 		else if (MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.HostGodot)
 		{
 			MainMenu.ClearLobbyIntent();
-			OnHostButtonPressed();
+			StartGodotHost();
 		}
 		else if (MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.HostSteam)
 		{
@@ -320,10 +311,15 @@ public partial class MultiplayerLobby : Control
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
-	// Connection buttons
+	// Connecting
+	//
+	// Nothing on this screen starts a connection any more: hosting and joining are both chosen before
+	// the player arrives here (MainMenu's host dialog, JoinGameScreen, SteamFriendLobbiesScreen). These
+	// are driven by ReadyInternal from the lobby intent, the dedicated-server path, and the debug
+	// auto-host/join instances.
 	// ══════════════════════════════════════════════════════════════════════════
 
-	private void OnHostButtonPressed()
+	private void StartGodotHost()
 	{
 		DebugUtilities.PrintPeer("Starting host...");
 		
@@ -357,7 +353,6 @@ public partial class MultiplayerLobby : Control
 		{
 			DebugUtilities.PrintPeerError($"Failed to host via Steam: {error}");
 			UpdateStatusLabel($"Failed to host via Steam — {error}");
-			// Deliberately leaves the buttons enabled: hosting over Godot is still one click away.
 			SteamworksApi.Instance?.LeaveCurrentLobby();
 			return;
 		}
@@ -380,19 +375,17 @@ public partial class MultiplayerLobby : Control
 		AddPlayerRow(1, $"{LocalDisplayName()} (Host)");
 		_startGameButton.Visible  = true;
 		_startGameButton.Disabled = true; // unlocks once all 6 factions are assigned
-		_hostButton.Disabled      = true;
-		_joinButton.Disabled      = true;
 		_scenarioPicker.Disabled  = false;
 		SetSeedFieldEnabled(true);
+		_openingDiscardCheckBox.Disabled = false;
 	}
 
 	private void OnInviteFriendsPressed() => SteamworksApi.Instance?.OpenInviteOverlay();
 
-	private void OnJoinButtonPressed()
+	private void JoinAt(string ip)
 	{
 		DebugUtilities.PrintPeer("Joining server...");
-		string ip = _ipAddressInput.Text;
-		
+
 		var peer  = new ENetMultiplayerPeer();
 		Error err = peer.CreateClient(ip, DEFAULT_PORT);
 		if (err != Error.Ok)
@@ -405,8 +398,6 @@ public partial class MultiplayerLobby : Control
 		Multiplayer.MultiplayerPeer = peer;
 		DebugUtilities.PrintPeer($"Connecting to {ip}:{DEFAULT_PORT}");
 		UpdateStatusLabel($"Connecting to {ip}:{DEFAULT_PORT}...");
-		_hostButton.Disabled = true;
-		_joinButton.Disabled = true;
 	}
 
 	private void OnStartGameButtonPressed()
@@ -425,13 +416,23 @@ public partial class MultiplayerLobby : Control
 		// Only the host's field is read: the seed travels to the clients on the StartSession RPC,
 		// so a client's own box never affects its game.
 		MenuSeedField.Commit(_seedInput);
+		CommitOpeningDiscard();
 		Rpc(nameof(StartGame));
 	}
+
+	/// <summary>
+	/// Hand the host's toggle to the game, the same way MenuSeedField.Commit hands over the seed —
+	/// and for the same reason: SetupInitialGameState runs on the host only, so only the host's box
+	/// matters and no RPC is needed to carry it.
+	/// </summary>
+	private void CommitOpeningDiscard()
+		=> GameManager.PendingOpeningDiscard = _openingDiscardCheckBox.ButtonPressed;
 
 	private void OnDebugSoloButtonPressed()
 	{
 		DebugUtilities.PrintPeer("Starting debug solo game...");
 		MenuSeedField.Commit(_seedInput);
+		CommitOpeningDiscard();
 		var list = new List<PlayerFactionAssignment>
 		{
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
@@ -637,6 +638,7 @@ public partial class MultiplayerLobby : Control
 			RpcId((int)peerId, nameof(SyncPlayerList),   GetPlayerListData());
 			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments());
 			RpcId((int)peerId, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
+			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 
 			if (_dedicatedServer)
 			{
@@ -736,8 +738,6 @@ public partial class MultiplayerLobby : Control
 	{
 		DebugUtilities.PrintPeerError("Connection failed");
 		UpdateStatusLabel("Connection failed!");
-		_hostButton.Disabled = false;
-		_joinButton.Disabled = false;
 	}
 
 	private void OnServerDisconnected()
@@ -746,8 +746,6 @@ public partial class MultiplayerLobby : Control
 		UpdateStatusLabel("Disconnected from server");
 		ClearAllRows();
 		_assignments.Clear();
-		_hostButton.Disabled     = false;
-		_joinButton.Disabled     = false;
 		_startGameButton.Visible = false;
 
 		// The session is over, so release the Steam lobby too — otherwise the next host attempt
@@ -888,6 +886,7 @@ public partial class MultiplayerLobby : Control
 		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());
 		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments());
 		RpcId(requester, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
+		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 	}
 
 	/// <summary>
@@ -913,7 +912,34 @@ public partial class MultiplayerLobby : Control
 		gameManager.SetSelectedScenarioByIndex(index);
 		UpdateScenarioDescription(gameManager.AvailableScenarios[index].Description);
 		Rpc(nameof(SyncScenarioSelection), gameManager.SelectedScenario.Path);
+
+		// A new scenario resets the toggle to that scenario's own answer — SetSelectedScenarioByIndex
+		// has just dropped the override that went with the previous one.
+		SetOpeningDiscard(gameManager.AvailableScenarios[index].OpeningDiscard);
+		Rpc(nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 	}
+
+	/// <summary>
+	/// Host toggled the opening discard. Only the host's box is ever read (it is committed to
+	/// GameManager.PendingOpeningDiscard when the game starts), but the clients are told so the lobby
+	/// shows everyone the rules they are about to play under.
+	/// </summary>
+	private void OnOpeningDiscardToggled(bool pressed)
+	{
+		if (!_isHost) return;
+		Rpc(nameof(SyncOpeningDiscard), pressed);
+	}
+
+	/// <summary>Set the box without the change echoing back out as a host toggle.</summary>
+	private void SetOpeningDiscard(bool enabled)
+	{
+		_openingDiscardCheckBox.Toggled -= OnOpeningDiscardToggled;
+		_openingDiscardCheckBox.ButtonPressed = enabled;
+		_openingDiscardCheckBox.Toggled += OnOpeningDiscardToggled;
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
+	private void SyncOpeningDiscard(bool enabled) => SetOpeningDiscard(enabled);
 
 	/// <summary>Seed entry follows the scenario picker: host-editable, read-only for everyone else.</summary>
 	private void SetSeedFieldEnabled(bool enabled)

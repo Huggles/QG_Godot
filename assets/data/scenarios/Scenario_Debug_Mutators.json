@@ -4,6 +4,7 @@
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 3,
+  "openingDiscard": false,
   "mutators": [
     {
       "name": "MutatorRedeployAfterPlayCard",

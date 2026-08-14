@@ -15,6 +15,17 @@ public class InitialGameStateData
     [JsonPropertyName("maxRounds")]
     public int MaxRounds { get; set; } = 20;
 
+    /// <summary>
+    /// When true (the default), every faction opens on StaticGameData.OpeningHandSize and must
+    /// immediately discard StaticGameData.OpeningDiscardCount, landing on the normal hand size.
+    /// When false the opening hand is dealt straight at StaticGameData.HandSize and play begins.
+    ///
+    /// The scenario's answer is the default; the host can override it in the lobby, which is why
+    /// GameFlow reads GameManager.PendingOpeningDiscard first.
+    /// </summary>
+    [JsonPropertyName("openingDiscard")]
+    public bool OpeningDiscard { get; set; } = true;
+
     // When true, every playable faction is given a random starting VP in
     // [RandomStartingVPMin, RandomStartingVPMax], overriding per-faction startingVP.
     [JsonPropertyName("randomizeStartingVP")]
