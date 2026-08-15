@@ -6,58 +6,58 @@ using System.Text.Json.Serialization;
 
 public partial class FactionState : StateObject
 {
-    [JsonIgnore] public FactionData FactionData { get; private set; }
-    private int _score { get; set; }
+	[JsonIgnore] public FactionData FactionData { get; private set; }
+	private int _score { get; set; }
 
-    public Faction Faction => FactionData.Faction;
-    /// <summary>Debug-log only (never on the wire — FactionStateDto does not carry it).</summary>
-    public string FactionLabel => Faction.Label();
-    public bool Playable => StaticGameData.PlayableFactions.Contains(Faction) ? true : false;
+	public Faction Faction => FactionData.Faction;
+	/// <summary>Debug-log only (never on the wire — FactionStateDto does not carry it).</summary>
+	public string FactionLabel => Faction.Label();
+	public bool Playable => StaticGameData.PlayableFactions.Contains(Faction) ? true : false;
 
-    [JsonIgnore] private MultiplayerGameState GameState => GameSession.Current.GameState;
+	[JsonIgnore] private MultiplayerGameState GameState => GameSession.Current.GameState;
 
 
-    public int Score
-    {
-        get => _score;
-        set
-        {
-            _score = value;
-            //EventBusLocal.EmitSignal(nameof(EventBusLocal.FactionScoredPoints), Faction, _score);
-        }
-    }
+	public int Score
+	{
+		get => _score;
+		set
+		{
+			_score = value;
+			//EventBusLocal.EmitSignal(nameof(EventBusLocal.FactionScoredPoints), Faction, _score);
+		}
+	}
 
-    public DeckState DeckState { get; private set; }
+	public DeckState DeckState { get; private set; }
 
-    public FactionState(Faction faction)
-    {
-        FactionData = new FactionData(){ 
-            Index = (int)faction,
-            UniqueName = faction.ToString(), 
-            Label = faction.ToString(), 
-            ColorString = "#FFFFFF", 
-            ColorStringText = "#000000", 
-            Team = "NONE", 
-            Homespace = "NONE", 
-            NumberOfArmyUnits = 0, 
-            NumberOfNavyUnits = 0};
-    }
+	public FactionState(Faction faction)
+	{
+		FactionData = new FactionData(){ 
+			Index = (int)faction,
+			UniqueName = faction.ToString(), 
+			Label = faction.ToString(), 
+			ColorString = "#FFFFFF", 
+			ColorStringText = "#000000", 
+			Team = "NONE", 
+			Homespace = "NONE", 
+			NumberOfArmyUnits = 0, 
+			NumberOfNavyUnits = 0};
+	}
 
-    public FactionState(FactionData factionData)
-    {
-        FactionData = factionData;
-        _score = 0;
-        DeckState = new DeckState(this);
-    }
+	public FactionState(FactionData factionData)
+	{
+		FactionData = factionData;
+		_score = 0;
+		DeckState = new DeckState(this);
+	}
 
-    public List<int> AllUnits => GameState.UnitStates.Where(unit => unit.Faction == Faction).Select(unit => unit.Id).ToList();
-    public List<int> ActiveUnitIds => UnitState.ForIds(AllUnits).Where(unit => unit.CountryId >= 0).Select(unit => unit.Id).ToList();
-    public List<int> OccupiedCountryIds => ActiveUnitIds.Select(id => GameState.UnitStatesById[id].CountryId).ToList();
-    public List<int> SuppliedUnitIds => ActiveUnitIds.Where(id => GameState.UnitStatesById[id].InSupply).ToList();
-    public List<int> UnsuppliedUnitIds => ActiveUnitIds.Where(id => !GameState.UnitStatesById[id].InSupply).ToList();
+	public List<int> AllUnits => GameState.UnitStates.Where(unit => unit.Faction == Faction).Select(unit => unit.Id).ToList();
+	public List<int> ActiveUnitIds => UnitState.ForIds(AllUnits).Where(unit => unit.CountryId >= 0).Select(unit => unit.Id).ToList();
+	public List<int> OccupiedCountryIds => ActiveUnitIds.Select(id => GameState.UnitStatesById[id].CountryId).ToList();
+	public List<int> SuppliedUnitIds => ActiveUnitIds.Where(id => GameState.UnitStatesById[id].InSupply).ToList();
+	public List<int> UnsuppliedUnitIds => ActiveUnitIds.Where(id => !GameState.UnitStatesById[id].InSupply).ToList();
 
-    public static FactionState ForEnum(Faction factionEnum) => 
-        MultiplayerSession.Instance.GameState.FactionStatesByFaction.ContainsKey(factionEnum) 
-        ? MultiplayerSession.Instance.GameState.FactionStatesByFaction[factionEnum] 
-        : null;    
+	public static FactionState ForEnum(Faction factionEnum) => 
+		MultiplayerSession.Instance.GameState.FactionStatesByFaction.ContainsKey(factionEnum) 
+		? MultiplayerSession.Instance.GameState.FactionStatesByFaction[factionEnum] 
+		: null;    
 }

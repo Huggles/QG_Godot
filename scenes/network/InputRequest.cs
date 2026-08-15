@@ -69,6 +69,32 @@ public abstract partial class InputRequest
     /// </summary>
     public bool WasSkipped { get; set; } = false;
 
+    /// <summary>
+    /// True when this card prompt is a reaction window — an after-reaction or a block — rather than
+    /// the faction's own reaction-depth-0 play. Set by the host; decides whether the client offers
+    /// the scoped skip buttons alongside the plain Skip.
+    /// </summary>
+    public bool IsReactionWindow { get; set; } = false;
+
+    /// <summary>
+    /// Cards the prompt should DISPLAY, as opposed to <see cref="TargetCardIds"/>, which is what may
+    /// be chosen. Everything here but not in TargetCardIds renders greyed out and unclickable.
+    ///
+    /// A reaction window carries the faction's whole event-triggered table
+    /// (<see cref="CardPlayRound.ReactionWindowDisplayCardIds"/>) so the player can see why nothing
+    /// of theirs applies, rather than facing a prompt that silently omits cards they know they hold.
+    /// Null everywhere else, which means "display exactly the selectable set".
+    /// </summary>
+    public List<int> DisplayCardIds { get; set; }
+
+    /// <summary>
+    /// Set by a reaction prompt when the player chose one of the scoped skip buttons instead of
+    /// plain Skip. Rides the same DTO round-trip as <see cref="WasSkipped"/>; the host feeds it to
+    /// <see cref="GameFlow.RecordReactionSkip"/> and stops opening the information-hiding reaction
+    /// windows for that faction for the scope's duration. NONE for every non-reaction request.
+    /// </summary>
+    public ReactionSkipScope ReactionSkipScope { get; set; } = ReactionSkipScope.NONE;
+
     public InputRequest(Faction targetFaction)
     {
         TargetFaction = targetFaction;
@@ -197,16 +223,30 @@ public abstract partial class InputRequest
     {
         public HandCardPlayRequestHandler(Faction targetFaction) : base(targetFaction) {}
 
-        // Mirrors InputManager.SetPlayCardInputActive(faction, includeHandCards: true).
+        // The initial play at reaction depth 0. Selectable = ActivatableCardIds, which for a hand card
+        // resolves to CardLogic.CanBeActivated — the play conditions AND HasExecutableCardSteps. The
+        // hand used to be concatenated in wholesale, which offered a card whose every step condition
+        // was false; playing it just reported "Unable to" on each step in turn and did nothing.
+        //
+        // The hand is still DISPLAYED, greyed out, so an unplayable card is visibly unplayable rather
+        // than missing. The client cannot narrow this itself: Tag.IsExecutable is server-internal and
+        // never replicated (see GameStateCalculator.ReplicatedTags).
+        //
+        // ??= so a caller can hand over its own set — EventLendLease grants an out-of-turn play, where
+        // ActivatableCardIds is empty for the receiving faction (IsFactionTurn fails) and the whole
+        // hand is the correct offer.
         public override void PopulateTargets()
         {
             DeckState deck = DeckState.ForFaction(TargetFaction);
-            TargetCardIds = deck.ActivatableCardIds.Concat(deck.HandCardIds).Distinct().ToList();
+            TargetCardIds ??= deck.ActivatableCardIds;
+            DisplayCardIds ??= deck.ActivatableCardIds.Concat(deck.HandCardIds).Distinct().ToList();
         }
 
         public override async Task Handle()
         {
-            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, true);
+            // The host's list, not a local re-derivation — same rule as BlockReactionRequestHandler.
+            PlayerScene.Current.InputManager.SetCardSelectionActive(
+                TargetFaction, TargetCardIds ?? new List<int>(), false, DisplayCardIds);
             Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0)
             {
@@ -219,17 +259,22 @@ public abstract partial class InputRequest
     {
         public ActivateCardRequestHandler(Faction targetFaction) : base(targetFaction) {}
 
-        // Mirrors InputManager.SetPlayCardInputActive(faction, includeHandCards: false).
+        // Table cards only, no hand — and never overwrites a list the caller already set:
+        // CardPlayRound.RequestPlay stamps the exact
+        // after-reaction options for a reaction window, and ActivatableCardIds is a wider set.
         public override void PopulateTargets()
-            => TargetCardIds = DeckState.ForFaction(TargetFaction).ActivatableCardIds;
+            => TargetCardIds ??= DeckState.ForFaction(TargetFaction).ActivatableCardIds;
 
         public override async Task Handle()
         {
-            PlayerScene.Current.InputManager.SetPlayCardInputActive(TargetFaction, false);
+            // The host's list, not a local re-derivation — same rule as BlockReactionRequestHandler.
+            PlayerScene.Current.InputManager.SetCardSelectionActive(
+                TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
             DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
             Variant[] results = await AwaitCardSelection();
+            ReactionSkipScope = PlayerScene.Current.InputManager.TakeReactionSkipScope();
             if (results != null && results.Length > 0)
             {
                 ResponseCardIds.Add((int)results[0]);
@@ -423,16 +468,22 @@ public abstract partial class InputRequest
     /// </summary>
     public class BlockReactionRequestHandler : InputRequest
     {
-        public BlockReactionRequestHandler(Faction targetFaction) : base(targetFaction) {}
+        // A block prompt is always a reaction window, so the scoped skip buttons always apply.
+        public BlockReactionRequestHandler(Faction targetFaction) : base(targetFaction)
+        {
+            IsReactionWindow = true;
+        }
 
         public override async Task Handle()
         {
             await Task.Delay(GameSettings.DurationMedium);
             // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
-            PlayerScene.Current.InputManager.SetCardSelectionActive(TargetFaction, TargetCardIds ?? new List<int>());
+            PlayerScene.Current.InputManager.SetCardSelectionActive(
+                TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
             Variant[] results = await AwaitCardSelection();
+            ReactionSkipScope = PlayerScene.Current.InputManager.TakeReactionSkipScope();
             if (results != null && results.Length > 0 && (int)results[0] > -1)
             {
                 ResponseCardIds.Add((int)results[0]);

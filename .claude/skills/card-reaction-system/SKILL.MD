@@ -144,6 +144,31 @@ Requests after reactions from all factions. Returns `true` if at least one react
 - If a faction plays → `_afterReactionPassedFactions.Clear()` **before** `DoCard`, so all factions get a fresh chance during that reaction's resolution; then `break` to restart with updated `RequestOrder`
 - Loop exits when a full pass through all non-skipped factions produces no plays
 
+#### `ShouldOpenReactionWindow(Faction, List<int> options)` — the always-ask rule
+The single gate deciding whether a faction is prompted at all. Used by **both** `RequestAfterReactions` and `RequestBlock`, so the rule lives in one place.
+
+```csharp
+if (GameFlow.Instance.IsSkippingReactions(faction))
+    return options.Any(IsPubliclyVisibleTableCard);
+return options.Count > 0 || HasHiddenResponseCards(faction);
+```
+
+**Why a faction with nothing to play is still asked.** Opening a window only when a reaction is actually available makes the *appearance* of the prompt proof that the faction holds a face-down Response card matching exactly that event — and its absence proof that it holds none. Every opponent could read the hidden card straight off "Waiting on Japan input…". So any faction holding an unrevealed Response card (`HasHiddenResponseCards`) is asked in every window and passes with Skip. The empty prompt is the cover story.
+
+Only unrevealed **Response** cards earn this. Status cards sit face up and their trigger conditions are computable by every player from public state, so a Status-driven window hides nothing.
+
+**Scoped skips.** Always-asking produces a lot of empty prompts, so a reaction prompt also offers *Skip rest of turn step* and *Skip rest of round* (`ReactionSkipScope`). The chosen scope rides back on `InputRequest.ReactionSkipScope` and is recorded by `GameFlow.RecordReactionSkip`.
+
+A scoped skip silences **only** the windows that exist to hide information. `IsPubliclyVisibleTableCard` (a Status card, or a Response card an earlier activation already revealed) keeps its window: everyone can see you hold it, so that prompt leaks nothing whether it appears or not, and the player must not lose a real reaction to a convenience button. Once the window is open the faction is offered *all* its activatable options, hidden ones included — the prompt is already explained by the public card.
+
+`GameFlow`'s two registries are host-only and self-expiring: each records the turn/step or round it was set in and stops being honoured once the game moves past it, so there is no clearing hook to keep in step with the turn loop. `ChangeRoundChangeEvent` calls `DropOwnTurnReactionSkip()` so a round-scope skip never survives into its owner's own turn — reacting to your own battle (Destroyer Transport, Surprise Attack) is core play and must not be muted by a decision taken on somebody else's turn.
+
+**What the prompt shows.** A reaction window draws the faction's *whole* event-triggered table — `ReactionWindowDisplayCardIds`, carried as `InputRequest.DisplayCardIds` — and greys out everything not in `TargetCardIds`. Showing only the playable cards left the player guessing why a card they knew they held was absent, and an always-ask window showed an empty table, which reads as a bug rather than as "nothing of yours triggers here". Passive-modifier Status cards are excluded (`HasEventBasedTrigger`), so a card that could never be a reaction is not shown as one that merely is not available.
+
+Clickability comes from `TargetCardIds`, never from `Tag.IsActivatable`: block-eligible cards carry `Tag.IsBlockReaction`, which is server-internal and never replicated, so a client re-deriving the answer would grey out a card the host is actually offering.
+
+**Consequence for tests.** "Was a prompt raised" no longer proves a card matched. A test that detected a wrongly-offered reaction by hanging on an unexpected prompt must assert on the option count instead — `assert promptoptions == 0` in the CLI. See `tests/qgc/block_reaction_prevents_removal.qgc` and `tests/qgc/reaction_always_asked_and_scoped_skip.qgc`.
+
 #### `CurrentReactionTrigger` (property on `CardPlayRound` / `CardPlayPool`)
 The change event that opened the currently-active reaction window. Card step logic reads this to determine *which specific event* it is reacting to, so targets are computed relative to that event rather than all matching events in the pool.
 
@@ -428,6 +453,8 @@ new CardStep(this, async() => {
 9. **`Finish()` is Unconditional at Top Level**: `DoCard` calls `Finish()` whenever `reactionDepth` returns to 0 for the initial play — the old `hasRemainingActions` guard was wrong because skipped reactions don't consume their tags
 10. **Reaction Windows are Trigger-Scoped**: `CurrentReactionTrigger` identifies which specific event opened the active window. Cards that can react to multiple different events (e.g. a card reacting to *any* sea battle in the pool) must use `CurrentReactionTrigger` to scope their targets to the correct event — not scan all matching events in the pool
 11. **Activations Bind Their Trigger**: `DoCard` pins the triggering event onto the `CardLogic` as `ActivationTrigger` for the whole activation. Step logic reads that, not the pool — a live pool read is retargeted by any `Apply()` that lands in between
+12. **Being Asked Proves Nothing**: any faction holding an unrevealed Response card is offered every reaction window whether or not it can react, so the prompt cannot be read as evidence of what the hidden card does. The option list, not the prompt's existence, is the signal
+13. **Scoped Skips Never Cost a Visible Reaction**: *Skip rest of turn step* / *Skip rest of round* suppress only the windows that exist to hide information. A window where the faction holds a face-up Status card (or an already-revealed Response) survives the skip — it was never hiding anything
 
 ## Common Pitfalls
 
@@ -439,4 +466,5 @@ new CardStep(this, async() => {
 6. **Double-ask bug**: `RequestAfterReactions` is called at every `DoChangeEvent` level. Without `_afterReactionPassedFactions`, a faction could be asked inside a nested reaction window AND again in the outer loop restart. Always use the shared pass-tracking set.
 7. **Stale `hasRemainingActions` check**: Checking for remaining reaction tags to decide whether to `Finish()` is incorrect — a skipped faction still holds the tag. `Finish()` must always fire when returning to `reactionDepth == 0`.
 8. **Matching a block trigger against the pool**: a block card's `CardTriggers()` must test `CardPlayPool.CurrentBlockTrigger`. Testing `LastNoneNewCardChangeEvent` matches inside *every* block window — including the one opened for a card play or reaction activation, which that property filters out — so the card gets offered against events it has nothing to do with.
-9. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.
+9. **Testing for a reaction by its prompt**: a test that proves a card is *not* offered by hanging on an unexpected prompt no longer works — the always-ask rule raises a window for that faction anyway. Assert `promptoptions == 0` instead.
+10. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.

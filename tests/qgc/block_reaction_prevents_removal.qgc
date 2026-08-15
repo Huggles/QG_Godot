@@ -38,14 +38,29 @@ assert decksize UNITED_STATES == 22
 
 api removeUnit --faction JAPAN --unit 110 --reason BATTLE
 pass                                    # UK declines Destroyers on the removal — this offer is correct
+pass                                    # Soviet: always-ask window on the removal, no options
 play 1                                  # US plays Radar
 
-# Deliberately NO answer command here. Radar's activation opens its own block window, and the UK
-# used to be offered Destroyers again inside it — a removal-blocker matching a card activation,
-# because UnitAboutToBeRemoved read LastNoneNewCardChangeEvent (which skips ActivateReactionChangeEvent
-# and so still reported the removal). Block triggers now match CurrentBlockTrigger, so no prompt is
-# raised and the asserts below run straight through. If that offer ever returns, this test HANGS
-# waiting for input and the runner reports a hard timeout. Do not "fix" that with an `auto` line.
+# Radar's activation opens its own block window, and the UK used to be offered Destroyers again
+# inside it — a removal-blocker matching a card activation, because UnitAboutToBeRemoved read
+# LastNoneNewCardChangeEvent (which skips ActivateReactionChangeEvent and so still reported the
+# removal). Block triggers now match CurrentBlockTrigger, so nothing matches here.
+#
+# The UK is still ASKED: it holds a face-down Destroyers, and the always-ask rule
+# (CardPlayRound.ShouldOpenReactionWindow) opens a window for every such faction so that being asked
+# stops proving a card matched. So the regression signal is no longer "does a prompt appear" — it is
+# "does that prompt carry any options". `assert promptoptions == 0` on the UK's window is the check;
+# it FAILS (1) the moment Destroyers is wrongly offered against a card activation again.
+pass                                    # block window on the activation: Japan  (no options)
+pass                                    #                                Italy  (no options)
+assert promptfaction == UNITED_KINGDOM  # the window that used to wrongly offer Destroyers
+assert promptoptions == 0               # FAILS (1) if a removal-blocker matches an activation again
+pass                                    #                                UK     (no options)
+pass                                    #                                Soviet (no options)
+pass                                    # activation window:             Japan  (no options)
+pass                                    #                                Italy  (no options)
+pass                                    #                                UK     (no options)
+pass                                    #                                Soviet (no options)
 
 assert units NORTH_ATLANTIC UNITED_STATES == 1   # FAILS (0) if the block was lost
 assert decksize UNITED_STATES == 20              # the cost was still paid

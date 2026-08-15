@@ -76,9 +76,10 @@ $screenWidth  = 1920
 $screenHeight = 1080
 try {
     Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
-    $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
-    $screenWidth  = $bounds.Width
-    $screenHeight = $bounds.Height
+    $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+    $screenWidth  = [math]::Floor($bounds.Width * 1.5)
+    $screenHeight = [math]::Floor($bounds.Height * 1.5)
+    Write-Host "Screen size detected: ${screenWidth}x${screenHeight}" -ForegroundColor DarkGray
 } catch {
     Write-Host "Could not read screen size; tiling against 1920x1080." -ForegroundColor DarkGray
 }
@@ -89,8 +90,9 @@ $titleBar = 40   # leave room for the window chrome so tiles do not overlap vert
 
 $tileWidth  = [math]::Floor($screenWidth / $cols)
 $tileHeight = [math]::Floor($screenHeight / $rows)
+Write-Host "Tiling $total windows in ${cols}x${rows} grid: ${tileWidth}x${tileHeight} each" -ForegroundColor DarkGray
 $winWidth   = $tileWidth - 10
-$winHeight  = $tileHeight - $titleBar
+$winHeight  = $tileHeight
 
 function Get-TileArgs([int]$index) {
     $col = $index % $cols

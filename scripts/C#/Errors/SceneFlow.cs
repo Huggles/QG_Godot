@@ -33,6 +33,11 @@ public static class SceneFlow
             if (from.Multiplayer?.MultiplayerPeer != null)
                 from.Multiplayer.MultiplayerPeer = null;
 
+            // A barrier that never came up in the session being left still holds parked ready reports.
+            // They are keyed by a node path that the next game reuses verbatim, so leaving them would
+            // pre-satisfy that game's barrier with peers who are not there.
+            NetworkApi.ClearBufferedBarrierReports();
+
             // A Steam-hosted session rides on a Steam lobby, so dropping the peer without releasing
             // the lobby would leave a stale entry in friends' lists and block the next host attempt
             // (the peer refuses to host on a lobby it does not own outright). Harmless no-op when

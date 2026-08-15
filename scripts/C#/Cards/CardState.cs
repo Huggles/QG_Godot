@@ -33,18 +33,21 @@ public partial class CardState : StateObject
 
     /// <summary>
     /// Whether this peer may see the card's face. A Response card is played face down and stays
-    /// secret until it is activated; every other card type is public. Purely a presentation rule —
-    /// the authoritative state is identical on every peer, only the render differs.
+    /// secret until it is activated; every other card type is public when played/revealed, or when the player owns the card's faction. 
+    /// Purely a presentation rule — the authoritative state is identical on every peer, only the render differs.
     ///
     /// Read only by the UI (CardFace.ForCard), so the headless-false answer from LocalPlayerControls
     /// is never reached on a server. The card type check is first so a non-Response card never
     /// touches PlayerScene.
     /// </summary>
     [JsonIgnore]
-    public bool IsFaceVisibleToLocalPlayer =>
-        CardData.CardType != CardType.RESPONSE
-        || IsRevealed
-        || PresentationServices.Notification.LocalPlayerControls(Faction);
+    public bool IsFaceVisibleToLocalPlayer {
+        get {
+            DebugUtilities.PrintPeer($"CardState.IsFaceVisibleToLocalPlayer: Card {CardName} (Id {Id}) of type {CardData.CardType} for faction {Faction} is {(IsRevealed ? "revealed" : "not revealed")} and {(PresentationServices.Notification.LocalPlayerControls(Faction) ? "controlled by local player" : "not controlled by local player")}");
+            return IsRevealed || PresentationServices.Notification.LocalPlayerControls(Faction);
+        }
+        
+    }
 
     public virtual bool IsPlayed => this.HasTag(Tag.IsPlayed, Faction);
 

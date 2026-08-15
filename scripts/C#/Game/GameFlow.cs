@@ -51,6 +51,59 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public DeckState CurrentFactionDeckState => DeckState.ForFaction(CurrentFaction);
     public Dictionary<Faction, int> CardsPlayedThisTurnStep = new Dictionary<Faction, int>();
 
+    /// <summary>
+    /// Reaction windows a faction has opted out of via the scoped skip buttons on a reaction prompt.
+    /// Entries are self-expiring: each records the window it was set in and is simply no longer
+    /// honoured once the game has moved past it, so there is no clearing hook to keep in step with
+    /// the turn loop.
+    ///
+    /// Host-only, like <see cref="CardsPlayedThisTurnStep"/>: it decides whether the host opens a
+    /// window at all, and the suppression reaches clients as the absence of an InputRequest. Not on
+    /// the GameFlowMultiplayerSynchronizer and deliberately not in MultiplayerGameState.ComputeHash —
+    /// a peer cannot get it wrong because a peer never has it.
+    /// </summary>
+    private readonly Dictionary<Faction, (int Turn, TurnStep Step)> reactionSkipTurnStep = new();
+    private readonly Dictionary<Faction, int> reactionSkipRound = new();
+
+    /// <summary>Record a faction's scoped skip choice from a reaction prompt. NONE is a no-op.</summary>
+    public void RecordReactionSkip(Faction faction, ReactionSkipScope scope)
+    {
+        switch (scope)
+        {
+            case ReactionSkipScope.TURN_STEP:
+                reactionSkipTurnStep[faction] = (GameTurn, TurnStep);
+                DebugUtilities.PrintPeer($"{faction} is skipping reactions for the rest of turn {GameTurn} step {TurnStep}");
+                break;
+
+            case ReactionSkipScope.ROUND:
+                reactionSkipRound[faction] = Round;
+                DebugUtilities.PrintPeer($"{faction} is skipping reactions for the rest of round {Round}");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Whether the faction has an active scoped skip. Callers must still offer the window when the
+    /// faction holds a publicly visible reaction — see CardPlayRound.ShouldOpenReactionWindow. This
+    /// answers only "did they ask to be left alone", not "may they be skipped".
+    /// </summary>
+    public bool IsSkippingReactions(Faction faction)
+    {
+        if (reactionSkipTurnStep.TryGetValue(faction, out (int Turn, TurnStep Step) window)
+            && window.Turn == GameTurn && window.Step == TurnStep)
+            return true;
+
+        return reactionSkipRound.TryGetValue(faction, out int round) && round == Round;
+    }
+
+    /// <summary>
+    /// Drop the incoming faction's round-scope skip. Reacting to your own battle (Destroyer
+    /// Transport, Surprise Attack) is core play and must not be silently muted by a decision taken
+    /// on somebody else's turn, so a round-scope skip never survives into its owner's own turn.
+    /// Called from ChangeRoundChangeEvent once GameTurn — and therefore CurrentFaction — has moved.
+    /// </summary>
+    public void DropOwnTurnReactionSkip() => reactionSkipRound.Remove(CurrentFaction);
+
     public FactionTeam CurrentFactionTeam => (GameTurn > 0 && GameTurn % 2 == 0) ? FactionTeam.ALLIES : FactionTeam.AXIS;
     
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();

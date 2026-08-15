@@ -20,6 +20,8 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
     {
         GameFlow.Instance.GameTurn = NewTurn;
         GameFlow.Instance.CardsPlayedThisTurnStep.Clear();
+        // After GameTurn moved, so CurrentFaction is the faction whose turn is starting.
+        GameFlow.Instance.DropOwnTurnReactionSkip();
         await Task.CompletedTask;
         return true;
     }

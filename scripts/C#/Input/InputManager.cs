@@ -27,34 +27,49 @@ public partial class InputManager : Node2D
 
     private InputHandlerPlayCard inputHandler;
 
-    [Signal] public delegate void KeyClickedEventHandler(InputEventKey keyEvent);    
+    /// <summary>Scope chosen on the open reaction prompt, consumed by <see cref="TakeReactionSkipScope"/>.</summary>
+    private ReactionSkipScope _pendingReactionSkipScope = ReactionSkipScope.NONE;
 
-    public InputHandlerPlayCard SetPlayCardInputActive(Faction faction, bool includeHandCards = false)
-    {        
-        List<int> cardIds = DeckState.ForFaction(faction).ActivatableCardIds;
-        DebugUtilities.PrintPeer($"SetPlayCardInputActive: ActivatableCardIds for {faction} = {string.Join(",", cardIds)}");
-        if(includeHandCards)
-        {
-            cardIds.AddRange(DeckState.ForFaction(faction).HandCardIds);
-            cardIds = cardIds.Distinct().ToList();
-        }
-        
-        return SetCardSelectionActive(faction, cardIds);
-    }
+    [Signal] public delegate void KeyClickedEventHandler(InputEventKey keyEvent);
 
     /// <summary>
-    /// Activates card selection over an explicit set of card ids. Used when the caller already knows
-    /// which cards are eligible (e.g. a block-reaction request, where only block cards may be chosen)
-    /// rather than deriving the list from Tag.IsActivatable.
+    /// Activates card selection over an explicit set of card ids. Every card prompt goes through here
+    /// with the list the host computed and put on the wire as InputRequest.TargetCardIds — a client
+    /// runs no GameStateCalculator and holds no CardPlayRound, so it cannot re-derive an option set
+    /// that depends on either (reaction depth being the one that bit: re-deriving inside a reaction
+    /// window offered the faction's whole hand).
     /// </summary>
-    public InputHandlerPlayCard SetCardSelectionActive(Faction faction, List<int> cardIds)
+    /// <param name="isReactionWindow">
+    /// True for an after-reaction or block prompt, which additionally offers the scoped skip buttons.
+    /// Such a prompt may legitimately carry an empty <paramref name="cardIds"/>: a faction with a
+    /// face-down Response card is asked in every window whether or not it can actually react, so
+    /// that the prompt itself stops giving the hidden card away.
+    /// </param>
+    /// <param name="displayCardIds">
+    /// What to draw, when that is wider than what may be chosen — a reaction window shows the
+    /// faction's whole event-triggered table and greys out everything not in
+    /// <paramref name="cardIds"/>. Null means "draw exactly the selectable set".
+    /// </param>
+    public InputHandlerPlayCard SetCardSelectionActive(
+        Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null)
     {
-        PlayerActionLabel.ShowText("Choose a card", faction);
-        FactionHandDisplay.Current.Show(cardIds);
+        _pendingReactionSkipScope = ReactionSkipScope.NONE;
+
+        PlayerActionLabel.ShowText(cardIds.Count > 0 ? "Choose a card" : "No reaction available", faction);
+        // The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
+        // and would resolve Faction.NONE for an empty always-ask prompt.
+        FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds);
         FactionHandDisplay.Current.CardSelected += HandleItemSelected;
         // The Skip button now doubles as the "pass" affordance for choosing a card to play/activate.
         SelectionSkipButton.Current?.Show();
         EventBus.Instance.SelectionSkipped += OnPlayCardSkipped;
+
+        if (isReactionWindow)
+        {
+            ReactionSkipScopeButton.ShowAll();
+            EventBus.Instance.ReactionSkipScoped += OnReactionSkipScoped;
+        }
+
         return inputHandler;
     }
 
@@ -62,6 +77,28 @@ public partial class InputManager : Node2D
     {
         // Skipping the card-play prompt is a pass (card id -1).
         HandleItemSelected(-1);
+    }
+
+    /// <summary>
+    /// A scoped skip is still a pass on this window; the scope is what the host reads afterwards to
+    /// decide how long to leave this faction alone.
+    /// </summary>
+    private void OnReactionSkipScoped(int scope)
+    {
+        _pendingReactionSkipScope = (ReactionSkipScope)scope;
+        HandleItemSelected(-1);
+    }
+
+    /// <summary>
+    /// Read and clear the scope chosen for the prompt that just closed. Read once, by the request's
+    /// Handle() right after the card selection resolves, so a stale scope cannot leak into the next
+    /// prompt (SetCardSelectionActive resets it on entry as a second guard).
+    /// </summary>
+    public ReactionSkipScope TakeReactionSkipScope()
+    {
+        ReactionSkipScope scope = _pendingReactionSkipScope;
+        _pendingReactionSkipScope = ReactionSkipScope.NONE;
+        return scope;
     }
 
     /// <summary>
@@ -77,6 +114,11 @@ public partial class InputManager : Node2D
     {
         FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
         EventBus.Instance.SelectionSkipped -= OnPlayCardSkipped;
+        // Unconditional: the host's abort path (CancelCardSelection on timeout or error recovery)
+        // comes through here too, and an unsubscribe/hide that never ran would leave the scoped
+        // buttons live over the next prompt. Both are no-ops when they were never set up.
+        EventBus.Instance.ReactionSkipScoped -= OnReactionSkipScoped;
+        ReactionSkipScopeButton.HideAll();
         SelectionSkipButton.Current?.Hide();
         FactionHandDisplay.Current.Hide();
         // The trigger context is its own node now, so hiding the hand no longer takes it down with it.

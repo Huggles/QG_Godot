@@ -134,6 +134,20 @@ Requests after reactions from all factions:
 - Each reaction is processed recursively
 - After all reactions complete, continues with next steps
 
+#### `ShouldOpenReactionWindow(Faction, List<int> options)`
+The single gate deciding whether a faction is prompted at all, used by both the block and the
+after-reaction path:
+
+- A faction holding an unrevealed Response card is asked **even with nothing activatable**. Asking
+  only when a reaction is available makes the appearance of the prompt proof of what the hidden card
+  does, and its absence proof that there is none — so the window is always opened and the player
+  passes with Skip. Status cards are face up and their triggers are computable by everyone, so they
+  hide nothing and do not earn a prompt.
+- A reaction prompt therefore also offers *Skip rest of turn step* and *Skip rest of round*
+  (`ReactionSkipScope`, recorded by `GameFlow.RecordReactionSkip`). Those suppress **only** the
+  information-hiding windows: a window where the faction holds a face-up Status card, or an
+  already-revealed Response card, still opens.
+
 #### `ContinueWithNextSteps()`
 Checks all cards in the pool for executable next steps:
 - Executes steps sequentially

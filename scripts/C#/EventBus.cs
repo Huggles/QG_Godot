@@ -39,6 +39,10 @@ public partial class EventBus : GodotObject
     // Emitted when the player presses the Skip button during a card-step board selection.
     [Signal] public delegate void SelectionSkippedEventHandler();
 
+    /// <summary>Emitted when the player presses one of the scoped skip buttons in a reaction
+    /// window. The argument is a <see cref="ReactionSkipScope"/>.</summary>
+    [Signal] public delegate void ReactionSkipScopedEventHandler(int scope);
+
     [Signal] public delegate void GameChangeEventOccurredEventHandler();
 
     [Signal] public delegate void CardSelectedEventHandler(int cardId);

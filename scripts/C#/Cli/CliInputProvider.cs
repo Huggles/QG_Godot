@@ -134,15 +134,24 @@ public sealed class CliInputProvider : IInputProvider
     }
 
     /// <summary>Decline, using this request type's own pass idiom (see PassMode).</summary>
-    public string Pass()
+    /// <param name="scope">
+    /// The scoped-skip buttons on a reaction prompt. NONE is a plain pass on this window only; the
+    /// others additionally tell the host to stop opening the information-hiding reaction windows for
+    /// this faction. Ignored by every non-reaction request, which never reads it back.
+    /// </param>
+    public string Pass(ReactionSkipScope scope = ReactionSkipScope.NONE)
     {
         if (_pending == null) return "no prompt is open";
         if (!_spec.CanPass) return $"{_spec.Kind} is mandatory — you must choose {_spec.MinSelections}";
+        if (scope != ReactionSkipScope.NONE && !_request.IsReactionWindow)
+            return $"{_spec.Kind} is not a reaction window — only a plain pass applies";
 
+        _request.ReactionSkipScope = scope;
         _spec.ApplyPass(_request);
         _renderer.Emit(new CliEvent("answered")
             .Set("kind", _spec.Kind).Set("faction", _spec.Faction.ToString()).Set("passed", true)
-            .Text($"OK  {_spec.Kind} {_spec.Faction} <- pass"));
+            .Set("skip_scope", scope.ToString())
+            .Text($"OK  {_spec.Kind} {_spec.Faction} <- pass{(scope == ReactionSkipScope.NONE ? "" : $" ({scope})")}"));
 
         Release();
         return null;

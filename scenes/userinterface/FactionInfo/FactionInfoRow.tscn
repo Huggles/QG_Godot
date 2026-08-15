@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://bjpmsri3am6gm"]
+[gd_scene format=3 uid="uid://bjpmsri3am6gm"]
 
 [ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
 [ext_resource type="StyleBox" uid="uid://iry13465ja03" path="res://scenes/cards/CardButtonStyleHovered.tres" id="2_h8eod"]
@@ -9,13 +9,6 @@
 [ext_resource type="Script" uid="uid://nwhfij0f43sv" path="res://scenes/userinterface/FactionInfo/CardsAnimationControl.cs" id="7_0r4er"]
 [ext_resource type="Texture2D" uid="uid://cpfklff0i6sut" path="res://assets/factions/germany/cards/Germany_CardBack.png" id="7_48ey3"]
 [ext_resource type="LabelSettings" uid="uid://cy7n8wr0krac1" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsLarge.tres" id="8_48ey3"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0r4er"]
-bg_color = Color(0.4509804, 0.8235294, 0.5137255, 1)
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-corner_detail = 16
-anti_aliasing_size = 0.551
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
 resource_local_to_scene = true
@@ -31,6 +24,11 @@ border_blend = true
 [sub_resource type="Theme" id="Theme_gac4n"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s1j4j"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_0r4er"]
+resource_local_to_scene = true
+outline_size = 7
+outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rhpmq"]
 
@@ -52,7 +50,7 @@ corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h8eod"]
 
-[node name="FactionInfoRow" type="Control"]
+[node name="FactionInfoRow" type="Control" unique_id=1940069184]
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 3
 anchors_preset = 15
@@ -65,16 +63,7 @@ grow_vertical = 2
 mouse_default_cursor_shape = 2
 script = ExtResource("1_osvc4")
 
-[node name="ActiveFactionPanel" type="Panel" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 49.0
-offset_bottom = 55.0
-grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0r4er")
-
-[node name="FactionFlag" type="TextureRect" parent="."]
+[node name="FactionFlag" type="TextureRect" parent="." unique_id=98411546]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 1
@@ -86,7 +75,7 @@ texture = ExtResource("2_s1j4j")
 expand_mode = 3
 stretch_mode = 4
 
-[node name="ScoreLabel" type="Label" parent="FactionFlag"]
+[node name="ScoreLabel" type="Label" parent="FactionFlag" unique_id=1942955123]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -99,7 +88,7 @@ label_settings = ExtResource("3_gac4n")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BackgroundPanel" type="Panel" parent="."]
+[node name="BackgroundPanel" type="Panel" parent="." unique_id=52719779]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(50, 50)
 layout_mode = 1
@@ -112,31 +101,49 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0g7yh")
 
-[node name="DeckButton" type="Button" parent="BackgroundPanel"]
+[node name="DiscardDeckButton" type="Button" parent="BackgroundPanel" unique_id=1698971982]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(50, 25)
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 1
+anchor_left = 1.0
 anchor_right = 1.0
+offset_left = -50.0
 offset_bottom = 25.0
-grow_horizontal = 2
+grow_horizontal = 0
 focus_mode = 0
 theme = SubResource("Theme_gac4n")
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = SubResource("StyleBoxEmpty_s1j4j")
 icon = ExtResource("3_s1j4j")
 icon_alignment = 1
 expand_icon = true
 
-[node name="PlayedCardsButton" type="Button" parent="BackgroundPanel"]
+[node name="DeckCardNumber" type="Label" parent="BackgroundPanel/DiscardDeckButton" unique_id=614173343]
+custom_minimum_size = Vector2(50, 25)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "9"
+label_settings = SubResource("LabelSettings_0r4er")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayedCardsButton" type="Button" parent="BackgroundPanel" unique_id=1709253810]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(50, 25)
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = 3
+anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -8.0
-grow_horizontal = 2
+offset_left = -50.0
+offset_top = -25.0
+grow_horizontal = 0
 grow_vertical = 0
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_rhpmq")
@@ -144,7 +151,7 @@ icon = ExtResource("4_rhpmq")
 icon_alignment = 1
 expand_icon = true
 
-[node name="DetailPanel" type="Panel" parent="."]
+[node name="DetailPanel" type="Panel" parent="." unique_id=1521963942]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(300, 300)
@@ -161,7 +168,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_sfxx1")
 
-[node name="MarginContainer" type="MarginContainer" parent="DetailPanel"]
+[node name="MarginContainer" type="MarginContainer" parent="DetailPanel" unique_id=75594480]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -173,14 +180,14 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 4
 
-[node name="TurnSummariesRichText" type="RichTextLabel" parent="DetailPanel/MarginContainer"]
+[node name="TurnSummariesRichText" type="RichTextLabel" parent="DetailPanel/MarginContainer" unique_id=952183249]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_force_pass_scroll_events = false
 bbcode_enabled = true
 text = "Lorem Ipsum is slechts een proeftekst uit het drukkerij- en zetterijwezen. Lorem Ipsum is de standaard proeftekst in deze bedrijfstak sinds de 16e eeuw, toen een onbekende drukker een zethaak met letters nam en ze door elkaar husselde om een font-catalogus te maken. Het heeft niet alleen vijf eeuwen overleefd maar is ook, vrijwel onveranderd, overgenomen in elektronische letterzetting. Het is in de jaren '60 populair geworden met de introductie van Letraset vellen met Lorem Ipsum passages en meer recentelijk door desktop publishing software zoals Aldus PageMaker die versies van Lorem Ipsum bevatten."
 
-[node name="FactionInfoButton" type="Button" parent="."]
+[node name="FactionInfoButton" type="Button" parent="." unique_id=1138684773]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 1
@@ -192,14 +199,14 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_osvc4")
 theme_override_styles/hover = ExtResource("2_h8eod")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_h8eod")
 
-[node name="CardsAnimationControl" type="Control" parent="."]
+[node name="CardsAnimationControl" type="Control" parent="." unique_id=1551812826]
 anchors_preset = 0
 offset_top = 60.0
 offset_right = 50.0
 offset_bottom = 130.0
 script = ExtResource("7_0r4er")
 
-[node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl"]
+[node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl" unique_id=1152488689]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -209,7 +216,7 @@ grow_vertical = 2
 texture = ExtResource("7_48ey3")
 expand_mode = 5
 
-[node name="CardsAnimationControlLabel" type="Label" parent="CardsAnimationControl"]
+[node name="CardsAnimationControlLabel" type="Label" parent="CardsAnimationControl" unique_id=1961802746]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

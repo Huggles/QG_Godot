@@ -139,10 +139,15 @@ public sealed class InputRequestSpec
             case InputRequest.HandCardPlayRequestHandler:
             case InputRequest.ActivateCardRequestHandler:
             case InputRequest.BlockReactionRequestHandler:
+                spec.Options = Cards(request.TargetCardIds);
                 spec.Title = request is InputRequest.BlockReactionRequestHandler
                     ? "Play a block reaction, or pass"
                     : "Play a card, or pass";
-                spec.Options = Cards(request.TargetCardIds);
+                // A reaction window with nothing on offer is the always-ask rule at work: a faction
+                // holding a face-down Response card is asked every time so that being asked stops
+                // proving anything. Say so, or the transcript reads like a bug.
+                if (request.IsReactionWindow && spec.Options.Count == 0)
+                    spec.Title += " (nothing available — always-ask window)";
                 spec.MinSelections = 0;
                 spec.MaxSelections = 1;
                 spec.Pass = PassMode.EmptyResponse;

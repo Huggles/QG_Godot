@@ -1,0 +1,98 @@
+#!args scenario=Scenario_AllCards seed=42
+#
+# Reaction windows must not leak what a face-down Response card is, and the scoped skip must only
+# silence the windows that exist to do that hiding.
+#
+# The host used to open a reaction window only for a faction that could actually play something. So
+# "Waiting on Soviet input…" during a specific block window was proof that the Soviet held a
+# face-down Response card matching exactly that event, and its absence was proof it held none — the
+# prompt read out the hidden card. CardPlayRound.ShouldOpenReactionWindow now asks every faction
+# holding an unrevealed Response card, whether or not it can react, so being asked stops proving
+# anything and the player passes with Skip.
+#
+# That produces a lot of empty prompts, so a reaction prompt also offers "skip rest of turn step"
+# and "skip rest of round" (ReactionSkipScope, answered here as `pass turnstep` / `pass round`).
+# Those must NOT cost the player a reaction everyone can already see they hold: a face-up Status card
+# is public knowledge, so its window leaks nothing and survives the skip. Only the windows that exist
+# solely because of face-down cards go away.
+#
+# The three things pinned below, all in one removal-and-block setup shared with
+# block_reaction_prevents_removal.qgc:
+#
+#   1. ALWAYS-ASK   the Soviet is asked with zero options, purely because it holds face-down cards.
+#   2. SCOPED SKIP  after `pass round` the Soviet is not asked again this round.
+#   3. CARVE-OUT    the US answers `pass round` too, but keeps being asked, because StatusRadar is a
+#                   face-up Status card that genuinely matches the trigger.
+#
+# Germany and Japan never appear: Japan triggers the removals (a faction cannot block its own event)
+# and Germany holds no unrevealed Response card under this scenario.
+#
+# Both removals target unit 110: a removed unit returns to the reserve pool and the next build takes
+# its id back, so the second Navy is 110 again. Values are pinned to the seed in the #!args line;
+# re-derive the id if unit allocation changes.
+#
+# Scope note: both removals land in the same turn, so this pins that a round-scope skip survives
+# across separate reaction windows and that the carve-out holds — not that it survives a turn
+# boundary. GameFlow.IsSkippingReactions compares against GameFlow.Round for that, and
+# ChangeRoundChangeEvent drops the incoming faction's entry.
+#
+# Run:  tests/run-cli.sh tests/qgc/reaction_always_asked_and_scoped_skip.qgc
+
+# The six mandatory opening discards — see opening_turn.qgc. Those carry the game through to Japan's
+# turn (still round 1), which is where everything below happens.
+auto 6
+
+prompt                                  # synchronise with the running game
+
+# ── Removal 1: prove the always-ask rule, and set two round-scope skips ──────────────────────────
+#
+# The US only starts with an Army in US East. Give it a Navy in the adjacent sea so both Destroyers
+# ("a supplied US or UK Navy is about to be removed") and StatusRadar can match the removal.
+force deployUnit --faction UNITED_STATES --country NORTH_ATLANTIC --deploy BUILD
+api removeUnit --faction JAPAN --unit 110 --reason BATTLE
+
+assert promptfaction == UNITED_KINGDOM
+assert promptoptions == 1               # Destroyers really matches — an ordinary window
+pass
+
+assert promptfaction == SOVIET
+assert promptoptions == 0               # (1) ALWAYS-ASK: nothing to play, asked anyway
+pass round                              # the Soviet opts out for the rest of round 1
+
+assert promptfaction == UNITED_STATES
+assert promptoptions == 1               # StatusRadar — face up, so public knowledge
+pass round                              # the US opts out too, and must still keep this window
+
+assert promptfaction == ITALY
+assert promptoptions == 0               # another always-ask window
+pass
+
+# The removal applies, opening its after-reaction windows. The Soviet is already gone from these.
+assert promptfaction == UNITED_KINGDOM
+pass
+assert promptfaction == JAPAN           # (2) not SOVIET — its round-scope skip is in force
+pass
+assert promptfaction == ITALY
+pass
+
+# ── Removal 2: prove the skip holds for one faction and not the other ────────────────────────────
+force deployUnit --faction UNITED_STATES --country NORTH_ATLANTIC --deploy BUILD
+api removeUnit --faction JAPAN --unit 110 --reason BATTLE   # id reused from the removed Navy
+
+assert promptfaction == UNITED_KINGDOM  # never skipped, so unaffected
+assert promptoptions == 1
+pass
+
+# The load-bearing pair. Both the Soviet and the US answered `pass round`, and both hold face-down
+# Response cards — but only the US also holds a face-up card that matches. So the Soviet's window is
+# gone and the US's is not. FAILS as SOVIET if the skip is ignored, and as ITALY if the skip wrongly
+# swallows a publicly visible reaction.
+assert promptfaction == UNITED_STATES   # (3) CARVE-OUT: still asked, because Radar is face up
+assert promptoptions == 1               # and it is still offered the card, not an empty window
+pass
+
+assert promptfaction == ITALY           # (2) the Soviet is still absent
+assert promptoptions == 0
+pass
+
+quit

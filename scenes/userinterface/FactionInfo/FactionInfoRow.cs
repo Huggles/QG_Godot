@@ -9,13 +9,12 @@ public partial class FactionInfoRow : Control
 	public Faction Faction;
 	private FactionState FactionState => FactionState.ForEnum(Faction);
 	private MultiplayerGameState gameState { get { return GameSession.Current.GameState; } }
-	private Panel ActiveFactionPanel => GetNode<Panel>("ActiveFactionPanel");
 	private Panel BackgroundPanel => GetNode<Panel>("%BackgroundPanel");
 	private TextureRect FactionFlagNode => GetNode<TextureRect>("FactionFlag");    
 	private Label ScoreLabel => FactionFlagNode.GetNode<Label>("ScoreLabel");
 	private Panel DetailPanel => GetNode<Panel>("DetailPanel");    
 	private Button FactionInfoButton => GetNode<Button>("FactionInfoButton");
-	private Button DeckButton => BackgroundPanel.GetNode<Button>("DeckButton");
+	private Button DiscardDeckButton => BackgroundPanel.GetNode<Button>("DiscardDeckButton");
 	private Button PlayedCardsButton => BackgroundPanel.GetNode<Button>("PlayedCardsButton");
 	private RichTextLabel TurnSummariesRichText => DetailPanel.GetNode<RichTextLabel>("MarginContainer/TurnSummariesRichText");
 	private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
@@ -40,7 +39,7 @@ public partial class FactionInfoRow : Control
 			EventBus.Instance.FactionScoredPoints -= OnFactionScoredPoints;
 			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
 			FactionInfoButton.Pressed -= OnFactionInfoButtonPressed;
-			DeckButton.Pressed -= OnDeckButtonPressed;
+			DiscardDeckButton.Pressed -= OnDiscardDeckButtonPressed;
 		}
 	}
 
@@ -72,19 +71,12 @@ public partial class FactionInfoRow : Control
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 
-
-
 		SetScore(FactionState.Score);
 
 		EventBus.Instance.FactionScoredPoints += OnFactionScoredPoints;                
 		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
-		DeckButton.Pressed += OnDeckButtonPressed;
-
-		if(!PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction))
-		{            
-			DeckButton.Disabled = true;
-		}
+		DiscardDeckButton.Pressed += OnDiscardDeckButtonPressed;
 		SetModulation();
 	}
 
@@ -113,15 +105,10 @@ public partial class FactionInfoRow : Control
 		PresentationModal.Current.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Played Cards", false);
 	}
 	
-	private void OnDeckButtonPressed()
+	private void OnDiscardDeckButtonPressed()
 	{   
-		List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DeckCardIds, false);
-		PresentationModal.Current.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Draw Deck", false);
-	}
-	
-	private void SetActiveFactionPanel()
-	{
-		ActiveFactionPanel.Visible = GameFlow.Instance.CurrentFaction == Faction;
+		List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardedCardIds, false);
+		PresentationModal.Current.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Discard Deck", false);
 	}
 	private void SetModulation()
 	{        
@@ -137,7 +124,6 @@ public partial class FactionInfoRow : Control
 		{
 			Modulate = new Color(Modulate.R - 0.2f, Modulate.G - 0.2f, Modulate.B - 0.2f,  Modulate.A); // Further dim the row if it's not the current faction's turn
 		}
-		SetActiveFactionPanel();
 	}
 
 	private void SetScore(int score)

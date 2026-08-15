@@ -10,9 +10,9 @@ public partial class EWDecimaFlottigliaMASFrogmen : EWCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                bool noAlliedNavyInMediterranean = !GameSession.Current.GameState.UnitStatesById.Values
-                    .Any(us => StaticGameData.FactionTeamForFaction(us.Faction) == FactionTeam.ALLIES
-                               && us.Type == UnitType.NAVY
+                bool noAlliedNavyInMediterranean = !StaticGameData.FactionsForTeam(FactionTeam.ALLIES)
+                    .SelectMany(faction => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates())
+                    .Any(us => us.Type == UnitType.NAVY
                                && us.CountryState.Country == Country.MediterraneanSea);
 
                 int totalDiscards = 1 + (noAlliedNavyInMediterranean ? 1 : 0);

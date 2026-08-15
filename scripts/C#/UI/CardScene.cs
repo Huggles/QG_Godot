@@ -125,9 +125,7 @@ public partial class CardScene : Control
             activatableColorOverlay.Visible = !activatable;
         }
         
-    }
-
-    
+    }    
     public void TriggersEmphasis(bool triggersEmphasis)
     {
         this.triggersEmphasis = triggersEmphasis;

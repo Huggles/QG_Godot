@@ -41,6 +41,20 @@ force deployUnit --faction UNITED_STATES --country NORTH_ATLANTIC --deploy BUILD
 api removeUnit --faction JAPAN --unit 110 --reason BATTLE
 play 1                                  # UK activates Destroyers
 
+# Activating Destroyers opens its own block window and then its activation window, and every faction
+# holding a face-down Response card is asked in both whether or not it can react — that is the
+# always-ask rule (CardPlayRound.ShouldOpenReactionWindow), and it is what stops the prompt itself
+# from revealing what the hidden card does. Scenario_AllCards puts Response cards on every table, so
+# these seven windows all open with nothing on offer. Explicit passes rather than `auto 7`: if the
+# set ever changes, the mismatch should surface here rather than be absorbed silently.
+pass                                    # block window on the activation: Japan   (no options)
+pass                                    #                                Italy    (no options)
+pass                                    #                                Soviet   (no options)
+pass                                    # activation window:             Japan    (no options)
+pass                                    #                                Italy    (no options)
+pass                                    #                                UK       (no options)
+pass                                    #                                Soviet   (no options)
+
 # Activated: flipped face up for every peer, and spent, so it moves to the discard pile.
 # ActivateReactionChangeEvent sets the flag inside ExecuteAsync, which ChangeEvent.ApplyMutation
 # awaits BEFORE it enqueues AfterAnimations — so the card is already revealed when the

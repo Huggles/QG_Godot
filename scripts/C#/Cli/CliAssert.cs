@@ -80,6 +80,18 @@ public static class CliAssert
             case "faction": return flow.CurrentFaction.ToString();
             case "hash":    return $"{state.ComputeHash():X8}";
             case "errors":  return (CliSession.Instance?.ErrorsSeen ?? 0).ToString();
+
+            // The open prompt, if any. `promptfaction` is NONE and `promptoptions` is -1 when
+            // nothing is open, so both distinguish "not asked" from "asked with nothing on offer" —
+            // a distinction the always-ask reaction rule made load-bearing. A faction holding a
+            // face-down Response card is now asked in every reaction window whether or not it can
+            // react, so "was a prompt raised" no longer tells you a card matched; only the option
+            // count does. Tests that used to detect a wrongly-offered reaction by hanging on an
+            // unexpected prompt must assert on the count instead.
+            case "promptoptions":
+                return (CliSession.Instance?.Input.OpenSpec?.Options.Count ?? -1).ToString();
+            case "promptfaction":
+                return (CliSession.Instance?.Input.OpenSpec?.Faction ?? Faction.NONE).ToString();
             case "rngdraws":return GameRandom.DrawCount.ToString();
             case "seed":    return GameRandom.Seed.ToString();
 

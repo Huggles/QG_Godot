@@ -354,22 +354,24 @@ public partial class CardPlayRound : GodotObject
                 {
                     if (_afterReactionPassedFactions.Contains(faction)) continue;
                     List<int> options = GetAfterReactionOptions(faction);
-                    if (options.Count > 0)
+                    // A faction the gate declines is re-evaluated next pass rather than recorded as
+                    // having passed, exactly as a faction with no options always has been — the gate
+                    // is a local state read, so there is no round-trip to save by caching it.
+                    if (!ShouldOpenReactionWindow(faction, options)) continue;
+
+                    int cardId = await RequestPlay(faction, options);
+                    if (cardId != -1)
                     {
-                        int cardId = await RequestPlay(faction);
-                        if (cardId != -1)
-                        {
-                            DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
-                            _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
-                            await DoCard(cardId, triggerEvent);
-                            anyEverPlayed = true;
-                            anyPlayedThisPass = true;
-                            break; // Restart with updated RequestOrder
-                        }
-                        else
-                        {
-                            _afterReactionPassedFactions.Add(faction);
-                        }
+                        DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
+                        _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
+                        await DoCard(cardId, triggerEvent);
+                        anyEverPlayed = true;
+                        anyPlayedThisPass = true;
+                        break; // Restart with updated RequestOrder
+                    }
+                    else
+                    {
+                        _afterReactionPassedFactions.Add(faction);
                     }
                 }
             }
@@ -425,7 +427,17 @@ public partial class CardPlayRound : GodotObject
     }
 
     /// <summary>Ask the faction to choose a card to play/activate (initial play or after reaction).</summary>
-    public async Task<int> RequestPlay(Faction faction)
+    /// <param name="reactionOptions">
+    /// Non-null when this is an after-reaction window: the exact set of cards on offer, sent to the
+    /// controlling peer as TargetCardIds the same way RequestBlock sends its block options.
+    ///
+    /// Without it the request fell through to HandCardPlayRequestHandler for any faction that had not
+    /// yet played a hand card this turn step — which is every faction reacting on an opponent's turn —
+    /// and that handler deliberately offers the whole hand. The prompt then showed all of the reacting
+    /// faction's hand cards beside the event it was answering. Hand cards are never playable inside a
+    /// reaction window, so the reaction path must never build that request.
+    /// </param>
+    public async Task<int> RequestPlay(Faction faction, List<int> reactionOptions = null)
     {
         PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
         if (controllingPlayer == null)
@@ -434,18 +446,40 @@ public partial class CardPlayRound : GodotObject
             return -1;
         }
 
+        bool isReaction = reactionOptions != null;
+        // In a reaction window the caller has already run ShouldOpenReactionWindow, and an empty
+        // option list is the whole point of the always-ask rule — an unanswerable prompt is the cover
+        // that stops the prompt itself from revealing a face-down Response card.
+        bool hasOptions = isReaction || DeckState.ForFaction(faction).ActivatableCardIds.Count > 0;
+
         int selectedId = -1;
-        if(DeckState.ForFaction(faction).ActivatableCardIds.Count > 0)
+        if(hasOptions)
         {
-            // Only this faction's own plays consume its hand-card play for the turn step; another
-            // faction playing must not hide this faction's hand cards.
-            bool hasPlayedHandCardThisTurnStep =
-                GameFlow.Instance.CardsPlayedThisTurnStep.TryGetValue(faction, out int cardsPlayedByFaction)
-                && cardsPlayedByFaction > 0;
-            bool isStartTurnStep = GameFlow.Instance.TurnStep == TurnStep.START;
-            InputRequest request = hasPlayedHandCardThisTurnStep || isStartTurnStep
-                ? new InputRequest.ActivateCardRequestHandler(faction)
-                : new InputRequest.HandCardPlayRequestHandler(faction);
+            InputRequest request;
+            if (isReaction)
+            {
+                // Carried explicitly rather than re-derived on the client. The client never runs
+                // GameStateCalculator (tags arrive over the wire) and has no CardPlayRound, so it
+                // cannot reproduce the host's reaction-depth-aware filtering on its own.
+                request = new InputRequest.ActivateCardRequestHandler(faction)
+                {
+                    TargetCardIds = reactionOptions,
+                    DisplayCardIds = ReactionWindowDisplayCardIds(faction),
+                    IsReactionWindow = true,
+                };
+            }
+            else
+            {
+                // Only this faction's own plays consume its hand-card play for the turn step; another
+                // faction playing must not hide this faction's hand cards.
+                bool hasPlayedHandCardThisTurnStep =
+                    GameFlow.Instance.CardsPlayedThisTurnStep.TryGetValue(faction, out int cardsPlayedByFaction)
+                    && cardsPlayedByFaction > 0;
+                bool isStartTurnStep = GameFlow.Instance.TurnStep == TurnStep.START;
+                request = hasPlayedHandCardThisTurnStep || isStartTurnStep
+                    ? new InputRequest.ActivateCardRequestHandler(faction)
+                    : new InputRequest.HandCardPlayRequestHandler(faction);
+            }
 
             if (CurrentReactionTrigger != null)
             {
@@ -454,10 +488,12 @@ public partial class CardPlayRound : GodotObject
             }
 
             InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
+            if (isReaction)
+                GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
             selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
         }
 
-        
+
         return selectedId;
     }
 
@@ -478,9 +514,9 @@ public partial class CardPlayRound : GodotObject
 
         List<int> blockOptions = GetBlockReactionOptions(faction);
 
-        if (blockOptions.Count == 0)
+        if (!ShouldOpenReactionWindow(faction, blockOptions))
         {
-            DebugUtilities.PrintPeer($"{faction} has no block reactions available");
+            DebugUtilities.PrintPeer($"{faction} is not offered a block window (no block reactions, and nothing hidden to cover for)");
             await Task.Delay(10);
             return -1;
         }
@@ -495,11 +531,13 @@ public partial class CardPlayRound : GodotObject
             // Sent explicitly so the client prompt offers only block-eligible cards rather than
             // everything tagged IsActivatable. Tag.IsBlockReaction itself stays server-internal.
             TargetCardIds = blockOptions,
+            DisplayCardIds = ReactionWindowDisplayCardIds(faction),
             TriggerCardId = GetTriggerCardId(CurrentBlockTrigger),
             TriggerSummaryText = CurrentBlockTrigger?.SummaryText()
         };
 
         InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
+        GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
         return responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
     }
 
@@ -516,6 +554,67 @@ public partial class CardPlayRound : GodotObject
 
     /// <summary>Card IDs of block reactions available to the faction.</summary>
     public List<int> GetBlockReactionOptions(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsBlockReaction, faction)).Select(cs => cs.Id).ToList();
+
+    /// <summary>
+    /// True if the faction holds at least one face-down Response card on the table.
+    ///
+    /// Such a faction is offered a reaction window even with nothing activatable. Asking only when a
+    /// reaction is actually available makes the mere appearance of the prompt proof that the hidden
+    /// card reacts to exactly this event — and its absence proof that it does not. The empty prompt
+    /// is the cover story; the player passes with Skip.
+    /// </summary>
+    public static bool HasHiddenResponseCards(Faction faction) =>
+        DeckState.ForFaction(faction).ResponseCardIds.Any(id => CardState.ForId(id)?.IsRevealed == false);
+
+    /// <summary>
+    /// Every event-triggered card the faction has on the table: the full set a reaction prompt puts
+    /// in front of the player, whether or not each one can be played right now. The prompt then
+    /// greys out and un-clicks everything outside <see cref="GetAfterReactionOptions"/> /
+    /// <see cref="GetBlockReactionOptions"/>.
+    ///
+    /// Showing only the playable cards left the player guessing why a card they knew they held was
+    /// absent — and an always-ask window showed an empty table, which reads as a bug rather than as
+    /// "nothing of yours triggers here". Both piles are on-table only: DeckState.DiscardCard removes
+    /// a spent card from them.
+    ///
+    /// Passive-modifier Status cards are excluded. HasEventBasedTrigger is the same property
+    /// CanBeActivated uses to keep them out of reaction chains, so a card that could never be a
+    /// reaction is not shown as one that merely is not available.
+    /// </summary>
+    public static List<int> ReactionWindowDisplayCardIds(Faction faction)
+    {
+        DeckState deck = DeckState.ForFaction(faction);
+        return deck.StatusCardIds
+            .Concat(deck.ResponseCardIds)
+            .Where(id => CardState.ForId(id)?.CardLogic?.HasEventBasedTrigger == true)
+            .ToList();
+    }
+
+    /// <summary>
+    /// True when every player can already see what this table card is: a Status card sits face up,
+    /// and a Response card stays face up once an earlier activation revealed it. A window opened by
+    /// such a card leaks nothing whether it appears or not.
+    /// </summary>
+    private static bool IsPubliclyVisibleTableCard(int cardId)
+    {
+        CardState card = CardState.ForId(cardId);
+        return card != null && (card.CardData.CardType != CardType.RESPONSE || card.IsRevealed);
+    }
+
+    /// <summary>
+    /// Whether to open a reaction window for this faction, given the reactions it can actually play.
+    /// The single gate for both the block and the after-reaction path.
+    /// </summary>
+    private static bool ShouldOpenReactionWindow(Faction faction, List<int> options)
+    {
+        // A scoped skip only silences the windows that exist to hide information. A face-up Status
+        // card (or an already-revealed Response) is public knowledge, so the player keeps that
+        // window — only the ones that exist solely because of face-down cards go away.
+        if (GameFlow.Instance.IsSkippingReactions(faction))
+            return options.Any(IsPubliclyVisibleTableCard);
+
+        return options.Count > 0 || HasHiddenResponseCards(faction);
+    }
 
     public List<T> GetChangeEvents<T>() where T : ChangeEvent
     {

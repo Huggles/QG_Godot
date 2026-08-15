@@ -77,6 +77,16 @@ public partial class MultiplayerLobby : Control
 	private bool _isHost        = false;
 	private bool _lobbyOnlyMode = false;
 
+	/// <summary>
+	/// Set the moment the game start is committed, and never cleared: this node is on its way out.
+	/// The scene change is deferred (and on the host waits a frame for the loading cover), so the
+	/// lobby stays alive and connected for a short window afterwards — long enough to still receive
+	/// peer signals. Broadcasting lobby state from that window sends packets addressed to a node the
+	/// receiver has already replaced, which is where the "Node not found: GameRoot/MultiplayerLobby"
+	/// RPC errors come from.
+	/// </summary>
+	private bool _gameStarting = false;
+
 	/// <summary>True when this session rides on a Steam lobby rather than a direct ENet connection.</summary>
 	private bool _isSteamSession = false;
 	/// <summary>The Steam lobby backing this session; 0 for an ENet session.</summary>
@@ -270,7 +280,7 @@ public partial class MultiplayerLobby : Control
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
 	private void ReportPlayerName(string displayName)
 	{
-		if (!Multiplayer.IsServer()) return;
+		if (!Multiplayer.IsServer() || _gameStarting) return;
 
 		int sender = Multiplayer.GetRemoteSenderId();
 		if (!_playerLabels.TryGetValue(sender, out Label label)) return;
@@ -486,6 +496,8 @@ public partial class MultiplayerLobby : Control
 	private void OnDebugSoloButtonPressed()
 	{
 		DebugUtilities.PrintPeer("Starting debug solo game...");
+		// Solo, but the debug host may still be listening on 7777 — nobody may wander in behind it.
+		CloseLobbyToNewPeers();
 		MenuSeedField.Commit(_seedInput);
 		CommitOpeningDiscard();
 		var list = new List<PlayerFactionAssignment>
@@ -493,6 +505,12 @@ public partial class MultiplayerLobby : Control
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
 		};
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(list);
+
+		// Same fix as GameModeSelectionScreen.StartGame — see the comment there. Null-guarded rather
+		// than unconditional because this button runs on a possibly-live debug host peer (only closed
+		// to new connections above), and replacing that peer would tear down the session it is on.
+		Multiplayer.MultiplayerPeer ??= new OfflineMultiplayerPeer();
+
 		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
 	}
 
@@ -523,7 +541,7 @@ public partial class MultiplayerLobby : Control
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
 	private void RequestFactionToggle(int targetPeerId, int factionInt)
 	{
-		if (!Multiplayer.IsServer()) return;
+		if (!Multiplayer.IsServer() || _gameStarting) return;
 
 		int requester = (int)Multiplayer.GetRemoteSenderId();
 		if (requester == 0) requester = 1; // direct (local) call by host
@@ -657,10 +675,32 @@ public partial class MultiplayerLobby : Control
 	// Game start
 	// ══════════════════════════════════════════════════════════════════════════
 
+	/// <summary>
+	/// The game is committed: stop the session accepting anyone else, and stop this node broadcasting.
+	///
+	/// There is no join-in-progress in this game, so a peer that connects after the start has nothing
+	/// to connect to — the host is already in Game.tscn, so the newcomer's join handshake is addressed
+	/// to a lobby node that no longer exists there (Godot logs it as "Node not found:
+	/// GameRoot/MultiplayerLobby") and the newcomer is left sitting in an empty lobby forever. Easy to
+	/// hit with the multi-instance launchers, where a straggler instance can still be booting when the
+	/// host clicks Start Game. Refusing the connection outright turns that into a plain "connection
+	/// failed" on the newcomer, which is both honest and the behaviour the join screen already handles.
+	///
+	/// The peer is dropped wholesale when the session ends (SceneFlow.ChangeScene with leaveSession, or
+	/// a load auto-hosting afresh), so nothing has to undo this.
+	/// </summary>
+	private void CloseLobbyToNewPeers()
+	{
+		_gameStarting = true;
+		if (Multiplayer.IsServer() && Multiplayer.MultiplayerPeer != null)
+			Multiplayer.MultiplayerPeer.RefuseNewConnections = true;
+	}
+
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
 	private void StartGame()
 	{
 		DebugUtilities.PrintPeer($"StartGame: peer {Multiplayer.GetUniqueId()}");
+		CloseLobbyToNewPeers();
 
 		var byPeer = new Dictionary<int, List<Faction>>();
 		foreach (var (faction, peerId) in _assignments)
@@ -686,6 +726,11 @@ public partial class MultiplayerLobby : Control
 
 	private void OnPeerConnected(long peerId)
 	{
+		// Should not happen once the peer refuses connections, but a connection already in flight at
+		// that moment can still land here, and adding a row to a lobby that is being replaced only
+		// produces broadcasts nobody can receive.
+		if (_gameStarting) return;
+
 		DebugUtilities.PrintPeer($"Peer connected: {peerId}");
 		int    number     = _playerLabels.Count + 1;
 		string playerName = $"Player {number}";
@@ -773,7 +818,10 @@ public partial class MultiplayerLobby : Control
 		DebugUtilities.PrintPeer($"Peer disconnected: {peerId}");
 		RemovePlayerRow((int)peerId);
 
-		if (_isHost)
+		// Everyone is mid-transition into the game, so a released-factions broadcast would arrive at
+		// peers that have already swapped the lobby out — and the assignments have been read off
+		// already anyway.
+		if (_isHost && !_gameStarting)
 		{
 			var released = _assignments
 				.Where(kv => kv.Value == (int)peerId)
@@ -953,7 +1001,7 @@ public partial class MultiplayerLobby : Control
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
 	private void RequestLobbyState()
 	{
-		if (!Multiplayer.IsServer()) return;
+		if (!Multiplayer.IsServer() || _gameStarting) return;
 
 		int requester = Multiplayer.GetRemoteSenderId();
 		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());

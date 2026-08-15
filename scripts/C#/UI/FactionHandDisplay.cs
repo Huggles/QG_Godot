@@ -126,11 +126,19 @@ public partial class FactionHandDisplay : Control
 		Show(cardIds, cardIds.Count > 0 ? CardState.ForId(cardIds[0]).Faction : Faction.NONE); // Assumes all cards are from the same faction, which should be true for hand display
 	}
 
-	public void Show(List<int> cardIds, Faction faction)
+	/// <param name="selectableCardIds">
+	/// Which of <paramref name="cardIds"/> may actually be clicked. Null falls back to
+	/// <see cref="Tag.IsActivatable"/>, which is what every non-prompt caller wants.
+	///
+	/// A reaction prompt must pass it: it draws the faction's whole event-triggered table so the
+	/// player can see why nothing applies, and only the host knows which of those are playable —
+	/// block-eligible cards in particular, since Tag.IsBlockReaction is never replicated.
+	/// </param>
+	public void Show(List<int> cardIds, Faction faction, List<int> selectableCardIds = null)
 	{
 		showingFaction = faction;
 		ResetVisibility();
-		InitCards(cardIds);
+		InitCards(cardIds, selectableCardIds);
 	}
 
 	private void ResetVisibility()
@@ -161,7 +169,7 @@ public partial class FactionHandDisplay : Control
 		}
 	}
 
-	private void InitCards(List<int> cardIds)
+	private void InitCards(List<int> cardIds, List<int> selectableCardIds = null)
 	{
 		// Only initialize cards if LoadUI has been called
 		DebugUtilities.PrintPeerFinest($"Initializing cards {string.Join(", ", cardIds)}");        
@@ -202,16 +210,14 @@ public partial class FactionHandDisplay : Control
 			CardScenes.Add(cardSceneInstance);
 			cardSceneInstance.ShowCard(cardId);
 
-			if (cardState.HasTag(Tag.IsActivatable, cardState.Faction))
-			{
-				cardSceneInstance.SetClickable(true);
-				cardSceneInstance.SetActivatable(true);
-			}
-			else
-			{
-				cardSceneInstance.SetClickable(false);
-				cardSceneInstance.SetActivatable(false);
-			}
+			// The caller's list wins when it gave one. Tag.IsActivatable is the right default for the
+			// plain hand display, but it is the wrong answer inside a prompt: block-eligible cards
+			// carry Tag.IsBlockReaction, which is server-internal and never reaches a client, so a
+			// card the host is offering would render greyed out and refuse the click.
+			bool selectable = selectableCardIds?.Contains(cardId)
+							  ?? cardState.HasTag(Tag.IsActivatable, cardState.Faction);
+			cardSceneInstance.SetClickable(selectable);
+			cardSceneInstance.SetActivatable(selectable);
 		}
 	}
 

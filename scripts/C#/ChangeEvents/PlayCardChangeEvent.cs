@@ -48,6 +48,14 @@ public partial class PlayCardChangeEvent : ChangeEvent
         }
 
         SourceCardState.PlayedInTurn.Add(GameFlow.Instance.GameTurn);
+        if(SourceCardState.CardData.CardType == CardType.RESPONSE)
+        {
+            SourceCardState.IsRevealed = false;
+        }
+        else
+        {
+            SourceCardState.IsRevealed = true;
+        }
         
         await Task.CompletedTask;
         return true;

@@ -15,6 +15,7 @@
 [ext_resource type="Script" uid="uid://b0yaf6jd2tqqi" path="res://scripts/C#/UI/AutoDismissControl.cs" id="13_autodismiss"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
+[ext_resource type="Script" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
 [ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
 [ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
 
@@ -51,6 +52,36 @@ offset_right = 625.0
 offset_bottom = 14.0
 grow_vertical = 0
 script = ExtResource("15_skip")
+
+[node name="SkipTurnStepButton" parent="." unique_id=1187079457 instance=ExtResource("14_skipscene")]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(160, 50)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 49.0
+offset_top = -169.0
+offset_right = 625.0
+offset_bottom = -51.0
+grow_vertical = 0
+script = ExtResource("18_rskip")
+Scope = 1
+
+[node name="SkipRoundButton" parent="." unique_id=1187079458 instance=ExtResource("14_skipscene")]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(160, 50)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 49.0
+offset_top = -234.0
+offset_right = 625.0
+offset_bottom = -116.0
+grow_vertical = 0
+script = ExtResource("18_rskip")
+Scope = 2
 
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
 offset_bottom = -1005.0

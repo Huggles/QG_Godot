@@ -97,6 +97,18 @@ public sealed class CliRenderer
         for (int i = 0; i < spec.Options.Count; i++)
             sb.Append($"\n  {i + 1,3}. [{spec.Options[i].Id}] {spec.Options[i].Label}");
 
+        // The cards the GUI draws greyed out beside the choosable ones: a reaction window shows the
+        // faction's whole event-triggered table so the player can see why nothing of theirs applies.
+        // Not answerable, so deliberately unnumbered — `answer` matches against spec.Options only.
+        List<int> shownOnly = (request.DisplayCardIds ?? new List<int>())
+            .Except(spec.Options.Select(o => o.Id)).ToList();
+        if (shownOnly.Count > 0)
+        {
+            e.Set("shown_not_selectable", shownOnly);
+            sb.Append("\n  shown, not selectable: "
+                      + string.Join(", ", shownOnly.Select(id => CardState.ForId(id)?.CardName ?? $"card#{id}")));
+        }
+
         if (spec.MinSelections == spec.MaxSelections)
             sb.Append($"\n  choose exactly {spec.MinSelections}");
         else if (spec.MinSelections == 0)

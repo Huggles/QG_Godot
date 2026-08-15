@@ -104,6 +104,14 @@ public partial class GameModeSelectionScreen : Control
 			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
 		};
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
+
+		// Without a peer, get_unique_id() is 0 → IsServer() is false → PeerReadinessComponent takes its
+		// client branch and the report dies on Godot's "no multiplayer peer is active" guard, hanging
+		// this path at the barrier forever. OfflineMultiplayerPeer gives unique id 1 and no peers, so
+		// the barrier expects exactly one and fires immediately. See CliBootstrap, which does the same.
+		// Must precede the scene change: the barrier goes up as soon as Game.tscn loads.
+		Multiplayer.MultiplayerPeer ??= new OfflineMultiplayerPeer();
+
 		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
 	}
 }

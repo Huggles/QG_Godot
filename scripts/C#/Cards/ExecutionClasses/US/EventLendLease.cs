@@ -14,7 +14,13 @@ public partial class EventLendLease : EventCardLogic
                     Faction, new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET }).BroadCast();
                 Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
 
-                var cardResp = await new InputRequest.HandCardPlayRequestHandler(selectedFaction).BroadCast();
+                // The whole hand, set explicitly: this is a granted out-of-turn play, so the handler's
+                // default offer (ActivatableCardIds) is empty for the receiving faction — its play
+                // conditions include IsFactionTurn, which fails on the US turn.
+                var cardResp = await new InputRequest.HandCardPlayRequestHandler(selectedFaction)
+                {
+                    TargetCardIds = DeckState.ForFaction(selectedFaction).HandCardIds
+                }.BroadCast();
                 if (cardResp.ResponseCardIds.Count > 0)
                     await CardPlayPool.DoCard(cardResp.ResponseCardIds[0]);
 

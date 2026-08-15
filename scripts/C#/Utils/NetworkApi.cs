@@ -104,6 +104,59 @@ public partial class NetworkApi : Node
         }
     }
 
+    // ── Readiness barriers ───────────────────────────────────────────────────
+    //
+    // Why a barrier report lands on this autoload instead of on the barrier node itself: a client used
+    // to send RpcId(1, …) ON its own PeerReadinessComponent, and Godot routes an RPC by resolving the
+    // sender's absolute NodePath ON THE RECEIVER. Peers enter Game.tscn at independent times
+    // (SceneFlow defers the change, and windowed peers additionally wait a frame that headless peers
+    // skip), so a fast client's report regularly arrived while the host was still in the lobby:
+    // "Node not found: Game/PeerReadinessComponent", packet dropped, no retry, that peer's readiness
+    // lost for good. CheckAllReady then never reached `expected`, AllPeersReady never fired, and the
+    // game hung behind the loading cover — reliably so at 6 peers.
+    //
+    // /root/NetworkApi is an autoload: it exists from the first frame of the process on every peer, so
+    // a report addressed here always has somewhere to land. If the target barrier is not up yet the
+    // report is parked below and drained by that barrier's own _Ready. Do not reintroduce a
+    // path-routed barrier RPC.
+
+    /// <summary>
+    /// Host-only: reports for barriers that do not exist on this peer yet, keyed by barrier id.
+    /// Drained by <see cref="PeerReadinessComponent"/> when it comes up.
+    /// </summary>
+    private static readonly Dictionary<string, HashSet<int>> _bufferedBarrierReports = new();
+
+    /// <summary>Client → host: this peer has reached <paramref name="barrierId"/>.</summary>
+    public void ReportBarrierReady(string barrierId)
+        => RpcId(1, nameof(NotifyBarrierReady), barrierId);
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void NotifyBarrierReady(string barrierId)
+    {
+        if (!Multiplayer.IsServer()) return;
+        int peerId = Multiplayer.GetRemoteSenderId();
+
+        if (PeerReadinessComponent.Deliver(barrierId, peerId)) return;
+
+        DebugUtilities.PrintPeerFinest(
+            $"Parking ready report from peer {peerId}: barrier {barrierId} has not been created here yet");
+        if (!_bufferedBarrierReports.TryGetValue(barrierId, out HashSet<int> parked))
+            _bufferedBarrierReports[barrierId] = parked = new HashSet<int>();
+        parked.Add(peerId);
+    }
+
+    /// <summary>Hand over — and forget — the reports parked for <paramref name="barrierId"/>.</summary>
+    internal static IEnumerable<int> TakeBufferedBarrierReports(string barrierId)
+        => barrierId != null && _bufferedBarrierReports.Remove(barrierId, out HashSet<int> parked)
+            ? parked
+            : Array.Empty<int>();
+
+    /// <summary>
+    /// Drop everything still parked. Called when a session ends, so a barrier that never materialised
+    /// in the last game cannot pre-satisfy the same barrier in the next one.
+    /// </summary>
+    public static void ClearBufferedBarrierReports() => _bufferedBarrierReports.Clear();
+
     /// <summary>
     /// Called on all clients by the server after a GameMessage is applied.
     /// Clients reconstruct the message, queue it for replay in wire order, and — for a state mutation —
@@ -355,6 +408,12 @@ public partial class NetworkApi : Node
     private void OnPeerDisconnectedDuringInput(long peerId)
     {
         if (Multiplayer?.MultiplayerPeer == null || !Multiplayer.IsServer()) return;
+
+        // A report parked for a peer that has since left would over-satisfy the next barrier:
+        // PeerReadinessComponent recomputes `expected` from the live peer list, so the departed peer is
+        // no longer counted, but its parked report would still be drained into _readyPeers.
+        foreach (HashSet<int> parked in _bufferedBarrierReports.Values)
+            parked.Remove((int)peerId);
 
         // Only this peer's own waits: another player may still be answering a concurrent request, and
         // releasing theirs too would throw away an answer they are about to give.
