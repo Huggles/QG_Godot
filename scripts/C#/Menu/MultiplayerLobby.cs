@@ -51,6 +51,15 @@ public partial class MultiplayerLobby : Control
 	private static readonly Color ColUnavailable = new(0.30f, 0.30f, 0.30f, 0.55f); // dark grey – wrong team
 	private static readonly Color ColOtherOwned  = new(0.50f, 0.50f, 0.50f, 0.75f); // mid grey  – owned by another player
 
+	// ── Player row sizing ─────────────────────────────────────────────────────
+	/// <summary>
+	/// Height of a row's faction flags, and so of the row itself — nothing else in the row is taller.
+	/// 60 rather than the original 96 because the player list is ~389px tall, so a full six-player
+	/// lobby (6 x 60 + 5px separations = 385) has to fit without pushing the last rows behind a
+	/// scrollbar.
+	/// </summary>
+	private const int FlagHeight = 60;
+
 	// ── Scene node references ─────────────────────────────────────────────────
 	private VBoxContainer _playerListContainer;
 	private Button        _startGameButton;
@@ -266,10 +275,43 @@ public partial class MultiplayerLobby : Control
 		int sender = Multiplayer.GetRemoteSenderId();
 		if (!_playerLabels.TryGetValue(sender, out Label label)) return;
 
-		string clean = SanitisePlayerName(displayName, sender);
+		string clean = MakeNameUnique(SanitisePlayerName(displayName, sender), sender);
 		label.Text            = clean;
 		_playerNames[sender]  = clean;
+		DebugUtilities.PrintPeer($"Peer {sender} reported \"{displayName}\", listed as \"{clean}\"");
 		Rpc(nameof(SyncPlayerList), GetPlayerListData());
+	}
+
+	/// <summary>
+	/// Appends " #2", " #3", … to a name another peer is already using, so identically-named players
+	/// stay tellable apart in the lobby and on the assignment carried into the game.
+	///
+	/// Not a debug-only concern, though it is loudest there: every local test instance reads the same
+	/// Steam persona (see <see cref="LocalDisplayName"/>), so a six-instance lobby is otherwise six
+	/// rows with one name on them. Two real players can just as easily share a persona name.
+	///
+	/// Host-only, and that is what makes it correct: every name passes through
+	/// <see cref="ReportPlayerName"/> here before it reaches anyone's list, so the host's view of who
+	/// is called what is the only one that has to be consistent. The peer keeps whichever name it
+	/// first claimed — the suffix lands on whoever reports later, and the host itself, having joined
+	/// first, always keeps the undecorated name.
+	/// </summary>
+	private string MakeNameUnique(string desiredName, int forPeerId)
+	{
+		bool TakenByAnother(string candidate)
+			=> _playerNames.Any(kv => kv.Key != forPeerId && kv.Value == candidate);
+
+		if (!TakenByAnother(desiredName)) return desiredName;
+
+		// Bounded by the peer count: a lobby only ever holds a host plus six clients.
+		for (int suffix = 2; suffix <= _playerNames.Count + 2; suffix++)
+		{
+			string candidate = $"{desiredName} #{suffix}";
+			if (!TakenByAnother(candidate)) return candidate;
+		}
+
+		// Unreachable while peer ids are unique, but it keeps the method total.
+		return $"{desiredName} #{forPeerId}";
 	}
 
 	/// <summary>
@@ -836,7 +878,7 @@ public partial class MultiplayerLobby : Control
 			// Visual separator between the Axis block (GER/JAP/ITA) and the Allies block.
 			if (!separatorAdded && !AxisSet.Contains(faction))
 			{
-				flagsBox.AddChild(new VSeparator { CustomMinimumSize = new Vector2(2, 96) });
+				flagsBox.AddChild(new VSeparator { CustomMinimumSize = new Vector2(2, FlagHeight) });
 				separatorAdded = true;
 			}
 
@@ -847,7 +889,7 @@ public partial class MultiplayerLobby : Control
 				TextureDisabled      = tex,    // colour state is driven entirely by Modulate
 				StretchMode          = TextureButton.StretchModeEnum.KeepAspectCentered,
 				IgnoreTextureSize    = true,
-				CustomMinimumSize    = new Vector2(0, 96),
+				CustomMinimumSize    = new Vector2(0, FlagHeight),
 				SizeFlagsHorizontal  = Control.SizeFlags.ExpandFill,
 				TooltipText          = FactionNames[faction]
 			};

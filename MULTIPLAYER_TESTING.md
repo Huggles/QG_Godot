@@ -17,6 +17,15 @@ Simply double-click `launch_multiplayer.bat`
 .\quick_launch.ps1
 ```
 
+### Option 4: Six instances (1 host + 5 clients) — F9
+```powershell
+.\quick_launch_six.ps1          # or -Clients N, 1..6
+```
+
+Launches six tiled instances: instance 1 auto-hosts over ENet on port 7777 and instances 2-6
+auto-join `127.0.0.1`. Everyone lands in the lobby and **the game does not start automatically** —
+assign the six factions across the players, then click **Start Game** in the host window.
+
 ## What the scripts do
 
 1. **Build** the project with `dotnet build`

@@ -19,6 +19,11 @@ VSCode tasks have been created for launching two game instances, but keybindings
     "key": "f7",
     "command": "workbench.action.tasks.runTask",
     "args": "Launch Two Instances (Lobby Only)"
+},
+{
+    "key": "f9",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Launch Six Instances (Lobby Only)"
 }
 ```
 
@@ -38,6 +43,11 @@ Your keybindings.json should look something like this:
         "key": "f7",
         "command": "workbench.action.tasks.runTask",
         "args": "Launch Two Instances (Lobby Only)"
+    },
+    {
+        "key": "f9",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Launch Six Instances (Lobby Only)"
     }
 ]
 ```
@@ -64,11 +74,20 @@ If you don't want to set up keybindings, you can also:
 3. ✅ Instance 1 auto-hosts, Instance 2 auto-joins
 4. ✅ Both wait in the lobby — click **Start Game** manually in Instance 1 when ready
 
+## What Happens When You Press F9
+
+1. ✅ Builds the project with `dotnet build`
+2. ✅ Launches six Godot instances, tiled in a 3x2 grid on the primary screen
+3. ✅ Instance 1 auto-hosts over ENet on port 7777; instances 2-6 auto-join `127.0.0.1`
+4. ✅ All six wait in the lobby — assign factions, then click **Start Game** in the host window
+
 ## Quick Reference
 
 - **F5** - Normal run / debug (single instance)
 - **F6** - Build and launch a headless dedicated server + two clients, auto-start the game
 - **F7** - Build and launch two instances, stay in lobby (manual start)
+- **F8** - Build and launch two plain instances at the main menu (nothing automated)
+- **F9** - Build and launch six instances (1 host + 5 clients), stay in lobby (manual start)
 
 ---
 

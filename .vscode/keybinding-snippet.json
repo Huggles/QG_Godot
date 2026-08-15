@@ -8,5 +8,15 @@
         "key": "f7",
         "command": "workbench.action.tasks.runTask",
         "args": "Launch Two Instances (Lobby Only)"
+    },
+    {
+        "key": "f8",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Launch Two Instances (Normal)"
+    },
+    {
+        "key": "f9",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Launch Six Instances (Lobby Only)"
     }
 ]

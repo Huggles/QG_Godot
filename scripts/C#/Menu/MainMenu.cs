@@ -182,11 +182,10 @@ public partial class MainMenu : Control
         {
             string inviter = SteamworksApi.Instance.PersonaNameFor(inviterSteamId);
 
-            bool join = await MenuNotice.ShowConfirmAsync(this,
-                "Game invite",
-                $"{inviter} invited you to their game.",
-                "Join Game",
-                "Ignore");
+            // A toast, not a dialog: the invite arrived unannounced, so it must not stop the player
+            // doing whatever they were already doing on the menu.
+            bool join = await MenuToast.ShowAsync(this,
+                $"{inviter} invited you to their game.", "Join Game");
 
             if (!IsInstanceValid(this) || !join) return;
 

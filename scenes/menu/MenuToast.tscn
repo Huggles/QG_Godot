@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cqmenutoast"]
+
+[ext_resource type="Script" path="res://scripts/C#/Menu/MenuToast.cs" id="1_script"]
+[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="2_style"]
+
+[node name="MenuToast" type="CanvasLayer"]
+process_mode = 3
+layer = 99
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -380.0
+offset_top = -32.0
+offset_right = 380.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = ExtResource("2_style")
+
+[node name="Margin" type="MarginContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 14
+
+[node name="Box" type="HBoxContainer" parent="Root/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="MessageLabel" type="Label" parent="Root/Panel/Margin/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="AcceptButton" type="Button" parent="Root/Panel/Margin/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="DismissButton" type="Button" parent="Root/Panel/Margin/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 40)
+layout_mode = 2
+size_flags_vertical = 4
+text = "Ignore"
