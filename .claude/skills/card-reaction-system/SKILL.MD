@@ -51,9 +51,9 @@ Reactions are requested in a specific order:
 When a faction plays a card during the play step:
 
 1. **PlayCardChangeEvent** is created and processed
-   - Block reactions requested from all factions in order
-   - If blocked, the card is not played
-   - If not blocked, the card is moved from hand to discard/play area
+   - The card is moved from hand to discard/play area
+   - **No block window opens** — an introduction event is not blockable, see below
+   - After reactions requested (the *activation window*)
 
 2. **First Card Step** is executed
    - The step's logic runs (e.g., deploy unit, attack country)
@@ -69,24 +69,26 @@ When a faction plays a card during the play step:
 When a faction plays a reaction (either block or after):
 
 1. The reaction goes through the **same flow** as the original card
-   - Creates introduction event (`ActivateReactionChangeEvent`)
-   - Can be blocked by other factions
+   - Creates introduction event (`ActivateReactionChangeEvent`) — not blockable, but it opens an activation window
    - Executes the reaction's steps
    - Each step can trigger more reactions
 
 2. This creates a **recursive chain**:
    ```
-   Card A played
-     → Block reaction from Player B
-       → Block reaction to B from Player C
-         → After reaction to C from Player D
+   Card A played  (the play itself cannot be blocked)
+     → Activation window on the play
+         → After reaction from Player B
+           → (recursive chain continues)
+     → A's step executes, producing a change event
+       → Block reaction from Player C
+         → Block reaction to C from Player D
            → (continues until no one responds)
-       → If B blocked A, A stops here
-     → If not blocked, A's step executes
-     → After reactions requested
-       → After reaction from Player E
-         → (recursive chain continues)
-       → (continues until no one responds)
+         → If C blocked the change event, it is not applied
+       → If not blocked, the change is applied
+       → After reactions requested
+         → After reaction from Player E
+           → (recursive chain continues)
+         → (continues until no one responds)
    ```
 
 3. **Response Priority Rules**:
@@ -117,7 +119,7 @@ Cards can have multiple steps (both play steps and react steps):
 #### `DoActivationOption(CardActivationOption)`
 Top-level method that processes a card being played or activated:
 1. Creates introduction event (PlayCard or ActivateReaction)
-2. Processes that event (blocks, apply, reactions)
+2. Processes that event (apply, then the activation window)
 3. Executes the card step
 4. Processes the step result
 
@@ -128,11 +130,34 @@ Central method that processes any change event:
 3. Applies change if not blocked
 4. Requests after reactions (for non-introduction events)
 
+#### Introduction events are not blockable
+`DoCard` builds both introduction events — `PlayCardChangeEvent` and `ActivateReactionChangeEvent` — with **`IsTrigger = false`**, and `ProcessIntroductionEvent` honours that flag:
+
+```csharp
+private async Task ProcessIntroductionEvent(ChangeEvent introEvent)
+{
+    await introEvent.Apply();
+    if (introEvent.IsTrigger)
+        await RequestBlockReactions(introEvent);
+}
+```
+
+**Nothing in the game blocks a card play or a reaction activation.** Every block card pairs `Condition.IsBlockRequest` with a second condition matching one of exactly two event types — `RemoveUnitChangeEvent` (via `Condition.UnitAboutToBeRemoved`: Radar, BattleshipRepair, Leningrad, Moscow, Stalingrad, Destroyers, RAF, DefensivePosture, MonteCassino, KwantungArmy) or `ForceDiscardCardsChangeEvent` (ASWTactics, SkilledPilots). Per `reaction-specifics` you react to a reaction's *effect* — Destroyers blocking the removal Surprise Attack causes — never to its activation.
+
+The window could not have worked even if a card matched it. Note the ordering above: `Apply()` runs **before** the block request, the inverse of `DoChangeEvent`. By the time anyone was asked, the card was already on the table, `CardsPlayedThisTurnStep` already incremented and the "X plays Y" modal already enqueued, so a block could only suppress the card's *steps* — never un-play the card.
+
+The cost of keeping it was real: combined with the always-ask rule, every card play and every activation fired a blocking `SendInputRequest` at every faction holding a face-down Response card, each preceded by a `GameStateCalculator.CalculateAll()`.
+
+`introWasBlocked` in `DoCard` is retained and now always reads `false`; a future blockable introduction event needs only the flag flipped.
+
+**The activation window is unaffected** — see the warning under `RequestAfterReactions` below.
+
 #### `RequestBlockReactions(ChangeEvent)`
 Requests block reactions from all factions in order:
 - Skips the faction that triggered the event
 - Each faction can play one block reaction
 - Block reactions are processed recursively
+- Reached only from `DoChangeEvent` in practice; the `ProcessIntroductionEvent` call site is gated off by `IsTrigger = false`
 
 #### `RequestAfterReactions(ChangeEvent triggerEvent)` → returns `bool`
 Requests after reactions from all factions. Returns `true` if at least one reaction was played, `false` if everyone skipped or had no options.
@@ -143,6 +168,16 @@ Requests after reactions from all factions. Returns `true` if at least one react
 - If a faction skips → added to `_afterReactionPassedFactions` (not asked again until a new reaction is played)
 - If a faction plays → `_afterReactionPassedFactions.Clear()` **before** `DoCard`, so all factions get a fresh chance during that reaction's resolution; then `break` to restart with updated `RequestOrder`
 - Loop exits when a full pass through all non-skipped factions produces no plays
+
+**The activation window is deliberately NOT gated on `IsTrigger`.** `DoCard` calls `RequestAfterReactions(introEvent)` unconditionally, right after the introduction event is applied. So an introduction event is *not blockable* yet *does* open an after-reaction window — the activation window is a fixed part of the activation sequence, not an `IsTrigger` reaction window.
+
+Do not "fix" that inconsistency by gating the call. Three cards react through this window and would silently stop being offered:
+
+| Card | Reacts to |
+|---|---|
+| `UK/ResponseRationing` | `PlayCardChangeEvent` (pool scan, `.InReactionWindow()`) |
+| `Soviet/StatusWomenConscripts` | `PlayCardChangeEvent` via `CurrentReactionTrigger` |
+| `UK/ResponseEnigmaCodeCracked` | `ActivateReactionChangeEvent` via `CardActivated(...).Immediately()` |
 
 #### `ShouldOpenReactionWindow(Faction, List<int> options)` — the always-ask rule
 The single gate deciding whether a faction is prompted at all. Used by **both** `RequestAfterReactions` and `RequestBlock`, so the rule lives in one place.
@@ -196,7 +231,7 @@ The change event currently being **offered for block**, or null when no block wi
 - `RequestBlockReactions` recalculates tags *inside* its loop, after `CurrentBlockTrigger` is set and again after any block card resolves, so conditions are always evaluated against the open window
 - Also drives the block prompt's trigger label and the "cannot block your own action" guard in `RequestBlock`
 
-**Never match a block trigger against `CardPlayPool.LastNoneNewCardChangeEvent`.** That property deliberately skips `PlayCardChangeEvent` and `ActivateReactionChangeEvent`, so inside the block window opened for a card play or a reaction activation it reports the *earlier* event. That is what made every removal-blocker (e.g. UK's Destroyers) offer itself against StatusRadar being activated — a card activation is not a unit removal, and no card in the game blocks a card play at all.
+**Never match a block trigger against `CardPlayPool.LastNoneNewCardChangeEvent`.** That property deliberately skips `PlayCardChangeEvent` and `ActivateReactionChangeEvent`, so when it is read anywhere near an introduction event it reports the *earlier* event. That is what made every removal-blocker (e.g. UK's Destroyers) offer itself against StatusRadar being activated — a card activation is not a unit removal. Introduction events no longer open a block window at all, which removes that particular trap at the source, but the rule stands for every other window.
 
 So the rule is symmetric: **step logic reads `ActivationTrigger`, block trigger conditions read `CurrentBlockTrigger`** — neither re-reads the live pool.
 
@@ -228,7 +263,7 @@ Tracks which factions have explicitly passed in the current reaction chain:
 
 1. **Germany plays "Build Army" card**
    ```
-   PlayCardChangeEvent → UK/Soviet/US check for blocks → None block → Play approved
+   PlayCardChangeEvent → applied (not blockable) → activation window → nobody reacts
    First step executes: Select country and create DeployUnitChangeEvent
    ```
 
@@ -241,7 +276,7 @@ Tracks which factions have explicitly passed in the current reaction chain:
 
 3. **UK's "Air Raid" activates**
    ```
-   ActivateReactionChangeEvent → Germany/Japan/Italy check for blocks → None block → Activation approved
+   ActivateReactionChangeEvent → applied (not blockable) → activation window → nobody reacts
    Air Raid step executes: Create RemoveUnitChangeEvent
    ```
 
@@ -253,7 +288,7 @@ Tracks which factions have explicitly passed in the current reaction chain:
 
 5. **Germany's "Anti-Aircraft" activates**
    ```
-   ActivateReactionChangeEvent → UK/Soviet/US check for blocks → None block → Activation approved
+   ActivateReactionChangeEvent → applied (not blockable) → activation window → nobody reacts
    Anti-Aircraft step executes: Blocks UK's RemoveUnitChangeEvent
    ```
 
@@ -455,16 +490,18 @@ new CardStep(this, async() => {
 11. **Activations Bind Their Trigger**: `DoCard` pins the triggering event onto the `CardLogic` as `ActivationTrigger` for the whole activation. Step logic reads that, not the pool — a live pool read is retargeted by any `Apply()` that lands in between
 12. **Being Asked Proves Nothing**: any faction holding an unrevealed Response card is offered every reaction window whether or not it can react, so the prompt cannot be read as evidence of what the hidden card does. The option list, not the prompt's existence, is the signal
 13. **Scoped Skips Never Cost a Visible Reaction**: *Skip rest of turn step* / *Skip rest of round* suppress only the windows that exist to hide information. A window where the faction holds a face-up Status card (or an already-revealed Response) survives the skip — it was never hiding anything
+14. **Only Change Events Are Blockable**: introduction events (`PlayCardChangeEvent`, `ActivateReactionChangeEvent`) carry `IsTrigger = false` and open no block window. Playing a card and activating a reaction are declarations, not effects — you block the effect the card's steps produce, never the declaration itself. Only `RemoveUnitChangeEvent` and `ForceDiscardCardsChangeEvent` are matched by any block card in the game
+15. **Not Blockable ≠ No Reactions**: an introduction event still opens its activation window. `IsTrigger` gates the block path and `DoChangeEvent`'s after-reaction path; the activation window in `DoCard` is unconditional by design
 
 ## Common Pitfalls
 
-1. **Forgetting `IsTrigger = true`**: ChangeEvents must have this flag to allow reactions
+1. **Forgetting `IsTrigger = true`**: ChangeEvents produced by a card step must have this flag to be blockable and to open an after-reaction window. The two introduction events are the deliberate exception — they carry `IsTrigger = false`, and their activation window runs regardless of it
 2. **Not marking block reactions**: Block reactions need `IsBlockRequest` in their triggers
 3. **Infinite loops**: Ensure reaction triggers have conditions that eventually become false
 4. **Blocking yourself**: The system prevents self-blocking, but be aware of the rules
 5. **Step prerequisites**: Make sure prerequisite steps are properly set for multi-step cards
 6. **Double-ask bug**: `RequestAfterReactions` is called at every `DoChangeEvent` level. Without `_afterReactionPassedFactions`, a faction could be asked inside a nested reaction window AND again in the outer loop restart. Always use the shared pass-tracking set.
 7. **Stale `hasRemainingActions` check**: Checking for remaining reaction tags to decide whether to `Finish()` is incorrect — a skipped faction still holds the tag. `Finish()` must always fire when returning to `reactionDepth == 0`.
-8. **Matching a block trigger against the pool**: a block card's `CardTriggers()` must test `CardPlayPool.CurrentBlockTrigger`. Testing `LastNoneNewCardChangeEvent` matches inside *every* block window — including the one opened for a card play or reaction activation, which that property filters out — so the card gets offered against events it has nothing to do with.
+8. **Matching a block trigger against the pool**: a block card's `CardTriggers()` must test `CardPlayPool.CurrentBlockTrigger`. Testing `LastNoneNewCardChangeEvent` matches inside *every* block window, so the card gets offered against events it has nothing to do with. Introduction events no longer open a block window, which retires the worst instance of this (a removal-blocker offered against a card activation), but not the pitfall.
 9. **Testing for a reaction by its prompt**: a test that proves a card is *not* offered by hanging on an unexpected prompt no longer works — the always-ask rule raises a window for that faction anyway. Assert `promptoptions == 0` instead.
 10. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.

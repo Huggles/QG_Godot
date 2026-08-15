@@ -1,5 +1,9 @@
 # Card Reaction System Documentation
 
+> **This file has drifted behind `.claude/skills/card-reaction-system/SKILL.MD`, which is the
+> authoritative and considerably more detailed description of the same system. Read that one.
+> Consider reducing this file to a pointer rather than maintaining both in parallel.**
+
 ## Overview
 
 The card reaction system allows factions to respond to actions taken during the play step. This creates a dynamic, interactive gameplay where each action can trigger a chain of responses and counter-responses.
@@ -45,9 +49,10 @@ Reactions are requested in a specific order:
 When a faction plays a card during the play step:
 
 1. **PlayCardChangeEvent** is created and processed
-   - Block reactions requested from all factions in order
-   - If blocked, the card is not played
-   - If not blocked, the card is moved from hand to discard/play area
+   - The card is moved from hand to discard/play area
+   - **No block window opens** — introduction events carry `IsTrigger = false`; nothing in the
+     game blocks a card play or a reaction activation
+   - After reactions requested (the *activation window*, which runs regardless of `IsTrigger`)
 
 2. **First Card Step** is executed
    - The step's logic runs (e.g., deploy unit, attack country)
@@ -63,20 +68,22 @@ When a faction plays a card during the play step:
 When a faction plays a reaction (either block or after):
 
 1. The reaction goes through the **same flow** as the original card
-   - Creates introduction event (`ActivateReactionChangeEvent`)
-   - Can be blocked by other factions
+   - Creates introduction event (`ActivateReactionChangeEvent`) — not blockable, but it opens an
+     activation window
    - Executes the reaction's steps
    - Each step can trigger more reactions
 
 2. This creates a **recursive chain**:
    ```
-   Card A played
-     → Block reaction from Player B
+   Card A played  (the play itself cannot be blocked)
+     → Activation window on the play — Player E may react here
+     → A's step executes, producing a change event
+       → Block reaction from Player B
        → Block reaction to B from Player C
          → After reaction to C from Player D
            → (continues until no one responds)
-       → If B blocked A, A stops here
-     → If not blocked, A's step executes
+       → If B blocked the change event, it is not applied
+     → If not blocked, A's next step executes
      → After reactions requested
        → After reaction from Player E
          → (recursive chain continues)
@@ -123,7 +130,9 @@ Central method that processes any change event:
 4. Requests after reactions (for non-introduction events)
 
 #### `RequestBlockReactions(ChangeEvent)`
-Requests block reactions from all factions in order:
+Requests block reactions from all factions in order. Reached only for change events produced by a
+card step — `ProcessIntroductionEvent` gates its call on `IsTrigger`, which both introduction
+events set to `false`.
 - Skips the faction that triggered the event
 - Each faction can play one block reaction
 - Block reactions are processed recursively
@@ -167,7 +176,7 @@ Checks all cards in the pool for executable next steps:
 
 1. **Germany plays "Build Army" card**
    ```
-   PlayCardChangeEvent → UK/Soviet/US check for blocks → None block → Play approved
+   PlayCardChangeEvent → applied (not blockable) → activation window → nobody reacts
    First step executes: Select country and create DeployUnitChangeEvent
    ```
 
@@ -180,7 +189,7 @@ Checks all cards in the pool for executable next steps:
 
 3. **UK's "Air Raid" activates**
    ```
-   ActivateReactionChangeEvent → Germany/Japan/Italy check for blocks → None block → Activation approved
+   ActivateReactionChangeEvent → applied (not blockable) → activation window → nobody reacts
    Air Raid step executes: Create RemoveUnitChangeEvent
    ```
 
@@ -192,7 +201,7 @@ Checks all cards in the pool for executable next steps:
 
 5. **Germany's "Anti-Aircraft" activates**
    ```
-   ActivateReactionChangeEvent → UK/Soviet/US check for blocks → None block → Activation approved
+   ActivateReactionChangeEvent → applied (not blockable) → activation window → nobody reacts
    Anti-Aircraft step executes: Blocks UK's RemoveUnitChangeEvent
    ```
 

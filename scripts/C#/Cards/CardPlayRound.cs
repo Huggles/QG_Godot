@@ -165,10 +165,18 @@ public partial class CardPlayRound : GodotObject
             bool introWasBlocked = false;
             ChangeEvent introEvent;
 
+            // IsTrigger = false on both: an introduction event is not blockable. No card in the
+            // game blocks a card play or a reaction activation — every block card matches either
+            // RemoveUnitChangeEvent or ForceDiscardCardsChangeEvent — and per the rules you react
+            // to a reaction's *effect* (Destroyers blocking the removal Surprise Attack causes),
+            // never to its activation. The window could not work even if a card matched it:
+            // ProcessIntroductionEvent applies the event first, so the card is already on the
+            // table and CardsPlayedThisTurnStep already spent by the time anyone is asked.
+            // This suppresses only the block window — see the activation window below.
             if (!cardState.IsPlayed)
             {
                 var evt = new PlayCardChangeEvent(cardState.Id);
-                evt.IsTrigger = true;
+                evt.IsTrigger = false;
                 introEvent = evt;
                 await ProcessIntroductionEvent(evt);
                 introWasBlocked = evt.IsBlocked;
@@ -176,7 +184,7 @@ public partial class CardPlayRound : GodotObject
             else
             {
                 var evt = new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, null);
-                evt.IsTrigger = true;
+                evt.IsTrigger = false;
                 introEvent = evt;
                 await ProcessIntroductionEvent(evt);
                 introWasBlocked = evt.IsBlocked;
@@ -188,11 +196,19 @@ public partial class CardPlayRound : GodotObject
             // automatically cascading to the next step.
             if (!introWasBlocked)
             {
-                // Activation window: fires immediately after the card is activated/played and
-                // block reactions resolve, before its own steps execute. CurrentReactionTrigger
-                // is set to introEvent so .Immediately() conditions like CardActivated (e.g.
-                // ResponseEnigmaCodeCracked discarding the activated card) fire here, ahead of
-                // any reactions to the change events this card's own steps are about to produce.
+                // Activation window: fires immediately after the card is activated/played,
+                // before its own steps execute. CurrentReactionTrigger is set to introEvent so
+                // .Immediately() conditions like CardActivated (e.g. ResponseEnigmaCodeCracked
+                // discarding the activated card) fire here, ahead of any reactions to the change
+                // events this card's own steps are about to produce.
+                //
+                // DELIBERATELY NOT GATED ON introEvent.IsTrigger. An introduction event is not
+                // blockable (IsTrigger = false above) but it does open an after-reaction window:
+                // the activation window is a fixed part of the activation sequence, not an
+                // IsTrigger reaction window. Gating this call to "fix" that inconsistency
+                // silently breaks every card that reacts to a play or an activation —
+                // ResponseRationing, StatusWomenConscripts, ResponseEnigmaCodeCracked.
+                //
                 // ContinueWithNextSteps is intentionally not called here: this card's own steps
                 // are resumed by the loop right below, and any change event a triggered reaction
                 // produces already gets its own continuation handling via its nested DoCard call.
@@ -267,9 +283,15 @@ public partial class CardPlayRound : GodotObject
     // ── Reaction chain helpers ─────────────────────────────────────────────────
 
     private async Task ProcessIntroductionEvent(ChangeEvent introEvent)
-    {        
+    {
         await introEvent.Apply();
-        await RequestBlockReactions(introEvent);        
+        // Gated so IsTrigger means the same thing here as it does in DoChangeEvent. DoCard builds
+        // both introduction events with IsTrigger = false, so today this never opens — a future
+        // blockable introduction event needs only the flag flipped. Note the ordering: Apply comes
+        // first here, the inverse of DoChangeEvent, so a block reached from this call could only
+        // suppress the card's steps, never un-play the card.
+        if (introEvent.IsTrigger)
+            await RequestBlockReactions(introEvent);
     }
 
     public void RegisterChangeEvent(ChangeEvent changeEvent)

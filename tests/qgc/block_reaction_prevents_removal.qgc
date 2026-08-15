@@ -41,24 +41,32 @@ pass                                    # UK declines Destroyers on the removal 
 pass                                    # Soviet: always-ask window on the removal, no options
 play 1                                  # US plays Radar
 
-# Radar's activation opens its own block window, and the UK used to be offered Destroyers again
-# inside it — a removal-blocker matching a card activation, because UnitAboutToBeRemoved read
-# LastNoneNewCardChangeEvent (which skips ActivateReactionChangeEvent and so still reported the
-# removal). Block triggers now match CurrentBlockTrigger, so nothing matches here.
+# Radar's activation no longer opens a block window at all. DoCard builds both introduction events
+# (PlayCardChangeEvent, ActivateReactionChangeEvent) with IsTrigger = false and
+# ProcessIntroductionEvent honours that flag, because nothing in the game blocks a card play or an
+# activation — every block card matches RemoveUnitChangeEvent or ForceDiscardCardsChangeEvent. The
+# window could not have worked regardless: ProcessIntroductionEvent applies the event before asking,
+# so a block there would leave the card spent on the table.
 #
-# The UK is still ASKED: it holds a face-down Destroyers, and the always-ask rule
-# (CardPlayRound.ShouldOpenReactionWindow) opens a window for every such faction so that being asked
-# stops proving a card matched. So the regression signal is no longer "does a prompt appear" — it is
-# "does that prompt carry any options". `assert promptoptions == 0` on the UK's window is the check;
-# it FAILS (1) the moment Destroyers is wrongly offered against a card activation again.
-pass                                    # block window on the activation: Japan  (no options)
-pass                                    #                                Italy  (no options)
-assert promptfaction == UNITED_KINGDOM  # the window that used to wrongly offer Destroyers
-assert promptoptions == 0               # FAILS (1) if a removal-blocker matches an activation again
-pass                                    #                                UK     (no options)
-pass                                    #                                Soviet (no options)
+# This supersedes the older guard that used to live here. The UK was once offered Destroyers inside
+# the activation's block window — a removal-blocker matching a card activation, because
+# UnitAboutToBeRemoved read LastNoneNewCardChangeEvent (which skips ActivateReactionChangeEvent and
+# so still reported the removal). Block triggers match CurrentBlockTrigger now, and there is no
+# activation block window left for them to match in.
+#
+# Only the activation window (RequestAfterReactions on the introduction event) remains. It is
+# deliberately NOT gated on IsTrigger — ResponseRationing, StatusWomenConscripts and
+# ResponseEnigmaCodeCracked react to plays and activations through it. The four passes below are
+# that window, and they must stay required: if they can be dropped, that gating was broken too.
+#
+# Every faction here is asked with nothing on offer. That is the always-ask rule
+# (CardPlayRound.ShouldOpenReactionWindow) — each holds a face-down Response card, and opening a
+# window for them is what stops the prompt itself from revealing what that card does.
+assert promptfaction == JAPAN           # FAILS (the next turn's faction) if the window is gone
 pass                                    # activation window:             Japan  (no options)
 pass                                    #                                Italy  (no options)
+assert promptfaction == UNITED_KINGDOM
+assert promptoptions == 0               # FAILS (1) if a removal-blocker matches an activation again
 pass                                    #                                UK     (no options)
 pass                                    #                                Soviet (no options)
 
