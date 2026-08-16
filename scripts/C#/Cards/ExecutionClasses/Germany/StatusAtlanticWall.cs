@@ -23,7 +23,6 @@ public partial class StatusAtlanticWall : StatusCardLogic
                 Faction attackingFaction = (CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent).TriggeringFaction;
                 ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, attackingFaction, 3));
                 ForceDiscardCardsChangeEvent.IsTrigger = true;
-                await Task.CompletedTask;
                 await CardPlayPool.DoChangeEvent(ForceDiscardCardsChangeEvent);
             })
             .WithGuidance("The attacker discards 3 cards")
