@@ -23,7 +23,7 @@ public partial class StatusRosietheRiveter : StatusCardLogic
                 var handIds = DeckState.ForFaction(Faction).HandCardIds.ToList();
                 var resp = await new InputRequest.CardsRequestHandler(Faction, handIds).BroadCast();
                 var selectedIds = resp.ResponseCardIds.Take(2).ToList();
-                if (selectedIds.Count == 0) return null;
+                if (selectedIds.Count == 0) return;
 
                 DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(
                     new DiscardHandCardsChangeEvent(Faction, Faction, selectedIds)).WithoutAnimations();
@@ -40,7 +40,6 @@ public partial class StatusRosietheRiveter : StatusCardLogic
 
                 PresentationServices.Notification.ShowActionText($"{Faction.WithPlayer()} placed {selectedIds.Count} card(s) on the bottom of their deck.", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
-                return null;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => DeckState.ForFaction(Faction).HandCardIds.Count > 0), this))
             .WithGuidance("Take 1 or 2 cards from your hand and place them on the bottom of your deck")

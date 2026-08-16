@@ -41,7 +41,6 @@ public partial class StatusGuards : StatusCardLogic
                 recycleEvent.IsTrigger = false;
                 await recycleEvent.Apply();
                 await CardPlayPool.DoCard(buildArmyCardId);
-                return null;
             })
             .WithGuidance("Discard 2 cards from hand to play a Build Army card from your discard pile")
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))

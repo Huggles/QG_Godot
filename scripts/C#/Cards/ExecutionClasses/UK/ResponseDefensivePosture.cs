@@ -23,7 +23,6 @@ public partial class ResponseDefensivePosture : ResponseCardLogic
                     PresentationServices.Notification.ShowActionText("Defensive Posture: UK Army will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
-                return null;
             })
             .WithGuidance("Do not remove your supplied Army this turn")
         };

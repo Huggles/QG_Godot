@@ -17,11 +17,10 @@ public partial class EWSubmarinesoftheMonsoonGroup : EWCardLogic
                 // Selected faction discards 2 cards
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, selectedFaction, 2));
                 discardEvent.IsTrigger = true;
+                await CardPlayPool.DoChangeEvent(discardEvent);
                 
                 // Score 2 VP
                 await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(2, "Submarines of the Monsoon Group"), Faction));
-                
-                return discardEvent;
             })
         }; 
     }

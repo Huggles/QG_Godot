@@ -18,7 +18,7 @@ public partial class SeaBattle : CardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
-                return battleCountryChange;
+                await CardPlayPool.DoChangeEvent(battleCountryChange);
             })
             .WithCondition(()=>Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))            
             .WithGuidance("Select a navy or empty sea country to attack")

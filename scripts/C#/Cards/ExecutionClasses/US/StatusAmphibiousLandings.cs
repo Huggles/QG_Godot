@@ -38,7 +38,7 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
                 int countryId = LastLandBattle.CountryId;
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 var b = LastLandBattle;

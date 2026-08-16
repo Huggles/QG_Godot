@@ -65,7 +65,7 @@ public partial class StatusFrontalAssault : StatusCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
-                return battleEvent;
+                await CardPlayPool.DoChangeEvent(battleEvent);
             })
             .WithGuidance("Discard 2 cards from hand to battle the same or adjacent land space")
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(SameOrAdjacentCountryIds, Faction), this))

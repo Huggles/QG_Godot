@@ -18,7 +18,7 @@ public partial class EventFreeFrenchAllies : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitableTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 return CountryState.RecruitableLand(Faction).Any(cs => targetCountries.Contains(cs.Country));

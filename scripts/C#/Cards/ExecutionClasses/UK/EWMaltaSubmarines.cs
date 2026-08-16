@@ -48,14 +48,14 @@ public partial class EWMaltaSubmarines : EWCardLogic
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             }
             else
             {
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(
                     new ForceDiscardCardsChangeEvent(Faction, targetFaction, 2));
                 discardEvent.IsTrigger = true;
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             }
         })
         .WithGuidance($"{targetFaction}: discard 2 cards or eliminate a Mediterranean Navy");

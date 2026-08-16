@@ -18,7 +18,7 @@ public partial class EventMilitaryDictatorshipsInTheBalkans : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int> { (int)Country.Balkans }).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction.ITALY, selectedCountryId, DeployType.RECRUIT));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(new List<int> { (int)Country.Balkans }, Faction.ITALY), this))
             .WithGuidance($"Recruit an Italian army in {CountryState.ForEnum(Country.Balkans).Label}"),
@@ -29,7 +29,7 @@ public partial class EventMilitaryDictatorshipsInTheBalkans : EventCardLogic
                 int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, alliedArmies).BroadCast()).ResponseUnitIds[0];
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AlliedArmiesInUkraine().Count > 0), this))
             .WithGuidance($"Eliminate an Allied army in {CountryState.ForEnum(Country.Ukraine).Label}"),

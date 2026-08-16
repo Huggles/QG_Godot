@@ -28,7 +28,6 @@ public partial class ResponseMonteCassino : ResponseCardLogic
                     PresentationServices.Notification.ShowActionText("Monte Cassino: Axis Army in Italy will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
-                return null;
             })
             .WithGuidance("Prevent the removal of an Axis Army in Italy this turn")
         };

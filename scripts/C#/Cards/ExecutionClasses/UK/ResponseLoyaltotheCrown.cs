@@ -24,12 +24,12 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
         return new List<CardStep> {
             new CardStep(this, async () => {
                 var deployEvent = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
-                if (deployEvent == null) return null;
+                if (deployEvent == null) return;
 
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, deployEvent.UnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             })
             .WithGuidance("Eliminate the Axis Army just built")
         };

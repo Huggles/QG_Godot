@@ -30,7 +30,7 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
                 fullDeck.AddRange(deck.DeckCardIds.Skip(peekCount));
 
                 ReorderDeckChangeEvent reorderEvent = BuildChangeEvent(new ReorderDeckChangeEvent(Faction, fullDeck));
-                return reorderEvent;
+                await CardPlayPool.DoChangeEvent(reorderEvent);
             }).WithGuidance("Examine and reorder the top 4 cards of your draw deck")
         };
     }

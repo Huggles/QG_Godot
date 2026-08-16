@@ -48,7 +48,7 @@ public partial class StatusResistance : StatusCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
-                return battleEvent;
+                await CardPlayPool.DoChangeEvent(battleEvent);
             })
             .WithGuidance("Discard 2 cards from hand to battle in Western Europe or Italy")
         };

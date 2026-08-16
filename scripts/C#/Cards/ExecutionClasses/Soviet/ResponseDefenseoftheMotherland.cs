@@ -45,7 +45,7 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
                 int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitableNearMoscowIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(MoscowAndAdjacentIds, Faction), this))
             .WithGuidance("Recruit an Army in or adjacent to Moscow"),
@@ -54,7 +54,7 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
                 int unitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesInMoscow).BroadCast()).ResponseUnitIds[0];
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInMoscow.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in Moscow")

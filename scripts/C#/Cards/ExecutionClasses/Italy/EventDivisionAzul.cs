@@ -22,7 +22,7 @@ public partial class EventDivisionAzul : EventCardLogic
                 PresentationServices.Notification.ShowActionText("Division Azul: A random Soviet Response card has been discarded.", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
 
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction.SOVIET).ResponseCardIds.Count > 0), this))

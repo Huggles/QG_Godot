@@ -31,7 +31,7 @@ public partial class ResponseRasputitsa : ResponseCardLogic
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             })
             .WithGuidance("Eliminate the Axis Army just built near Moscow")
         };

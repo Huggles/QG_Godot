@@ -14,7 +14,7 @@ public partial class EventGermanSovietTreatyofFriendshipCooperationandDemarcatio
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.Russia]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Russia], Faction), this))
             .WithGuidance("Recruit an army in Russia"),
@@ -24,7 +24,7 @@ public partial class EventGermanSovietTreatyofFriendshipCooperationandDemarcatio
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.EasternEurope]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)Country.EasternEurope], Faction), this))
             .WithGuidance("Recruit an army in Eastern Europe"),

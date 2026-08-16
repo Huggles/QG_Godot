@@ -37,7 +37,6 @@ public partial class ResponseKwantungArmy : ResponseCardLogic
                     PresentationServices.Notification.ShowActionText("Kwantung Army: Japanese Army will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
-                return null;
             })
             .WithGuidance("Do not remove your supplied Army in China, Szechuan, Mongolia, or Vladivostok")
         };

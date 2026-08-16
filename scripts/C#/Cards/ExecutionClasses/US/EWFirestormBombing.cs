@@ -34,7 +34,6 @@ public partial class EWFirestormBombing : EWCardLogic
                     discardEvent.IsTrigger = true;
                     await CardPlayPool.DoChangeEvent(discardEvent);
                 }
-                return null;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => QualifyingAxisFactions().Count > 0), this))
             .WithGuidance("Axis country with US unit adjacent to its Home space must discard 7 cards")

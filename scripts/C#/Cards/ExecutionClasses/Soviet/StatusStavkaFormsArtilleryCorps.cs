@@ -58,7 +58,7 @@ public partial class StatusStavkaFormsArtilleryCorps : StatusCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
-                return battleEvent;
+                await CardPlayPool.DoChangeEvent(battleEvent);
             })
             .WithGuidance("Discard a card from hand to battle the same space")
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(SameSpaceCountryIds, Faction), this))

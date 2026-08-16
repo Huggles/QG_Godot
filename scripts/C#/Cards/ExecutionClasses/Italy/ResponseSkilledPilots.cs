@@ -32,7 +32,7 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
                     ForceDiscardCardsChangeEvent.NumberOfCards = newNumberOfCards;
                     PresentationServices.Notification.ShowActionText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
-                    return null;          
+                    return;
                 }else {
                     throw new Exception("Reaction should be to a discard change event");
                 }

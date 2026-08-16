@@ -26,7 +26,7 @@ public partial class EventLendLease : EventCardLogic
 
                 DrawCardsChangeEvent drawEvent = BuildChangeEvent(new DrawCardsChangeEvent(Faction, selectedFaction, 1, true));
                 drawEvent.IsTrigger = true;
-                return drawEvent;
+                await CardPlayPool.DoChangeEvent(drawEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction.UNITED_KINGDOM).HandCardIds.Count > 0 ||

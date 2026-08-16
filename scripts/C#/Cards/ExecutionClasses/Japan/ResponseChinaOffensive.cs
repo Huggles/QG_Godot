@@ -26,7 +26,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, EligibleAttackedCountries()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithConditions(()=>{ return EligibleAttackedCountries().Map(countryId => Condition.Build(new Condition.CountryIsEmpty(countryId), this)).ToList<Condition>(); })
             .WithGuidance("Build an army in the country just battled"), 
@@ -36,7 +36,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
                 int selectedCountryId = (await new InputRequest.SelectUnitRequestHandler(Faction, targets).BroadCast()).ResponseUnitIds[0];
                 BattleUnitChangeEvent battleUnitChangeEvent = BuildChangeEvent(new BattleUnitChangeEvent(Faction, selectedCountryId));
                 battleUnitChangeEvent.IsTrigger = true;
-                return battleUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(battleUnitChangeEvent);
             }).WithCondition(
                 ()=>{ return Condition.Build(new Condition.CountryIsAttackable(TargetCountries.ToCountryIds(), Faction), this); }
             ).WithGuidance("Attack an army in China or an adjacent country"),

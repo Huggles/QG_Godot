@@ -26,7 +26,6 @@ public partial class ResponseMoscow : ResponseCardLogic
                     PresentationServices.Notification.ShowActionText($"{Faction.WithPlayer()} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
-                return null;
             })
             .WithGuidance("Do not remove your Army in Moscow this turn")
         };

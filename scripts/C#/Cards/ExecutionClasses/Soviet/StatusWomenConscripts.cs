@@ -45,7 +45,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Women Conscripts: no Build Army card found to recycle");
-                    return null;
+                    return;
                 }
 
                 ModifierRegistry.Register(new MutatorRecycleAfterStep(
@@ -57,7 +57,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
                     "The call-up never stops. The Build Army card just played goes back on top of its owner's draw deck instead of being discarded."));
 
                 await Task.CompletedTask;
-                return null;   // the mutator does the work once the step ends
+                // the mutator does the work once the step ends
             })
             .WithGuidance("Place Build Army card on top of your draw deck at the end of this step")
         };

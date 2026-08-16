@@ -27,11 +27,11 @@ public partial class StatusBlitzkrieg : StatusCardLogic
                 await CardPlayPool.DoChangeEvent(discardEvent);
 
                 var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
-                if (trigger == null) return null;
+                if (trigger == null) return;
 
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, trigger.CountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;                
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             }).WithGuidance("Deploy an army in the country where you just battled") 
         };
     }

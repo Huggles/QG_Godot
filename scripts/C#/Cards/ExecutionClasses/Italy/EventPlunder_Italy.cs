@@ -13,7 +13,6 @@ public partial class EventPlunder_Italy : EventCardLogic
                 FactionState factionState = FactionState.ForEnum(Faction);
                 int score = factionState.ActiveUnitIds.ToUnitStates().ToList().Count(unitState => unitState.CountryState.Country != Country.Italy);
                 await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(score, $"{factionState.FactionData.FactionAdjactiveLabel} armies and navies outside Italy"), Faction));
-                return null;
             })
         }; 
     }

@@ -23,7 +23,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
             // Build first Army adjacent to the Navy just built (the triggering event)
             new CardStep(this, async() => {
                 var triggerDeploy = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
-                if (triggerDeploy == null) return null;
+                if (triggerDeploy == null) return;
                 _triggerNavyLocation = triggerDeploy.CountryState;
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
                     .Where(cs => _triggerNavyLocation.ConnectedCountryStates.Contains(cs))
@@ -31,7 +31,7 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 var triggerDeploy = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
@@ -42,14 +42,14 @@ public partial class ResponseSpecialNavalLandingForces : ResponseCardLogic
             
             // Build second Army adjacent to the same Navy (location captured in step 1)
             new CardStep(this, async() => {
-                if (_triggerNavyLocation == null) return null;
+                if (_triggerNavyLocation == null) return;
                 var adjacentBuildable = CountryState.BuildableLand(Faction)
                     .Where(cs => _triggerNavyLocation.ConnectedCountryStates.Contains(cs))
                     .ToList();
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 if (_triggerNavyLocation == null) return false;

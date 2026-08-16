@@ -31,7 +31,6 @@ public partial class EWB26Marauder : EWCardLogic
                     discardEvent.IsTrigger = true;
                     await CardPlayPool.DoChangeEvent(discardEvent);
                 }
-                return null;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => QualifyingAxisFactions().Count > 0), this))
             .WithGuidance("Axis country with US Army within 3 spaces of its Home must discard 4 cards")

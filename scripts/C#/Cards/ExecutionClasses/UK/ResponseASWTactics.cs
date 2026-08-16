@@ -23,7 +23,6 @@ public partial class ResponseASWTactics : ResponseCardLogic
                 ActivationTrigger.IsBlocked = true;
                 ActivationTrigger.IsCardBlocked = true;
                 PresentationServices.Notification.ShowActionText("Axis EW card effect ignored", Faction);                
-                return null;
             })
         };
     }

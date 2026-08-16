@@ -29,7 +29,7 @@ public partial class EventTheAutobahn : EventCardLogic
             if (hasMoreUnits) CardSteps.AddRange(MakeRelocationSteps());
             RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
             removeEvent.IsTrigger = false;
-            return removeEvent;
+            await CardPlayPool.DoChangeEvent(removeEvent);
         })
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
         {
@@ -48,7 +48,7 @@ public partial class EventTheAutobahn : EventCardLogic
             int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableIds).BroadCast()).ResponseCountryIds[0];
             DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
             deployEvent.IsTrigger = true;
-            return deployEvent;
+            await CardPlayPool.DoChangeEvent(deployEvent);
         })
         .WithGuidance("Select where to rebuild the German Army");
     }

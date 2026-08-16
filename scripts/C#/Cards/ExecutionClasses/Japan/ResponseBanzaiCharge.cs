@@ -18,7 +18,7 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
         return new List<CardStep> {
             new CardStep(this, async() => {
                 var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
-                if (triggerBattle == null) return null;
+                if (triggerBattle == null) return;
                 var battleLocation = triggerBattle.CountryState;
                 
                 // Get same or adjacent land spaces that are attackable
@@ -40,7 +40,7 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
-                return battleCountryChange;
+                await CardPlayPool.DoChangeEvent(battleCountryChange);
             })
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
             .WithGuidance("Battle in the same or adjacent land space"),

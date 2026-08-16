@@ -26,7 +26,7 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
                     : new BattleTarget(respSea.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
-                return battleCountryChange;
+                await CardPlayPool.DoChangeEvent(battleCountryChange);
             })
             .WithCondition(()=> Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))
             .WithGuidance("Battle a sea space"),
@@ -41,7 +41,7 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
                     : new BattleTarget(respLand.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
-                return battleCountryChange;
+                await CardPlayPool.DoChangeEvent(battleCountryChange);
             })
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
             .WithGuidance("Battle a land space"),

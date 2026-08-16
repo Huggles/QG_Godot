@@ -23,7 +23,6 @@ public partial class ResponseDestroyers : ResponseCardLogic
                     PresentationServices.Notification.ShowActionText("Destroyers: Navy will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
-                return null;
             })
             .WithGuidance("Do not remove the supplied Navy this turn")
         };

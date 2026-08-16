@@ -15,7 +15,7 @@ public partial class EventVasilevskyTakesCommandInTheFarEast : EventCardLogic
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
                     new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Vladivostok], Faction), this))
             .WithGuidance("Recruit an Army in Vladivostok"),
@@ -37,7 +37,7 @@ public partial class EventVasilevskyTakesCommandInTheFarEast : EventCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
-                return battleCountryChange;
+                await CardPlayPool.DoChangeEvent(battleCountryChange);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 var china = CountryState.ForEnum(Country.China);

@@ -22,7 +22,7 @@ public partial class EventMaoTsetung : EventCardLogic
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInChinaOrSzechuan.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in China or Szechuan")

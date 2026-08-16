@@ -29,7 +29,7 @@ public partial class StatusFreeFrance : StatusCardLogic
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
                     new DeployUnitChangeEvent(Faction, (int)Country.WesternEurope, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable([(int)Country.WesternEurope], Faction), this))
             .WithGuidance("Discard top 2 deck cards to build an Army in Western Europe")

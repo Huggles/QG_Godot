@@ -28,7 +28,7 @@ public partial class EventLedoAndBurmaRoads : EventCardLogic
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
                     new DeployUnitChangeEvent(Faction, (int)Country.SouthEastAsia, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable([(int)Country.SouthEastAsia], Faction), this))
             .WithGuidance("Build an Army in Southeast Asia"),
@@ -41,7 +41,7 @@ public partial class EventLedoAndBurmaRoads : EventCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
-                return battleEvent;
+                await CardPlayPool.DoChangeEvent(battleEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(BattleCountryIds, Faction), this))
             .WithGuidance("Battle in China or Szechuan")

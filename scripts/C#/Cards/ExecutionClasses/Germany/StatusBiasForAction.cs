@@ -60,7 +60,7 @@ public partial class StatusBiasForAction : StatusCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleCountryChange.IsTrigger = true;
-                return battleCountryChange;
+                await CardPlayPool.DoChangeEvent(battleCountryChange);
             }).WithGuidance("Battle a country adjacent to where you've deployed an army this turn")
         };
     }

@@ -22,7 +22,7 @@ public partial class EventArsenalofDemocracy : EventCardLogic
                 _firstWasArmy = CountryState.ForId(selectedCountryId).Type == CountryType.LAND;
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 CountryState.BuildableLand(targetFaction).Any() || CountryState.BuildableSea(targetFaction).Any()), this))
@@ -35,7 +35,7 @@ public partial class EventArsenalofDemocracy : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(targetFaction, buildable).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 var buildable = _firstWasArmy

@@ -24,11 +24,11 @@ public partial class ResponseKamikaze : ResponseCardLogic
         return new List<CardStep> {
             new CardStep(this, async () => {
                 var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
-                if (trigger == null) return null;
+                if (trigger == null) return;
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             })
             .WithGuidance("Eliminate the Allied Navy just built"),
         };

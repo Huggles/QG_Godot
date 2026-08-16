@@ -24,7 +24,7 @@ public partial class StatusAtlanticWall : StatusCardLogic
                 ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, attackingFaction, 3));
                 ForceDiscardCardsChangeEvent.IsTrigger = true;
                 await Task.CompletedTask;
-                return ForceDiscardCardsChangeEvent;  
+                await CardPlayPool.DoChangeEvent(ForceDiscardCardsChangeEvent);
             })
             .WithGuidance("The attacker discards 3 cards")
         };

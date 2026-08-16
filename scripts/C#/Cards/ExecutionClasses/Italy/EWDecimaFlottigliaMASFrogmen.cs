@@ -21,7 +21,7 @@ public partial class EWDecimaFlottigliaMASFrogmen : EWCardLogic
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, totalDiscards));
                 discardEvent.IsTrigger = true;
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             })
         };
     }

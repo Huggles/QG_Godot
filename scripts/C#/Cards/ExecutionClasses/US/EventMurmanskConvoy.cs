@@ -13,7 +13,7 @@ public partial class EventMurmanskConvoy : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction.SOVIET, [(int)Country.Russia]).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction.SOVIET, selectedCountryId, DeployType.RECRUIT));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Russia], Faction.SOVIET), this))
             .WithGuidance("Recruit a Soviet Army in Russia"),
@@ -22,7 +22,7 @@ public partial class EventMurmanskConvoy : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction.SOVIET, buildableLand).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction.SOVIET, selectedCountryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction.SOVIET), this))
             .WithGuidance("Soviet Union may build an Army"),

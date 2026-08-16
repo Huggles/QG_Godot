@@ -22,7 +22,7 @@ public partial class EventTitosPartisans : EventCardLogic
                 RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
                     new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
                 removeEvent.IsTrigger = true;
-                return removeEvent;
+                await CardPlayPool.DoChangeEvent(removeEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInBalkans.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in the Balkans"),
@@ -36,7 +36,7 @@ public partial class EventTitosPartisans : EventCardLogic
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
                     new DeployUnitChangeEvent(selectedFaction, (int)Country.Balkans, DeployType.RECRUIT));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Balkans], Faction.SOVIET), this).MeetCondition() ||

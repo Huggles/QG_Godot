@@ -46,7 +46,7 @@ public partial class ResponseRationing : ResponseCardLogic
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Rationing: no played card found to recycle");
-                    return null;
+                    return;
                 }
 
                 ModifierRegistry.Register(new MutatorRecycleAfterStep(
@@ -58,7 +58,7 @@ public partial class ResponseRationing : ResponseCardLogic
                     "Nothing is wasted. The card just played is shuffled back into its owner's draw deck instead of staying discarded."));
 
                 await Task.CompletedTask;
-                return null;   // the mutator does the work once the step ends
+                // the mutator does the work once the step ends
             })
             .WithGuidance("Shuffle last played card into your draw deck at the end of this step")
         };

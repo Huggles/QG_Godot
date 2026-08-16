@@ -43,7 +43,7 @@ public partial class StatusBravado : StatusCardLogic
 
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
-                return battleEvent;
+                await CardPlayPool.DoChangeEvent(battleEvent);
             })
             .WithGuidance("Discard the top 2 cards of your draw deck to battle a land space")
         };

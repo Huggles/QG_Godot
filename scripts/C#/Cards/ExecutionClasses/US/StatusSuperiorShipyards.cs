@@ -32,7 +32,7 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;                
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             }).WithGuidance("Discard top 1 deck card to build an additional Navy")
         };
     }

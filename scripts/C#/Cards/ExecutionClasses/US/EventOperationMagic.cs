@@ -22,7 +22,7 @@ public partial class EventOperationMagic : EventCardLogic
                 PresentationServices.Notification.ShowActionText("Operation Magic: A random Japanese Response card has been discarded.", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
 
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction.JAPAN).ResponseCardIds.Count > 0), this))

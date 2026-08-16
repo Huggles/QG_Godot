@@ -28,7 +28,6 @@ public partial class ResponseRAF : ResponseCardLogic
                     PresentationServices.Notification.ShowActionText("RAF: UK piece will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
-                return null;
             })
             .WithGuidance("Do not remove your piece in or adjacent to the United Kingdom this turn")
         };

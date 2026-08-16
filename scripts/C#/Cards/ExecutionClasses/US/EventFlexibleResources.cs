@@ -19,7 +19,6 @@ public partial class EventFlexibleResources : EventCardLogic
                 await recycleEvent.Apply();
 
                 await CardPlayPool.DoCard(selectedCardId);
-                return null;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction).DiscardedCardIds.Count > 0), this))

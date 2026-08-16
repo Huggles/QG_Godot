@@ -23,7 +23,6 @@ public partial class ResponseBattleshipRepair : ResponseCardLogic
                     PresentationServices.Notification.ShowActionText("Battleship Repair: Japanese Navy will not be removed this turn", Faction);
                     await Task.Delay(GameSettings.DurationMedium);
                 }
-                return null;
             })
             .WithGuidance("Do not remove your supplied Navy this turn")
         };

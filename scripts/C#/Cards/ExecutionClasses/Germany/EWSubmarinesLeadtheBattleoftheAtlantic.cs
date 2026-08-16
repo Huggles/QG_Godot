@@ -21,7 +21,7 @@ public partial class EWSubmarinesLeadtheBattleoftheAtlantic : EWCardLogic
                 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count * 2));
                 discardEvent.IsTrigger = true;
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             })
         }; 
     }

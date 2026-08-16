@@ -25,7 +25,7 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleCountryChangeEvent = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
                 battleCountryChangeEvent.IsTrigger = true;
-                return battleCountryChangeEvent;
+                await CardPlayPool.DoChangeEvent(battleCountryChangeEvent);
             })
             .WithGuidance("Battle in the South China Sea")
             .WithConditions( () => { return new List<Condition> { new Condition.CountryIsAttackable([CountryState.ForEnum(Country.SouthChinaSea).Id], Faction) }; } ),
@@ -33,7 +33,7 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id }).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             }).WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsRecruitable([CountryState.ForEnum(Country.SouthEastAsia).Id], Faction)}; } )
             .WithGuidance("Recruit an army in South East Asia")
 

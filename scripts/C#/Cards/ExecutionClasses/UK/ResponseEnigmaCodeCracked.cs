@@ -18,11 +18,11 @@ public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
         return new List<CardStep> {
             new CardStep(this, async () => {
                 var statusActivation = CardPlayPool.CurrentReactionTrigger as ActivateReactionChangeEvent;
-                if (statusActivation == null) return null;
+                if (statusActivation == null) return;
 
                 DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new DiscardHandCardsChangeEvent(Faction, Faction.GERMANY, new List<int> { statusActivation.SourceCardId }));
                 discardEvent.IsTrigger = true;
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             })
             .WithGuidance("Discard Germany's Status card")
         };

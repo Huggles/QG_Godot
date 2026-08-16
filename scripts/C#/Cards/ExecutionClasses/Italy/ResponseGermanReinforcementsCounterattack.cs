@@ -25,9 +25,8 @@ public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLog
                     int countryId = removeEvent.CountryId;
                     DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction.GERMANY, countryId, DeployType.RECRUIT));
                     deployEvent.IsTrigger = true;
-                    return deployEvent;
+                    await CardPlayPool.DoChangeEvent(deployEvent);
                 }
-                return null;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)

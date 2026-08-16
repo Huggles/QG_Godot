@@ -32,10 +32,8 @@ public partial class EWSubmarinesSupportPacificIslands : EWCardLogic
                     // US discards 2 cards per navy
                     ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_STATES, count * 2));
                     discardEvent.IsTrigger = true;
-                    return discardEvent;
+                    await CardPlayPool.DoChangeEvent(discardEvent);
                 }
-                
-                return null;
             })
         }; 
     }

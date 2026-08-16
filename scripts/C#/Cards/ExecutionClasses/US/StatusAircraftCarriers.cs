@@ -33,7 +33,7 @@ public partial class StatusAircraftCarriers : StatusCardLogic
                 int countryId = LastSeaBattle.CountryId;
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 var battle = LastSeaBattle;
