@@ -14,7 +14,7 @@ public partial class CardStep : ITaggable
     public int Id { get; set; } = 0;
     [JsonIgnore] public CardStep NextCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) + 1);
     [JsonIgnore] public CardLogic CardLogic;    
-    protected Func<Task<ChangeEvent>> StepLogic;
+    protected Func<Task> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
     [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod != null ? GetConditionsMethod() : null;
@@ -22,7 +22,7 @@ public partial class CardStep : ITaggable
 
     public string ActionGuidance;
 
-    public CardStep(CardLogic cardLogic, Func<Task<ChangeEvent>> stepLogic)
+    public CardStep(CardLogic cardLogic, Func<Task> stepLogic)
     {
         this.CardLogic = cardLogic;
         this.StepLogic = stepLogic;
@@ -35,7 +35,7 @@ public partial class CardStep : ITaggable
         return this;
     }
 
-    public CardStep WithStepLogic(Func<Task<ChangeEvent>> stepLogic)
+    public CardStep WithStepLogic(Func<Task> stepLogic)
     {
         this.StepLogic = stepLogic;
         return this;
@@ -58,11 +58,10 @@ public partial class CardStep : ITaggable
         return this;
     }
 
-    public async Task<ChangeEvent> Execute()
+    public async Task Execute()
     {
         StepFinished = true;
         bool CanExecuteStep = MeetAllConditions;
-        ChangeEvent result = null;
         
         if (!CanExecuteStep)
         {
@@ -72,7 +71,7 @@ public partial class CardStep : ITaggable
             await Task.Delay(GameSettings.DurationLong);
             if (NextCardStep != null)
             {
-                result = await NextCardStep.Execute();
+                await NextCardStep.Execute();
             }
             else
             {
@@ -86,7 +85,7 @@ public partial class CardStep : ITaggable
                 DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName}");
                 await new ShowActionLabelPresentationEvent(TriggeringFaction, ActionGuidance).Apply();
                 ErrorInjection.MaybeThrow(ErrorInjection.Site.CardStep, CardLogic?.CardState?.CardName);
-                result = await StepLogic.Invoke();
+                await StepLogic();
             }
             catch (StepSkippedException)
             {
@@ -118,8 +117,6 @@ public partial class CardStep : ITaggable
         // Note: ChangeEvent.Apply() also recalculates, but this ensures tags are fresh
         // for any immediate condition checks or UI updates
         GameStateCalculator.CalculateAll();
-        
-        return result;
     }
 
     public T BuildChangeEvent<T>(T changeEvent) where T : ChangeEvent

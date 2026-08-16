@@ -14,7 +14,7 @@ public partial class BuildNavy : CardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, targetableCountries.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
-                return deployUnitChangeEvent;
+                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.HasBuildableSea(Faction), this))
             .WithGuidance("Build a navy")

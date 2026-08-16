@@ -199,10 +199,7 @@ public partial class CardPlayRound : GodotObject
                 while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0 && cardLogic.IsBlocked == false)
                 {
                     List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished ).ToList();
-                    ChangeEvent stepResult = await nextSteps[0].Execute();
-                    //Only apply the change event if it is not null, if the step is not blocked, and the card is not blocked.
-                    if (stepResult != null && stepResult.IsBlocked && !cardLogic.IsBlocked)
-                        await DoChangeEvent(stepResult);
+                    await nextSteps[0].Execute();
                 }
             }
         }

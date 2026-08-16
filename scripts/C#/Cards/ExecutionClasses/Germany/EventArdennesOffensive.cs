@@ -30,7 +30,7 @@ public partial class EventArdennesOffensive : EventCardLogic
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
                 BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
                 battleEvent.IsTrigger = true;
-                return battleEvent;
+                await CardPlayPool.DoChangeEvent(battleEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(targetCountryIds, Faction), this))
             .WithGuidance("Battle in Western Europe"),
@@ -38,7 +38,7 @@ public partial class EventArdennesOffensive : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, targetCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent)   ;
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(targetCountryIds, Faction), this))
             .WithGuidance("Build an Army in Western Europe"),

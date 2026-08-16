@@ -20,7 +20,7 @@ public partial class EventForcedConscription : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitableCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => RecruitableCountryIds.Count > 0), this))
             .WithGuidance("Recruit an Army in or adjacent to Germany"),
@@ -28,7 +28,7 @@ public partial class EventForcedConscription : EventCardLogic
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitableCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployEvent.IsTrigger = true;
-                return deployEvent;
+                await CardPlayPool.DoChangeEvent(deployEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => RecruitableCountryIds.Count > 0), this))
             .WithGuidance("Recruit a second Army in or adjacent to Germany"),

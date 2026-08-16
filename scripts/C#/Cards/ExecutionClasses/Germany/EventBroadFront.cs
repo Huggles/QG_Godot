@@ -40,7 +40,7 @@ public partial class EventBroadFront : EventCardLogic
                 CardSteps.Add(MakeBattleStep());
             BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
             battleEvent.IsTrigger = true;
-            return battleEvent;
+            await CardPlayPool.DoChangeEvent(battleEvent);
         })
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
             battlesCompleted < MaxBattles && QualifyingTargets().Count > 0), this))

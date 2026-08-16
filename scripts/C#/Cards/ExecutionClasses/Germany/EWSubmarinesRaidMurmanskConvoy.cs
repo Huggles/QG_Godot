@@ -25,7 +25,7 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
 
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.SOVIET, count * 2));
                 discardEvent.IsTrigger = true;
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             })
         }; 
     }

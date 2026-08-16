@@ -56,9 +56,10 @@ public partial class EventGunsAndButter : EventCardLogic
                 }
 
                 if (result != null)
+                {
                     result.IsTrigger = true;
-
-                return result;
+                    await CardPlayPool.DoChangeEvent(result);
+                }
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 CountryState.BuildableLand(Faction).Any()
