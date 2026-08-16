@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if TOOLS
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -314,6 +315,10 @@ public partial class WrapperGeneratorMain
             if (IsBitField) builder.Append(indent).AppendLine("[Flags]");
             builder.Append($"{indent}public enum ");
             RenderEnumName(builder);
+            // Godot bitfields can carry values outside int range (e.g. 0xFFFFFFFF), which the
+            // default int backing type cannot hold.
+            if (EnumConstants.Any(x => x.EnumValue is < int.MinValue or > int.MaxValue))
+                builder.Append(" : long");
             builder.AppendLine();
             builder.AppendLine(
                 $$"""
@@ -966,3 +971,4 @@ public partial class WrapperGeneratorMain
 
     #endregion
 }
+#endif

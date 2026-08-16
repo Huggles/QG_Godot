@@ -5,13 +5,9 @@ using Godot;
 
 public partial class EventMilitaryDictatorshipsInTheBalkans : EventCardLogic
 {
-    private List<int> AlliedArmiesInUkraine()
-    {
-        var attackableArmyIds = UnitState.AttackableArmyIds(Faction).ToHashSet();
-        return CountryState.ForEnum(Country.Ukraine).Units.Values
-            .Where(uId => attackableArmyIds.Contains(uId))
-            .ToList();
-    }
+    private List<int> AlliedArmiesInUkraine() =>
+        CountryState.ForEnum(Country.Ukraine).Units.Values
+        .Where(unitId => StaticGameData.FactionTeamForFaction(UnitState.ForId(unitId).Faction) == FactionTeam.ALLIES).ToList();
 
     public override List<CardStep> OnActivate()
     {

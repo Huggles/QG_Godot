@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if TOOLS
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -85,3 +86,4 @@ public partial class WrapperGeneratorMain
         }
     }
 }
+#endif

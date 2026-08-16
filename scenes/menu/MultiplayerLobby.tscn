@@ -162,7 +162,7 @@ theme_override_constants/separation = 5
 [node name="HSeparator3" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=574421845]
 layout_mode = 2
 
-[node name="InviteButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer"]
+[node name="InviteButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=209349752]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -174,11 +174,3 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Start Game"
-
-[node name="DebugSoloButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1176048974]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-tooltip_text = "Start a single-player debug game controlling all factions"
-theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-text = "🔧 Play Solo (Debug)"

@@ -1,40 +1,54 @@
 using System.Threading.Tasks;
 
 /// <summary>
-/// One-shot: shuffles a card out of its faction's discard pile back into the draw deck once the given
-/// turn step ends.
+/// One-shot: moves a card out of its faction's discard pile back into the draw deck once the given
+/// turn step ends. The destination is the caller's — ResponseRationing shuffles it in,
+/// StatusWomenConscripts puts it on top.
 ///
-/// Registered by ResponseRationing as a detached instance rather than implemented on the card itself.
+/// Registered by the reacting card as a detached instance rather than implemented on the card itself.
 /// Two reasons: DeckState.PlayCard only registers modifiers for STATUS cards, so a Response card's
-/// logic would never be registered; and a detached instance is untouched by wherever the Rationing
+/// logic would never be registered; and a detached instance is untouched by wherever the reacting
 /// card ends up (response pile, discard pile, recycled).
 ///
-/// The deferral is the point. Rationing fires in the activation window, before the triggering card's
-/// own CardSteps have run — recycling immediately would put the card back in the deck and only then
-/// resolve its effect. Waiting for the step to end lets the CardPlayRound finish normally.
+/// The deferral is the point. Both cards fire in the played card's introduction window, before that
+/// card's own CardSteps have run — recycling immediately would put it back in the deck and only then
+/// resolve its effect, with Tag.IsPlayed no longer set and the card redrawable in the same turn.
+/// Their text is about where the played card ENDS UP, not whether it resolves, so waiting for the
+/// step to end is what the cards actually say. Waiting also lets the CardPlayRound finish normally.
 /// </summary>
 public class MutatorRecycleAfterStep : StepMutator
 {
     private readonly Faction _faction;
     private readonly int _cardId;
     private readonly TurnStep _step;
+    private readonly RecycleDestination _destination;
+    private readonly string _description;
+    private readonly string _bulletinText;
     private readonly int _turn;
     private bool _done;
 
-    public MutatorRecycleAfterStep(Faction faction, int cardId, TurnStep step)
+    public MutatorRecycleAfterStep(
+        Faction faction,
+        int cardId,
+        TurnStep step,
+        RecycleDestination destination,
+        string description,
+        string bulletinText)
     {
         _faction = faction;
         _cardId = cardId;
         _step = step;
+        _destination = destination;
+        _description = description;
+        _bulletinText = bulletinText;
         _turn = GameFlow.Instance.GameTurn;
     }
 
     // Captured at registration, so this also works if the card is ever activated in the START step.
-    public override TurnStep      Step        => _step;
-    public override MutatorTiming Timing      => MutatorTiming.AFTER;
-    public override string        Description => "Rationing: shuffle the played card into the draw deck";
-    public override string        BulletinText =>
-        "Nothing is wasted. The card just played is shuffled back into its owner's draw deck instead of staying discarded.";
+    public override TurnStep      Step         => _step;
+    public override MutatorTiming Timing       => MutatorTiming.AFTER;
+    public override string        Description  => _description;
+    public override string        BulletinText => _bulletinText;
 
     /// <summary>
     /// Retires once fired. The turn check is the backstop for a step abandoned by error recovery —
@@ -51,7 +65,7 @@ public class MutatorRecycleAfterStep : StepMutator
         _done = true;
         // isTrigger:false — a bookkeeping move, as it was before. No block or reaction window.
         await this.Do(
-            new RecycleCardChangeEvent(_faction, _faction, _cardId, RecycleDestination.ShuffleIntoDeck),
+            new RecycleCardChangeEvent(_faction, _faction, _cardId, _destination),
             isTrigger: false);
     }
 }

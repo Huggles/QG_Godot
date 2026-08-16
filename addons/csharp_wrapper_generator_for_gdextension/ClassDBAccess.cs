@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if TOOLS
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,6 +67,7 @@ public partial class WrapperGeneratorMain
             new GodotName(ClassDB.ClassGetPropertySetter(godotTypeName.String, propertyName.String));
 
         public static IEnumerable<Dictionary> ClassGetSignalList(GodotName godotTypeName, bool noInheritance) => ClassDB.ClassGetSignalList(godotTypeName.String, noInheritance);
-        
+
     }
 }
+#endif

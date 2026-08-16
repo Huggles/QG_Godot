@@ -361,6 +361,16 @@ public partial class CardPlayRound : GodotObject
         var previousPassed = _afterReactionPassedFactions;
         _afterReactionPassedFactions = new HashSet<Faction>();
         bool anyEverPlayed = false;
+
+        // A card can never react to its own introduction. DeckState.PlayCard files a Response card
+        // into ResponseCardIds with IsRevealed = false BEFORE this window opens, so without this the
+        // player is prompted in the one window where the card they just played is provably
+        // unplayable — and, if it was their only hidden Response, prompted with nothing else to
+        // offer. Excluded from the offered options and from the always-ask cover count alike.
+        int excludedCardId = triggerEvent is PlayCardChangeEvent or ActivateReactionChangeEvent
+            ? triggerEvent.SourceCardId
+            : -1;
+
         try
         {
             bool anyPlayedThisPass = true;
@@ -376,10 +386,11 @@ public partial class CardPlayRound : GodotObject
                 {
                     if (_afterReactionPassedFactions.Contains(faction)) continue;
                     List<int> options = GetAfterReactionOptions(faction);
+                    options.Remove(excludedCardId);
                     // A faction the gate declines is re-evaluated next pass rather than recorded as
                     // having passed, exactly as a faction with no options always has been — the gate
                     // is a local state read, so there is no round-trip to save by caching it.
-                    if (!ShouldOpenReactionWindow(faction, options)) continue;
+                    if (!ShouldOpenReactionWindow(faction, options, excludedCardId)) continue;
 
                     int cardId = await RequestPlay(faction, options);
                     if (cardId != -1)
@@ -584,9 +595,16 @@ public partial class CardPlayRound : GodotObject
     /// reaction is actually available makes the mere appearance of the prompt proof that the hidden
     /// card reacts to exactly this event — and its absence proof that it does not. The empty prompt
     /// is the cover story; the player passes with Skip.
+    ///
+    /// <paramref name="excludeCardId"/> drops one card from the count: inside an introduction
+    /// event's window the card being introduced cannot react to itself, so it must not be the reason
+    /// a cover window opens. The residual tell — that being prompted there implies you hold ANOTHER
+    /// hidden Response card — is accepted. It is a count, not an identity, and the alternative is
+    /// asking a question the player provably cannot answer.
     /// </summary>
-    public static bool HasHiddenResponseCards(Faction faction) =>
-        DeckState.ForFaction(faction).ResponseCardIds.Any(id => CardState.ForId(id)?.IsRevealed == false);
+    public static bool HasHiddenResponseCards(Faction faction, int excludeCardId = -1) =>
+        DeckState.ForFaction(faction).ResponseCardIds
+            .Any(id => id != excludeCardId && CardState.ForId(id)?.IsRevealed == false);
 
     /// <summary>
     /// Every event-triggered card the faction has on the table: the full set a reaction prompt puts
@@ -626,8 +644,13 @@ public partial class CardPlayRound : GodotObject
     /// <summary>
     /// Whether to open a reaction window for this faction, given the reactions it can actually play.
     /// The single gate for both the block and the after-reaction path.
+    ///
+    /// <paramref name="excludeCardId"/> is the card being introduced, when this is an introduction
+    /// event's window — it can neither be offered nor act as cover. The caller has already stripped
+    /// it from <paramref name="options"/>; this passes it on to the cover count. Block windows leave
+    /// it at -1: introduction events no longer open one, so there is nothing to exclude.
     /// </summary>
-    private static bool ShouldOpenReactionWindow(Faction faction, List<int> options)
+    private static bool ShouldOpenReactionWindow(Faction faction, List<int> options, int excludeCardId = -1)
     {
         // A scoped skip only silences the windows that exist to hide information. A face-up Status
         // card (or an already-revealed Response) is public knowledge, so the player keeps that
@@ -635,7 +658,7 @@ public partial class CardPlayRound : GodotObject
         if (GameFlow.Instance.IsSkippingReactions(faction))
             return options.Any(IsPubliclyVisibleTableCard);
 
-        return options.Count > 0 || HasHiddenResponseCards(faction);
+        return options.Count > 0 || HasHiddenResponseCards(faction, excludeCardId);
     }
 
     public List<T> GetChangeEvents<T>() where T : ChangeEvent

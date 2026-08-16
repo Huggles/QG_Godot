@@ -20,7 +20,7 @@
       ],
       "initialHandCards": [
         { "name": "StatusBiasForAction" },
-        { "name": "StatusWolfPacks" },
+        { "name": "EventMilitaryDictatorshipsInTheBalkans" },
         { "name": "EWSubmarinesRaidMurmanskConvoy" }
       ],
       "startingVP": 0
@@ -64,8 +64,8 @@
         { "countryName": "EASTERN_EUROPE" },
         { "countryName": "SZECHUAN" },
         { "countryName": "KAZAKHSTAN" },
-        { "countryName": "SOUTH_EAST_ASIA" },
-        { "countryName": "BALKANS" }
+        { "countryName": "UKRAINE" },
+        { "countryName": "SOUTH_EAST_ASIA" }
       ],
       "initialCards": [
         { "name": "ResponseLeningrad" }

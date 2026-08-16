@@ -173,20 +173,30 @@ Requests after reactions from all factions. Returns `true` if at least one react
 
 Do not "fix" that inconsistency by gating the call. Three cards react through this window and would silently stop being offered:
 
-| Card | Reacts to |
-|---|---|
-| `UK/ResponseRationing` | `PlayCardChangeEvent` (pool scan, `.InReactionWindow()`) |
-| `Soviet/StatusWomenConscripts` | `PlayCardChangeEvent` via `CurrentReactionTrigger` |
-| `UK/ResponseEnigmaCodeCracked` | `ActivateReactionChangeEvent` via `CardActivated(...).Immediately()` |
+| Card | Reacts to | Effect |
+|---|---|---|
+| `UK/ResponseRationing` | `PlayCardChangeEvent` via `CurrentReactionTrigger`, `.InReactionWindow()` | registers `MutatorRecycleAfterStep(ShuffleIntoDeck)` |
+| `Soviet/StatusWomenConscripts` | `PlayCardChangeEvent` (own faction, `BUILD_ARMY`), `.InReactionWindow()` | registers `MutatorRecycleAfterStep(TopOfDeck)` |
+| `UK/ResponseEnigmaCodeCracked` | `ActivateReactionChangeEvent` via `CardActivated(...).Immediately()` | discards Germany's Status card |
 
-#### `ShouldOpenReactionWindow(Faction, List<int> options)` — the always-ask rule
+The first two react to a card play but must not *act* during the window — see "Reacting to a play, acting after it" below.
+
+**A card can never react to its own introduction.** `RequestAfterReactions` computes an `excludedCardId` from the introduction event's `SourceCardId` and applies it twice: it is stripped from the faction's `options`, and passed to `ShouldOpenReactionWindow` so it cannot serve as always-ask cover either.
+
+The second half is the load-bearing one. `DeckState.PlayCard` files a freshly played Response card into `ResponseCardIds` with `IsRevealed = false` **before** this window opens, so without the exclusion `HasHiddenResponseCards` is always true for a player who just played a Response card — and they are prompted in the one window where that card is provably unplayable, with nothing else on offer if it was their only hidden one.
+
+Residual tell, accepted: being prompted in your own Response card's introduction window now implies you hold *another* hidden Response card. That is a count, not an identity, and the alternative is asking a question the player cannot answer.
+
+#### `ShouldOpenReactionWindow(Faction, List<int> options, int excludeCardId = -1)` — the always-ask rule
 The single gate deciding whether a faction is prompted at all. Used by **both** `RequestAfterReactions` and `RequestBlock`, so the rule lives in one place.
 
 ```csharp
 if (GameFlow.Instance.IsSkippingReactions(faction))
     return options.Any(IsPubliclyVisibleTableCard);
-return options.Count > 0 || HasHiddenResponseCards(faction);
+return options.Count > 0 || HasHiddenResponseCards(faction, excludeCardId);
 ```
+
+`excludeCardId` is the card being introduced, in an introduction event's window; `-1` everywhere else. The caller has already stripped it from `options`. `RequestBlock` leaves it at the default — introduction events no longer open a block window, so there is nothing to exclude.
 
 **Why a faction with nothing to play is still asked.** Opening a window only when a reaction is actually available makes the *appearance* of the prompt proof that the faction holds a face-down Response card matching exactly that event — and its absence proof that it holds none. Every opponent could read the hidden card straight off "Waiting on Japan input…". So any faction holding an unrevealed Response card (`HasHiddenResponseCards`) is asked in every window and passes with Skip. The empty prompt is the cover story.
 
@@ -446,6 +456,35 @@ new CardStep(this, async() => {
 - Use `CurrentReactionTrigger` in `CardTriggers()` for response cards that react *immediately* to a specific event — ensures the card only appears as an option in the correct window
 - Use pool-based conditions (`HasBattledAtSea`, etc.) for status cards that can score or activate at any point after the event occurred
 
+### Reacting to a play, acting after it
+
+A card that reacts to a `PlayCardChangeEvent` fires in the played card's **introduction window**, which runs *before* that card's own `CardSteps`. So a reaction that touches the played card itself must not act in its step — it has to defer.
+
+`UK/ResponseRationing` ("instead of placing that card in your discard pile, shuffle it into your draw deck") and `Soviet/StatusWomenConscripts` ("place that Build Army card on the top of your draw deck instead of discarding it") are both this shape. Acting immediately moved the played card out of the discard pile and *then* let it resolve — `Tag.IsPlayed` no longer set for it, and the card redrawable in the same turn. Their text is about where the played card **ends up**, not whether it resolves.
+
+Both register a one-shot `MutatorRecycleAfterStep`, which fires `AFTER` the turn step:
+
+```csharp
+new CardStep(this, async () => {
+    // ActivationTrigger, never the pool: DoCard pins the event this activation was offered
+    // against, and it survives any Apply() landing between selection and this step running.
+    PlayCardChangeEvent playEvent = PlayedCard(ActivationTrigger);
+    if (playEvent == null) return null;
+
+    ModifierRegistry.Register(new MutatorRecycleAfterStep(
+        Faction, playEvent.SourceCardId, GameFlow.Instance.TurnStep,
+        RecycleDestination.ShuffleIntoDeck, "…description…", "…bulletin text…"));
+
+    await Task.CompletedTask;
+    return null;   // the mutator does the work once the step ends
+})
+```
+
+Two things to copy:
+
+- **One predicate, used twice.** The same helper answers `CardTriggers()` (against `CardPlayPool.CurrentReactionTrigger`) and the step (against `ActivationTrigger`). It replaced a pool scan plus a "which of my plays did this window mean?" fallback — scoping the trigger to the current window removes the ambiguity rather than resolving it.
+- **`.InReactionWindow()` is load-bearing.** A bare `CustomCondition` reports `RequiresEventContext = false`, so `HasEventBasedTrigger` is false, so `CanBeActivated` rejects the card at any `ReactionDepth > 0` — which every reaction window is. Omit it and the card can never be offered at all, silently. `StatusWomenConscripts` shipped that way.
+
 ### Prerequisite Change Events Within a Step
 
 Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `Apply()` directly — no need to split into two steps or go through `CardPlayPool.DoChangeEvent`.
@@ -492,6 +531,8 @@ new CardStep(this, async() => {
 13. **Scoped Skips Never Cost a Visible Reaction**: *Skip rest of turn step* / *Skip rest of round* suppress only the windows that exist to hide information. A window where the faction holds a face-up Status card (or an already-revealed Response) survives the skip — it was never hiding anything
 14. **Only Change Events Are Blockable**: introduction events (`PlayCardChangeEvent`, `ActivateReactionChangeEvent`) carry `IsTrigger = false` and open no block window. Playing a card and activating a reaction are declarations, not effects — you block the effect the card's steps produce, never the declaration itself. Only `RemoveUnitChangeEvent` and `ForceDiscardCardsChangeEvent` are matched by any block card in the game
 15. **Not Blockable ≠ No Reactions**: an introduction event still opens its activation window. `IsTrigger` gates the block path and `DoChangeEvent`'s after-reaction path; the activation window in `DoCard` is unconditional by design
+16. **No Card Reacts to Its Own Introduction**: the introduced card is stripped from the offered options *and* from the always-ask cover count in its own window. Without the second half, playing a Response card always prompts its owner — `DeckState.PlayCard` marks it hidden before the window opens — in the one window where it cannot be played
+17. **React in the Window, Act After the Step**: a reaction to a `PlayCardChangeEvent` runs before the played card's own steps. Anything that moves or re-files that card must defer to an `AFTER` step mutator, or it will relocate the card and only then let it resolve
 
 ## Common Pitfalls
 
@@ -504,4 +545,6 @@ new CardStep(this, async() => {
 7. **Stale `hasRemainingActions` check**: Checking for remaining reaction tags to decide whether to `Finish()` is incorrect — a skipped faction still holds the tag. `Finish()` must always fire when returning to `reactionDepth == 0`.
 8. **Matching a block trigger against the pool**: a block card's `CardTriggers()` must test `CardPlayPool.CurrentBlockTrigger`. Testing `LastNoneNewCardChangeEvent` matches inside *every* block window, so the card gets offered against events it has nothing to do with. Introduction events no longer open a block window, which retires the worst instance of this (a removal-blocker offered against a card activation), but not the pitfall.
 9. **Testing for a reaction by its prompt**: a test that proves a card is *not* offered by hanging on an unexpected prompt no longer works — the always-ask rule raises a window for that faction anyway. Assert `promptoptions == 0` instead.
-10. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.
+10. **Forgetting `.InReactionWindow()` on a `CustomCondition`**: a bare `CustomCondition` has `RequiresEventContext = false`, so `HasEventBasedTrigger` is false and `CanBeActivated` rejects the card at any `ReactionDepth > 0`. The card compiles, reads correctly, and can never be offered — there is no error. Chain `.InReactionWindow()` on any condition that reads `CurrentReactionTrigger`.
+11. **Acting on the played card inside its introduction window**: that window runs *before* the played card's `CardSteps`. Moving the card there (recycle, discard, re-file) lands it in its new pile and only then resolves it. Defer to an `AFTER` step mutator — see "Reacting to a play, acting after it".
+12. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.

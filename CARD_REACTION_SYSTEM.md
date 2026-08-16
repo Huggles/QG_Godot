@@ -52,7 +52,11 @@ When a faction plays a card during the play step:
    - The card is moved from hand to discard/play area
    - **No block window opens** — introduction events carry `IsTrigger = false`; nothing in the
      game blocks a card play or a reaction activation
-   - After reactions requested (the *activation window*, which runs regardless of `IsTrigger`)
+   - After reactions requested (the *activation window*, which runs regardless of `IsTrigger`),
+     with the card just introduced excluded from it — a card cannot react to its own introduction,
+     neither as an offered option nor as always-ask cover
+   - A reaction here fires **before** the played card's own steps, so anything that moves the
+     played card must defer to an `AFTER` step mutator (`MutatorRecycleAfterStep`)
 
 2. **First Card Step** is executed
    - The step's logic runs (e.g., deploy unit, attack country)

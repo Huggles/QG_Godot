@@ -83,6 +83,28 @@
         "dependsOn": "build"
       },
       {
+        "label": "Launch Two Instances (Lobby Only)",
+        "detail": "One ENet host + one auto-joining clients, all waiting in the lobby. No auto-start.",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}/quick_launch_two.ps1"
+        ],
+        "problemMatcher": [],
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false,
+          "clear": true
+        },
+        "dependsOn": "build"
+      },
+      {
         "label": "Launch Six Instances (Lobby Only)",
         "detail": "One ENet host + five auto-joining clients, all waiting in the lobby. No auto-start.",
         "type": "shell",

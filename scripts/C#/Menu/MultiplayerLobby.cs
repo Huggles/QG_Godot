@@ -63,7 +63,6 @@ public partial class MultiplayerLobby : Control
 	// ── Scene node references ─────────────────────────────────────────────────
 	private VBoxContainer _playerListContainer;
 	private Button        _startGameButton;
-	private Button        _debugSoloButton;
 	/// <summary>Authored hidden in the .tscn: only a Steam host ever has anyone to invite.</summary>
 	private Button        _inviteButton;
 	private Label         _statusLabel;
@@ -133,7 +132,6 @@ public partial class MultiplayerLobby : Control
 		// Get UI references
 		_playerListContainer = GetNode<VBoxContainer>("%PlayerListContainer");
 		_startGameButton     = GetNode<Button>("%StartGameButton");
-		_debugSoloButton     = GetNode<Button>("%DebugSoloButton");
 		_inviteButton        = GetNode<Button>("%InviteButton");
 		_statusLabel         = GetNode<Label>("%StatusLabel");
 		_scenarioPicker      = GetNode<OptionButton>("%ScenarioOptionButton");
@@ -145,7 +143,6 @@ public partial class MultiplayerLobby : Control
 		_startGameButton.Visible = false;
 
 		_startGameButton.Pressed += OnStartGameButtonPressed;
-		_debugSoloButton.Pressed += OnDebugSoloButtonPressed;
 		_inviteButton.Pressed    += OnInviteFriendsPressed;
 
 		Multiplayer.PeerConnected      += OnPeerConnected;
@@ -491,28 +488,7 @@ public partial class MultiplayerLobby : Control
 	/// matters and no RPC is needed to carry it.
 	/// </summary>
 	private void CommitOpeningDiscard()
-		=> GameManager.PendingOpeningDiscard = _openingDiscardCheckBox.ButtonPressed;
-
-	private void OnDebugSoloButtonPressed()
-	{
-		DebugUtilities.PrintPeer("Starting debug solo game...");
-		// Solo, but the debug host may still be listening on 7777 — nobody may wander in behind it.
-		CloseLobbyToNewPeers();
-		MenuSeedField.Commit(_seedInput);
-		CommitOpeningDiscard();
-		var list = new List<PlayerFactionAssignment>
-		{
-			new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
-		};
-		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(list);
-
-		// Same fix as GameModeSelectionScreen.StartGame — see the comment there. Null-guarded rather
-		// than unconditional because this button runs on a possibly-live debug host peer (only closed
-		// to new connections above), and replacing that peer would tear down the session it is on.
-		Multiplayer.MultiplayerPeer ??= new OfflineMultiplayerPeer();
-
-		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
-	}
+		=> GameManager.PendingOpeningDiscard = _openingDiscardCheckBox.ButtonPressed; 
 
 	// ══════════════════════════════════════════════════════════════════════════
 	// Faction selection — client side
