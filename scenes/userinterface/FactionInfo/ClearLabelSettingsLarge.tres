@@ -1,9 +1,10 @@
 [gd_resource type="LabelSettings" format=3 uid="uid://cy7n8wr0krac1"]
 
 [resource]
-resource_local_to_scene = true
 line_spacing = 0.0
 font_size = 30
 outline_size = 15
 outline_color = Color(0, 0, 0, 1)
-shadow_color = Color(0.9494347, 0, 0.22214997, 0)
+shadow_size = 5
+shadow_color = Color(0.24587663, 0.24488956, 0.23624083, 1)
+shadow_offset = Vector2(5, 5)

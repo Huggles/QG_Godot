@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System;
 
 public partial class AssetRepository : Node
@@ -22,6 +23,4 @@ public partial class AssetRepository : Node
     // Materials
     public ShaderMaterial normalShaderMaterial = GD.Load<ShaderMaterial>("res://assets/materials/unit_shader_material.tres").Duplicate() as ShaderMaterial;
     public ShaderMaterial outOfSupplyShaderMaterial = GD.Load<ShaderMaterial>("res://assets/materials/UnitOutOfSupplyShaderMaterial.tres").Duplicate() as ShaderMaterial;
-
-    
 }

@@ -28,6 +28,9 @@ public partial class ClickableSprite : Area2D
 			return _Image;
 		}
 	}
+
+	public Vector2 Size => new Vector2(this.texture.GetWidth(), this.texture.GetHeight()) * this.Scale;
+	public Rect2 Bounds => new Rect2(this.Position - (Size/2), Size);
 	
 
 

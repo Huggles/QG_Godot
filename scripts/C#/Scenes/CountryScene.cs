@@ -21,7 +21,7 @@ public partial class CountryScene : Node2D
 
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
-    public Vector2 Size = new Vector2(AssetRepository.TargetCountrySprite.GetWidth(), AssetRepository.TargetCountrySprite.GetHeight());
+    public Vector2 Size => new Vector2(this.CountryState.StaticCountryData.Texture.GetWidth(), this.CountryState.StaticCountryData.Texture.GetHeight());
     public Rect2 Bounds => new Rect2(this.Position - (Size/2), Size);
 
     public static CountryScene SpawnCountry(int countryId)
@@ -34,10 +34,14 @@ public partial class CountryScene : Node2D
         countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionCenter;
         countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
         countrySceneInstance.CountryLabel.Size = countrySceneInstance.Bounds.Size;
+
+        
+
         countrySceneInstance.CountryLabel.Position = new Vector2(
             - (countrySceneInstance.CountryLabel.Size.X / 2), 
             - (countrySceneInstance.CountryLabel.Size.Y / 2)
         ) + countrySceneInstance.StaticCountryData.LabelTransformData.Position2D;
+        
         return countrySceneInstance;
     }
 
@@ -59,8 +63,21 @@ public partial class CountryScene : Node2D
         StraightState.OnReady();
 
         CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
-        
-        
+
+        CountryLabel.Visible = GameSettings.ShowCountryLabels;
+        EventBus.Instance.CountryNamesToggled += OnCountryNameToggled;
+    }
+
+    public override void _ExitTree()
+    {
+        CountryState.Tags.TagAdded -= OnTagAdded;
+        CountryState.Tags.TagRemoved -= OnTagRemoved;
+        EventBus.Instance.CountryNamesToggled -= OnCountryNameToggled;
+    }
+
+    private void OnCountryNameToggled(bool show)
+    {
+        CountryLabel.Visible = show;
     }
 
     private void OnTagAdded(Tag tag, Faction faction)
@@ -163,6 +180,9 @@ public partial class CountryScene : Node2D
 
     public void SetClickable()
     {
+        CountrySprite.Position = 
+        new Vector2(0,0) 
+        + StaticCountryData.LabelTransformData.Position2D;        
         CountrySprite.ShowSprite();
         CountrySprite.SetClickable();
     }

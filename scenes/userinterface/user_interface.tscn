@@ -15,9 +15,12 @@
 [ext_resource type="Script" uid="uid://b0yaf6jd2tqqi" path="res://scripts/C#/UI/AutoDismissControl.cs" id="13_autodismiss"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
-[ext_resource type="Script" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
 [ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
 [ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
+[ext_resource type="Script" uid="uid://by4r72f7bleb0" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
+[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="19_nfi4l"]
+[ext_resource type="Script" uid="uid://5xe5ni5ixdvo" path="res://scenes/userinterface/BottomLeftMenu.cs" id="19_x2nnb"]
+[ext_resource type="PackedScene" uid="uid://b2aymnt6sg5po" path="res://scenes/userinterface/MarginTextureButton.tscn" id="22_x2nnb"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -221,3 +224,77 @@ mouse_filter = 2
 script = ExtResource("12_gamestatedetail")
 
 [node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
+
+[node name="BottomLeftMenu" type="Control" parent="." unique_id=1063376234]
+z_index = 150
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+script = ExtResource("19_x2nnb")
+
+[node name="BottomLeftMenuModal" type="PanelContainer" parent="BottomLeftMenu" unique_id=54608066]
+unique_name_in_owner = true
+z_index = 150
+layout_mode = 0
+offset_left = 13.0
+offset_top = -210.0
+offset_right = 113.0
+offset_bottom = -10.0
+theme_override_styles/panel = ExtResource("19_nfi4l")
+
+[node name="MarginContainer" type="MarginContainer" parent="BottomLeftMenu/BottomLeftMenuModal" unique_id=160946699]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="BottomLeftMenu/BottomLeftMenuModal/MarginContainer" unique_id=2016041426]
+layout_mode = 2
+
+[node name="CountryLabelsButton" type="Button" parent="BottomLeftMenu/BottomLeftMenuModal/MarginContainer/VBoxContainer" unique_id=254644009]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Country Labels"
+
+[node name="DebugMenuButton" type="Button" parent="BottomLeftMenu/BottomLeftMenuModal/MarginContainer/VBoxContainer" unique_id=1615541710]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+text = "Debug Menu
+"
+
+[node name="BottomLeftMenuContainer" type="PanelContainer" parent="BottomLeftMenu" unique_id=1591248873]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+propagate_maximum_size = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("19_nfi4l")
+
+[node name="BottomLeftMenuHBox" type="HBoxContainer" parent="BottomLeftMenu/BottomLeftMenuContainer" unique_id=342587826]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+propagate_maximum_size = false
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="VisibilityButton" parent="BottomLeftMenu/BottomLeftMenuContainer/BottomLeftMenuHBox" unique_id=628711102 instance=ExtResource("22_x2nnb")]
+unique_name_in_owner = true
+layout_mode = 2
+TextureNormal = null
+TexturePressed = null

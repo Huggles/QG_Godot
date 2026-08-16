@@ -27,6 +27,10 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void UserInterfaceReadyEventHandler();
 
 
+    [Signal] public delegate void CountryNamesToggledEventHandler(bool show);
+    [Signal] public delegate void DebugMenuToggledEventHandler(bool show);
+
+
     [Signal] public delegate void PlayerJoinedEventHandler();
     [Signal] public delegate void PlayerLeftEventHandler();
     [Signal] public delegate void GameSessionStartedEventHandler();

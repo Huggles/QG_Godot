@@ -31,12 +31,14 @@ public partial class DebugOverlay : PanelContainer
     private EventBus.CardPlayStartedEventHandler _onCardPlayStarted;
     private EventBus.CardPlayPoolFinishedEventHandler _onCardPlayPoolFinished;
     private EventBus.GameChangeEventAfterEventHandler _onGameChangeEventAfter;
-
     public override void _Ready()
     {
         BuildUI();
         SubscribeToEvents();
         UpdateDisplay();
+
+        this.Visible = GameSettings.ShowDebugMenu;
+        EventBus.Instance.DebugMenuToggled += SetVisibility;
     }
 
     public override void _ExitTree()
@@ -48,6 +50,13 @@ public partial class DebugOverlay : PanelContainer
         if (_onCardPlayStarted != null)        EventBus.Instance.CardPlayStarted        -= _onCardPlayStarted;
         if (_onCardPlayPoolFinished != null)   EventBus.Instance.CardPlayPoolFinished   -= _onCardPlayPoolFinished;
         if (_onGameChangeEventAfter != null)   EventBus.Instance.GameChangeEventAfter   -= _onGameChangeEventAfter;
+
+        EventBus.Instance.DebugMenuToggled -= SetVisibility;
+    }
+
+    private void SetVisibility(bool show)
+    {
+        Visible = !Visible;
     }
 
     // ── UI construction ───────────────────────────────────────────────────────

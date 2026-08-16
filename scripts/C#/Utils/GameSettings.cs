@@ -69,11 +69,17 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     public static int    DurationVeryShort        => GetDuration(DurationScale.VeryShort);
     public static double DurationVeryShortSeconds => GetDurationSeconds(DurationScale.VeryShort);
+
+    public static bool ShowCountryLabels;
+    public static bool ShowDebugMenu;
     
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
     public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
+
+    public void SetShowCountryLabels(bool value) { ShowCountryLabels = value; Save(); }
+    public void SetShowDebugMenu(bool value) { ShowDebugMenu = value; Save(); }
 
     public override void _Ready()
     {
@@ -95,6 +101,11 @@ public partial class GameSettings : SingletonNode<GameSettings>
             AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
             LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
+
+
+            ShowCountryLabels = config.GetValue(Section, "show_country_labels", true).As<bool>();
+            ShowDebugMenu = config.GetValue(Section, "show_debug_menu", false).As<bool>();
+            
         }
 
         // DebugMultiplayer is a runtime-only flag, driven solely by the command-line arg used
@@ -116,6 +127,8 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "auto_dismiss_modal",    AutoDismissModal);
         config.SetValue(Section, "last_join_ip",          LastJoinIp);
         config.SetValue(Section, "last_join_port",        LastJoinPort);
+        config.SetValue(Section, "show_country_labels",   ShowCountryLabels);
+        config.SetValue(Section, "show_debug_menu",       ShowDebugMenu);
         config.Save(ConfigPath);
     }
 }
