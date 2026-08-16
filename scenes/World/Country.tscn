@@ -1,22 +1,23 @@
-[gd_scene load_steps=7 format=3 uid="uid://l5548wfmcdsi"]
+[gd_scene format=3 uid="uid://l5548wfmcdsi"]
 
 [ext_resource type="Script" uid="uid://blm76drcs8wms" path="res://scripts/C#/Scenes/CountryScene.cs" id="1_upkmi"]
 [ext_resource type="Texture2D" uid="uid://ceg5tibtem12g" path="res://assets/textures/Other/StraightIcon.png" id="2_llf52"]
 [ext_resource type="Texture2D" uid="uid://bs3yx35coiu1s" path="res://assets/textures/Other/target_country.png" id="5_1hw3w"]
 [ext_resource type="PackedScene" uid="uid://cfav78gd417lf" path="res://scenes/ClickableSprite.tscn" id="5_oqybm"]
 [ext_resource type="Texture2D" uid="uid://c73fkdd7t4mmu" path="res://assets/textures/Other/SupplyStar.png" id="5_twgbx"]
+[ext_resource type="LabelSettings" uid="uid://cy7n8wr0krac1" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsLarge.tres" id="6_1hw3w"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_8mwya"]
 blend_mode = 1
 
-[node name="CountryRoot" type="Node2D"]
+[node name="CountryRoot" type="Node2D" unique_id=413934646]
 script = ExtResource("1_upkmi")
 
-[node name="UnitContainer" type="Node2D" parent="."]
+[node name="UnitContainer" type="Node2D" parent="." unique_id=1070326305]
 unique_name_in_owner = true
 z_index = 26
 
-[node name="SupplyStarSprite" type="Sprite2D" parent="."]
+[node name="SupplyStarSprite" type="Sprite2D" parent="." unique_id=1981111688]
 unique_name_in_owner = true
 visible = false
 z_index = 24
@@ -24,14 +25,30 @@ position = Vector2(0, 10)
 scale = Vector2(0.1, 0.1)
 texture = ExtResource("5_twgbx")
 
-[node name="StraightSprite" type="Sprite2D" parent="."]
+[node name="StraightSprite" type="Sprite2D" parent="." unique_id=146075532]
 unique_name_in_owner = true
 visible = false
 z_index = 22
 texture = ExtResource("2_llf52")
 
-[node name="CountrySprite" parent="." instance=ExtResource("5_oqybm")]
+[node name="CountrySprite" parent="." unique_id=1639379791 instance=ExtResource("5_oqybm")]
 z_index = 20
 material = SubResource("CanvasItemMaterial_8mwya")
 scale = Vector2(0.3, 0.3)
 texture = ExtResource("5_1hw3w")
+
+[node name="CountryLabel" type="Label" parent="." unique_id=1013654637]
+z_index = 30
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -58.5
+offset_top = -150.0
+offset_right = 58.5
+offset_bottom = -67.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "ABC"
+label_settings = ExtResource("6_1hw3w")

@@ -310,7 +310,17 @@ public partial class NetworkApi : Node
         }
     }
 
-    public async Task<InputRequest> SendInputRequest(InputRequest inputRequest)
+    /// <param name="withdrawToken">
+    /// Cancelled by the caller when this request no longer needs an answer. Used by the reaction
+    /// system: a team's turn prompts every one of its factions at once and the first card chosen ends
+    /// the turn, so the prompts still open have to be taken off the other players' screens.
+    ///
+    /// The request comes back <see cref="InputRequest.WasSkipped"/>, exactly like a timeout Skip, so
+    /// every existing caller unwinds through the path it already has. Callers that need to tell a
+    /// withdrawal apart from a real pass — a withdrawn player never chose anything and must not be
+    /// recorded as having passed — own the token and so already know.
+    /// </param>
+    public async Task<InputRequest> SendInputRequest(InputRequest inputRequest, CancellationToken withdrawToken = default)
     {
         DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");
 
@@ -320,6 +330,15 @@ public partial class NetworkApi : Node
         // and those build the very requests (HandCardPlay, ActivateCard) that need it. Outside the
         // retry loop: the option set must not shift between attempts at the same prompt.
         inputRequest.PopulateTargets();
+
+        // Withdrawn before we ever reached the wire — the team turn was decided by another faction
+        // while this one was still queued behind its peer's earlier prompt. Return without putting
+        // anything on anyone's screen.
+        if (withdrawToken.IsCancellationRequested)
+        {
+            inputRequest.WasSkipped = true;
+            return inputRequest;
+        }
 
         // Loop so Retry re-sends THIS request. Nothing unwinds between attempts: the caller's await is
         // still parked here, which is exactly what keeps the turn loop from advancing while the host
@@ -356,14 +375,43 @@ public partial class NetworkApi : Node
             // Cancelled on the normal path so a long game does not accumulate one live 15-minute timer
             // per input request; the old bare Task.Delay was never cancelled.
             using CancellationTokenSource timeoutCts = new();
+            // A TCS bridged off the token rather than passing it into WhenAny: the withdrawal must
+            // complete this await normally, not throw OperationCanceledException through a caller that
+            // has a pass path already.
+            TaskCompletionSource<bool> withdrawn = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            using CancellationTokenRegistration withdrawRegistration =
+                withdrawToken.Register(() => withdrawn.TrySetResult(true));
+
             Task completed = await Task.WhenAny(
-                tcs.Task, forceTimeout.Task, Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
+                tcs.Task, forceTimeout.Task, withdrawn.Task, Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
             timeoutCts.Cancel();
 
             if (completed == tcs.Task)
             {
                 ClearPendingInput(pendingId, pending);
                 return InputRequest.FromJson(await tcs.Task);
+            }
+
+            if (completed == withdrawn.Task)
+            {
+                DebugUtilities.PrintPeer(
+                    $"Withdrawing {inputRequest.GetType().Name} (Id {inputRequest.Id}) — the answer is no longer needed");
+
+                // Same ordering as the timeout path below, for the same reason: drop the awaiter FIRST,
+                // so the reply the client sends as its prompt is torn down finds no request pending and
+                // is discarded as stale instead of resolving something we have already abandoned.
+                //
+                // Aimed at this request's own peer. A blanket abort would also close the prompts of the
+                // team's other factions, which are still live and are exactly the answers we are racing
+                // for. The `Peer != 0` guard keeps it that way; the no-session case falls through to
+                // AbortRemoteInput's own local-release branch.
+                ClearPendingInput(pendingId, pending);
+                if (pending.Peer != 0 || Multiplayer?.MultiplayerPeer == null)
+                    AbortRemoteInput(pending.Peer);
+                AnnounceInputClosed(inputRequest.TargetFaction);
+
+                inputRequest.WasSkipped = true;
+                return inputRequest;
             }
 
             bool wasForced = completed == forceTimeout.Task;
@@ -382,6 +430,7 @@ public partial class NetworkApi : Node
             // deciding, not just the one that timed out.
             ClearPendingInput(pendingId, pending);
             AbortRemoteInput(pending.Peer);
+            AnnounceInputClosed(inputRequest.TargetFaction);
             GameFlow.Instance?.ClearCurrentInputRequest();
 
             if (await ErrorReporter.ReportInputTimeoutAndAwaitDecision(inputRequest, wasForced)) continue;
@@ -452,6 +501,7 @@ public partial class NetworkApi : Node
         {
             skipped.WasSkipped = true;
             tcs.TrySetResult(skipped.ToJson());
+            AnnounceInputClosed(skipped.TargetFaction);
         }
         else
         {
@@ -516,17 +566,30 @@ public partial class NetworkApi : Node
     }
 
     /// <summary>
-    /// Server → all peers: the pending input has been answered, so stop the countdown everywhere.
+    /// Server → all peers: one pending input has closed — answered, withdrawn, or given up on.
     ///
     /// Needed because the answering peer's <c>ReceiveInputResponse</c> does not reach the other clients —
     /// an AnyPeer Rpc from a client only reaches the server (see <see cref="ReportErrorToServer"/> for the
     /// same asymmetry). Without this, every peer that was merely watching would count its countdown down
     /// to 0:00 and leave it stranded there while play carried on.
+    ///
+    /// Carries the faction rather than being the bare "everything is answered" signal it used to be: a
+    /// reaction window takes a whole team's turn at once, so several prompts are open together and each
+    /// watcher has to know which one closed. The "is anything still open" test that used to live here as
+    /// a host-side <c>_pendingInputs.IsEmpty</c> gate now reads the receiver's own waiting set, which is
+    /// the same condition answered locally.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void InputRequestAnswered()
+    public void InputRequestAnswered(int faction)
     {
-        InputTimerDisplay.Current?.Hide();
+        InputRequest.MarkInputClosed((Faction)faction);
+    }
+
+    /// <summary>Host-side helper: tell every peer that this faction's prompt is no longer open.</summary>
+    private void AnnounceInputClosed(Faction faction)
+    {
+        if (Multiplayer?.MultiplayerPeer != null) Rpc(nameof(InputRequestAnswered), (int)faction);
+        else InputRequestAnswered((int)faction);   // single process: no wire, but the label is still ours
     }
 
     // ── Error propagation ────────────────────────────────────────────────────
@@ -654,17 +717,11 @@ public partial class NetworkApi : Node
             // timeout popup, so last-answered-wins is fine.
             GameFlow.Instance.CurrentInputRequest = response;
 
-            // Clear the countdown on every peer, not just here. Below the guards on purpose: doing it for
-            // a stale reply would wipe the live countdown of a retry already in progress — and only once
-            // nothing is left in flight, so the first player to answer a concurrent round of requests
-            // does not blank the countdown of everyone still choosing.
-            if (_pendingInputs.IsEmpty)
-            {
-                if (Multiplayer?.MultiplayerPeer != null)
-                    Rpc(nameof(InputRequestAnswered));
-                else
-                    InputRequestAnswered();
-            }
+            // Drop this faction from every peer's waiting list, not just here. Below the guards on
+            // purpose: announcing a stale reply would drop a faction whose retry is already in progress.
+            // Each peer hides its own countdown once its list empties, so the first player to answer a
+            // concurrent team turn still does not blank the countdown of everyone else choosing.
+            AnnounceInputClosed(pending.Request?.TargetFaction ?? response.TargetFaction);
 
             pending.Tcs.TrySetResult(dtoJson);
 

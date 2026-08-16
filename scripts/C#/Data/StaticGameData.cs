@@ -201,6 +201,20 @@ public static partial class StaticGameData
             _ => FactionTeam.NONE
         };
     }
+    /// <summary>
+    /// The other of the two playing teams. NONE and ALL have no opposite and map to themselves, so a
+    /// caller alternating between the teams of a reaction window terminates rather than ping-ponging
+    /// on a trigger that belongs to neither side.
+    /// </summary>
+    public static FactionTeam OpponentTeam(FactionTeam team)
+    {
+        return team switch
+        {
+            FactionTeam.AXIS => FactionTeam.ALLIES,
+            FactionTeam.ALLIES => FactionTeam.AXIS,
+            _ => team
+        };
+    }
     public static List<Faction> FactionsForTeam(FactionTeam team)
     {
         return team switch

@@ -36,13 +36,28 @@ There are two types of reactions based on timing:
 - Any reaction WITHOUT `IsBlockRequest` is an after-reaction
 - Example: Deploying units after an enemy attacks
 
-### 3. Faction Order
+### 3. Team Turns
 
-Reactions are requested in a specific order:
-- If the last action was by an **Axis** faction → **Allies go first** (UK, Soviet, US, then Germany, Japan, Italy)
-- If the last action was by an **Allied** faction → **Axis go first** (Germany, Japan, Italy, then UK, Soviet, US)
-- This ensures the opposing team always gets priority for reactions
-- Factions can respond to their own team's actions (but not block their own)
+A reaction window is a sequence of **team turns**, not a walk down a list of factions. The rules
+(`reaction-specifics`) define an order between the two *teams* and none at all between the factions
+inside one:
+
+- The team that did **not** cause the trigger takes the first turn. If nothing caused it — a game
+  mechanic rather than a country's action — the team of the faction taking its turn goes second.
+- A team uses **one** reaction per turn. Then the turn passes to the other team.
+- A team may use several reactions to the same trigger, in whatever order it likes, as long as the
+  other side gets a turn in between.
+- Two consecutive team turns with nothing played close the window.
+- Factions can respond to their own team's actions (but not block their own).
+
+`RequestAfterReactions` implements this with a **turn pointer** — a local, seeded from the event that
+opened the window and flipped after every turn, played or passed. See its section below.
+
+Within a turn, every eligible faction of the team is prompted **at the same time** and the first card
+chosen wins; the rest are withdrawn. That race *is* the team's choice of which reaction to use, since
+the rules give no order to impose. The flat six-faction `RequestOrder` this replaced invented one
+(UK always before Soviet before US) and let a team react twice in a row, because after a play it
+restarted from the top of the same team's slice.
 
 ## Reaction Chain Flow
 
@@ -92,7 +107,9 @@ When a faction plays a reaction (either block or after):
    ```
 
 3. **Response Priority Rules**:
-   - Each time a response is played, faction order is recalculated based on who triggered it
+   - Each window has its own turn pointer, fixed by the event that opened it. Playing a reaction does
+     not recalculate it — the nested window the reaction opens gets its own, and the outer window
+     simply passes the turn to the other team
    - Factions can respond to their own team's actions
    - But cannot block their own specific actions
 
@@ -152,22 +169,58 @@ The cost of keeping it was real: combined with the always-ask rule, every card p
 
 **The activation window is unaffected** — see the warning under `RequestAfterReactions` below.
 
+#### `TakeTeamTurn(candidates, ask, passed)` → `(Faction, int cardId)`
+One team's turn, shared by both windows. Prompts every candidate faction at once and returns the
+first card any of them chooses.
+
+- Candidates are grouped by controlling peer (`PlayerFactionRegistry.GetPeerIdForFaction`), the same
+  shape `OpeningDiscard` uses. Groups run concurrently; the factions inside a group run in sequence,
+  because a peer has one `PresentationModal`. **A single-process game — the CLI, a hotseat — collapses
+  to one group and stays fully sequential**, which is why `.qgc` scripts still drive one prompt at a time.
+- The first card chosen cancels the turn's `CancellationTokenSource`. Every still-open prompt is
+  withdrawn through `NetworkApi.SendInputRequest`'s `withdrawToken`, which clears the host's awaiter
+  and then `AbortRemoteInput`s that one peer.
+- A faction that **declined** is added to `passed`. A faction that was **withdrawn**, or never reached
+  because the turn was already decided, is not — it made no decision and must be offered again on the
+  team's next turn. A card chosen a hair too late is discarded and logged, for the same reason.
+- `Task.WhenAll` before returning: the caller must not resolve the winning card while another peer's
+  prompt is still live, or `DoCard` mutates state alongside it and the peers' GameMessage ids and
+  state hashes stop agreeing.
+
 #### `RequestBlockReactions(ChangeEvent)`
-Requests block reactions from all factions in order:
+Only the **opponent team** is offered a block, and it takes repeated turns until it produces no play
+or the event is blocked. Every block card in the game reacts to an opponent's `RemoveUnitChangeEvent`
+or `ForceDiscardCardsChangeEvent`, so a turn for the acting team would be an empty window in every
+case that exists.
+
+- Computes the team itself from `changeEvent.TriggeringFaction` — the caller passes no order
 - Skips the faction that triggered the event
-- Each faction can play one block reaction
-- Block reactions are processed recursively
+- `GameStateCalculator.CalculateAll()` once per turn rather than once per faction: a turn raises all
+  of its prompts from one tag snapshot, so the old `tagsDirty` bookkeeping is gone and this is
+  strictly fewer calls
 - Reached only from `DoChangeEvent` in practice; the `ProcessIntroductionEvent` call site is gated off by `IsTrigger = false`
 
-#### `RequestAfterReactions(ChangeEvent triggerEvent)` → returns `bool`
-Requests after reactions from all factions. Returns `true` if at least one reaction was played, `false` if everyone skipped or had no options.
+#### `RequestAfterReactions(ChangeEvent triggerEvent, List<Faction> onlyFactions = null)` → returns `bool`
+Runs the window as alternating team turns. Returns `true` if at least one reaction was played, `false` if everyone skipped or had no options.
 
 - Takes the `triggerEvent` that opened this reaction window
 - Sets `CurrentReactionTrigger = triggerEvent` for the duration of the window, then restores the previous value in a `finally` block (safe for nested windows)
-- Iterates factions in `RequestOrder`; skips factions in `_afterReactionPassedFactions`
+- **The turn pointer is a local**, seeded by `FirstTeamToReactTo(triggerEvent)` and flipped at the end
+  of every turn whether or not anything was played. A local is what makes it per-window: a reaction
+  recurses into `DoCard`, which opens its own windows with their own pointers, and when that unwinds
+  this frame resumes on the team whose turn it actually was. A field would be clobbered by the nested
+  window, and the old `RequestOrder` — a live read of `LastChangeEvent` — was clobbered by the nested
+  window's change events.
+- Candidates for a turn are that team's factions, minus `onlyFactions` exclusions, minus
+  `_afterReactionPassedFactions`, minus anything `ShouldOpenReactionWindow` declines
 - If a faction skips → added to `_afterReactionPassedFactions` (not asked again until a new reaction is played)
-- If a faction plays → `_afterReactionPassedFactions.Clear()` **before** `DoCard`, so all factions get a fresh chance during that reaction's resolution; then `break` to restart with updated `RequestOrder`
-- Loop exits when a full pass through all non-skipped factions produces no plays
+- If a faction plays → `_afterReactionPassedFactions.Clear()` **before** `DoCard`, so all factions get
+  a fresh chance during that reaction's resolution — but the turn still passes to the other team, so
+  the team that just played cannot play again until the opponent has had its chance
+- Loop exits after two consecutive team turns with no play
+- `onlyFactions` is a **filter, not an order**. The activation window on a `PlayCardChangeEvent`
+  passes the playing faction alone; the other team's turn then has zero candidates and passes
+  instantly, so no special case is needed.
 
 **The activation window is deliberately NOT gated on `IsTrigger`.** `DoCard` calls `RequestAfterReactions(introEvent)` unconditionally, right after the introduction event is applied. So an introduction event is *not blockable* yet *does* open an after-reaction window — the activation window is a fixed part of the activation sequence, not an `IsTrigger` reaction window.
 
@@ -517,13 +570,13 @@ new CardStep(this, async() => {
 ## Key Design Principles
 
 1. **Recursive by Nature**: Every reaction goes through the same flow as the original action, enabling deep chains
-2. **Faction Order Matters**: Opponents always get first chance to respond
+2. **Teams Take Turns, Factions Do Not Queue**: a window alternates team turns, opponent team first, one reaction per turn. There is no order between the factions of a team — they are prompted together and the first card chosen is the team's choice
 3. **Steps Execute Sequentially**: Next steps only execute after all reactions to previous steps complete, AND only if at least one reaction was played
 4. **Two Reaction Timings**: Block (before) and After (after) reactions provide strategic options
 5. **Self-Response Allowed**: Factions can respond to their own team's actions, but not block their own
 6. **Pass-Once Per Window**: Once a faction skips a reaction, they aren't asked again until a new reaction resets the window
-7. **Priority Reset on Play**: When any faction plays a reaction, all pass-locks are cleared before resolving it — everyone gets a fresh opportunity during its resolution
-8. **Round Ends on All-Skip**: If no faction plays a reaction (everyone skips or has no options), `ContinueWithNextSteps` is skipped and `Finish()` is called at the top-level `DoCard`
+7. **Priority Reset on Play, But the Turn Still Passes**: when any faction plays a reaction, all pass-locks are cleared before resolving it — everyone gets a fresh opportunity during its resolution. The turn pointer still flips, so the team that just played waits for the opponent's turn before using a second reaction
+8. **Round Ends on All-Skip**: if neither team plays in two consecutive turns, `ContinueWithNextSteps` is skipped and `Finish()` is called at the top-level `DoCard`
 9. **`Finish()` is Unconditional at Top Level**: `DoCard` calls `Finish()` whenever `reactionDepth` returns to 0 for the initial play — the old `hasRemainingActions` guard was wrong because skipped reactions don't consume their tags
 10. **Reaction Windows are Trigger-Scoped**: `CurrentReactionTrigger` identifies which specific event opened the active window. Cards that can react to multiple different events (e.g. a card reacting to *any* sea battle in the pool) must use `CurrentReactionTrigger` to scope their targets to the correct event — not scan all matching events in the pool
 11. **Activations Bind Their Trigger**: `DoCard` pins the triggering event onto the `CardLogic` as `ActivationTrigger` for the whole activation. Step logic reads that, not the pool — a live pool read is retargeted by any `Apply()` that lands in between
@@ -547,4 +600,6 @@ new CardStep(this, async() => {
 9. **Testing for a reaction by its prompt**: a test that proves a card is *not* offered by hanging on an unexpected prompt no longer works — the always-ask rule raises a window for that faction anyway. Assert `promptoptions == 0` instead.
 10. **Forgetting `.InReactionWindow()` on a `CustomCondition`**: a bare `CustomCondition` has `RequiresEventContext = false`, so `HasEventBasedTrigger` is false and `CanBeActivated` rejects the card at any `ReactionDepth > 0`. The card compiles, reads correctly, and can never be offered — there is no error. Chain `.InReactionWindow()` on any condition that reads `CurrentReactionTrigger`.
 11. **Acting on the played card inside its introduction window**: that window runs *before* the played card's `CardSteps`. Moving the card there (recycle, discard, re-file) lands it in its new pile and only then resolves it. Defer to an `AFTER` step mutator — see "Reacting to a play, acting after it".
-12. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.
+12. **Resolving a reaction while the team's other prompts are still open**: `TakeTeamTurn` must `Task.WhenAll` its peer groups before its caller runs `DoCard`. Resolving from inside a group task leaves another peer's prompt live while state mutates, and the two peers' GameMessage ids and state hashes stop agreeing. Same reason `OpeningDiscard` gathers in parallel but applies serially.
+13. **Recording a withdrawn prompt as a pass**: a faction whose prompt was taken off the screen because a teammate used the team's reaction made no decision. Adding it to `_afterReactionPassedFactions`, or feeding its untouched `ReactionSkipScope` to `GameFlow.RecordReactionSkip`, silences a player over somebody else's choice. Both call sites test `withdrawToken.IsCancellationRequested`.
+14. **Reading the pool in step logic**: `CardPlayPool.LastNoneNewCardChangeEvent` / `LastChangeEvent` are live reads. Between the card being chosen and its step running, the introduction event's own reaction window and any prerequisite `Apply()` both push onto the pool, so the read silently lands on the wrong event and the `is SomeChangeEvent` pattern fails with no error. Use `ActivationTrigger` in step logic; keep the pool read only in `CardTriggers()`, which runs before activation.

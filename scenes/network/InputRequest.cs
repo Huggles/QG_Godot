@@ -137,14 +137,58 @@ public abstract partial class InputRequest
         }
         else
         {
-            PresentationServices.Notification.ShowActionText($"Waiting on {TargetFaction.WithPlayer()} input...");
+            AwaitedFactions.Add(TargetFaction);
+            RenderAwaitingText();
 
             // No finally to hide it here: this branch returns immediately rather than awaiting anything,
             // so the countdown is cleared where the waiting text already is — NetworkApi's
-            // ReceiveInputResponse (the answer arrived) and AbortInputRequest (the host gave up on it).
-            InputTimerDisplay.Current?.Start(TimeoutSeconds, $"Waiting on {TargetFaction.WithPlayer()}");
+            // InputRequestAnswered (this faction's prompt closed) and AbortInputRequest (the host gave
+            // up on it).
+            InputTimerDisplay.Current?.Start(TimeoutSeconds, $"Waiting on {AwaitingLabel()}");
         }
     }
+
+    // ── "Waiting on …" bookkeeping ───────────────────────────────────────────────
+    //
+    // A set rather than a single name. A reaction window takes a whole TEAM's turn at once
+    // (CardPlayRound.TakeTeamTurn), so up to three requests are open together on different peers, and
+    // each one arriving used to overwrite the label — a watcher was told it was waiting on whichever
+    // request happened to land last. Maintained on every peer: the watcher branch above adds, and
+    // NetworkApi.InputRequestAnswered removes as each prompt closes.
+
+    private static readonly HashSet<Faction> AwaitedFactions = new();
+
+    /// <summary>One of the prompts this peer was watching has closed — answered, withdrawn or given up on.</summary>
+    public static void MarkInputClosed(Faction faction)
+    {
+        if (!AwaitedFactions.Remove(faction)) return;
+        RenderAwaitingText();
+        // Only once nothing is left, so the first answer of a concurrent team turn does not blank the
+        // countdown of the players still deciding.
+        if (AwaitedFactions.Count == 0) InputTimerDisplay.Current?.Hide();
+    }
+
+    /// <summary>Drop everything, for a session ending with prompts still nominally open.</summary>
+    public static void ClearAwaitingInput()
+    {
+        if (AwaitedFactions.Count == 0) return;
+        AwaitedFactions.Clear();
+        RenderAwaitingText();
+        InputTimerDisplay.Current?.Hide();
+    }
+
+    private static void RenderAwaitingText()
+    {
+        if (AwaitedFactions.Count == 0)
+        {
+            PresentationServices.Notification.HideActionText();
+            return;
+        }
+        PresentationServices.Notification.ShowActionText($"Waiting on {AwaitingLabel()} input...");
+    }
+
+    private static string AwaitingLabel() =>
+        string.Join(", ", AwaitedFactions.Select(f => f.WithPlayer()));
 
     public async Task<InputRequest> BroadCast()
     {

@@ -34,13 +34,17 @@ There are two types of reactions based on timing:
 - Any reaction WITHOUT `IsBlockRequest` is an after-reaction
 - Example: Deploying units after an enemy attacks
 
-### 3. Faction Order
+### 3. Team Turns
 
-Reactions are requested in a specific order:
-- If the last action was by an **Axis** faction → **Allies go first** (UK, Soviet, US, then Germany, Japan, Italy)
-- If the last action was by an **Allied** faction → **Axis go first** (Germany, Japan, Italy, then UK, Soviet, US)
-- This ensures the opposing team always gets priority for reactions
+A reaction window is a sequence of **team turns**. There is no order between the factions of a team:
+- The team that did **not** cause the trigger takes the first turn
+- A team uses **one** reaction per turn, then the turn passes to the other team
+- Within a turn all of the team's eligible factions are prompted at once; the first card chosen wins
+  and the rest are withdrawn
+- Two consecutive team turns with nothing played close the window
 - Factions can respond to their own team's actions (but not block their own)
+
+The flat six-faction `RequestOrder` this replaced is gone. See the skill for the turn pointer.
 
 ## Reaction Chain Flow
 
@@ -95,7 +99,8 @@ When a faction plays a reaction (either block or after):
    ```
 
 3. **Response Priority Rules**:
-   - Each time a response is played, faction order is recalculated based on who triggered it
+   - Each window owns a turn pointer, fixed by the event that opened it. Playing a reaction passes the
+     turn to the other team; the nested window the reaction opens gets its own pointer
    - Factions can respond to their own team's actions
    - But cannot block their own specific actions
 
@@ -133,18 +138,26 @@ Central method that processes any change event:
 3. Applies change if not blocked
 4. Requests after reactions (for non-introduction events)
 
+#### `TakeTeamTurn(candidates, ask, passed)`
+One team's turn, shared by the block and after-reaction paths. Prompts every candidate faction at
+once — grouped by controlling peer, so groups run concurrently and a peer's own factions run in
+sequence — and returns the first card chosen, withdrawing the rest. A single-process game collapses
+to one group and stays fully sequential.
+
 #### `RequestBlockReactions(ChangeEvent)`
-Requests block reactions from all factions in order. Reached only for change events produced by a
-card step — `ProcessIntroductionEvent` gates its call on `IsTrigger`, which both introduction
-events set to `false`.
+Offers the block to the **opponent team only**, in repeated turns until the team produces no play or
+the event is blocked. Reached only for change events produced by a card step —
+`ProcessIntroductionEvent` gates its call on `IsTrigger`, which both introduction events set to
+`false`.
 - Skips the faction that triggered the event
-- Each faction can play one block reaction
+- Each team turn yields at most one block reaction
 - Block reactions are processed recursively
 
-#### `RequestAfterReactions()`
-Requests after reactions from all factions:
-- Loops until no faction plays a reaction
-- Each reaction is processed recursively
+#### `RequestAfterReactions(ChangeEvent, List<Faction> onlyFactions = null)`
+Alternating team turns, opponent team first:
+- Loops until two consecutive team turns produce no play
+- Each reaction is processed recursively; the turn then passes to the other team
+- `onlyFactions` is a filter, not an order
 - After all reactions complete, continues with next steps
 
 #### `ShouldOpenReactionWindow(Faction, List<int> options)`
@@ -319,7 +332,7 @@ public override List<CardStep> InitializeReactCardSteps()
 ## Key Design Principles
 
 1. **Recursive by Nature**: Every reaction goes through the same flow as the original action, enabling deep chains
-2. **Faction Order Matters**: Opponents always get first chance to respond
+2. **Teams Take Turns, Factions Do Not Queue**: the opponent team reacts first, one reaction per turn, and the factions within a team are prompted together rather than in a fixed order
 3. **Steps Execute Sequentially**: Next steps only execute after all reactions to previous steps complete
 4. **Two Reaction Timings**: Block (before) and After (after) reactions provide strategic options
 5. **Self-Response Allowed**: Factions can respond to their own team's actions, but not block their own

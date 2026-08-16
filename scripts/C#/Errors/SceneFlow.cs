@@ -38,6 +38,10 @@ public static class SceneFlow
             // pre-satisfy that game's barrier with peers who are not there.
             NetworkApi.ClearBufferedBarrierReports();
 
+            // Likewise the "Waiting on …" list: prompts left open by the session being abandoned never
+            // announce their closure, and a stale name would carry into the next game's label.
+            InputRequest.ClearAwaitingInput();
+
             // A Steam-hosted session rides on a Steam lobby, so dropping the peer without releasing
             // the lobby would leave a stale entry in friends' lists and block the next host attempt
             // (the peer refuses to host on a lobby it does not own outright). Harmless no-op when

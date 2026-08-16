@@ -17,6 +17,7 @@ public partial class CountryScene : Node2D
     public Sprite2D SupplyStarSprite => GetNode<Sprite2D>("SupplyStarSprite");
     public Sprite2D StraightSpriteNode => GetNode<Sprite2D>("StraightSprite");
     public ClickableSprite CountrySprite => GetNode<ClickableSprite>("CountrySprite");
+    public Label CountryLabel => GetNode<Label>("CountryLabel");
 
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
@@ -28,6 +29,7 @@ public partial class CountryScene : Node2D
         countrySceneInstance.CountryState.Tags.TagRemoved += countrySceneInstance.OnTagRemoved;
         NodeUtilities.Instance.CountriesNode.AddChild(countrySceneInstance, false);
         countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionCenter;
+        countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
         return countrySceneInstance;
     }
 

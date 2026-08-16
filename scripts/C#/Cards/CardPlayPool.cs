@@ -29,12 +29,6 @@ public static class CardPlayPool
     public static Dictionary<int, ChangeEvent> ChangeEventsPoolMap =>
         CardPlayRound.Current?.ChangeEventsPoolMap ?? new();
 
-    public static Faction LastChangeEventByFaction =>
-        CardPlayRound.Current?.LastChangeEventByFaction ?? Faction.GERMANY;
-
-    public static FactionTeam LastChangeEventByTeam =>
-        CardPlayRound.Current?.LastChangeEventByTeam ?? FactionTeam.AXIS;
-
     public static ChangeEvent LastNoneNewCardChangeEvent =>
         CardPlayRound.Current?.LastNoneNewCardChangeEvent;
 
@@ -49,12 +43,6 @@ public static class CardPlayPool
     /// </summary>
     public static ChangeEvent CurrentBlockTrigger =>
         CardPlayRound.Current?.CurrentBlockTrigger;
-
-    public static List<Faction> RequestOrder =>
-        CardPlayRound.Current?.RequestOrder ?? CardPlayRound.AxisFirstOrder;
-
-    public static List<Faction> AxisFirstOrder => CardPlayRound.AxisFirstOrder;
-    public static List<Faction> AlliesFirstOrder => CardPlayRound.AlliesFirstOrder;
 
     // ── Lifecycle ──────────────────────────────────────────────────────────────
     public static void ClearPool() => CardPlayRound.Current?.ClearPool();

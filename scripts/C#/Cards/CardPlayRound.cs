@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -59,20 +60,12 @@ public partial class CardPlayRound : GodotObject
     public Dictionary<int, ChangeEvent> ChangeEventsPoolMap =>
         ChangeEventsPool.ToDictionary(c => c.Id, c => c);
 
-    public Faction LastChangeEventByFaction =>
-        LastChangeEvent != null ? LastChangeEvent.TriggeringFaction : Faction.GERMANY;
-
-    public FactionTeam LastChangeEventByTeam => StaticGameData.FactionTeamForFaction(LastChangeEventByFaction);
-
     public ChangeEvent LastNoneNewCardChangeEvent => ChangeEventsPool.LastOrDefault(c => c is not PlayCardChangeEvent && c is not ActivateReactionChangeEvent);
 
-    public List<Faction> RequestOrder => LastChangeEventByTeam == FactionTeam.AXIS ? AlliesFirstOrder : AxisFirstOrder;
-
-    public static List<Faction> AxisFirstOrder => new()
-        { Faction.GERMANY, Faction.JAPAN, Faction.ITALY, Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES };
-
-    public static List<Faction> AlliesFirstOrder => new()
-        { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES, Faction.GERMANY, Faction.JAPAN, Faction.ITALY };
+    // A flat six-faction RequestOrder used to live here, derived from LastChangeEvent. It is gone:
+    // the rules define no order between the factions of a team, only an order between the two TEAMS,
+    // and deriving that from LastChangeEvent read a live pool value that every nested reaction moved.
+    // Each reaction window now owns its own turn pointer — see RequestAfterReactions.
 
     // ── Entry point ────────────────────────────────────────────────────────────
 
@@ -230,11 +223,10 @@ public partial class CardPlayRound : GodotObject
 
         RegisterChangeEvent(changeEvent);
 
+        // Which team is offered the block is RequestBlockReactions' own business now — it is the
+        // opponent team in every case, so there is nothing for the caller to decide.
         if (changeEvent.IsTrigger)
-        {
-            List<Faction> factions = StaticGameData.OpponentFactionsForTeam(StaticGameData.FactionTeamForFaction(changeEvent.TriggeringFaction));
-            await RequestBlockReactions(changeEvent, factions);
-        }
+            await RequestBlockReactions(changeEvent);
 
         if (!changeEvent.IsBlocked)
         {
@@ -267,7 +259,105 @@ public partial class CardPlayRound : GodotObject
         LastChangeEvent = changeEvent;
     }
 
-    private async Task RequestBlockReactions(ChangeEvent changeEvent, List<Faction> blockRequestOrder = null)
+    /// <summary>
+    /// Take one team's turn in a reaction window: prompt every candidate faction at the same time and
+    /// return the first card any of them chooses.
+    ///
+    /// A team uses only one reaction per turn (reaction-specifics), so the first card chosen ends the
+    /// turn and every prompt still open is withdrawn. Which of its reactions a team uses, and in what
+    /// order, is the team's own decision — the rules define no order between the factions of a team,
+    /// so racing them IS the choice rather than an approximation of one. The flat six-faction
+    /// RequestOrder this replaced invented one (UK always before Soviet before US).
+    ///
+    /// Grouped by controlling peer, the same shape <see cref="OpeningDiscard"/> uses: groups run
+    /// concurrently, the factions inside a group one after another. A peer has a single
+    /// PresentationModal, so its own factions could not be prompted simultaneously anyway — and a
+    /// single-process game (the CLI, a hotseat) collapses to one group and stays fully sequential.
+    /// </summary>
+    /// <param name="ask">Raises one faction's prompt. Given the turn's token so it can be withdrawn.</param>
+    /// <param name="passed">
+    /// Factions that declined are added here. A faction whose prompt was withdrawn, or that was never
+    /// reached because the turn was already decided, is deliberately NOT added: it made no decision,
+    /// and must still be offered when this team's turn comes round again.
+    /// </param>
+    /// <returns>The winning faction and card id, or <c>(Faction.NONE, -1)</c> if the whole team declined.</returns>
+    private static async Task<(Faction faction, int cardId)> TakeTeamTurn(
+        List<Faction> candidates,
+        Func<Faction, CancellationToken, Task<int>> ask,
+        HashSet<Faction> passed)
+    {
+        if (candidates.Count == 0) return (Faction.NONE, -1);
+
+        using CancellationTokenSource turnDecided = new();
+        object winnerLock = new();
+        Faction winningFaction = Faction.NONE;
+        int winningCardId = -1;
+
+        List<Task> groups = candidates
+            .GroupBy(PlayerFactionRegistry.GetPeerIdForFaction)
+            .Select(async peerFactions =>
+            {
+                foreach (Faction faction in peerFactions)
+                {
+                    // Checked before the prompt is raised, not only inside the wait: once the turn is
+                    // decided this peer's later factions must not reach the screen at all.
+                    if (turnDecided.IsCancellationRequested) return;
+
+                    int cardId = await ask(faction, turnDecided.Token);
+
+                    // Withdrawn rather than answered — no decision to record either way.
+                    if (turnDecided.IsCancellationRequested)
+                    {
+                        if (cardId != -1)
+                            DebugUtilities.PrintPeer(
+                                $"{faction} chose card {cardId} just as the team turn was decided elsewhere — " +
+                                "discarded; it is offered again on this team's next turn");
+                        return;
+                    }
+
+                    if (cardId == -1)
+                    {
+                        lock (winnerLock) passed.Add(faction);
+                        continue;
+                    }
+
+                    lock (winnerLock)
+                    {
+                        if (winningCardId != -1) return;
+                        winningFaction = faction;
+                        winningCardId = cardId;
+                    }
+                    turnDecided.Cancel();
+                    return;
+                }
+            })
+            .ToList();
+
+        // Every prompt in this turn must be closed before the caller resolves the winning card.
+        // Resolving while another peer is still deciding would let DoCard mutate state alongside a
+        // live prompt, and the peers' GameMessage ids and state hashes would stop agreeing — the same
+        // hazard OpeningDiscard gathers in parallel but applies serially to avoid.
+        await Task.WhenAll(groups);
+
+        return (winningFaction, winningCardId);
+    }
+
+    /// <summary>
+    /// The team that reacts first to <paramref name="triggerEvent"/>: the one that did not cause it.
+    ///
+    /// A trigger with no faction behind it is a game mechanic rather than a country's action. Per
+    /// reaction-specifics the team of the faction taking its turn goes SECOND there, so the causing
+    /// team is read from GameFlow instead of from the event.
+    /// </summary>
+    private static FactionTeam FirstTeamToReactTo(ChangeEvent triggerEvent)
+    {
+        FactionTeam causedBy = StaticGameData.FactionTeamForFaction(triggerEvent.TriggeringFaction);
+        if (causedBy == FactionTeam.NONE)
+            causedBy = StaticGameData.FactionTeamForFaction(GameFlow.Instance.CurrentFaction);
+        return StaticGameData.OpponentTeam(causedBy);
+    }
+
+    private async Task RequestBlockReactions(ChangeEvent changeEvent)
     {
         // Saved and restored rather than nulled, mirroring CurrentReactionTrigger. A block card
         // played below opens a nested window via its own introduction event; when that returns,
@@ -277,32 +367,33 @@ public partial class CardPlayRound : GodotObject
         CurrentBlockTrigger = changeEvent;
         try
         {
-            // Recalculated inside the loop rather than once before it. Block trigger conditions
-            // read CurrentBlockTrigger, so any tags computed before the assignment above describe
-            // a different window — and a block card played by an earlier faction runs its own
-            // nested windows and steps, each of which recalculates under a different trigger.
-            // tagsDirty keeps this at one call per window in the common case.
-            bool tagsDirty = true;
-            foreach (Faction faction in blockRequestOrder ?? RequestOrder)
+            // Only the team that did not cause the event is offered a block. Every block card in the
+            // game reacts to an opponent's unit removal or forced discard, so a turn for the acting
+            // team would be an empty window in every case that actually exists.
+            FactionTeam team = StaticGameData.OpponentFactionTeamForFaction(changeEvent.TriggeringFaction);
+            HashSet<Faction> passed = new();
+
+            while (!changeEvent.IsBlocked)
             {
-                if (changeEvent.IsBlocked)
-                    break; // Already prevented — there is nothing left for anyone to block
+                // Once per turn rather than once per faction — a turn raises all of its prompts from
+                // one tag snapshot, so the tagsDirty bookkeeping this replaced is no longer needed and
+                // this is strictly fewer CalculateAll calls. Inside the loop, not before it: block
+                // trigger conditions read CurrentBlockTrigger (set above), and a block card resolved
+                // below runs nested windows that recalculate under a different trigger.
+                GameStateCalculator.CalculateAll();
 
-                if (faction == changeEvent.TriggeringFaction)
-                    continue; // Factions cannot block their own actions
+                List<Faction> candidates = StaticGameData.FactionsForTeam(team)
+                    .Where(f => f != changeEvent.TriggeringFaction)   // nobody blocks their own action
+                    .Where(f => !passed.Contains(f))
+                    .Where(f => ShouldOpenReactionWindow(f, GetBlockReactionOptions(f)))
+                    .ToList();
 
-                if (tagsDirty)
-                {
-                    GameStateCalculator.CalculateAll();
-                    tagsDirty = false;
-                }
+                (Faction faction, int cardId) = await TakeTeamTurn(candidates, RequestBlock, passed);
+                if (cardId == -1)
+                    break; // The whole team declined — nothing further will block this event
 
-                int cardId = await RequestBlock(faction);
-                if (cardId != -1)
-                {
-                    await DoCard(cardId, changeEvent);
-                    tagsDirty = true;
-                }
+                DebugUtilities.PrintPeer($"BLOCK REACTION from {FactionState.ForEnum(faction).FactionLabel}");
+                await DoCard(cardId, changeEvent);
             }
         }
         finally
@@ -311,7 +402,12 @@ public partial class CardPlayRound : GodotObject
         }
     }
 
-    private async Task<bool> RequestAfterReactions(ChangeEvent triggerEvent, List<Faction> reactionRequestOrder = null)    
+    /// <param name="onlyFactions">
+    /// Restricts the window to these factions. A filter, not an order — the two teams still take
+    /// their turns in the rules' order, they just have fewer candidates. Used for the activation
+    /// window on a PlayCardChangeEvent, where only the playing faction can react.
+    /// </param>
+    private async Task<bool> RequestAfterReactions(ChangeEvent triggerEvent, List<Faction> onlyFactions = null)
     {
         DebugUtilities.PrintPeer("RequestAfterReactions");
         var previousTrigger = CurrentReactionTrigger;
@@ -333,44 +429,69 @@ public partial class CardPlayRound : GodotObject
             ? triggerEvent.SourceCardId
             : -1;
 
+        // Whose turn it is. Fixed once, from the event that opened THIS window, and then tracked here
+        // rather than re-derived: the flat RequestOrder this replaced read LastChangeEvent, which every
+        // nested reaction and every prerequisite Apply() moves out from under it.
+        //
+        // A LOCAL, deliberately, not a field. A reaction played below recurses into DoCard, which opens
+        // its own windows with their own pointers; when that unwinds, this frame resumes on the team
+        // whose turn it actually was. A field would be clobbered by the nested window.
+        FactionTeam teamToAct = FirstTeamToReactTo(triggerEvent);
+
         try
         {
-            bool anyPlayedThisPass = true;
-            while (anyPlayedThisPass)
+            // Two team turns in a row with nothing played closes the window.
+            int consecutiveTeamPasses = 0;
+            while (consecutiveTeamPasses < 2)
             {
-                // Recalculate tags at the start of every pass so Immediate-scope
+                // Recalculate tags at the start of every turn so Immediate-scope
                 // EventConditions always evaluate against the current (possibly restored)
                 // CurrentReactionTrigger — including after a nested reaction card resolves
                 // and the trigger is restored from the finally block.
                 GameStateCalculator.CalculateAll();
-                anyPlayedThisPass = false;
-                foreach (Faction faction in reactionRequestOrder ?? RequestOrder)
+
+                List<Faction> candidates = new();
+                Dictionary<Faction, List<int>> offers = new();
+                foreach (Faction faction in StaticGameData.FactionsForTeam(teamToAct))
                 {
+                    if (onlyFactions != null && !onlyFactions.Contains(faction)) continue;
                     if (_afterReactionPassedFactions.Contains(faction)) continue;
+
                     List<int> options = GetAfterReactionOptions(faction);
                     options.Remove(excludedCardId);
-                    // A faction the gate declines is re-evaluated next pass rather than recorded as
-                    // having passed, exactly as a faction with no options always has been — the gate
-                    // is a local state read, so there is no round-trip to save by caching it.
+                    // A faction the gate declines is re-evaluated on this team's next turn rather than
+                    // recorded as having passed, exactly as a faction with no options always has been —
+                    // the gate is a local state read, so there is no round-trip to save by caching it.
                     if (!ShouldOpenReactionWindow(faction, options, excludedCardId)) continue;
 
-                    int cardId = await RequestPlay(faction, options);
-                    if (cardId != -1)
-                    {
-                        DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(faction).FactionLabel}");
-                        _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
-                        await DoCard(cardId, triggerEvent);
-                        anyEverPlayed = true;
-                        anyPlayedThisPass = true;
-                        break; // Restart with updated RequestOrder
-                    }
-                    else
-                    {
-                        _afterReactionPassedFactions.Add(faction);
-                    }
+                    candidates.Add(faction);
+                    offers[faction] = options;
                 }
+
+                (Faction winner, int cardId) = await TakeTeamTurn(
+                    candidates,
+                    (faction, ct) => RequestPlay(faction, offers[faction], ct),
+                    _afterReactionPassedFactions);
+
+                if (cardId != -1)
+                {
+                    DebugUtilities.PrintPeer($"AFTER REACTION from {FactionState.ForEnum(winner).FactionLabel}");
+                    _afterReactionPassedFactions.Clear(); // A reaction is about to happen — give everyone a fresh chance
+                    await DoCard(cardId, triggerEvent);
+                    anyEverPlayed = true;
+                    consecutiveTeamPasses = 0;
+                }
+                else
+                {
+                    consecutiveTeamPasses++;
+                }
+
+                // Unconditionally, played or passed. This is the other half of the rule: a team that
+                // has just used a reaction does not get to use a second one until the other side has
+                // had a chance to react in between.
+                teamToAct = StaticGameData.OpponentTeam(teamToAct);
             }
-            DebugUtilities.PrintPeer("No more after-reaction options available for any faction");
+            DebugUtilities.PrintPeer("Both teams passed — no more after-reactions to this trigger");
         }
         finally
         {
@@ -432,7 +553,13 @@ public partial class CardPlayRound : GodotObject
     /// faction's hand cards beside the event it was answering. Hand cards are never playable inside a
     /// reaction window, so the reaction path must never build that request.
     /// </param>
-    public async Task<int> RequestPlay(Faction faction, List<int> reactionOptions = null)
+    /// <param name="withdrawToken">
+    /// Cancelled by <see cref="TakeTeamTurn"/> when another faction on this team has already used the
+    /// team's one reaction for this turn. The prompt closes and this returns -1, the same as a pass —
+    /// the caller distinguishes the two by the token, not by the return value.
+    /// </param>
+    public async Task<int> RequestPlay(Faction faction, List<int> reactionOptions = null,
+                                       CancellationToken withdrawToken = default)
     {
         PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
         if (controllingPlayer == null)
@@ -482,8 +609,11 @@ public partial class CardPlayRound : GodotObject
                 request.TriggerSummaryText = CurrentReactionTrigger.SummaryText();
             }
 
-            InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
-            if (isReaction)
+            InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request, withdrawToken);
+            // Not for a withdrawn prompt: the player never got to answer it, so there is no skip scope
+            // of theirs to record — reading the untouched default would silence them for the rest of
+            // the turn step on a decision somebody else made.
+            if (isReaction && !withdrawToken.IsCancellationRequested)
                 GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
             selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
         }
@@ -493,7 +623,9 @@ public partial class CardPlayRound : GodotObject
     }
 
     /// <summary>Ask the faction to choose a block-reaction step, or pass.</summary>
-    public async Task<int> RequestBlock(Faction faction)
+    /// <param name="withdrawToken">See <see cref="RequestPlay"/> — the team's turn was decided by one
+    /// of its other factions and this prompt is being taken back off the screen.</param>
+    public async Task<int> RequestBlock(Faction faction, CancellationToken withdrawToken = default)
     {
         PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
         if (controllingPlayer == null)
@@ -531,8 +663,10 @@ public partial class CardPlayRound : GodotObject
             TriggerSummaryText = CurrentBlockTrigger?.SummaryText()
         };
 
-        InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
-        GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
+        InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request, withdrawToken);
+        // See RequestPlay: a withdrawn prompt carries no decision of this player's to record.
+        if (!withdrawToken.IsCancellationRequested)
+            GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
         return responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
     }
 
