@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://blt1trgctx001"]
 
-[ext_resource type="Script" path="res://scripts/C#/UI/TriggerContextDisplay.cs" id="1_tctx"]
+[ext_resource type="Script" uid="uid://xyxrkj14cjx" path="res://scripts/C#/UI/TriggerContextDisplay.cs" id="1_tctx"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_tccard"]
+[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="3_t1u62"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tctx"]
 
-[node name="TriggerContextDisplay" type="Control"]
+[node name="TriggerContextDisplay" type="Control" unique_id=1151867651]
 custom_minimum_size = Vector2(0, 1080)
 layout_mode = 3
 anchors_preset = 15
@@ -16,9 +17,8 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_tctx")
 
-[node name="TriggerContextPanel" type="Panel" parent="."]
+[node name="TriggerContextPanel" type="Panel" parent="." unique_id=619802641]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
@@ -31,7 +31,7 @@ grow_horizontal = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_tctx")
 
-[node name="TriggerCard" parent="TriggerContextPanel" instance=ExtResource("2_tccard")]
+[node name="TriggerCard" parent="TriggerContextPanel" unique_id=1106938271 instance=ExtResource("2_tccard")]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
@@ -44,13 +44,23 @@ offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 350.0
 
-[node name="TriggerLabel" type="RichTextLabel" parent="TriggerContextPanel"]
+[node name="Panel" type="Panel" parent="TriggerContextPanel" unique_id=1520113763]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -130.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = ExtResource("3_t1u62")
+
+[node name="TriggerLabel" type="RichTextLabel" parent="TriggerContextPanel/Panel" unique_id=309435135]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-offset_top = 360.0
-offset_bottom = 490.0
+offset_bottom = 130.0
+bbcode_enabled = true
 fit_content = true
 scroll_active = false
-bbcode_enabled = true
