@@ -32,6 +32,11 @@ public partial class CardState : StateObject
     public bool IsRevealed { get; set; } = false;
 
     /// <summary>
+    /// Whether the card was blocked by a card reaction. This is set by the card logic that blocks the card, and is used to prevent the card from being activated.
+    /// </summary>
+    public bool IsBlocked { get; set; } = false;
+
+    /// <summary>
     /// Whether this peer may see the card's face. A Response card is played face down and stays
     /// secret until it is activated; every other card type is public when played/revealed, or when the player owns the card's faction. 
     /// Purely a presentation rule — the authoritative state is identical on every peer, only the render differs.
@@ -43,7 +48,6 @@ public partial class CardState : StateObject
     [JsonIgnore]
     public bool IsFaceVisibleToLocalPlayer {
         get {
-            DebugUtilities.PrintPeer($"CardState.IsFaceVisibleToLocalPlayer: Card {CardName} (Id {Id}) of type {CardData.CardType} for faction {Faction} is {(IsRevealed ? "revealed" : "not revealed")} and {(PresentationServices.Notification.LocalPlayerControls(Faction) ? "controlled by local player" : "not controlled by local player")}");
             return IsRevealed || PresentationServices.Notification.LocalPlayerControls(Faction);
         }
         

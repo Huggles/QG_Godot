@@ -59,6 +59,8 @@ public abstract partial class CardLogic : GodotObject
         // block reactions alike.
         if (CardState.IsDiscarded)
             return false;
+        if (IsBlocked)
+            return false;
 
         // For an unplayed card TriggerConditionsMet resolves to _defaultPlayConditions, which is
         // the correct gate for a play.
@@ -90,6 +92,11 @@ public abstract partial class CardLogic : GodotObject
         }
 
         return true;
+    }
+
+    public bool IsBlocked {
+        get { return CardState.IsBlocked; }
+        set { CardState.IsBlocked = value; }
     }
     
     public bool TriggerConditionsMet => _conditions.All(condition=>condition.MeetCondition());
@@ -134,6 +141,7 @@ public abstract partial class CardLogic : GodotObject
         // Safety net: DoCard releases the binding when the card's steps finish, but an activation
         // abandoned mid-way (exception, aborted epoch) would otherwise leave it dangling.
         ActivationTrigger = null;
+        IsBlocked = false;
     }
 
     public virtual string PlayActionGuidance() =>

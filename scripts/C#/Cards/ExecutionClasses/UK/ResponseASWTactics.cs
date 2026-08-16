@@ -9,15 +9,10 @@ public partial class ResponseASWTactics : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.IsBlockRequest(), this),
-            Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.CurrentBlockTrigger is ForceDiscardCardsChangeEvent fde) {
-                    return fde.HasSourceCard
-                        && StaticGameData.FactionTeamForFaction(fde.SourceCardState.Faction) == FactionTeam.AXIS
-                        && fde.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE;
-                }
-                return false;
-            }), this)
+            Condition.Build(
+                new Condition.IsBlockRequest(CardType.ECONOMIC_WARFARE), 
+                this
+            )
         };
     }
 
@@ -25,16 +20,11 @@ public partial class ResponseASWTactics : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                // Guarded and read from ActivationTrigger, mirroring CardTriggers above: the pool's
-                // last event is not necessarily the one this card was activated to block.
-                if (ActivationTrigger is not ForceDiscardCardsChangeEvent discardEvent) return null;
-
-                discardEvent.IsBlocked = true;
-                PresentationServices.Notification.ShowActionText("ASW Tactics: Axis EW card effect ignored", Faction);
-                await Task.Delay(GameSettings.DurationMedium);
+                ActivationTrigger.IsBlocked = true;
+                ActivationTrigger.IsCardBlocked = true;
+                PresentationServices.Notification.ShowActionText("Axis EW card effect ignored", Faction);                
                 return null;
             })
-            .WithGuidance("Ignore the Axis EW card's game text")
         };
     }
 }

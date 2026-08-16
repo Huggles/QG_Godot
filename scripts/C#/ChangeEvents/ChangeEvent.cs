@@ -21,7 +21,22 @@ public abstract partial class ChangeEvent : GameMessage
     FactionState targetFactionState => FactionState.ForEnum(TargetFaction);
     public bool SuppressGameProgress { get; set; } = false;
     public bool IsTrigger { get; set; } = true;
+    
+    /// <summary>
+    /// Whether the change event was blocked by a card reaction. This is set by the card logic that blocks the event, and is used to prevent the event from being applied.
+    /// </summary>
     public bool IsBlocked { get; set; } = false;
+
+    /// <summary>
+    /// Whether the entire card was blocked by a card reaction. This is set by the card logic that blocks the event, and is used to prevent the event from being applied.
+    /// In the base game, this happens only with ResponseASWTactics, but in expansion (or mods) it could happen with other cards as well.
+    /// </summary>
+    public bool IsCardBlocked { 
+        get { return SourceCardState.IsBlocked; }
+        set { SourceCardState.IsBlocked = value; }
+    }
+
+
     public int SourceCardId { get; set; } = -1;
     public bool HasSourceCard => SourceCardId > -1;
     public CardState SourceCardState => CardState.ForId(SourceCardId);

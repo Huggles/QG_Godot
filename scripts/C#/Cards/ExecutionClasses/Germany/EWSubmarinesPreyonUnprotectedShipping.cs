@@ -23,11 +23,15 @@ public partial class EWSubmarinesPreyonUnprotectedShipping : EWCardLogic
                 // UK discards cards
                 ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, discardCount));
                 discardEvent.IsTrigger = true;
-                
-                // Score 1 VP
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "Submarines Prey on Unprotected Shipping"), Faction));
-                
-                return discardEvent;
+                await CardPlayPool.DoChangeEvent(discardEvent);
+                return null;
+            }),
+            new CardStep(this, async() => {               
+                // Score 1 VP       
+                ScorePointsChangeEvent scorePointsEvent = BuildChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "Submarines Prey on Unprotected Shipping"), Faction));                
+                scorePointsEvent.IsTrigger = false;
+                await CardPlayPool.DoChangeEvent(scorePointsEvent);
+                return null;
             })
         }; 
     }

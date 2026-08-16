@@ -21,7 +21,7 @@ public class GameStateCalculator
         // Unit
         Tag.InSupply, Tag.OutOfSupply,
         // Card
-        Tag.IsActivatable, Tag.IsPlayable, Tag.IsAfterReaction, Tag.IsPlayed,
+        Tag.IsActivatable, Tag.IsPlayable, Tag.IsAfterReaction, Tag.IsPlayed, Tag.IsBlocked
         // Straight tags (AxisControlled / AlliesControlled) are intentionally excluded:
         // they are 100% deterministic from ControllingCountryId and are recomputed
         // locally via CalculateStraightControlForFaction() on every peer.
@@ -84,7 +84,10 @@ public class GameStateCalculator
         candidates.AddRange(deckState.StatusCardStates);
         candidates.AddRange(deckState.ResponseCardStates);
 
-        List<CardState> cardPlayedThisTurn = CardState.AllForFaction(faction).Values.Where(cs => cs.PlayedInTurn.Contains(GameFlow.Instance.GameTurn)).ToList();
+        List<CardState> cardPlayedThisTurn = 
+            CardState.AllForFaction(faction).Values
+                .Where(cs => cs.PlayedInTurn.Contains(GameFlow.Instance.GameTurn))
+                .ToList();
         candidates.AddRange(cardPlayedThisTurn);
 
         // Activatable scenario mutators are in no DeckState pile and are never "played", so none of the
@@ -96,14 +99,21 @@ public class GameStateCalculator
 
         foreach (var cardState in candidates)
         {
-            if (cardState.CardLogic == null) { DebugUtilities.PrintPeer($"[DIAG]   {cardState.CardData?.UniqueName ?? "?"} skipped - CardLogic is null"); continue; }
+            if (cardState.CardLogic == null) { 
+                DebugUtilities.PrintPeer($"[DIAG]   {cardState.CardData?.UniqueName ?? "?"} skipped - CardLogic is null"); 
+                continue; 
+            }
 
             bool canActivate = cardState.CardLogic.CanBeActivated();
             if (canActivate)
-            {           
-                DebugUtilities.PrintPeer($"Card {cardState.CardData.UniqueName} is activatable for {faction}");                 
+            {   
                 cardState.AddTag(Tag.IsActivatable, faction);
             }
+
+            if (cardState.IsBlocked)
+                cardState.AddTag(Tag.IsBlocked, faction);
+            else
+                cardState.Tags.Remove(Tag.IsBlocked, faction);
         };  
     }
 
@@ -164,7 +174,9 @@ public class GameStateCalculator
     {
         ClearTagsForFaction(faction, Tag.IsPlayable);        
         DeckState deckState = DeckState.ForFaction(faction);
-        deckState.HandCardStates.Where(cs => cs.HasTag(Tag.IsActivatable, faction) && !cs.IsPlayed).AddTag(Tag.IsPlayable, faction);
+        deckState.HandCardStates
+            .Where(cs => cs.HasTag(Tag.IsActivatable, faction) && !cs.IsPlayed)
+            .AddTag(Tag.IsPlayable, faction);
     }
 
     private static void CalculateInSupplyForFaction(Faction faction)
@@ -213,7 +225,6 @@ public class GameStateCalculator
         CardStep.All.ForEach(step =>
         {
             bool isExecutable = !step.StepFinished && step.MeetAllConditions;
-
             if (isExecutable)
                 step.Tags.Add(Tag.IsExecutable, faction);
         });

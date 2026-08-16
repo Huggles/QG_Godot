@@ -48,6 +48,7 @@ public abstract class Condition
     DeployType DeployType;
     UnitType UnitType;
     CountryType CountryType;
+    CardType? TargetCardType;
 
     public Condition() { }
 
@@ -375,9 +376,27 @@ public abstract class Condition
     public class IsBlockRequest : Condition
     {
         public override bool RequiresEventContext => true;
+
+        public IsBlockRequest() {}
+        public IsBlockRequest(CardType cardType) 
+        {
+            this.TargetCardType = cardType;
+        }
+        
         public override bool MeetCondition()
         {
-            return true;
+            bool meetsCondition = this.TargetCardType != null ? CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData?.CardType == this.TargetCardType : true;
+            if(CardLogic.CardData.UniqueName == "ResponseASWTactics")
+            {
+                DebugUtilities.PrintPeer($"[DIAG] IsBlockRequest: Card {CardLogic.CardData.UniqueName} (Id {CardLogic.CardState.Id}) for faction {CardLogic.Faction} ");
+                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData?.CardType}");
+                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData}");
+                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardState}");
+                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardId}");
+                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.ScriptName}");
+                DebugUtilities.PrintPeer($"[DIAG] {this.TargetCardType}");
+            }
+            return meetsCondition;
         }
     }
 
