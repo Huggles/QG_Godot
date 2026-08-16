@@ -36,6 +36,22 @@ public partial class MarginTextureButton : MarginContainer
 		}
 	}
 
+	/// <summary>Disables the inner button and dims it, so an unavailable action reads as unavailable.</summary>
+	public bool Disabled
+	{
+		get => TextureButton?.Disabled ?? false;
+		set
+		{
+			TextureButton textureButton = TextureButton;
+			if (textureButton == null)
+			{
+				return;
+			}
+			textureButton.Disabled = value;
+			Modulate = value ? new Color(1, 1, 1, 0.4f) : Colors.White;
+		}
+	}
+
 	public override void _Ready()
 	{
 		ApplyTextures();

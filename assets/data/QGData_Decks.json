@@ -36,8 +36,7 @@
 	},
 	{
 		"FactionIndex" : 2,
-		"Cards": [
-			{"CardName":"EWBomberCommand","Number":1},
+		"Cards": [			
 			{"CardName":"BuildArmy","Number":5},
 			{"CardName":"BuildNavy","Number":5},
 			{"CardName":"LandBattle","Number":4},			
@@ -48,6 +47,7 @@
 			{"CardName":"EventLedoAndBurmaRoads","Number":1},
 			{"CardName":"EventSingaporeFortified","Number":1},
 			{"CardName":"EWMaltaSubmarines","Number":1},
+			{"CardName":"EWBomberCommand","Number":1},
 			{"CardName":"ResponseASWTactics","Number":1},
 			{"CardName":"ResponseDefensivePosture","Number":1},
 			{"CardName":"ResponseDestroyers","Number":1},

@@ -23,6 +23,7 @@
 [ext_resource type="PackedScene" uid="uid://b2aymnt6sg5po" path="res://scenes/userinterface/MarginTextureButton.tscn" id="22_x2nnb"]
 [ext_resource type="Texture2D" uid="uid://b5evjrup5daot" path="res://assets/textures/Other/eye_icon.png" id="23_eyeicon"]
 [ext_resource type="Texture2D" uid="uid://bqyf0w6t7iv32" path="res://assets/textures/Other/eye_icon_pressed.png" id="24_eyeiconp"]
+[ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/PlayedCardsIcon.png" id="25_playedcards"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -302,3 +303,9 @@ unique_name_in_owner = true
 layout_mode = 2
 TextureNormal = ExtResource("23_eyeicon")
 TexturePressed = ExtResource("24_eyeiconp")
+
+[node name="ActiveInputRequestButton" parent="BottomLeftMenu/BottomLeftMenuContainer/BottomLeftMenuHBox" unique_id=628711103 instance=ExtResource("22_x2nnb")]
+unique_name_in_owner = true
+layout_mode = 2
+TextureNormal = ExtResource("25_playedcards")
+TexturePressed = ExtResource("25_playedcards")

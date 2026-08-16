@@ -30,6 +30,14 @@ public partial class InputManager : Node2D
     /// <summary>Scope chosen on the open reaction prompt, consumed by <see cref="TakeReactionSkipScope"/>.</summary>
     private ReactionSkipScope _pendingReactionSkipScope = ReactionSkipScope.NONE;
 
+    /// <summary>
+    /// What the open card prompt is offering, or null when no prompt is open on this peer. The
+    /// request object itself never reaches the client — <see cref="InputRequest.Execute"/> pushes
+    /// into the UI singletons and is gone — so this is the only place the prompt survives after
+    /// <see cref="FactionHandDisplay"/> has been drawn over by something else.
+    /// </summary>
+    public static ActiveCardPrompt CurrentCardPrompt { get; private set; }
+
     [Signal] public delegate void KeyClickedEventHandler(InputEventKey keyEvent);
 
     /// <summary>
@@ -55,11 +63,14 @@ public partial class InputManager : Node2D
     {
         _pendingReactionSkipScope = ReactionSkipScope.NONE;
 
+        CurrentCardPrompt = new ActiveCardPrompt(faction, displayCardIds ?? cardIds, cardIds);
+
         PlayerActionLabel.ShowText(cardIds.Count > 0 ? "Choose a card" : "No reaction available", faction);
         // The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
         // and would resolve Faction.NONE for an empty always-ask prompt.
         FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds);
         FactionHandDisplay.Current.CardSelected += HandleItemSelected;
+        EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
         // The Skip button now doubles as the "pass" affordance for choosing a card to play/activate.
         SelectionSkipButton.Current?.Show();
         EventBus.Instance.SelectionSkipped += OnPlayCardSkipped;
@@ -110,8 +121,27 @@ public partial class InputManager : Node2D
     /// </summary>
     public void CancelCardSelection() => HandleItemSelected(-1);
 
+    /// <summary>
+    /// Re-draw the open card prompt over whatever is on the hand display now — the way back from
+    /// browsing another faction's hand. A no-op returning false when no prompt is open. The
+    /// CardSelected subscription lives on the display node rather than on the card nodes, so
+    /// re-showing does not disturb the handler that is awaiting the answer.
+    /// </summary>
+    public static bool ShowCurrentCardPrompt()
+    {
+        if (CurrentCardPrompt == null || FactionHandDisplay.Current == null)
+        {
+            return false;
+        }
+
+        FactionHandDisplay.Current.Show(
+            CurrentCardPrompt.DisplayCardIds, CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds);
+        return true;
+    }
+
     private void HandleItemSelected(int cardId)
     {
+        CurrentCardPrompt = null;
         FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
         EventBus.Instance.SelectionSkipped -= OnPlayCardSkipped;
         // Unconditional: the host's abort path (CancelCardSelection on timeout or error recovery)
@@ -123,6 +153,7 @@ public partial class InputManager : Node2D
         FactionHandDisplay.Current.Hide();
         // The trigger context is its own node now, so hiding the hand no longer takes it down with it.
         TriggerContextDisplay.Current?.Hide();
+        EventBus.Emit(EventBus.SignalName.CardPromptClosed);
         EventBus.Emit("CardSelected", cardId);
     }
 

@@ -188,6 +188,8 @@ public partial class FactionHandDisplay : Control
 		float totalRotationSize = (cardIds.Count - 1) * rotationStepSize;
 		float totalSizeX = (cardIds.Count - 1) * cardStepSize;
 
+		cardIds.Sort();
+
 		foreach (var (cardId, index) in cardIds.Select((cardId, index) => (cardId, index)))
 		{
 			CardState cardState = CardState.ForId(cardId);

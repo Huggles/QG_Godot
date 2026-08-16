@@ -51,6 +51,11 @@ public partial class EventBus : GodotObject
 
     [Signal] public delegate void CardSelectedEventHandler(int cardId);
 
+    /// <summary>A card prompt opened on this peer. The argument is the prompted <see cref="Faction"/>.</summary>
+    [Signal] public delegate void CardPromptOpenedEventHandler(int faction);
+    /// <summary>The open card prompt resolved (a card was chosen, passed or the host abandoned it).</summary>
+    [Signal] public delegate void CardPromptClosedEventHandler();
+
     [Signal] public delegate void CardsDrawnEventHandler(int faction, int numberOfCards);
     [Signal] public delegate void CardsDiscardedEventHandler(int faction, int numberOfCards);
 
