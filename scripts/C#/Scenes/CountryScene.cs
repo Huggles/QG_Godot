@@ -21,6 +21,9 @@ public partial class CountryScene : Node2D
 
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
+    public Vector2 Size = new Vector2(AssetRepository.TargetCountrySprite.GetWidth(), AssetRepository.TargetCountrySprite.GetHeight());
+    public Rect2 Bounds => new Rect2(this.Position - (Size/2), Size);
+
     public static CountryScene SpawnCountry(int countryId)
     {
         CountryScene countrySceneInstance = CountryScenePacked.Instantiate<CountryScene>();                
@@ -30,11 +33,17 @@ public partial class CountryScene : Node2D
         NodeUtilities.Instance.CountriesNode.AddChild(countrySceneInstance, false);
         countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionCenter;
         countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
+        countrySceneInstance.CountryLabel.Size = countrySceneInstance.Bounds.Size;
+        countrySceneInstance.CountryLabel.Position = new Vector2(
+            - (countrySceneInstance.CountryLabel.Size.X / 2), 
+            - (countrySceneInstance.CountryLabel.Size.Y / 2)
+        ) + countrySceneInstance.StaticCountryData.LabelTransformData.Position2D;
         return countrySceneInstance;
     }
 
     public override void _Ready()
     {
+        DebugUtilities.PrintPeer($"{this.StaticCountryData.Label}");
         Name = CountryState.Name; 
         if (StaticCountryData.Texture != null)
             ApplyTexture();
@@ -50,6 +59,8 @@ public partial class CountryScene : Node2D
         StraightState.OnReady();
 
         CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
+        
+        
     }
 
     private void OnTagAdded(Tag tag, Faction faction)

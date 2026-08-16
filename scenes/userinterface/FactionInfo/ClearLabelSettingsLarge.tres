@@ -3,7 +3,7 @@
 [resource]
 resource_local_to_scene = true
 line_spacing = 0.0
-font_size = 60
+font_size = 30
 outline_size = 15
 outline_color = Color(0, 0, 0, 1)
 shadow_color = Color(0.9494347, 0, 0.22214997, 0)

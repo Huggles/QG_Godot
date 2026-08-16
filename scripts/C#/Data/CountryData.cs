@@ -18,6 +18,8 @@ public partial class CountryData : DataObject
     public TransformData SupplyStarTransformData { get; set; }
     public UnitTransformData UnitTransformData { get; set; }
 
+    public TransformData LabelTransformData { get; set; }
+
     public Texture2D Texture { get; private set; }
 
     public class DataNotFoundException : Exception { public DataNotFoundException(String message) : base(message) { } }

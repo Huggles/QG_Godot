@@ -52,3 +52,6 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "ABC"
 label_settings = ExtResource("6_1hw3w")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
