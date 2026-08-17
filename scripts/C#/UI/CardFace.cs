@@ -20,7 +20,7 @@ public readonly struct CardFace
 
     public static CardFace ForCard(CardState cardState) =>
         cardState.IsFaceVisibleToLocalPlayer
-            ? new(cardState.FrontTexture, cardState.CardData.Label, cardState.CardData.Text)
+            ? new(cardState.FrontTexture, cardState.CardData.Label, cardState.DisplayText)
             : Back(cardState.Faction);
 
     /// <summary>

@@ -61,7 +61,6 @@ public partial class RegisterBulletinCardChangeEvent : ChangeEvent
             UniqueName = MutatorClassName,
             Number = string.Empty,
             Label = mutator.Label,
-            Text = mutator.Text,
             Type = "STATUS",
             ExecutionClass = MutatorClassName,
             MultipleActivationsPerTurn = mutator.MultipleActivationsPerTurn
@@ -76,6 +75,15 @@ public partial class RegisterBulletinCardChangeEvent : ChangeEvent
         // CardState's reflecting constructor does this itself; the pre-built-logic constructor leaves
         // it to the caller.
         mutator.CardState = cardState;
+
+        // Text is read only once the CardState is wired, and so is deliberately not part of the
+        // initializer above: ActivatableMutator.Text may compute from live game state, and everything
+        // it needs to do that — CardLogic.Faction most of all — reads through CardState. Filled in
+        // here rather than left null because CardData.Text is what the wire and every consumer other
+        // than CardFace sees; CardFace itself re-reads it per render via BulletinCardState.DisplayText.
+        // Label has no equivalent problem: a Bulletin's title is a constant.
+        cardData.Text = mutator.Text;
+
         mutator.CardSteps = mutator.OnActivate();
 
         GameSession.Current.GameState.CardStates.Add(cardState);

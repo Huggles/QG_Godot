@@ -127,6 +127,14 @@ public sealed class InputRequestSpec
                 spec.Pass = PassMode.NotAllowed;
                 break;
 
+            case InputRequest.SelectCardRequestHandler select:
+                spec.Title = select.Title;
+                spec.Options = Cards(request.TargetCardIds);
+                spec.MinSelections = select.Required ? 1 : 0;
+                spec.MaxSelections = 1;
+                spec.Pass = select.Required ? PassMode.NotAllowed : PassMode.EmptyResponse;
+                break;
+
             case InputRequest.HandCardsDiscardRequestHandler:
             case InputRequest.CardsRequestHandler:
                 spec.Title = "Select cards to discard";

@@ -71,6 +71,17 @@ public partial class CardState : StateObject
     public virtual Texture2D FrontTexture =>
         FactionState.ForEnum(Faction).FactionData.CardFrontTextures[CardData.CardType];
 
+    /// <summary>
+    /// The body text CardFace renders. Virtual for the same reason as <see cref="FrontTexture"/>: a
+    /// Bulletin is not a card, and its text belongs to its ActivatableMutator — which may compute it
+    /// from live game state, so it has to be read at render time rather than from the copy baked into
+    /// the synthetic CardData when the Bulletin was registered.
+    ///
+    /// CardData.Label has no equivalent override: a card's title never changes.
+    /// </summary>
+    [JsonIgnore]
+    public virtual string DisplayText => CardData.Text;
+
     // Constructor
     public CardState(CardData cardData)
     {

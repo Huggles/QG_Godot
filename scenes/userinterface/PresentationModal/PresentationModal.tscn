@@ -22,8 +22,8 @@ layout_mode = 2
 
 [node name="WindowButtons" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=91184756]
 layout_mode = 2
-alignment = 2
 theme_override_constants/separation = 8
+alignment = 2
 
 [node name="ParkButton" type="Button" parent="MarginContainer/VBoxContainer/WindowButtons" unique_id=91184755]
 unique_name_in_owner = true
@@ -63,7 +63,8 @@ columns = 6
 [node name="TitleText" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=894613482]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/normal_font_size = 50
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 20
 text = "TEXT
 "
 fit_content = true

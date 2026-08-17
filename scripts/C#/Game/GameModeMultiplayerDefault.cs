@@ -249,6 +249,34 @@ public partial class GameModeMultiplayerDefault : IGameMode
             DebugUtilities.PrintPeer(
                 $"Registered scenario mutator {entry.Name} ({mutator.Timing} {mutator.Step}, order {mutator.Order})");
         }
+
+        await RegisterAlwaysAvailableMutators(initialStateData);
+    }
+
+    /// <summary>
+    /// Mutators every faction has in every game, registered here rather than declared in a scenario's
+    /// "mutators" array — a scenario cannot omit or disable them. Reallocate Resources is the whole
+    /// point of the list: it is the standing action in the fan beside the hand, not a scenario rule.
+    ///
+    /// A scenario may still name one explicitly (to give it a round window, or a faction subset), and
+    /// that declaration wins — the loop above has already registered it, so registering it again here
+    /// would give the faction two identical Bulletins.
+    /// </summary>
+    private async Task RegisterAlwaysAvailableMutators(InitialGameStateData initialStateData)
+    {
+        List<string> alwaysAvailable = new List<string> { nameof(MutatorReallocateResources) };
+
+        foreach (string mutatorName in alwaysAvailable)
+        {
+            if (initialStateData.Mutators.Any(entry => entry.Name == mutatorName))
+            {
+                DebugUtilities.PrintPeer($"{mutatorName} declared by the scenario; not registering it again");
+                continue;
+            }
+
+            // No faction filter: RegisterActivatableMutator reads an empty list as "all playable".
+            await RegisterActivatableMutator(new MutatorScenarioData { Name = mutatorName }, new List<Faction>());
+        }
     }
 
     /// <summary>

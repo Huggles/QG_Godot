@@ -34,4 +34,15 @@ public partial class BulletinCardState : CardState
     /// contains this id; overriding states the intent rather than relying on that.
     /// </summary>
     public override bool IsDiscarded => false;
+
+    /// <summary>
+    /// The mutator's text as it reads right now, not the copy RegisterBulletinCardChangeEvent baked
+    /// into the synthetic CardData at setup. A mutator whose Text depends on game state — see
+    /// MutatorReallocateResources, which names the cards still in the draw deck — would otherwise
+    /// render frozen at its round-1 value for the whole game.
+    ///
+    /// Falls back to CardData.Text: CardLogic is null on a card whose ExecutionClass failed to
+    /// resolve, and the base class handles that case everywhere else too.
+    /// </summary>
+    public override string DisplayText => (CardLogic as ActivatableMutator)?.Text ?? CardData.Text;
 }

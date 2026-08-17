@@ -22,7 +22,17 @@ public abstract partial class ActivatableMutator : CardLogic
     /// <summary>Card title shown in the UI. Baked into the synthetic CardData at registration.</summary>
     public abstract string Label { get; }
 
-    /// <summary>Card body text shown in the UI. Baked into the synthetic CardData at registration.</summary>
+    /// <summary>
+    /// Card body text shown in the UI. Read twice: once at registration, to bake into the synthetic
+    /// CardData (which is what the wire and any consumer other than CardFace sees), and again on every
+    /// render through BulletinCardState.DisplayText. So an override MAY compute from live game state —
+    /// but only from state every peer shares, or two players would read a different card.
+    ///
+    /// Both reads happen with CardState already assigned, which is what makes <see cref="CardLogic.Faction"/>
+    /// safe to use here. RegisterBulletinCardChangeEvent depends on that ordering: it builds the
+    /// CardData without Text, wires CardState, and only then fills Text in. Reading Text any earlier
+    /// dereferences a null CardState.
+    /// </summary>
     public abstract string Text { get; }
 
     /// <summary>

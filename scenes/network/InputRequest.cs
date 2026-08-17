@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 [JsonDerivedType(typeof(ActivateCardRequestHandler),        "ActivateCard")]
 [JsonDerivedType(typeof(HandCardsDiscardRequestHandler),    "RequestHandCardsDiscard")]
 [JsonDerivedType(typeof(CardsRequestHandler),               "RequestCards")]
+[JsonDerivedType(typeof(SelectCardRequestHandler),          "SelectCard")]
 [JsonDerivedType(typeof(ForceDiscardHandCardsRequestHandler), "ForceDiscardHandCards")]
 [JsonDerivedType(typeof(SelectUnitRequestHandler),           "SelectUnit")]
 [JsonDerivedType(typeof(SelectBattleTargetRequestHandler),   "SelectBattleTarget")]
@@ -374,6 +375,42 @@ public abstract partial class InputRequest
             InputHandlerDiscard inputHandler = new InputHandlerDiscard(TargetFaction, TargetCardIds, 0, false);
             List<int> selectedCardIds = await inputHandler.GetSelectedCards();            
             ResponseCardIds = selectedCardIds;
+        }
+    }
+
+    /// <summary>
+    /// Pick one of the offered cards.
+    ///
+    /// <see cref="CardsRequestHandler"/> is the closest existing prompt and is wrong twice over for a
+    /// choice that is not a discard: its title is hardcoded to "Select card(s) to discard", and it
+    /// leaves MaxSelections unlimited, so a player asked to take one card could take several. This
+    /// clamps the selection to a single card and takes the caller's own wording.
+    ///
+    /// Required by default, so the modal has no Cancel; pass required: false for a genuinely optional
+    /// pick, where an empty ResponseCardIds means "took none".
+    /// </summary>
+    public class SelectCardRequestHandler : InputRequest
+    {
+        public string Title { get; set; }
+        public bool Required { get; set; }
+
+        public SelectCardRequestHandler(Faction targetFaction, List<int> targetCardIds, string title,
+            bool required = true) : base(targetFaction)
+        {
+            TargetCardIds = targetCardIds;
+            Title = title;
+            Required = required;
+        }
+
+        public override async Task Handle()
+        {
+            PlayerActionLabel.ShowText(Title, TargetFaction);
+            ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectOne(
+                Title, PresentationItemCard.FromCardIds(TargetCardIds, true), Required));
+
+            // WasSkipped is deliberately not set: BroadCast turns that into a StepSkippedException,
+            // and the caller decides for itself what an empty answer means.
+            ResponseCardIds = result.WasCancelled ? new List<int>() : result.SelectedItems;
         }
     }
 

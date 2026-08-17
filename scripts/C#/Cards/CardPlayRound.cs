@@ -735,16 +735,24 @@ public partial class CardPlayRound : GodotObject
     /// have on the table, simply missing from the prompt, reads as a bug — and the hand it sits beside
     /// already shows its unplayable cards greyed rather than hiding them.
     ///
-    /// On-table piles only, so a Status card still in hand is not drawn twice: CardTriggers() does not
-    /// depend on IsPlayed, so scanning every card of the faction would put an unplayed one in the hand
-    /// fan and the side fan at once.
+    /// Scanned over CardState rather than the DeckState piles, the same way <see cref="ActivatableCardIds"/>
+    /// next to it does — a Bulletin is in NO pile (see BulletinCardState), so a pile scan dropped the
+    /// always-available Reallocate Resources action from the fan on exactly the turns it was not usable,
+    /// which is the opposite of the greying-out this method exists for.
+    ///
+    /// IsPlayed is what keeps a Status card still in HAND out of the side fan: CardTriggers() does not
+    /// depend on it, so an unplayed one would otherwise appear in the hand fan and the side fan at once.
+    /// It is also what BulletinCardState hardcodes to true, so a Bulletin passes. IsDiscarded is the
+    /// other half: a discarded card keeps Tag.IsPlayed (see GameStateCalculator.CalculatePlayedCardsForFaction),
+    /// so a Status card that has left the table would come back as a side-fan card without it.
     /// </summary>
     public static List<int> PlayStepActivationCardIds(Faction faction)
     {
-        DeckState deck = DeckState.ForFaction(faction);
-        return deck.StatusCardIds
-            .Concat(deck.ResponseCardIds)
-            .Where(id => CardState.ForId(id)?.CardLogic?.IsPlayStepActivation == true)
+        return CardState.AllForFaction(faction).Values
+            .Where(cardState => cardState.IsPlayed
+                             && !cardState.IsDiscarded
+                             && cardState.CardLogic?.IsPlayStepActivation == true)
+            .Select(cardState => cardState.Id)
             .ToList();
     }
 
