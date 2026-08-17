@@ -129,8 +129,11 @@ public partial class PresentationModal : PanelContainer, LoadableUI
         TitleText.Text = config.Title;
 
         ConfirmButton.Visible = config.ShowApplyButton;
-        ConfirmButton.Text = config.ApplyLabel;
-        ConfirmButton.Disabled = config.MinSelections > 0;
+        // Through UpdateConfirmButton rather than setting the plain label, so the count is right from the
+        // start: it used to read a bare "Apply" until the first click. That matters more now that Apply
+        // with nothing selected is the only way to decline an optional prompt — "Apply (0)" says what
+        // pressing it will do, "Apply" does not.
+        UpdateConfirmButton();
         ExitButton.Visible = config.ShowCancelButton;
         // The label becomes the tooltip, not the caption: this is the "×" in the title bar now, and
         // writing "Close" over it would replace the glyph with a word. Hovering still tells the player
@@ -232,14 +235,15 @@ public partial class PresentationModal : PanelContainer, LoadableUI
     {
         if (_closed || _activeConfig == null) return false;
 
-        // A modal with a Cancel button: Escape cancels, exactly as before.
+        // An info modal: Escape closes it, exactly as before.
         if (_activeConfig.ShowCancelButton)
         {
             OnExitButtonPressed();
             return true;
         }
-        // A mandatory prompt has no way out at all, so Escape reads as "get this out of my way"
-        // rather than as an answer.
+        // Any prompt: Escape means "get this out of my way", never an answer. Since no prompt carries a
+        // Cancel button any more this is the only branch they take — so Escape can no longer silently
+        // decline an optional discard the way it used to.
         if (CanPark)
         {
             Park();

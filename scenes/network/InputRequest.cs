@@ -289,8 +289,13 @@ public abstract partial class InputRequest
         public override async Task Handle()
         {
             // The host's list, not a local re-derivation — same rule as BlockReactionRequestHandler.
+            //
+            // separateNonHandCards: this is the one prompt whose offer spans two zones, so the table
+            // cards that activate instead of a hand play get their own smaller fan beside the hand
+            // rather than being interleaved into it by card id.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
-                TargetFaction, TargetCardIds ?? new List<int>(), false, DisplayCardIds);
+                TargetFaction, TargetCardIds ?? new List<int>(), false, DisplayCardIds,
+                separateNonHandCards: true);
             Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0)
             {
@@ -312,6 +317,13 @@ public abstract partial class InputRequest
         public override async Task Handle()
         {
             // The host's list, not a local re-derivation — same rule as BlockReactionRequestHandler.
+            //
+            // No separateNonHandCards here, unlike HandCardPlayRequestHandler: everything this prompt
+            // offers is already a table card, so splitting it out would leave the hand position empty.
+            // A reaction window draws ReactionWindowDisplayCardIds (the Status and Response piles), and
+            // outside the play window a hand card cannot be IsActivatable at all —
+            // CardLogic._defaultPlayConditions requires PLAY_CARD, this faction's turn, and nothing
+            // played yet, which is exactly when RequestPlay sends the hand-play request instead.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds);
             if (TriggerCardId > -1)
@@ -446,7 +458,10 @@ public abstract partial class InputRequest
             var items = PresentationItem.ForFactions(TargetFactions);
             ModalResult result = await ModalStack.Current.Show(
                 ModalConfig.SelectOne("Select a faction", items));
-            if (result.WasCancelled)
+            // Count as well as WasCancelled: SelectOne's default gates Apply behind one selection, so an
+            // empty result is unreachable today — but indexing [0] on one is an exception thrown out of
+            // card execution, and a SelectOne(required: false) would make it reachable.
+            if (result.WasCancelled || result.SelectedItems.Count == 0)
             {
                 WasSkipped = true;
                 return;
@@ -479,7 +494,8 @@ public abstract partial class InputRequest
                 .Select((label, i) => (PresentationItem)new PresentationItemTextButton(TargetOptionIds[i], label, true))
                 .ToList();
             ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectOne(ModalTitle, items));
-            if (result.WasCancelled)
+            // See SelectFactionRequestHandler: guarded against an empty result for the same reason.
+            if (result.WasCancelled || result.SelectedItems.Count == 0)
             {
                 WasSkipped = true;
                 return;

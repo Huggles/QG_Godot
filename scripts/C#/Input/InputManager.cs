@@ -58,17 +58,24 @@ public partial class InputManager : Node2D
     /// faction's whole event-triggered table and greys out everything not in
     /// <paramref name="cardIds"/>. Null means "draw exactly the selectable set".
     /// </param>
+    /// <param name="separateNonHandCards">
+    /// True for the hand-play prompt, the one prompt whose offer spans two zones: the cards that are
+    /// not in hand get their own smaller fan beside the hand instead of being interleaved with it by
+    /// card id. See <see cref="FactionHandDisplay.Show(List{int}, Faction, List{int}, bool)"/> — it
+    /// must stay false for the table-cards-only prompts, which would end up with an empty hand.
+    /// </param>
     public InputHandlerPlayCard SetCardSelectionActive(
-        Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null)
+        Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
+        bool separateNonHandCards = false)
     {
         _pendingReactionSkipScope = ReactionSkipScope.NONE;
 
-        CurrentCardPrompt = new ActiveCardPrompt(faction, displayCardIds ?? cardIds, cardIds);
+        CurrentCardPrompt = new ActiveCardPrompt(faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards);
 
         PlayerActionLabel.ShowText(cardIds.Count > 0 ? "Choose a card" : "No reaction available", faction);
         // The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
         // and would resolve Faction.NONE for an empty always-ask prompt.
-        FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds);
+        FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds, separateNonHandCards);
         FactionHandDisplay.Current.CardSelected += HandleItemSelected;
         EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
         // A card prompt is recallable for as long as it is open: the player can browse another faction's
@@ -138,7 +145,8 @@ public partial class InputManager : Node2D
         }
 
         FactionHandDisplay.Current.Show(
-            CurrentCardPrompt.DisplayCardIds, CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds);
+            CurrentCardPrompt.DisplayCardIds, CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds,
+            CurrentCardPrompt.SeparateNonHandCards);
         return true;
     }
 

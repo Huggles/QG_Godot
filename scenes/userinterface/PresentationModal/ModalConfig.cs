@@ -23,16 +23,32 @@ public class ModalConfig
     public string DedupeKey { get; private set; }
 
     public bool ShowApplyButton => Mode != ModalSelectionMode.Display;
-    public bool ShowCancelButton => MinSelections == 0 && !AutoDismiss;
+
+    /// <summary>
+    /// The "×" in the title bar. Info modals only — a prompt never offers one.
+    ///
+    /// A mandatory prompt never had one (there is no answer to give). An optional one no longer needs it:
+    /// "I decline" is already Apply with nothing selected, which both discard paths treat identically to a
+    /// cancel (<c>result.WasCancelled ? new List&lt;int&gt;() : result.SelectedItems</c>). Two buttons for
+    /// one outcome only invited the player to wonder which was which. Declining is now always Apply, and
+    /// getting a prompt off the screen is always Hide.
+    ///
+    /// <see cref="ModalResult.WasCancelled"/> is still produced for prompts — by
+    /// <c>PresentationModal.Dismiss</c> on the error-recovery and stack-teardown paths — so callers must
+    /// keep handling it.
+    /// </summary>
+    public bool ShowCancelButton => Mode == ModalSelectionMode.Display && !AutoDismiss;
 
     /// <summary>
     /// Whether this modal offers the "Hide" button, which puts the prompt aside without answering it so
     /// the player can look at the board and bring it back from the bottom-left menu.
     ///
-    /// A selection prompt is exactly what needs it — the mandatory ones (<see cref="SelectExactly"/>,
-    /// required <see cref="SelectOne"/>, <see cref="Reorder"/>) have no Cancel button at all, so this is
-    /// their only way out that is not an answer. An info modal has nothing to come back to, and an
-    /// auto-dismissing one is gone before you could recall it.
+    /// A selection prompt is exactly what needs it: no prompt carries a Cancel button, so this is the only
+    /// way to get one off the screen without answering it. An info modal has nothing to come back to, and
+    /// an auto-dismissing one is gone before you could recall it.
+    ///
+    /// Together with <see cref="ShowCancelButton"/> this gives the title bar exactly one button: "−" on a
+    /// prompt, "×" on an info modal.
     /// </summary>
     public bool ShowParkButton => Mode != ModalSelectionMode.Display && !AutoDismiss;
 

@@ -11,7 +11,13 @@ using System.Collections.Generic;
 /// The subset that may actually be clicked. Only the host can compute this — see the remarks on
 /// <see cref="InputManager.SetCardSelectionActive"/> — so it must be carried around, never re-derived.
 /// </param>
+/// <param name="SeparateNonHandCards">
+/// Presentation only: whether this prompt draws the cards that are not in hand as their own smaller
+/// fan. Carried so a re-draw after browsing reproduces the prompt as the player last saw it, rather
+/// than collapsing it back into one row.
+/// </param>
 public sealed record ActiveCardPrompt(
     Faction Faction,
     List<int> DisplayCardIds,
-    List<int> SelectableCardIds);
+    List<int> SelectableCardIds,
+    bool SeparateNonHandCards = false);
