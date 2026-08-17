@@ -279,11 +279,19 @@ public abstract partial class InputRequest
         // ??= so a caller can hand over its own set — EventLendLease grants an out-of-turn play, where
         // ActivatableCardIds is empty for the receiving faction (IsFactionTurn fails) and the whole
         // hand is the correct offer.
+        // The play-step activations are added to the DISPLAY set only, so one that cannot be used right
+        // now — cost unpayable, no legal target, or the play already spent — is drawn greyed out beside
+        // the hand instead of silently disappearing from the prompt. Same treatment the hand's own
+        // unplayable cards get, and the same reasoning as ReactionWindowDisplayCardIds.
         public override void PopulateTargets()
         {
             DeckState deck = DeckState.ForFaction(TargetFaction);
             TargetCardIds ??= deck.ActivatableCardIds;
-            DisplayCardIds ??= deck.ActivatableCardIds.Concat(deck.HandCardIds).Distinct().ToList();
+            DisplayCardIds ??= deck.ActivatableCardIds
+                .Concat(deck.HandCardIds)
+                .Concat(CardPlayRound.PlayStepActivationCardIds(TargetFaction))
+                .Distinct()
+                .ToList();
         }
 
         public override async Task Handle()

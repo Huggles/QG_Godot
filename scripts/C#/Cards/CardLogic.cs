@@ -20,7 +20,17 @@ public abstract partial class CardLogic : GodotObject
     public bool IsStatus => CardData.Type == "STATUS";
     public bool IsPlayFinished = false;
     public bool IsActivationFinished = false;
-    public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);    
+    public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);
+
+    /// <summary>
+    /// This card activates during its faction's Play step instead of a card being played from hand.
+    /// A structural test on the trigger list, deliberately NOT whether the trigger is currently met:
+    /// it decides what the play prompt DISPLAYS beside the hand, and a card that cannot be used right
+    /// now — cost unpayable, no legal target, play already spent — must be shown unusable rather than
+    /// disappear. Selectability is a separate question, answered by Tag.IsActivatable.
+    /// </summary>
+    public bool IsPlayStepActivation => CardTriggers().Any(c => c is Condition.IsPlayCardStep);
+
     public bool HasEventBasedTrigger => CardTriggers().Any(c => c.RequiresEventContext);
     public bool HasImmediateTrigger => CardTriggers().Any(c => c is Condition.EventCondition ec && ec.IsImmediate);
     public bool HasExecutableCardSteps => CardSteps.Count == 0 || ExecutableCardSteps.Count > 0;

@@ -727,6 +727,28 @@ public partial class CardPlayRound : GodotObject
     }
 
     /// <summary>
+    /// Every table card the faction can activate during its Play step instead of playing from hand —
+    /// what the hand-play prompt draws beside the hand, whether or not each one can be used right now.
+    /// The prompt greys out and un-clicks everything outside <see cref="ActivatableCardIds"/>.
+    ///
+    /// The same reasoning as <see cref="ReactionWindowDisplayCardIds"/>: a card the player knows they
+    /// have on the table, simply missing from the prompt, reads as a bug — and the hand it sits beside
+    /// already shows its unplayable cards greyed rather than hiding them.
+    ///
+    /// On-table piles only, so a Status card still in hand is not drawn twice: CardTriggers() does not
+    /// depend on IsPlayed, so scanning every card of the faction would put an unplayed one in the hand
+    /// fan and the side fan at once.
+    /// </summary>
+    public static List<int> PlayStepActivationCardIds(Faction faction)
+    {
+        DeckState deck = DeckState.ForFaction(faction);
+        return deck.StatusCardIds
+            .Concat(deck.ResponseCardIds)
+            .Where(id => CardState.ForId(id)?.CardLogic?.IsPlayStepActivation == true)
+            .ToList();
+    }
+
+    /// <summary>
     /// True when every player can already see what this table card is: a Status card sits face up,
     /// and a Response card stays face up once an earlier activation revealed it. A window opened by
     /// such a card leaks nothing whether it appears or not.

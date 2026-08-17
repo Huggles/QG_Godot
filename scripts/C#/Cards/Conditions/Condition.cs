@@ -627,7 +627,17 @@ public abstract class Condition
     public class HasPlayedCardThisTurnStep : Condition
     {
         public HasPlayedCardThisTurnStep(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(Faction) && GameFlow.Instance.CardsPlayedThisTurnStep[Faction] > 0;
+        public override bool MeetCondition() => For(Faction);
+
+        /// <summary>
+        /// Whether the faction has already spent its play this turn step. Both a hand play
+        /// (PlayCardChangeEvent) and a play-step activation (SpendPlayActionChangeEvent) increment the
+        /// counter, so this is the single "the play is gone" test. Static so
+        /// <see cref="IsPlayCardStep"/> can fold it in without allocating a condition per check.
+        /// </summary>
+        public static bool For(Faction faction)
+            => GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(faction)
+               && GameFlow.Instance.CardsPlayedThisTurnStep[faction] > 0;
     }
 
     public class IsFactionTurn : Condition
@@ -641,9 +651,35 @@ public abstract class Condition
         public override bool MeetCondition() => GameFlow.Instance.TurnStep == TurnStep.VICTORY_POINT;
     }
 
+    /// <summary>
+    /// The Play step, with the faction's play still unspent — the window in which a table card can be
+    /// activated INSTEAD of playing a card from hand.
+    ///
+    /// The "not yet played" half is folded in rather than left to each card to add its own
+    /// Not(HasPlayedCardThisTurnStep): every card carrying this condition needs it (activating one
+    /// spends the play via SpendPlayActionChangeEvent, so a second activation would be a free extra
+    /// action), and a new card that forgot it would silently be activatable twice in a step.
+    /// The six cards that predate this keep their explicit Not(...) — it is now redundant, not wrong.
+    ///
+    /// This condition is also the marker for "belongs beside the hand in the play prompt" — see
+    /// <see cref="CardLogic.IsPlayStepActivation"/>, which tests for its PRESENCE, not whether it is
+    /// met, so a card whose play is already spent is still shown (greyed out) rather than vanishing.
+    /// </summary>
     public class IsPlayCardStep : Condition
     {
-        public override bool MeetCondition() => GameFlow.Instance.TurnStep == TurnStep.PLAY_CARD;
+        public override bool MeetCondition()
+        {
+            if (GameFlow.Instance.TurnStep != TurnStep.PLAY_CARD)
+                return false;
+
+            // CardLogic is set by Condition.Build, which every card trigger goes through. A bare
+            // instance has no owner to attribute the spent play to, so it keeps the plain step check.
+            Faction faction = CardLogic?.Faction ?? Faction.NONE;
+            if (faction == Faction.NONE)
+                return true;
+
+            return !HasPlayedCardThisTurnStep.For(faction);
+        }
     }
 
     public class IsStartStep : Condition
