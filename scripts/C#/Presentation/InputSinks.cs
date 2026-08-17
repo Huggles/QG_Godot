@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 //
 // InputRequest.Execute() used to call Handle() directly, and every one of the 12 Handle()
 // implementations reaches into a UI singleton (PlayerScene.Current.InputManager,
-// PresentationModal.Current, FactionHandDisplay.Current, SelectionSkipButton.Current). None of those
+// ModalStack.Current, FactionHandDisplay.Current, SelectionSkipButton.Current). None of those
 // exist headless, so a headless process that actually controls a faction NREs on the first prompt.
 //
 // Execute() now routes through InputServices.Provider instead. The Godot provider is a pass-through

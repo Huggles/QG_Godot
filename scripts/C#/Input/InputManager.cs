@@ -71,6 +71,9 @@ public partial class InputManager : Node2D
         FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds);
         FactionHandDisplay.Current.CardSelected += HandleItemSelected;
         EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
+        // A card prompt is recallable for as long as it is open: the player can browse another faction's
+        // hand over the top of it, and the recall button draws this one back.
+        RecallablePrompts.Set(CardPromptRecall.Instance);
         // The Skip button now doubles as the "pass" affordance for choosing a card to play/activate.
         SelectionSkipButton.Current?.Show();
         EventBus.Instance.SelectionSkipped += OnPlayCardSkipped;
@@ -154,6 +157,7 @@ public partial class InputManager : Node2D
         // The trigger context is its own node now, so hiding the hand no longer takes it down with it.
         TriggerContextDisplay.Current?.Hide();
         EventBus.Emit(EventBus.SignalName.CardPromptClosed);
+        RecallablePrompts.Clear(CardPromptRecall.Instance);
         EventBus.Emit("CardSelected", cardId);
     }
 

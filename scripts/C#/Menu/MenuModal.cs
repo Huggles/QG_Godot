@@ -8,8 +8,9 @@ using Godot;
 /// an *inherited* scene of that shell: it overrides the root script with its own subclass and adds its
 /// contents under <c>%Box</c>, so the whole layout is editable in Godot.
 ///
-/// These are deliberately standalone rather than reusing <c>PresentationModal</c>: that one lives inside
-/// <c>user_interface.tscn</c> and only exists once a game has loaded, so it is unavailable on the menu.
+/// These are deliberately standalone rather than reusing the game's <c>ModalStack</c>: that one lives
+/// inside <c>user_interface.tscn</c> and only exists once a game has loaded, so it is unavailable on the
+/// menu.
 ///
 /// Unlike <see cref="ErrorPopup"/> this is NOT owned by an autoload: a menu modal is always dismissed
 /// before the scene changes, so it has no reason to outlive its parent.

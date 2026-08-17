@@ -270,9 +270,9 @@ public partial class CardPlayRound : GodotObject
     /// RequestOrder this replaced invented one (UK always before Soviet before US).
     ///
     /// Grouped by controlling peer, the same shape <see cref="OpeningDiscard"/> uses: groups run
-    /// concurrently, the factions inside a group one after another. A peer has a single
-    /// PresentationModal, so its own factions could not be prompted simultaneously anyway — and a
-    /// single-process game (the CLI, a hotseat) collapses to one group and stays fully sequential.
+    /// concurrently, the factions inside a group one after another. A peer is only ever asked one thing
+    /// at a time, so its own factions must not be prompted simultaneously — and a single-process game
+    /// (the CLI, a hotseat) collapses to one group and stays fully sequential.
     /// </summary>
     /// <param name="ask">Raises one faction's prompt. Given the turn's token so it can be withdrawn.</param>
     /// <param name="passed">

@@ -6,16 +6,16 @@ using System.Collections.Generic;
 /// In-game error overlay, built entirely in C# (same approach as DebugOverlay.BuildUI) so it needs
 /// no .tscn and no edit to user_interface.tscn.
 ///
-/// Deliberately NOT PresentationModal: that lives inside the per-player user_interface.tscn which
+/// Deliberately NOT the game's modal stack: that lives inside the per-player user_interface.tscn which
 /// only exists once a game has loaded, it is built for card grids rather than text, and
-/// PresentationModal.Current is itself a live null-deref source. This overlay has to work in the
+/// ModalStack.Current is itself a live null-deref source. This overlay has to work in the
 /// menu, during loading, and on a client whose UI failed to build — so it is owned by the
 /// ErrorReporter autoload and therefore survives ChangeSceneToFile.
 /// </summary>
 public partial class ErrorPopup : CanvasLayer
 {
     // The gameplay UI CanvasLayer sits at the default layer 1 and orders its children with z_index
-    // (PresentationModal 100, DebugOverlay 99). z_index never crosses CanvasLayers, so any
+    // (ModalStack 100, DebugOverlay 99). z_index never crosses CanvasLayers, so any
     // layer >= 2 wins; 128 is the top of the editor's conventional range.
     private const int OverlayLayer = 128;
 

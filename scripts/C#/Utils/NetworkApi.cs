@@ -558,7 +558,9 @@ public partial class NetworkApi : Node
     public void AbortInputRequest()
     {
         PendingLocalInput.CancelAll();
-        PresentationModal.Current?.CancelPending();
+        // The whole stack, not one modal: a prompt the player parked is invisible but still pending, and
+        // an info modal may be open beside or over it.
+        ModalStack.Current?.CancelAll();
 
         // Covers the peers that were only watching: their Execute() took the "Waiting on X" branch and
         // returned, so nothing local will ever clear their countdown.

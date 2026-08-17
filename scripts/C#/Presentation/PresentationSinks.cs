@@ -23,15 +23,15 @@ public interface IAnimationSink
     Task Start();
 }
 
-/// <summary>Player-facing messages and modals. Backed by <c>PlayerActionLabel</c>/<c>PresentationModal</c> on a GUI process.</summary>
+/// <summary>Player-facing messages and modals. Backed by <c>PlayerActionLabel</c>/<c>ModalStack</c> on a GUI process.</summary>
 public interface INotificationSink
 {
     void ShowActionText(string text, Faction faction = (Faction)(-1));
     void ShowActionText(string text, int duration, Faction faction = (Faction)(-1));
     void HideActionText();
 
-    /// <summary>Show a modal and complete when it is dismissed (or a selection is made). Never displays on headless.</summary>
-    Task ShowModal(List<PresentationItem> items, string title, bool requireSelection = false);
+    /// <summary>Show an info modal and complete when it is dismissed. Never displays on headless.</summary>
+    Task ShowModal(List<PresentationItem> items, string title);
 
     /// <summary>True when the local player controls <paramref name="faction"/>. Always false headless (server controls no faction).</summary>
     bool LocalPlayerControls(Faction faction);
@@ -58,13 +58,8 @@ public sealed class GodotNotificationSink : INotificationSink
     public void ShowActionText(string text, int duration, Faction faction = (Faction)(-1)) => PlayerActionLabel.ShowText(text, duration, faction);
     public void HideActionText() => PlayerActionLabel.HideText();
 
-    public async Task ShowModal(List<PresentationItem> items, string title, bool requireSelection = false)
-    {
-        if (requireSelection)
-            await PresentationModal.Current.ShowModal(items, title, true);
-        else
-            await PresentationModal.Current.ShowModal(items, title);
-    }
+    public Task ShowModal(List<PresentationItem> items, string title)
+        => ModalStack.Current.Show(ModalConfig.Display(title, items).WithAutoDismiss());
 
     public bool LocalPlayerControls(Faction faction)
         => PlayerScene.Current?.ControlledFactions.Contains(faction) ?? false;
@@ -100,7 +95,7 @@ public sealed class NullNotificationSink : INotificationSink
     public void ShowActionText(string text, Faction faction = (Faction)(-1)) { }
     public void ShowActionText(string text, int duration, Faction faction = (Faction)(-1)) { }
     public void HideActionText() { }
-    public Task ShowModal(List<PresentationItem> items, string title, bool requireSelection = false) => Task.CompletedTask;
+    public Task ShowModal(List<PresentationItem> items, string title) => Task.CompletedTask;
     public bool LocalPlayerControls(Faction faction) => false;
 }
 

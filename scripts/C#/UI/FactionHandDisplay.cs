@@ -54,7 +54,9 @@ public partial class FactionHandDisplay : Control
 		{
 			if (!IsInstanceValid(this) || !IsInsideTree()) return;
 			
-			PresentationModal.Current.ShowModalPersistent(PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]), "Select a faction");
+			_ = ModalStack.Current.Show(
+				ModalConfig.Display("Select a faction", PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]))
+					.WithDedupeKey("debug:select-faction"));
 		};
 		TestButton.Pressed += onTestButtonPressed;
 	}

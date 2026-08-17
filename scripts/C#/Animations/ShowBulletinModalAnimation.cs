@@ -21,7 +21,7 @@ public class ShowBulletinModalAnimation : ChangeEventAnimation
 
     protected override async Task AnimateForTargetFaction()
     {
-        // Through the notification sink rather than PresentationModal.Current directly, so a headless
+        // Through the notification sink rather than ModalStack.Current directly, so a headless
         // server no-ops instead of dereferencing a UI singleton it never created. Routes to
         // ModalConfig.Display(...).WithAutoDismiss(): fade in, GameSettings.DurationLong, fade out.
         await PresentationServices.Notification.ShowModal(

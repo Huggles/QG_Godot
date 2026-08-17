@@ -60,17 +60,6 @@ public partial class GameManager : Node
     public Camera2D MyCamera => GetViewport().GetCamera2D();
     public InputManager MyInputManager => playerStates.Count > 0 ? playerStates[0].InputManager : null;
     
-    public List<string> UserInterfaceElementsLoaded = new List<string>();
-    public List<string> UserInterfaceElementsToLoad = new List<string> {
-        "PlayerActionLabel",
-        "InputOptionsList",
-        "FactionHandDisplay",
-        "FactionsContainer",
-        "PresentationModal",
-        "PlayerInfoDisplay"
-    };
-    
-
     public override void _Ready()
     {
         Instance = this;

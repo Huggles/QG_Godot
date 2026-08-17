@@ -102,13 +102,17 @@ public partial class FactionInfoRow : Control
 		DeckState deckState = DeckState.ForFaction(Faction);
 		List<int> playedCardIds = [.. deckState.StatusCardIds, .. deckState.ResponseCardIds];
 		List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(playedCardIds, false);            
-		PresentationModal.Current.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Played Cards", false);
+		_ = ModalStack.Current.Show(
+			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Played Cards", presentationItems)
+				.WithDedupeKey($"played-cards:{Faction}"));
 	}
 	
 	private void OnDiscardDeckButtonPressed()
 	{   
 		List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardedCardIds, false);
-		PresentationModal.Current.ShowModal(presentationItems, $"{FactionState.FactionData.FactionAdjactiveLabel} Discard Deck", false);
+		_ = ModalStack.Current.Show(
+			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Discard Deck", presentationItems)
+				.WithDedupeKey($"discard-deck:{Faction}"));
 	}
 	private void SetModulation()
 	{        

@@ -444,7 +444,7 @@ public abstract partial class InputRequest
         public override async Task Handle()
         {
             var items = PresentationItem.ForFactions(TargetFactions);
-            ModalResult result = await PresentationModal.Current.Show(
+            ModalResult result = await ModalStack.Current.Show(
                 ModalConfig.SelectOne("Select a faction", items));
             if (result.WasCancelled)
             {
@@ -478,7 +478,7 @@ public abstract partial class InputRequest
             var items = TargetOptionLabels
                 .Select((label, i) => (PresentationItem)new PresentationItemTextButton(TargetOptionIds[i], label, true))
                 .ToList();
-            ModalResult result = await PresentationModal.Current.Show(ModalConfig.SelectOne(ModalTitle, items));
+            ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectOne(ModalTitle, items));
             if (result.WasCancelled)
             {
                 WasSkipped = true;
@@ -498,7 +498,7 @@ public abstract partial class InputRequest
         public override async Task Handle()
         {
             var items = PresentationItemCard.FromCardIds(TargetCardIds, true);
-            ModalResult result = await PresentationModal.Current.Show(
+            ModalResult result = await ModalStack.Current.Show(
                 ModalConfig.Reorder("Reorder the top cards of your draw deck", items));
             ResponseCardIds = result.WasCancelled ? new List<int>(TargetCardIds) : result.SelectedItems;
         }

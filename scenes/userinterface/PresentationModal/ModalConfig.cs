@@ -19,8 +19,22 @@ public class ModalConfig
 
     public bool AutoDismiss { get; private set; } = false;
 
+    /// <summary>This modal's identity, or null when it does not deduplicate. See <see cref="WithDedupeKey"/>.</summary>
+    public string DedupeKey { get; private set; }
+
     public bool ShowApplyButton => Mode != ModalSelectionMode.Display;
     public bool ShowCancelButton => MinSelections == 0 && !AutoDismiss;
+
+    /// <summary>
+    /// Whether this modal offers the "Hide" button, which puts the prompt aside without answering it so
+    /// the player can look at the board and bring it back from the bottom-left menu.
+    ///
+    /// A selection prompt is exactly what needs it — the mandatory ones (<see cref="SelectExactly"/>,
+    /// required <see cref="SelectOne"/>, <see cref="Reorder"/>) have no Cancel button at all, so this is
+    /// their only way out that is not an answer. An info modal has nothing to come back to, and an
+    /// auto-dismissing one is gone before you could recall it.
+    /// </summary>
+    public bool ShowParkButton => Mode != ModalSelectionMode.Display && !AutoDismiss;
 
     private ModalConfig() { }
 
@@ -49,6 +63,24 @@ public class ModalConfig
     /// <summary>Place all items in a chosen order. Apply enabled only when all items are placed. No Cancel.</summary>
     public static ModalConfig Reorder(string title, List<PresentationItem> items)
         => new ModalConfig { Title = title, Items = items, Mode = ModalSelectionMode.Reorder, MinSelections = items.Count, MaxSelections = items.Count };
+
+    /// <summary>
+    /// Give this modal an identity, so pressing the button that opens it again while it is still up
+    /// toggles it shut rather than stacking an identical copy beside it. Two configs carrying the same
+    /// key are the same modal.
+    ///
+    /// Info modals only, and enforced here rather than left to the stack: deduplicating an input request
+    /// would hand the second caller the *first* request's answer, and the host would sit waiting on a
+    /// response for its own request that never comes.
+    /// </summary>
+    public ModalConfig WithDedupeKey(string key)
+    {
+        if (Mode != ModalSelectionMode.Display)
+            throw new System.InvalidOperationException(
+                $"Only an info modal may carry a dedupe key; this one is {Mode}.");
+        DedupeKey = key;
+        return this;
+    }
 
     public ModalConfig WithApplyLabel(string label) { ApplyLabel = label; return this; }
     public ModalConfig WithCancelLabel(string label) { CancelLabel = label; return this; }

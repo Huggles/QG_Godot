@@ -24,8 +24,8 @@ public static class OpeningDiscard
         if (numberOfCards <= 0) return;
 
         // Grouped by controlling peer, keeping PlayableFactions order inside each group: one player's
-        // factions are asked one after another (a peer has a single PresentationModal, so they could
-        // not overlap anyway), while different players are asked at the same time.
+        // factions are asked one after another (a peer is only ever asked one thing at a time, so they
+        // must not overlap), while different players are asked at the same time.
         List<IGrouping<int, Faction>> byPeer = StaticGameData.PlayableFactions
             .GroupBy(PlayerFactionRegistry.GetPeerIdForFaction)
             .ToList();

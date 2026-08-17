@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="1_bj75k"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
-[ext_resource type="PackedScene" uid="uid://dfqs0a11viijb" path="res://scenes/userinterface/PresentationModal/PresentationModal.tscn" id="3_oxwje"]
+[ext_resource type="Script" uid="uid://cv2ogjvefody7" path="res://scenes/userinterface/PresentationModal/ModalStack.cs" id="3_oxwje"]
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="4_dvfjj"]
 [ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://scenes/userinterface/FactionInfo/FactionsContainer.tscn" id="5_8bdsb"]
 [ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="6_x05kf"]
@@ -39,8 +39,39 @@ offset_bottom = -347.0
 [node name="InputTimerDisplay" parent="." unique_id=2116314957 instance=ExtResource("17_inptmr")]
 z_index = 4096
 
-[node name="PresentationModal" parent="." unique_id=78458452 instance=ExtResource("3_oxwje")]
+[node name="ModalStack" type="Control" parent="." unique_id=78458452]
 z_index = 100
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_oxwje")
+
+[node name="ModalGutter" type="MarginContainer" parent="ModalStack" unique_id=78458453]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_top = 200
+theme_override_constants/margin_right = 200
+theme_override_constants/margin_bottom = 200
+
+[node name="ModalCenter" type="CenterContainer" parent="ModalStack/ModalGutter" unique_id=78458454]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ModalRow" type="HBoxContainer" parent="ModalStack/ModalGutter/ModalCenter" unique_id=78458455]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 40
 
 [node name="PlayerAction" parent="." unique_id=836962227 instance=ExtResource("4_dvfjj")]
 offset_bottom = -942.0

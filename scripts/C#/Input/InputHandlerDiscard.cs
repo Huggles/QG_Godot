@@ -38,7 +38,7 @@ public partial class InputHandlerDiscard
             ? ModalConfig.SelectExactly(title, presentationItems, minimumDiscards)
             : ModalConfig.SelectMany(title, presentationItems, minimumDiscards);
 
-        ModalResult result = await PresentationModal.Current.Show(config);
+        ModalResult result = await ModalStack.Current.Show(config);
         return result.WasCancelled ? new List<int>() : result.SelectedItems;
     }
 }

@@ -23,7 +23,7 @@ public class ShowDiscardModalAnimation : ShowCardsModalAnimation
             return;
 
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(_cardIds, false);
-        await PresentationModal.Current.ShowModal(presentationItems, _title);
+        await ModalStack.Current.Show(ModalConfig.Display(_title, presentationItems).WithAutoDismiss());
     }
 
     protected override async Task AnimateForEnemyFaction()

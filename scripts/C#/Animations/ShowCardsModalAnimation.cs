@@ -15,6 +15,6 @@ public class ShowCardsModalAnimation : ChangeEventAnimation
     protected override async Task AnimateForTargetFaction()
     {
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(_cardIds, false);
-        await PresentationModal.Current.ShowModal(presentationItems, _title);
+        await ModalStack.Current.Show(ModalConfig.Display(_title, presentationItems).WithAutoDismiss());
     }
 }

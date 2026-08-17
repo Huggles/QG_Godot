@@ -56,6 +56,10 @@ public partial class EventBus : GodotObject
     /// <summary>The open card prompt resolved (a card was chosen, passed or the host abandoned it).</summary>
     [Signal] public delegate void CardPromptClosedEventHandler();
 
+    /// <summary>What the recall button can bring back changed — a prompt was parked, recalled or
+    /// resolved. See <see cref="RecallablePrompts"/>.</summary>
+    [Signal] public delegate void RecallablePromptChangedEventHandler();
+
     [Signal] public delegate void CardsDrawnEventHandler(int faction, int numberOfCards);
     [Signal] public delegate void CardsDiscardedEventHandler(int faction, int numberOfCards);
 

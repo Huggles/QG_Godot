@@ -14,6 +14,7 @@ public partial class AssetRepository : Node
     public static readonly PackedScene UnitScenePacked = GD.Load<PackedScene>("res://scenes/Units/Unit.tscn");    
     public static readonly PackedScene GameHistoryItemScenePackaged = GD.Load<PackedScene>("res://scenes/userinterface/History/game_history_item.tscn");
     public static readonly PackedScene MarginTextureButtonScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/MarginTextureButton.tscn");
+    public static readonly PackedScene PresentationModalScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/PresentationModal/PresentationModal.tscn");
     public static readonly Texture2D ArmySprite = GD.Load<Texture2D>(ArmySpritePath);
     public static readonly Texture2D NavySprite = GD.Load<Texture2D>(NavySpritePath);    
     public static readonly Texture2D StraightIcon = GD.Load<Texture2D>("res://assets/textures/Other/StraightIcon.png");

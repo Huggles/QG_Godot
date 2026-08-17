@@ -175,7 +175,7 @@ first card any of them chooses.
 
 - Candidates are grouped by controlling peer (`PlayerFactionRegistry.GetPeerIdForFaction`), the same
   shape `OpeningDiscard` uses. Groups run concurrently; the factions inside a group run in sequence,
-  because a peer has one `PresentationModal`. **A single-process game — the CLI, a hotseat — collapses
+  because a peer is only ever asked one thing at a time. **A single-process game — the CLI, a hotseat — collapses
   to one group and stays fully sequential**, which is why `.qgc` scripts still drive one prompt at a time.
 - The first card chosen cancels the turn's `CancellationTokenSource`. Every still-open prompt is
   withdrawn through `NetworkApi.SendInputRequest`'s `withdrawToken`, which clears the host's awaiter
@@ -553,7 +553,7 @@ new CardStep(this, async() => {
 
     // Use runtime results from the prerequisite if needed
     List<PresentationItem> items = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-    await PresentationModal.Current.ShowModal(items, "Discarded cards");
+    await ModalStack.Current.Show(ModalConfig.Display("Discarded cards", items).WithAutoDismiss());
 
     // Main action
     int countryId = await new SelectCountryHandler(targets.ToCountryIds()).Handle();

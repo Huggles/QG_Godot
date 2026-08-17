@@ -25,12 +25,8 @@ public partial class InputHandlerDiscardHand : Node
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(handCardIds, true);
 
         // Show modal with multi-select enabled
-        Variant[] response = await PresentationModal.Current.ShowModalMultiSelect(
-            presentationItems, 
-            title, 
-            0
-        );
-        List<int> selectedCardIds = response[0].As<PresentationModal.PresentationItemResponse>().SelectedItems;
-        return selectedCardIds;
+        ModalResult result = await ModalStack.Current.Show(
+            ModalConfig.SelectMany(title, presentationItems, 0));
+        return result.WasCancelled ? new List<int>() : result.SelectedItems;
     }
 }

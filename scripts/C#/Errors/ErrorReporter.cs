@@ -388,7 +388,7 @@ public partial class ErrorReporter : Node
         Guard.Try(() => NetworkApi.Instance?.CancelPendingInputRequest(), "cancel:inputRequest");
         Guard.Try(() => NetworkApi.Instance?.AbortRemoteInput(), "cancel:remoteInput");
         Guard.Try(() => AnimationQueue.Instance?.CancelAll(), "cancel:animationQueue");
-        Guard.Try(() => PresentationModal.Current?.CancelPending(), "cancel:presentationModal");
+        Guard.Try(() => ModalStack.Current?.CancelAll(), "cancel:modalStack");
 
         // A timed-out request still awaiting Retry/Skip is one more dangling awaiter. Resolve it as
         // Skip: the recovery path is restarting the loop from the step boundary, so re-sending the

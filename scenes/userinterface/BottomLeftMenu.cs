@@ -47,6 +47,7 @@ public partial class BottomLeftMenu : Control
 
 		EventBus.Instance.CardPromptOpened += OnCardPromptOpened;
 		EventBus.Instance.CardPromptClosed += OnCardPromptClosed;
+		EventBus.Instance.RecallablePromptChanged += RefreshActiveInputRequestButton;
 
 		AddFactionButtons();
 		RefreshActiveInputRequestButton();
@@ -61,6 +62,7 @@ public partial class BottomLeftMenu : Control
 			EventBus.Instance.UserInterfaceReady -= AddFactionButtons;
 			EventBus.Instance.CardPromptOpened -= OnCardPromptOpened;
 			EventBus.Instance.CardPromptClosed -= OnCardPromptClosed;
+			EventBus.Instance.RecallablePromptChanged -= RefreshActiveInputRequestButton;
 		}
 	}
 
@@ -129,24 +131,35 @@ public partial class BottomLeftMenu : Control
 		// FactionState, which is null until the game state has arrived.
 		FactionState factionState = FactionState.ForEnum(faction);
 		DeckState deckState = factionState?.DeckState;
-
-		if (_browsingFaction == faction)
-		{	
-			return;
-		}
-		if(InputManager.CurrentCardPrompt != null)
-		{
-			if (faction == InputManager.CurrentCardPrompt.Faction && InputManager.CurrentCardPrompt.DisplayCardIds.Except(factionState.DeckState.HandCardIds).ToList().Count == 0)
-			{
-				CloseBrowsing();
-				return;
-			}
-		}
-		
+		// Hoisted above the toggle branches, which both read the hand: the second one dereferenced
+		// factionState directly and would NRE before the game state arrived.
 		if (deckState == null)
 		{
 			return;
 		}
+
+		// Pressing the card back of the hand already on the display puts it away again. This used to bail
+		// out instead of toggling, which left the button dead on the second press — and toggling off is now
+		// how a player gets back a prompt that browsing auto-parked.
+		if (_browsingFaction == faction)
+		{
+			CloseBrowsing();
+			return;
+		}
+
+		// The open card prompt is already showing exactly this hand, so there is nothing to browse to.
+		if (InputManager.CurrentCardPrompt != null
+			&& faction == InputManager.CurrentCardPrompt.Faction
+			&& !InputManager.CurrentCardPrompt.DisplayCardIds.Except(deckState.HandCardIds).Any())
+		{
+			CloseBrowsing();
+			return;
+		}
+
+		// FactionHandDisplay sits below the modal band, so a hand browsed while a prompt modal is up would
+		// be drawn behind it. Put the prompt aside instead — the recall button brings it back, and parking
+		// never answers it.
+		ModalStack.Current?.ParkTopRequest();
 
 		_browsingFaction = faction;
 		FactionHandDisplay.Current.Show(deckState.HandCardIds, faction, new List<int>());
@@ -155,20 +168,24 @@ public partial class BottomLeftMenu : Control
 	/// <summary>
 	/// Leaves browsing mode: hands the display back to the open card prompt if there is one, so a
 	/// player who looked away mid-prompt gets their actual choices back rather than a dead hand.
+	/// Failing that, gives back a modal prompt that browsing auto-parked to make room for itself.
 	/// </summary>
 	private void CloseBrowsing()
 	{
 		_browsingFaction = Faction.NONE;
-		if (!InputManager.ShowCurrentCardPrompt())
+		if (InputManager.ShowCurrentCardPrompt())
 		{
-			FactionHandDisplay.Current.Hide();
+			return;
 		}
+
+		FactionHandDisplay.Current.Hide();
+		ModalStack.Current?.Recall();
 	}
 
 	private void OnActiveInputRequestButtonPressed()
 	{
 		_browsingFaction = Faction.NONE;
-		InputManager.ShowCurrentCardPrompt();
+		RecallablePrompts.Recall();
 	}
 
 	private void OnCardPromptOpened(int faction)
@@ -183,13 +200,16 @@ public partial class BottomLeftMenu : Control
 		RefreshActiveInputRequestButton();
 	}
 
+	/// <summary>
+	/// One button for every kind of prompt that can be brought back — an open card prompt drawn over by
+	/// browsing, or a modal prompt the player put aside. <see cref="RecallablePrompts"/> is the single
+	/// slot both register with, so this does not grow a branch per prompt kind.
+	/// </summary>
 	private void RefreshActiveInputRequestButton()
 	{
-		bool promptOpen = InputManager.CurrentCardPrompt != null;
-		ActiveInputRequestButton.Disabled = !promptOpen;
-		ActiveInputRequestButton.TooltipText = promptOpen
-			? "Show the cards you are being asked to choose from"
-			: "No card choice is open";
+		IRecallablePrompt prompt = RecallablePrompts.Current;
+		ActiveInputRequestButton.Disabled = prompt == null;
+		ActiveInputRequestButton.TooltipText = prompt?.RecallTooltip ?? "Nothing to bring back";
 	}
 
 	public void OnVisibilityButtonPressed()
