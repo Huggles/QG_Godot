@@ -20,6 +20,32 @@ theme_override_constants/margin_bottom = 50
 custom_minimum_size = Vector2(400, 200)
 layout_mode = 2
 
+[node name="WindowButtons" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=91184756]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="ParkButton" type="Button" parent="MarginContainer/VBoxContainer/WindowButtons" unique_id=91184755]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = ExtResource("3_6yadj")
+theme_override_styles/hover = ExtResource("2_6kmdm")
+text = "−"
+
+[node name="ExitButton" type="Button" parent="MarginContainer/VBoxContainer/WindowButtons" unique_id=91184754]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = ExtResource("3_6yadj")
+theme_override_styles/hover = ExtResource("2_6kmdm")
+text = "×"
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=644509033]
 layout_mode = 2
 alignment = 1
@@ -55,22 +81,3 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_styles/normal = ExtResource("3_6yadj")
 theme_override_styles/hover = ExtResource("2_6kmdm")
 text = "Confirm"
-
-[node name="ExitButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=91184754]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_styles/normal = ExtResource("3_6yadj")
-theme_override_styles/hover = ExtResource("2_6kmdm")
-text = "Quit"
-
-[node name="ParkButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=91184755]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_styles/normal = ExtResource("3_6yadj")
-theme_override_styles/hover = ExtResource("2_6kmdm")
-text = "Hide"

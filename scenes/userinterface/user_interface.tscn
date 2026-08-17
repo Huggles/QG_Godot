@@ -70,7 +70,6 @@ layout_mode = 2
 [node name="ModalRow" type="HBoxContainer" parent="ModalStack/ModalGutter/ModalCenter" unique_id=78458455]
 unique_name_in_owner = true
 layout_mode = 2
-alignment = 1
 theme_override_constants/separation = 40
 
 [node name="PlayerAction" parent="." unique_id=836962227 instance=ExtResource("4_dvfjj")]

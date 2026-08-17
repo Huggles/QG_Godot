@@ -81,7 +81,8 @@ public partial class PresentationModal : PanelContainer, LoadableUI
         {
             ParkButton.Pressed += OnParkButtonPressed;
             ParkButton.Visible = false;
-            ParkButton.TooltipText = "Put this aside — bring it back with the button in the bottom-left menu.";
+            // Names the action, because the button itself is now just a glyph in the title bar.
+            ParkButton.TooltipText = "Hide — put this aside without answering it, and bring it back from the bottom-left menu.";
         }
     }
 
@@ -131,7 +132,10 @@ public partial class PresentationModal : PanelContainer, LoadableUI
         ConfirmButton.Text = config.ApplyLabel;
         ConfirmButton.Disabled = config.MinSelections > 0;
         ExitButton.Visible = config.ShowCancelButton;
-        ExitButton.Text = config.CancelLabel;
+        // The label becomes the tooltip, not the caption: this is the "×" in the title bar now, and
+        // writing "Close" over it would replace the glyph with a word. Hovering still tells the player
+        // whether this closes, cancels or quits.
+        ExitButton.TooltipText = config.CancelLabel;
         if (ParkButton != null)
             ParkButton.Visible = config.ShowParkButton;
 
@@ -370,6 +374,20 @@ public partial class PresentationModal : PanelContainer, LoadableUI
     {
         if (_closed) return;
         Close(ModalResult.Cancelled);
+    }
+
+    /// <summary>
+    /// Close this to free room for a higher-priority modal. Hidden at once rather than faded out, because
+    /// a container still reserves space for a visible child: left fading, this would keep occupying the
+    /// width it was closed to give away, and the row would overlap for the length of the fade.
+    /// </summary>
+    internal void DismissForSpace()
+    {
+        if (_closed) return;
+        _activeTween?.Kill();
+        Visible = false;
+        _placed = false;
+        Dismiss();
     }
 
     private void Close(ModalResult result)
