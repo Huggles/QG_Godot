@@ -29,7 +29,11 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
                 List<int> fullDeck = new List<int>(reorderedIds);
                 fullDeck.AddRange(deck.DeckCardIds.Skip(peekCount));
 
-                ReorderDeckChangeEvent reorderEvent = BuildChangeEvent(new ReorderDeckChangeEvent(Faction, fullDeck));
+                // fullDeck is the whole deck because ExecuteAsync replaces DeckCardIds outright, so the
+                // event has to be told how much of it the player actually rearranged — otherwise the
+                // history reports a four-card peek as a reorder of every card in the deck.
+                ReorderDeckChangeEvent reorderEvent = BuildChangeEvent(
+                    new ReorderDeckChangeEvent(Faction, fullDeck) { ReorderedFromTop = peekCount });
                 await CardPlayPool.DoChangeEvent(reorderEvent);
             }).WithGuidance("Examine and reorder the top 4 cards of your draw deck")
         };

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b81m75p4xp4nu"
-path="res://.godot/imported/PlayedCardsIcon.png-913fd940605bfc4b0f7a13f7cc598845.ctex"
+path="res://.godot/imported/PlayedCardsIcon.png-b5c230cfe7e6e34cb2f2fb2b47e03286.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/Other/PlayedCardsIcon.png"
-dest_files=["res://.godot/imported/PlayedCardsIcon.png-913fd940605bfc4b0f7a13f7cc598845.ctex"]
+source_file="res://assets/textures/Other/Icons/PlayedCardsIcon.png"
+dest_files=["res://.godot/imported/PlayedCardsIcon.png-b5c230cfe7e6e34cb2f2fb2b47e03286.ctex"]
 
 [params]
 

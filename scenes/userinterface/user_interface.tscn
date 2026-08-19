@@ -23,7 +23,7 @@
 [ext_resource type="PackedScene" uid="uid://b2aymnt6sg5po" path="res://scenes/userinterface/MarginTextureButton.tscn" id="22_x2nnb"]
 [ext_resource type="Texture2D" uid="uid://b5evjrup5daot" path="res://assets/textures/Other/eye_icon.png" id="23_eyeicon"]
 [ext_resource type="Texture2D" uid="uid://bqyf0w6t7iv32" path="res://assets/textures/Other/eye_icon_pressed.png" id="24_eyeiconp"]
-[ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/PlayedCardsIcon.png" id="25_playedcards"]
+[ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/Icons/PlayedCardsIcon.png" id="25_playedcards"]
 [ext_resource type="PackedScene" uid="uid://blt1histpop01" path="res://scenes/userinterface/History/HistoryDetailPopup.tscn" id="26_histpop"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]

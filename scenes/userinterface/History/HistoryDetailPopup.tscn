@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://blt1histpop01"]
+[gd_scene format=3 uid="uid://blt1histpop01"]
 
 [ext_resource type="Script" uid="uid://no1lswlgrd1o" path="res://scripts/C#/UI/HistoryDetailPopup.cs" id="1_hdpop"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_hdcard"]

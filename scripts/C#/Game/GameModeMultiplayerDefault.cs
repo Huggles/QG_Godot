@@ -425,6 +425,8 @@ public partial class GameModeMultiplayerDefault : IGameMode
             List<int> shuffledOrder = new List<int>(deckState.DeckCardIds);
             GameRandom.Shuffle(shuffledOrder);
 
+            // ReorderedFromTop is left at its -1 default on purpose: this is a whole-deck shuffle, and
+            // that is what makes the history say so rather than naming a reorder depth.
             await new ReorderDeckChangeEvent(faction, shuffledOrder) { IsTrigger = false }.Apply();
         }
     }

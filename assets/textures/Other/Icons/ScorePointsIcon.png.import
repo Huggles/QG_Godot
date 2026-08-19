@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://deodddhcuupnq"
-path="res://.godot/imported/DeckIcon.png-de99135cfcec49cd25a307f8038d29c5.ctex"
+uid="uid://bibc0k0qeeku5"
+path="res://.godot/imported/ScorePointsIcon.png-cc04ca58b033b4ea03f2c8e18a017558.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/Other/DeckIcon.png"
-dest_files=["res://.godot/imported/DeckIcon.png-de99135cfcec49cd25a307f8038d29c5.ctex"]
+source_file="res://assets/textures/Other/Icons/ScorePointsIcon.png"
+dest_files=["res://.godot/imported/ScorePointsIcon.png-cc04ca58b033b4ea03f2c8e18a017558.ctex"]
 
 [params]
 

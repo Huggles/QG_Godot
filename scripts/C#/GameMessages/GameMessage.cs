@@ -137,7 +137,7 @@ public abstract partial class GameMessage : GodotObject
             ChangeRoundChangeEventDto d       => new ChangeRoundChangeEvent(d.NewTurn),
             RecycleCardChangeEventDto d        => new RecycleCardChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardId, d.Destination),
             SpendPlayActionChangeEventDto d    => new SpendPlayActionChangeEvent(d.TriggeringFaction),
-            ReorderDeckChangeEventDto d        => new ReorderDeckChangeEvent(d.TriggeringFaction, d.ReorderedCardIds),
+            ReorderDeckChangeEventDto d        => new ReorderDeckChangeEvent(d.TriggeringFaction, d.ReorderedCardIds) { ReorderedFromTop = d.ReorderedFromTop },
             GrantSupplyChangeEventDto d         => new GrantSupplyChangeEvent(d.TriggeringFaction, d.UnitIds),
             RegisterBulletinCardChangeEventDto d => new RegisterBulletinCardChangeEvent(d.TargetFaction, d.CardId, d.MutatorClassName, d.FromRound, d.ToRound),
 

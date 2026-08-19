@@ -9,10 +9,13 @@ public static class GameMessageDisplay
 {
     // The badge icons. Paths rather than Texture2D so nothing here loads a texture on a headless
     // server — GameHistoryItem resolves them, and it only ever runs with a UI.
-    private const string IconCards = "res://assets/textures/Other/PlayedCardsIcon.png";
-    private const string IconDeck  = "res://assets/textures/Other/DeckIcon.png";
-    private const string IconArmy  = "res://assets/textures/Units/QGArmyDetailed.png";
-    private const string IconNavy  = "res://assets/textures/Units/QGNavyDetailed.png";
+    private const string IconDraw            = "res://assets/textures/Other/Icons/PlayedCardsIcon.png";
+    private const string IconPlayCard        = "res://assets/textures/Other/Icons/PlayCardIcon.png";
+    private const string IconDiscard         = "res://assets/textures/Other/Icons/DiscardIcon.png";
+    private const string IconDiscardFromHand = "res://assets/textures/Other/Icons/DiscardFromHandIcon.png";
+    private const string IconScorePoints     = "res://assets/textures/Other/Icons/ScorePointsIcon.png";
+    private const string IconArmy            = "res://assets/textures/Units/QGArmyDetailed.png";
+    private const string IconNavy            = "res://assets/textures/Units/QGNavyDetailed.png";
 
     /// <summary>
     /// The icon drawn over the faction flag on a history badge, or null for a message that has no
@@ -26,12 +29,19 @@ public static class GameMessageDisplay
     {
         DeployUnitChangeEvent d               => DeployIcon(d),
 
-        DrawCardsChangeEvent                  => IconCards,
-        DrawCardByNameChangeEvent             => IconCards,
+        PlayCardChangeEvent                   => IconPlayCard,
 
-        DiscardHandCardsChangeEvent           => IconDeck,
-        ForceDiscardCardsChangeEvent          => IconDeck,
-        ForceDiscardHandCardsChangeEvent      => IconDeck,
+        DrawCardsChangeEvent                  => IconDraw,
+        DrawCardByNameChangeEvent             => IconDraw,
+
+        // Split on where the cards come from, which is what the two icons depict.
+        // ForceDiscardCardsChangeEvent discards off the top of the draw deck (DiscardTopCards); the
+        // other two take them out of the target's hand.
+        ForceDiscardCardsChangeEvent          => IconDiscard,
+        DiscardHandCardsChangeEvent           => IconDiscardFromHand,
+        ForceDiscardHandCardsChangeEvent      => IconDiscardFromHand,
+
+        ScorePointsChangeEvent                => IconScorePoints,
 
         _                                     => null,
     };

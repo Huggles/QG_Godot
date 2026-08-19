@@ -140,6 +140,8 @@ public class SpendPlayActionChangeEventDto : ChangeEventDto { }
 public class ReorderDeckChangeEventDto : ChangeEventDto
 {
     public List<int> ReorderedCardIds { get; set; }
+    /// <summary>-1 for a whole-deck shuffle. See ReorderDeckChangeEvent.ReorderedFromTop.</summary>
+    public int ReorderedFromTop { get; set; } = -1;
 }
 
 public class GrantSupplyChangeEventDto : ChangeEventDto
