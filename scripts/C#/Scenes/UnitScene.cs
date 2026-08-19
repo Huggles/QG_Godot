@@ -45,8 +45,12 @@ public partial class UnitScene : Node2D
 	/// </summary>
 	private Vector2 defaultTargetScale;
 
-	/// <summary>How much smaller a rebuild-in-place target is drawn than an ordinary one.</summary>
-	private const float SubduedTargetScaleFactor = 0.6f;
+	/// <summary>
+	/// How much smaller a rebuild-in-place target is drawn than an ordinary one. Well under half: the
+	/// country's own full-size marker is still on screen beside it, and at 0.6 the two read as the same
+	/// kind of target.
+	/// </summary>
+	private const float SubduedTargetScaleFactor = 0.45f;
 
 	public override void _Ready()
 	{

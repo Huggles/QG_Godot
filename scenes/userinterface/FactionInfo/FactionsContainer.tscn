@@ -1,10 +1,25 @@
-[gd_scene load_steps=3 format=3 uid="uid://bmfob702ugwps"]
+[gd_scene format=3 uid="uid://bmfob702ugwps"]
 
 [ext_resource type="Script" uid="uid://c7gs15duynas5" path="res://scenes/userinterface/FactionInfo/FactionsContainer.cs" id="1_s20bd"]
+[ext_resource type="Script" uid="uid://4ocaaxy68mc8" path="res://scenes/userinterface/FactionInfo/TeamScoreDisplay.cs" id="2_team"]
+[ext_resource type="Texture2D" uid="uid://dy33p3st34r4r" path="res://assets/factions/AxisFlag.png" id="3_axis"]
+[ext_resource type="Texture2D" uid="uid://dq2mrgd1e7e6" path="res://assets/factions/AlliesFlag.png" id="4_allies"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t8s4d"]
 
-[node name="FactionsContainer" type="Control"]
+[sub_resource type="LabelSettings" id="LabelSettings_axis"]
+resource_local_to_scene = true
+font_size = 48
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_allies"]
+resource_local_to_scene = true
+font_size = 48
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[node name="FactionsContainer" type="Control" unique_id=144027662]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +28,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_s20bd")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="Panel" parent="." unique_id=82975379]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -24,7 +39,7 @@ offset_bottom = 75.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_t8s4d")
 
-[node name="FactionsHorizontalContainer" type="HBoxContainer" parent="Panel"]
+[node name="FactionsHorizontalContainer" type="HBoxContainer" parent="Panel" unique_id=1572403057]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(650, 75)
 layout_mode = 1
@@ -37,3 +52,65 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 10
 alignment = 1
+
+[node name="AxisTotal" type="TextureRect" parent="." unique_id=507668837]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 60)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 595.0
+offset_top = 1.0
+offset_right = 495.0
+offset_bottom = 61.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("3_axis")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("2_team")
+Team = 1
+
+[node name="ScoreLabel" type="Label" parent="AxisTotal" unique_id=697512589]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_axis")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AlliesTotal" type="TextureRect" parent="." unique_id=1900194688]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 60)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 735.0
+offset_top = 1.0
+offset_right = 585.0
+offset_bottom = 61.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("4_allies")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("2_team")
+Team = 2
+
+[node name="ScoreLabel" type="Label" parent="AlliesTotal" unique_id=884375566]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_allies")
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 
 
@@ -232,6 +233,20 @@ public static partial class StaticGameData
             FactionTeam.AXIS => new() { Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES },
             _ => new()
         };
+    }
+
+    /// <summary>
+    /// A team's running victory-point total — the number GameFlow's 30-point game-end check compares,
+    /// and what the Axis/Allies flags either side of the faction strip display.
+    ///
+    /// Guarded because the UI can ask before there is a game state to ask about: FactionState.ForEnum
+    /// dereferences MultiplayerSession.Instance.GameState, and returns null for a faction that is not
+    /// in the current state.
+    /// </summary>
+    public static int ScoreForTeam(FactionTeam team)
+    {
+        if (MultiplayerSession.Instance?.GameState == null) return 0;
+        return FactionsForTeam(team).Sum(faction => FactionState.ForEnum(faction)?.Score ?? 0);
     }
 
    

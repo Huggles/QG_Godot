@@ -27,17 +27,15 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
     }
 
     /// <summary>
-    /// The asked faction's own units standing on the offered countries. Clicking one answers with its
-    /// country (see UnitScene.OnMouseLeftClickOpaque), so this list is purely "which units are also a
-    /// way to point at an offered country".
+    /// Offered countries the asked faction already occupies — picking one rebuilds the piece standing
+    /// there rather than placing a new one. Empty when no faction was supplied.
     /// </summary>
-    private List<int> RebuildTargetUnitIds()
+    private List<CountryState> RebuildTargetCountries()
     {
-        if (selectingFaction == Faction.NONE) return new List<int>();
+        if (selectingFaction == Faction.NONE) return new List<CountryState>();
 
         return CountryState.ForIds(countryIds)
             .Where(country => country.HasUnit(selectingFaction))
-            .Select(country => country.Units[selectingFaction])
             .ToList();
     }
 
@@ -48,11 +46,23 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
         void onSkip() { tcs.TrySetResult(-1); }
 
         // Captured up front: the deploy that follows can move units, and the finally below has to clear
-        // the tag off exactly the units it was raised on.
-        List<int> rebuildTargetUnitIds = RebuildTargetUnitIds();
+        // the tags off exactly the countries and units they were raised on.
+        List<CountryState> rebuildCountries = RebuildTargetCountries();
+        List<int> rebuildUnitIds = rebuildCountries.Select(country => country.Units[selectingFaction]).ToList();
 
+        // RebuildTarget BEFORE Clickable: adding Clickable is what makes CountryScene draw the marker,
+        // and it reads this tag to decide whether to draw the ordinary or the subdued one.
+        rebuildCountries.AddTag(Tag.RebuildTarget, Faction.ALL);
         CountryState.ForIds(countryIds).AddTag(Tag.Clickable, Faction.ALL);
-        UnitState.ForIds(rebuildTargetUnitIds).AddTag(Tag.RebuildTarget, Faction.ALL);
+        UnitState.ForIds(rebuildUnitIds).AddTag(Tag.RebuildTarget, Faction.ALL);
+
+        if (rebuildCountries.Count > 0)
+        {
+            DebugUtilities.PrintPeer(
+                $"Country selection for {selectingFaction}: {rebuildCountries.Count} of {countryIds.Count} " +
+                $"offered countries are rebuild-in-place targets " +
+                $"({string.Join(", ", rebuildCountries.Select(country => country.Label))})");
+        }
         InputManager.Current.EnableRayTraceCasting();
         SelectionSkipButton.Current?.Show();
 
@@ -75,8 +85,12 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
                 EventBus.Instance.CountryClicked -= onCountry;
                 EventBus.Instance.SelectionSkipped -= onSkip;
                 SelectionSkipButton.Current?.Hide();
+                // Clickable first: CountryScene.OnTagRemoved restyles a country that loses RebuildTarget
+                // while still clickable, so clearing them the other way round would repaint every
+                // rebuild target as an ordinary one on the way out.
                 CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
-                UnitState.ForIds(rebuildTargetUnitIds).RemoveTag(Tag.RebuildTarget, Faction.ALL);
+                rebuildCountries.RemoveTag(Tag.RebuildTarget, Faction.ALL);
+                UnitState.ForIds(rebuildUnitIds).RemoveTag(Tag.RebuildTarget, Faction.ALL);
                 InputManager.Current.DisableRayTraceCasting();
             }
         }

@@ -42,7 +42,7 @@ public partial class ClickableSprite : Area2D
 	/// action. Fainter so it reads as the unusual option without disappearing. See
 	/// <see cref="SetClickableSubdued"/>.
 	/// </summary>
-	public static Color SUBDUED_COLOR = new Color(1,1,1,.35f);
+	public static Color SUBDUED_COLOR = new Color(1,1,1,.3f);
 
 	public bool mouseOverOpaque = false;
 
@@ -79,6 +79,9 @@ public partial class ClickableSprite : Area2D
 	public void SetClickable()
 	{
 		_restingColor = SELECTABLE_COLOR;
+		// Assign before the tween: a sprite left faint by a previous subdued stint would otherwise stay
+		// faint for most of the 20-second leg it takes the wave to climb back.
+		Sprite.Modulate = _restingColor;
 		IsClickable = true;
 		CollisionShape.Disabled = false;
 		CollisionShape.Visible = true;
@@ -86,18 +89,24 @@ public partial class ClickableSprite : Area2D
 	}
 
 	/// <summary>
-	/// Clickable, but drawn as a secondary target: the same pulse over a fainter range. Used for the
-	/// rebuild-in-place deploy target on a unit, which is a rare option offered beside the ordinary
-	/// ones and must not compete with them for attention. Hover still brightens to HOVER_COLOR, so the
-	/// sprite is unambiguous once the mouse is actually on it.
+	/// Clickable, but drawn as a secondary target: a flat faint alpha with NO pulse. Used for the
+	/// rebuild-in-place deploy target on a unit, a rare option offered beside the ordinary ones that
+	/// must not compete with them for attention.
+	///
+	/// Deliberately not a fainter version of the wave. One leg of that wave lasts
+	/// DurationLongSeconds * 10 — twenty seconds at Normal speed — so a subdued target starting from
+	/// SELECTABLE_COLOR's 0.8 spent most of the selection at ordinary opacity and read as an ordinary
+	/// target. Holding still is also the clearer signal: the ordinary targets are the ones that
+	/// breathe. Hover still brightens to HOVER_COLOR, so the sprite is unambiguous under the mouse.
 	/// </summary>
 	public void SetClickableSubdued()
 	{
 		_restingColor = SUBDUED_COLOR;
+		StopAlphaWaveAnimation();
+		Sprite.Modulate = _restingColor;
 		IsClickable = true;
 		CollisionShape.Disabled = false;
 		CollisionShape.Visible = true;
-		SpriteAlphaWaveAnimation(0.12f, SUBDUED_COLOR.A);
 	}
 
 	public void SetUnclickable()
@@ -109,12 +118,12 @@ public partial class ClickableSprite : Area2D
 		StopAlphaWaveAnimation();
 	}
 
-	public void SpriteAlphaWaveAnimation(float minAlpha = 0.3f, float maxAlpha = 0.8f)
+	public void SpriteAlphaWaveAnimation()
 	{
 		_alphaWaveTween?.Kill();
 		_alphaWaveTween = GetTree().CreateTween().SetLoops();
-		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", minAlpha, GameSettings.DurationLongSeconds * 10);
-		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", maxAlpha, GameSettings.DurationLongSeconds * 10);
+		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.3, GameSettings.DurationLongSeconds * 10);
+		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.8, GameSettings.DurationLongSeconds * 10);
 	}
 
 	public void StopAlphaWaveAnimation()

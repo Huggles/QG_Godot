@@ -201,8 +201,8 @@ public partial class GameFlow : SingletonNode<GameFlow>
         // turn, so CurrentFaction / Round describe the turn that ended.
         if (CurrentFaction == Faction.UNITED_STATES)
         {
-            int axis   = StaticGameData.FactionsForTeam(FactionTeam.AXIS).Sum(f => FactionState.ForEnum(f).Score);
-            int allies = StaticGameData.FactionsForTeam(FactionTeam.ALLIES).Sum(f => FactionState.ForEnum(f).Score);
+            int axis   = StaticGameData.ScoreForTeam(FactionTeam.AXIS);
+            int allies = StaticGameData.ScoreForTeam(FactionTeam.ALLIES);
             bool pointLead  = Math.Abs(axis - allies) >= 30;
             bool roundLimit = Round >= MaxRound;
             if (pointLead || roundLimit)

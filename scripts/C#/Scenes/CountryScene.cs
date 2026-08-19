@@ -45,10 +45,23 @@ public partial class CountryScene : Node2D
         return countrySceneInstance;
     }
 
+    /// <summary>
+    /// CountrySprite's authored scale, captured before anything shrinks it, so the subdued rebuild
+    /// style is defined relative to whatever Country.tscn says.
+    /// </summary>
+    private Vector2 defaultTargetScale;
+
+    /// <summary>
+    /// How much smaller a rebuild-in-place target is drawn than an ordinary one. Matches
+    /// UnitScene.SubduedTargetScaleFactor so the two markers for the same space shrink together.
+    /// </summary>
+    private const float SubduedTargetScaleFactor = 0.45f;
+
     public override void _Ready()
     {
+        defaultTargetScale = CountrySprite.Scale;
         DebugUtilities.PrintPeer($"{this.StaticCountryData.Label}");
-        Name = CountryState.Name; 
+        Name = CountryState.Name;
         if (StaticCountryData.Texture != null)
             ApplyTexture();
 
@@ -86,6 +99,13 @@ public partial class CountryScene : Node2D
         {
             SetClickable();
         }
+        // Restyle rather than assume an order: SelectCountryHandler raises RebuildTarget before
+        // Clickable, but a caller that ever does it the other way round would otherwise leave the
+        // country drawn as an ordinary target.
+        else if (tag == Tag.RebuildTarget && CountryState.Tags.Has(Tag.Clickable, Faction.ALL))
+        {
+            SetClickable();
+        }
     }
 
     private void OnTagRemoved(Tag tag, Faction faction)
@@ -93,6 +113,11 @@ public partial class CountryScene : Node2D
         if (tag == Tag.Clickable)
         {
             SetUnclickable();
+        }
+        // Still an offered target, just no longer a rebuild — back to the ordinary style.
+        else if (tag == Tag.RebuildTarget && CountryState.Tags.Has(Tag.Clickable, Faction.ALL))
+        {
+            SetClickable();
         }
     }
 
@@ -192,15 +217,29 @@ public partial class CountryScene : Node2D
 
     public void SetClickable()
     {
-        CountrySprite.Position = 
-        new Vector2(0,0) 
-        + StaticCountryData.LabelTransformData.Position2D;        
+        CountrySprite.Position =
+        new Vector2(0,0)
+        + StaticCountryData.LabelTransformData.Position2D;
         CountrySprite.ShowSprite();
+
+        // A country the asked faction already occupies is a rebuild-in-place target: legal, but the rare
+        // option. This marker is the one doing the visual talking — it is authored larger than the unit
+        // marker and sits at the country label — so subduing only the unit's marker left the target
+        // looking exactly like an ordinary one. Both are subdued now.
+        if (CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL))
+        {
+            CountrySprite.Scale = defaultTargetScale * SubduedTargetScaleFactor;
+            CountrySprite.SetClickableSubdued();
+            return;
+        }
+
+        CountrySprite.Scale = defaultTargetScale;
         CountrySprite.SetClickable();
     }
 
     public void SetUnclickable()
     {
+        CountrySprite.Scale = defaultTargetScale;
         CountrySprite.HideSprite();
         CountrySprite.SetUnclickable();
     }

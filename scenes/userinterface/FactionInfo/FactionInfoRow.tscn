@@ -282,7 +282,7 @@ theme_override_constants/separation = 2
 
 [node name="ArmyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/ArmyCell" unique_id=1898280267]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 25)
+custom_minimum_size = Vector2(35, 25)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("9_army")
@@ -305,7 +305,7 @@ theme_override_constants/separation = 2
 
 [node name="NavyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/NavyCell" unique_id=1397946510]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 25)
+custom_minimum_size = Vector2(35, 25)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10_navy")
