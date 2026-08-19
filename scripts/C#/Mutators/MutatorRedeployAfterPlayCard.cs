@@ -42,8 +42,9 @@ public class MutatorRedeployAfterPlayCard : StepMutator
 
         // Deliberately computed after the removal has fully resolved, reactions included: GameAPI
         // .DeployUnitToCountry validates against the live Tag.Buildable and throws otherwise, and the
-        // removal itself changes that set — most obviously by freeing the country just vacated, which a
-        // pre-removal list could never offer (CanBuild requires !HasUnit(faction)).
+        // removal itself changes that set — most obviously by breaking the supply adjacency that made
+        // some other country buildable. (The country just vacated is offered either way now that a
+        // faction may build onto a country it already occupies — see CountryState.CanBuild.)
         List<int> destinationIds = isNavy
             ? CountryState.BuildableSeaIds(activeFaction)
             : CountryState.BuildableLandIds(activeFaction);

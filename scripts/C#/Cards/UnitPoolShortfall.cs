@@ -31,6 +31,11 @@ public static class UnitPoolShortfall
         Faction faction = deploy.TriggeringFaction;
         UnitType unitType = deploy.UnitType;              // derived from the destination country's type
 
+        // A "build that army again" onto a country the faction already occupies consumes no pool piece:
+        // GameAPI.DeployUnitToCountry redeploys the piece already standing there. An empty pool is no
+        // obstacle, so asking the player to give up a unit would be taking one for nothing.
+        if (deploy.CountryState.HasUnit(faction)) return;
+
         if (UnitPool.FactionHasAvailableUnits(faction, unitType)) return;
 
         List<int> candidates = UnitPool.RecallCandidates(

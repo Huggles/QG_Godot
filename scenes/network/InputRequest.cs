@@ -254,7 +254,10 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            int countryId = await new SelectCountryHandler(TargetCountryIds).Handle();
+            // TargetFaction so the handler can mark this faction's own units standing on the offered
+            // countries — a country it already occupies is a legal deploy target, and the marker for
+            // that goes on the unit. See SelectCountryHandler.RebuildTargetUnitIds.
+            int countryId = await new SelectCountryHandler(TargetCountryIds, TargetFaction).Handle();
             if (countryId == -1)
             {
                 WasSkipped = true;

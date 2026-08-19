@@ -103,13 +103,23 @@ public partial class CountryState : StateObject
     public List<CountryState> AdjacentCountryStates(Faction faction) => CountryState.ForIds(AdjacentCountryIds(faction));
 
     public bool HasHarbor(Faction faction) => ConnectedCountryStates.Any(connected => connected.IsLand && connected.OccupyingTeam == StaticGameData.FactionTeamForFaction(faction));    
-    public bool CanBuild(Faction faction) =>    
+    /// <summary>
+    /// A faction may deploy onto a country it ALREADY occupies — "build that army again". The piece
+    /// standing there is notionally returned to the pool and deployed again, so the board does not
+    /// change but the deploy is a real, reactable DeployUnitChangeEvent (GameAPI.DeployUnitToCountry
+    /// handles the mechanics). That is why neither of these tests <c>!HasUnit(faction)</c> any more.
+    ///
+    /// Everything else is unchanged: a non-home-space BUILD still needs an adjacent supplied unit, and
+    /// a sea space still needs a harbour. Rebuilding in place is a target that becomes legal, not a way
+    /// around the placement rules — a faction's own unit is not adjacent to itself, so an isolated unit
+    /// outside its home space still cannot rebuild where it stands.
+    /// </summary>
+    public bool CanBuild(Faction faction) =>
             CanRecruit(faction) && //Can faction recruit here (i.e., it's empty or occupied by their own team) AND
-            !HasUnit(faction) && //No unit of theirs is already here AND
             (!IsHomeSpace(faction) ? HasAdjacentSuppliedUnit(faction) : true) && //If it's not their home space, they must have an adjacent supplied unit AND
             (this.IsSea ? HasHarbor(faction) : true); //If it's a sea country, they must have a harbor (i.e., an adjacent land country occupied by their team)
 
-    public bool CanRecruit(Faction faction) => OccupyingTeam == FactionTeam.NONE || (OccupyingTeam == StaticGameData.FactionTeamForFaction(faction) && !HasUnit(faction));
+    public bool CanRecruit(Faction faction) => OccupyingTeam == FactionTeam.NONE || OccupyingTeam == StaticGameData.FactionTeamForFaction(faction);
     public bool HasUnit(Faction faction) => Units.ContainsKey(faction);
     public bool IsHomeSpace(Faction faction) => FactionState.ForEnum(faction).FactionData.HomeSpaceCountryState.Id == this.Id;
     public List<int> AdjacentUnits(Faction faction) => AdjacentCountryStates(faction).Where(ccs => ccs.Units.ContainsKey(faction)).Select(ccs => ccs.Units[faction]).ToList();

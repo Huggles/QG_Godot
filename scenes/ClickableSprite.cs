@@ -36,7 +36,18 @@ public partial class ClickableSprite : Area2D
 
 	public static Color HOVER_COLOR = new Color(0.5f, 1, 0.5f, .8f);
     public static Color SELECTABLE_COLOR = new Color(1,1,1,.8f);
+
+	/// <summary>
+	/// Resting colour for a secondary target — one offered alongside the ordinary ones for a rarer
+	/// action. Fainter so it reads as the unusual option without disappearing. See
+	/// <see cref="SetClickableSubdued"/>.
+	/// </summary>
+	public static Color SUBDUED_COLOR = new Color(1,1,1,.35f);
+
 	public bool mouseOverOpaque = false;
+
+	/// <summary>Alpha the sprite returns to when the mouse leaves. Lowered by the subdued mode.</summary>
+	private Color _restingColor = SELECTABLE_COLOR;
 
 	[Signal] public delegate void MouseLeftClickOnOpaqueEventHandler();
 	[Signal] public delegate void MouseRightClickOnOpaqueEventHandler();
@@ -67,26 +78,43 @@ public partial class ClickableSprite : Area2D
 
 	public void SetClickable()
 	{
+		_restingColor = SELECTABLE_COLOR;
 		IsClickable = true;
 		CollisionShape.Disabled = false;
 		CollisionShape.Visible = true;
 		SpriteAlphaWaveAnimation();
 	}
 
+	/// <summary>
+	/// Clickable, but drawn as a secondary target: the same pulse over a fainter range. Used for the
+	/// rebuild-in-place deploy target on a unit, which is a rare option offered beside the ordinary
+	/// ones and must not compete with them for attention. Hover still brightens to HOVER_COLOR, so the
+	/// sprite is unambiguous once the mouse is actually on it.
+	/// </summary>
+	public void SetClickableSubdued()
+	{
+		_restingColor = SUBDUED_COLOR;
+		IsClickable = true;
+		CollisionShape.Disabled = false;
+		CollisionShape.Visible = true;
+		SpriteAlphaWaveAnimation(0.12f, SUBDUED_COLOR.A);
+	}
+
 	public void SetUnclickable()
 	{
+		_restingColor = SELECTABLE_COLOR;
 		IsClickable = false;
 		CollisionShape.Disabled = true;
 		CollisionShape.Visible = false;
 		StopAlphaWaveAnimation();
 	}
 
-	public void SpriteAlphaWaveAnimation()
+	public void SpriteAlphaWaveAnimation(float minAlpha = 0.3f, float maxAlpha = 0.8f)
 	{
 		_alphaWaveTween?.Kill();
 		_alphaWaveTween = GetTree().CreateTween().SetLoops();
-		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.3, GameSettings.DurationLongSeconds * 10);
-		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.8, GameSettings.DurationLongSeconds * 10);
+		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", minAlpha, GameSettings.DurationLongSeconds * 10);
+		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", maxAlpha, GameSettings.DurationLongSeconds * 10);
 	}
 
 	public void StopAlphaWaveAnimation()
@@ -105,7 +133,9 @@ public partial class ClickableSprite : Area2D
     private void OnMouseExitSpriteOpaque()
     {
         DebugUtilities.PrintPeerFinest("OnMouseExitSpriteOpaque");
-        Sprite.Modulate = SELECTABLE_COLOR;
+        // The resting colour, not SELECTABLE_COLOR: a subdued target that has been hovered once must
+        // fall back to being subdued, otherwise it is left as prominent as an ordinary target.
+        Sprite.Modulate = _restingColor;
     }
 
 

@@ -120,27 +120,40 @@ public partial class GameAPI : Node
         DebugUtilities.PrintPeer($"Deploying unit of type {unitType} for faction {faction} to country {countryId} with deploy type {deployType}");
         CountryState countryState = GameState.CountryStateById[countryId];
 
-        // Throws GameRuleException when the pool is empty — same category as GameAPIException below, a
-        // rules mismatch thrown before any mutation. It never returns -1, so there is nothing to test
-        // for here. An interactive deploy is expected to have freed a piece first; see
-        // UnitPoolShortfall.ResolveBeforeDeploy.
-        int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
-        UnitState unitState = UnitState.ForId(unitId);
+        // "Build that army again": a deploy may target a country the faction already occupies. See
+        // CountryState.CanBuild. Notionally the piece standing there returns to the pool and is
+        // deployed again; in practice the SAME piece is redeployed, which is what makes the removal
+        // half a non-event — no ChangeEvent, no UnitRemoved signal, no removal animation, and no
+        // sprite to hide and re-show. It also means no pool piece is consumed and no pool scan runs,
+        // so the peers cannot disagree about which piece was used.
+        bool rebuildInPlace = countryState.Units.ContainsKey(faction);
 
         bool deployable = deployType == DeployType.BUILD ? countryState.Tags.Has(Tag.Buildable, faction) : countryState.Tags.Has(Tag.Recruitable, faction);
 
-        if (!countryState.IsCountryFull && deployable)
+        // Fullness cannot block a rebuild in place: the slot being filled is the faction's own, and it
+        // is the one being vacated. Checked before anything mutates, so a refused deploy leaves the
+        // board untouched.
+        if ((countryState.IsCountryFull && !rebuildInPlace) || !deployable)
         {
-            countryState.Units[faction] = unitState.Id;
-            unitState.CountryId = countryState.Id;
-            EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
-            _ = PresentationServices.Animation.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
-        } else {
             string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. Country is full or not deployable.";
             DebugUtilities.PrintPeer(exceptionMessage);
             throw new GameAPIException(exceptionMessage);
         }
-        
+
+        // Throws GameRuleException when the pool is empty — same category as GameAPIException above, a
+        // rules mismatch thrown before any mutation. It never returns -1, so there is nothing to test
+        // for here. An interactive deploy is expected to have freed a piece first; see
+        // UnitPoolShortfall.ResolveBeforeDeploy, which skips a rebuild in place for the reason above.
+        int unitId = rebuildInPlace
+            ? countryState.Units[faction]
+            : UnitPool.GetAvailableUnitForFaction(faction, unitType);
+        UnitState unitState = UnitState.ForId(unitId);
+
+        countryState.Units[faction] = unitState.Id;
+        unitState.CountryId = countryState.Id;
+        EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
+        _ = PresentationServices.Animation.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+
         return unitId;
     }
     public static void RemoveUnitFromCountry(int unitId, bool awaitAnimation = true)

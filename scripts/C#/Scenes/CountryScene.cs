@@ -121,6 +121,12 @@ public partial class CountryScene : Node2D
 
         if (position <= 0) return;
 
+        // A "build that army again" redeploys the piece already standing here, so DeployUnitAnimation
+        // calls this for a scene that never left. Re-parenting it to the node it is already under would
+        // only churn child order; SetUnitOnAvailablePosition has already returned the slot it holds, so
+        // the tween still plays on the right unit and the slot is not double-booked.
+        if (unitScene.GetParent() == UnitContainerNode) return;
+
         unitScene.GetParent().RemoveChild(unitScene);
         UnitContainerNode.AddChild(unitScene);
 
@@ -143,6 +149,12 @@ public partial class CountryScene : Node2D
 
     private int SetUnitOnAvailablePosition(UnitScene unitScene)
     {
+        // Already holding a slot here — a rebuild in place. Hand back the slot it has rather than
+        // booking it a second one, which would leave the same scene registered twice and leak the
+        // first slot when the unit is later removed.
+        int existing = GetUnitPosition(unitScene);
+        if (existing > 0) return existing;
+
         if (UnitScene1 == null)
         {
             UnitScene1 = unitScene;

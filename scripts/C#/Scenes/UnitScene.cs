@@ -39,8 +39,18 @@ public partial class UnitScene : Node2D
 		return unitSceneInstance;
 	}
 
+	/// <summary>
+	/// TargetSprite's authored scale, captured before anything shrinks it, so the subdued mode is
+	/// defined relative to whatever Unit.tscn says rather than to a duplicated constant.
+	/// </summary>
+	private Vector2 defaultTargetScale;
+
+	/// <summary>How much smaller a rebuild-in-place target is drawn than an ordinary one.</summary>
+	private const float SubduedTargetScaleFactor = 0.6f;
+
 	public override void _Ready()
 	{
+		defaultTargetScale = TargetSprite.Scale;
 		SetSprite();
 		SetUnclickable();
 		if (UnitState.CountryId >= 0 && !UnitState.InSupply)
@@ -54,9 +64,28 @@ public partial class UnitScene : Node2D
 		
 		TargetSprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
 	}
+	/// <summary>
+	/// One sprite, two answers. Ordinarily the target on a unit means "pick this unit". When it is the
+	/// rebuild-in-place marker instead, the thing being chosen is the COUNTRY the unit stands on — the
+	/// deploy targets a space, and the unit is only how that space is pointed at while occupied.
+	///
+	/// Read off the tags at click time rather than cached in a field: both tags are raised and cleared
+	/// by the selection handlers, and a cached flag is one more thing that can be left stale by a
+	/// handler that unwinds. Tag.Clickable wins if somehow both are set — being asked for a unit is the
+	/// more specific request.
+	/// </summary>
 	private void OnMouseLeftClickOpaque()
 	{
-		EventBus.Emit(EventBus.SignalName.UnitClicked, this.UnitState.Id);
+		if (UnitState.Tags.Has(Tag.Clickable, Faction.ALL))
+		{
+			EventBus.Emit(EventBus.SignalName.UnitClicked, this.UnitState.Id);
+			return;
+		}
+
+		if (UnitState.Tags.Has(Tag.RebuildTarget, Faction.ALL))
+		{
+			EventBus.Emit(EventBus.SignalName.CountryClicked, this.UnitState.CountryId);
+		}
 	}
 
 	private void SetSprite()
@@ -67,12 +96,26 @@ public partial class UnitScene : Node2D
 
 	public void SetClickable()
 	{
+		TargetSprite.Scale = defaultTargetScale;
 		TargetSprite.ShowSprite();
 		TargetSprite.SetClickable();
 	}
 
+	/// <summary>
+	/// Mark this unit as the rebuild-in-place deploy target for the country it stands on: smaller and
+	/// fainter than an ordinary target, because being able to build onto a space you already hold is
+	/// the rare option and must not read as loudly as the ordinary ones beside it.
+	/// </summary>
+	public void SetRebuildTarget()
+	{
+		TargetSprite.Scale = defaultTargetScale * SubduedTargetScaleFactor;
+		TargetSprite.ShowSprite();
+		TargetSprite.SetClickableSubdued();
+	}
+
 	public void SetUnclickable()
-	{        
+	{
+		TargetSprite.Scale = defaultTargetScale;
 		TargetSprite.HideSprite();
 		TargetSprite.SetUnclickable();
 	}
@@ -86,6 +129,10 @@ public partial class UnitScene : Node2D
 		{
 			Callable.From(SetClickable).CallDeferred();
 		}
+		else if (tag == Tag.RebuildTarget)
+		{
+			Callable.From(SetRebuildTarget).CallDeferred();
+		}
 		else if (tag == Tag.InSupply || tag == Tag.SuppliedForTurn)
 		{
 			Callable.From(HideOutOfSupply).CallDeferred();
@@ -98,7 +145,7 @@ public partial class UnitScene : Node2D
 
 	private void OnTagRemoved(Tag tag, Faction faction)
 	{
-		if (tag == Tag.Clickable)
+		if (tag == Tag.Clickable || tag == Tag.RebuildTarget)
 		{
 			Callable.From(SetUnclickable).CallDeferred();
 		}

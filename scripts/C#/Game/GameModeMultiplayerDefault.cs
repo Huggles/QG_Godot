@@ -365,6 +365,18 @@ public partial class GameModeMultiplayerDefault : IGameMode
                     DeployType.RECRUIT
                 ) { IsTrigger = false, BlockAnimationQueue = false, PlayAnimations = false }; // prevent animations during initial setup
 
+                // A faction may now deploy onto a country it already occupies (CountryState.CanBuild),
+                // which in play redeploys the piece already there. In a scenario that is never what was
+                // meant — it silently places one unit for two listed deployments — so a duplicated
+                // countryName stays an authoring error rather than becoming a no-op.
+                if (countryState.HasUnit(faction))
+                {
+                    throw new Exception(
+                        $"Scenario deploys {faction} to '{deployment.CountryName}' more than once. A " +
+                        $"deploy onto a country you already occupy rebuilds the piece in place, so the " +
+                        $"second deployment would place nothing.");
+                }
+
                 // Setup cannot ask anybody to free a unit — there is no player interaction here at all
                 // — so an over-deploying scenario has to fail loudly instead. Checked BEFORE Apply() so
                 // the throw is outside the mutate-then-broadcast window and is not mis-classified as a
