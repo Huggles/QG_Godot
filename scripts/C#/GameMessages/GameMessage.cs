@@ -196,9 +196,4 @@ public abstract partial class GameMessage : GodotObject
     public virtual string SummaryText() => ScriptName;
 
     public virtual string DebugText() => ScriptName;
-
-    public GameHistoryItem ToGameHistoryItem()
-    {
-        return ToHistoryItem ? GameHistoryItem.Create(SummaryText(), TriggeringFaction) : null;
-    }
 }

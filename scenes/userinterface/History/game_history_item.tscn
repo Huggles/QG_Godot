@@ -1,43 +1,76 @@
-[gd_scene load_steps=3 format=3 uid="uid://bhqnymug3arir"]
+[gd_scene load_steps=4 format=3 uid="uid://bhqnymug3arir"]
 
 [ext_resource type="Script" uid="uid://ktk2bkxu122e" path="res://scenes/userinterface/History/GameHistoryItem.cs" id="1_s2x5k"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_un8ke"]
-font_size = 12
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tint"]
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_number"]
+font_size = 9
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
 
 [node name="GameHistoryItem" type="Control"]
-custom_minimum_size = Vector2(200, 50)
+custom_minimum_size = Vector2(40, 30)
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -1720.0
-offset_bottom = -1030.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 30.0
+size_flags_horizontal = 4
 script = ExtResource("1_s2x5k")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Flag" type="TextureRect" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 4.0
+offset_top = 1.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Tint" type="Panel" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 1.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tint")
+
+[node name="Icon" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
 offset_top = 4.0
-offset_right = -4.0
+offset_right = -3.0
 offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Label" type="Label" parent="Panel"]
+[node name="Number" type="Label" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
+anchors_preset = 9
 anchor_bottom = 1.0
-grow_horizontal = 2
+offset_right = 14.0
 grow_vertical = 2
-text = "This is a dummy text"
-label_settings = SubResource("LabelSettings_un8ke")
+mouse_filter = 2
+text = "12"
+label_settings = SubResource("LabelSettings_number")
 horizontal_alignment = 1
 vertical_alignment = 1
-autowrap_mode = 2

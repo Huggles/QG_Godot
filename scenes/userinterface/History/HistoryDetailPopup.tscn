@@ -1,0 +1,51 @@
+[gd_scene load_steps=4 format=3 uid="uid://blt1histpop01"]
+
+[ext_resource type="Script" uid="uid://no1lswlgrd1o" path="res://scripts/C#/UI/HistoryDetailPopup.cs" id="1_hdpop"]
+[ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_hdcard"]
+[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="3_hdstyle"]
+
+[node name="HistoryDetailPopup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_hdpop")
+
+[node name="HistoryDetailPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 270.0
+offset_bottom = 480.0
+mouse_filter = 2
+visible = false
+theme_override_styles/panel = ExtResource("3_hdstyle")
+
+[node name="Margin" type="MarginContainer" parent="HistoryDetailPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="HistoryDetailPanel/Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="HistoryCard" parent="HistoryDetailPanel/Margin/VBox" instance=ExtResource("2_hdcard")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 350)
+layout_mode = 2
+
+[node name="HistorySummary" type="RichTextLabel" parent="HistoryDetailPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 3

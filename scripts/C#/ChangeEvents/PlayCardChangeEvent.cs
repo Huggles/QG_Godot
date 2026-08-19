@@ -64,5 +64,5 @@ public partial class PlayCardChangeEvent : ChangeEvent
     public override string SummaryText() => 
         SourceCardState.CardData.CardType == CardType.RESPONSE ? 
         $"{TriggeringFaction.WithPlayer()} played a response card (hidden)" :
-        $"{TriggeringFaction.WithPlayer()} played {SourceCardState.CardData.CardType} card {SourceCardState.CardName}";
+        $"{TriggeringFaction.WithPlayer()} played {SourceCardState.CardData.CardType.Label()} card {SourceCardState.CardName}";
 }

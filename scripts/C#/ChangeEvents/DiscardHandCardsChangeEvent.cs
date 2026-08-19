@@ -34,4 +34,14 @@ public partial class DiscardHandCardsChangeEvent : ChangeEvent
         await Task.Delay(GameSettings.DurationShort);
         return true;
     }
+
+    /// <summary>
+    /// Split on who is discarding: a self-discard is the common case and reads badly as
+    /// "X made X discard". Null-coalesced because SummaryText() goes on the wire as
+    /// InputRequest.TriggerSummaryText and must never throw.
+    /// </summary>
+    public override string SummaryText() =>
+        TriggeringFaction == TargetFaction
+            ? $"{TargetFaction.WithPlayer()} discarded {CardIds?.Count ?? 0} hand card(s)"
+            : $"{TriggeringFaction.WithPlayer()} made {TargetFaction.WithPlayer()} discard {CardIds?.Count ?? 0} hand card(s)";
 }

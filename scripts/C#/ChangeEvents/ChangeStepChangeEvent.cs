@@ -24,7 +24,12 @@ public partial class ChangeStepChangeEvent : ChangeEvent
         return Task.FromResult(true);
     }
 
-    public override bool ToHistoryItem => true;
+    /// <summary>
+    /// Kept out of the history strip. A step change fires several times a round and belongs to no
+    /// faction, so it produced a run of flagless grey badges that pushed the entries a player actually
+    /// wants — who deployed, who drew, who battled — out of the capped window.
+    /// </summary>
+    public override bool ToHistoryItem => false;
 
     public override string SummaryText() => $"Turn step changed to {NewStep}";
 }

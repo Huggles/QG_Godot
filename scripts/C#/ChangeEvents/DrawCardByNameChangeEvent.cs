@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public partial class DrawCardByNameChangeEvent : ChangeEvent
@@ -26,4 +27,12 @@ public partial class DrawCardByNameChangeEvent : ChangeEvent
         await Task.CompletedTask;
         return true;
     }
+
+    /// <summary>
+    /// CardName is a UniqueName, so show the player-facing Label where there is one. Falls back to
+    /// the raw name rather than throwing — SummaryText() goes on the wire as
+    /// InputRequest.TriggerSummaryText.
+    /// </summary>
+    public override string SummaryText() =>
+        $"{TargetFaction.WithPlayer()} drew {StaticGameData.CardDataByName.GetValueOrDefault(CardName)?.Label ?? CardName} from their deck";
 }

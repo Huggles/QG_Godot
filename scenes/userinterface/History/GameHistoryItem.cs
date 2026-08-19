@@ -1,89 +1,111 @@
+using System.Collections.Generic;
 using Godot;
-using System;
-using System.Threading.Tasks;
 
+/// <summary>
+/// One entry in the game history strip, drawn as a compact faction badge: the faction's flag, the
+/// entry's sequence number, and an icon for what happened. The detail — the summary text and the card
+/// that triggered it — lives in <see cref="HistoryDetailPopup"/>, which this item opens on hover.
+///
+/// Badges rather than text rows so the strip can stay on screen permanently. The old rows were 200px
+/// wide and had to fade themselves out after five seconds to give the board back, which meant the
+/// history could not be read on demand at all.
+/// </summary>
 public partial class GameHistoryItem : Control
 {
-    private GameHistoryList gameHistoryList => GetParent<GameHistoryList>();
-    private Panel Panel => GetNode<Panel>("Panel");
-    private Label Label => Panel.GetNode<Label>("Label");
+	private TextureRect Flag => GetNode<TextureRect>("%Flag");
+	private Panel Tint => GetNode<Panel>("%Tint");
+	private TextureRect Icon => GetNode<TextureRect>("%Icon");
+	private Label Number => GetNode<Label>("%Number");
 
-    private Tween appearTween;
-    private Timer fadeTimer;
+	/// <summary>Faction colour wash over the flag, low enough that the flag still reads through it.</summary>
+	private const float TintAlpha = 0.35f;
 
-    public static GameHistoryItem Create(string text, Faction faction)
-    {
-        GameHistoryItem item = AssetRepository.GameHistoryItemScenePackaged.Instantiate<GameHistoryItem>();
-        item.Label.Text = text;
+	/// <summary>
+	/// Fixed, not a GameSettings duration: DurationMedium is 3s on Slow speed, and a badge that takes
+	/// three seconds to appear is not feedback.
+	/// </summary>
+	private const double AppearSeconds = 0.15;
 
-        if(faction == Faction.NONE)
-        {
-            item.Panel.SelfModulate = Colors.Gray;
-        }
-        else
-        {            
-            item.Panel.SelfModulate = FactionState.ForEnum(faction).FactionData.FactionColor;
-        }        
-        return item;
-    }
+	private GameHistoryEntry entry;
+	private Tween appearTween;
 
-    public override void _Ready()
-    {        
-        base._Ready();
+	public static GameHistoryItem Create(GameHistoryEntry entry)
+	{
+		GameHistoryItem item = AssetRepository.GameHistoryItemScenePackaged.Instantiate<GameHistoryItem>();
+		item.entry = entry;
+		item.Paint();
+		return item;
+	}
 
-        fadeTimer = new Timer { OneShot = true, WaitTime = 5.0 };
-        fadeTimer.Timeout += Fade;
-        AddChild(fadeTimer);
+	private void Paint()
+	{
+		// StaticGameData rather than FactionState.ForEnum: ForEnum dereferences MultiplayerSession and
+		// returns null for a faction that is not in the current state. Same reasoning as
+		// FactionDisplay.Label.
+		FactionData data = StaticGameData.FactionDataMap.GetValueOrDefault(entry.Faction);
 
-        this.Visible = false;
-        this.Modulate = new Color(1, 1, 1, 0);
-        Callable.From(Appear).CallDeferred();        
-    }
+		Number.Text = entry.Sequence.ToString();
+		// Duplicated per item: a LabelSettings sub-resource is shared across every instance of the
+		// PackedScene, so recolouring the shared one would recolour every badge in the strip. Same
+		// reason FactionInfoRow duplicates ClearLabelSettings.tres before touching it.
+		Number.LabelSettings = (LabelSettings)Number.LabelSettings.Duplicate();
+		Number.LabelSettings.FontColor = data?.FactionColorText ?? Colors.White;
 
-    public override void _ExitTree()
-    {
-        base._ExitTree();
-        appearTween?.Kill();
-    }
+		// GD.Load rather than a preloaded table: ResourceLoader caches, so the repeat cost is a
+		// dictionary hit, and keeping the load here means a headless run — which never builds a badge
+		// — never touches a texture. Null for a message type that has no icon yet, which leaves the
+		// badge reading as flag plus number.
+		Icon.Texture = string.IsNullOrEmpty(entry.IconPath) ? null : GD.Load<Texture2D>(entry.IconPath);
 
-    public async void Appear()
-    {
-        await Task.Delay(100); // slight delay to allow for any necessary setup before showing the item
-        if (!GodotObject.IsInstanceValid(this)) return;
-        this.Visible = true;
-        appearTween = CreateTween();
-        appearTween.TweenProperty(this, "modulate:a", 1, GameSettings.DurationMediumSeconds);        
-        appearTween.Finished += OnAppear;
-    }
+		// Faction.NONE and Faction.ALL have no row in FactionData.FactionFlags, so FlagTexture (a raw
+		// indexer) would throw KeyNotFoundException. Not a corner case: ChangeStepChangeEvent and
+		// ChangeRoundChangeEvent are both NONE, so they hit this on every single turn step.
+		bool hasFlag = data != null && FactionData.FactionFlags.ContainsKey(entry.Faction);
+		Flag.Visible = hasFlag;
+		Flag.Texture = hasFlag ? data.FlagTexture : null;
+		Tint.SelfModulate = hasFlag
+			? new Color(data.FactionColor, TintAlpha)
+			: new Color(Colors.Gray, 0.85f);
+	}
 
-    public async void Fade()
-    {
-        await Task.Delay(100); // slight delay to allow for any necessary setup before hiding the item
-        if (!GodotObject.IsInstanceValid(this)) return;
-        Tween fadeTween = CreateTween();
-        fadeTween.TweenProperty(this, "modulate:a", 0, GameSettings.DurationMediumSeconds);
-    }
+	public override void _Ready()
+	{
+		base._Ready();
 
+		MouseEntered += OnMouseEntered;
+		MouseExited += OnMouseExited;
 
-    public async void AppearInstantly()
-    {
-        await Task.Delay(100); // slight delay to allow for any necessary setup before showing the item
-        if (!GodotObject.IsInstanceValid(this)) return;
-        this.Visible = true;
-        this.Modulate = new Color(1, 1, 1, 1);
-        OnAppear();
-    }
+		Modulate = new Color(1, 1, 1, 0);
+		appearTween = CreateTween();
+		appearTween.TweenProperty(this, "modulate:a", 1.0, AppearSeconds);
+	}
 
-    public async void FadeInstantly()
-    {
-        await Task.Delay(100); // slight delay to allow for any necessary setup before hiding the item
-        if (!GodotObject.IsInstanceValid(this)) return;
-        this.Visible = false;
-        this.Modulate = new Color(1, 1, 1, 0);
-    }
+	public override void _ExitTree()
+	{
+		base._ExitTree();
+		appearTween?.Kill();
+		// Trimmed out of the window, or the whole UI torn down, while this badge owned the popup.
+		// IsInstanceValid because a static handle to a freed Godot object throws on access rather
+		// than reading as null.
+		if (GodotObject.IsInstanceValid(HistoryDetailPopup.Current))
+		{
+			HistoryDetailPopup.Current.HideFor(this);
+		}
+	}
 
-    public void OnAppear()
-    {
-        fadeTimer.Start();
-    }
+	private void OnMouseEntered()
+	{
+		if (GodotObject.IsInstanceValid(HistoryDetailPopup.Current))
+		{
+			HistoryDetailPopup.Current.ShowFor(this, entry);
+		}
+	}
+
+	private void OnMouseExited()
+	{
+		if (GodotObject.IsInstanceValid(HistoryDetailPopup.Current))
+		{
+			HistoryDetailPopup.Current.HideFor(this);
+		}
+	}
 }

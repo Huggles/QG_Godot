@@ -48,4 +48,12 @@ public partial class BattleCountryChangeEvent : ChangeEvent
         return true;
     }
 
+    /// <summary>
+    /// Must never throw: CardPlayRound puts SummaryText() on the wire as
+    /// InputRequest.TriggerSummaryText, so a lookup that threw here would take down a turn rather
+    /// than just garble a label. The subclasses RemoveUnitChangeEvent/BattleUnitChangeEvent
+    /// override this with their own text.
+    /// </summary>
+    public override string SummaryText() =>
+        $"{TriggeringFaction.WithPlayer()} battled in {CountryState?.Label ?? "an unknown country"}";
 }

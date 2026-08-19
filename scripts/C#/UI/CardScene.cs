@@ -14,8 +14,10 @@ public partial class CardScene : Control
 	public FactionState FactionState => FactionState.ForEnum(CardState.Faction);
 
 	private bool triggersEmphasis = true;
-	
+
 	private bool showActivatableOverlay = false;
+
+	private bool mousePassthrough = false;
 
 	private VBoxContainer textBackgroundContainerNode => GetNode<VBoxContainer>("%TextBackgroundBox");
 	private VBoxContainer textContainerNode => GetNode<VBoxContainer>("%TextContainer");
@@ -70,7 +72,7 @@ public partial class CardScene : Control
 		}
 
 		Visible = true;
-		MouseFilter = MouseFilterEnum.Stop;
+		MouseFilter = mousePassthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
 		CardId = cardId;
 		titleNode.Text = "Card Not Found";
 		textNode.Text = $"Card Id = {CardId}";
@@ -86,7 +88,7 @@ public partial class CardScene : Control
 	public void ShowFace(CardFace face)
 	{
 		Visible = true;
-		MouseFilter = MouseFilterEnum.Stop;
+		MouseFilter = mousePassthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
 		CardId = -1;
 
 		cardTextureNode.Texture = face.Front;
@@ -129,5 +131,25 @@ public partial class CardScene : Control
 	public void TriggersEmphasis(bool triggersEmphasis)
 	{
 		this.triggersEmphasis = triggersEmphasis;
+	}
+
+	/// <summary>
+	/// Make the whole card mouse-transparent, for a card that is pure decoration — the game history
+	/// hover popup floats over the 3D board and must not eat clicks meant for it.
+	///
+	/// Sticky rather than one-shot because ShowCard/ShowFace re-assign MouseFilter on every render,
+	/// so a single assignment from outside would be undone by the next ShowCard. Covers %CardButton
+	/// too: a *disabled* Button still consumes mouse events, because MOUSE_FILTER_STOP stops
+	/// propagation whether or not the control acts on the event.
+	/// </summary>
+	public void SetMousePassthrough(bool passthrough)
+	{
+		mousePassthrough = passthrough;
+		MouseFilterEnum filter = passthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
+		MouseFilter = filter;
+		if (cardButton != null)
+		{
+			cardButton.MouseFilter = filter;
+		}
 	}
 }
