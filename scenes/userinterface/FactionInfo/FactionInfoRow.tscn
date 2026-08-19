@@ -9,6 +9,8 @@
 [ext_resource type="Script" uid="uid://nwhfij0f43sv" path="res://scenes/userinterface/FactionInfo/CardsAnimationControl.cs" id="7_0r4er"]
 [ext_resource type="Texture2D" uid="uid://cpfklff0i6sut" path="res://assets/factions/germany/cards/Germany_CardBack.png" id="7_48ey3"]
 [ext_resource type="LabelSettings" uid="uid://cy7n8wr0krac1" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsLarge.tres" id="8_48ey3"]
+[ext_resource type="Texture2D" uid="uid://sfhhmtjxiwqx" path="res://assets/textures/Units/QGArmyDetailed.png" id="9_army"]
+[ext_resource type="Texture2D" uid="uid://1gl1q0exfxm2" path="res://assets/textures/Units/QGNavyDetailed.png" id="10_navy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
 resource_local_to_scene = true
@@ -50,8 +52,20 @@ corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h8eod"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_army"]
+resource_local_to_scene = true
+font_size = 18
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_navy"]
+resource_local_to_scene = true
+font_size = 18
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
+
 [node name="FactionInfoRow" type="Control" unique_id=1940069184]
-custom_minimum_size = Vector2(150, 50)
+custom_minimum_size = Vector2(150, 75)
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -70,6 +84,7 @@ layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 100.0
+offset_bottom = -25.0
 grow_vertical = 2
 texture = ExtResource("2_s1j4j")
 expand_mode = 3
@@ -96,6 +111,7 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_bottom = -25.0
 grow_horizontal = 0
 grow_vertical = 2
 mouse_filter = 2
@@ -160,9 +176,9 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -100.0
-offset_top = 65.0
+offset_top = 90.0
 offset_right = 100.0
-offset_bottom = 315.0
+offset_bottom = 340.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -194,6 +210,7 @@ layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 8.0
+offset_bottom = -25.0
 grow_vertical = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_osvc4")
 theme_override_styles/hover = ExtResource("2_h8eod")
@@ -201,9 +218,9 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_h8eod")
 
 [node name="CardsAnimationControl" type="Control" parent="." unique_id=1551812826]
 anchors_preset = 0
-offset_top = 60.0
+offset_top = 85.0
 offset_right = 50.0
-offset_bottom = 130.0
+offset_bottom = 155.0
 script = ExtResource("7_0r4er")
 
 [node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl" unique_id=1152488689]
@@ -225,5 +242,81 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "1"
 label_settings = ExtResource("8_48ey3")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackgroundPanel2" type="Panel" parent="." unique_id=1248810872]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 25)
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = 50.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_0g7yh")
+
+[node name="UnitsStrip" type="HBoxContainer" parent="BackgroundPanel2" unique_id=1893580154]
+custom_minimum_size = Vector2(150, 25)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -25.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ArmyCell" type="HBoxContainer" parent="BackgroundPanel2/UnitsStrip" unique_id=1151390211]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="ArmyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/ArmyCell" unique_id=1898280267]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 25)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("9_army")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ArmyCountLabel" type="Label" parent="BackgroundPanel2/UnitsStrip/ArmyCell" unique_id=1033955341]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 25)
+layout_mode = 2
+text = "10"
+label_settings = SubResource("LabelSettings_army")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NavyCell" type="HBoxContainer" parent="BackgroundPanel2/UnitsStrip" unique_id=1041305104]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="NavyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/NavyCell" unique_id=1397946510]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 25)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("10_navy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NavyCountLabel" type="Label" parent="BackgroundPanel2/UnitsStrip/NavyCell" unique_id=633649371]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 25)
+layout_mode = 2
+text = "10"
+label_settings = SubResource("LabelSettings_navy")
 horizontal_alignment = 1
 vertical_alignment = 1

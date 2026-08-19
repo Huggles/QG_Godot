@@ -40,12 +40,19 @@ public partial class UnitPool : Object
 
     public static bool FactionHasAvailableUnits(Faction faction, UnitType unitType)
     {
-        List<UnitState> unitStates = UnitState.ForIds(FactionState.ForEnum(faction).AllUnits);
+        return AvailableUnitCount(faction, unitType) > 0;
+    }
 
-        var availableUnitStates = unitStates
-            .Where(unit => unit.Type == unitType && !unit.IsDeployedToCountry)
-            .ToList();
+    /// <summary>
+    /// How many units of this type the faction still has in the pool, i.e. not deployed to a country.
+    /// Returns 0 before the game state exists, so UI can call this while it is still being built.
+    /// </summary>
+    public static int AvailableUnitCount(Faction faction, UnitType unitType)
+    {
+        FactionState factionState = FactionState.ForEnum(faction);
+        if (factionState == null) return 0;
 
-        return availableUnitStates.Count > 0;
+        return UnitState.ForIds(factionState.AllUnits)
+            .Count(unit => unit.Type == unitType && !unit.IsDeployedToCountry);
     }
 }

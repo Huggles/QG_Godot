@@ -8,8 +8,8 @@
 		"Team" : "AXIS",
 		"Homespace" : "GERMANY",
 		"Deck" : [],
-		"NumberOfArmyUnits" : 10,
-		"NumberOfNavyUnits" : 10
+		"NumberOfArmyUnits" : 7,
+		"NumberOfNavyUnits" : 3
 	},
 	{
 		"UniqueName": "UNITED_KINGDOM",
@@ -20,8 +20,8 @@
 		"Team" : "ALLIES",
 		"Homespace" : "UNITED_KINGDOM",
 		"Deck" : [],
-		"NumberOfArmyUnits" : 10,
-		"NumberOfNavyUnits" : 10
+		"NumberOfArmyUnits" : 5,
+		"NumberOfNavyUnits" : 5
 	},
 	{
 		"UniqueName": "JAPAN",
@@ -32,8 +32,8 @@
 		"Team" : "AXIS",
 		"Homespace" : "JAPAN",
 		"Deck" : [],
-		"NumberOfArmyUnits" : 10,
-		"NumberOfNavyUnits" : 10
+		"NumberOfArmyUnits" : 5,
+		"NumberOfNavyUnits" : 5
 	},
 	{
 		"UniqueName": "SOVIET",
@@ -44,8 +44,8 @@
 		"Team" : "ALLIES",
 		"Homespace" : "MOSCOW",
 		"Deck" : [],
-		"NumberOfArmyUnits" : 10,
-		"NumberOfNavyUnits" : 10
+		"NumberOfArmyUnits" : 7,
+		"NumberOfNavyUnits" : 1
 	},
 	{
 		"UniqueName": "ITALY",
@@ -56,8 +56,8 @@
 		"Team" : "AXIS",
 		"Homespace" : "ITALY",
 		"Deck" : [],
-		"NumberOfArmyUnits" : 10,
-		"NumberOfNavyUnits" : 10
+		"NumberOfArmyUnits" : 4,
+		"NumberOfNavyUnits" : 3
 	},
 	{
 		"UniqueName": "UNITED_STATES",
@@ -68,7 +68,7 @@
 		"Team" : "ALLIES",
 		"Homespace" : "US_EAST",
 		"Deck" : [],
-		"NumberOfArmyUnits" : 10,
-		"NumberOfNavyUnits" : 10
+		"NumberOfArmyUnits" : 5,
+		"NumberOfNavyUnits" : 6
 	}
 ]

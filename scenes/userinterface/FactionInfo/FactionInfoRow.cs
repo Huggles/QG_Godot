@@ -10,6 +10,7 @@ public partial class FactionInfoRow : Control
 	private FactionState FactionState => FactionState.ForEnum(Faction);
 	private MultiplayerGameState gameState { get { return GameSession.Current.GameState; } }
 	private Panel BackgroundPanel => GetNode<Panel>("%BackgroundPanel");
+	private Panel BackgroundPanel2 => GetNode<Panel>("%BackgroundPanel2");
 	private TextureRect FactionFlagNode => GetNode<TextureRect>("FactionFlag");    
 	private Label ScoreLabel => FactionFlagNode.GetNode<Label>("ScoreLabel");
 	private Panel DetailPanel => GetNode<Panel>("DetailPanel");    
@@ -18,6 +19,10 @@ public partial class FactionInfoRow : Control
 	private Button PlayedCardsButton => BackgroundPanel.GetNode<Button>("PlayedCardsButton");
 	private RichTextLabel TurnSummariesRichText => DetailPanel.GetNode<RichTextLabel>("MarginContainer/TurnSummariesRichText");
 	private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
+	private TextureRect ArmyIcon => GetNode<TextureRect>("%ArmyIcon");
+	private TextureRect NavyIcon => GetNode<TextureRect>("%NavyIcon");
+	private Label ArmyCountLabel => GetNode<Label>("%ArmyCountLabel");
+	private Label NavyCountLabel => GetNode<Label>("%NavyCountLabel");
 
 	private Timer hoverTimer;
 	private bool isMouseOver = false;
@@ -37,6 +42,9 @@ public partial class FactionInfoRow : Control
 		{
 			EventBus.Instance.NewTurnStarted -= OnNewTurnStarted;
 			EventBus.Instance.FactionScoredPoints -= OnFactionScoredPoints;
+			EventBus.Instance.UnitDeployed -= OnUnitDeployed;
+			EventBus.Instance.UnitRemoved -= OnUnitRemoved;
+			EventBus.Instance.GameStateRecalculated -= SetUnitCounts;
 			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
 			FactionInfoButton.Pressed -= OnFactionInfoButtonPressed;
 			DiscardDeckButton.Pressed -= OnDiscardDeckButtonPressed;
@@ -56,6 +64,7 @@ public partial class FactionInfoRow : Control
 		// Set background color
 		Color factionColor = FactionState.FactionData.FactionColor;        
 		BackgroundPanel.SelfModulate = Colors.White;
+		BackgroundPanel2.SelfModulate = Colors.White;
 
 		Texture2D factionFlag = FactionState.FactionData.FlagTexture;
 		FactionFlagNode.Texture = factionFlag;
@@ -64,6 +73,7 @@ public partial class FactionInfoRow : Control
 		StyleBoxFlat styleBox = (StyleBoxFlat)BackgroundPanel.GetThemeStylebox("panel").Duplicate();
 		styleBox.BgColor = factionColor;
 		BackgroundPanel.AddThemeStyleboxOverride("panel", styleBox);
+		BackgroundPanel2.AddThemeStyleboxOverride("panel", styleBox);
 
 		StyleBoxFlat styleBoxDetails = (StyleBoxFlat)DetailPanel.GetThemeStylebox("panel").Duplicate();
 		styleBoxDetails.BgColor = factionColor;
@@ -71,9 +81,22 @@ public partial class FactionInfoRow : Control
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 
-		SetScore(FactionState.Score);
+		// SelfModulate, not Modulate: the row-level Modulate dimming in SetModulation() has to compose
+		// on top of the faction tint, same reason BackgroundPanel uses SelfModulate above.
+		ArmyIcon.SelfModulate = factionColor;
+		NavyIcon.SelfModulate = factionColor;
 
-		EventBus.Instance.FactionScoredPoints += OnFactionScoredPoints;                
+		// Each count label recolours independently, so neither may share a LabelSettings instance.
+		ArmyCountLabel.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
+		NavyCountLabel.LabelSettings = (LabelSettings)NavyCountLabel.LabelSettings.Duplicate();
+
+		SetScore(FactionState.Score);
+		SetUnitCounts();
+
+		EventBus.Instance.FactionScoredPoints += OnFactionScoredPoints;
+		EventBus.Instance.UnitDeployed += OnUnitDeployed;
+		EventBus.Instance.UnitRemoved += OnUnitRemoved;
+		EventBus.Instance.GameStateRecalculated += SetUnitCounts;
 		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		DiscardDeckButton.Pressed += OnDiscardDeckButtonPressed;
@@ -89,6 +112,22 @@ public partial class FactionInfoRow : Control
 		if (faction == Faction)
 		{
 			SetScore(newScore);
+		}
+	}
+
+	private void OnUnitDeployed(int unitId, int countryId)
+	{
+		if (UnitState.ForId(unitId).Faction == Faction)
+		{
+			SetUnitCounts();
+		}
+	}
+
+	private void OnUnitRemoved(int unitId, int countryId)
+	{
+		if (UnitState.ForId(unitId).Faction == Faction)
+		{
+			SetUnitCounts();
 		}
 	}
 
@@ -137,6 +176,28 @@ public partial class FactionInfoRow : Control
 		tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 72, GameSettings.DurationShortSeconds);
 		tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 36, GameSettings.DurationShortSeconds);
 		LoadVPDetails();
+	}
+
+	/// <summary>
+	/// Repaints the army/navy pool counters — how many pieces of each type the faction has left to play.
+	/// </summary>
+	private void SetUnitCounts()
+	{
+		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY));
+		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY));
+	}
+
+	private void SetUnitCount(Label label, int count)
+	{		
+		label.Text = count.ToString();
+		// FontColor on the LabelSettings, not AddThemeColorOverride: a Label with label_settings
+		// assigned ignores theme colour overrides. The black border comes from the same resource.
+		label.LabelSettings.FontColor = count switch
+		{
+			0 => Colors.Red,
+			1 => Colors.Orange,
+			_ => Colors.White
+		};
 	}
 
 	private void ToggleDetails()
