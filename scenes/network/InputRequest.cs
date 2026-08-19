@@ -442,14 +442,28 @@ public abstract partial class InputRequest
 
     public class SelectUnitRequestHandler : InputRequest
     {
-        public SelectUnitRequestHandler(Faction targetFaction, List<int> targetUnitIds) : base(targetFaction)
+        /// <summary>
+        /// False for a mandatory selection — the answering peer gets no Skip button, and
+        /// InputRequestSpec reports PassMode.NotAllowed so the CLI and headless providers refuse a
+        /// pass. Serialized with the request: only the target peer's copy runs Handle(), so the flag
+        /// has to travel. Still a single parameterized constructor, so System.Text.Json binds it
+        /// without a [JsonConstructor].
+        ///
+        /// A skip can STILL arrive: the host's input-timeout Retry/Skip decision and
+        /// ErrorReporter.CancelPendingAwaiters both resolve a request as skipped, and BroadCast turns
+        /// that into StepSkippedException. Callers must tolerate it.
+        /// </summary>
+        public bool AllowSkip { get; set; } = true;
+
+        public SelectUnitRequestHandler(Faction targetFaction, List<int> targetUnitIds, bool allowSkip = true) : base(targetFaction)
         {
             TargetUnitIds = targetUnitIds;
+            AllowSkip = allowSkip;
         }
 
         public override async Task Handle()
         {
-            int unitId = await new SelectUnitHandler(TargetUnitIds).Handle();
+            int unitId = await new SelectUnitHandler(TargetUnitIds, AllowSkip).Handle();
             if (unitId == -1)
             {
                 WasSkipped = true;

@@ -6,9 +6,17 @@ using System.Threading.Tasks;
 public partial class SelectUnitHandler : IGameEventHandler<int>
 {
     List<int> unitIds;
-    public SelectUnitHandler(List<int> unitIds)
+    private readonly bool allowSkip;
+
+    /// <param name="allowSkip">
+    /// False for a mandatory selection: the Skip button is not shown and the SelectionSkipped signal is
+    /// not listened for, so the player cannot decline. Error recovery can still release the awaiter
+    /// through PendingLocalInput — see below.
+    /// </param>
+    public SelectUnitHandler(List<int> unitIds, bool allowSkip = true)
     {
         this.unitIds = unitIds;
+        this.allowSkip = allowSkip;
     }
 
     public async Task<int> Handle()
@@ -19,12 +27,14 @@ public partial class SelectUnitHandler : IGameEventHandler<int>
 
         UnitState.ForIds(unitIds).AddTag(Tag.Clickable, Faction.ALL);
         InputManager.Current.EnableRayTraceCasting();
-        SelectionSkipButton.Current?.Show();
+        if (allowSkip) SelectionSkipButton.Current?.Show();
 
         EventBus.Instance.UnitClicked += onUnit;
-        EventBus.Instance.SelectionSkipped += onSkip;
+        if (allowSkip) EventBus.Instance.SelectionSkipped += onSkip;
 
-        // Registered so error recovery can release this selection — see SelectCountryHandler.
+        // Registered so error recovery can release this selection — see SelectCountryHandler. Kept even
+        // for a mandatory selection: ErrorReporter.CancelPendingAwaiters is how a failed step stops
+        // waiting on a prompt nobody is going to answer, and losing that would deadlock the recovery.
         int unitId;
         using (PendingLocalInput.Register(onSkip))
         {
@@ -35,8 +45,11 @@ public partial class SelectUnitHandler : IGameEventHandler<int>
             finally
             {
                 EventBus.Instance.UnitClicked -= onUnit;
-                EventBus.Instance.SelectionSkipped -= onSkip;
-                SelectionSkipButton.Current?.Hide();
+                if (allowSkip)
+                {
+                    EventBus.Instance.SelectionSkipped -= onSkip;
+                    SelectionSkipButton.Current?.Hide();
+                }
                 UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
                 InputManager.Current.DisableRayTraceCasting();
             }

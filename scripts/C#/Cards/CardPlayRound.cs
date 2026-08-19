@@ -230,6 +230,11 @@ public partial class CardPlayRound : GodotObject
 
         if (!changeEvent.IsBlocked)
         {
+            // After the block window, before Apply(): a faction whose pool is empty must free a unit
+            // first, but only once the deploy is actually going to happen. See UnitPoolShortfall.
+            if (changeEvent is DeployUnitChangeEvent deployEvent)
+                await UnitPoolShortfall.ResolveBeforeDeploy(deployEvent);
+
             LastChangeEvent = changeEvent;
             DebugUtilities.PrintPeer($"Applying change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
             await changeEvent.Apply();

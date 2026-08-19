@@ -120,9 +120,11 @@ public partial class GameAPI : Node
         DebugUtilities.PrintPeer($"Deploying unit of type {unitType} for faction {faction} to country {countryId} with deploy type {deployType}");
         CountryState countryState = GameState.CountryStateById[countryId];
 
+        // Throws GameRuleException when the pool is empty — same category as GameAPIException below, a
+        // rules mismatch thrown before any mutation. It never returns -1, so there is nothing to test
+        // for here. An interactive deploy is expected to have freed a piece first; see
+        // UnitPoolShortfall.ResolveBeforeDeploy.
         int unitId = UnitPool.GetAvailableUnitForFaction(faction, unitType);
-        // Same category as GameAPIException below: a rules mismatch, thrown before any mutation.
-        if(unitId == -1) throw new GameAPIException($"No available units of type {unitType} for faction {faction}");
         UnitState unitState = UnitState.ForId(unitId);
 
         bool deployable = deployType == DeployType.BUILD ? countryState.Tags.Has(Tag.Buildable, faction) : countryState.Tags.Has(Tag.Recruitable, faction);

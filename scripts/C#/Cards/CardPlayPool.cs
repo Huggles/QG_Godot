@@ -61,13 +61,22 @@ public static class CardPlayPool
     /// Process a change event through the full pipeline.
     /// When no round is active (e.g. draw/discard steps with IsTrigger=false), applies the event directly.
     /// </summary>
-    public static Task DoChangeEvent(ChangeEvent changeEvent)
+    public static async Task DoChangeEvent(ChangeEvent changeEvent)
     {
         if (CardPlayRound.Current != null)
-            return CardPlayRound.Current.DoChangeEvent(changeEvent);
+        {
+            await CardPlayRound.Current.DoChangeEvent(changeEvent);
+            return;
+        }
 
-        // No active round — apply directly without reaction chain
-        return changeEvent.Apply().ContinueWith(_ => { });
+        // No active round — apply directly without reaction chain. The pool guard still belongs here:
+        // a mutator deploying at a turn-step boundary can land outside a round, and the player is just
+        // as able to answer a prompt there. Setup is the case that must NOT reach it, and setup applies
+        // its deploys with a bare Apply() rather than coming through here.
+        if (changeEvent is DeployUnitChangeEvent deployEvent)
+            await UnitPoolShortfall.ResolveBeforeDeploy(deployEvent);
+
+        await changeEvent.Apply();
     }
 
     public static Task<int> RequestCardPlay(Faction faction) =>

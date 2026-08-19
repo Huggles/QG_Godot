@@ -364,6 +364,20 @@ public partial class GameModeMultiplayerDefault : IGameMode
                     countryState.Id, 
                     DeployType.RECRUIT
                 ) { IsTrigger = false, BlockAnimationQueue = false, PlayAnimations = false }; // prevent animations during initial setup
+
+                // Setup cannot ask anybody to free a unit — there is no player interaction here at all
+                // — so an over-deploying scenario has to fail loudly instead. Checked BEFORE Apply() so
+                // the throw is outside the mutate-then-broadcast window and is not mis-classified as a
+                // divergence; UnitPool.GetAvailableUnitForFaction would otherwise throw from inside it.
+                if (!UnitPool.FactionHasAvailableUnits(faction, deployUnitChangeEvent.UnitType))
+                {
+                    throw new Exception(
+                        $"Scenario deploys more {deployUnitChangeEvent.UnitType} units for {faction} " +
+                        $"than QGData_Factions_V2.json allows " +
+                        $"({UnitState.ForIds(FactionState.ForEnum(faction).AllUnits).Count(unit => unit.Type == deployUnitChangeEvent.UnitType)} " +
+                        $"available in total). Setup cannot prompt for a removal.");
+                }
+
                 await deployUnitChangeEvent.Apply();
             }
         }

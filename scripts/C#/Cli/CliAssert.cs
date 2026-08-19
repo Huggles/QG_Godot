@@ -113,6 +113,27 @@ public static class CliAssert
                 return country.Units.Count.ToString();
             }
 
+            // How many pieces of a type the faction still has to play: `assert pool GERMANY NAVY == 0`.
+            // Not derivable from `units`, which reads the board — this reads what is NOT on it, and it
+            // is the only way to see a faction has hit its QGData_Factions_V2.json cap.
+            case "pool":
+            {
+                UnitType unitType = ParseEnum<UnitType>(subject.Count > 2 ? subject[2] : null, "unit type");
+                return UnitPool.AvailableUnitCount(ParseFaction(arg1), unitType).ToString();
+            }
+
+            // Change events registered in the CURRENT round's pool — the surface every pool-scoped
+            // Condition reads. `assert poolevents == 4` counts them all; `assert poolevents
+            // RemoveUnitChangeEvent == 0` counts one kind, which is how a test proves an event carrying
+            // RegisterInPool = false really stayed out of the pool rather than merely opening no window.
+            case "poolevents":
+            {
+                List<ChangeEvent> pool = CardPlayPool.ChangeEventsPool;
+                if (arg1 == null) return pool.Count.ToString();
+                return pool.Count(changeEvent =>
+                    changeEvent.GetType().Name.Equals(arg1, StringComparison.OrdinalIgnoreCase)).ToString();
+            }
+
             case "occupant":
             {
                 CountryState country = ParseCountry(arg1);

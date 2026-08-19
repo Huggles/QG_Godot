@@ -69,11 +69,14 @@ public sealed class InputRequestSpec
                 spec.Pass = PassMode.Skip;
                 break;
 
-            case InputRequest.SelectUnitRequestHandler:
-                spec.Title = "Select a unit";
+            // AllowSkip = false is a mandatory selection (freeing a unit for a deploy the pool cannot
+            // pay for). Reporting Skip for it would let a script pass on a prompt the GUI gives no Skip
+            // button for, so the CLI and the game would disagree about what is answerable.
+            case InputRequest.SelectUnitRequestHandler unitRequest:
+                spec.Title = unitRequest.AllowSkip ? "Select a unit" : "Select a unit (required)";
                 spec.Options = Units(request.TargetUnitIds);
                 spec.MinSelections = spec.MaxSelections = 1;
-                spec.Pass = PassMode.Skip;
+                spec.Pass = unitRequest.AllowSkip ? PassMode.Skip : PassMode.NotAllowed;
                 break;
 
             // The only prompt whose options span two kinds. The chosen option's Kind is what decides

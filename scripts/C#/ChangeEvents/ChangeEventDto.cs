@@ -17,6 +17,7 @@ public abstract class ChangeEventDto : GameMessageDto
     public int     SourceCardId         { get; set; } = -1;
     public bool    IsTrigger            { get; set; } = true;
     public bool    SuppressGameProgress { get; set; } = false;
+    public bool    RegisterInPool       { get; set; } = true;
 
     public static T Build<T>(ChangeEvent handler, int Id) where T : ChangeEventDto, new()
     {
@@ -26,6 +27,7 @@ public abstract class ChangeEventDto : GameMessageDto
         dto.SourceCardId = handler.SourceCardId;
         dto.IsTrigger = handler.IsTrigger;
         dto.SuppressGameProgress = handler.SuppressGameProgress;
+        dto.RegisterInPool = handler.RegisterInPool;
         return dto;
     }
 }

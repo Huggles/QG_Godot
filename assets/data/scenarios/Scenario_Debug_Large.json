@@ -1,5 +1,5 @@
 {
-  "title": "Debug Scenario 3",
+  "title": "Debug Scenario Large",
   "description": "Germany starts with pre-loaded status cards, making it easier to test card effects without full deployments.",
   "startingFaction": "GERMANY",
   "startingRound": 1,
@@ -7,7 +7,17 @@
   "openingDiscard": false,
   "factions": {
     "GERMANY": {
-      "unitDeplppoyments": [
+      "unitDeployments": [
+        { "countryName": "GERMANY" },
+        { "countryName": "WESTERN_EUROPE" },
+        { "countryName": "ITALY" },
+        { "countryName": "BALKANS" },
+        { "countryName": "EASTERN_EUROPE" },
+        { "countryName": "MEDITERRANEAN_SEA" },
+        { "countryName": "NORTH_AFRICA" },
+        { "countryName": "NORTH_SEA" },
+        { "countryName": "BALTIC_SEA" },
+        { "countryName": "AFRICA" }
       ],
       "initialCards": [
         { "name": "StatusSuperiorPlanning" },

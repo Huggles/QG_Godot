@@ -458,6 +458,8 @@ public sealed class CliCommands
 		"         subjects: turn round step faction hash errors rngdraws seed",
 		"                   promptoptions | promptfaction  (open prompt; -1/NONE when none is open)",
 		"                   score <F> | vp <TEAM> | units <country> [faction] | occupant <country>",
+		"                   pool <F> <ARMY|NAVY>  (undeployed pieces left in the faction's pool)",
+		"                   poolevents [ChangeEventName]  (events registered in the current round)",
 		"                   handsize <F> | decksize <F> | discardsize <F> | decktop <F> | deckorder <F>",
 		"                   card <name|id>  (-> hand/deck/discard/status/response/nowhere)",
 		"                   cardrevealed <name|id>  (-> true/false, Response card face public?)",

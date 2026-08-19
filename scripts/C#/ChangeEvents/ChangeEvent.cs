@@ -21,7 +21,19 @@ public abstract partial class ChangeEvent : GameMessage
     FactionState targetFactionState => FactionState.ForEnum(TargetFaction);
     public bool SuppressGameProgress { get; set; } = false;
     public bool IsTrigger { get; set; } = true;
-    
+
+    /// <summary>
+    /// Whether this event joins the round's <c>ChangeEventsPool</c>. False for a mechanical mutation
+    /// that is not a game event at all: nothing may react to it AND nothing may read it back as
+    /// history. <see cref="IsTrigger"/> = false only closes the block and after-reaction windows;
+    /// this additionally keeps the event out of the pool, out of <c>LastChangeEvent</c> /
+    /// <c>LastNoneNewCardChangeEvent</c>, and so out of every pool-scoped <c>Condition</c>.
+    ///
+    /// Replicated, because a client evaluates conditions against its own pool — a flag the host
+    /// honoured and the client did not would let the two peers disagree about what is reactable.
+    /// </summary>
+    public bool RegisterInPool { get; set; } = true;
+
     /// <summary>
     /// Whether the change event was blocked by a card reaction. This is set by the card logic that blocks the event, and is used to prevent the event from being applied.
     /// </summary>
@@ -68,6 +80,7 @@ public abstract partial class ChangeEvent : GameMessage
         SourceCardId         = d.SourceCardId;
         IsTrigger            = d.IsTrigger;
         SuppressGameProgress = d.SuppressGameProgress;
+        RegisterInPool       = d.RegisterInPool;
     }
 
     /// <summary>The state hash a client compares against after replaying this event.</summary>
@@ -117,7 +130,7 @@ public abstract partial class ChangeEvent : GameMessage
 
         EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
         DebugUtilities.PrintPeer($"Doing change event {ScriptName} (Id: {Id}) with source card {SourceCardId} and triggering faction {TriggeringFaction}");
-        if(CardPlayRound.Current != null)
+        if(RegisterInPool && CardPlayRound.Current != null)
         {
             DebugUtilities.PrintPeer($"Registering change event {ScriptName} (Id: {Id}) with current CardPlayRound");
             CardPlayRound.Current.RegisterChangeEvent(this);
