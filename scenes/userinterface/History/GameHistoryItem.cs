@@ -51,22 +51,35 @@ public partial class GameHistoryItem : Control
 		Number.LabelSettings = (LabelSettings)Number.LabelSettings.Duplicate();
 		Number.LabelSettings.FontColor = data?.FactionColorText ?? Colors.White;
 
-		// GD.Load rather than a preloaded table: ResourceLoader caches, so the repeat cost is a
-		// dictionary hit, and keeping the load here means a headless run — which never builds a badge
-		// — never touches a texture. Null for a message type that has no icon yet, which leaves the
-		// badge reading as flag plus number.
-		Icon.Texture = string.IsNullOrEmpty(entry.IconPath) ? null : GD.Load<Texture2D>(entry.IconPath);
-
 		// Faction.NONE and Faction.ALL have no row in FactionData.FactionFlags, so FlagTexture (a raw
-		// indexer) would throw KeyNotFoundException. Not a corner case: ChangeStepChangeEvent and
-		// ChangeRoundChangeEvent are both NONE, so they hit this on every single turn step.
-		bool hasFlag = data != null && FactionData.FactionFlags.ContainsKey(entry.Faction);
-		Flag.Visible = hasFlag;
-		Flag.Texture = hasFlag ? data.FlagTexture : null;
-		Tint.SelfModulate = hasFlag
-			? new Color(data.FactionColor, TintAlpha)
+		// indexer) would throw KeyNotFoundException. Not a corner case: ChangeRoundChangeEvent is
+		// NONE, and so is anything else the turn structure does rather than a player.
+		bool hasFactionFlag = data != null && FactionData.FactionFlags.ContainsKey(entry.Faction);
+
+		// An override flag — the composite all-factions NextRoundFlag — replaces the faction flag and
+		// takes the badge over completely: no icon on top and no colour wash, because the flag is the
+		// picture and either would only muddy it.
+		Texture2D overrideFlag = LoadTexture(entry.FlagPath);
+		bool hasOverrideFlag = overrideFlag != null;
+
+		Flag.Texture = hasOverrideFlag ? overrideFlag : (hasFactionFlag ? data.FlagTexture : null);
+		Flag.Visible = Flag.Texture != null;
+
+		Icon.Texture = hasOverrideFlag ? null : LoadTexture(entry.IconPath);
+
+		Tint.SelfModulate =
+			hasOverrideFlag ? Colors.Transparent
+			: hasFactionFlag ? new Color(data.FactionColor, TintAlpha)
 			: new Color(Colors.Gray, 0.85f);
 	}
+
+	/// <summary>
+	/// GD.Load rather than a preloaded table: ResourceLoader caches, so the repeat cost is a dictionary
+	/// hit, and keeping the load here means a headless run — which never builds a badge — never touches
+	/// a texture.
+	/// </summary>
+	private static Texture2D LoadTexture(string path)
+		=> string.IsNullOrEmpty(path) ? null : GD.Load<Texture2D>(path);
 
 	public override void _Ready()
 	{

@@ -16,6 +16,7 @@ public readonly record struct GameHistoryEntry(
     int     Sequence,        // 1-based position in the history the player sees, shown on the badge
     int     MessageId,       // position in the replicated stream; not dense, so not what is displayed
     string  IconPath,        // null when this message type has no icon yet
+    string  FlagPath,        // overrides the faction flag; null for the ordinary faction-flag badge
     string  Summary,
     Faction Faction,
     int     SourceCardId,    // -1 when the message has no source card
@@ -31,6 +32,7 @@ public readonly record struct GameHistoryEntry(
         sequence,
         message.Id,
         message.HistoryIconPath(),
+        message.HistoryFlagPath(),
         message.SummaryText(),
         message.HistoryFaction(),
         (message as ChangeEvent)?.SourceCardId ?? -1,

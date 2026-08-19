@@ -22,5 +22,8 @@ public partial class SpendPlayActionChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} spent their play action";
+    /// <summary>
+    /// Kept out of the history strip. 
+    /// </summary>
+    public override bool ToHistoryItem => false;
 }

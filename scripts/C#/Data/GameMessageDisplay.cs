@@ -10,12 +10,17 @@ public static class GameMessageDisplay
     // The badge icons. Paths rather than Texture2D so nothing here loads a texture on a headless
     // server — GameHistoryItem resolves them, and it only ever runs with a UI.
     private const string IconDraw            = "res://assets/textures/Other/Icons/PlayedCardsIcon.png";
+    // Same asset as IconDraw, named separately so either mapping can move without disturbing the other.
+    private const string IconReorder         = "res://assets/textures/Other/Icons/PlayedCardsIcon.png";
     private const string IconPlayCard        = "res://assets/textures/Other/Icons/PlayCardIcon.png";
     private const string IconDiscard         = "res://assets/textures/Other/Icons/DiscardIcon.png";
     private const string IconDiscardFromHand = "res://assets/textures/Other/Icons/DiscardFromHandIcon.png";
     private const string IconScorePoints     = "res://assets/textures/Other/Icons/ScorePointsIcon.png";
     private const string IconArmy            = "res://assets/textures/Units/QGArmyDetailed.png";
     private const string IconNavy            = "res://assets/textures/Units/QGNavyDetailed.png";
+
+    // Badge flags, which replace the faction flag rather than sitting over it. See HistoryFlagPath.
+    private const string FlagNextRound        = "res://assets/textures/Other/NextRoundFlag.png";
 
     /// <summary>
     /// The icon drawn over the faction flag on a history badge, or null for a message that has no
@@ -41,8 +46,24 @@ public static class GameMessageDisplay
         DiscardHandCardsChangeEvent           => IconDiscardFromHand,
         ForceDiscardHandCardsChangeEvent      => IconDiscardFromHand,
 
+        ReorderDeckChangeEvent                => IconReorder,
+
         ScorePointsChangeEvent                => IconScorePoints,
 
+        _                                     => null,
+    };
+
+    /// <summary>
+    /// A flag texture that replaces the acting faction's on the badge, or null to use the faction's own.
+    ///
+    /// For an entry that belongs to no faction but still has to be recognisable at a glance. A new
+    /// round is the whole table's event — Faction.NONE, so it would otherwise be an anonymous grey
+    /// badge — and it flies the composite all-factions flag instead. A badge with an override flag
+    /// carries no icon and no faction colour wash: the flag *is* the picture.
+    /// </summary>
+    public static string HistoryFlagPath(this GameMessage message) => message switch
+    {
+        ChangeRoundChangeEvent                => FlagNextRound,
         _                                     => null,
     };
 
