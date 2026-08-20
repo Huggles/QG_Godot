@@ -28,6 +28,20 @@ public static class SceneFlow
     {
         ErrorReporter.IsShuttingDown = true;
 
+        // Menu music is a property of not being in the game, so it is decided here rather than in
+        // each screen: everything that is not Game.tscn is a menu screen and keeps the same track
+        // running (PlayMusic is a no-op for the track already playing, so navigating between screens
+        // does not restart it), and entering the game silences it. Coming back out — to the victory
+        // screen or the main menu — starts it again through this same call.
+        if (scenePath == GameScenePath)
+        {
+            AudioManager.StopMusic();
+        }
+        else
+        {
+            AudioManager.PlayMusic(AudioManager.MenuMusicTrack);
+        }
+
         if (leaveSession)
         {
             if (from.Multiplayer?.MultiplayerPeer != null)

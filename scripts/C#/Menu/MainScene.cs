@@ -29,6 +29,11 @@ public partial class MainScene : Node
             ? "res://scenes/menu/MultiplayerLobby.tscn"
             : "res://scenes/menu/Menu.tscn";
 
+        // Boot goes straight to ChangeSceneToFile rather than through SceneFlow (which owns the
+        // shutting-down flag and has nothing to tear down yet), so the menu music has to start here.
+        // SceneFlow keeps it going across every later menu navigation and stops it entering the game.
+        AudioManager.PlayMusic(AudioManager.MenuMusicTrack);
+
         GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, targetScene);
     }
 }

@@ -30,6 +30,15 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>Last server port entered on the join screen, restored on the next launch.</summary>
     public int LastJoinPort { get; private set; } = MultiplayerLobby.DEFAULT_PORT;
 
+    /// <summary>Overall output level, 0..1. Multiplies both of the levels below via the Master bus.</summary>
+    public float MasterVolume { get; private set; } = 1.0f;
+
+    /// <summary>Music level, 0..1, applied to the Music audio bus.</summary>
+    public float MusicVolume { get; private set; } = 0.8f;
+
+    /// <summary>Sound effect level, 0..1, applied to the SFX audio bus.</summary>
+    public float SfxVolume { get; private set; } = 0.8f;
+
     public static DebugVerbosity Debug => Instance.DebugLevel;
     public static bool IsDebugMultiplayer => Instance.DebugMultiplayer;
     public static bool IsAutoDismissModal => Instance.AutoDismissModal;
@@ -78,6 +87,22 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
     public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
 
+    /// <summary>
+    /// Persists all three audio levels in one write and pushes them onto the audio buses.
+    /// Deliberately a single setter: <see cref="Save"/> rewrites the whole config file, so a
+    /// slider must not call this per tick — see the sound panel in <c>BottomLeftMenu</c>, which
+    /// applies changes live through <see cref="AudioManager.SetBusVolume"/> and only lands here
+    /// when the drag ends or the panel closes.
+    /// </summary>
+    public void SetVolumes(float master, float music, float sfx)
+    {
+        MasterVolume = Mathf.Clamp(master, 0f, 1f);
+        MusicVolume  = Mathf.Clamp(music,  0f, 1f);
+        SfxVolume    = Mathf.Clamp(sfx,    0f, 1f);
+        Save();
+        AudioManager.Instance?.ApplyVolumes();
+    }
+
     public void SetShowCountryLabels(bool value) { ShowCountryLabels = value; Save(); }
     public void SetShowDebugMenu(bool value) { ShowDebugMenu = value; Save(); }
 
@@ -105,7 +130,11 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
             ShowCountryLabels = config.GetValue(Section, "show_country_labels", true).As<bool>();
             ShowDebugMenu = config.GetValue(Section, "show_debug_menu", false).As<bool>();
-            
+
+            MasterVolume = Mathf.Clamp(config.GetValue(Section, "master_volume", 1.0f).As<float>(), 0f, 1f);
+            MusicVolume  = Mathf.Clamp(config.GetValue(Section, "music_volume",  0.8f).As<float>(), 0f, 1f);
+            SfxVolume    = Mathf.Clamp(config.GetValue(Section, "sfx_volume",    0.8f).As<float>(), 0f, 1f);
+
         }
 
         // DebugMultiplayer is a runtime-only flag, driven solely by the command-line arg used
@@ -129,6 +158,9 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "last_join_port",        LastJoinPort);
         config.SetValue(Section, "show_country_labels",   ShowCountryLabels);
         config.SetValue(Section, "show_debug_menu",       ShowDebugMenu);
+        config.SetValue(Section, "master_volume",         MasterVolume);
+        config.SetValue(Section, "music_volume",          MusicVolume);
+        config.SetValue(Section, "sfx_volume",            SfxVolume);
         config.Save(ConfigPath);
     }
 }

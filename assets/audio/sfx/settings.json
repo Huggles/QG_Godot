@@ -1,0 +1,32 @@
+{
+    "settings" : [
+        {
+            "name": "inputRequest",
+            "label": "Input Request",
+            "sound_files": [
+                {
+                    "name": "ping",
+                    "file": "assets/audio/sfx/InputRequest1",
+                    "label": "Ping"
+                },
+                {
+                    "name": "airhorn",
+                    "file": "assets/audio/sfx/InputRequest2",
+                    "label": "Airhorn"
+                }                
+
+            ]
+        },
+        {
+            "name": "menuButtonclick",
+            "label": "Menu Button Click",
+            "sound_files": [
+                {
+                    "name": "menuButtonClick1",
+                    "file": "assets/audio/sfx/MenuButtonClick1",
+                    "label": "Metal Click"
+                }
+            ]
+        }
+    ]
+}

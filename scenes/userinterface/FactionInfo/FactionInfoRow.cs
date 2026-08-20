@@ -16,6 +16,7 @@ public partial class FactionInfoRow : Control
 	private Panel DetailPanel => GetNode<Panel>("DetailPanel");    
 	private Button FactionInfoButton => GetNode<Button>("FactionInfoButton");
 	private Button DiscardDeckButton => BackgroundPanel.GetNode<Button>("DiscardDeckButton");
+	private Label DeckCardNumber => DiscardDeckButton.GetNode<Label>("DeckCardNumber");
 	private Button PlayedCardsButton => BackgroundPanel.GetNode<Button>("PlayedCardsButton");
 	private RichTextLabel TurnSummariesRichText => DetailPanel.GetNode<RichTextLabel>("MarginContainer/TurnSummariesRichText");
 	private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
@@ -45,6 +46,9 @@ public partial class FactionInfoRow : Control
 			EventBus.Instance.UnitDeployed -= OnUnitDeployed;
 			EventBus.Instance.UnitRemoved -= OnUnitRemoved;
 			EventBus.Instance.GameStateRecalculated -= SetUnitCounts;
+			EventBus.Instance.GameStateRecalculated -= SetDeckCardCount;
+			EventBus.Instance.CardsDrawn -= OnCardsChanged;
+			EventBus.Instance.CardsDiscarded -= OnCardsChanged;
 			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
 			FactionInfoButton.Pressed -= OnFactionInfoButtonPressed;
 			DiscardDeckButton.Pressed -= OnDiscardDeckButtonPressed;
@@ -92,11 +96,15 @@ public partial class FactionInfoRow : Control
 
 		SetScore(FactionState.Score);
 		SetUnitCounts();
+		SetDeckCardCount();
 
 		EventBus.Instance.FactionScoredPoints += OnFactionScoredPoints;
 		EventBus.Instance.UnitDeployed += OnUnitDeployed;
 		EventBus.Instance.UnitRemoved += OnUnitRemoved;
 		EventBus.Instance.GameStateRecalculated += SetUnitCounts;
+		EventBus.Instance.GameStateRecalculated += SetDeckCardCount;
+		EventBus.Instance.CardsDrawn += OnCardsChanged;
+		EventBus.Instance.CardsDiscarded += OnCardsChanged;
 		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		DiscardDeckButton.Pressed += OnDiscardDeckButtonPressed;
@@ -128,6 +136,18 @@ public partial class FactionInfoRow : Control
 		if (UnitState.ForId(unitId).Faction == Faction)
 		{
 			SetUnitCounts();
+		}
+	}
+
+	/// <summary>
+	/// Handles both CardsDrawn and CardsDiscarded — they share the (faction, numberOfCards) shape.
+	/// Gives immediate feedback for the common case; GameStateRecalculated is the catch-all resync.
+	/// </summary>
+	private void OnCardsChanged(int faction, int numberOfCards)
+	{
+		if ((Faction)faction == Faction)
+		{
+			SetDeckCardCount();
 		}
 	}
 
@@ -185,6 +205,19 @@ public partial class FactionInfoRow : Control
 	{
 		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY));
 		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY));
+	}
+
+	/// <summary>
+	/// Repaints the draw-deck counter — how many cards the faction has left to draw.
+	/// Reads state directly rather than tracking deltas: several paths change DeckCardIds without
+	/// emitting CardsDrawn/CardsDiscarded (DiscardTopCards, PlayCard, ShuffleDeck, RecycleCardChangeEvent,
+	/// and a client applying a snapshot), so the card signals alone would drift out of sync.
+	/// </summary>
+	private void SetDeckCardCount()
+	{
+		// FactionState.ForEnum returns null before the game state exists — same guard as UnitPool.AvailableUnitCount.
+		DeckState deckState = FactionState?.DeckState;
+		DeckCardNumber.Text = (deckState?.DeckCardIds.Count ?? 0).ToString();
 	}
 
 	private void SetUnitCount(Label label, int count)

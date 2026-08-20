@@ -5,9 +5,10 @@ using System.Linq;
 
 /// <summary>
 /// Multiplayer lobby: host/join + per-player faction selection.
-/// Each player picks factions from one team (Axis or Allies).
-/// Host can revoke any player's faction assignment.
-/// All 6 factions must be assigned before the game can start.
+/// Each player picks factions from one team (Axis or Allies), or takes "Random" instead — no factions
+/// named, and whatever nobody else claimed is dealt to them (still all on one team) when the game starts.
+/// Host can revoke any player's faction assignment or Random claim.
+/// All 6 factions must be accounted for — named or covered by a Random claim — before the game can start.
 /// </summary>
 public partial class MultiplayerLobby : Control
 {
@@ -34,6 +35,12 @@ public partial class MultiplayerLobby : Control
 		{ Faction.SOVIET,         "res://assets/factions/soviet/Soviet_Flag.png" },
 		{ Faction.UNITED_STATES,  "res://assets/factions/united_states/US_Flag.png" },
 	};
+
+	/// <summary>
+	/// The "Random" pick's icon: the composite all-factions flag, already used elsewhere to mean
+	/// "every faction at once" (see GameMessageDisplay's next-round flag).
+	/// </summary>
+	private const string RandomFlagPath = "res://assets/textures/Other/NextRoundFlag.png";
 
 	private static readonly Dictionary<Faction, string> FactionNames = new()
 	{
@@ -114,8 +121,18 @@ public partial class MultiplayerLobby : Control
 	private readonly Dictionary<int, PanelContainer> _playerRowPanels = new();
 	/// <summary>peerId → { faction → TextureButton }.</summary>
 	private readonly Dictionary<int, Dictionary<Faction, TextureButton>> _factionButtons = new();
+	/// <summary>peerId → that row's "Random" button.</summary>
+	private readonly Dictionary<int, TextureButton> _randomButtons = new();
 	/// <summary>Authoritative faction assignments: faction → owning peerId.</summary>
 	private readonly Dictionary<Faction, int> _assignments = new();
+	/// <summary>
+	/// Authoritative set of peers that picked "Random" rather than naming factions. Turned into real
+	/// entries in <see cref="_assignments"/> by <see cref="DealRandomClaims"/> when the host starts the
+	/// game, and not a moment earlier — the whole point is that nobody knows what they drew until then.
+	///
+	/// Per row this is mutually exclusive with holding factions; see <see cref="RequestRandomToggle"/>.
+	/// </summary>
+	private readonly HashSet<int> _randomClaims = new();
 
 	// ══════════════════════════════════════════════════════════════════════════
 	// Godot lifecycle
@@ -469,12 +486,22 @@ public partial class MultiplayerLobby : Control
 			DebugUtilities.PrintPeerError("Only the host can start the game");
 			return;
 		}
-		if (!AllPlayableFactions.All(f => _assignments.ContainsKey(f)))
+		if (!CanCoverAllFactions(out string problem))
 		{
-			DebugUtilities.PrintPeerError("Cannot start: not all factions are assigned");
+			DebugUtilities.PrintPeerError($"Cannot start: {problem}");
 			return;
 		}
 		DebugUtilities.PrintPeer("Host starting game...");
+
+		// The draw happens here, on the host, and is pushed out as a plain assignment sync before the
+		// start goes out — StartGame reads _assignments on every peer, so the table has to be settled
+		// and identical everywhere first. RPCs are reliable and ordered, so the sync lands first.
+		if (_randomClaims.Count > 0)
+		{
+			DealRandomClaims();
+			BroadcastFactionState();
+		}
+
 		// Only the host's field is read: the seed travels to the clients on the StartSession RPC,
 		// so a client's own box never affects its game.
 		MenuSeedField.Commit(_seedInput);
@@ -504,6 +531,18 @@ public partial class MultiplayerLobby : Control
 			RequestFactionToggle(rowPeerId, (int)faction);
 		else
 			RpcId(1, nameof(RequestFactionToggle), rowPeerId, (int)faction);
+	}
+
+	private void OnRandomButtonPressed(int rowPeerId)
+	{
+		int me = Multiplayer.GetUniqueId();
+		// Only the row's owner or the host may interact with a row.
+		if (me != rowPeerId && me != 1) return;
+
+		if (Multiplayer.IsServer())
+			RequestRandomToggle(rowPeerId);
+		else
+			RpcId(1, nameof(RequestRandomToggle), rowPeerId);
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -539,9 +578,10 @@ public partial class MultiplayerLobby : Control
 				// Unclaim own faction.
 				_assignments.Remove(faction);
 			}
-			else if (!isClaimed)
+			else if (!isClaimed && !_randomClaims.Contains(requester))
 			{
-				// Attempt to claim: enforce team constraint.
+				// Attempt to claim: enforce team constraint. A player holding Random cannot also name
+				// factions — they gave up the choice, which is exactly what Random means.
 				FactionTeam playerTeam  = GetTeam(requester);
 				FactionTeam factionTeam = AxisSet.Contains(faction) ? FactionTeam.AXIS : FactionTeam.ALLIES;
 				if (playerTeam == FactionTeam.NONE || playerTeam == factionTeam)
@@ -549,18 +589,58 @@ public partial class MultiplayerLobby : Control
 			}
 		}
 
-		Rpc(nameof(SyncFactionState), SerialiseAssignments());
+		BroadcastFactionState();
 	}
+
+	/// <summary>
+	/// Called on the host (directly or via RPC from a client): toggles a row's "Random" claim.
+	/// Mirrors <see cref="RequestFactionToggle"/>'s permission model exactly — a player toggles their
+	/// own row, and the host can only revoke on someone else's.
+	/// </summary>
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+	private void RequestRandomToggle(int targetPeerId)
+	{
+		if (!Multiplayer.IsServer() || _gameStarting) return;
+
+		int requester = (int)Multiplayer.GetRemoteSenderId();
+		if (requester == 0) requester = 1; // direct (local) call by host
+
+		bool heldByTarget = _randomClaims.Contains(targetPeerId);
+
+		if (requester == 1 && targetPeerId != 1)
+		{
+			// Host acting on another player's row: revoke only.
+			if (heldByTarget)
+				_randomClaims.Remove(targetPeerId);
+		}
+		else if (requester == targetPeerId)
+		{
+			if (heldByTarget)
+				_randomClaims.Remove(requester);
+			// Random is all-or-nothing for a row: a player already holding factions has made their pick.
+			else if (!_assignments.ContainsValue(requester))
+				_randomClaims.Add(requester);
+		}
+
+		BroadcastFactionState();
+	}
+
+	private void BroadcastFactionState()
+		=> Rpc(nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
 
 	/// <summary>
 	/// Broadcast from the host to all peers (and locally): the authoritative assignment table.
 	/// </summary>
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
-	private void SyncFactionState(Godot.Collections.Dictionary<int, int> data)
+	private void SyncFactionState(Godot.Collections.Dictionary<int, int> data, int[] randomPeers)
 	{
 		_assignments.Clear();
 		foreach (var kv in data)
 			_assignments[(Faction)kv.Key] = kv.Value;
+
+		_randomClaims.Clear();
+		foreach (int peerId in randomPeers)
+			_randomClaims.Add(peerId);
 
 		RefreshAllButtons();
 		UpdateStartGameButton();
@@ -571,6 +651,9 @@ public partial class MultiplayerLobby : Control
 		foreach (var (peerId, buttons) in _factionButtons)
 			foreach (var (faction, btn) in buttons)
 				RefreshButton(peerId, faction, btn);
+
+		foreach (var (peerId, btn) in _randomButtons)
+			RefreshRandomButton(peerId, btn);
 	}
 
 	private void RefreshButton(int rowPeerId, Faction faction, TextureButton btn)
@@ -607,6 +690,12 @@ public partial class MultiplayerLobby : Control
 			btn.Modulate = ColOtherOwned;
 			btn.Disabled = true;
 		}
+		else if (_randomClaims.Contains(rowPeerId))
+		{
+			// My row, but I picked Random: naming a faction is no longer mine to do.
+			btn.Modulate = ColUnavailable;
+			btn.Disabled = true;
+		}
 		else if (!teamOk)
 		{
 			// My row, but this faction belongs to the opposing team.
@@ -616,6 +705,42 @@ public partial class MultiplayerLobby : Control
 		else
 		{
 			// My row, faction available and team-compatible.
+			btn.Modulate = ColAvailable;
+			btn.Disabled = false;
+		}
+	}
+
+	/// <summary>
+	/// Same four states as <see cref="RefreshButton"/>, read off <see cref="_randomClaims"/> instead:
+	/// claimed by this row, another row's business, blocked because this row already holds factions,
+	/// or free to take.
+	/// </summary>
+	private void RefreshRandomButton(int rowPeerId, TextureButton btn)
+	{
+		int  me      = Multiplayer.GetUniqueId();
+		bool isMyRow = rowPeerId == me;
+		bool iAmHost = me == 1;
+
+		if (_randomClaims.Contains(rowPeerId))
+		{
+			// Gold: this row's player is going random.
+			// Clickable by the owner (to unclaim) or the host (to revoke).
+			btn.Modulate = ColClaimed;
+			btn.Disabled = !(isMyRow || iAmHost);
+		}
+		else if (!isMyRow)
+		{
+			btn.Modulate = ColOtherOwned;
+			btn.Disabled = true;
+		}
+		else if (_assignments.ContainsValue(me))
+		{
+			// My row, but I have already named factions — the two are mutually exclusive.
+			btn.Modulate = ColUnavailable;
+			btn.Disabled = true;
+		}
+		else
+		{
 			btn.Modulate = ColAvailable;
 			btn.Disabled = false;
 		}
@@ -637,14 +762,137 @@ public partial class MultiplayerLobby : Control
 		return d;
 	}
 
+	/// <summary>
+	/// A plain <c>int[]</c> — it goes over the wire as a PackedInt32Array, which needs no type
+	/// information carried alongside it the way a typed Array would.
+	/// </summary>
+	private int[] SerialiseRandomClaims() => _randomClaims.ToArray();
+
 	private void UpdateStartGameButton()
 	{
 		if (!_isHost) return;
-		int missing = AllPlayableFactions.Count(f => !_assignments.ContainsKey(f));
-		_startGameButton.Disabled    = missing > 0;
-		_startGameButton.TooltipText = missing == 0
-			? "All factions assigned – ready to start!"
-			: $"{missing} faction(s) still unassigned";
+		bool canStart = CanCoverAllFactions(out string problem);
+		_startGameButton.Disabled    = !canStart;
+		_startGameButton.TooltipText = canStart
+			? "All factions accounted for – ready to start!"
+			: problem;
+	}
+
+	// ══════════════════════════════════════════════════════════════════════════
+	// Random claims
+	// ══════════════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// Whether every faction has an owner, counting a Random claim as cover for its share of whatever
+	/// nobody named. Host-side gate for the start button, and the precondition
+	/// <see cref="DealRandomClaims"/> is written against.
+	///
+	/// Two things can go wrong once Random is in play, and both are the host's to fix:
+	/// there are more Random claims than factions left to hand out, or the leftovers straddle both
+	/// teams with only one player willing to take them (a player only ever ends up on one team, so a
+	/// lone Random pick cannot mop up an Axis and an Allied faction between them).
+	/// </summary>
+	private bool CanCoverAllFactions(out string problem)
+	{
+		List<Faction> unclaimed = AllPlayableFactions.Where(f => !_assignments.ContainsKey(f)).ToList();
+		int           pickers   = _randomClaims.Count;
+
+		if (pickers == 0)
+		{
+			problem = unclaimed.Count == 0 ? null : $"{unclaimed.Count} faction(s) still unassigned";
+			return unclaimed.Count == 0;
+		}
+
+		if (unclaimed.Count == 0)
+		{
+			problem = $"{pickers} Random pick(s) with no factions left to draw from";
+			return false;
+		}
+		if (pickers > unclaimed.Count)
+		{
+			problem = $"{pickers} Random pick(s) but only {unclaimed.Count} faction(s) left";
+			return false;
+		}
+
+		int teamsInPool = (unclaimed.Any(AxisSet.Contains) ? 1 : 0)
+						+ (unclaimed.Any(f => !AxisSet.Contains(f)) ? 1 : 0);
+		if (pickers < teamsInPool)
+		{
+			problem = "Both teams have factions left, so one Random pick cannot cover them all";
+			return false;
+		}
+
+		problem = null;
+		return true;
+	}
+
+	/// <summary>
+	/// Turns every Random claim into real ownership, dealt from the factions nobody named. Each picker
+	/// comes out on a single team — the game has no notion of a player straddling both — and the
+	/// factions already claimed by hand are, by construction, never in the pool.
+	///
+	/// Host-only, and called exactly once: the draw happens on the host and travels to the clients as
+	/// an ordinary assignment sync, so nobody rolls their own and diverges.
+	/// Assumes <see cref="CanCoverAllFactions"/> has just said yes.
+	/// </summary>
+	private void DealRandomClaims()
+	{
+		if (_randomClaims.Count == 0) return;
+
+		var rng = new Random();
+		var pool = new Dictionary<FactionTeam, List<Faction>>
+		{
+			[FactionTeam.AXIS]   = Shuffled(AllPlayableFactions.Where(f =>  AxisSet.Contains(f) && !_assignments.ContainsKey(f)), rng),
+			[FactionTeam.ALLIES] = Shuffled(AllPlayableFactions.Where(f => !AxisSet.Contains(f) && !_assignments.ContainsKey(f)), rng),
+		};
+
+		List<int>         pickers      = Shuffled(_randomClaims, rng);
+		List<FactionTeam> teams        = pool.Where(kv => kv.Value.Count > 0).Select(kv => kv.Key).ToList();
+		var               pickersOnTeam = teams.ToDictionary(t => t, _ => new List<int>());
+
+		// Every team with factions left needs someone to take them, so seed one picker each before
+		// anything else; the rest go wherever the most factions are waiting per picker, which is what
+		// keeps a 6-player lobby dealing one faction apiece instead of three to one player.
+		int next = 0;
+		foreach (FactionTeam team in teams)
+		{
+			if (next >= pickers.Count) break; // unreachable while CanCoverAllFactions holds
+			pickersOnTeam[team].Add(pickers[next++]);
+		}
+
+		for (; next < pickers.Count; next++)
+		{
+			FactionTeam? target = teams
+				.Where(t => pickersOnTeam[t].Count < pool[t].Count)
+				.OrderByDescending(t => (double)pool[t].Count / pickersOnTeam[t].Count)
+				.Cast<FactionTeam?>()
+				.FirstOrDefault();
+			if (target == null) break; // unreachable while CanCoverAllFactions holds
+			pickersOnTeam[target.Value].Add(pickers[next]);
+		}
+
+		foreach (FactionTeam team in teams)
+		{
+			List<Faction> factions    = pool[team];
+			List<int>     teamPickers = pickersOnTeam[team];
+			if (teamPickers.Count == 0) continue; // as above: nobody to deal this team to
+			for (int i = 0; i < factions.Count; i++)
+				_assignments[factions[i]] = teamPickers[i % teamPickers.Count];
+		}
+
+		DebugUtilities.PrintPeer($"Random picks dealt: {string.Join(", ", pickers.Select(p => $"peer {p} → {string.Join('/', _assignments.Where(kv => kv.Value == p).Select(kv => FactionNames[kv.Key]))}"))}");
+		_randomClaims.Clear();
+	}
+
+	private static List<T> Shuffled<T>(IEnumerable<T> source, Random rng)
+	{
+		var list = source.ToList();
+		for (int i = list.Count - 1; i > 0; i--)
+		{
+			int j = rng.Next(i + 1);
+			(list[i], list[j]) = (list[j], list[i]);
+		}
+		return list;
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -715,7 +963,7 @@ public partial class MultiplayerLobby : Control
 		if (_isHost)
 		{
 			RpcId((int)peerId, nameof(SyncPlayerList),   GetPlayerListData());
-			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments());
+			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
 			RpcId((int)peerId, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
 			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 
@@ -728,7 +976,7 @@ public partial class MultiplayerLobby : Control
 				if (connectedClients >= _requiredPlayers)
 				{
 					AutoAssignDedicatedFactions();
-					Rpc(nameof(SyncFactionState), SerialiseAssignments());
+					BroadcastFactionState();
 					OnStartGameButtonPressed();
 				}
 			}
@@ -736,7 +984,7 @@ public partial class MultiplayerLobby : Control
 			{
 				// F6 debug auto-start: assign default factions, sync to all, then start.
 				AutoAssignDebugFactions((int)peerId);
-				Rpc(nameof(SyncFactionState), SerialiseAssignments());
+				BroadcastFactionState();
 				OnStartGameButtonPressed();
 			}
 		}
@@ -750,6 +998,7 @@ public partial class MultiplayerLobby : Control
 	private void AutoAssignDebugFactions(int clientPeerId)
 	{
 		_assignments.Clear();
+		_randomClaims.Clear(); // the auto-split names every faction, so nothing is left to draw
 		if (GameSettings.IsDebugTeamsSwapped)
 		{
 			foreach (var f in AxisSet)                              _assignments[f] = clientPeerId;
@@ -772,6 +1021,7 @@ public partial class MultiplayerLobby : Control
 	private void AutoAssignDedicatedFactions()
 	{
 		_assignments.Clear();
+		_randomClaims.Clear(); // as above: every faction is dealt here, so no Random claim survives
 		List<int> clientPeers = _playerLabels.Keys.Where(p => p != 1).OrderBy(p => p).ToList();
 		if (clientPeers.Count == 0) return;
 
@@ -804,7 +1054,8 @@ public partial class MultiplayerLobby : Control
 				.Select(kv => kv.Key)
 				.ToList();
 			foreach (var f in released) _assignments.Remove(f);
-			Rpc(nameof(SyncFactionState), SerialiseAssignments());
+			_randomClaims.Remove((int)peerId);
+			BroadcastFactionState();
 		}
 	}
 
@@ -835,6 +1086,7 @@ public partial class MultiplayerLobby : Control
 		UpdateStatusLabel("Disconnected from server");
 		ClearAllRows();
 		_assignments.Clear();
+		_randomClaims.Clear();
 		_startGameButton.Visible = false;
 
 		// The session is over, so release the Steam lobby too — otherwise the next host attempt
@@ -927,6 +1179,29 @@ public partial class MultiplayerLobby : Control
 			_factionButtons[peerId][faction] = btn;
 		}
 
+		// ── Random ────────────────────────────────────────────────────────
+		// Set apart from both team blocks by its own separator: it is not a seventh faction, it is the
+		// choice not to choose.
+		flagsBox.AddChild(new VSeparator { CustomMinimumSize = new Vector2(2, FlagHeight) });
+
+		var randomTex = GD.Load<Texture2D>(RandomFlagPath);
+		var randomBtn = new TextureButton
+		{
+			TextureNormal        = randomTex,
+			TextureDisabled      = randomTex,
+			StretchMode          = TextureButton.StretchModeEnum.KeepAspectCentered,
+			IgnoreTextureSize    = true,
+			CustomMinimumSize    = new Vector2(0, FlagHeight),
+			SizeFlagsHorizontal  = Control.SizeFlags.ExpandFill,
+			TooltipText          = "Random – take whatever nobody picked, drawn when the game starts"
+		};
+
+		int capRandomPeerId = peerId;
+		randomBtn.Pressed += () => OnRandomButtonPressed(capRandomPeerId);
+
+		flagsBox.AddChild(randomBtn);
+		_randomButtons[peerId] = randomBtn;
+
 		_playerListContainer.AddChild(panel);
 		_playerLabels[peerId]    = nameLabel;
 		_playerRowPanels[peerId] = panel;
@@ -935,6 +1210,7 @@ public partial class MultiplayerLobby : Control
 		// Initialise visual states for the new row based on current assignments.
 		foreach (var (f, b) in _factionButtons[peerId])
 			RefreshButton(peerId, f, b);
+		RefreshRandomButton(peerId, randomBtn);
 
 		DebugUtilities.PrintPeer($"Added player row: {playerName} (Peer {peerId})");
 	}
@@ -949,6 +1225,7 @@ public partial class MultiplayerLobby : Control
 		_playerLabels.Remove(peerId);
 		_playerNames.Remove(peerId);
 		_factionButtons.Remove(peerId);
+		_randomButtons.Remove(peerId);
 		DebugUtilities.PrintPeer($"Removed player row: Peer {peerId}");
 	}
 
@@ -959,6 +1236,7 @@ public partial class MultiplayerLobby : Control
 		_playerLabels.Clear();
 		_playerNames.Clear();
 		_factionButtons.Clear();
+		_randomButtons.Clear();
 	}
 
 	private Godot.Collections.Dictionary<int, string> GetPlayerListData()
@@ -981,7 +1259,7 @@ public partial class MultiplayerLobby : Control
 
 		int requester = Multiplayer.GetRemoteSenderId();
 		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());
-		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments());
+		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
 		RpcId(requester, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
 		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 	}

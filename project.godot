@@ -19,10 +19,15 @@ run/main_scene="res://scenes/menu/MainScene.tscn"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 ErrorReporter="*res://scripts/C#/Errors/ErrorReporter.cs"
 GameSettings="*res://scripts/C#/Utils/GameSettings.cs"
+AudioManager="*res://scripts/C#/Utils/AudioManager.cs"
 NodeUtilities="*res://scripts/C#/Utils/NodeUtilities.cs"
 DebugUtilities="*res://scripts/C#/Utils/DebugUtilities.cs"
 GameManager="*res://scripts/C#/Game/GameManager.cs"
