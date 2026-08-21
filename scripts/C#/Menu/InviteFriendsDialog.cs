@@ -170,8 +170,8 @@ public partial class InviteFriendsDialog : MenuModal
 		status.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
 		row.AddChild(status);
 
-		// A plain Button, not MenuPanelButton: Disabled has to genuinely block the click for someone who
-		// is already here or has just been invited, and MenuPanelButton's own Pressed signal ignores it.
+		// A plain Button, not MenuPanelButton: this is a compact list row rather than menu chrome, and
+		// the default styling suits it. Disabled genuinely blocks the click in both widgets.
 		var invite = new Button { CustomMinimumSize = new Vector2(120, 44) };
 		if (friend.AlreadyInLobby)
 		{

@@ -28,8 +28,7 @@ public partial class GameMenuModal : MenuModal
         GD.Load<PackedScene>("res://scenes/menu/GameMenuModal.tscn");
 
     /// <summary>
-    /// Guards the settings flow. Needed because <see cref="MenuPanelButton"/> emits Pressed even
-    /// while Disabled, and because a second click during the await would open a second dialog.
+    /// Guards the settings flow: a second click during the await would open a second dialog.
     /// </summary>
     private bool _flowBusy;
 

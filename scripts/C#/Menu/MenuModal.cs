@@ -21,9 +21,9 @@ public partial class MenuModal : CanvasLayer
 	protected const int OverlayLayer = 100;
 
 	/// <summary>
-	/// Set the moment a choice is made, and checked first by every handler.
-	/// Required, not cosmetic: <see cref="MenuPanelButton"/> emits its own Pressed from _GuiInput,
-	/// which still fires while the button is Disabled — Disabled only swaps in the dimmed stylebox.
+	/// Set the moment a choice is made, and checked first by every handler. Guards against a second
+	/// click landing while the first choice is still being acted on - <see cref="MenuPanelButton"/>
+	/// acts on the press, so a double click arrives as two presses in quick succession.
 	/// </summary>
 	protected bool Resolved;
 

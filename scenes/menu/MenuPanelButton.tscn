@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dxq3kwan4wpb5"]
 
+[ext_resource type="Texture2D" uid="uid://cauflnn4rtw5c" path="res://assets/textures/Other/Menu/Button9PatchImage1.png" id="2_5581r"]
 [ext_resource type="Script" uid="uid://cbtnmr7p4xq8g" path="res://scripts/C#/Menu/MenuPanelButton.cs" id="2_script"]
-[ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="3_dgjnc"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="4_q0r3r"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5581r"]
@@ -15,10 +15,9 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hv7sk"]
 
 [node name="NinePatchButton" type="Button" unique_id=566933446]
-custom_minimum_size = Vector2(100, 80)
-offset_right = 296.0
-offset_bottom = 160.0
-scale = Vector2(0.5, 0.5)
+custom_minimum_size = Vector2(318, 156)
+offset_right = 318.0
+offset_bottom = 156.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_5581r")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_dgjnc")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_q0r3r")
@@ -28,18 +27,18 @@ script = ExtResource("2_script")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=171759037]
 layout_mode = 0
-offset_right = 1480.0
-offset_bottom = 800.0
-scale = Vector2(0.2, 0.2)
-texture = ExtResource("3_dgjnc")
+offset_right = 1060.0
+offset_bottom = 520.0
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("2_5581r")
 patch_margin_left = 438
-patch_margin_top = 376
+patch_margin_top = 229
 patch_margin_right = 469
-patch_margin_bottom = 416
+patch_margin_bottom = 291
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 script = ExtResource("4_q0r3r")
-TileScale = 0.2
+TileScale = 0.3
 
 [node name="ContentContainer" type="MarginContainer" parent="." unique_id=1659046377]
 layout_mode = 1
@@ -48,16 +47,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 50
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 50
-
-[node name="Label" type="RichTextLabel" parent="ContentContainer" unique_id=1225715149]
-layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/normal_font_size = 32
-bbcode_enabled = true
-text = "[center]Jingle Bells[/center]"
-fit_content = true
-scroll_active = false
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Label" type="Label" parent="ContentContainer" unique_id=1066952590]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Jingle Bells"
+horizontal_alignment = 1
+vertical_alignment = 3

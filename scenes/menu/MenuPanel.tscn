@@ -5,9 +5,9 @@
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="2_ykxvf"]
 
 [node name="MenuPanel" type="Container" unique_id=438408597]
-custom_minimum_size = Vector2(158, 237)
-offset_right = 432.0
-offset_bottom = 237.0
+custom_minimum_size = Vector2(158, 100)
+offset_right = 501.0
+offset_bottom = 158.40001
 script = ExtResource("2_panel")
 
 [node name="Label" type="Label" parent="." unique_id=1629054955]
@@ -16,9 +16,9 @@ layout_mode = 2
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=779728291]
 layout_mode = 2
 texture = ExtResource("2_ykxvf")
-patch_margin_left = 438
+patch_margin_left = 530
 patch_margin_top = 376
-patch_margin_right = 469
+patch_margin_right = 489
 patch_margin_bottom = 416
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
