@@ -1,16 +1,18 @@
 [gd_scene format=3 uid="uid://cviw1rdhjifft"]
 
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="1_emoit"]
+[ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="2_panel"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_1o14l"]
 load_path = "res://.godot/imported/Menu9PatchImages.png-567c89f9ff73b9db0b97307b7ede6f0e.ctex"
 
-[node name="MenuPanel" type="Control" unique_id=438408597]
+[node name="MenuPanel" type="Container" unique_id=438408597]
 custom_minimum_size = Vector2(158, 237)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 356.0
 offset_bottom = 503.0
+script = ExtResource("2_panel")
 
 [node name="Label" type="Label" parent="." unique_id=1629054955]
 layout_mode = 1
@@ -23,15 +25,9 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=779728291]
-custom_minimum_size = Vector2(100, 100)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+layout_mode = 0
 offset_right = 1424.0
 offset_bottom = 2012.0
-grow_horizontal = 2
-grow_vertical = 2
 scale = Vector2(0.2, 0.2)
 texture = SubResource("CompressedTexture2D_1o14l")
 patch_margin_left = 438

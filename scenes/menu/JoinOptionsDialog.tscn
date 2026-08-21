@@ -7,34 +7,34 @@
 [node name="JoinOptionsDialog" instance=ExtResource("1_shell")]
 script = ExtResource("2_script")
 
-[node name="Title" parent="Root/Centre/Panel/Margin/Box" index="0"]
+[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
 text = "Join Game"
 
-[node name="Choices" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="1"]
+[node name="Choices" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="DirectButton" parent="Root/Centre/Panel/Margin/Box/Choices" index="0" instance=ExtResource("3_btn")]
+[node name="DirectButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="0" instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(330, 130)
 layout_mode = 2
 ButtonText = "Join by IP"
 
-[node name="FriendsButton" parent="Root/Centre/Panel/Margin/Box/Choices" index="1" instance=ExtResource("3_btn")]
+[node name="FriendsButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(330, 130)
 layout_mode = 2
 ButtonText = "Friends' Games"
 
-[node name="Hint" type="Label" parent="Root/Centre/Panel/Margin/Box" index="2"]
+[node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
 text = "Joining by IP needs the host's address. Friends' games are found through Steam."
 autowrap_mode = 3
 
-[node name="WarningLabel" type="Label" parent="Root/Centre/Panel/Margin/Box" index="3"]
+[node name="WarningLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="3"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -42,14 +42,16 @@ theme_override_colors/font_color = Color(0.85, 0.54, 0.54, 1)
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
 
-[node name="Separator" type="HSeparator" parent="Root/Centre/Panel/Margin/Box" index="4"]
+[node name="Separator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box" index="4"]
 layout_mode = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="5"]
+[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="5"]
 layout_mode = 2
 
-[node name="CancelButton" type="Button" parent="Root/Centre/Panel/Margin/Box/Buttons" index="0"]
+[node name="CancelButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
 text = "Cancel"
+
+[editable path="Root/Centre/Panel"]

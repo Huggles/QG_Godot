@@ -9,7 +9,7 @@ script = ExtResource("2_script")
 [node name="Panel" parent="Root/Centre" index="0"]
 custom_minimum_size = Vector2(620, 0)
 
-[node name="MessageLabel" type="Label" parent="Root/Centre/Panel/Margin/Box" index="1"]
+[node name="MessageLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -18,14 +18,16 @@ theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="ButtonRow" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="2"]
+[node name="ButtonRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 alignment = 1
 
-[node name="OkButton" type="Button" parent="Root/Centre/Panel/Margin/Box/ButtonRow" index="0"]
+[node name="OkButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="0"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
 text = "OK"
+
+[editable path="Root/Centre/Panel"]

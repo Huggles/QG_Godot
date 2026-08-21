@@ -46,7 +46,9 @@ public partial class ParentSizedNinePatchRect : NinePatchRect
     {
         Node parent = GetParent();
 
-        if (parent is Container)
+        // MenuPanel is a Container, but it deliberately leaves this node out of its layout pass
+        // precisely so the sizing below can stand.
+        if (parent is Container && parent is not MenuPanel)
         {
             return new[]
             {

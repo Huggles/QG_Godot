@@ -8,33 +8,33 @@
 [node name="SettingsDialog" instance=ExtResource("1_shell")]
 script = ExtResource("2_script")
 
-[node name="Title" parent="Root/Centre/Panel/Margin/Box" index="0"]
+[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
 text = "Settings"
 
-[node name="Tabs" type="TabContainer" parent="Root/Centre/Panel/Margin/Box" index="1"]
+[node name="Tabs" type="TabContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 380)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 current_tab = 0
 
-[node name="Video" type="VBoxContainer" parent="Root/Centre/Panel/Margin/Box/Tabs"]
+[node name="Video" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs"]
 layout_mode = 2
 theme_override_constants/separation = 14
 metadata/_tab_index = 0
 script = ExtResource("3_video")
 
-[node name="DisplayModeRow" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box/Tabs/Video"]
+[node name="DisplayModeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="DisplayModeLabel" type="Label" parent="Root/Centre/Panel/Margin/Box/Tabs/Video/DisplayModeRow"]
+[node name="DisplayModeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow"]
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Display Mode"
 
-[node name="DisplayModeOption" type="OptionButton" parent="Root/Centre/Panel/Margin/Box/Tabs/Video/DisplayModeRow"]
+[node name="DisplayModeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
@@ -47,99 +47,101 @@ popup/item_2/text = "Fullscreen (exclusive)"
 popup/item_2/id = 2
 selected = 0
 
-[node name="ResolutionRow" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box/Tabs/Video"]
+[node name="ResolutionRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ResolutionLabel" type="Label" parent="Root/Centre/Panel/Margin/Box/Tabs/Video/ResolutionRow"]
+[node name="ResolutionLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionRow"]
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Resolution"
 
-[node name="ResolutionOption" type="OptionButton" parent="Root/Centre/Panel/Margin/Box/Tabs/Video/ResolutionRow"]
+[node name="ResolutionOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 
-[node name="ResolutionHint" type="Label" parent="Root/Centre/Panel/Margin/Box/Tabs/Video"]
+[node name="ResolutionHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
 text = "Both fullscreen modes run at your desktop resolution. The board is drawn for a 16:9 screen, so only 16:9 sizes are offered."
 autowrap_mode = 3
 
-[node name="ApplyRow" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box/Tabs/Video"]
+[node name="ApplyRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
 layout_mode = 2
 alignment = 2
 
-[node name="ApplyButton" type="Button" parent="Root/Centre/Panel/Margin/Box/Tabs/Video/ApplyRow"]
+[node name="ApplyButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ApplyRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
 disabled = true
 text = "Apply"
 
-[node name="Audio" type="VBoxContainer" parent="Root/Centre/Panel/Margin/Box/Tabs"]
+[node name="Audio" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 8
 metadata/_tab_index = 1
 script = ExtResource("4_audio")
 
-[node name="MasterVolumeLabel" type="Label" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="MasterVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Master Volume"
 
-[node name="MasterVolumeSlider" type="HSlider" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="MasterVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="MusicVolumeLabel" type="Label" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="MusicVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Music Volume"
 
-[node name="MusicVolumeSlider" type="HSlider" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="MusicVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.8
 
-[node name="SfxVolumeLabel" type="Label" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="SfxVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Sound Effect Volume"
 
-[node name="SfxVolumeSlider" type="HSlider" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="SfxVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.8
 
-[node name="SfxSettingsSeparator" type="HSeparator" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="SfxSettingsSeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 layout_mode = 2
 
-[node name="SfxSettingsContainer" type="VBoxContainer" parent="Root/Centre/Panel/Margin/Box/Tabs/Audio"]
+[node name="SfxSettingsContainer" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Separator" type="HSeparator" parent="Root/Centre/Panel/Margin/Box" index="2"]
+[node name="Separator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
 layout_mode = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="3"]
+[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="3"]
 layout_mode = 2
 alignment = 2
 
-[node name="CloseButton" type="Button" parent="Root/Centre/Panel/Margin/Box/Buttons" index="0"]
+[node name="CloseButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
 text = "Close"
+
+[editable path="Root/Centre/Panel"]

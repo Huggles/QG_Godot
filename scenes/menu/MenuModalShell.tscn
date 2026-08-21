@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bqmodalshelf"]
 
 [ext_resource type="Script" uid="uid://cpbprvfkfgnow" path="res://scripts/C#/Menu/MenuModal.cs" id="1_script"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="2_style"]
+[ext_resource type="PackedScene" uid="uid://cviw1rdhjifft" path="res://scenes/menu/MenuPanel.tscn" id="2_panel"]
 
 [node name="MenuModal" type="CanvasLayer"]
 process_mode = 3
@@ -36,26 +36,20 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="Panel" type="PanelContainer" parent="Root/Centre"]
+[node name="Panel" parent="Root/Centre" instance=ExtResource("2_panel")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(760, 0)
 layout_mode = 2
-theme_override_styles/panel = ExtResource("2_style")
 
-[node name="Margin" type="MarginContainer" parent="Root/Centre/Panel"]
-layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 20
-
-[node name="Box" type="VBoxContainer" parent="Root/Centre/Panel/Margin"]
+[node name="Box" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Title" type="Label" parent="Root/Centre/Panel/Margin/Box"]
+[node name="Title" type="Label" parent="Root/Centre/Panel/ContentContainer/Box"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 horizontal_alignment = 1
+
+[editable path="Root/Centre/Panel"]

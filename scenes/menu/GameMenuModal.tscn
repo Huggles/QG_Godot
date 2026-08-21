@@ -7,36 +7,38 @@
 [node name="GameMenuModal" instance=ExtResource("1_shell")]
 script = ExtResource("2_script")
 
-[node name="Title" parent="Root/Centre/Panel/Margin/Box" index="0"]
+[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
 text = "Game Menu"
 
-[node name="Choices" type="VBoxContainer" parent="Root/Centre/Panel/Margin/Box" index="1"]
+[node name="Choices" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="ResumeButton" parent="Root/Centre/Panel/Margin/Box/Choices" index="0" instance=ExtResource("3_btn")]
+[node name="ResumeButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="0" instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(680, 110)
 layout_mode = 2
 ButtonText = "Resume"
 
-[node name="SettingsButton" parent="Root/Centre/Panel/Margin/Box/Choices" index="1" instance=ExtResource("3_btn")]
+[node name="SettingsButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(680, 110)
 layout_mode = 2
 ButtonText = "Settings"
 
-[node name="QuitToMenuButton" parent="Root/Centre/Panel/Margin/Box/Choices" index="2" instance=ExtResource("3_btn")]
+[node name="QuitToMenuButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="2" instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(680, 110)
 layout_mode = 2
 ButtonText = "Quit to Main Menu"
 
-[node name="Hint" type="Label" parent="Root/Centre/Panel/Margin/Box" index="2"]
+[node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 text = "The game keeps running while this menu is open."
 autowrap_mode = 3
+
+[editable path="Root/Centre/Panel"]

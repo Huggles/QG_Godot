@@ -2,30 +2,28 @@
 
 [ext_resource type="Script" uid="uid://bp74tttlq1s05" path="res://scenes/userinterface/PresentationModal/PresentationModal.cs" id="1_jje3m"]
 [ext_resource type="StyleBox" uid="uid://dmulmhugod2s6" path="res://scenes/cards/NormalButtonStyle_Hover.tres" id="2_6kmdm"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="2_6yadj"]
+[ext_resource type="PackedScene" uid="uid://cviw1rdhjifft" path="res://scenes/menu/MenuPanel.tscn" id="2_6yadj"]
 [ext_resource type="StyleBox" uid="uid://bg8upag18tny5" path="res://scenes/cards/NormalButtonStyle_Normal.tres" id="3_6yadj"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
+
 [node name="PresentationModal" type="PanelContainer" unique_id=2116214158]
-theme_override_styles/panel = ExtResource("2_6yadj")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 script = ExtResource("1_jje3m")
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1020300196]
+[node name="MenuPanel" parent="." instance=ExtResource("2_6yadj")]
 layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 50
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 50
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1402501194]
+[node name="VBoxContainer" type="VBoxContainer" parent="MenuPanel/ContentContainer" unique_id=1402501194]
 custom_minimum_size = Vector2(400, 200)
 layout_mode = 2
 
-[node name="WindowButtons" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=91184756]
+[node name="WindowButtons" type="HBoxContainer" parent="MenuPanel/ContentContainer/VBoxContainer" unique_id=91184756]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 2
 
-[node name="ParkButton" type="Button" parent="MarginContainer/VBoxContainer/WindowButtons" unique_id=91184755]
+[node name="ParkButton" type="Button" parent="MenuPanel/ContentContainer/VBoxContainer/WindowButtons" unique_id=91184755]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(48, 48)
@@ -36,7 +34,7 @@ theme_override_styles/normal = ExtResource("3_6yadj")
 theme_override_styles/hover = ExtResource("2_6kmdm")
 text = "−"
 
-[node name="ExitButton" type="Button" parent="MarginContainer/VBoxContainer/WindowButtons" unique_id=91184754]
+[node name="ExitButton" type="Button" parent="MenuPanel/ContentContainer/VBoxContainer/WindowButtons" unique_id=91184754]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
@@ -46,21 +44,21 @@ theme_override_styles/normal = ExtResource("3_6yadj")
 theme_override_styles/hover = ExtResource("2_6kmdm")
 text = "×"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=644509033]
+[node name="HBoxContainer" type="HBoxContainer" parent="MenuPanel/ContentContainer/VBoxContainer" unique_id=644509033]
 layout_mode = 2
 alignment = 1
 
-[node name="CardScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=817423048]
+[node name="CardScrollContainer" type="ScrollContainer" parent="MenuPanel/ContentContainer/VBoxContainer/HBoxContainer" unique_id=817423048]
 unique_name_in_owner = true
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="GridCardContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/CardScrollContainer" unique_id=183372686]
+[node name="GridCardContainer" type="GridContainer" parent="MenuPanel/ContentContainer/VBoxContainer/HBoxContainer/CardScrollContainer" unique_id=183372686]
 unique_name_in_owner = true
 layout_mode = 2
 columns = 6
 
-[node name="TitleText" type="RichTextLabel" parent="MarginContainer/VBoxContainer" unique_id=894613482]
+[node name="TitleText" type="RichTextLabel" parent="MenuPanel/ContentContainer/VBoxContainer" unique_id=894613482]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -70,11 +68,11 @@ text = "TEXT
 fit_content = true
 horizontal_alignment = 1
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=2144659447]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MenuPanel/ContentContainer/VBoxContainer" unique_id=2144659447]
 layout_mode = 2
 alignment = 1
 
-[node name="ConfirmButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=693248034]
+[node name="ConfirmButton" type="Button" parent="MenuPanel/ContentContainer/VBoxContainer/HBoxContainer2" unique_id=693248034]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
@@ -82,3 +80,5 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_styles/normal = ExtResource("3_6yadj")
 theme_override_styles/hover = ExtResource("2_6kmdm")
 text = "Confirm"
+
+[editable path="MenuPanel"]
