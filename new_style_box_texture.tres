@@ -1,0 +1,15 @@
+[gd_resource type="StyleBoxTexture" format=3 uid="uid://dcu3qcfjyyqa7"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_dgjnc"]
+load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
+
+[resource]
+resource_local_to_scene = true
+texture = SubResource("CompressedTexture2D_dgjnc")
+texture_margin_left = 30.0
+texture_margin_top = 15.0
+texture_margin_right = 30.0
+texture_margin_bottom = 15.0
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+region_rect = Rect2(1.3333435, -0.6666565, 198.66666, 124.66666)

@@ -33,12 +33,34 @@ public partial class MenuPanel : Container
     }
 
     /// <summary>
-    /// The content drives the panel's size. The background is deliberately not part of this: it
-    /// stretches to whatever the panel ends up being, so letting it push back would be circular.
+    /// The content drives the panel's size, but not below what the frame art needs: a nine patch
+    /// cannot draw thinner than its own patch margins, so a panel smaller than that would have its
+    /// border hanging outside the panel. Only the background's *own* minimum counts here - it is
+    /// measured in its unscaled space, so scaling the background down lowers this floor, which is
+    /// how a panel gets to be smaller than its border art is wide.
     /// </summary>
     public override Vector2 _GetMinimumSize()
     {
-        return ContentContainer?.GetCombinedMinimumSize() ?? Vector2.Zero;
+        Vector2 minimum = ContentContainer?.GetCombinedMinimumSize() ?? Vector2.Zero;
+
+        foreach (Node child in GetChildren())
+        {
+            if (child is not ParentSizedNinePatchRect background)
+            {
+                continue;
+            }
+
+            // TileScale, not Scale: the background owns Scale and may not have written this frame's
+            // value into it yet, whereas TileScale is the authored setting.
+            Vector2 backgroundMinimum = background.GetCombinedMinimumSize() * background.TileScale;
+
+            minimum = new Vector2(
+                Mathf.Max(minimum.X, backgroundMinimum.X),
+                Mathf.Max(minimum.Y, backgroundMinimum.Y)
+            );
+        }
+
+        return minimum;
     }
 
     private void SortContent()

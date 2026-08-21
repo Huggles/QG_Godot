@@ -2,49 +2,31 @@
 
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="1_emoit"]
 [ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="2_panel"]
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_1o14l"]
-load_path = "res://.godot/imported/Menu9PatchImages.png-567c89f9ff73b9db0b97307b7ede6f0e.ctex"
+[ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="2_ykxvf"]
 
 [node name="MenuPanel" type="Container" unique_id=438408597]
 custom_minimum_size = Vector2(158, 237)
-layout_mode = 3
-anchors_preset = 0
-offset_right = 356.0
-offset_bottom = 503.0
+offset_right = 432.0
+offset_bottom = 237.0
 script = ExtResource("2_panel")
 
 [node name="Label" type="Label" parent="." unique_id=1629054955]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 525.0
-offset_bottom = 162.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=779728291]
-layout_mode = 0
-offset_right = 1424.0
-offset_bottom = 2012.0
-scale = Vector2(0.2, 0.2)
-texture = SubResource("CompressedTexture2D_1o14l")
+layout_mode = 2
+texture = ExtResource("2_ykxvf")
 patch_margin_left = 438
-patch_margin_top = 321
+patch_margin_top = 376
 patch_margin_right = 469
-patch_margin_bottom = 467
+patch_margin_bottom = 416
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 script = ExtResource("1_emoit")
+TileScale = 0.2
 
 [node name="ContentContainer" type="MarginContainer" parent="." unique_id=672142930]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 theme_override_constants/margin_left = 50
 theme_override_constants/margin_top = 50
 theme_override_constants/margin_right = 50

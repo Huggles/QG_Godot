@@ -1,89 +1,59 @@
 [gd_scene format=3 uid="uid://dxq3kwan4wpb5"]
 
-[ext_resource type="Texture2D" uid="uid://d3ccya2smu5cj" path="res://assets/textures/Other/MenuPanelButton.png" id="1_tex"]
 [ext_resource type="Script" uid="uid://cbtnmr7p4xq8g" path="res://scripts/C#/Menu/MenuPanelButton.cs" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="3_dgjnc"]
+[ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="4_q0r3r"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kb8kt"]
-texture = ExtResource("1_tex")
-texture_margin_left = 30.0
-texture_margin_top = 15.0
-texture_margin_right = 30.0
-texture_margin_bottom = 15.0
-region_rect = Rect2(1.3333435, -0.6666565, 198.66666, 124.66666)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5581r"]
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_5581r"]
-load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dgjnc"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_dgjnc"]
-texture = SubResource("CompressedTexture2D_5581r")
-texture_margin_left = 80.0
-texture_margin_top = 55.0
-texture_margin_right = 80.0
-texture_margin_bottom = 55.0
-modulate_color = Color(0.60933006, 0.6093301, 0.60933006, 1)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_q0r3r"]
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ouugf"]
-load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_13edg"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qiktu"]
-texture = SubResource("CompressedTexture2D_ouugf")
-texture_margin_left = 80.0
-texture_margin_top = 55.0
-texture_margin_right = 80.0
-texture_margin_bottom = 55.0
-modulate_color = Color(0.8776157, 0.8776158, 0.8776157, 1)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hv7sk"]
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_qiktu"]
-load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5581r"]
-texture = SubResource("CompressedTexture2D_qiktu")
-texture_margin_left = 80.0
-texture_margin_top = 55.0
-texture_margin_right = 80.0
-texture_margin_bottom = 55.0
-modulate_color = Color(0.60933006, 0.6093301, 0.60933006, 1)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_q0r3r"]
-load_path = "res://.godot/imported/MenuPanelButton.png-a2ee2a0720d2fab3f0d354e4737fe90e.ctex"
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_13edg"]
-texture = SubResource("CompressedTexture2D_q0r3r")
-texture_margin_left = 80.0
-texture_margin_top = 55.0
-texture_margin_right = 80.0
-texture_margin_bottom = 55.0
-modulate_color = Color(0.28974146, 0.28974146, 0.28974146, 1)
-
-[node name="Button" type="Button" unique_id=566933446]
+[node name="NinePatchButton" type="Button" unique_id=566933446]
 custom_minimum_size = Vector2(100, 80)
-offset_right = 300.0
-offset_bottom = 150.0
+offset_right = 296.0
+offset_bottom = 160.0
 scale = Vector2(0.5, 0.5)
-theme_override_styles/normal = SubResource("StyleBoxTexture_kb8kt")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_dgjnc")
-theme_override_styles/hover = SubResource("StyleBoxTexture_qiktu")
-theme_override_styles/hover_mirrored = SubResource("StyleBoxTexture_qiktu")
-theme_override_styles/hover_pressed = SubResource("StyleBoxTexture_5581r")
-theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxTexture_5581r")
-theme_override_styles/disabled = SubResource("StyleBoxTexture_13edg")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_5581r")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_dgjnc")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_q0r3r")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_13edg")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_hv7sk")
 script = ExtResource("2_script")
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2081602700]
-propagate_maximum_size = false
+[node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=171759037]
+layout_mode = 0
+offset_right = 1480.0
+offset_bottom = 800.0
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("3_dgjnc")
+patch_margin_left = 438
+patch_margin_top = 376
+patch_margin_right = 469
+patch_margin_bottom = 416
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+script = ExtResource("4_q0r3r")
+TileScale = 0.2
+
+[node name="ContentContainer" type="MarginContainer" parent="." unique_id=1659046377]
 layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
+anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 0.5
-offset_top = -22.5
-offset_bottom = 22.5
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 30
-theme_override_constants/margin_right = 30
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
 
-[node name="Label" type="RichTextLabel" parent="MarginContainer" unique_id=1225715149]
+[node name="Label" type="RichTextLabel" parent="ContentContainer" unique_id=1225715149]
 layout_mode = 2
 mouse_filter = 2
 theme_override_font_sizes/normal_font_size = 32
