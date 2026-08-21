@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 
 /// <summary>
@@ -11,6 +12,14 @@ public partial class GameSettings : SingletonNode<GameSettings>
 {    
     private const string ConfigPath = "user://settings.cfg";
     private const string Section    = "gameplay";
+
+    /// <summary>
+    /// Section holding the chosen sound per configurable effect, keyed by the setting's name from
+    /// <c>assets/audio/sfx/settings.json</c>. Its own section rather than mangled keys in
+    /// <see cref="Section"/> because the set of settings is data-driven: entries come and go with
+    /// that file, and <see cref="Save"/> has to be able to write back whatever it read.
+    /// </summary>
+    private const string SfxSection = "audio_sfx";
 
     /// <summary>Controls how fast animations play and how long pauses last.</summary>
     public GameSpeed PresentationSpeed { get; private set; } = GameSpeed.Normal;
@@ -38,6 +47,26 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     /// <summary>Sound effect level, 0..1, applied to the SFX audio bus.</summary>
     public float SfxVolume { get; private set; } = 0.8f;
+
+    /// <summary>How the window presents itself. Applied by <see cref="DisplaySettings"/>.</summary>
+    public WindowDisplayMode DisplayMode { get; private set; } = WindowDisplayMode.Windowed;
+
+    /// <summary>
+    /// Window size for <see cref="WindowDisplayMode.Windowed"/>. Both fullscreen modes run at the
+    /// desktop resolution, so this is remembered rather than overwritten while one of those is active.
+    ///
+    /// Defaulted from the actual window in <see cref="Load"/> rather than to a literal 1920x1080:
+    /// Godot shrinks the boot window to fit a smaller monitor, and applying a hard-coded 1080p on
+    /// startup would push most of it off screen on exactly the machines that can least afford it.
+    /// </summary>
+    public Vector2I WindowResolution { get; private set; } = new Vector2I(1920, 1080);
+
+    /// <summary>
+    /// Chosen sound per configurable effect: setting name → sound file name, both from
+    /// <c>settings.json</c>. Only settings the player actually chose for appear here; anything
+    /// missing falls back to the first sound the data offers (see <see cref="AudioManager"/>).
+    /// </summary>
+    private readonly Dictionary<string, string> _sfxChoices = new Dictionary<string, string>();
 
     public static DebugVerbosity Debug => Instance.DebugLevel;
     public static bool IsDebugMultiplayer => Instance.DebugMultiplayer;
@@ -103,14 +132,55 @@ public partial class GameSettings : SingletonNode<GameSettings>
         AudioManager.Instance?.ApplyVolumes();
     }
 
+    /// <summary>
+    /// Persists the window mode and size in one write and applies them. A single setter for the same
+    /// reason as <see cref="SetVolumes"/>: <see cref="Save"/> rewrites the whole config file.
+    /// </summary>
+    public void SetDisplay(WindowDisplayMode mode, Vector2I resolution)
+    {
+        DisplayMode      = mode;
+        WindowResolution = resolution;
+        Save();
+        DisplaySettings.Apply(mode, resolution);
+    }
+
+    /// <summary>
+    /// The sound the player picked for <paramref name="settingName"/>, or null when they never
+    /// picked one — the caller decides the default, because only the audio data knows what the
+    /// options are.
+    /// </summary>
+    public string GetSfxChoice(string settingName)
+        => _sfxChoices.TryGetValue(settingName, out string choice) ? choice : null;
+
+    /// <summary>Records the sound chosen for a configurable effect and persists it.</summary>
+    public void SetSfxChoice(string settingName, string soundFileName)
+    {
+        _sfxChoices[settingName] = soundFileName;
+        Save();
+    }
+
     public void SetShowCountryLabels(bool value) { ShowCountryLabels = value; Save(); }
     public void SetShowDebugMenu(bool value) { ShowDebugMenu = value; Save(); }
+
+    /// <summary>
+    /// False until a display choice has actually been saved. Guards the startup apply: on a first
+    /// launch there is nothing to restore, and resizing the window to a value we only just read off
+    /// that same window would be a no-op at best and a fight with Godot's boot-time fit at worst.
+    /// </summary>
+    private bool _hasSavedDisplay;
 
     public override void _Ready()
     {
         base._Ready();
         GD.Print("GameSettings Ready");
         Load();
+
+        // Same shape as AudioManager._Ready pushing the saved levels onto the buses: the values are
+        // loaded here, so this is where they first reach the thing they describe.
+        if (_hasSavedDisplay)
+        {
+            DisplaySettings.Apply(DisplayMode, WindowResolution);
+        }
     }
 
     /// <summary>Loads settings from <c>user://settings.cfg</c>. Call once on startup.</summary>
@@ -135,6 +205,39 @@ public partial class GameSettings : SingletonNode<GameSettings>
             MusicVolume  = Mathf.Clamp(config.GetValue(Section, "music_volume",  0.8f).As<float>(), 0f, 1f);
             SfxVolume    = Mathf.Clamp(config.GetValue(Section, "sfx_volume",    0.8f).As<float>(), 0f, 1f);
 
+            DisplayMode = (WindowDisplayMode)Math.Clamp(
+                config.GetValue(Section, "display_mode", (int)WindowDisplayMode.Windowed).As<int>(),
+                0, (int)WindowDisplayMode.ExclusiveFullscreen);
+
+            // Keyed off the width because that is what tells a saved choice apart from a first launch.
+            _hasSavedDisplay = config.HasSectionKey(Section, "window_width");
+            if (_hasSavedDisplay)
+            {
+                WindowResolution = new Vector2I(
+                    config.GetValue(Section, "window_width",  1920).As<int>(),
+                    config.GetValue(Section, "window_height", 1080).As<int>());
+            }
+
+            // Read by enumerating the section rather than by a fixed key list: which effects are
+            // configurable is data, and a choice for a setting this build has never heard of has to
+            // survive the round-trip rather than be dropped by Save().
+            _sfxChoices.Clear();
+            if (config.HasSection(SfxSection))
+            {
+                foreach (string settingName in config.GetSectionKeys(SfxSection))
+                {
+                    _sfxChoices[settingName] = config.GetValue(SfxSection, settingName, "").AsString();
+                }
+            }
+
+        }
+
+        // First launch, or a config file predating display settings: adopt whatever size Godot
+        // actually opened at. That is already fitted to the monitor, so it is the only safe default —
+        // and it means the picker opens showing the player's real size rather than a guess.
+        if (!_hasSavedDisplay && !GameContext.IsHeadless)
+        {
+            WindowResolution = DisplayServer.WindowGetSize();
         }
 
         // DebugMultiplayer is a runtime-only flag, driven solely by the command-line arg used
@@ -161,6 +264,15 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "master_volume",         MasterVolume);
         config.SetValue(Section, "music_volume",          MusicVolume);
         config.SetValue(Section, "sfx_volume",            SfxVolume);
+        config.SetValue(Section, "display_mode",          (int)DisplayMode);
+        config.SetValue(Section, "window_width",          WindowResolution.X);
+        config.SetValue(Section, "window_height",         WindowResolution.Y);
+
+        foreach (KeyValuePair<string, string> choice in _sfxChoices)
+        {
+            config.SetValue(SfxSection, choice.Key, choice.Value);
+        }
+
         config.Save(ConfigPath);
     }
 }

@@ -374,4 +374,10 @@ public partial class ModalStack : Control, LoadableUI, IRecallablePrompt
 	private PresentationModal EscapeTarget()
 		=> _modals.FirstOrDefault(modal => IsInstanceValid(modal) && modal.Visible && modal.IsRequest)
 		?? _modals.FirstOrDefault(modal => IsInstanceValid(modal) && modal.Visible);
+
+	/// <summary>
+	/// Whether this stack would act on an Escape. Read by <see cref="GameMenuTrigger"/> so the
+	/// in-game menu never opens over a modal that is already waiting for that key.
+	/// </summary>
+	public bool HasEscapeTarget => EscapeTarget() != null;
 }

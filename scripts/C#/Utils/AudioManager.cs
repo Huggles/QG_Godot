@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 /// <summary>
 /// The single audio service: one music track at a time, any number of overlapping sound
@@ -12,6 +13,12 @@ using System.Linq;
 /// dropping <c>card_flip.ogg</c> into the sfx folder is all it takes to make
 /// <c>AudioManager.PlaySfx("card_flip")</c> work. Nothing has to be registered in code and
 /// nothing auto-plays — music starts only when something calls <see cref="PlayMusic"/>.
+///
+/// On top of that, <c>res://assets/audio/sfx/settings.json</c> declares *configurable cues*: a cue
+/// has a stable name, a display label, and a list of sounds the player may choose between. Game code
+/// raises a cue by name through <see cref="PlaySfxSetting"/> and never names a file, so which sound
+/// a cue makes is the player's choice — persisted per cue by <see cref="GameSettings"/> and picked
+/// in the sound panel. A cue with no saved choice uses the first sound the data lists.
 ///
 /// Playback is routed through the <c>Music</c> and <c>SFX</c> buses of
 /// <c>res://default_bus_layout.tres</c>, both of which send to <c>Master</c>. That is what makes
@@ -30,14 +37,18 @@ public partial class AudioManager : SingletonNode<AudioManager>
     public const string MusicBus  = "Music";
     public const string SfxBus    = "SFX";
 
+    /// <summary>Music track names referenced from code, named after the files in the music folder.</summary>
+    public const string MenuMusicTrack = "MainMenuMusic";
+
     /// <summary>
-    /// Clips referenced from code, named after the files in the audio folders. Only clips that a
-    /// call site has to name belong here — content dropped in the folders needs no entry, and
-    /// anything played from data can pass its own string.
+    /// Names of the configurable effects in <see cref="SfxSettingsPath"/>. Call sites name the
+    /// *setting*, not a clip — which sound it maps to is the player's choice, so these are the keys
+    /// passed to <see cref="PlaySfxSetting"/> and to <c>GameSettings.GetSfxChoice</c>.
     /// </summary>
-    public const string MenuMusicTrack     = "MainMenuMusic";
-    public const string MenuButtonClickSfx = "MenuButtonClick";
-    public const string InputRequestSfx    = "InputRequest1";
+    public const string MenuButtonClickSetting = "menuButtonclick";
+    public const string InputRequestSetting    = "inputRequest";
+
+    private const string SfxSettingsPath = "res://assets/audio/sfx/settings.json";
 
     /// <summary>Effects playable at the same instant before the pool has to grow.</summary>
     private const int InitialSfxPlayers = 8;
@@ -76,6 +87,12 @@ public partial class AudioManager : SingletonNode<AudioManager>
     private readonly Dictionary<string, AudioStream> _sfx =
         new Dictionary<string, AudioStream>(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The configurable effects, in the order <c>settings.json</c> lists them, so the sound panel
+    /// renders them in the order the data author chose rather than an arbitrary one.
+    /// </summary>
+    private readonly List<SfxSettingData> _sfxSettings = new List<SfxSettingData>();
+
     private AudioStreamPlayer _musicPlayer;
     private readonly List<AudioStreamPlayer> _sfxPlayers = new List<AudioStreamPlayer>();
 
@@ -87,6 +104,9 @@ public partial class AudioManager : SingletonNode<AudioManager>
 
     public IReadOnlyCollection<string> MusicNames => _musicPaths.Keys.ToList();
     public IReadOnlyCollection<string> SfxNames   => _sfx.Keys.ToList();
+
+    /// <summary>The configurable effects, for the sound panel to build a row per entry.</summary>
+    public IReadOnlyList<SfxSettingData> SfxSettings => _sfxSettings;
 
     public override void _Ready()
     {
@@ -124,9 +144,12 @@ public partial class AudioManager : SingletonNode<AudioManager>
             AddSfxPlayer();
         }
 
+        LoadSfxSettings();
+
         ApplyVolumes();
 
-        DebugUtilities.PrintPeer($"AudioManager ready: {_musicPaths.Count} music track(s), {_sfx.Count} sound effect(s).");
+        DebugUtilities.PrintPeer($"AudioManager ready: {_musicPaths.Count} music track(s), "
+            + $"{_sfx.Count} sound effect(s), {_sfxSettings.Count} configurable cue(s).");
     }
 
     // ---------------------------------------------------------------- discovery
@@ -212,6 +235,80 @@ public partial class AudioManager : SingletonNode<AudioManager>
             _musicCache[name] = stream;
         }
         return stream;
+    }
+
+    /// <summary>
+    /// Reads the configurable effects from <see cref="SfxSettingsPath"/>. Missing or malformed data
+    /// leaves the list empty: the panel then shows only the volume sliders and every cue falls back
+    /// to nothing, which is a far better failure than a startup crash over a sound.
+    /// </summary>
+    private void LoadSfxSettings()
+    {
+        if (!Godot.FileAccess.FileExists(SfxSettingsPath))
+        {
+            DebugUtilities.PrintPeerFinest($"AudioManager: no sfx settings at {SfxSettingsPath}.");
+            return;
+        }
+
+        try
+        {
+            using Godot.FileAccess file = Godot.FileAccess.Open(SfxSettingsPath, Godot.FileAccess.ModeFlags.Read);
+            SfxSettingsFileData parsed = JsonSerializer.Deserialize<SfxSettingsFileData>(file.GetAsText());
+
+            foreach (SfxSettingData setting in parsed?.Settings ?? new List<SfxSettingData>())
+            {
+                if (string.IsNullOrEmpty(setting.Name))
+                {
+                    DebugUtilities.PrintPeerError("AudioManager: an sfx setting has no name; skipped.");
+                    continue;
+                }
+
+                // Options whose file is not among the scanned clips are dropped here rather than at
+                // play time, so a typo in the data shows up once at startup instead of as a cue that
+                // silently does nothing, and never reaches the picklist.
+                List<SfxSoundFileData> playable = setting.SoundFiles
+                    .Where(option => ResolveSfxOption(setting, option) != null)
+                    .ToList();
+
+                if (playable.Count == 0)
+                {
+                    DebugUtilities.PrintPeerError($"AudioManager: sfx setting {setting.Name} has no playable sound; skipped.");
+                    continue;
+                }
+
+                setting.SoundFiles = playable;
+                _sfxSettings.Add(setting);
+            }
+        }
+        catch (Exception e)
+        {
+            DebugUtilities.PrintPeerError($"AudioManager: could not read {SfxSettingsPath}: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// The clip name an option points at, or null when it does not resolve. The data carries a path
+    /// without an extension; only its filename is used, matched against the scanned sfx folder, so
+    /// the scan stays the single authority on what can actually be played.
+    /// </summary>
+    private string ResolveSfxOption(SfxSettingData setting, SfxSoundFileData option)
+    {
+        if (string.IsNullOrEmpty(option?.File))
+        {
+            DebugUtilities.PrintPeerError($"AudioManager: option {option?.Name} of {setting.Name} has no file.");
+            return null;
+        }
+
+        string clipName = option.File.GetFile();
+        if (!_sfx.ContainsKey(clipName))
+        {
+            DebugUtilities.PrintPeerError(
+                $"AudioManager: option {option.Name} of {setting.Name} points at {option.File}, "
+                + $"which is not in the sfx folder. Known effects: {DescribeKnown(_sfx.Keys)}.");
+            return null;
+        }
+
+        return clipName;
     }
 
     /// <summary>Removes a trailing <c>.import</c> / <c>.remap</c> so exported builds see real filenames.</summary>
@@ -317,6 +414,55 @@ public partial class AudioManager : SingletonNode<AudioManager>
     /// Plays <paramref name="name"/> on a free pooled player, so any number of effects overlap.
     /// </summary>
     public static void PlaySfx(string name, float pitchScale = 1f) => Instance?.PlaySfxInternal(name, pitchScale);
+
+    /// <summary>
+    /// Plays a configurable cue by its *setting* name (e.g. <see cref="InputRequestSetting"/>) using
+    /// whichever sound the player chose for it. This is what game code calls: it must not care which
+    /// file is currently selected, only which cue it is raising.
+    /// </summary>
+    public static void PlaySfxSetting(string settingName) => Instance?.PlaySfxSettingInternal(settingName);
+
+    private void PlaySfxSettingInternal(string settingName)
+    {
+        if (!_enabled)
+        {
+            return;
+        }
+
+        string clipName = SelectedClipFor(settingName);
+        if (clipName == null)
+        {
+            DebugUtilities.PrintPeerError($"AudioManager: no sfx setting named {settingName} in settings.json.");
+            return;
+        }
+
+        PlaySfxInternal(clipName, 1f);
+    }
+
+    /// <summary>
+    /// The option currently selected for a setting, falling back to the first one the data lists when
+    /// the player has never chosen — so a cue is audible before anybody opens the sound panel, and a
+    /// saved choice that no longer exists in the data degrades to the default instead of going silent.
+    /// </summary>
+    public SfxSoundFileData SelectedOptionFor(string settingName)
+    {
+        SfxSettingData setting = _sfxSettings.FirstOrDefault(entry => entry.Name == settingName);
+        if (setting == null || setting.SoundFiles.Count == 0)
+        {
+            return null;
+        }
+
+        string savedChoice = GameSettings.Instance?.GetSfxChoice(settingName);
+        return setting.SoundFiles.FirstOrDefault(option => option.Name == savedChoice)
+               ?? setting.SoundFiles[0];
+    }
+
+    /// <summary>The clip name a setting currently resolves to, or null when the setting is unknown.</summary>
+    private string SelectedClipFor(string settingName)
+    {
+        SfxSoundFileData option = SelectedOptionFor(settingName);
+        return option == null ? null : option.File.GetFile();
+    }
 
     private void PlaySfxInternal(string name, float pitchScale)
     {

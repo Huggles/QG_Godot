@@ -24,9 +24,8 @@
 [ext_resource type="Texture2D" uid="uid://b5evjrup5daot" path="res://assets/textures/Other/eye_icon.png" id="23_eyeicon"]
 [ext_resource type="Texture2D" uid="uid://bqyf0w6t7iv32" path="res://assets/textures/Other/eye_icon_pressed.png" id="24_eyeiconp"]
 [ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/Icons/PlayedCardsIcon.png" id="25_playedcards"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/SoundIcon.svg" id="27_soundicon"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/SoundIconPressed.svg" id="28_soundiconp"]
 [ext_resource type="PackedScene" uid="uid://blt1histpop01" path="res://scenes/userinterface/History/HistoryDetailPopup.tscn" id="26_histpop"]
+[ext_resource type="Script" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -246,66 +245,6 @@ toggle_mode = true
 text = "Debug Menu
 "
 
-[node name="SoundModal" type="PanelContainer" parent="BottomLeftMenu" unique_id=54608067]
-unique_name_in_owner = true
-z_index = 150
-layout_mode = 0
-offset_left = 13.0
-offset_top = -160.0
-offset_right = 193.0
-offset_bottom = -10.0
-theme_override_styles/panel = ExtResource("19_nfi4l")
-
-[node name="MarginContainer" type="MarginContainer" parent="BottomLeftMenu/SoundModal" unique_id=160946700]
-layout_mode = 2
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 4
-
-[node name="VBoxContainer" type="VBoxContainer" parent="BottomLeftMenu/SoundModal/MarginContainer" unique_id=2016041427]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="MasterVolumeLabel" type="Label" parent="BottomLeftMenu/SoundModal/MarginContainer/VBoxContainer" unique_id=254644010]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "Master Volume"
-
-[node name="MasterVolumeSlider" type="HSlider" parent="BottomLeftMenu/SoundModal/MarginContainer/VBoxContainer" unique_id=254644011]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2
-max_value = 1.0
-step = 0.01
-value = 1.0
-
-[node name="MusicVolumeLabel" type="Label" parent="BottomLeftMenu/SoundModal/MarginContainer/VBoxContainer" unique_id=254644012]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "Music Volume"
-
-[node name="MusicVolumeSlider" type="HSlider" parent="BottomLeftMenu/SoundModal/MarginContainer/VBoxContainer" unique_id=254644013]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2
-max_value = 1.0
-step = 0.01
-value = 0.8
-
-[node name="SfxVolumeLabel" type="Label" parent="BottomLeftMenu/SoundModal/MarginContainer/VBoxContainer" unique_id=254644014]
-layout_mode = 2
-theme_override_font_sizes/font_size = 8
-text = "Sound Effect Volume"
-
-[node name="SfxVolumeSlider" type="HSlider" parent="BottomLeftMenu/SoundModal/MarginContainer/VBoxContainer" unique_id=254644015]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2
-max_value = 1.0
-step = 0.01
-value = 0.8
-
 [node name="BottomLeftMenuContainer" type="PanelContainer" parent="BottomLeftMenu" unique_id=1591248873]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
@@ -340,8 +279,5 @@ layout_mode = 2
 TextureNormal = ExtResource("25_playedcards")
 TexturePressed = ExtResource("25_playedcards")
 
-[node name="SoundButton" parent="BottomLeftMenu/BottomLeftMenuContainer/BottomLeftMenuHBox" unique_id=628711104 instance=ExtResource("22_x2nnb")]
-unique_name_in_owner = true
-layout_mode = 2
-TextureNormal = ExtResource("27_soundicon")
-TexturePressed = ExtResource("28_soundiconp")
+[node name="GameMenuTrigger" type="Node" parent="."]
+script = ExtResource("27_gamemenu")

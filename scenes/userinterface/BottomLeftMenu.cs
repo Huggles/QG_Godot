@@ -15,14 +15,7 @@ public partial class BottomLeftMenu : Control
 	public Button ToggleCountryLabelsButton => GetNode<Button>("%CountryLabelsButton");
 	public Button ToggleDebugMenuButton => GetNode<Button>("%DebugMenuButton");
 
-	public MarginTextureButton SoundButton => GetNode<MarginTextureButton>("%SoundButton");
-	public PanelContainer SoundModal => GetNode<PanelContainer>("%SoundModal");
-	public HSlider MasterVolumeSlider => GetNode<HSlider>("%MasterVolumeSlider");
-	public HSlider MusicVolumeSlider => GetNode<HSlider>("%MusicVolumeSlider");
-	public HSlider SfxVolumeSlider => GetNode<HSlider>("%SfxVolumeSlider");
-
 	public bool VisibilityModalOpen = false;
-	public bool SoundModalOpen = false;
 
 	/// <summary>The faction whose hand this menu put on the display, or NONE when it did not.</summary>
 	private Faction _browsingFaction = Faction.NONE;
@@ -31,12 +24,8 @@ public partial class BottomLeftMenu : Control
 	public override void _Ready()
 	{
 		BottomLeftMenuModal.Visible = false;
-		SoundModal.Visible = false;
 		VisibilityButton.TextureButton.Pressed += OnVisibilityButtonPressed;
 		ActiveInputRequestButton.TextureButton.Pressed += OnActiveInputRequestButtonPressed;
-		SoundButton.TextureButton.Pressed += OnSoundButtonPressed;
-
-		InitialiseVolumeSliders();
 
 		ToggleCountryLabelsButton.ButtonPressed = GameSettings.ShowCountryLabels;
 		ToggleCountryLabelsButton.Pressed += () => {
@@ -227,61 +216,5 @@ public partial class BottomLeftMenu : Control
 	{
 		VisibilityModalOpen = !VisibilityModalOpen;
 		BottomLeftMenuModal.Visible = VisibilityModalOpen;
-
-		// Both panels sit in the same corner, so the other one has to go away.
-		if (VisibilityModalOpen)
-		{
-			SetSoundModalOpen(false);
-		}
-	}
-
-	private void OnSoundButtonPressed() => SetSoundModalOpen(!SoundModalOpen);
-
-	private void SetSoundModalOpen(bool open)
-	{
-		if (open && VisibilityModalOpen)
-		{
-			VisibilityModalOpen = false;
-			BottomLeftMenuModal.Visible = false;
-		}
-
-		// Closing is the catch-all persistence point: a slider moved with the keyboard or the
-		// scroll wheel never emits DragEnded, so without this those changes would be lost on quit.
-		if (!open && SoundModalOpen)
-		{
-			PersistVolumes();
-		}
-
-		SoundModalOpen = open;
-		SoundModal.Visible = open;
-	}
-
-	/// <summary>
-	/// Seeds the sliders from the saved levels and wires them so a drag is heard immediately while
-	/// the config file is only rewritten once the drag ends: <c>GameSettings.Save</c> rewrites the
-	/// whole file, so persisting on every value change would hit the disk every frame of a drag.
-	/// </summary>
-	private void InitialiseVolumeSliders()
-	{
-		GameSettings settings = GameSettings.Instance;
-		MasterVolumeSlider.Value = settings.MasterVolume;
-		MusicVolumeSlider.Value  = settings.MusicVolume;
-		SfxVolumeSlider.Value    = settings.SfxVolume;
-
-		MasterVolumeSlider.ValueChanged += value => AudioManager.SetBusVolume(AudioManager.MasterBus, (float)value);
-		MusicVolumeSlider.ValueChanged  += value => AudioManager.SetBusVolume(AudioManager.MusicBus,  (float)value);
-		SfxVolumeSlider.ValueChanged    += value => AudioManager.SetBusVolume(AudioManager.SfxBus,    (float)value);
-
-		MasterVolumeSlider.DragEnded += _ => PersistVolumes();
-		MusicVolumeSlider.DragEnded  += _ => PersistVolumes();
-		SfxVolumeSlider.DragEnded    += _ => PersistVolumes();
-	}
-
-	private void PersistVolumes()
-	{
-		GameSettings.Instance.SetVolumes(
-			(float)MasterVolumeSlider.Value,
-			(float)MusicVolumeSlider.Value,
-			(float)SfxVolumeSlider.Value);
 	}
 }

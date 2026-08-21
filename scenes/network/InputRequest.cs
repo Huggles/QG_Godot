@@ -122,7 +122,7 @@ public abstract partial class InputRequest
             // Inside the IsForCurrentPeer branch on purpose: only the player actually being asked
             // hears it. Every request subclass funnels through here, so this covers card, country,
             // unit and battle-target prompts without a cue per handler.
-            AudioManager.PlaySfx(AudioManager.InputRequestSfx);
+            AudioManager.PlaySfxSetting(AudioManager.InputRequestSetting);
 
             InputTimerDisplay.Current?.Start(TimeoutSeconds, "Your input");
 

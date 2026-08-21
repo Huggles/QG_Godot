@@ -82,18 +82,21 @@ public partial class MainMenu : Control
         var multiplayerHost  = GetNode<MenuPanelButton>("%MultiplayerHostButton");
         var multiplayerJoin  = GetNode<MenuPanelButton>("%MultiplayerJoinButton");
         var victoryTest      = GetNode<MenuPanelButton>("%VictoryScreenTestButton");
+        var settings         = GetNode<MenuPanelButton>("%SettingsButton");
         var quit             = GetNode<MenuPanelButton>("%QuitButton");
 
         singlePlayer.ButtonText    = "Single Player";
         multiplayerHost.ButtonText = "Host Game";
         multiplayerJoin.ButtonText = "Join Game";
         victoryTest.ButtonText     = "Victory Screen (Test)";
+        settings.ButtonText        = "Settings";
         quit.ButtonText            = "Quit";
 
         singlePlayer.Pressed    += OnSinglePlayerPressed;
         multiplayerHost.Pressed += OnMultiplayerHostPressed;
         multiplayerJoin.Pressed += OnMultiplayerJoinPressed;
         victoryTest.Pressed     += OnVictoryScreenTestPressed;
+        settings.Pressed        += OnSettingsPressed;
         quit.Pressed            += OnQuitPressed;
 
         if (SteamworksApi.Instance != null)
@@ -293,6 +296,30 @@ public partial class MainMenu : Control
                     SceneFlow.ChangeScene(this, SteamLobbiesScenePath);
                     break;
             }
+        }
+        finally
+        {
+            if (IsInstanceValid(this)) _flowBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// The same dialog the in-game Escape menu opens — see <see cref="SettingsDialog"/>. Guarded by
+    /// <see cref="_flowBusy"/> like the host and join flows: MenuPanelButton fires Pressed even while
+    /// Disabled, and a second click during the await would stack a second dialog.
+    /// </summary>
+    private void OnSettingsPressed()
+    {
+        if (_flowBusy) return;
+        _flowBusy = true;
+        Guard.FireAndForget(SettingsFlowAsync, "MainMenu.SettingsFlow");
+    }
+
+    private async Task SettingsFlowAsync()
+    {
+        try
+        {
+            await SettingsDialog.ShowAsync(this);
         }
         finally
         {
