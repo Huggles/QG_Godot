@@ -175,6 +175,8 @@ public partial class InputManager : Node2D
 		{
 			Current = this;
 			Camera.Enabled = true;
+			// ApplyZoom re-frames through ApplyCameraBounds, so this also pulls the blind
+			// DEFAULT_POSITION/DEFAULT_ZOOM from _EnterTree onto the board.
 			ApplyZoom();
 		}
 		else
@@ -195,6 +197,63 @@ public partial class InputManager : Node2D
 	public override void _Process(double delta)
 	{
 		KeyboardMovement();
+		ApplyCameraBounds();
+	}
+
+	/// <summary>
+	/// Clamps the camera's limits, zoom range and position to the board backdrop
+	/// (<see cref="NodeUtilities.BoardBounds"/>), so the viewport can never show anything outside the
+	/// NinePatchRect. Re-derived every frame rather than cached once: it costs one transform multiply,
+	/// and it means moving or resizing the NinePatchRect — in the editor or at runtime — retunes the
+	/// camera with no further wiring. A no-op while the board is not in the tree (menu, lobby,
+	/// headless), which is why the call in <see cref="_Ready"/> is not enough on its own.
+	///
+	/// Position is clamped here rather than left to Camera2D's own limits: those clamp the rendered
+	/// transform but leave <c>Camera.Position</c> wherever it was written, so panning or a
+	/// <see cref="ZoomToCountryAnimation"/> tween aimed off-board would park the node out there and
+	/// the next keypress would appear to do nothing.
+	/// </summary>
+	private void ApplyCameraBounds()
+	{
+		if (Camera == null) return;
+
+		Rect2? bounds = NodeUtilities.Instance?.BoardBounds;
+		if (bounds == null) return;
+
+		Rect2 board = bounds.Value;
+		Camera.LimitLeft = Mathf.RoundToInt(board.Position.X);
+		Camera.LimitTop = Mathf.RoundToInt(board.Position.Y);
+		Camera.LimitRight = Mathf.RoundToInt(board.End.X);
+		Camera.LimitBottom = Mathf.RoundToInt(board.End.Y);
+
+		// AnchorMode is the default DragCenter, so Position is the centre of the view and the legal
+		// centres are the board inset by half a viewport. MinZoomLevel already keeps that half-extent
+		// under half the board, but Max guards the degenerate case anyway — an inverted range would
+		// otherwise snap the camera to the far edge.
+		Vector2 halfExtent = GetViewport().GetVisibleRect().Size / (2f * Camera.Zoom);
+		Vector2 min = board.Position + halfExtent;
+		Vector2 max = board.End - halfExtent;
+		Camera.Position = new Vector2(
+			Mathf.Clamp(Camera.Position.X, min.X, Mathf.Max(min.X, max.X)),
+			Mathf.Clamp(Camera.Position.Y, min.Y, Mathf.Max(min.Y, max.Y)));
+	}
+
+	/// <summary>
+	/// The furthest out the player may zoom: whatever still keeps the whole viewport inside the board,
+	/// falling back to <see cref="MIN_ZOOM_LEVEL"/> when there is no board to measure against.
+	/// </summary>
+	private float MinZoomLevel
+	{
+		get
+		{
+			Rect2? bounds = NodeUtilities.Instance?.BoardBounds;
+			if (bounds == null || bounds.Value.Size.X <= 0 || bounds.Value.Size.Y <= 0)
+				return MIN_ZOOM_LEVEL;
+
+			Vector2 viewport = GetViewport().GetVisibleRect().Size;
+			float fitZoom = Mathf.Max(viewport.X / bounds.Value.Size.X, viewport.Y / bounds.Value.Size.Y);
+			return Mathf.Max(MIN_ZOOM_LEVEL, fitZoom);
+		}
 	}
 
 	private void KeyboardMovement()
@@ -283,7 +342,7 @@ public partial class InputManager : Node2D
 
 	private void ZoomOut()
 	{
-		if (zoom > MIN_ZOOM_LEVEL)
+		if (zoom > MinZoomLevel)
 		{
 			zoom -= ZOOM_STEP;
 			ApplyZoom();
@@ -293,7 +352,10 @@ public partial class InputManager : Node2D
 	private void ApplyZoom()
 	{
 		if (Camera == null) return;
-		var pos = Camera.Position;
+		// The floor is the board-fit zoom, not MIN_ZOOM_LEVEL: DEFAULT_ZOOM is set blind in
+		// _EnterTree and a small board would make it show past the edges.
+		zoom = Mathf.Clamp(zoom, MinZoomLevel, MAX_ZOOM_LEVEL);
 		Camera.Zoom = new Vector2(zoom, zoom);
+		ApplyCameraBounds();
 	}
 }
