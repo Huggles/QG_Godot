@@ -138,6 +138,18 @@ public sealed class InputRequestSpec
                 spec.Pass = select.Required ? PassMode.NotAllowed : PassMode.EmptyResponse;
                 break;
 
+            // MaxSelections -1 means unlimited in ModalConfig; the CLI clamps both ends, so translate
+            // it to the option count rather than passing -1 through as a bound.
+            case InputRequest.SelectCardsRequestHandler selectMany:
+                spec.Title = selectMany.Title;
+                spec.Options = Cards(request.TargetCardIds);
+                spec.MinSelections = selectMany.MinSelections;
+                spec.MaxSelections = selectMany.MaxSelections < 0
+                    ? spec.Options.Count
+                    : Math.Min(selectMany.MaxSelections, spec.Options.Count);
+                spec.Pass = selectMany.MinSelections > 0 ? PassMode.NotAllowed : PassMode.EmptyResponse;
+                break;
+
             case InputRequest.HandCardsDiscardRequestHandler:
             case InputRequest.CardsRequestHandler:
                 spec.Title = "Select cards to discard";

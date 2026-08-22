@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 [JsonDerivedType(typeof(HandCardsDiscardRequestHandler),    "RequestHandCardsDiscard")]
 [JsonDerivedType(typeof(CardsRequestHandler),               "RequestCards")]
 [JsonDerivedType(typeof(SelectCardRequestHandler),          "SelectCard")]
+[JsonDerivedType(typeof(SelectCardsRequestHandler),         "SelectCards")]
 [JsonDerivedType(typeof(ForceDiscardHandCardsRequestHandler), "ForceDiscardHandCards")]
 [JsonDerivedType(typeof(SelectUnitRequestHandler),           "SelectUnit")]
 [JsonDerivedType(typeof(SelectBattleTargetRequestHandler),   "SelectBattleTarget")]
@@ -418,6 +419,43 @@ public abstract partial class InputRequest
 
             // WasSkipped is deliberately not set: BroadCast turns that into a StepSkippedException,
             // and the caller decides for itself what an empty answer means.
+            ResponseCardIds = result.WasCancelled ? new List<int>() : result.SelectedItems;
+        }
+    }
+
+    /// <summary>
+    /// Pick between <see cref="MinSelections"/> and <see cref="MaxSelections"/> of the offered cards,
+    /// under the caller's own wording.
+    ///
+    /// The range is the reason this exists next to <see cref="SelectCardRequestHandler"/>, which clamps
+    /// to exactly one, and to <see cref="CardsRequestHandler"/>, whose title says "discard" and whose
+    /// upper bound is unlimited. A card that says "take 1 or 2 cards" (StatusRosietheRiveter) is neither.
+    ///
+    /// MinSelections 0 makes the pick optional: an empty ResponseCardIds means "took none". As with
+    /// SelectCardRequestHandler, WasSkipped is never set, so the caller — not BroadCast — decides what
+    /// an empty answer means.
+    /// </summary>
+    public class SelectCardsRequestHandler : InputRequest
+    {
+        public string Title { get; set; }
+        public int MinSelections { get; set; }
+        public int MaxSelections { get; set; }
+
+        public SelectCardsRequestHandler(Faction targetFaction, List<int> targetCardIds, string title,
+            int minSelections, int maxSelections) : base(targetFaction)
+        {
+            TargetCardIds = targetCardIds;
+            Title = title;
+            MinSelections = minSelections;
+            MaxSelections = maxSelections;
+        }
+
+        public override async Task Handle()
+        {
+            PlayerActionLabel.ShowText(Title, TargetFaction);
+            ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectMany(
+                Title, PresentationItemCard.FromCardIds(TargetCardIds, true), MinSelections, MaxSelections));
+
             ResponseCardIds = result.WasCancelled ? new List<int>() : result.SelectedItems;
         }
     }

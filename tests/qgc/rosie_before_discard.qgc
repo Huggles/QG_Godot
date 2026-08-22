@@ -1,0 +1,72 @@
+#!args scenario=Scenario_Debug_USA seed=42
+#
+# Rosie the Riveter runs BEFORE the discard step, and its cards go to the BOTTOM of the draw deck.
+#
+# "Use once per turn at the beginning of your Discard step. Take 1 or 2 cards from your hand and
+# place them on the bottom of your draw deck." The card used to declare a plain
+# IsGameFlowStep(DISCARD) trigger, which is not a reaction window and so was never a chance to use
+# it: GameFlow.BeginStep runs the BEFORE mutators and then hands straight to the discard handler,
+# whose DiscardHandCardsChangeEvent carries IsTrigger = false. It is now a BEFORE-DISCARD
+# IStepMutator on the card logic itself, registered by DeckState.PlayCard with the Status card.
+#
+# Scenario_Debug_USA opens on the US with Rosie already on the table and openingDiscard off, so turn
+# 1 IS the US turn and no opening discards stand in the way.
+#
+# The four things pinned below:
+#
+#   1. ORDER      the Rosie prompt arrives before the discard prompt, not after it.
+#   2. BOTTOM     the picks land at the bottom of the deck, in the order chosen.
+#   3. NO DISCARD they never pass through the discard pile on the way (the old version applied a
+#                 DiscardHandCardsChangeEvent first, filing them as discarded this turn).
+#   4. SCOPED     only the owner's own Discard step — Germany's next turn gets no Rosie prompt.
+#
+# Card ids are pinned to the seed in the #!args line: 186 (Build Navy) and 180 (Build Army) are in
+# the US opening hand at that seed. Re-derive them after any change to the shuffle.
+#
+# Run:  tests/run-cli.sh tests/qgc/rosie_before_discard.qgc
+
+prompt                                  # turn 1, US, PLAY_CARD — synchronise with the running game
+
+assert faction == UNITED_STATES
+assert step == PLAY_CARD
+assert card StatusRosietheRiveter in status
+assert handsize UNITED_STATES == 7
+assert decksize UNITED_STATES == 25
+
+pass                                    # no play this turn; walk on to the discard step
+
+# (1) ORDER. This prompt is Rosie's, raised by the mutator before the discard handler starts. It is
+# the discard prompt instead ("choose up to 7") if the mutator did not run.
+prompt
+assert step == DISCARD
+assert promptoptions == 7                # the whole hand is offered, capped at 2 picks
+
+answer id=186,180                        # Build Navy first, then Build Army
+
+# The normal discard step follows, as it would with no Rosie in play at all — and it is the SECOND
+# prompt of this step, not the first. Its option count is the hand Rosie left behind: 5, not 7.
+prompt
+assert promptfaction == UNITED_STATES
+assert promptoptions == 5
+
+# (2) BOTTOM, in the order chosen: 186 then 180, so 180 is last.
+assert handsize UNITED_STATES == 5
+assert decksize UNITED_STATES == 27
+assert deckbottom UNITED_STATES == 180
+assert card 186 in deck
+
+# (3) NO DISCARD — nothing has reached the discard pile, these two least of all.
+assert discardsize UNITED_STATES == 0
+
+pass                                     # under the hand cap, so declining the discard is legal
+
+# (4) SCOPED to the owner. The draw step refills the US hand from the TOP, so both recycled cards
+# must still be in the deck afterwards — they would be straight back in hand had they gone to the
+# top. And this prompt is Germany's own turn, not a second Rosie window.
+prompt
+assert faction == GERMANY
+assert card 186 in deck
+assert card 180 in deck
+assert handsize UNITED_STATES == 7
+
+quit

@@ -460,7 +460,7 @@ public sealed class CliCommands
 		"                   score <F> | vp <TEAM> | units <country> [faction] | occupant <country>",
 		"                   pool <F> <ARMY|NAVY>  (undeployed pieces left in the faction's pool)",
 		"                   poolevents [ChangeEventName]  (events registered in the current round)",
-		"                   handsize <F> | decksize <F> | discardsize <F> | decktop <F> | deckorder <F>",
+		"                   handsize <F> | decksize <F> | discardsize <F> | decktop <F> | deckbottom <F> | deckorder <F>",
 		"                   card <name|id>  (-> hand/deck/discard/status/response/nowhere)",
 		"                   cardrevealed <name|id>  (-> true/false, Response card face public?)",
 		"CONTROL  auto <n> | run <n>   auto-pass n prompts",

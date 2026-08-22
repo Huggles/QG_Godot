@@ -154,6 +154,14 @@ public static class CliAssert
                 DeckState deck = DeckState.ForFaction(ParseFaction(arg1));
                 return deck.DeckCardIds.Count == 0 ? "empty" : deck.DeckCardIds[0].ToString();
             }
+            // The other end of the deck, for the recycle destinations that put a card there
+            // (RecycleDestination.BottomOfDeck — StatusRosietheRiveter). decktop cannot see those:
+            // both ends move the deck count by one, so only the order tells them apart.
+            case "deckbottom":
+            {
+                DeckState deck = DeckState.ForFaction(ParseFaction(arg1));
+                return deck.DeckCardIds.Count == 0 ? "empty" : deck.DeckCardIds[^1].ToString();
+            }
             case "deckorder": return string.Join("-", DeckState.ForFaction(ParseFaction(arg1)).DeckCardIds);
 
             // assert card <name|id> in hand|deck|discard|status|response
