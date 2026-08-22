@@ -16,6 +16,7 @@ public partial class InputHandlerDiscardHand : Node
     {
         DeckState deckState = DeckState.ForFaction(faction);
         List<int> handCardIds = deckState.HandCardIds;
+        handCardIds.Sort();
 
         string title = "Select card(s) to discard (or skip)";
 

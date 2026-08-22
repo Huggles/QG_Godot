@@ -2,8 +2,8 @@
 	{
 		"FactionIndex" : 1,
 		"Cards": [
-			{"CardName":"EventGunsAndButter","Number":1},
-			{"CardName":"StatusOccupationOfCzechoslovakia","Number":1},
+			
+			
 			{"CardName":"BuildArmy","Number":6},
 			{"CardName":"BuildNavy","Number":2},
 			{"CardName":"LandBattle","Number":7},			
@@ -18,7 +18,8 @@
 			{"CardName":"StatusSuperiorPlanning","Number":1},
 			{"CardName":"StatusJetFighters","Number":1},
 			{"CardName":"StatusWolfPacks","Number":1},
-			{"CardName":"StatusVolksturm","Number":1},
+			{"CardName":"StatusVolksturm","Number":1},			
+			{"CardName":"EventGunsAndButter","Number":1},
 			{"CardName":"EventPlunder_Germany","Number":1},
 			{"CardName":"EventTheAutobahn","Number":1},
 			{"CardName":"EventForcedConscription","Number":1},			
@@ -29,9 +30,7 @@
 			{"CardName":"EWSubmarinesEnforceBlockade","Number":1},
 			{"CardName":"EWSubmarinesLeadtheBattleoftheAtlantic","Number":1},
 			{"CardName":"EWSubmarinesPreyonUnprotectedShipping","Number":1},
-			{"CardName":"EWSubmarinesSupportPacificIslands","Number":1},
-			{"CardName":"EventArdennesOffensive","Number":1}
-
+			{"CardName":"EWSubmarinesSupportPacificIslands","Number":1}
 		]
 	},
 	{
