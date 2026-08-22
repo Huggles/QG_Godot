@@ -2,8 +2,6 @@
 
 [ext_resource type="Script" uid="uid://1urdnsxckvlr" path="res://scripts/C#/UI/FactionHandDisplay.cs" id="1_yrcqs"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_xs7nf"]
-[ext_resource type="StyleBox" uid="uid://dmulmhugod2s6" path="res://scenes/cards/NormalButtonStyle_Hover.tres" id="3_ff84v"]
-[ext_resource type="StyleBox" uid="uid://bg8upag18tny5" path="res://scenes/cards/NormalButtonStyle_Normal.tres" id="4_54hqk"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ff84v"]
 
@@ -22,14 +20,14 @@ script = ExtResource("1_yrcqs")
 
 [node name="CardsContainerPanel" type="Panel" parent="." unique_id=1243657932]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 200)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -250.0
-offset_bottom = -50.0
+offset_bottom = -150.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_ff84v")
@@ -56,27 +54,3 @@ offset_left = 0.0
 offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 0.0
-
-[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1963215262]
-custom_minimum_size = Vector2(200, 0)
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -40.0
-offset_right = 118.0
-grow_vertical = 0
-
-[node name="TestButton" type="Button" parent="HBoxContainer" unique_id=1523460222]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(200, 50)
-layout_mode = 2
-focus_mode = 0
-mouse_force_pass_scroll_events = false
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 28
-theme_override_styles/normal = ExtResource("4_54hqk")
-theme_override_styles/hover = ExtResource("3_ff84v")
-text = "Test
-"
