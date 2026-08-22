@@ -67,6 +67,10 @@ public partial class UnitScene : Node2D
 		}
 		
 		TargetSprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
+
+		// Units are all spawned up front and only later deployed, so a fresh scene is a pool unit
+		// sitting on the same off-board spot a removed one is parked on — same rule, same treatment.
+		if (!UnitState.IsDeployedToCountry) ResetToPoolState();
 	}
 	/// <summary>
 	/// One sprite, two answers. Ordinarily the target on a unit means "pick this unit". When it is the
@@ -126,6 +130,24 @@ public partial class UnitScene : Node2D
 
 	public void ShowOutOfSupply() => OutOfSupplyNode.Show();
 	public void HideOutOfSupply() => OutOfSupplyNode.Hide();
+
+	/// <summary>
+	/// The look of a unit sitting in the pool. CountryScene.RemoveUnit parks a removed unit at a fixed
+	/// off-board position, so it must not be drawn there, and its transform is put back to what
+	/// Unit.tscn authors: the removal tween ends on a zeroed sprite scale, and the next deploy tween
+	/// starts from whatever it finds, so without this the redeployed unit pops out of nothing.
+	/// The unit is shown again by CountryScene.AddUnit.
+	/// </summary>
+	public void ResetToPoolState()
+	{
+		Hide();
+		Rotation = 0f;
+		Scale = Vector2.One;
+		UnitSpriteNode.Rotation = 0f;
+		UnitSpriteNode.Scale = new Vector2(DefaultSpriteScale, DefaultSpriteScale);
+		SetUnclickable();
+		HideOutOfSupply();
+	}
 
 	private void OnTagAdded(Tag tag, Faction faction)
 	{

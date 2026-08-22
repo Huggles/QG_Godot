@@ -31,9 +31,8 @@ public class RemoveUnitAnimation : ChangeEventAnimation
         await unitScene.ToSignal(tween, Tween.SignalName.Finished);
         tween.Dispose();
 
+        // RemoveUnit parks the scene at the off-board position and hides it there (ResetToPoolState),
+        // which also undoes what the tween above did to the sprite — so nothing to restore here.
         countryScene.RemoveUnit(unitScene);
-        unitScene.UnitSpriteNode.Scale = new Vector2(1f, 1f);
-
-        
     }
 }

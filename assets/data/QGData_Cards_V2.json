@@ -796,7 +796,7 @@
         "Number":  "110",
         "Type":  "RESPONSE",
         "ExecutionClass":  "ResponseGermanReinforcementsCounterattack",
-        "Label":  "German Reinforcement sCounterattack",
+        "Label":  "German Reinforcement Counterattack",
         "Text":  "Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space.",
         "MultipleActivationsPerTurn":  false
     },

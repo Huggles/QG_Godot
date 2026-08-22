@@ -146,6 +146,10 @@ public partial class CountryScene : Node2D
 
         if (position <= 0) return;
 
+        // Undoes the Hide() from RemoveUnit. Ahead of the already-parented early return below, because
+        // a rebuild-in-place unit is on the board either way and must be drawn.
+        unitScene.Show();
+
         // A "build that army again" redeploys the piece already standing here, so DeployUnitAnimation
         // calls this for a scene that never left. Re-parenting it to the node it is already under would
         // only churn child order; SetUnitOnAvailablePosition has already returned the slot it holds, so
@@ -206,6 +210,11 @@ public partial class CountryScene : Node2D
         UnitContainerNode.RemoveChild(unitScene);
         NodeUtilities.Instance.UnitsNode.AddChild(unitScene);
         unitScene.Position = Vector2.Zero;
+
+        // Off the board is off the screen: every removed unit is parked on the same spot, so leaving
+        // them drawn there stacks the whole pool on one pile. ResetToPoolState hides it and puts the
+        // transform back to Unit.tscn's, undoing the removal tween. AddUnit shows it again.
+        unitScene.ResetToPoolState();
 
         switch (position)
         {
