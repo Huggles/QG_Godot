@@ -15,7 +15,22 @@ public partial class CardScene : Control
 
 	private bool triggersEmphasis = true;
 
-	private bool showActivatableOverlay = false;
+	/// <summary>
+	/// How the card is drawn. <c>Unavailable</c> is the long-standing red "cannot use this" scrim;
+	/// <c>Caution</c> is its milder sibling — the card CAN be used, but every effect it offers is hollow
+	/// on the current board (see <see cref="Tag.NeedsAttention"/>), so it stays clickable and only the
+	/// scrim colour differs.
+	/// </summary>
+	public enum CardAvailability { Available, Caution, Unavailable }
+
+	// UnavailableTint mirrors ActivatableColorOverlay's colour in CardScene.tscn; that scene value is
+	// now only the editor preview, since SetAvailability always writes the colour.
+	private static readonly Color UnavailableTint = new Color(0.8509804f, 0f, 0.13725491f, 0.29411766f);
+	private static readonly Color CautionTint = new Color(0.98f, 0.76f, 0f, 0.15411766f);
+
+	// Held rather than read back off the node: callers may set it before the ColorRect is in the tree,
+	// and _Ready re-applies whatever was last asked for.
+	private CardAvailability availability = CardAvailability.Available;
 
 	private bool mousePassthrough = false;
 
@@ -37,7 +52,7 @@ public partial class CardScene : Control
 		cardButton.MouseEntered += CardButton_MouseEntered;
 		cardButton.MouseExited += CardButton_MouseExited;
 
-		SetActivatable(!showActivatableOverlay);
+		SetAvailability(availability);
 	}
 
 	private void CardButton_Pressed()
@@ -119,15 +134,24 @@ public partial class CardScene : Control
 	{
 		cardButton.Disabled = !clickable;
 	}
-	public void SetActivatable(bool activatable)
+	public void SetAvailability(CardAvailability cardAvailability)
 	{
-		showActivatableOverlay = !activatable;
+		availability = cardAvailability;
 		if(activatableColorOverlay != null)
 		{
-			activatableColorOverlay.Visible = !activatable;
+			activatableColorOverlay.Visible = cardAvailability != CardAvailability.Available;
+			activatableColorOverlay.Color = cardAvailability == CardAvailability.Caution ? CautionTint : UnavailableTint;
 		}
-		
-	}    
+	}
+
+	/// <summary>
+	/// The two-state form, kept for the callers that only ever clear the scrim (a card shown in a modal,
+	/// the history popup, the "Reacting to:" panel). The hand uses <see cref="SetAvailability"/>.
+	/// </summary>
+	public void SetActivatable(bool activatable)
+	{
+		SetAvailability(activatable ? CardAvailability.Available : CardAvailability.Unavailable);
+	}
 	public void TriggersEmphasis(bool triggersEmphasis)
 	{
 		this.triggersEmphasis = triggersEmphasis;

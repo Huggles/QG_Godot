@@ -334,8 +334,17 @@ public partial class FactionHandDisplay : Control
 			// card the host is offering would render greyed out and refuse the click.
 			bool selectable = selectableCardIds?.Contains(cardId)
 							  ?? cardState.HasTag(Tag.IsActivatable, cardState.Faction);
+
+			// Read from the tag rather than from selectableCardIds: a cautioned card IS selectable and so
+			// IS in the host's offered set. The caution is an extra fact about it, not a third value of
+			// the same question.
+			bool needsAttention = selectable && cardState.HasTag(Tag.NeedsAttention, cardState.Faction);
+
 			cardSceneInstance.SetClickable(selectable);
-			cardSceneInstance.SetActivatable(selectable);
+			cardSceneInstance.SetAvailability(
+				!selectable    ? CardScene.CardAvailability.Unavailable :
+				needsAttention ? CardScene.CardAvailability.Caution
+							   : CardScene.CardAvailability.Available);
 		}
 	}
 

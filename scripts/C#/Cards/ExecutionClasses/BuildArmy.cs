@@ -16,7 +16,8 @@ public partial class BuildArmy : CardLogic
                 deployUnitChangeEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
-            .WithCondition(()=> Condition.Build(new Condition.HasBuildableLand(Faction), this))            
+            .WithCondition(()=> Condition.Build(new Condition.HasBuildableLand(Faction), this))
+            .WithAdvisoryCondition(()=> Condition.Build(new Condition.HasVacantBuildableLand(Faction), this))
             .WithGuidance("Build an army")
         }; 
     }

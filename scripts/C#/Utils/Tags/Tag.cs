@@ -51,4 +51,19 @@ public enum Tag
     /// TagEntry serializes a Tag numerically, so inserting one would reinterpret every replicated tag.
     /// </summary>
     RebuildTarget,
+
+    /// <summary>
+    /// On a CARD: it can be played, but on the current board every effect it offers is hollow — the
+    /// canonical case being a build card whose only remaining targets are countries the faction
+    /// already occupies, where GameAPI.DeployUnitToCountry rebuilds in place and the board does not
+    /// change. Drawn with a caution scrim rather than hidden or blocked: the play is legal and
+    /// sometimes wanted (it is still a reactable DeployUnitChangeEvent), it just is not what a player
+    /// reaching for the card usually means.
+    ///
+    /// Raised by GameStateCalculator.CalculateAttentionCardsForFaction from the advisory conditions on
+    /// the card's executable steps (<see cref="CardStep.MeetAllAdvisoryConditions"/>), and replicated —
+    /// the client renders the hand, so it must know. New values go at the END of this enum, see
+    /// <see cref="RebuildTarget"/>.
+    /// </summary>
+    NeedsAttention,
 }

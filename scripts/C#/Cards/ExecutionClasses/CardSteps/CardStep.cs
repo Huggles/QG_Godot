@@ -27,6 +27,7 @@ public partial class CardStep : ITaggable
     [JsonIgnore] public CardLogic CardLogic;    
     protected Func<Task> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
+    protected Func<List<Condition>> GetAdvisoryConditionsMethod;
     private bool _requiresPreviousStep = false;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
     [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod != null ? GetConditionsMethod() : null;
@@ -39,6 +40,20 @@ public partial class CardStep : ITaggable
     /// </summary>
     [JsonIgnore] private bool PreviousStepRequirementMet => !_requiresPreviousStep || (PreviousCardStep?.StepSucceeded ?? false);
     [JsonIgnore] public bool MeetAllConditions => (Conditions == null || Conditions.All(condition => condition.MeetCondition())) && PreviousStepRequirementMet;
+
+    [JsonIgnore] protected List<Condition> AdvisoryConditions => GetAdvisoryConditionsMethod?.Invoke();
+
+    /// <summary>
+    /// Whether this step, if run right now, would do something worth doing — see
+    /// <see cref="WithAdvisoryCondition"/>. Deliberately NOT folded into
+    /// <see cref="MeetAllConditions"/>, unlike <see cref="PreviousStepRequirementMet"/> just above: an
+    /// advisory condition must never stop the step or make it unexecutable, it only reports that the
+    /// step's effect would be hollow. Read by
+    /// GameStateCalculator.CalculateAttentionCardsForFaction to raise
+    /// <see cref="Tag.NeedsAttention"/>, and by nothing in the execution path.
+    /// </summary>
+    [JsonIgnore] public bool MeetAllAdvisoryConditions =>
+        AdvisoryConditions == null || AdvisoryConditions.All(condition => condition.MeetCondition());
 
     public string ActionGuidance;
 
@@ -69,6 +84,29 @@ public partial class CardStep : ITaggable
     public CardStep WithCondition(Func<Condition> getConditionMethod)
     {
         this.GetConditionsMethod = () => new List<Condition> { getConditionMethod() };
+        return this;
+    }
+
+    /// <summary>
+    /// An advisory condition: when it is NOT met the step still runs exactly as before, but the card is
+    /// flagged <see cref="Tag.NeedsAttention"/> and drawn with a caution scrim so the player notices
+    /// that the play, while legal, would achieve nothing on the current board.
+    ///
+    /// Use it for "the effect is hollow", never for "the effect is illegal" — that is
+    /// <see cref="WithCondition"/>. A build card whose only targets are countries the faction already
+    /// occupies is the motivating case: CountryState.CanBuild permits the deploy, GameAPI rebuilds in
+    /// place, and the board is identical afterwards.
+    /// </summary>
+    public CardStep WithAdvisoryCondition(Func<Condition> getConditionMethod)
+    {
+        this.GetAdvisoryConditionsMethod = () => new List<Condition> { getConditionMethod() };
+        return this;
+    }
+
+    /// <inheritdoc cref="WithAdvisoryCondition"/>
+    public CardStep WithAdvisoryConditions(Func<List<Condition>> getConditionsMethod)
+    {
+        this.GetAdvisoryConditionsMethod = getConditionsMethod;
         return this;
     }
 

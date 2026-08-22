@@ -551,6 +551,25 @@ public abstract class Condition
         public override bool MeetCondition() => CountryState.BuildableSea(Faction).Any();
     }
 
+    /// <summary>
+    /// A buildable land space the faction does NOT already occupy — a build that would actually change
+    /// the board, as opposed to the rebuild-in-place that <see cref="CountryState.CanBuild"/> also
+    /// permits (the piece standing there is redeployed, so nothing moves). Intended as a
+    /// <see cref="CardStep.WithAdvisoryCondition"/>, not as a gate: rebuilding in place is legal.
+    /// </summary>
+    public class HasVacantBuildableLand : Condition
+    {
+        public HasVacantBuildableLand(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.BuildableLand(Faction).Any(cs => !cs.HasUnit(Faction));
+    }
+
+    /// <inheritdoc cref="HasVacantBuildableLand"/>
+    public class HasVacantBuildableSea : Condition
+    {
+        public HasVacantBuildableSea(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition() => CountryState.BuildableSea(Faction).Any(cs => !cs.HasUnit(Faction));
+    }
+
     public class HasRecruitableLand : Condition
     {
         public HasRecruitableLand(Faction faction) { this.Faction = faction; }

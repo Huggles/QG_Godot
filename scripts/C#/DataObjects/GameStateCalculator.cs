@@ -21,7 +21,8 @@ public class GameStateCalculator
         // Unit
         Tag.InSupply, Tag.OutOfSupply,
         // Card
-        Tag.IsActivatable, Tag.IsPlayable, Tag.IsAfterReaction, Tag.IsPlayed, Tag.IsBlocked
+        Tag.IsActivatable, Tag.IsPlayable, Tag.IsAfterReaction, Tag.IsPlayed, Tag.IsBlocked,
+        Tag.NeedsAttention
         // Straight tags (AxisControlled / AlliesControlled) are intentionally excluded:
         // they are 100% deterministic from ControllingCountryId and are recomputed
         // locally via CalculateStraightControlForFaction() on every peer.
@@ -177,6 +178,36 @@ public class GameStateCalculator
         deckState.HandCardStates
             .Where(cs => cs.HasTag(Tag.IsActivatable, faction) && !cs.IsPlayed)
             .AddTag(Tag.IsPlayable, faction);
+    }
+
+    /// <summary>
+    /// Raises <see cref="Tag.NeedsAttention"/> on a card that can be used but whose every executable
+    /// step would be hollow — see <see cref="CardStep.WithAdvisoryCondition"/>. The card stays
+    /// activatable and selectable; only the way it is drawn changes.
+    ///
+    /// All(), not Any(): a step with no advisory condition always meets it, so a card offering one
+    /// hollow effect beside one real effect is left alone. Runs after
+    /// <see cref="CalculateActivatableCardsForFaction"/>, whose tag it reads.
+    /// </summary>
+    private static void CalculateAttentionCardsForFaction(Faction faction)
+    {
+        ClearTagsForFaction(faction, Tag.NeedsAttention);
+        CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
+        {
+            if (!cardState.HasTag(Tag.IsActivatable, faction))
+                return;
+            // A Status/Response card in hand is being PLAYED onto the table; its steps are the later
+            // activation effect and say nothing about this play. Same reasoning as
+            // CardLogic.IsTableCardInHand. The != false also covers a null CardLogic.
+            if (cardState.CardLogic?.IsTableCardInHand != false)
+                return;
+
+            List<CardStep> steps = cardState.CardLogic.ExecutableCardSteps;
+            if (steps.Count == 0)
+                return;
+            if (steps.All(step => !step.MeetAllAdvisoryConditions))
+                cardState.AddTag(Tag.NeedsAttention, faction);
+        });
     }
 
     private static void CalculateInSupplyForFaction(Faction faction)
@@ -403,6 +434,7 @@ public class GameStateCalculator
         CalculateAfterReactionCardsForFaction(faction);
         CalculateBlockReactionCardsForFaction(faction);
         CalculatePlayableCardsForFaction(faction);
+        CalculateAttentionCardsForFaction(faction);
 
         return calculator;
     }

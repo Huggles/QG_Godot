@@ -17,6 +17,7 @@ public partial class BuildNavy : CardLogic
                 await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.HasBuildableSea(Faction), this))
+            .WithAdvisoryCondition(()=> Condition.Build(new Condition.HasVacantBuildableSea(Faction), this))
             .WithGuidance("Build a navy")
         }; 
     }
