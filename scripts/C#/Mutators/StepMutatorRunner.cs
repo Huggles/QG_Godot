@@ -12,12 +12,15 @@ using System.Threading.Tasks;
 public static class StepMutatorRunner
 {
     /// <summary>
-    /// The Bulletin of the mutator currently executing, or null outside a mutator's Run(). Read by
-    /// InputRequest.BroadCast so any input a mutator asks for carries its Bulletin to the player, which
+    /// The announcement of the mutator currently executing, or null outside a mutator's Run(). Read by
+    /// InputRequest.BroadCast so any input a mutator asks for carries its context to the player, which
     /// is what makes "why am I being asked to pick a unit?" answerable. Ambient rather than threaded
     /// through, mirroring CardPlayRound.CurrentReactionTrigger; server-side only, like the runner.
+    ///
+    /// SourceCardId is the card behind the mutator, or -1 for a scenario one — the same split the
+    /// announcement modal makes, so the prompt shows the player the card it just showed them.
     /// </summary>
-    public static (string Label, string Text)? RunningBulletin { get; private set; }
+    public static (string Label, string Text, int SourceCardId)? RunningBulletin { get; private set; }
 
     public static async Task Run(TurnStep step, MutatorTiming timing, Faction activeFaction)
     {
@@ -54,14 +57,16 @@ public static class StepMutatorRunner
                 ErrorReporter.ThrowIfStaleEpoch(epoch);
                 DebugUtilities.PrintPeer($"Mutator {mutator.GetType().Name} ({timing} {step})");
 
-                // Announce the mutator as a Bulletin card on every peer. Replaces the old
-                // ShowPlayerActionLabel RPC, which was a single line of text that nothing cleared and
-                // that any client-side input round-trip wiped (see NetworkApi.ReceiveInputResponse).
+                // Announce the mutator on every peer — as its own card when a card put it in play, as
+                // a Bulletin card when the scenario declared it. Replaces the old ShowPlayerActionLabel
+                // RPC, which was a single line of text that nothing cleared and that any client-side
+                // input round-trip wiped (see NetworkApi.ReceiveInputResponse).
                 //
                 // A PresentationEvent, so it costs no state hash, no tag recalculation and no reach into
                 // the reaction chain — it only needs its position in the replicated stream, so that the
                 // modal lands with the effects it announces rather than racing them.
-                await new ShowBulletinPresentationEvent(activeFaction, mutator.Description, mutator.BulletinText).Apply();
+                await new ShowBulletinPresentationEvent(
+                    activeFaction, mutator.Description, mutator.BulletinText, mutator.SourceCardId).Apply();
 
                 // Load-bearing, and it used to be redundant: the announcement was a ChangeEvent, so its
                 // own Apply() recalculated too and this was the second pass of two. As a PresentationEvent
@@ -71,7 +76,7 @@ public static class StepMutatorRunner
                 // builds inside Run() below.
                 GameStateCalculator.CalculateAll();
 
-                RunningBulletin = (mutator.Description, mutator.BulletinText);
+                RunningBulletin = (mutator.Description, mutator.BulletinText, mutator.SourceCardId);
                 try
                 {
                     await mutator.Run(activeFaction);

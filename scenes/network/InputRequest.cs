@@ -47,13 +47,23 @@ public abstract partial class InputRequest
     public string TriggerSummaryText { get; set; }
 
     /// <summary>
-    /// Set by <see cref="BroadCast"/> when this request is raised from inside a scenario mutator's
-    /// Run(), so the player being asked to pick a unit or a country can see which Bulletin is asking.
-    /// Null for every other request. Serialized with the rest of the request — the base class carries
-    /// the [JsonPolymorphic] attribute, so properties added here round-trip with no registration.
+    /// Set by <see cref="BroadCast"/> when this request is raised from inside a step mutator's Run(),
+    /// so the player being asked to pick a unit or a country can see what is asking. Null for every
+    /// other request. Serialized with the rest of the request — the base class carries the
+    /// [JsonPolymorphic] attribute, so properties added here round-trip with no registration.
     /// </summary>
     public string TriggerBulletinLabel { get; set; }
     public string TriggerBulletinText { get; set; }
+
+    /// <summary>
+    /// The card behind the mutator that raised this request, or -1 when the scenario declared it (or
+    /// no mutator is running). Shown instead of the Bulletin face, matching the announcement modal.
+    ///
+    /// Deliberately not <see cref="TriggerCardId"/>: that one is only rendered by the two card-choice
+    /// handlers, whereas the block below sits in <see cref="Execute"/> and so covers every request
+    /// subclass — including the unit and country selections a mutator actually raises.
+    /// </summary>
+    public int TriggerBulletinCardId { get; set; } = -1;
 
     /// <summary>
     /// How long the host will wait for this attempt before releasing the prompt and asking for a
@@ -109,11 +119,18 @@ public abstract partial class InputRequest
     {
         if(IsForCurrentPeer)
         {
-            // Showing the Bulletin here rather than in each Handle() covers every request subclass at
-            // once — including the unit and country selections a mutator actually raises, which have
-            // never had any trigger context of their own.
+            // Showing the mutator's context here rather than in each Handle() covers every request
+            // subclass at once — including the unit and country selections a mutator actually raises,
+            // which have never had any trigger context of their own.
             bool showedBulletin = false;
-            if (!string.IsNullOrEmpty(TriggerBulletinLabel))
+            if (TriggerBulletinCardId > -1)
+            {
+                // A card put this mutator in play, so show that card — the same one the announcement
+                // modal just showed — rather than a Bulletin standing in for it.
+                TriggerContextDisplay.Current?.ShowCard(TriggerBulletinCardId, TriggerBulletinLabel);
+                showedBulletin = true;
+            }
+            else if (!string.IsNullOrEmpty(TriggerBulletinLabel))
             {
                 TriggerContextDisplay.Current?.ShowBulletin(
                     CardFace.Bulletin(TriggerBulletinLabel, TriggerBulletinText), TriggerBulletinLabel);
@@ -201,12 +218,13 @@ public abstract partial class InputRequest
     {
         DebugUtilities.PrintPeer($"Broadcasting input request {GetType().Name} to {TargetFaction}");
 
-        // Stamp the running mutator's Bulletin on the way out. BroadCast is the single chokepoint every
+        // Stamp the running mutator's context on the way out. BroadCast is the single chokepoint every
         // request passes through, and TriggerCardId taking precedence keeps card reactions unchanged.
         if (TriggerCardId == -1 && StepMutatorRunner.RunningBulletin is { } bulletin)
         {
             TriggerBulletinLabel = bulletin.Label;
             TriggerBulletinText = bulletin.Text;
+            TriggerBulletinCardId = bulletin.SourceCardId;
         }
 
         InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(this);

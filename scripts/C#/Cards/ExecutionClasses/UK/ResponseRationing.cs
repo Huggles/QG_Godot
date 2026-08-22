@@ -52,6 +52,7 @@ public partial class ResponseRationing : ResponseCardLogic
                 ModifierRegistry.Register(new MutatorRecycleAfterStep(
                     Faction,
                     playEvent.SourceCardId,
+                    CardState.Id,
                     GameFlow.Instance.TurnStep,
                     RecycleDestination.ShuffleIntoDeck,
                     "Rationing: shuffle the played card into the draw deck",

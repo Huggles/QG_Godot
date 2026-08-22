@@ -78,6 +78,9 @@ public class ShowBulletinPresentationEventDto : PresentationEventDto
 {
     public string Label        { get; set; }
     public string BulletinText { get; set; }
+
+    /// <summary>-1 for a scenario mutator; a card id when a card put the mutator in play.</summary>
+    public int SourceCardId { get; set; } = -1;
 }
 
 public class ShowActionLabelPresentationEventDto : PresentationEventDto

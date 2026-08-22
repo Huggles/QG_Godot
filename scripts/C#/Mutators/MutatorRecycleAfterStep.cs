@@ -19,7 +19,17 @@ using System.Threading.Tasks;
 public class MutatorRecycleAfterStep : StepMutator
 {
     private readonly Faction _faction;
-    private readonly int _cardId;
+
+    /// <summary>The card this mutator moves — the one that was played, not the one that reacted.</summary>
+    private readonly int _recycledCardId;
+
+    /// <summary>
+    /// The reacting card that registered this mutator (Rationing, Women Conscripts). Deliberately a
+    /// second id: it is what the mutator announces itself with when it fires, and confusing it with
+    /// <see cref="_recycledCardId"/> would show the player the wrong card entirely.
+    /// </summary>
+    private readonly int _sourceCardId;
+
     private readonly TurnStep _step;
     private readonly RecycleDestination _destination;
     private readonly string _description;
@@ -29,14 +39,16 @@ public class MutatorRecycleAfterStep : StepMutator
 
     public MutatorRecycleAfterStep(
         Faction faction,
-        int cardId,
+        int recycledCardId,
+        int sourceCardId,
         TurnStep step,
         RecycleDestination destination,
         string description,
         string bulletinText)
     {
         _faction = faction;
-        _cardId = cardId;
+        _recycledCardId = recycledCardId;
+        _sourceCardId = sourceCardId;
         _step = step;
         _destination = destination;
         _description = description;
@@ -49,6 +61,7 @@ public class MutatorRecycleAfterStep : StepMutator
     public override MutatorTiming Timing       => MutatorTiming.AFTER;
     public override string        Description  => _description;
     public override string        BulletinText => _bulletinText;
+    public override int           SourceCardId => _sourceCardId;
 
     /// <summary>
     /// Retires once fired. The turn check is the backstop for a step abandoned by error recovery —
@@ -58,14 +71,14 @@ public class MutatorRecycleAfterStep : StepMutator
 
     public override bool ShouldRun(Faction activeFaction) =>
         activeFaction == _faction
-        && DeckState.ForFaction(_faction).DiscardedCardIds.Contains(_cardId);
+        && DeckState.ForFaction(_faction).DiscardedCardIds.Contains(_recycledCardId);
 
     public override async Task Run(Faction activeFaction)
     {
         _done = true;
         // isTrigger:false — a bookkeeping move, as it was before. No block or reaction window.
         await this.Do(
-            new RecycleCardChangeEvent(_faction, _faction, _cardId, _destination),
+            new RecycleCardChangeEvent(_faction, _faction, _recycledCardId, _destination),
             isTrigger: false);
     }
 }

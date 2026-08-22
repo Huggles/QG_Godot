@@ -30,6 +30,9 @@ public partial class StatusRosietheRiveter : StatusCardLogic, IStepMutator
     public TurnStep      Step   => TurnStep.DISCARD;
     public MutatorTiming Timing => MutatorTiming.BEFORE;
 
+    /// <summary>This card is the mutator, so it announces itself with its own face rather than a Bulletin.</summary>
+    public int SourceCardId => CardState.Id;
+
     public string Description =>
         "Rosie the Riveter: place 1 or 2 cards from your hand on the bottom of your draw deck";
 

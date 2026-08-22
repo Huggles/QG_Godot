@@ -51,6 +51,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
                 ModifierRegistry.Register(new MutatorRecycleAfterStep(
                     Faction,
                     playEvent.SourceCardId,
+                    CardState.Id,
                     GameFlow.Instance.TurnStep,
                     RecycleDestination.TopOfDeck,
                     "Women Conscripts: return the Build Army card to the top of the draw deck",

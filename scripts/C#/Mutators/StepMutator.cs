@@ -18,10 +18,14 @@ public abstract class StepMutator : IStepMutator
 
     public virtual string Description => GetType().Name;
 
-    // Re-declared here rather than inherited as IStepMutator's default: a subclass cannot override a
-    // default interface member, and every scenario mutator wants to fill this in. Same shape as
+    // Re-declared here rather than inherited as IStepMutator's defaults: a subclass cannot override a
+    // default interface member, and these are exactly what a subclass wants to fill in. Same shape as
     // Description above.
+    //
+    // SourceCardId stays -1 for a scenario mutator, which is what makes it announce itself as a
+    // Bulletin; a detached mutator a card step registers overrides it with the registering card.
     public virtual string BulletinText => string.Empty;
+    public virtual int    SourceCardId => -1;
 
     // Populated from the scenario entry at registration time; left at defaults for detached mutators.
     public List<Faction> FactionFilter { get; set; } = new();

@@ -19,11 +19,18 @@ mouse_filter = 2
 [node name="MenuPanel" type="Container" parent="." unique_id=438408597]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(158, 25)
-layout_mode = 0
-offset_left = 653.0
-offset_top = 1026.0
-offset_right = 1154.0
-offset_bottom = 1093.0
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -250.5
+offset_top = -45.0
+offset_right = 250.5
+offset_bottom = 11.0
+grow_horizontal = 2
+grow_vertical = 0
 script = ExtResource("1_pjedk")
 
 [node name="BackgroundContainer" type="MarginContainer" parent="MenuPanel" unique_id=836205175]
@@ -41,10 +48,10 @@ theme_override_styles/panel = ExtResource("2_6h8hq")
 unique_name_in_owner = true
 custom_maximum_size = Vector2(600, 60)
 layout_mode = 2
-theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_colors/default_color = Color(0.7863468, 0.78634685, 0.78634685, 1)
 theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
-text = "[color=red] ABC [/color]"
+text = "ABC"
 fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1

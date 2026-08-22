@@ -145,7 +145,7 @@ public abstract partial class GameMessage : GodotObject
             RecalculateTagsMessageDto d     => new RecalculateTagsMessage(d.Snapshot),
 
             // ── Presentation only ────────────────────────────────────────────
-            ShowBulletinPresentationEventDto d   => new ShowBulletinPresentationEvent(d.TriggeringFaction, d.Label, d.BulletinText),
+            ShowBulletinPresentationEventDto d   => new ShowBulletinPresentationEvent(d.TriggeringFaction, d.Label, d.BulletinText, d.SourceCardId),
             ShowActionLabelPresentationEventDto d => new ShowActionLabelPresentationEvent(d.TriggeringFaction, d.Text),
 
             _ => throw new NotSupportedException($"Unknown GameMessageDto type: {dto.GetType().Name}")

@@ -23,8 +23,26 @@ public interface IStepMutator : IModifier
     /// </summary>
     string Description { get; }
 
-    /// <summary>Body text of the Bulletin card. Empty hides the card's text box entirely.</summary>
+    /// <summary>
+    /// Body text of the Bulletin card. Empty hides the card's text box entirely. Unused when
+    /// <see cref="SourceCardId"/> names a card — that card's own face is shown instead of a Bulletin.
+    /// </summary>
     string BulletinText => string.Empty;
+
+    /// <summary>
+    /// The card that put this mutator in play, or -1 when the scenario declared it. This is the only
+    /// record of a mutator's origin — the registry holds no per-entry metadata, and the three
+    /// registration sites are otherwise indistinguishable once they have run.
+    ///
+    /// It decides how the mutator announces itself when it fires: a card-sourced mutator shows that
+    /// card, exactly as a card activation does, while a scenario one shows a Bulletin built from
+    /// <see cref="Description"/> and <see cref="BulletinText"/>.
+    ///
+    /// A card logic class that IS the mutator fills this in with a one-liner, since CardLogic already
+    /// holds the state: <c>public int SourceCardId =&gt; CardState.Id;</c>. A detached mutator a card
+    /// step registers takes the id through its constructor — see MutatorRecycleAfterStep.
+    /// </summary>
+    int SourceCardId => -1;
 
     Task Run(Faction activeFaction);
 

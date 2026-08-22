@@ -24,9 +24,10 @@ public readonly record struct GameHistoryEntry(
     string  BulletinText)
 {
     /// <summary>
-    /// The SourceCardId cast is to ChangeEvent because a PresentationEvent has none.
-    /// ShowBulletinPresentationEvent is the one presentation message that reaches history, and it
-    /// can still draw a card — via CardFace.Bulletin rather than a CardState.
+    /// SourceCardId comes off a ChangeEvent, which is the only branch that declares one — except for
+    /// ShowBulletinPresentationEvent, the one presentation message that reaches history: a mutator a
+    /// card put in play names that card, so the popup draws the real card, and only a scenario
+    /// mutator falls through to the Bulletin face built from the two fields below.
     /// </summary>
     public static GameHistoryEntry For(GameMessage message, int sequence) => new(
         sequence,
@@ -35,7 +36,8 @@ public readonly record struct GameHistoryEntry(
         message.HistoryFlagPath(),
         message.SummaryText(),
         message.HistoryFaction(),
-        (message as ChangeEvent)?.SourceCardId ?? -1,
+        (message as ChangeEvent)?.SourceCardId
+            ?? (message as ShowBulletinPresentationEvent)?.SourceCardId ?? -1,
         (message as ShowBulletinPresentationEvent)?.Label,
         (message as ShowBulletinPresentationEvent)?.BulletinText);
 }
