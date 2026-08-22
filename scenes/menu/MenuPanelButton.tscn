@@ -15,9 +15,9 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hv7sk"]
 
 [node name="NinePatchButton" type="Button" unique_id=566933446]
-custom_minimum_size = Vector2(318, 156)
-offset_right = 318.0
-offset_bottom = 156.0
+custom_minimum_size = Vector2(150, 80)
+offset_right = 150.0
+offset_bottom = 80.0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_5581r")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_dgjnc")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_q0r3r")
@@ -27,9 +27,9 @@ script = ExtResource("2_script")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=171759037]
 layout_mode = 0
-offset_right = 1060.0
-offset_bottom = 520.0
-scale = Vector2(0.3, 0.3)
+offset_right = 1500.0
+offset_bottom = 800.0
+scale = Vector2(0.1, 0.1)
 texture = ExtResource("2_5581r")
 patch_margin_left = 438
 patch_margin_top = 229
@@ -38,7 +38,7 @@ patch_margin_bottom = 291
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 script = ExtResource("4_q0r3r")
-TileScale = 0.3
+TileScale = 0.1
 
 [node name="ContentContainer" type="MarginContainer" parent="." unique_id=1659046377]
 layout_mode = 1
@@ -55,7 +55,7 @@ theme_override_constants/margin_bottom = 10
 
 [node name="Label" type="Label" parent="ContentContainer" unique_id=1066952590]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 24
 text = "Jingle Bells"
 horizontal_alignment = 1
 vertical_alignment = 3

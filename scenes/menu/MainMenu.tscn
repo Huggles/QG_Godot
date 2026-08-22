@@ -2,7 +2,10 @@
 
 [ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="3_mgsx5"]
 [ext_resource type="Script" uid="uid://bwx4k7nap2qnr" path="res://scripts/C#/Menu/MainMenu.cs" id="3_script"]
+[ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_y6vun"]
+[ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_e1dod"]
 
 [node name="Control" type="Control" unique_id=533686469]
 layout_mode = 3
@@ -23,40 +26,58 @@ grow_vertical = 2
 texture = ExtResource("1_m2yvp")
 expand_mode = 3
 
-[node name="ButtonContainer" type="VBoxContainer" parent="." unique_id=586174224]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 67.0
-offset_top = -484.0
-offset_right = 1731.0
-offset_bottom = 1102.0
-grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(0.5, 0.5)
+[node name="MenuPanel" type="Container" parent="." unique_id=438408597]
+custom_minimum_size = Vector2(158, 100)
+layout_mode = 0
+offset_left = 1437.0
+offset_top = 199.0
+offset_right = 1837.0
+offset_bottom = 899.0
+script = ExtResource("3_mgsx5")
+
+[node name="Label" type="Label" parent="MenuPanel" unique_id=1629054955]
+layout_mode = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="MenuPanel" unique_id=779728291]
+layout_mode = 2
+texture = ExtResource("4_y6vun")
+patch_margin_left = 530
+patch_margin_top = 376
+patch_margin_right = 489
+patch_margin_bottom = 416
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+script = ExtResource("5_e1dod")
+TileScale = 0.2
+
+[node name="ContentContainer" type="MarginContainer" parent="MenuPanel" unique_id=672142930]
+layout_mode = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="ButtonContainer" type="VBoxContainer" parent="MenuPanel/ContentContainer" unique_id=586174224]
+layout_mode = 2
 theme_override_constants/separation = 50
 alignment = 1
 
-[node name="SinglePlayerButton" parent="ButtonContainer" unique_id=409954901 instance=ExtResource("2_btn")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 156)
-layout_mode = 2
-
-[node name="MultiplayerHostButton" parent="ButtonContainer" unique_id=1302279736 instance=ExtResource("2_btn")]
+[node name="SinglePlayerButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=409954901 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="MultiplayerJoinButton" parent="ButtonContainer" unique_id=2125586497 instance=ExtResource("2_btn")]
+[node name="MultiplayerHostButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1302279736 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="SettingsButton" parent="ButtonContainer" unique_id=1815641807 instance=ExtResource("2_btn")]
+[node name="MultiplayerJoinButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=2125586497 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="QuitButton" parent="ButtonContainer" unique_id=1588731681 instance=ExtResource("2_btn")]
+[node name="SettingsButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1815641807 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="QuitButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1588731681 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2

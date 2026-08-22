@@ -33,7 +33,7 @@ public partial class GameModeSelectionScreen : Control
 		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
 
 		_startGameButton.CustomMinimumSize = new Vector2(600, 180);
-		_startGameButton.ButtonText = "[b][font_size=28]Start Game[/font_size][/b]";
+		_startGameButton.ButtonText = "Start Game";
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 		_scenarioPicker.Clear();

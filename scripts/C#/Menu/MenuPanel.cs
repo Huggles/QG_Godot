@@ -21,65 +21,65 @@ using Godot;
 [GlobalClass]
 public partial class MenuPanel : Container
 {
-    /// <summary>Where the panel's contents go; the margins on it keep them off the nine-patch border.</summary>
-    public MarginContainer ContentContainer => GetNodeOrNull<MarginContainer>("ContentContainer");
+	/// <summary>Where the panel's contents go; the margins on it keep them off the nine-patch border.</summary>
+	public MarginContainer ContentContainer => GetNodeOrNull<MarginContainer>("ContentContainer");
 
-    public override void _Notification(int what)
-    {
-        if (what == NotificationSortChildren)
-        {
-            SortContent();
-        }
-    }
+	public override void _Notification(int what)
+	{
+		if (what == NotificationSortChildren)
+		{
+			SortContent();
+		}
+	}
 
-    /// <summary>
-    /// The content drives the panel's size, but not below what the frame art needs: a nine patch
-    /// cannot draw thinner than its own patch margins, so a panel smaller than that would have its
-    /// border hanging outside the panel. Only the background's *own* minimum counts here - it is
-    /// measured in its unscaled space, so scaling the background down lowers this floor, which is
-    /// how a panel gets to be smaller than its border art is wide.
-    /// </summary>
-    public override Vector2 _GetMinimumSize()
-    {
-        Vector2 minimum = ContentContainer?.GetCombinedMinimumSize() ?? Vector2.Zero;
+	/// <summary>
+	/// The content drives the panel's size, but not below what the frame art needs: a nine patch
+	/// cannot draw thinner than its own patch margins, so a panel smaller than that would have its
+	/// border hanging outside the panel. Only the background's *own* minimum counts here - it is
+	/// measured in its unscaled space, so scaling the background down lowers this floor, which is
+	/// how a panel gets to be smaller than its border art is wide.
+	/// </summary>
+	public override Vector2 _GetMinimumSize()
+	{
+		Vector2 minimum = ContentContainer?.GetCombinedMinimumSize() ?? Vector2.Zero;
 
-        foreach (Node child in GetChildren())
-        {
-            if (child is not ParentSizedNinePatchRect background)
-            {
-                continue;
-            }
+		foreach (Node child in GetChildren())
+		{
+			if (child is not ParentSizedNinePatchRect background)
+			{
+				continue;
+			}
 
-            // TileScale, not Scale: the background owns Scale and may not have written this frame's
-            // value into it yet, whereas TileScale is the authored setting.
-            Vector2 backgroundMinimum = background.GetCombinedMinimumSize() * background.TileScale;
+			// TileScale, not Scale: the background owns Scale and may not have written this frame's
+			// value into it yet, whereas TileScale is the authored setting.
+			Vector2 backgroundMinimum = background.GetCombinedMinimumSize() * background.TileScale;
 
-            minimum = new Vector2(
-                Mathf.Max(minimum.X, backgroundMinimum.X),
-                Mathf.Max(minimum.Y, backgroundMinimum.Y)
-            );
-        }
+			minimum = new Vector2(
+				Mathf.Max(minimum.X, backgroundMinimum.X),
+				Mathf.Max(minimum.Y, backgroundMinimum.Y)
+			);
+		}
 
-        return minimum;
-    }
+		return minimum;
+	}
 
-    private void SortContent()
-    {
-        var rect = new Rect2(Vector2.Zero, Size);
+	private void SortContent()
+	{
+		var rect = new Rect2(Vector2.Zero, Size);
 
-        foreach (Node child in GetChildren())
-        {
-            if (child is not Control control || control.TopLevel)
-            {
-                continue;
-            }
+		foreach (Node child in GetChildren())
+		{
+			if (child is not Control control || control.TopLevel)
+			{
+				continue;
+			}
 
-            if (control is ParentSizedNinePatchRect)
-            {
-                continue;
-            }
+			if (control is ParentSizedNinePatchRect)
+			{
+				continue;
+			}
 
-            FitChildInRect(control, rect);
-        }
-    }
+			FitChildInRect(control, rect);
+		}
+	}
 }

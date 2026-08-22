@@ -14,7 +14,7 @@ public partial class VideoSettingsPanel : VBoxContainer
 {
     private OptionButton _displayMode;
     private OptionButton _resolution;
-    private Button       _applyButton;
+    private MenuPanelButton _applyButton;
 
     /// <summary>What Apply would commit. Only <see cref="OnApplyPressed"/> writes it to settings.</summary>
     private WindowDisplayMode _pendingMode;
@@ -32,7 +32,7 @@ public partial class VideoSettingsPanel : VBoxContainer
     {
         _displayMode = GetNode<OptionButton>("%DisplayModeOption");
         _resolution  = GetNode<OptionButton>("%ResolutionOption");
-        _applyButton = GetNode<Button>("%ApplyButton");
+        _applyButton = GetNode<MenuPanelButton>("%ApplyButton");
 
         // The %DisplayModeOption entries are authored in the scene, and their *ids* — not their
         // order — are the WindowDisplayMode values OnApplyPressed reads back. Getting them wrong
@@ -55,6 +55,7 @@ public partial class VideoSettingsPanel : VBoxContainer
         _displayMode.ItemSelected += OnDisplayModeSelected;
         _resolution.ItemSelected  += OnResolutionSelected;
         _applyButton.Pressed      += OnApplyPressed;
+        _applyButton.ButtonText = "Apply";
 
         RefreshState();
     }

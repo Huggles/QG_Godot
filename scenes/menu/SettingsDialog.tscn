@@ -1,43 +1,64 @@
 [gd_scene format=3 uid="uid://csettingsdlg"]
 
 [ext_resource type="PackedScene" uid="uid://bqmodalshelf" path="res://scenes/menu/MenuModalShell.tscn" id="1_shell"]
-[ext_resource type="Script" path="res://scripts/C#/Menu/SettingsDialog.cs" id="2_script"]
-[ext_resource type="Script" path="res://scripts/C#/Menu/VideoSettingsPanel.cs" id="3_video"]
-[ext_resource type="Script" path="res://scripts/C#/Menu/AudioSettingsPanel.cs" id="4_audio"]
+[ext_resource type="Script" uid="uid://ybl2cvtd4i5f" path="res://scripts/C#/Menu/SettingsDialog.cs" id="2_script"]
+[ext_resource type="StyleBox" uid="uid://ce1n7e4f25o61" path="res://MenuTabUnselected.tres" id="3_32jg2"]
+[ext_resource type="Script" uid="uid://ckrn0xvadtrd3" path="res://scripts/C#/Menu/VideoSettingsPanel.cs" id="3_video"]
+[ext_resource type="StyleBox" uid="uid://hjkudb5dv872" path="res://MenuTabHovered.tres" id="4_32jg2"]
+[ext_resource type="Script" uid="uid://blykbmr06abmr" path="res://scripts/C#/Menu/AudioSettingsPanel.cs" id="4_audio"]
+[ext_resource type="StyleBox" uid="uid://cykeqsx8bdexx" path="res://MenuTabSelected.tres" id="4_qmwfw"]
+[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="8_voqsf"]
 
-[node name="SettingsDialog" instance=ExtResource("1_shell")]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hgfs0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_00qb5"]
+
+[node name="SettingsDialog" unique_id=981918145 instance=ExtResource("1_shell")]
 script = ExtResource("2_script")
 
-[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
+[node name="Centre" parent="Root" parent_id_path=PackedInt32Array(563518941) index="1" unique_id=1357201429]
+offset_left = -11.0
+offset_top = -7.0
+offset_right = -11.0
+offset_bottom = -7.0
+
+[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="0" unique_id=647576227]
 text = "Settings"
 
-[node name="Tabs" type="TabContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
+[node name="Tabs" type="TabContainer" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="1" unique_id=1793021974]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 380)
 layout_mode = 2
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 20
+theme_override_styles/panel = SubResource("StyleBoxEmpty_hgfs0")
+theme_override_styles/tabbar_background = SubResource("StyleBoxEmpty_00qb5")
+theme_override_styles/tab_unselected = ExtResource("3_32jg2")
+theme_override_styles/tab_hovered = ExtResource("4_32jg2")
+theme_override_styles/tab_selected = ExtResource("4_qmwfw")
 current_tab = 0
 
-[node name="Video" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs"]
+[node name="Video" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="1" unique_id=665061009]
 layout_mode = 2
 theme_override_constants/separation = 14
-metadata/_tab_index = 0
 script = ExtResource("3_video")
+metadata/_tab_index = 0
 
-[node name="DisplayModeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
+[node name="DisplayModeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video" index="0" unique_id=269337357]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="DisplayModeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow"]
+[node name="DisplayModeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow" index="0" unique_id=1060291231]
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Display Mode"
 
-[node name="DisplayModeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow"]
+[node name="DisplayModeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow" index="1" unique_id=398782208]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
+selected = 0
 item_count = 3
 popup/item_0/text = "Windowed"
 popup/item_0/id = 0
@@ -45,103 +66,101 @@ popup/item_1/text = "Windowed Fullscreen"
 popup/item_1/id = 1
 popup/item_2/text = "Fullscreen (exclusive)"
 popup/item_2/id = 2
-selected = 0
 
-[node name="ResolutionRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
+[node name="ResolutionRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video" index="1" unique_id=1175872208]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ResolutionLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionRow"]
+[node name="ResolutionLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionRow" index="0" unique_id=1299310788]
 custom_minimum_size = Vector2(230, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Resolution"
 
-[node name="ResolutionOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionRow"]
+[node name="ResolutionOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionRow" index="1" unique_id=2108154630]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 
-[node name="ResolutionHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
+[node name="ResolutionHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video" index="2" unique_id=2115484642]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
 text = "Both fullscreen modes run at your desktop resolution. The board is drawn for a 16:9 screen, so only 16:9 sizes are offered."
 autowrap_mode = 3
 
-[node name="ApplyRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
+[node name="ApplyRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video" index="3" unique_id=1959486721]
 layout_mode = 2
 alignment = 2
 
-[node name="ApplyButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ApplyRow"]
+[node name="ApplyButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ApplyRow" index="0" unique_id=566933446 instance=ExtResource("8_voqsf")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 44)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
-disabled = true
-text = "Apply"
+text = "Close Button"
 
-[node name="Audio" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs"]
+[node name="Audio" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="2" unique_id=409647964]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 8
-metadata/_tab_index = 1
 script = ExtResource("4_audio")
+metadata/_tab_index = 1
 
-[node name="MasterVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="MasterVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="0" unique_id=899753237]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Master Volume"
 
-[node name="MasterVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="MasterVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="1" unique_id=2005317525]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="MusicVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="MusicVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="2" unique_id=1630490876]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Music Volume"
 
-[node name="MusicVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="MusicVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="3" unique_id=851515162]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.8
 
-[node name="SfxVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="SfxVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="4" unique_id=20949931]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Sound Effect Volume"
 
-[node name="SfxVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="SfxVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="5" unique_id=771873444]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.8
 
-[node name="SfxSettingsSeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="SfxSettingsSeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="6" unique_id=871341561]
 layout_mode = 2
 
-[node name="SfxSettingsContainer" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
+[node name="SfxSettingsContainer" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" index="7" unique_id=856387836]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Separator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
+[node name="Separator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="2" unique_id=311857598]
 layout_mode = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="3"]
+[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="3" unique_id=557663306]
 layout_mode = 2
 alignment = 2
 
-[node name="CloseButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0"]
+[node name="CloseButton" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0" unique_id=653500860 instance=ExtResource("8_voqsf")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 44)
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
-text = "Close"
+text = "Close Button"
 
 [editable path="Root/Centre/Panel"]

@@ -44,8 +44,10 @@ public partial class SettingsDialog : MenuModal
     public override void _ExitTree() => _closed.TrySetResult();
 
     private void ReadyInternal()
-    {
-        GetNode<Button>("%CloseButton").Pressed += Cancel;
+    {       
+        var menuPanelButton = GetNode<MenuPanelButton>("%CloseButton");
+        menuPanelButton.Pressed += Cancel;
+        menuPanelButton.ButtonText = "Close";
     }
 
     protected override void Cancel()
