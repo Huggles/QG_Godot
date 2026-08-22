@@ -59,6 +59,9 @@ public partial class EventTransSiberianRailroad : EventCardLogic
             deployEvent.IsTrigger = true;
             await CardPlayPool.DoChangeEvent(deployEvent);
         })
+        // Rebuilding is the other half of the removal, not an effect of its own: a skipped removal
+        // finishes the card instead of granting a free army.
+        .RequiringPreviousStep()
         .WithGuidance("Select where to rebuild the Soviet Army");
     }
 }

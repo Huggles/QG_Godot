@@ -5,6 +5,10 @@
 [ext_resource type="Script" uid="uid://bscreengmd5k3" path="res://scripts/C#/Menu/GameModeSelectionScreen.cs" id="3_script"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_bg"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
 bg_color = Color(0.05, 0.05, 0.05, 0.8)
 border_width_left = 2
 border_width_top = 2
@@ -15,12 +19,8 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-content_margin_left = 16
-content_margin_top = 16
-content_margin_right = 16
-content_margin_bottom = 16
 
-[node name="Control" type="Control"]
+[node name="Control" type="Control" unique_id=1686350979]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,7 +29,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_script")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1018556183]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,7 +39,7 @@ grow_vertical = 2
 texture = ExtResource("1_m2yvp")
 expand_mode = 3
 
-[node name="TitleLabel" type="RichTextLabel" parent="."]
+[node name="TitleLabel" type="RichTextLabel" parent="." unique_id=334728534]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -49,12 +49,12 @@ offset_top = 80.0
 offset_right = 400.0
 offset_bottom = 150.0
 grow_horizontal = 2
-bbcode_enabled = true
-scroll_active = false
-text = "[center][font_size=42][b]Single Player — Select Game Mode[/b][/font_size][/center]"
 theme_override_font_sizes/normal_font_size = 36
+bbcode_enabled = true
+text = "[center][font_size=42][b]Single Player — Select Game Mode[/b][/font_size][/center]"
+scroll_active = false
 
-[node name="ButtonContainer" type="VBoxContainer" parent="."]
+[node name="ButtonContainer" type="VBoxContainer" parent="." unique_id=746547968]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -70,59 +70,57 @@ grow_vertical = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="ScenarioLabel" type="Label" parent="ButtonContainer"]
+[node name="ScenarioLabel" type="Label" parent="ButtonContainer" unique_id=866633671]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 28
 text = "Select a Scenario"
 horizontal_alignment = 1
 
-[node name="ScenarioOptionButton" type="OptionButton" parent="ButtonContainer"]
-layout_mode = 2
+[node name="ScenarioOptionButton" type="OptionButton" parent="ButtonContainer" unique_id=1587846790]
 custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
-[node name="DescriptionPanel" type="PanelContainer" parent="ButtonContainer"]
-layout_mode = 2
+[node name="DescriptionPanel" type="PanelContainer" parent="ButtonContainer" unique_id=2129022782]
 custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_bg")
 
-[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="ButtonContainer/DescriptionPanel"]
-layout_mode = 2
+[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="ButtonContainer/DescriptionPanel" unique_id=476860882]
 custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 22
 bbcode_enabled = true
 text = "[color=#bbbbbb]Select a scenario to see its description.[/color]"
 scroll_active = false
-theme_override_font_sizes/normal_font_size = 22
 
-[node name="SeedRow" type="HBoxContainer" parent="ButtonContainer"]
+[node name="SeedRow" type="HBoxContainer" parent="ButtonContainer" unique_id=2112580064]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="SeedLabel" type="Label" parent="ButtonContainer/SeedRow"]
+[node name="SeedLabel" type="Label" parent="ButtonContainer/SeedRow" unique_id=1197556295]
 layout_mode = 2
-size_flags_vertical = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 24
 text = "Seed"
 
-[node name="SeedInput" type="LineEdit" parent="ButtonContainer/SeedRow"]
+[node name="SeedInput" type="LineEdit" parent="ButtonContainer/SeedRow" unique_id=134324777]
 custom_minimum_size = Vector2(240, 56)
 layout_mode = 2
 placeholder_text = "random"
 alignment = 1
 
-[node name="RandomizeSeedButton" type="Button" parent="ButtonContainer/SeedRow"]
+[node name="RandomizeSeedButton" type="Button" parent="ButtonContainer/SeedRow" unique_id=397362117]
 custom_minimum_size = Vector2(180, 56)
 layout_mode = 2
 text = "Randomize"
 
-[node name="StartGameButton" parent="ButtonContainer" instance=ExtResource("2_btn")]
+[node name="StartGameButton" parent="ButtonContainer" unique_id=163641719 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(600, 50)
 layout_mode = 2
-custom_minimum_size = Vector2(600, 180)
-

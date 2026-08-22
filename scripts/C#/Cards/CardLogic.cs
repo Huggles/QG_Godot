@@ -146,7 +146,13 @@ public abstract partial class CardLogic : GodotObject
     public void OnNewTurnStarted(int turnNumber)
     {
         if (IsStatus)
-            CardSteps.ForEach(step => step.StepFinished = false);
+            CardSteps.ForEach(step =>
+            {
+                step.StepFinished = false;
+                // Cleared with StepFinished: a step re-armed for this turn must not still count last
+                // turn's success as satisfying a CardStep.RequiringPreviousStep prerequisite.
+                step.StepSucceeded = false;
+            });
 
         // Safety net: DoCard releases the binding when the card's steps finish, but an activation
         // abandoned mid-way (exception, aborted epoch) would otherwise leave it dangling.

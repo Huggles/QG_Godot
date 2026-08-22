@@ -11,14 +11,34 @@ public partial class CardStep : ITaggable
     [JsonIgnore] public TagContainer Tags => _tags;
 
     public bool StepFinished { get; set; } = false;
+
+    /// <summary>
+    /// True only once this step's logic has run to completion. Narrower than StepFinished, which is
+    /// set before the logic runs and so means "done, no matter how": a step that was skipped —
+    /// conditions not met, or the player cancelling its selection — is finished but not succeeded.
+    /// Read by <see cref="RequiringPreviousStep"/> to keep the second half of a single action from
+    /// happening on its own.
+    /// </summary>
+    public bool StepSucceeded { get; set; } = false;
     public int Id { get; set; } = 0;
     [JsonIgnore] public CardStep NextCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) + 1);
+    // ElementAtOrDefault returns null for a negative index, so the card's first step has none.
+    [JsonIgnore] public CardStep PreviousCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) - 1);
     [JsonIgnore] public CardLogic CardLogic;    
     protected Func<Task> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
+    private bool _requiresPreviousStep = false;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
     [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod != null ? GetConditionsMethod() : null;
-    [JsonIgnore] public bool MeetAllConditions => Conditions != null ? Conditions.All(condition => condition.MeetCondition()) : true;
+
+    /// <summary>
+    /// The prerequisite from <see cref="RequiringPreviousStep"/>. Folded into MeetAllConditions rather
+    /// than into Conditions so the single gate that Execute and
+    /// GameStateCalculator.CalculateExecutableStepsForFaction already consult stays the whole truth
+    /// about whether this step can run.
+    /// </summary>
+    [JsonIgnore] private bool PreviousStepRequirementMet => !_requiresPreviousStep || (PreviousCardStep?.StepSucceeded ?? false);
+    [JsonIgnore] public bool MeetAllConditions => (Conditions == null || Conditions.All(condition => condition.MeetCondition())) && PreviousStepRequirementMet;
 
     public string ActionGuidance;
 
@@ -58,17 +78,39 @@ public partial class CardStep : ITaggable
         return this;
     }
 
+    /// <summary>
+    /// This step is one half of a single action and must not happen on its own: if the step before it
+    /// in the card was skipped — its conditions not met, or the player cancelling its selection — this
+    /// step is skipped too, quietly, which for a two-step card ends the card.
+    ///
+    /// Without it, a card that eliminates one of your units and then rebuilds it elsewhere hands out a
+    /// free unit whenever the removal half is skipped, because the two steps are otherwise independent.
+    /// </summary>
+    public CardStep RequiringPreviousStep()
+    {
+        this._requiresPreviousStep = true;
+        return this;
+    }
+
     public async Task Execute()
     {
         StepFinished = true;
+        // A re-run — a Status card's steps are re-armed every turn — must not inherit the last run's result.
+        StepSucceeded = false;
         bool CanExecuteStep = MeetAllConditions;
-        
+
         if (!CanExecuteStep)
         {
             //Should skip step
             DebugUtilities.PrintPeer("SKIPPING STEP");
-            await new ShowActionLabelPresentationEvent(TriggeringFaction, "Unable to: " + ActionGuidance).Apply();
-            await Task.Delay(GameSettings.DurationLong);
+            // A step skipped only because its prerequisite step did not happen says nothing: the player
+            // was already told about that step, and "Unable to: rebuild the unit" on top of it reads as
+            // a second, separate failure.
+            if (PreviousStepRequirementMet)
+            {
+                await new ShowActionLabelPresentationEvent(TriggeringFaction, "Unable to: " + ActionGuidance).Apply();
+                await Task.Delay(GameSettings.DurationLong);
+            }
             if (NextCardStep != null)
             {
                 await NextCardStep.Execute();
@@ -86,6 +128,7 @@ public partial class CardStep : ITaggable
                 await new ShowActionLabelPresentationEvent(TriggeringFaction, ActionGuidance).Apply();
                 ErrorInjection.MaybeThrow(ErrorInjection.Site.CardStep, CardLogic?.CardState?.CardName);
                 await StepLogic();
+                StepSucceeded = true;
             }
             catch (StepSkippedException)
             {
