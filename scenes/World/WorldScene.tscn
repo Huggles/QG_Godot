@@ -1,28 +1,36 @@
-[gd_scene load_steps=3 format=3 uid="uid://ulu5d3pvyttl"]
+[gd_scene format=3 uid="uid://ulu5d3pvyttl"]
 
-[ext_resource type="Texture2D" uid="uid://b6rlobc622abu" path="res://assets/textures/Countries/World_Clean.png" id="3_uu1v5"]
-[ext_resource type="Texture2D" uid="uid://ly4yeqnos5w3" path="res://assets/textures/Other/WoodTable.jpg" id="5_50r1o"]
+[ext_resource type="Texture2D" uid="uid://ftqjs2rbfp1t" path="res://assets/textures/Other/Board9Patch_2.png" id="1_86c0c"]
+[ext_resource type="Texture2D" uid="uid://dsgtbjipkhdsy" path="res://assets/textures/Countries/World_Clean_3.png" id="2_r63mr"]
 
-[node name="World" type="Node2D"]
+[node name="World" type="Node2D" unique_id=810156569]
 
-[node name="Countries" type="Node2D" parent="."]
+[node name="Countries" type="Node2D" parent="." unique_id=168300018]
 unique_name_in_owner = true
 scale = Vector2(3, 3)
 
-[node name="Background" type="Node2D" parent="."]
+[node name="Background" type="Node2D" parent="." unique_id=642334047]
 position = Vector2(300, -1520)
 scale = Vector2(4.56, 4.56)
 
-[node name="WorldSprite" type="Sprite2D" parent="Background"]
-z_index = 2
-position = Vector2(1324, 702)
-texture = ExtResource("3_uu1v5")
+[node name="NinePatchRect" type="NinePatchRect" parent="Background" unique_id=1311192095]
+z_index = 3
+offset_left = -134.86842
+offset_top = -151.31577
+offset_right = 2787.7192
+offset_bottom = 1571.272
+texture = ExtResource("1_86c0c")
+patch_margin_left = 383
+patch_margin_top = 434
+patch_margin_right = 384
+patch_margin_bottom = 416
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
 
-[node name="TableSprite" type="Sprite2D" parent="Background"]
+[node name="WorldSprite" type="Sprite2D" parent="Background" unique_id=1626979141]
 z_index = 1
-position = Vector2(1332.5, 708.5)
-scale = Vector2(2.115, 1.60918)
-texture = ExtResource("5_50r1o")
+position = Vector2(1324, 702)
+texture = ExtResource("2_r63mr")
 
-[node name="PlayerSpawnPosition" type="Node2D" parent="."]
+[node name="PlayerSpawnPosition" type="Node2D" parent="." unique_id=1869371452]
 unique_name_in_owner = true
