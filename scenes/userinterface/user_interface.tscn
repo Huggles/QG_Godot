@@ -5,13 +5,10 @@
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="4_dvfjj"]
 [ext_resource type="PackedScene" uid="uid://bmfob702ugwps" path="res://scenes/userinterface/FactionInfo/FactionsContainer.tscn" id="5_8bdsb"]
 [ext_resource type="PackedScene" uid="uid://cqm8r5yh3vk2p" path="res://scenes/userinterface/PlayerInfoDisplay.tscn" id="6_x05kf"]
-[ext_resource type="Script" uid="uid://6krq1p1wqi43" path="res://scripts/C#/UI/SpeedControl.cs" id="7_v35kq"]
-[ext_resource type="Script" uid="uid://bkgumcj218qt5" path="res://scripts/C#/UI/DebugVerbosityControl.cs" id="8_debugverb"]
 [ext_resource type="Script" uid="uid://poytc7oh3ay1" path="res://scenes/userinterface/History/GameHistoryList.cs" id="9_oxwje"]
 [ext_resource type="PackedScene" uid="uid://bhqnymug3arir" path="res://scenes/userinterface/History/game_history_item.tscn" id="10_dvfjj"]
 [ext_resource type="Script" uid="uid://bqnash47ag2v1" path="res://scripts/C#/UI/DebugOverlay.cs" id="11_debugoverlay"]
 [ext_resource type="Script" uid="uid://cnu2sfmowg40f" path="res://scripts/C#/UI/GameStateDetailPanel.cs" id="12_gamestatedetail"]
-[ext_resource type="Script" uid="uid://b0yaf6jd2tqqi" path="res://scripts/C#/UI/AutoDismissControl.cs" id="13_autodismiss"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
 [ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
@@ -117,21 +114,6 @@ Scope = 2
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
 offset_bottom = -1005.0
 mouse_filter = 2
-
-[node name="SpeedControl" type="PanelContainer" parent="." unique_id=1382976398]
-offset_left = 10.0
-offset_top = 10.0
-script = ExtResource("7_v35kq")
-
-[node name="DebugVerbosityControl" type="PanelContainer" parent="." unique_id=428700644]
-offset_left = 10.0
-offset_top = 50.0
-script = ExtResource("8_debugverb")
-
-[node name="AutoDismissControl" type="PanelContainer" parent="." unique_id=1819554252]
-offset_left = 10.0
-offset_top = 90.0
-script = ExtResource("13_autodismiss")
 
 [node name="GameHistoryList" type="VBoxContainer" parent="." unique_id=703922686]
 clip_contents = true

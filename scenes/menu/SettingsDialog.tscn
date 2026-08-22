@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://ckrn0xvadtrd3" path="res://scripts/C#/Menu/VideoSettingsPanel.cs" id="3_video"]
 [ext_resource type="StyleBox" uid="uid://hjkudb5dv872" path="res://MenuTabHovered.tres" id="4_32jg2"]
 [ext_resource type="Script" uid="uid://blykbmr06abmr" path="res://scripts/C#/Menu/AudioSettingsPanel.cs" id="4_audio"]
+[ext_resource type="Script" uid="uid://bgmplystngspnl" path="res://scripts/C#/Menu/GameplaySettingsPanel.cs" id="5_gameplay"]
 [ext_resource type="StyleBox" uid="uid://cykeqsx8bdexx" path="res://MenuTabSelected.tres" id="4_qmwfw"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="8_voqsf"]
 
@@ -157,6 +158,96 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 4
+
+[node name="Gameplay" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="3" unique_id=1904471001]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 14
+script = ExtResource("5_gameplay")
+metadata/_tab_index = 2
+
+[node name="SpeedRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="0" unique_id=1904471002]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SpeedLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/SpeedRow" index="0" unique_id=1904471003]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Presentation Speed"
+
+[node name="SpeedOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/SpeedRow" index="1" unique_id=1904471004]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+selected = 1
+item_count = 3
+popup/item_0/text = "Slow"
+popup/item_0/id = 0
+popup/item_1/text = "Normal"
+popup/item_1/id = 1
+popup/item_2/text = "Fast"
+popup/item_2/id = 2
+
+[node name="SpeedHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="1" unique_id=1904471005]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "How fast animations play and how long the game pauses between them."
+autowrap_mode = 3
+
+[node name="AutoDismissRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="2" unique_id=1904471006]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="AutoDismissLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/AutoDismissRow" index="0" unique_id=1904471007]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Auto-skip Messages"
+
+[node name="AutoDismissToggle" type="CheckButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/AutoDismissRow" index="1" unique_id=1904471008]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+
+[node name="AutoDismissHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="3" unique_id=1904471009]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "Messages that only report what happened close themselves after a moment instead of waiting for a click."
+autowrap_mode = 3
+
+[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="4" unique_id=1904471010]
+layout_mode = 2
+
+[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="5" unique_id=1904471011]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DebugLevelLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/DebugLevelRow" index="0" unique_id=1904471012]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Debug Logging"
+
+[node name="DebugLevelOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/DebugLevelRow" index="1" unique_id=1904471013]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Info"
+popup/item_0/id = 0
+popup/item_1/text = "Finest"
+popup/item_1/id = 1
+
+[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471014]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "How much detail is written to the console. Finest is loud and only useful when diagnosing a problem."
+autowrap_mode = 3
 
 [node name="Separator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="2" unique_id=311857598]
 layout_mode = 2
