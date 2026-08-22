@@ -201,7 +201,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             ShowCountryLabels = config.GetValue(Section, "show_country_labels", true).As<bool>();
             ShowDebugMenu = config.GetValue(Section, "show_debug_menu", false).As<bool>();
 
-            MasterVolume = Mathf.Clamp(config.GetValue(Section, "master_volume", 1.0f).As<float>(), 0f, 1f);
+            MasterVolume = Mathf.Clamp(config.GetValue(Section, "master_volume", 0.5f).As<float>(), 0f, 1f);
             MusicVolume  = Mathf.Clamp(config.GetValue(Section, "music_volume",  0.8f).As<float>(), 0f, 1f);
             SfxVolume    = Mathf.Clamp(config.GetValue(Section, "sfx_volume",    0.8f).As<float>(), 0f, 1f);
 

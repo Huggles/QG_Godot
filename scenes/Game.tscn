@@ -1,37 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://6g7c3c7dw4ys"]
+[gd_scene format=3 uid="uid://6g7c3c7dw4ys"]
 
 [ext_resource type="PackedScene" uid="uid://ulu5d3pvyttl" path="res://scenes/World/WorldScene.tscn" id="1_qbsmt"]
 [ext_resource type="Script" uid="uid://cde0nvl8mrot5" path="res://scenes/network/PeerReadinessComponent.cs" id="2_qbsmt"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_ys2y3"]
-font_color = Color(0, 1, 1, 1)
+[node name="Game" type="Node2D" unique_id=349124145]
 
-[node name="Game" type="Node2D"]
+[node name="Players" type="Node2D" parent="." unique_id=1473019270]
 
-[node name="Players" type="Node2D" parent="."]
-
-[node name="Units" type="Node2D" parent="."]
+[node name="Units" type="Node2D" parent="." unique_id=1932789460]
 unique_name_in_owner = true
 
-[node name="World" parent="." instance=ExtResource("1_qbsmt")]
+[node name="World" parent="." unique_id=1100295779 instance=ExtResource("1_qbsmt")]
 
-[node name="UserInterface" type="CanvasLayer" parent="."]
-follow_viewport_enabled = true
-
-[node name="Node2D" type="Node2D" parent="UserInterface"]
-
-[node name="Control" type="Control" parent="UserInterface/Node2D"]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 415.0
-offset_bottom = 98.0
-
-[node name="Label" type="Label" parent="UserInterface/Node2D/Control"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Hello World"
-label_settings = SubResource("LabelSettings_ys2y3")
-
-[node name="PeerReadinessComponent" type="Node" parent="."]
+[node name="PeerReadinessComponent" type="Node" parent="." unique_id=2038907439]
 script = ExtResource("2_qbsmt")

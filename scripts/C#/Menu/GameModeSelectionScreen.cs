@@ -21,18 +21,13 @@ public partial class GameModeSelectionScreen : Control
 		{
 			GD.PrintErr("GameModeSelectionScreen: scenario description label node not found.");
 		}
-		if (_descriptionLabel == null)
-		{
-			GD.PrintErr("GameModeSelectionScreen: scenario description label node not found.");
-		}
 
 		_startGameButton  = GetNode<MenuPanelButton>("ButtonContainer/StartGameButton");
 
 		_seedInput           = GetNode<LineEdit>("ButtonContainer/SeedRow/SeedInput");
 		_randomizeSeedButton = GetNode<Button>("ButtonContainer/SeedRow/RandomizeSeedButton");
 		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
-
-		_startGameButton.CustomMinimumSize = new Vector2(600, 180);
+		
 		_startGameButton.ButtonText = "Start Game";
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
@@ -85,6 +80,9 @@ public partial class GameModeSelectionScreen : Control
 
 	private void UpdateDescription(string description)
 	{
+		if (_descriptionLabel == null)
+			return;
+
 		_descriptionLabel.BbcodeEnabled = true;
 		_descriptionLabel.Text = $"[color=#bbbbbb]{description}[/color]";
 	}

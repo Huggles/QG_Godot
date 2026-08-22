@@ -1,44 +1,44 @@
 [gd_scene format=3 uid="uid://tuufb62vtpu2"]
 
 [ext_resource type="PackedScene" uid="uid://bqmodalshelf" path="res://scenes/menu/MenuModalShell.tscn" id="1_shell"]
-[ext_resource type="Script" path="res://scripts/C#/Menu/GameMenuModal.cs" id="2_script"]
+[ext_resource type="Script" uid="uid://br0oy3xj5886a" path="res://scripts/C#/Menu/GameMenuModal.cs" id="2_script"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="3_btn"]
 
-[node name="GameMenuModal" instance=ExtResource("1_shell")]
+[node name="GameMenuModal" unique_id=1289415583 instance=ExtResource("1_shell")]
 script = ExtResource("2_script")
 
-[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
+[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="0" unique_id=647576227]
 text = "Game Menu"
 
-[node name="Choices" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
+[node name="Choices" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="1" unique_id=2098525958]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="ResumeButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="0" instance=ExtResource("3_btn")]
+[node name="ResumeButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="0" unique_id=1032208208 instance=ExtResource("3_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(680, 110)
+custom_minimum_size = Vector2(680, 60)
 layout_mode = 2
 ButtonText = "Resume"
 
-[node name="SettingsButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" instance=ExtResource("3_btn")]
+[node name="SettingsButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" unique_id=1867989050 instance=ExtResource("3_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(680, 110)
+custom_minimum_size = Vector2(680, 60)
 layout_mode = 2
 ButtonText = "Settings"
 
-[node name="QuitToMenuButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="2" instance=ExtResource("3_btn")]
+[node name="QuitToMenuButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="2" unique_id=901806904 instance=ExtResource("3_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(680, 110)
+custom_minimum_size = Vector2(680, 60)
 layout_mode = 2
 ButtonText = "Quit to Main Menu"
 
-[node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
+[node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="2" unique_id=203831937]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-horizontal_alignment = 1
 text = "The game keeps running while this menu is open."
+horizontal_alignment = 1
 autowrap_mode = 3
 
 [editable path="Root/Centre/Panel"]

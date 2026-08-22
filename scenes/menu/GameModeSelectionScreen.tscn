@@ -84,18 +84,18 @@ size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="DescriptionPanel" type="PanelContainer" parent="ButtonContainer" unique_id=2129022782]
-custom_minimum_size = Vector2(0, 220)
+custom_minimum_size = Vector2(600, 220)
 layout_mode = 2
-size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_bg")
 
 [node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="ButtonContainer/DescriptionPanel" unique_id=476860882]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 22
 bbcode_enabled = true
 text = "[color=#bbbbbb]Select a scenario to see its description.[/color]"
-scroll_active = false
+fit_content = true
 
 [node name="SeedRow" type="HBoxContainer" parent="ButtonContainer" unique_id=2112580064]
 layout_mode = 2
