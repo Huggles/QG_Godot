@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="1_emoit"]
 [ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="2_panel"]
+[ext_resource type="StyleBox" uid="uid://di1jtwe77usf2" path="res://MenuPanelBackground.tres" id="2_t12fl"]
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="2_ykxvf"]
 
 [node name="MenuPanel" type="Container" unique_id=438408597]
@@ -10,10 +11,22 @@ offset_right = 501.0
 offset_bottom = 158.40001
 script = ExtResource("2_panel")
 
+[node name="BackgroundContainer" type="MarginContainer" parent="." unique_id=836205175]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Panel" type="Panel" parent="BackgroundContainer" unique_id=1617866188]
+layout_mode = 2
+theme_override_styles/panel = ExtResource("2_t12fl")
+
 [node name="Label" type="Label" parent="." unique_id=1629054955]
 layout_mode = 2
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=779728291]
+clip_contents = true
 layout_mode = 2
 texture = ExtResource("2_ykxvf")
 patch_margin_left = 530

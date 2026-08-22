@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bfjulhs5stno3"
+path="res://.godot/imported/Faccetta Nera_ Marching Song of the Kingdom of Italy (With Lyrics).mp3-5674959a1d7411fd441e1ee89c22a1fe.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/italy/Faccetta Nera_ Marching Song of the Kingdom of Italy (With Lyrics).mp3"
+dest_files=["res://.godot/imported/Faccetta Nera_ Marching Song of the Kingdom of Italy (With Lyrics).mp3-5674959a1d7411fd441e1ee89c22a1fe.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

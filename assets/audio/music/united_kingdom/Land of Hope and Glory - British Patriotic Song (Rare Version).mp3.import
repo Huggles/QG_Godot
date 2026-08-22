@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://jnxgmq58nx6r"
+path="res://.godot/imported/Land of Hope and Glory - British Patriotic Song (Rare Version).mp3-521d1b70b35b971ed8a8577097c3104f.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/united_kingdom/Land of Hope and Glory - British Patriotic Song (Rare Version).mp3"
+dest_files=["res://.godot/imported/Land of Hope and Glory - British Patriotic Song (Rare Version).mp3-521d1b70b35b971ed8a8577097c3104f.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

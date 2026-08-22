@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://dqdvhk2rm85fc"]
 
-[ext_resource type="PackedScene" uid="uid://cxp1fbs41rbk7" path="res://scenes/userinterface/Messaging/InputMessaging.tscn" id="1_bj75k"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
 [ext_resource type="Script" uid="uid://cv2ogjvefody7" path="res://scenes/userinterface/PresentationModal/ModalStack.cs" id="3_oxwje"]
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="4_dvfjj"]
@@ -25,14 +24,9 @@
 [ext_resource type="Texture2D" uid="uid://bqyf0w6t7iv32" path="res://assets/textures/Other/eye_icon_pressed.png" id="24_eyeiconp"]
 [ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/Icons/PlayedCardsIcon.png" id="25_playedcards"]
 [ext_resource type="PackedScene" uid="uid://blt1histpop01" path="res://scenes/userinterface/History/HistoryDetailPopup.tscn" id="26_histpop"]
-[ext_resource type="Script" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
+[ext_resource type="Script" uid="uid://uq8tqtb6j8iq" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
-
-[node name="InputMessaging" parent="." unique_id=2087545050 instance=ExtResource("1_bj75k")]
-visible = false
-offset_left = 1494.0
-offset_bottom = -347.0
 
 [node name="FactionHandDisplay" parent="." unique_id=1158523193 instance=ExtResource("2_ntnkv")]
 
@@ -75,49 +69,48 @@ layout_mode = 2
 theme_override_constants/separation = 40
 
 [node name="PlayerAction" parent="." unique_id=836962227 instance=ExtResource("4_dvfjj")]
-offset_bottom = -942.0
 
-[node name="SelectionSkipButton" parent="." unique_id=1187079456 instance=ExtResource("14_skipscene")]
-unique_name_in_owner = true
-z_index = 50
-custom_minimum_size = Vector2(160, 50)
+[node name="Control" type="Control" parent="." unique_id=235064403]
+layout_mode = 3
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 49.0
-offset_top = -104.0
-offset_right = 625.0
-offset_bottom = 14.0
+offset_left = 150.0
+offset_top = -230.0
+offset_right = 441.0
+offset_bottom = -60.0
 grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=243347223]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -15.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
+
+[node name="SelectionSkipButton" parent="Control/VBoxContainer" unique_id=1187079456 instance=ExtResource("14_skipscene")]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(160, 50)
+layout_mode = 2
 script = ExtResource("15_skip")
 
-[node name="SkipTurnStepButton" parent="." unique_id=1187079457 instance=ExtResource("14_skipscene")]
+[node name="SkipTurnStepButton" parent="Control/VBoxContainer" unique_id=1187079457 instance=ExtResource("14_skipscene")]
 unique_name_in_owner = true
 z_index = 50
 custom_minimum_size = Vector2(160, 50)
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 49.0
-offset_top = -169.0
-offset_right = 625.0
-offset_bottom = -51.0
-grow_vertical = 0
+layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 1
 
-[node name="SkipRoundButton" parent="." unique_id=1187079458 instance=ExtResource("14_skipscene")]
+[node name="SkipRoundButton" parent="Control/VBoxContainer" unique_id=1187079458 instance=ExtResource("14_skipscene")]
 unique_name_in_owner = true
 z_index = 50
-custom_minimum_size = Vector2(160, 50)
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 49.0
-offset_top = -234.0
-offset_right = 625.0
-offset_bottom = -116.0
-grow_vertical = 0
+custom_minimum_size = Vector2(250, 50)
+layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 2
 
@@ -152,8 +145,8 @@ offset_bottom = -250.0
 grow_horizontal = 0
 grow_vertical = 2
 mouse_filter = 2
-alignment = 2
 theme_override_constants/separation = 0
+alignment = 2
 script = ExtResource("9_oxwje")
 
 [node name="GameHistoryItem" parent="GameHistoryList" unique_id=25697885 instance=ExtResource("10_dvfjj")]
@@ -192,7 +185,7 @@ grow_horizontal = 0
 mouse_filter = 2
 script = ExtResource("12_gamestatedetail")
 
-[node name="HistoryDetailPopup" parent="." instance=ExtResource("26_histpop")]
+[node name="HistoryDetailPopup" parent="." unique_id=617734349 instance=ExtResource("26_histpop")]
 z_index = 99
 
 [node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
@@ -279,5 +272,5 @@ layout_mode = 2
 TextureNormal = ExtResource("25_playedcards")
 TexturePressed = ExtResource("25_playedcards")
 
-[node name="GameMenuTrigger" type="Node" parent="."]
+[node name="GameMenuTrigger" type="Node" parent="." unique_id=804170072]
 script = ExtResource("27_gamemenu")

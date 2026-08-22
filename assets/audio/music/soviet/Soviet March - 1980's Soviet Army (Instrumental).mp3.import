@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://nyi4pma52but"
+path="res://.godot/imported/Soviet March - 1980's Soviet Army (Instrumental).mp3-a2f41798905f33cbc93a98b1bb8ef4c9.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/soviet/Soviet March - 1980's Soviet Army (Instrumental).mp3"
+dest_files=["res://.godot/imported/Soviet March - 1980's Soviet Army (Instrumental).mp3-a2f41798905f33cbc93a98b1bb8ef4c9.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

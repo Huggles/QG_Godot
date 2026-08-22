@@ -6,7 +6,7 @@ public partial class PlayerActionLabel : RichTextLabel, LoadableUI
 {    
     public static PlayerActionLabel Instance;
     
-    private Panel ContainerPanel => GetNode<Panel>("%ContainerPanel");
+    private MenuPanel MenuPanel => GetNode<MenuPanel>("%MenuPanel");
 
     public override void _Ready()
     {        
@@ -33,17 +33,17 @@ public partial class PlayerActionLabel : RichTextLabel, LoadableUI
 
     public void ShowTextForDuration(string text, int duration = -1, Faction faction = (Faction)(-1))
     {
-        ContainerPanel.MouseFilter = MouseFilterEnum.Stop;
+        MenuPanel.MouseFilter = MouseFilterEnum.Stop;
         this.MouseFilter = MouseFilterEnum.Stop;
         Text = text;
         Visible = true;
-        if (ContainerPanel != null)
+        if (MenuPanel != null)
             
         {
-            ContainerPanel.Visible = true;
+            MenuPanel.Visible = true;
             if (faction == (Faction)(-1))
             {
-                var stylebox = ContainerPanel.GetThemeStylebox("panel") as StyleBoxFlat;
+                var stylebox = MenuPanel.GetThemeStylebox("panel") as StyleBoxFlat;
                 if (stylebox != null)
                     stylebox.BgColor = Colors.White;
 
@@ -53,7 +53,7 @@ public partial class PlayerActionLabel : RichTextLabel, LoadableUI
             {
                 FactionState factionState = FactionState.ForEnum(faction);
                 FactionData factionData = factionState.FactionData;
-                var stylebox = ContainerPanel.GetThemeStylebox("panel") as StyleBoxFlat;
+                var stylebox = MenuPanel.GetThemeStylebox("panel") as StyleBoxFlat;
                 if (stylebox != null)
                     stylebox.BgColor = factionData.FactionColor;
 
@@ -79,11 +79,11 @@ public partial class PlayerActionLabel : RichTextLabel, LoadableUI
     public void HideNode()
     {
         Visible = false;
-        if (ContainerPanel != null)
+        if (MenuPanel != null)
         {
-            ContainerPanel.Visible = false;
+            MenuPanel.Visible = false;
         }
-        ContainerPanel.MouseFilter = MouseFilterEnum.Pass;
+        MenuPanel.MouseFilter = MouseFilterEnum.Pass;
         this.MouseFilter = MouseFilterEnum.Pass;
     }
 }

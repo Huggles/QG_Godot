@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
 [ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="3_mgsx5"]
 [ext_resource type="Script" uid="uid://bwx4k7nap2qnr" path="res://scripts/C#/Menu/MainMenu.cs" id="3_script"]
+[ext_resource type="StyleBox" uid="uid://di1jtwe77usf2" path="res://MenuPanelBackground.tres" id="4_e1dod"]
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_y6vun"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_e1dod"]
 
@@ -37,6 +38,17 @@ script = ExtResource("3_mgsx5")
 
 [node name="Label" type="Label" parent="MenuPanel" unique_id=1629054955]
 layout_mode = 2
+
+[node name="BackgroundContainer" type="MarginContainer" parent="MenuPanel" unique_id=1096535963]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Panel" type="Panel" parent="MenuPanel/BackgroundContainer" unique_id=1707724424]
+layout_mode = 2
+theme_override_styles/panel = ExtResource("4_e1dod")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="MenuPanel" unique_id=779728291]
 layout_mode = 2

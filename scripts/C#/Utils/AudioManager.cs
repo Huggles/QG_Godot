@@ -9,10 +9,15 @@ using System.Text.Json;
 /// effects, and the three volume levels persisted in <see cref="GameSettings"/>.
 ///
 /// Clips are discovered by scanning <c>res://assets/audio/music</c> and
-/// <c>res://assets/audio/sfx</c> once on startup, keyed by filename without extension, so
-/// dropping <c>card_flip.ogg</c> into the sfx folder is all it takes to make
-/// <c>AudioManager.PlaySfx("card_flip")</c> work. Nothing has to be registered in code and
-/// nothing auto-plays — music starts only when something calls <see cref="PlayMusic"/>.
+/// <c>res://assets/audio/sfx</c> once on startup, keyed by their path *relative to that folder*
+/// without the extension, so dropping <c>card_flip.ogg</c> into the sfx folder is all it takes to
+/// make <c>AudioManager.PlaySfx("card_flip")</c> work, and a music track in a subfolder is named
+/// <c>"germany/Königgrätzer Marsch"</c>. Nothing has to be registered in code and nothing
+/// auto-plays — music starts only when something calls <see cref="PlayMusic"/>.
+///
+/// Music subfolders are also addressable as a group through <see cref="TracksInFolder"/>, which is
+/// what lets the game build a per-faction playlist without the audio service knowing what a faction
+/// is. <see cref="PlayPlaylist"/> then plays a list of tracks back to back, looping the whole list.
 ///
 /// On top of that, <c>res://assets/audio/sfx/settings.json</c> declares *configurable cues*: a cue
 /// has a stable name, a display label, and a list of sounds the player may choose between. Game code
@@ -69,13 +74,19 @@ public partial class AudioManager : SingletonNode<AudioManager>
     private static readonly string[] ImportSuffixes = { ".import", ".remap" };
 
     /// <summary>
-    /// Music is discovered as name → resource path and loaded on first play, then cached. A music
-    /// file is a whole song and can run to tens of megabytes, all of which an AudioStream holds in
-    /// memory — eager-loading the folder would put that on the boot path for tracks that may never
-    /// be played.
+    /// A discovered clip: the name it is played by, where it lives, and which subfolder of its root
+    /// it came from (empty at the root). The folder is kept because it is the only grouping the files
+    /// carry — <c>music/germany</c> is what makes a faction playlist possible.
     /// </summary>
-    private readonly Dictionary<string, string> _musicPaths =
-        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    private sealed record AudioClip(string Name, string ResourcePath, string Folder);
+
+    /// <summary>
+    /// Music is discovered as name → clip and loaded on first play, then cached. A music file is a
+    /// whole song and can run to tens of megabytes, all of which an AudioStream holds in memory —
+    /// eager-loading the folder would put that on the boot path for tracks that may never be played.
+    /// </summary>
+    private readonly Dictionary<string, AudioClip> _musicTracks =
+        new Dictionary<string, AudioClip>(StringComparer.OrdinalIgnoreCase);
 
     private readonly Dictionary<string, AudioStream> _musicCache =
         new Dictionary<string, AudioStream>(StringComparer.OrdinalIgnoreCase);
@@ -96,13 +107,20 @@ public partial class AudioManager : SingletonNode<AudioManager>
     private AudioStreamPlayer _musicPlayer;
     private readonly List<AudioStreamPlayer> _sfxPlayers = new List<AudioStreamPlayer>();
 
+    /// <summary>
+    /// The track order <see cref="PlayPlaylist"/> is working through, or null when a single track is
+    /// playing. Held as names rather than streams so the whole playlist is not resident in memory.
+    /// </summary>
+    private List<string> _playlist;
+    private int _playlistIndex;
+
     private bool _loopCurrentMusic;
     private bool _enabled;
 
     /// <summary>Name of the track currently playing, or null when nothing is.</summary>
     public string CurrentMusic { get; private set; }
 
-    public IReadOnlyCollection<string> MusicNames => _musicPaths.Keys.ToList();
+    public IReadOnlyCollection<string> MusicNames => _musicTracks.Keys.ToList();
     public IReadOnlyCollection<string> SfxNames   => _sfx.Keys.ToList();
 
     /// <summary>The configurable effects, for the sound panel to build a row per entry.</summary>
@@ -122,13 +140,13 @@ public partial class AudioManager : SingletonNode<AudioManager>
 
         _enabled = true;
 
-        ScanDirectory(MusicDir, _musicPaths);
+        ScanDirectory(MusicDir, "", _musicTracks);
 
-        Dictionary<string, string> sfxPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        ScanDirectory(SfxDir, sfxPaths);
-        foreach (KeyValuePair<string, string> sfx in sfxPaths)
+        Dictionary<string, AudioClip> sfxClips = new Dictionary<string, AudioClip>(StringComparer.OrdinalIgnoreCase);
+        ScanDirectory(SfxDir, "", sfxClips);
+        foreach (KeyValuePair<string, AudioClip> sfx in sfxClips)
         {
-            AudioStream stream = LoadStream(sfx.Value);
+            AudioStream stream = LoadStream(sfx.Value.ResourcePath);
             if (stream != null)
             {
                 _sfx[sfx.Key] = stream;
@@ -148,18 +166,27 @@ public partial class AudioManager : SingletonNode<AudioManager>
 
         ApplyVolumes();
 
-        DebugUtilities.PrintPeer($"AudioManager ready: {_musicPaths.Count} music track(s), "
+        DebugUtilities.PrintPeer($"AudioManager ready: {_musicTracks.Count} music track(s), "
             + $"{_sfx.Count} sound effect(s), {_sfxSettings.Count} configurable cue(s).");
+
+        // The track names, because they are derived from the folder layout rather than declared
+        // anywhere: a track that was dropped in the wrong folder, or whose name a playlist does not
+        // match, is otherwise only visible as silence.
+        DebugUtilities.PrintPeerFinest($"AudioManager music: {DescribeKnown(_musicTracks.Keys)}.");
     }
 
     // ---------------------------------------------------------------- discovery
 
     /// <summary>
-    /// Maps every audio file under <paramref name="path"/> as clip name → resource path, recursing
-    /// into subfolders. Nothing is loaded here. A missing folder is not an error: Godot omits empty
+    /// Maps every audio file under <paramref name="path"/> as clip name → clip, recursing into
+    /// subfolders. Nothing is loaded here. A missing folder is not an error: Godot omits empty
     /// directories from exports, and these folders start out empty.
+    ///
+    /// <paramref name="relativeFolder"/> is the path of <paramref name="path"/> below the root the
+    /// scan started at (empty at that root, <c>germany</c> one level down). It is what makes a clip
+    /// name carry its folder, so two subfolders may both hold a <c>theme.mp3</c>.
     /// </summary>
-    private static void ScanDirectory(string path, Dictionary<string, string> target)
+    private static void ScanDirectory(string path, string relativeFolder, Dictionary<string, AudioClip> target)
     {
         using DirAccess dir = DirAccess.Open(path);
         if (dir == null)
@@ -170,7 +197,8 @@ public partial class AudioManager : SingletonNode<AudioManager>
 
         foreach (string subDirectory in dir.GetDirectories())
         {
-            ScanDirectory($"{path}/{subDirectory}", target);
+            string childFolder = relativeFolder.Length == 0 ? subDirectory : $"{relativeFolder}/{subDirectory}";
+            ScanDirectory($"{path}/{subDirectory}", childFolder, target);
         }
 
         // A dev filesystem lists both `track.ogg` and `track.ogg.import`, while an exported PCK lists
@@ -189,9 +217,12 @@ public partial class AudioManager : SingletonNode<AudioManager>
 
         foreach (string fileName in fileNames)
         {
-            string clipName = fileName.GetBaseName();
+            string baseName = fileName.GetBaseName();
+            string clipName = relativeFolder.Length == 0 ? baseName : $"{relativeFolder}/{baseName}";
             string resourcePath = $"{path}/{fileName}";
 
+            // Only reachable now when one folder holds the same name under two extensions
+            // (theme.ogg and theme.mp3) — the folder is part of the name, so subfolders cannot clash.
             if (target.ContainsKey(clipName))
             {
                 DebugUtilities.PrintPeerError(
@@ -199,8 +230,21 @@ public partial class AudioManager : SingletonNode<AudioManager>
                 continue;
             }
 
-            target[clipName] = resourcePath;
+            target[clipName] = new AudioClip(clipName, resourcePath, relativeFolder);
         }
+    }
+
+    /// <summary>
+    /// The names of the music tracks directly inside <paramref name="folder"/> (a path relative to
+    /// the music folder, e.g. <c>germany</c>), in no particular order. Empty when the folder holds no
+    /// music, which is the normal state of a faction nobody has written a theme for yet.
+    /// </summary>
+    public IReadOnlyList<string> TracksInFolder(string folder)
+    {
+        return _musicTracks.Values
+            .Where(track => string.Equals(track.Folder, folder, StringComparison.OrdinalIgnoreCase))
+            .Select(track => track.Name)
+            .ToList();
     }
 
     private static AudioStream LoadStream(string resourcePath)
@@ -224,12 +268,12 @@ public partial class AudioManager : SingletonNode<AudioManager>
             return cached;
         }
 
-        if (!_musicPaths.TryGetValue(name, out string resourcePath))
+        if (!_musicTracks.TryGetValue(name, out AudioClip track))
         {
             return null;
         }
 
-        AudioStream stream = LoadStream(resourcePath);
+        AudioStream stream = LoadStream(track.ResourcePath);
         if (stream != null)
         {
             _musicCache[name] = stream;
@@ -328,7 +372,9 @@ public partial class AudioManager : SingletonNode<AudioManager>
 
     /// <summary>
     /// Ensures <paramref name="name"/> is the track playing, replacing whatever was — there is only
-    /// ever one music player, so music can never stack.
+    /// ever one music player, so music can never stack. Ends any running playlist: a caller naming a
+    /// single track is taking the music over, which is what lets the menu theme resume cleanly when
+    /// the player leaves a game.
     ///
     /// Asking for the track that is already playing is a no-op rather than a restart. That is what
     /// lets every menu screen call this in its own right without the music jumping back to the top
@@ -339,6 +385,13 @@ public partial class AudioManager : SingletonNode<AudioManager>
     /// <summary>Starts a random track from the music folder. No-op when the folder is empty.</summary>
     public static void PlayRandomMusic(bool loop = true) => Instance?.PlayRandomMusicInternal(loop);
 
+    /// <summary>
+    /// Plays <paramref name="trackNames"/> back to back in the order given, restarting from the top
+    /// once the last one ends, so the music never stops during a session. The caller owns the order:
+    /// it is what decides which track opens the game. No-op when the list is empty.
+    /// </summary>
+    public static void PlayPlaylist(IReadOnlyList<string> trackNames) => Instance?.PlayPlaylistInternal(trackNames);
+
     public static void StopMusic() => Instance?.StopMusicInternal();
 
     private void PlayMusicInternal(string name, bool loop)
@@ -348,35 +401,71 @@ public partial class AudioManager : SingletonNode<AudioManager>
             return;
         }
 
+        _playlist = null;
+        PlayTrack(name, loop);
+    }
+
+    /// <summary>
+    /// Puts a single track on the player. Leaves <see cref="_playlist"/> alone — this is the shared
+    /// core of naming a track directly and of advancing a playlist, and only the former ends one.
+    /// </summary>
+    /// <returns>False when the track does not exist or will not load.</returns>
+    private bool PlayTrack(string name, bool loop)
+    {
         // Already the running track: keep playing it rather than restarting from the top.
         if (CurrentMusic == name && _musicPlayer.Playing)
         {
             _loopCurrentMusic = loop;
-            return;
+            return true;
         }
 
         AudioStream stream = ResolveMusic(name);
         if (stream == null)
         {
-            DebugUtilities.PrintPeerError($"AudioManager: no music track named {name}. Known tracks: {DescribeKnown(_musicPaths.Keys)}.");
-            return;
+            DebugUtilities.PrintPeerError($"AudioManager: no music track named {name}. Known tracks: {DescribeKnown(_musicTracks.Keys)}.");
+            return false;
         }
 
         _loopCurrentMusic = loop;
         CurrentMusic = name;
         _musicPlayer.Stream = stream;
         _musicPlayer.Play();
+        return true;
     }
 
     private void PlayRandomMusicInternal(bool loop)
     {
-        if (!_enabled || _musicPaths.Count == 0)
+        if (!_enabled || _musicTracks.Count == 0)
         {
             return;
         }
 
-        List<string> names = _musicPaths.Keys.ToList();
+        List<string> names = _musicTracks.Keys.ToList();
         PlayMusicInternal(names[GD.RandRange(0, names.Count - 1)], loop);
+    }
+
+    private void PlayPlaylistInternal(IReadOnlyList<string> trackNames)
+    {
+        if (!_enabled)
+        {
+            return;
+        }
+
+        if (trackNames == null || trackNames.Count == 0)
+        {
+            DebugUtilities.PrintPeerFinest("AudioManager: empty playlist, nothing to play.");
+            return;
+        }
+
+        // Copied: the caller's list must not be able to change what is playing after the fact.
+        _playlist = trackNames.ToList();
+        _playlistIndex = 0;
+
+        // Individual tracks never loop inside a playlist — Finished is what advances it.
+        if (!PlayTrack(_playlist[0], loop: false))
+        {
+            AdvancePlaylist();
+        }
     }
 
     private void StopMusicInternal()
@@ -388,6 +477,7 @@ public partial class AudioManager : SingletonNode<AudioManager>
 
         // Cleared before Stop() so the Finished handler cannot restart the track we just stopped.
         _loopCurrentMusic = false;
+        _playlist = null;
         CurrentMusic = null;
         _musicPlayer.Stop();
     }
@@ -399,6 +489,12 @@ public partial class AudioManager : SingletonNode<AudioManager>
     /// </summary>
     private void OnMusicFinished()
     {
+        if (_playlist != null)
+        {
+            AdvancePlaylist();
+            return;
+        }
+
         if (_loopCurrentMusic && _musicPlayer.Stream != null)
         {
             _musicPlayer.Play();
@@ -406,6 +502,28 @@ public partial class AudioManager : SingletonNode<AudioManager>
         }
 
         CurrentMusic = null;
+    }
+
+    /// <summary>
+    /// Moves to the next track in the playlist, wrapping to the top after the last one.
+    ///
+    /// A track that will not load is skipped rather than left to stall the playlist, but only as many
+    /// times as the playlist is long: a playlist where nothing loads must end in an error, not in an
+    /// endless walk over broken entries.
+    /// </summary>
+    private void AdvancePlaylist()
+    {
+        for (int attempt = 0; attempt < _playlist.Count; attempt++)
+        {
+            _playlistIndex = (_playlistIndex + 1) % _playlist.Count;
+            if (PlayTrack(_playlist[_playlistIndex], loop: false))
+            {
+                return;
+            }
+        }
+
+        DebugUtilities.PrintPeerError("AudioManager: no track in the playlist could be played; stopping music.");
+        StopMusicInternal();
     }
 
     // ---------------------------------------------------------------- sound effects

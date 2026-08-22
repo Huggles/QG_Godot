@@ -93,6 +93,12 @@ public partial class MultiplayerSession : Node
             PlayerScene.Current?.EnsureUiLoaded();
             EventBus.Emit(EventBus.SignalName.GameSessionStarted);
 
+            // In-game music. Here rather than in SceneFlow because the opening track is chosen from
+            // the factions this peer controls, and the registry only becomes valid once LoadPlayers
+            // has run — which it has by the time this RPC arrives. The loading cover is still up, so
+            // the track starts underneath it. A no-op on a headless peer, which has no audio at all.
+            GameMusic.StartForLocalPlayer();
+
             // Drop the cover on every peer, each once its own queue has caught up.
             if (Multiplayer.IsServer())
                 Rpc(nameof(HideLoadingScreenWhenReady));

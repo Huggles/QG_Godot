@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b227v3llgjeyo"
+path="res://.godot/imported/Священная война - Soviet Patriotic Song (The Sacred War).mp3-5dd79c1791ad161447c24a55822a02ae.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/soviet/Священная война - Soviet Patriotic Song (The Sacred War).mp3"
+dest_files=["res://.godot/imported/Священная война - Soviet Patriotic Song (The Sacred War).mp3-5dd79c1791ad161447c24a55822a02ae.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

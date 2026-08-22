@@ -22,6 +22,13 @@ offset_top = -7.0
 offset_right = -11.0
 offset_bottom = -7.0
 
+[node name="NinePatchRect" parent="Root/Centre/Panel" parent_id_path=PackedInt32Array(440882464) index="2" unique_id=779728291]
+region_rect = Rect2(0, -1, 1194, 1143)
+patch_margin_left = 357
+patch_margin_top = 360
+patch_margin_right = 350
+patch_margin_bottom = 355
+
 [node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="0" unique_id=647576227]
 text = "Settings"
 
@@ -97,7 +104,8 @@ alignment = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
-text = "Close Button"
+text = "
+"
 
 [node name="Audio" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="2" unique_id=409647964]
 visible = false

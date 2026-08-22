@@ -32,7 +32,12 @@ public static class SceneFlow
         // each screen: everything that is not Game.tscn is a menu screen and keeps the same track
         // running (PlayMusic is a no-op for the track already playing, so navigating between screens
         // does not restart it), and entering the game silences it. Coming back out — to the victory
-        // screen or the main menu — starts it again through this same call.
+        // screen or the main menu — starts it again through this same call, which also ends whatever
+        // in-game playlist was running.
+        //
+        // Only the silencing half of the game case belongs here: the in-game playlist depends on
+        // which factions this peer ended up with, so it is started later, from
+        // MultiplayerSession.StartSession, once the player-faction registry is populated.
         if (scenePath == GameScenePath)
         {
             AudioManager.StopMusic();

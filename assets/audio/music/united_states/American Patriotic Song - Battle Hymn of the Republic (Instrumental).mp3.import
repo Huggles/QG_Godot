@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://brc47eh43a1f"
+path="res://.godot/imported/American Patriotic Song - Battle Hymn of the Republic (Instrumental).mp3-b3b836754da8872dcdb9bccba432f177.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/united_states/American Patriotic Song - Battle Hymn of the Republic (Instrumental).mp3"
+dest_files=["res://.godot/imported/American Patriotic Song - Battle Hymn of the Republic (Instrumental).mp3-b3b836754da8872dcdb9bccba432f177.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bbqyqhu1y244u"
+path="res://.godot/imported/Rising Storm OST - Way of the Warrior.mp3-ba9e368b33d2ac70019d370e84a67a86.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/music/japan/Rising Storm OST - Way of the Warrior.mp3"
+dest_files=["res://.godot/imported/Rising Storm OST - Way of the Warrior.mp3-ba9e368b33d2ac70019d370e84a67a86.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
