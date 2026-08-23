@@ -16,7 +16,8 @@ public partial class CountryScene : Node2D
     public Node2D UnitContainerNode => GetNode<Node2D>("UnitContainer");
     public Sprite2D SupplyStarSprite => GetNode<Sprite2D>("SupplyStarSprite");
     public Sprite2D StraightSpriteNode => GetNode<Sprite2D>("StraightSprite");
-    public ClickableSprite CountrySprite => GetNode<ClickableSprite>("CountrySprite");
+    public ClickableSprite CountrySprite => GetNode<ClickableSprite>("CountryClickableSprite");
+    public TextureRect CountrySpriteTextureRect => GetNode<TextureRect>("TextureRect");
     public Label CountryLabel => GetNode<Label>("CountryLabel");
 
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
@@ -33,15 +34,16 @@ public partial class CountryScene : Node2D
         NodeUtilities.Instance.CountriesNode.AddChild(countrySceneInstance, false);
         countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionCenter;
         countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
+        
         countrySceneInstance.CountryLabel.Size = countrySceneInstance.Bounds.Size;
+        Vector2 countryTopLeftPos = -(countrySceneInstance.Bounds.Size/2);
+        Vector2 labelPos = countryTopLeftPos + countrySceneInstance.StaticCountryData.LabelTransformData.Position2D;
 
-        
-
-        countrySceneInstance.CountryLabel.Position = new Vector2(
-            - (countrySceneInstance.CountryLabel.Size.X / 2), 
-            - (countrySceneInstance.CountryLabel.Size.Y / 2)
-        ) + countrySceneInstance.StaticCountryData.LabelTransformData.Position2D;
-        
+        countrySceneInstance.CountryLabel.Position = labelPos;
+        countrySceneInstance.CountrySpriteTextureRect.Texture = countrySceneInstance.StaticCountryData.Texture;
+        countrySceneInstance.CountrySpriteTextureRect.Size = countrySceneInstance.Bounds.Size;
+        countrySceneInstance.CountrySpriteTextureRect.Position = countryTopLeftPos;      
+        countrySceneInstance.CountrySpriteTextureRect.Visible = true;        
         return countrySceneInstance;
     }
 
@@ -76,9 +78,11 @@ public partial class CountryScene : Node2D
         StraightState.OnReady();
 
         CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
-
         CountryLabel.Visible = GameSettings.ShowCountryLabels;
+
         EventBus.Instance.CountryNamesToggled += OnCountryNameToggled;
+
+        countrySceneInstance.CountrySpriteTextureRect.MouseEntered += () => DebugUtilities.PrintPeer($"Mouse entered {countrySceneInstance.StaticCountryData.Label}");
     }
 
     public override void _ExitTree()
