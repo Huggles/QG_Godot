@@ -175,6 +175,11 @@ public partial class CountryScene : Node2D
         worldPresentationMode = mode;
     }
 
+    /// <summary>
+    /// The ONLY listener for the tags that drive this country's target visuals. Tag.Clickable was
+    /// once handled here and in the CountryState constructor at the same time, which subscribed the
+    /// click handler twice; keep every new visual tag in this one place.
+    /// </summary>
     private void OnTagAdded(Tag tag, Faction faction)
     {
         if (tag == Tag.Clickable)
@@ -188,6 +193,10 @@ public partial class CountryScene : Node2D
         {
             SetClickable();
         }
+        else if (tag == Tag.PreviewTarget)
+        {
+            SetPreviewTarget(true);
+        }
     }
 
     private void OnTagRemoved(Tag tag, Faction faction)
@@ -200,6 +209,10 @@ public partial class CountryScene : Node2D
         else if (tag == Tag.RebuildTarget && CountryState.Tags.Has(Tag.Clickable, Faction.ALL))
         {
             SetClickable();
+        }
+        else if (tag == Tag.PreviewTarget)
+        {
+            SetPreviewTarget(false);
         }
     }
 
@@ -508,14 +521,65 @@ public partial class CountryScene : Node2D
         UpdateOccupyingFactionColors();
     }
 
+    /// <summary>True while this country is an actually-offered selection target.</summary>
+    private bool IsOfferedTarget => CountryState.Tags.Has(Tag.Clickable, Faction.ALL);
+
+    /// <summary>True while the player is hovering a card that could affect this country.</summary>
+    private bool IsPreviewTarget => CountryState.Tags.Has(Tag.PreviewTarget, Faction.ALL);
+
+    /// <summary>
+    /// Shows the glow overlay, without touching the click handler. Split out of
+    /// <see cref="SetClickable"/> so the hover preview (<see cref="SetPreviewTarget"/>) can draw the
+    /// identical marker for a country that is NOT clickable — the game is waiting for a card, not a
+    /// country, so the same visual must not carry the same interaction.
+    /// </summary>
+    private void ShowTargetGlow()
+    {
+        CountrySpriteTextureRect.Visible = true;
+        CountrySpriteTextureRectContainer.Visible = true;
+        OnMouseExitedOpaque();
+    }
+
+    /// <inheritdoc cref="ShowTargetGlow"/>
+    private void HideTargetGlow()
+    {
+        CountrySpriteTextureRect.Visible = false;
+        CountrySpriteTextureRectContainer.Visible = false;
+        OnMouseExitedOpaque();
+    }
+
+    /// <summary>
+    /// Draws (or clears) the hover preview: the same glow an offered target gets, no click handler.
+    ///
+    /// An offered target wins outright — it owns the click handler, and letting a preview clearing
+    /// over the top of it call <see cref="HideTargetGlow"/> would blank a live selection prompt.
+    /// Only the Glow presentation draws a preview; the TargetSprite marker is authored as an
+    /// "click this" affordance and previewing with it would be a lie.
+    /// </summary>
+    public void SetPreviewTarget(bool isPreviewTarget)
+    {
+        if (targetPresentationMode != TargetPresentationMode.Glow) return;
+        if (IsOfferedTarget) return;
+
+        if (isPreviewTarget)
+            ShowTargetGlow();
+        else
+            HideTargetGlow();
+    }
+
     public void SetClickable()
     {
         if(targetPresentationMode == TargetPresentationMode.Glow)
         {
-            CountrySpriteTextureRect.Visible = true;
-            CountrySpriteTextureRectContainer.Visible = true;
+            ShowTargetGlow();
+            // Detach before attaching, so however many times this runs the handler is attached once.
+            // A Godot [Signal] compiles to a plain multicast delegate (add => backing += value) with
+            // no duplicate detection, so a second += fires the handler a second time — and this is
+            // re-entered while already clickable by OnTagAdded's Tag.RebuildTarget restyle, which is
+            // written to tolerate either tag order and so is meant to be reachable. Only one -= ever
+            // follows, in SetUnclickable. Removing a handler that is not attached is a safe no-op.
+            CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
             CountrySpriteTextureRect.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
-            OnMouseExitedOpaque();
         }
         else if(targetPresentationMode == TargetPresentationMode.TargetSprite)
         {
@@ -543,10 +607,14 @@ public partial class CountryScene : Node2D
         CountrySprite.HideSprite();
         CountrySprite.SetUnclickable();
 
-        CountrySpriteTextureRect.Visible = false;
-        CountrySpriteTextureRectContainer.Visible = false;
         CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
-        OnMouseExitedOpaque();
+
+        // The hover preview draws this same overlay, so hiding it unconditionally would blank a
+        // preview that is still meant to be up. The click handler above always goes.
+        if (IsPreviewTarget)
+            ShowTargetGlow();
+        else
+            HideTargetGlow();
     }
 
     private void ShowSupplyStar()

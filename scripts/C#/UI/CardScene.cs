@@ -67,6 +67,10 @@ public partial class CardScene : Control
 		if (triggersEmphasis)
 		{
 			FactionHandDisplay.Current?.ShowCardEmphasis(CardId);
+			// Inside the triggersEmphasis guard on purpose: the CardScene copies rendered in the
+			// trigger-context panel, the history popup and the presentation modals all clear that flag,
+			// and none of them should be able to paint the board.
+			CardTargetPreviewDisplay.Show(CardId);
 		}
 
 	}
@@ -74,6 +78,10 @@ public partial class CardScene : Control
 	{
 		DebugUtilities.PrintPeerFinest($"Mouse exited card with ID: {CardId}");
 		FactionHandDisplay.Current?.HideCardEmphasis();
+		// Ownership-checked rather than unconditional: Godot can deliver this exit after the next
+		// card's MouseEntered, and clearing then would blank a preview that has already moved on.
+		// Unguarded by triggersEmphasis so a card that stops emphasising mid-hover still cleans up.
+		CardTargetPreviewDisplay.Clear(CardId);
 	}
 
 	public void ShowCard(int cardId)

@@ -54,19 +54,18 @@ public partial class CountryState : StateObject
         else
             this.Tags.AddForAll(Tag.SeaCountry);
 
-        // Presentation side-effect: drive the country's clickable visual off the Clickable tag.
-        // Skipped on a headless server, which has no CountryScene (the getter would throw).
-        if (!GameContext.IsHeadless)
-        {
-            this.Tags.TagAdded += (Tag t, Faction f) =>
-            {
-                if(t is Tag.Clickable) CountryScene.SetClickable();
-            };
-            this.Tags.TagRemoved += (Tag t, Faction f) =>
-            {
-                if(t is Tag.Clickable) CountryScene.SetUnclickable();
-            };
-        }
+        // Tag.Clickable's visual is driven by CountryScene.OnTagAdded/OnTagRemoved, and ONLY there.
+        // It used to be driven from here as well, so SetClickable ran twice per tag and
+        // CountrySpriteTextureRect.MouseLeftClickOnOpaque — a plain multicast delegate with no
+        // duplicate detection — was subscribed twice, making one click emit CountryClicked twice.
+        // Both consumers answer through TaskCompletionSource.TrySetResult, which is why the second
+        // emit was swallowed and nothing ever looked wrong.
+        //
+        // CountryScene's copy is the one to keep: this class is state, that handler is paired with an
+        // unsubscribe in _ExitTree, and Tag.Clickable now sits with Tag.RebuildTarget and
+        // Tag.PreviewTarget, which were only ever handled there. The !GameContext.IsHeadless guard
+        // this replaced matched exactly when countries are spawned at all — see
+        // GodotWorldPresenter.SpawnCountries versus its headless no-op — so nothing is lost.
     }
 
     public void InitNeighborCountryStateArray()

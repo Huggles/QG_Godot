@@ -138,6 +138,53 @@ public abstract partial class CardLogic : GodotObject
 
     public List<CardStep> ExecutableCardSteps => CardSteps.Where(step => step.HasTagForAny(Tag.IsExecutable)).ToList();
 
+    /// <summary>
+    /// Every country this card could affect if it were used right now — the union of
+    /// <see cref="CardStep.TargetPreview"/> over the card's executable steps, with unit targets
+    /// resolved to the country the unit is standing in. Empty for a card that declares no previews,
+    /// which is most of them today.
+    ///
+    /// Filtered on <see cref="ExecutableCardSteps"/> — the same Tag.IsExecutable set
+    /// <see cref="CanBeActivated"/> gates on — so the preview describes only steps that would
+    /// actually run. Steps a card appends to itself mid-execution (EventBroadFront, EventTheAutobahn)
+    /// are correctly absent: they do not exist at hover time either.
+    ///
+    /// HOST ONLY. It reads Tag.IsExecutable, which is not in GameStateCalculator.ReplicatedTags, and
+    /// the step expressions themselves may read CardPlayPool.CurrentReactionTrigger, which is null on
+    /// a peer that holds no CardPlayRound. Clients receive the result over the wire on
+    /// <see cref="InputRequest.CardTargetPreviews"/> instead of recomputing it.
+    /// </summary>
+    public List<int> PreviewTargetCountryIds()
+    {
+        HashSet<int> countryIds = new();
+
+        foreach (CardStep step in ExecutableCardSteps)
+        {
+            // A preview must never be able to break the prompt it rides on. These expressions are
+            // written for a live step, so one can legitimately throw when evaluated a moment early —
+            // a stale reaction trigger, an empty pool — and that must cost nothing but the preview.
+            try
+            {
+                StepTargetPreview preview = step.TargetPreview;
+                if (preview == null) continue;
+
+                foreach (int countryId in preview.CountryIds)
+                    countryIds.Add(countryId);
+
+                foreach (UnitState unitState in UnitState.ForIds(preview.UnitIds))
+                    if (unitState != null && unitState.CountryId >= 0)
+                        countryIds.Add(unitState.CountryId);
+            }
+            catch (Exception e)
+            {
+                DebugUtilities.PrintPeer(
+                    $"Target preview failed for {CardState?.CardName} step {step.Id}: {e.Message}");
+            }
+        }
+
+        return countryIds.ToList();
+    }
+
     public CardLogic()
     {   
         EventBus.Instance.NewTurnStarted += OnNewTurnStarted;

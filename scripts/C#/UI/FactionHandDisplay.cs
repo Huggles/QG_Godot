@@ -347,6 +347,10 @@ public partial class FactionHandDisplay : Control
 
 	private void DeleteCurrentCards()
 	{
+		// The nodes about to be freed are the only things that could ever fire the MouseExited that
+		// clears a hover preview, so a glow raised from one of them would otherwise be permanent.
+		CardTargetPreviewDisplay.ClearAll();
+
 		foreach (CardScene cardScene in CardScenes)
 		{
 			// Only remove from CardsContainer if it's been initialized

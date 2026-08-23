@@ -64,13 +64,25 @@ public partial class InputManager : Node2D
 	/// card id. See <see cref="FactionHandDisplay.Show(List{int}, Faction, List{int}, bool)"/> — it
 	/// must stay false for the table-cards-only prompts, which would end up with an empty hand.
 	/// </param>
+	/// <param name="cardTargetPreviews">
+	/// The host's per-card target preview, straight off <see cref="InputRequest.CardTargetPreviews"/>.
+	/// Drives the board glow when the player hovers a card — see <see cref="CardTargetPreviewDisplay"/>.
+	/// Null is fine and means no card previews anything.
+	/// </param>
 	public InputHandlerPlayCard SetCardSelectionActive(
 		Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
-		bool separateNonHandCards = false)
+		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null)
 	{
 		_pendingReactionSkipScope = ReactionSkipScope.NONE;
 
-		CurrentCardPrompt = new ActiveCardPrompt(faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards);
+		// A previous prompt's glow must never survive into this one. SetCardSelectionActive is also
+		// reached without HandleItemSelected having run in between (a retried request opens a fresh
+		// prompt over the old one), so clearing here rather than only on teardown.
+		CardTargetPreviewDisplay.ClearAll();
+
+		CurrentCardPrompt = new ActiveCardPrompt(
+			faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards,
+			ToPreviewMap(cardTargetPreviews));
 
 		PlayerActionLabel.ShowText(cardIds.Count > 0 ? "Choose a card" : "No reaction available", faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
@@ -92,6 +104,21 @@ public partial class InputManager : Node2D
 		}
 
 		return inputHandler;
+	}
+
+	/// <summary>
+	/// Flattens the wire list into the by-card-id lookup the hover path wants. Defensive against
+	/// duplicate card ids: the host builds the list with Distinct(), but ToDictionary would throw on
+	/// the prompt rather than merely mis-drawing a preview if that ever changed.
+	/// </summary>
+	private static Dictionary<int, List<int>> ToPreviewMap(List<InputRequest.CardTargetPreview> previews)
+	{
+		if (previews == null) return null;
+
+		Dictionary<int, List<int>> map = new();
+		foreach (InputRequest.CardTargetPreview preview in previews)
+			map[preview.CardId] = preview.CountryIds ?? new List<int>();
+		return map;
 	}
 
 	private void OnPlayCardSkipped()
@@ -152,6 +179,9 @@ public partial class InputManager : Node2D
 
 	private void HandleItemSelected(int cardId)
 	{
+		// The prompt is answered, so its hover glow must go: nothing else clears it on this path, and a
+		// country left lit would stay lit through the country-selection prompt that follows and beyond.
+		CardTargetPreviewDisplay.ClearAll();
 		CurrentCardPrompt = null;
 		FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
 		EventBus.Instance.SelectionSkipped -= OnPlayCardSkipped;

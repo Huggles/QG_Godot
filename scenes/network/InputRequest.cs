@@ -100,6 +100,30 @@ public abstract partial class InputRequest
     public List<int> DisplayCardIds { get; set; }
 
     /// <summary>
+    /// Per-card hover preview: which countries each card this prompt draws could affect, so hovering
+    /// a card in the hand lights its targets up on the board before the player commits to it.
+    ///
+    /// Computed on the host in <see cref="PopulateTargets"/>, where the window's reaction trigger and
+    /// freshly calculated tags are both live. A client cannot derive this itself for the same two
+    /// reasons it cannot derive <see cref="TargetCardIds"/>: it holds no CardPlayRound, so
+    /// CardPlayPool.CurrentReactionTrigger is null and every reaction-scoped target set collapses;
+    /// and Tag.IsExecutable is not in GameStateCalculator.ReplicatedTags, so it cannot tell which of
+    /// a card's steps are live.
+    ///
+    /// A list rather than a Dictionary&lt;int, List&lt;int&gt;&gt; so System.Text.Json needs no key
+    /// converter. Cards with no targets to show are omitted entirely rather than carried as empty
+    /// entries.
+    /// </summary>
+    public List<CardTargetPreview> CardTargetPreviews { get; set; }
+
+    /// <summary>One entry of <see cref="CardTargetPreviews"/>.</summary>
+    public sealed class CardTargetPreview
+    {
+        public int CardId { get; set; }
+        public List<int> CountryIds { get; set; }
+    }
+
+    /// <summary>
     /// Set by a reaction prompt when the player chose one of the scoped skip buttons instead of
     /// plain Skip. Rides the same DTO round-trip as <see cref="WasSkipped"/>; the host feeds it to
     /// <see cref="GameFlow.RecordReactionSkip"/> and stops opening the information-hiding reaction
@@ -254,6 +278,30 @@ public abstract partial class InputRequest
     public virtual void PopulateTargets() { }
 
     /// <summary>
+    /// Fill <see cref="CardTargetPreviews"/> for every card this prompt draws. Called at the end of
+    /// the card prompts' <see cref="PopulateTargets"/>, which is the one moment the host has both the
+    /// offer set and the window's live context.
+    ///
+    /// Runs over the DISPLAY set, not the selectable one: a greyed-out card lighting up nothing is
+    /// itself the answer to "why can't I play this?", and it costs nothing to compute.
+    /// </summary>
+    protected void PopulateCardTargetPreviews()
+    {
+        List<int> cardIds = DisplayCardIds ?? TargetCardIds;
+        if (cardIds == null) return;
+
+        CardTargetPreviews = cardIds
+            .Distinct()
+            .Select(cardId => new CardTargetPreview
+            {
+                CardId = cardId,
+                CountryIds = CardState.ForId(cardId)?.CardLogic?.PreviewTargetCountryIds() ?? new List<int>()
+            })
+            .Where(preview => preview.CountryIds.Count > 0)
+            .ToList();
+    }
+
+    /// <summary>
     /// Await the CardSelected signal, releasing the prompt as a pass if the host abandons the request.
     /// The three card-selection requests all used a bare <c>GetSignalAwaiter</c>, which nothing but a
     /// real click could ever complete — so an aborted request left the hand live and clickable forever.
@@ -320,6 +368,7 @@ public abstract partial class InputRequest
                 .Concat(CardPlayRound.PlayStepActivationCardIds(TargetFaction))
                 .Distinct()
                 .ToList();
+            PopulateCardTargetPreviews();
         }
 
         public override async Task Handle()
@@ -331,7 +380,7 @@ public abstract partial class InputRequest
             // rather than being interleaved into it by card id.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), false, DisplayCardIds,
-                separateNonHandCards: true);
+                separateNonHandCards: true, cardTargetPreviews: CardTargetPreviews);
             Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0)
             {
@@ -348,7 +397,10 @@ public abstract partial class InputRequest
         // CardPlayRound.RequestPlay stamps the exact
         // after-reaction options for a reaction window, and ActivatableCardIds is a wider set.
         public override void PopulateTargets()
-            => TargetCardIds ??= DeckState.ForFaction(TargetFaction).ActivatableCardIds;
+        {
+            TargetCardIds ??= DeckState.ForFaction(TargetFaction).ActivatableCardIds;
+            PopulateCardTargetPreviews();
+        }
 
         public override async Task Handle()
         {
@@ -361,7 +413,8 @@ public abstract partial class InputRequest
             // CardLogic._defaultPlayConditions requires PLAY_CARD, this faction's turn, and nothing
             // played yet, which is exactly when RequestPlay sends the hand-play request instead.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
-                TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds);
+                TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
+                cardTargetPreviews: CardTargetPreviews);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
             DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
@@ -657,12 +710,18 @@ public abstract partial class InputRequest
             IsReactionWindow = true;
         }
 
+        // TargetCardIds/DisplayCardIds are stamped by CardPlayRound.RequestBlock — a block window
+        // offers only the block-eligible cards and cannot be re-derived here. Previews still need
+        // filling in, and this runs with CurrentBlockTrigger live.
+        public override void PopulateTargets() => PopulateCardTargetPreviews();
+
         public override async Task Handle()
         {
             await Task.Delay(GameSettings.DurationMedium);
             // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
-                TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds);
+                TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
+                cardTargetPreviews: CardTargetPreviews);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
             Variant[] results = await AwaitCardSelection();

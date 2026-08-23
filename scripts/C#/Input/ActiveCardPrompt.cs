@@ -16,8 +16,16 @@ using System.Collections.Generic;
 /// fan. Carried so a re-draw after browsing reproduces the prompt as the player last saw it, rather
 /// than collapsing it back into one row.
 /// </param>
+/// <param name="PreviewCountryIdsByCardId">
+/// Which countries each drawn card could affect, for the hover preview — see
+/// <see cref="CardTargetPreviewDisplay"/>. Computed by the host and shipped on
+/// <see cref="InputRequest.CardTargetPreviews"/>; a client cannot re-derive it, for the same reasons
+/// it cannot re-derive <paramref name="SelectableCardIds"/>. A card absent from the map has nothing
+/// to show.
+/// </param>
 public sealed record ActiveCardPrompt(
     Faction Faction,
     List<int> DisplayCardIds,
     List<int> SelectableCardIds,
-    bool SeparateNonHandCards = false);
+    bool SeparateNonHandCards = false,
+    Dictionary<int, List<int>> PreviewCountryIdsByCardId = null);
