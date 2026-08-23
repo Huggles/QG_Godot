@@ -77,6 +77,7 @@ offset_top = -230.0
 offset_right = 441.0
 offset_bottom = -60.0
 grow_vertical = 0
+mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control" unique_id=243347223]
 layout_mode = 1
@@ -86,6 +87,7 @@ anchor_bottom = 1.0
 offset_top = -15.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 alignment = 2
 
 [node name="SelectionSkipButton" parent="Control/VBoxContainer" unique_id=1187079456 instance=ExtResource("14_skipscene")]

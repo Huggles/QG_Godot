@@ -82,7 +82,8 @@ public partial class CountryScene : Node2D
 
         EventBus.Instance.CountryNamesToggled += OnCountryNameToggled;
 
-        countrySceneInstance.CountrySpriteTextureRect.MouseEntered += () => DebugUtilities.PrintPeer($"Mouse entered {countrySceneInstance.StaticCountryData.Label}");
+        CountrySpriteTextureRect.MouseEntered += () => SetCountryColor(Colors.Green);
+        CountrySpriteTextureRect.MouseExited += () => SetCountryColor(Colors.Red);
     }
 
     public override void _ExitTree()
@@ -134,6 +135,40 @@ public partial class CountryScene : Node2D
     private void ApplyTexture()
     {
         CountrySprite.SetTexture(AssetRepository.TargetCountrySprite);
+    }
+
+
+    /// <summary>
+    /// The TextureRect's glow material, duplicated per country. Country.tscn's ShaderMaterial is a
+    /// sub-resource shared by every instance, so recoloring it directly would recolor the whole map.
+    /// </summary>
+    private ShaderMaterial countryShaderMaterial;
+
+    private ShaderMaterial CountryShaderMaterial
+    {
+        get
+        {
+            if (countryShaderMaterial == null)
+            {
+                countryShaderMaterial = (CountrySpriteTextureRect.Material as ShaderMaterial)?.Duplicate() as ShaderMaterial;
+                CountrySpriteTextureRect.Material = countryShaderMaterial;
+            }
+            return countryShaderMaterial;
+        }
+    }
+
+    /// <summary>
+    /// Tints the country silhouette. <paramref name="color"/> is the outline glow; the fill follows it
+    /// unless <paramref name="fillColor"/> names its own. Opacity stays with the material's authored
+    /// glow_alpha/fill_alpha, so a caller only has to think about hue.
+    /// </summary>
+    public void SetCountryColor(Color color, Color? fillColor = null)
+    {
+        ShaderMaterial material = CountryShaderMaterial;
+        if (material == null) return;
+
+        material.SetShaderParameter("glow_color", color);
+        material.SetShaderParameter("fill_color", fillColor ?? color);
     }
 
     public UnitScene AddUnit(int unitId)
