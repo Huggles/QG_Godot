@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://buwmfq5vmxxi8" path="res://scripts/C#/Scenes/UnitScene.cs" id="1_8vg5g"]
 [ext_resource type="Texture2D" uid="uid://sfhhmtjxiwqx" path="res://assets/textures/Units/QGArmyDetailed.png" id="2_3bedt"]
 [ext_resource type="Texture2D" uid="uid://cqehtwpiof1rd" path="res://assets/textures/Other/SupplyIcon.png" id="3_ided0"]
-[ext_resource type="Script" uid="uid://w3n71c5f0nhy" path="res://scenes/Units/BlinkingSprite2D.cs" id="4_3bedt"]
 [ext_resource type="Script" uid="uid://dexhj3ccx1bay" path="res://scripts/C#/Input/ClickableTextureRect.cs" id="4_uddu0"]
+[ext_resource type="Material" uid="uid://kvokyv2saed0" path="res://BlinkingMaterial.tres" id="5_3bedt"]
 [ext_resource type="Texture2D" uid="uid://cgx3wjhrptpt5" path="res://assets/textures/Other/Target_Unit.png" id="6_3bedt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n4c3c"]
@@ -69,10 +69,18 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_n4c3c")
 
-[node name="OutOfSupplyIcon" type="Sprite2D" parent="." unique_id=1133449168]
+[node name="OutOfSupplyIcon" type="TextureRect" parent="." unique_id=1112947345]
 unique_name_in_owner = true
-visible = false
-z_index = 60
-scale = Vector2(0.15, 0.15)
+z_index = 61
+material = ExtResource("5_3bedt")
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = -16.0
+grow_horizontal = 0
 texture = ExtResource("3_ided0")
-script = ExtResource("4_3bedt")
+expand_mode = 1
+stretch_mode = 5
