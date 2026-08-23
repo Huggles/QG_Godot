@@ -6,7 +6,7 @@ public partial class UnitScene : Node2D
 	public int UnitId { get; set; }
 	public UnitState UnitState => UnitState.ForId(UnitId);
 	public Sprite2D UnitSpriteNode => GetNode<Sprite2D>("UnitSprite2D");
-	public ClickableSprite TargetSprite => GetNode<ClickableSprite>("TargetSprite");
+	public ClickableTextureRect TargetSprite => GetNode<ClickableTextureRect>("TargetSprite");
 	public BlinkingSprite2D OutOfSupplyNode => GetNode<BlinkingSprite2D>("OutOfSupplyIcon");
 	public static float DefaultSpriteScale = 0.2f;    
 	[Signal] public delegate void UnitClickedEventHandler();
