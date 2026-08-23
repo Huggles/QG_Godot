@@ -935,7 +935,7 @@
         },
         "WorldTransformData": {
             "Scale": 1,
-            "XPosition": 2040.91,
+            "XPosition": 2025.91,
             "YPosition": -776.29,
             "ZPosition": 0.0
         },
@@ -2039,8 +2039,8 @@
         },
         "WorldTransformData": {
             "Scale": 1,
-            "XPosition": 1326.32,
-            "YPosition": 56.64,
+            "XPosition": 1306.32,
+            "YPosition": 61.64,
             "ZPosition": 0.0
         },
         "SupplyStarTransformData": {
@@ -2172,8 +2172,8 @@
         },
         "WorldTransformData": {
             "Scale": 1,
-            "XPosition": 2214.11,
-            "YPosition": 18.68,
+            "XPosition": 2204.11,
+            "YPosition": 13.68,
             "ZPosition": 0.0
         },
         "SupplyStarTransformData": {

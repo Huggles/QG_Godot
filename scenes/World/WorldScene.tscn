@@ -4,6 +4,18 @@
 [ext_resource type="Script" uid="uid://chg0qtenjlldw" path="res://scenes/World/WorldScene.cs" id="1_r63mr"]
 [ext_resource type="Texture2D" uid="uid://dsgtbjipkhdsy" path="res://assets/textures/Countries/World_Clean_3.png" id="2_r63mr"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r63mr"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
 [node name="World" type="Node2D" unique_id=810156569]
 script = ExtResource("1_r63mr")
 
@@ -28,6 +40,19 @@ patch_margin_right = 384
 patch_margin_bottom = 416
 axis_stretch_horizontal = 2
 axis_stretch_vertical = 2
+
+[node name="Panel" type="Panel" parent="Background/NinePatchRect" unique_id=153794483]
+modulate = Color(18.892157, 18.892157, 18.892157, 1)
+show_behind_parent = true
+z_index = -10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_r63mr")
 
 [node name="WorldSprite" type="Sprite2D" parent="Background" unique_id=1626979141]
 unique_name_in_owner = true

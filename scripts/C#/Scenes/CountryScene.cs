@@ -282,7 +282,7 @@ public partial class CountryScene : Node2D
     /// space simply is not drawn rather than showing a placeholder tint over half the map.
     /// </summary>
     private static readonly Color UnoccupiedStripeColor1 = new Color(0.2f, 0.2f, 0.2f, 1);
-    private static readonly Color UnoccupiedStripeColor2 = new Color(0.1f, 0.1f, 0.1f, 1);
+    private static readonly Color UnoccupiedStripeColor2 = new Color(0.18f, 0.18f, 0.18f, 1);
 
     /// <summary>
     /// Writes the stripe palette on the tactical overlay: <paramref name="colors"/> padded out to the
