@@ -30,6 +30,7 @@ offset_top = -250.0
 offset_bottom = -150.0
 grow_horizontal = 2
 grow_vertical = 0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_ff84v")
 
 [node name="CardPreviewContainer" type="Panel" parent="." unique_id=1410620602]

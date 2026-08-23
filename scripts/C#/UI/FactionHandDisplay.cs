@@ -166,13 +166,6 @@ public partial class FactionHandDisplay : Control
 	private void ResetVisibility()
 	{
 		Visible = true;
-		
-		// Only access CardsContainer if it's been initialized (in LoadUI)
-		if (CardsContainer != null)
-		{
-			CardsContainer.MouseFilter = MouseFilterEnum.Stop;
-		}
-		
 		HideCardEmphasis();
 	}
 
