@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://cqehtwpiof1rd" path="res://assets/textures/Other/SupplyIcon.png" id="3_ided0"]
 [ext_resource type="Script" uid="uid://w3n71c5f0nhy" path="res://scenes/Units/BlinkingSprite2D.cs" id="4_3bedt"]
 [ext_resource type="PackedScene" uid="uid://cfav78gd417lf" path="res://scenes/ClickableSprite.tscn" id="4_uddu0"]
-[ext_resource type="Texture2D" uid="uid://nid6j0fylhjs" path="res://assets/textures/Other/target.png" id="5_1bc45"]
+[ext_resource type="Texture2D" uid="uid://cgx3wjhrptpt5" path="res://assets/textures/Other/Target_Unit.png" id="6_3bedt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n4c3c"]
 content_margin_left = 0.0
@@ -63,4 +63,4 @@ script = ExtResource("4_3bedt")
 visible = false
 z_index = 61
 scale = Vector2(0.2, 0.2)
-texture = ExtResource("5_1bc45")
+texture = ExtResource("6_3bedt")

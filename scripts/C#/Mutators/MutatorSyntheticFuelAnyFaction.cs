@@ -45,6 +45,16 @@ public partial class MutatorSyntheticFuelAnyFaction : ActivatableMutator
         }
     }
 
+    /// <summary>
+    /// Reuses <see cref="DeployTargets"/>, which the trigger condition above already reads, so this is
+    /// a third consumer of one expression rather than a second definition of it.
+    ///
+    /// Worth noting what this demonstrates: an ActivatableMutator IS a CardLogic, and its Bulletin is a
+    /// real CardState drawn beside the hand in the play prompt — so the preview reaches a non-card with
+    /// no plumbing beyond this override.
+    /// </summary>
+    public override TargetSet Targets() => TargetSet.Countries(DeployTargets);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {

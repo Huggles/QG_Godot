@@ -104,11 +104,9 @@ public abstract partial class InputRequest
     /// a card in the hand lights its targets up on the board before the player commits to it.
     ///
     /// Computed on the host in <see cref="PopulateTargets"/>, where the window's reaction trigger and
-    /// freshly calculated tags are both live. A client cannot derive this itself for the same two
-    /// reasons it cannot derive <see cref="TargetCardIds"/>: it holds no CardPlayRound, so
-    /// CardPlayPool.CurrentReactionTrigger is null and every reaction-scoped target set collapses;
-    /// and Tag.IsExecutable is not in GameStateCalculator.ReplicatedTags, so it cannot tell which of
-    /// a card's steps are live.
+    /// freshly calculated tags are both live, from each card's <see cref="CardLogic.Targets"/>. A
+    /// client cannot derive it: a peer holds no CardPlayRound, so CardPlayPool.CurrentReactionTrigger
+    /// is null there and every reaction-scoped target set collapses to empty.
     ///
     /// A list rather than a Dictionary&lt;int, List&lt;int&gt;&gt; so System.Text.Json needs no key
     /// converter. Cards with no targets to show are omitted entirely rather than carried as empty
@@ -295,7 +293,10 @@ public abstract partial class InputRequest
             .Select(cardId => new CardTargetPreview
             {
                 CardId = cardId,
-                CountryIds = CardState.ForId(cardId)?.CardLogic?.PreviewTargetCountryIds() ?? new List<int>()
+                // TargetsOrNone, not Targets: a target expression evaluated a moment before its step
+                // can legitimately throw, and that must cost the preview and not the prompt.
+                CountryIds = CardState.ForId(cardId)?.CardLogic?.TargetsOrNone().ResolvedCountryIds()
+                             ?? new List<int>()
             })
             .Where(preview => preview.CountryIds.Count > 0)
             .ToList();

@@ -28,7 +28,6 @@ public partial class CardStep : ITaggable
     protected Func<Task> StepLogic;
     protected Func<List<Condition>> GetConditionsMethod;
     protected Func<List<Condition>> GetAdvisoryConditionsMethod;
-    protected Func<StepTargetPreview> GetTargetPreviewMethod;
     private bool _requiresPreviousStep = false;
     protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
     [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod != null ? GetConditionsMethod() : null;
@@ -110,29 +109,6 @@ public partial class CardStep : ITaggable
         this.GetAdvisoryConditionsMethod = getConditionsMethod;
         return this;
     }
-
-    /// <summary>
-    /// Declares what this step could reach on the board, so hovering the card in a play or reaction
-    /// prompt can light those countries up before the player commits to the card.
-    ///
-    /// Presentation only, like <see cref="WithAdvisoryCondition"/> and unlike
-    /// <see cref="WithCondition"/>: it never gates the step and is never consulted while the step
-    /// runs. A step that declares nothing previews nothing.
-    ///
-    /// Pass the SAME expression the step's own selection uses. The step lambda is handed to the
-    /// constructor and so cannot reach the CardStep it is attached to, so hoist the target set into a
-    /// local <c>Func</c> declared just above the step and use that local in both places — one source
-    /// of truth, no chance of the preview drifting from what the step actually offers. See
-    /// <c>BuildArmy</c> for the canonical shape.
-    /// </summary>
-    public CardStep WithTargetPreview(Func<StepTargetPreview> getTargetPreviewMethod)
-    {
-        this.GetTargetPreviewMethod = getTargetPreviewMethod;
-        return this;
-    }
-
-    /// <inheritdoc cref="WithTargetPreview"/>
-    [JsonIgnore] public StepTargetPreview TargetPreview => GetTargetPreviewMethod?.Invoke();
 
     public CardStep WithGuidance(string actionGuidance)
     {

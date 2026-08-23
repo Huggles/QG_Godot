@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
-public abstract partial class CardLogic : GodotObject
+public abstract partial class CardLogic : GodotObject, ITargetSetProvider
 {
     public CardState CardState;
     public CardData CardData => CardState.CardData;
@@ -139,51 +139,28 @@ public abstract partial class CardLogic : GodotObject
     public List<CardStep> ExecutableCardSteps => CardSteps.Where(step => step.HasTagForAny(Tag.IsExecutable)).ToList();
 
     /// <summary>
-    /// Every country this card could affect if it were used right now — the union of
-    /// <see cref="CardStep.TargetPreview"/> over the card's executable steps, with unit targets
-    /// resolved to the country the unit is standing in. Empty for a card that declares no previews,
-    /// which is most of them today.
+    /// What this card would affect if it were used right now, for the hover preview that lights its
+    /// targets up while the player is still choosing a card. Declares nothing by default — an opt-in
+    /// hook like <see cref="CardTriggers"/> and <see cref="PlayActionGuidance"/>.
     ///
-    /// Filtered on <see cref="ExecutableCardSteps"/> — the same Tag.IsExecutable set
-    /// <see cref="CanBeActivated"/> gates on — so the preview describes only steps that would
-    /// actually run. Steps a card appends to itself mid-execution (EventBroadFront, EventTheAutobahn)
-    /// are correctly absent: they do not exist at hover time either.
+    /// Override it with the SAME expression the card's steps select from — a private member reused by
+    /// both, which is what keeps the preview honest. See <c>BuildArmy</c> for the canonical shape.
     ///
-    /// HOST ONLY. It reads Tag.IsExecutable, which is not in GameStateCalculator.ReplicatedTags, and
-    /// the step expressions themselves may read CardPlayPool.CurrentReactionTrigger, which is null on
-    /// a peer that holds no CardPlayRound. Clients receive the result over the wire on
-    /// <see cref="InputRequest.CardTargetPreviews"/> instead of recomputing it.
+    /// Presentation only: nothing in the execution path reads this, and returning
+    /// <see cref="TargetSet.None"/> is always safe.
+    ///
+    /// A card with several steps reports whatever it chooses to report — usually the union of
+    /// everything it might touch, which answers "where does this card operate?". A card that wants to
+    /// narrow that to the step about to run can read <see cref="ExecutableCardSteps"/> or
+    /// <see cref="NextStepId"/> itself; there is deliberately no house rule, because steps a card
+    /// appends to itself mid-execution (EventBroadFront, EventTheAutobahn) do not exist at hover time
+    /// and no single rule covers them.
+    ///
+    /// HOST ONLY, in practice: an override may read CardPlayPool.CurrentReactionTrigger, which is null
+    /// on a peer that holds no CardPlayRound. Clients receive the resolved result over the wire on
+    /// <see cref="InputRequest.CardTargetPreviews"/> rather than recomputing it.
     /// </summary>
-    public List<int> PreviewTargetCountryIds()
-    {
-        HashSet<int> countryIds = new();
-
-        foreach (CardStep step in ExecutableCardSteps)
-        {
-            // A preview must never be able to break the prompt it rides on. These expressions are
-            // written for a live step, so one can legitimately throw when evaluated a moment early —
-            // a stale reaction trigger, an empty pool — and that must cost nothing but the preview.
-            try
-            {
-                StepTargetPreview preview = step.TargetPreview;
-                if (preview == null) continue;
-
-                foreach (int countryId in preview.CountryIds)
-                    countryIds.Add(countryId);
-
-                foreach (UnitState unitState in UnitState.ForIds(preview.UnitIds))
-                    if (unitState != null && unitState.CountryId >= 0)
-                        countryIds.Add(unitState.CountryId);
-            }
-            catch (Exception e)
-            {
-                DebugUtilities.PrintPeer(
-                    $"Target preview failed for {CardState?.CardName} step {step.Id}: {e.Message}");
-            }
-        }
-
-        return countryIds.ToList();
-    }
+    public virtual TargetSet Targets() => TargetSet.None;
 
     public CardLogic()
     {   

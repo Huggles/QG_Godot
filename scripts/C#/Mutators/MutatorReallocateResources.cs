@@ -86,6 +86,14 @@ public partial class MutatorReallocateResources : ActivatableMutator
         };
     }
 
+    /// <summary>
+    /// This action reaches cards, not board spaces, so it declares Card targets and the board stays
+    /// dark — TargetSet.ResolvedCountryIds ignores every kind that is not a place. Declared anyway
+    /// rather than left as None: it is the truthful answer, and a future presentation that highlights
+    /// deck cards gets it for free.
+    /// </summary>
+    public override TargetSet Targets() => TargetSet.Cards(DrawOptions());
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
