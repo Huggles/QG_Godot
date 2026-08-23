@@ -10,6 +10,7 @@ public partial class EventForcedConscription : EventCardLogic
             .Concat(CountryState.ForEnum(Country.Germany).ConnectedCountryStates
                 .Select(cs => cs.Id))
             .Where(id => CountryState.ForId(id).Tags.Has(Tag.Recruitable, Faction))
+            .Where(id => CountryState.ForId(id).Tags.Has(Tag.LandCountry, Faction.ALL))
             .ToList();
 
     public override List<CardStep> OnActivate()
