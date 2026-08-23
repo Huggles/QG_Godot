@@ -22,7 +22,6 @@ public partial class FactionHandDisplay : Control
 	private Control CardsContainer => GetNode<Panel>("%CardsContainerPanel");
 	private Panel CardPreviewContainer => GetNode<Panel>("%CardPreviewContainer");
 	private CardScene CardPreview => GetNode<CardScene>("%CardPreview");
-	private Button TestButton => GetNode<Button>("%TestButton");
 
 	private List<CardScene> CardScenes = new List<CardScene>();
 	private Faction showingFaction;
@@ -69,7 +68,6 @@ public partial class FactionHandDisplay : Control
 				ModalConfig.Display("Select a faction", PresentationItemImageButton.ForFactions([Faction.GERMANY,Faction.JAPAN]))
 					.WithDedupeKey("debug:select-faction"));
 		};
-		TestButton.Pressed += onTestButtonPressed;
 	}
 
 	private void OnCardsDrawn(int faction, int numberOfCards)
@@ -393,12 +391,6 @@ public partial class FactionHandDisplay : Control
 		if (EventBus.Instance != null && OnNextStepStarted != null)
 		{
 			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
-		}
-
-		// Unsubscribe from button events
-		if (IsInstanceValid(TestButton) && onTestButtonPressed != null)
-		{
-			TestButton.Pressed -= onTestButtonPressed;
 		}
 	}
 }
