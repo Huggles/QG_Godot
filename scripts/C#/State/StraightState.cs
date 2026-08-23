@@ -48,13 +48,11 @@ public partial class StraightState : StateObject
 
     public void OnReady()
     {
+        // ShowStraightSprite applies the initial color itself; the tag system takes it from there.
         if (StaticStraightData.IsStraight)
             ShowStraightSprite();
         else
             HideStraightSprite();
-
-        // Initial color will be set by tag system
-        ChangeColorTeam(ControllingCountryState.OccupyingTeam);
     }
 
     public FactionTeam ControlledByFaction => ControllingCountryState.OccupyingTeam == FactionTeam.NONE ? FactionTeam.ALLIES : ControllingCountryState.OccupyingTeam;
@@ -66,6 +64,12 @@ public partial class StraightState : StateObject
 
         sprite.Texture = StaticStraightData.IconInversed ? AssetRepository.StraightIconInverse : AssetRepository.StraightIcon;
         sprite.Visible = true;
+
+        // The team color goes through the shader's fill_color now, so the border keeps its own color
+        // instead of being tinted along with the silhouette. Modulate multiplies the shader's final
+        // output — border included — so it has to stay neutral for that split to hold.
+        sprite.Modulate = Colors.White;
+        ChangeColorTeam(ControllingCountryState.OccupyingTeam);
 
         var t = StaticStraightData.StraightTransform;
         sprite.Position = new Vector2(t.XPosition, t.YPosition);
@@ -82,19 +86,13 @@ public partial class StraightState : StateObject
 
     public void ChangeColorTeam(FactionTeam controllingTeam)
     {
-        var sprite = StraightSpriteNode;
+        // Every country subscribes to the control tags, but only a straight ever draws the icon. Writing
+        // the color anyway would have each of the others duplicate a ShaderMaterial for a sprite that
+        // stays hidden for the whole game.
+        if (!StaticStraightData.IsStraight) return;
 
-        switch (controllingTeam)
-        {
-            case FactionTeam.AXIS:
-                sprite.Modulate = Colors.Red;
-                break;
-            case FactionTeam.ALLIES:
-                sprite.Modulate = Colors.DarkBlue;
-                break;
-            case FactionTeam.NONE:
-                sprite.Modulate = Colors.Blue;
-                break;
-        }
+        Color fill = StaticGameData.FactionTeamColor(controllingTeam == FactionTeam.NONE ? FactionTeam.ALLIES : controllingTeam);
+        fill += (Colors.White / 10);
+        ControllingCountryState.CountryScene.SetStraightColor(fill);
     }
 }

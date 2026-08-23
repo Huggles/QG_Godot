@@ -184,6 +184,23 @@ public static partial class StaticGameData
     }
 
     
+    /// <summary>
+    /// The color a side is drawn in by the TacticalTeam map overlay. Teams carry no color of their own in
+    /// the faction data — ColorString is per faction — so the two sides are named here rather than being
+    /// derived from a member faction, which would have made the whole side read as one of its members.
+    /// NONE and ALL are not sides anyone occupies a country as; they fall back to a neutral grey so a
+    /// stray Faction.NONE unit is visible rather than silently painted as one of the two teams.
+    /// </summary>
+    public static Color FactionTeamColor(FactionTeam team)
+    {
+        return team switch
+        {
+            FactionTeam.AXIS => new Color(0.4f, 0.16f, 0.16f, 1),
+            FactionTeam.ALLIES => new Color(0.16f, 0.38f, 0.6f, 1),
+            _ => new Color(0.5f, 0.5f, 0.5f, 1)
+        };
+    }
+
     public static FactionTeam FactionTeamForFaction(Faction faction)
     {
         return faction switch

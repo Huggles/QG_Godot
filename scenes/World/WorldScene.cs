@@ -42,6 +42,9 @@ public partial class WorldScene : Node2D
 				ShowWorldPresentationNormal();
 				break;
 			case WorldPresentationMode.Tactical:
+			// Both tactical views hide the ordinary board and let the per-country overlays draw it;
+			// they differ only in the palette CountryScene paints, not in what the world shows.
+			case WorldPresentationMode.TacticalTeam:
 				ShowWorldPresentationTactical();
 				break;
 		}        

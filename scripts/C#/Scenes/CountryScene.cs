@@ -84,6 +84,9 @@ public partial class CountryScene : Node2D
                 ShowWorldPresentationNormal();
                 break;
             case WorldPresentationMode.Tactical:
+            // Same overlay, different palette — UpdateOccupyingFactionColors reads worldPresentationMode
+            // to decide whether it paints factions or sides, so both views set up identically here.
+            case WorldPresentationMode.TacticalTeam:
                 ShowWorldPresentationTactical();
                 break;
         }        
@@ -270,6 +273,41 @@ public partial class CountryScene : Node2D
     }
 
     /// <summary>
+    /// The straight icon's material, duplicated per country for the same reason as
+    /// <see cref="CountryShaderMaterial"/>: StraightMaterial.tres is one shared resource, so writing a
+    /// team color straight onto it would recolor every straight on the map at once.
+    /// </summary>
+    private ShaderMaterial straightShaderMaterial;
+
+    private ShaderMaterial StraightShaderMaterial
+    {
+        get
+        {
+            if (straightShaderMaterial == null)
+            {
+                straightShaderMaterial = (StraightSpriteNode.Material as ShaderMaterial)?.Duplicate() as ShaderMaterial;
+                StraightSpriteNode.Material = straightShaderMaterial;
+            }
+            return straightShaderMaterial;
+        }
+    }
+
+    /// <summary>
+    /// Colors the straight icon. <paramref name="fillColor"/> fills the silhouette; the border keeps the
+    /// width and color authored on StraightMaterial.tres unless <paramref name="borderColor"/> names its
+    /// own, so the outline stays tunable from the inspector rather than hardcoded per team.
+    /// </summary>
+    public void SetStraightColor(Color fillColor, Color? borderColor = null)
+    {
+        ShaderMaterial material = StraightShaderMaterial;
+        if (material == null) return;
+
+        material.SetShaderParameter("fill_color", fillColor);
+        if (borderColor.HasValue)
+            material.SetShaderParameter("border_color", borderColor.Value);
+    }
+
+    /// <summary>
     /// Stripes.gdshader's MAX_COLORS. GLSL arrays are fixed size, so the `colors` uniform is always
     /// written at exactly this length and `color_count` decides how much of it is read. Godot ignores a
     /// shorter array, which is why <see cref="SetStripeColors"/> pads instead of passing what it has.
@@ -281,8 +319,9 @@ public partial class CountryScene : Node2D
     /// on <c>colors[index] * COLOR</c> — a zero-alpha entry multiplies the silhouette away, so unclaimed
     /// space simply is not drawn rather than showing a placeholder tint over half the map.
     /// </summary>
-    private static readonly Color UnoccupiedStripeColor1 = new Color(0.2f, 0.2f, 0.2f, 1);
-    private static readonly Color UnoccupiedStripeColor2 = new Color(0.18f, 0.18f, 0.18f, 1);
+    private static readonly Color UnoccupiedStripeColor = new Color(0.2f, 0.2f, 0.2f, 1);
+    private static readonly Color UnoccupiedStripeColorLand = new Color(0.1f, 0.15f, 0.1f, 1);
+    private static readonly Color UnoccupiedStripeColorWater = new Color(0.1f, 0.1f, 0.15f, 1);
 
     /// <summary>
     /// Writes the stripe palette on the tactical overlay: <paramref name="colors"/> padded out to the
@@ -304,8 +343,8 @@ public partial class CountryScene : Node2D
         } else
         {
             padded = new Color[2];
-            padded[0] = UnoccupiedStripeColor1;
-            padded[1] = UnoccupiedStripeColor2;
+            padded[0] = UnoccupiedStripeColor;
+            padded[1] = this.CountryState.IsLand ? UnoccupiedStripeColorLand : UnoccupiedStripeColorWater;
         }        
 
         // The shader clamps color_count to at least 1, so an empty palette would read colors[0] whatever
@@ -335,15 +374,40 @@ public partial class CountryScene : Node2D
     }
 
     /// <summary>
-    /// Repaints the tactical overlay from whoever is standing here — one stripe per occupying faction, in
-    /// that faction's color. Called by <see cref="AddUnit(UnitScene)"/> and <see cref="RemoveUnit"/>, the
-    /// only two places the slots change, and again when the country switches into tactical mode.
+    /// Repaints the tactical overlay from whoever is standing here — one stripe per occupant, in the color
+    /// the current view asks for. Called by <see cref="AddUnit(UnitScene)"/> and <see cref="RemoveUnit"/>,
+    /// the only two places the slots change, and again when the country switches into a tactical mode.
+    ///
+    /// Reads worldPresentationMode on every repaint rather than being told which palette to use, so a unit
+    /// arriving while TacticalTeam is on does not repaint the country in faction colors.
     /// </summary>
     public void UpdateOccupyingFactionColors()
     {
-        SetStripeColors(OccupyingUnitFactions()
+        SetStripeColors(OccupyingStripeColors());
+    }
+
+    /// <summary>
+    /// One color per occupant for the current view: the faction's own color in Tactical, its side's color
+    /// in TacticalTeam. Teams are de-duplicated the same way factions are in
+    /// <see cref="OccupyingUnitFactions"/> — Germany and Italy sharing a country is one Axis stripe, not
+    /// two identical red ones. Normal never reaches here, since the overlay it draws is hidden.
+    /// </summary>
+    private List<Color> OccupyingStripeColors()
+    {
+        List<Faction> factions = OccupyingUnitFactions();
+
+        if (worldPresentationMode == WorldPresentationMode.TacticalTeam)
+        {
+            return factions
+                .Select(StaticGameData.FactionTeamForFaction)
+                .Distinct()
+                .Select(StaticGameData.FactionTeamColor)
+                .ToList();
+        }
+
+        return factions
             .Select(faction => StaticGameData.FactionDataMap[faction].FactionColor)
-            .ToList());
+            .ToList();
     }
 
     public UnitScene AddUnit(int unitId)
