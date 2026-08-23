@@ -5,9 +5,14 @@
 [resource]
 resource_local_to_scene = true
 shader = ExtResource("1_ht248")
-shader_parameter/blink_speed = 0.50000002375
-shader_parameter/min_scale = 0.7
+shader_parameter/spin_speed = 0.4
+shader_parameter/spin_axis = 0
+shader_parameter/perspective = 0.0
+shader_parameter/edge_shade = 0.7510000356725
+shader_parameter/back_shade = 0.0
+shader_parameter/blink_speed = 0.0
+shader_parameter/min_scale = 1.0
 shader_parameter/max_scale = 1.0
-shader_parameter/min_alpha = 0.90000004275
+shader_parameter/min_alpha = 1.0
 shader_parameter/max_alpha = 1.0
 shader_parameter/alpha_offset = 0.0

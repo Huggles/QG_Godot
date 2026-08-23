@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://6eapox2v0pny"]
-
-[ext_resource type="Script" uid="uid://w3n71c5f0nhy" path="res://scenes/Units/BlinkingSprite2D.cs" id="1_lp3tv"]
-
-[node name="BlinkingSprite2d" type="Sprite2D"]
-script = ExtResource("1_lp3tv")
