@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public partial class CountryScene : Node2D
 {
@@ -20,20 +22,37 @@ public partial class CountryScene : Node2D
 
     public MarginContainer CountrySpriteTextureRectContainer => GetNode<MarginContainer>("%TextureRectContainer");
     public OpaqueTextureRect CountrySpriteTextureRect => GetNode<OpaqueTextureRect>("%TextureRect");
-    public Label CountryLabel => GetNode<Label>("CountryLabel");
+    public MarginContainer TVCountrySpriteTextureRectContainer => GetNode<MarginContainer>("%TVTextureRectContainer");
+    public OpaqueTextureRect TVCountrySpriteTextureRect => GetNode<OpaqueTextureRect>("%TVTextureRect");
 
+
+    public Label CountryLabel => GetNode<Label>("CountryLabel");
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
     public Vector2 Size => new Vector2(this.CountryState.StaticCountryData.Texture.GetWidth(), this.CountryState.StaticCountryData.Texture.GetHeight());
     public Rect2 Bounds => new Rect2(this.Position - (Size/2), Size);
 
-    public PresentationMode presentationMode = PresentationMode.Glow;
+    public TargetPresentationMode targetPresentationMode = TargetPresentationMode.Glow;
 
-    public enum PresentationMode
+    public WorldPresentationMode worldPresentationMode
+    {
+        get {
+            return field;
+        }
+        set {
+            field = value;
+            // Pass the value through. Calling this argument-less took the parameter default instead, so
+            // every assignment — Tactical included — landed on the Normal branch.
+            ChangeWorldPresentationMode(value);
+        }
+    }    
+
+    public enum TargetPresentationMode
     {
         Glow,
         TargetSprite
     }
+
 
     public static CountryScene SpawnCountry(int countryId)
     {
@@ -55,6 +74,38 @@ public partial class CountryScene : Node2D
         countrySceneInstance.CountrySpriteTextureRectContainer.Position = countryTopLeftPos;      
         countrySceneInstance.CountrySpriteTextureRectContainer.Visible = false;        
         return countrySceneInstance;
+    }
+
+    private void ChangeWorldPresentationMode(WorldPresentationMode newMode = WorldPresentationMode.Normal)
+    {
+        switch (newMode)
+        {
+            case WorldPresentationMode.Normal:
+                ShowWorldPresentationNormal();
+                break;
+            case WorldPresentationMode.Tactical:
+                ShowWorldPresentationTactical();
+                break;
+        }        
+    }
+
+    private void ShowWorldPresentationNormal()
+    {
+        // Was empty, which was harmless only while nothing ever reached the Tactical branch. Now that the
+        // signal does, switching back has to put the overlay away or the stripes stay on screen for good.
+        TVCountrySpriteTextureRectContainer.Visible = false;
+    }
+
+    private void ShowWorldPresentationTactical()
+    {
+        TVCountrySpriteTextureRect.Texture = StaticCountryData.Texture;
+        TVCountrySpriteTextureRectContainer.Size = Bounds.Size;
+        TVCountrySpriteTextureRectContainer.Position = -(Bounds.Size/2);
+
+        // The overlay is only repainted when a unit moves, so a country whose garrison has not changed
+        // since the last time tactical mode was off would come back with a stale palette.
+        UpdateOccupyingFactionColors();
+        TVCountrySpriteTextureRectContainer.Visible = true;
     }
 
     /// <summary>
@@ -90,6 +141,7 @@ public partial class CountryScene : Node2D
         CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
         CountryLabel.Visible = GameSettings.ShowCountryLabels;
 
+        EventBus.Instance.WorldPresentationViewChanged += OnWorldPresentationViewChanged;
         EventBus.Instance.CountryNamesToggled += OnCountryNameToggled;
 
         CountrySpriteTextureRect.MouseEntered += OnMouseEnteredOpaque;
@@ -100,12 +152,24 @@ public partial class CountryScene : Node2D
     {
         CountryState.Tags.TagAdded -= OnTagAdded;
         CountryState.Tags.TagRemoved -= OnTagRemoved;
+        EventBus.Instance.WorldPresentationViewChanged -= OnWorldPresentationViewChanged;
         EventBus.Instance.CountryNamesToggled -= OnCountryNameToggled;
     }
 
     private void OnCountryNameToggled(bool show)
     {
         CountryLabel.Visible = show;
+    }
+
+    /// <summary>
+    /// Every country listens for itself: the view is a property of the whole map, but each CountryScene
+    /// owns its own overlay nodes and duplicated stripe material, so there is nothing central to switch.
+    /// Assigning through the property rather than calling ChangeWorldPresentationMode directly keeps
+    /// worldPresentationMode readable as "what this country is currently drawing".
+    /// </summary>
+    private void OnWorldPresentationViewChanged(WorldPresentationMode mode)
+    {
+        worldPresentationMode = mode;
     }
 
     private void OnTagAdded(Tag tag, Faction faction)
@@ -184,6 +248,104 @@ public partial class CountryScene : Node2D
         material.SetShaderParameter("fill_color", fillColor ?? color);
     }
 
+
+    /// <summary>
+    /// The tactical overlay's stripe material, duplicated per country for the same reason as
+    /// <see cref="CountryShaderMaterial"/>: StripesMaterial.tres is one shared resource, so writing the
+    /// palette straight onto it would give every country on the map the same factions' stripes.
+    /// </summary>
+    private ShaderMaterial tvCountryShaderMaterial;
+
+    private ShaderMaterial TVCountryShaderMaterial
+    {
+        get
+        {
+            if (tvCountryShaderMaterial == null)
+            {
+                tvCountryShaderMaterial = (TVCountrySpriteTextureRect.Material as ShaderMaterial)?.Duplicate() as ShaderMaterial;
+                TVCountrySpriteTextureRect.Material = tvCountryShaderMaterial;
+            }
+            return tvCountryShaderMaterial;
+        }
+    }
+
+    /// <summary>
+    /// Stripes.gdshader's MAX_COLORS. GLSL arrays are fixed size, so the `colors` uniform is always
+    /// written at exactly this length and `color_count` decides how much of it is read. Godot ignores a
+    /// shorter array, which is why <see cref="SetStripeColors"/> pads instead of passing what it has.
+    /// </summary>
+    private const int MaxStripeColors = 3;
+
+    /// <summary>
+    /// What the overlay paints for a country nobody occupies. Fully transparent, because the shader ends
+    /// on <c>colors[index] * COLOR</c> — a zero-alpha entry multiplies the silhouette away, so unclaimed
+    /// space simply is not drawn rather than showing a placeholder tint over half the map.
+    /// </summary>
+    private static readonly Color UnoccupiedStripeColor1 = new Color(0.2f, 0.2f, 0.2f, 1);
+    private static readonly Color UnoccupiedStripeColor2 = new Color(0.1f, 0.1f, 0.1f, 1);
+
+    /// <summary>
+    /// Writes the stripe palette on the tactical overlay: <paramref name="colors"/> padded out to the
+    /// shader's fixed array length into `colors`, and how many of those entries to cycle through into
+    /// `color_count`. An empty (or null) list paints the country as unoccupied; anything past
+    /// <see cref="MaxStripeColors"/> is dropped, which a country capped at three units cannot reach.
+    /// </summary>
+    public void SetStripeColors(IReadOnlyList<Color> colors)
+    {
+        ShaderMaterial material = TVCountryShaderMaterial;
+        if (material == null) return;
+
+        int count = Math.Min(colors?.Count ?? 0, MaxStripeColors);
+        Color[] padded = new Color[count];
+        if(count > 0)
+        {            
+            for (int i = 0; i < count; i++)
+                padded[i] = colors[i];
+        } else
+        {
+            padded = new Color[2];
+            padded[0] = UnoccupiedStripeColor1;
+            padded[1] = UnoccupiedStripeColor2;
+        }        
+
+        // The shader clamps color_count to at least 1, so an empty palette would read colors[0] whatever
+        // we asked for. Say 1 out loud and let it land on the transparent entry padding already put there.
+        material.SetShaderParameter("colors", padded);
+        material.SetShaderParameter("color_count", Math.Max(padded.Length, 1));
+    }
+
+    /// <summary>
+    /// The distinct factions with a unit standing here, in slot order.
+    ///
+    /// Read off the UnitScene slots rather than <c>CountryState.Units</c> so the overlay always agrees
+    /// with the pieces actually drawn on the board: the state dictionary is updated when the change
+    /// event applies, while the scene arrives a deploy animation later.
+    /// </summary>
+    public List<Faction> OccupyingUnitFactions()
+    {
+        List<Faction> factions = new List<Faction>();
+        foreach (UnitScene unitScene in new[] { UnitScene1, UnitScene2, UnitScene3 })
+        {
+            if (unitScene == null) continue;
+            // Two armies of the same faction are one stripe, not two — the overlay answers "who is here",
+            // and a doubled band would only read as a wider stripe anyway.
+            if (!factions.Contains(unitScene.Faction)) factions.Add(unitScene.Faction);
+        }
+        return factions;
+    }
+
+    /// <summary>
+    /// Repaints the tactical overlay from whoever is standing here — one stripe per occupying faction, in
+    /// that faction's color. Called by <see cref="AddUnit(UnitScene)"/> and <see cref="RemoveUnit"/>, the
+    /// only two places the slots change, and again when the country switches into tactical mode.
+    /// </summary>
+    public void UpdateOccupyingFactionColors()
+    {
+        SetStripeColors(OccupyingUnitFactions()
+            .Select(faction => StaticGameData.FactionDataMap[faction].FactionColor)
+            .ToList());
+    }
+
     public UnitScene AddUnit(int unitId)
     {
         UnitScene unitScene = UnitState.ForId(unitId).UnitScene;
@@ -195,8 +357,11 @@ public partial class CountryScene : Node2D
     public void AddUnit(UnitScene unitScene)
     {
         int position = SetUnitOnAvailablePosition(unitScene);
-
         if (position <= 0) return;
+
+        // Ahead of every early return below: the slot is booked by this point, so the overlay must
+        // reflect the new occupant even on the rebuild-in-place path that skips the re-parenting.
+        UpdateOccupyingFactionColors();
 
         // Undoes the Hide() from RemoveUnit. Ahead of the already-parented early return below, because
         // a rebuild-in-place unit is on the board either way and must be drawn.
@@ -274,18 +439,21 @@ public partial class CountryScene : Node2D
             case 2: UnitScene2 = null; break;
             case 3: UnitScene3 = null; break;
         }
+
+        // After the slot is cleared, not before: the departing faction must be gone from the palette.
+        UpdateOccupyingFactionColors();
     }
 
     public void SetClickable()
     {
-        if(presentationMode == PresentationMode.Glow)
+        if(targetPresentationMode == TargetPresentationMode.Glow)
         {
             CountrySpriteTextureRect.Visible = true;
             CountrySpriteTextureRectContainer.Visible = true;
             CountrySpriteTextureRect.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
             OnMouseExitedOpaque();
         }
-        else if(presentationMode == PresentationMode.TargetSprite)
+        else if(targetPresentationMode == TargetPresentationMode.TargetSprite)
         {
             CountrySprite.Position = new Vector2(0,0) + StaticCountryData.LabelTransformData.Position2D;
             CountrySprite.ShowSprite();

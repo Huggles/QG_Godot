@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://ulu5d3pvyttl"]
 
 [ext_resource type="Texture2D" uid="uid://ftqjs2rbfp1t" path="res://assets/textures/Other/Board9Patch_2.png" id="1_86c0c"]
+[ext_resource type="Script" uid="uid://chg0qtenjlldw" path="res://scenes/World/WorldScene.cs" id="1_r63mr"]
 [ext_resource type="Texture2D" uid="uid://dsgtbjipkhdsy" path="res://assets/textures/Countries/World_Clean_3.png" id="2_r63mr"]
 
 [node name="World" type="Node2D" unique_id=810156569]
+script = ExtResource("1_r63mr")
 
 [node name="Countries" type="Node2D" parent="." unique_id=168300018]
 unique_name_in_owner = true
@@ -28,6 +30,7 @@ axis_stretch_horizontal = 2
 axis_stretch_vertical = 2
 
 [node name="WorldSprite" type="Sprite2D" parent="Background" unique_id=1626979141]
+unique_name_in_owner = true
 z_index = 1
 position = Vector2(1324, 702)
 texture = ExtResource("2_r63mr")

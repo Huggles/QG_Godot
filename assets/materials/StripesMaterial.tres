@@ -4,7 +4,7 @@
 
 [resource]
 shader = ExtResource("1_67ko1")
-shader_parameter/colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/colors = PackedColorArray(1, 0, 0, 1, 0, 0.18431373, 1, 0.99215686, 0.5796909, 0.57969093, 0.57969093, 1)
 shader_parameter/color_count = 3
 shader_parameter/stripe_width = 0.1
 shader_parameter/angle_degrees = 45.0

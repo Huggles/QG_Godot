@@ -14,6 +14,7 @@ public partial class BottomLeftMenu : Control
 
 	public Button ToggleCountryLabelsButton => GetNode<Button>("%CountryLabelsButton");
 	public Button ToggleDebugMenuButton => GetNode<Button>("%DebugMenuButton");
+	public Button WorldPresentationButton => GetNode<Button>("%WorldPresentationButton");
 
 	public bool VisibilityModalOpen = false;
 
@@ -38,6 +39,9 @@ public partial class BottomLeftMenu : Control
 			EventBus.Instance.EmitSignal(EventBus.SignalName.DebugMenuToggled, ToggleDebugMenuButton.ButtonPressed);
 			GameSettings.Instance.SetShowDebugMenu(ToggleDebugMenuButton.ButtonPressed);
 		};
+
+		WorldPresentationButton.Pressed += CycleWorldPresentationMode;
+		RefreshWorldPresentationButton();
 
 		// The local player's factions are not known yet when this menu enters the tree, so
 		// rebuild the card backs whenever the assignment can have changed.
@@ -216,5 +220,38 @@ public partial class BottomLeftMenu : Control
 	{
 		VisibilityModalOpen = !VisibilityModalOpen;
 		BottomLeftMenuModal.Visible = VisibilityModalOpen;
+	}
+
+	/// <summary>
+	/// The view the map is currently drawing. Held here rather than read back off a CountryScene because
+	/// this button is what decides it: every country follows the signal, so the menu is the one place the
+	/// current value exists. Session-only — unlike its two neighbours in this modal it is not persisted,
+	/// so the map always opens in Normal.
+	/// </summary>
+	private WorldPresentationMode _worldPresentationMode = WorldPresentationMode.Normal;
+
+	/// <summary>
+	/// Steps to the next <see cref="WorldPresentationMode"/> and tells the map. Walks Enum.GetValues and
+	/// wraps rather than branching Normal/Tactical, so a third view added to the enum joins the rotation
+	/// with no change here — which is also why this is a plain button and not a two-state toggle.
+	/// </summary>
+	private void CycleWorldPresentationMode()
+	{
+		WorldPresentationMode[] modes = Enum.GetValues<WorldPresentationMode>();
+		int next = (Array.IndexOf(modes, _worldPresentationMode) + 1) % modes.Length;
+		_worldPresentationMode = modes[next];
+
+		EventBus.Emit(EventBus.SignalName.WorldPresentationViewChanged, (int)_worldPresentationMode);
+		RefreshWorldPresentationButton();
+	}
+
+	/// <summary>
+	/// Labels the button with the view currently on screen, not the one the next press would bring up:
+	/// the other rows in this modal read as state rather than as actions, and a row that named its own
+	/// destination would disagree with them.
+	/// </summary>
+	private void RefreshWorldPresentationButton()
+	{
+		WorldPresentationButton.Text = $"View: {_worldPresentationMode}";
 	}
 }

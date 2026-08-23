@@ -104,4 +104,6 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void UnitRemovedEventHandler(int unitId, int countryId);
 
     [Signal] public delegate void GameStateRecalculatedEventHandler();
+
+    [Signal] public delegate void WorldPresentationViewChangedEventHandler(WorldPresentationMode mode);
 }
