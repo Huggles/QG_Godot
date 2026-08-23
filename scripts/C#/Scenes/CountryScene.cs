@@ -17,13 +17,23 @@ public partial class CountryScene : Node2D
     public Sprite2D SupplyStarSprite => GetNode<Sprite2D>("SupplyStarSprite");
     public Sprite2D StraightSpriteNode => GetNode<Sprite2D>("StraightSprite");
     public ClickableSprite CountrySprite => GetNode<ClickableSprite>("CountryClickableSprite");
-    public TextureRect CountrySpriteTextureRect => GetNode<TextureRect>("TextureRect");
+
+    public MarginContainer CountrySpriteTextureRectContainer => GetNode<MarginContainer>("%TextureRectContainer");
+    public OpaqueTextureRect CountrySpriteTextureRect => GetNode<OpaqueTextureRect>("%TextureRect");
     public Label CountryLabel => GetNode<Label>("CountryLabel");
 
     public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
     public Vector2 Size => new Vector2(this.CountryState.StaticCountryData.Texture.GetWidth(), this.CountryState.StaticCountryData.Texture.GetHeight());
     public Rect2 Bounds => new Rect2(this.Position - (Size/2), Size);
+
+    public PresentationMode presentationMode = PresentationMode.Glow;
+
+    public enum PresentationMode
+    {
+        Glow,
+        TargetSprite
+    }
 
     public static CountryScene SpawnCountry(int countryId)
     {
@@ -41,9 +51,9 @@ public partial class CountryScene : Node2D
 
         countrySceneInstance.CountryLabel.Position = labelPos;
         countrySceneInstance.CountrySpriteTextureRect.Texture = countrySceneInstance.StaticCountryData.Texture;
-        countrySceneInstance.CountrySpriteTextureRect.Size = countrySceneInstance.Bounds.Size;
-        countrySceneInstance.CountrySpriteTextureRect.Position = countryTopLeftPos;      
-        countrySceneInstance.CountrySpriteTextureRect.Visible = true;        
+        countrySceneInstance.CountrySpriteTextureRectContainer.Size = countrySceneInstance.Bounds.Size;
+        countrySceneInstance.CountrySpriteTextureRectContainer.Position = countryTopLeftPos;      
+        countrySceneInstance.CountrySpriteTextureRectContainer.Visible = false;        
         return countrySceneInstance;
     }
 
@@ -82,8 +92,8 @@ public partial class CountryScene : Node2D
 
         EventBus.Instance.CountryNamesToggled += OnCountryNameToggled;
 
-        CountrySpriteTextureRect.MouseEntered += () => SetCountryColor(Colors.Green);
-        CountrySpriteTextureRect.MouseExited += () => SetCountryColor(Colors.Red);
+        CountrySpriteTextureRect.MouseEntered += OnMouseEnteredOpaque;
+        CountrySpriteTextureRect.MouseExited += OnMouseExitedOpaque;
     }
 
     public override void _ExitTree()
@@ -125,6 +135,9 @@ public partial class CountryScene : Node2D
             SetClickable();
         }
     }
+
+    private void OnMouseEnteredOpaque() => SetCountryColor(Colors.Green);
+    private void OnMouseExitedOpaque() => SetCountryColor(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Yellow : Colors.Red);
 
     private void OnMouseLeftClickOpaque()
     {
@@ -265,24 +278,31 @@ public partial class CountryScene : Node2D
 
     public void SetClickable()
     {
-        CountrySprite.Position =
-        new Vector2(0,0)
-        + StaticCountryData.LabelTransformData.Position2D;
-        CountrySprite.ShowSprite();
-
-        // A country the asked faction already occupies is a rebuild-in-place target: legal, but the rare
-        // option. This marker is the one doing the visual talking — it is authored larger than the unit
-        // marker and sits at the country label — so subduing only the unit's marker left the target
-        // looking exactly like an ordinary one. Both are subdued now.
-        if (CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL))
+        if(presentationMode == PresentationMode.Glow)
         {
-            CountrySprite.Scale = defaultTargetScale * SubduedTargetScaleFactor;
-            CountrySprite.SetClickableSubdued();
-            return;
+            CountrySpriteTextureRect.Visible = true;
+            CountrySpriteTextureRectContainer.Visible = true;
+            CountrySpriteTextureRect.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
+            OnMouseExitedOpaque();
         }
+        else if(presentationMode == PresentationMode.TargetSprite)
+        {
+            CountrySprite.Position = new Vector2(0,0) + StaticCountryData.LabelTransformData.Position2D;
+            CountrySprite.ShowSprite();
 
-        CountrySprite.Scale = defaultTargetScale;
-        CountrySprite.SetClickable();
+            // A country the asked faction already occupies is a rebuild-in-place target: legal, but the rare
+            // option. This marker is the one doing the visual talking — it is authored larger than the unit
+            // marker and sits at the country label — so subduing only the unit's marker left the target
+            // looking exactly like an ordinary one. Both are subdued now.
+            if (CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL))
+            {
+                CountrySprite.Scale = defaultTargetScale * SubduedTargetScaleFactor;
+                CountrySprite.SetClickableSubdued();
+                return;
+            }
+            CountrySprite.Scale = defaultTargetScale;
+            CountrySprite.SetClickable();
+        }
     }
 
     public void SetUnclickable()
@@ -290,6 +310,11 @@ public partial class CountryScene : Node2D
         CountrySprite.Scale = defaultTargetScale;
         CountrySprite.HideSprite();
         CountrySprite.SetUnclickable();
+
+        CountrySpriteTextureRect.Visible = false;
+        CountrySpriteTextureRectContainer.Visible = false;
+        CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
+        OnMouseExitedOpaque();
     }
 
     private void ShowSupplyStar()
