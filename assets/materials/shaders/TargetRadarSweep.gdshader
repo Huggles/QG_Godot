@@ -1,8 +1,8 @@
 shader_type canvas_item;
 
-// The radar look of a selection target marker: the middle of the icon sits at a low resting alpha and
-// pie slices sweep around it at full opacity, like radar beams passing over a blip. The outer ring is
-// left alone, so the marker keeps a solid rim and reads as a target even at the moment no beam is
+// The radar look of a selection target marker: the outer ring of the icon sits at a low resting alpha
+// and pie slices sweep around it at full opacity, like radar beams passing over a blip. The middle is
+// left alone, so the marker keeps a solid core and reads as a target even at the moment no beam is
 // pointing anywhere useful.
 //
 // Lives in a shader rather than in a Tween because a tween can only drive whole-node properties — it
@@ -19,14 +19,14 @@ uniform bool sweeping = true;
 /// What the swept area is drawn at while the beam is elsewhere.
 uniform float base_alpha : hint_range(0.0, 1.0) = 0.0;
 
-/// How far out the slices reach, as a fraction of the distance from the middle of the texture to the
-/// middle of an edge. Everything beyond this is left at the icon's own alpha and never dims, which is
-/// what keeps the rim of the target solid while the inside turns. Above 1.0 it starts eating into the
-/// corners, which for a round marker is past the artwork anyway.
-uniform float sweep_radius : hint_range(0.0, 1.5) = 0.66;
+/// Where the swept ring begins, as a fraction of the distance from the middle of the texture to the
+/// middle of an edge. Everything inside this is left at the icon's own alpha and never dims, which is
+/// what keeps the core of the target solid while the outside turns. The ring runs from here out to
+/// wherever the artwork stops — there is no outer bound, because past the artwork COLOR.a is already 0.
+uniform float sweep_inner_radius : hint_range(0.0, 1.5) = 0.66;
 
 /// Width of the fade at that boundary, in the same units. Enough to keep the circle from stair-stepping
-/// without blurring the rim into the sweep.
+/// without blurring the core into the sweep.
 uniform float radius_edge : hint_range(0.0, 0.5) = 0.03;
 
 /// What the icon is drawn at under the beam.
@@ -81,12 +81,12 @@ void fragment() {
 		float edge = clamp(radians(edge_degrees), 0.0001, width * 0.5);
 		float wedge = smoothstep(0.0, edge, behind) * (1.0 - smoothstep(width - edge, width, behind));
 
-		// 1 in the swept disc, 0 out on the rim. Scaled so the boundary is measured against the half
+		// 0 in the core, 1 out in the swept ring. Scaled so the boundary is measured against the half
 		// width of the texture rather than against UV, which would put it at half the intended radius.
 		float radius = length(offset) * 2.0;
-		float swept = 1.0 - smoothstep(sweep_radius - radius_edge, sweep_radius, radius);
+		float swept = smoothstep(sweep_inner_radius - radius_edge, sweep_inner_radius, radius);
 
-		// The rim is not merely "always lit" — it is untouched, so whatever alpha the artwork and the
+		// The core is not merely "always lit" — it is untouched, so whatever alpha the artwork and the
 		// node's modulate give it is what it keeps.
 		alpha_scale = mix(1.0, mix(base_alpha, sweep_alpha, wedge), swept);
 	}
