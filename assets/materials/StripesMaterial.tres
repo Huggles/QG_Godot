@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://ba0cxvw7vb63r"]
+
+[ext_resource type="Shader" uid="uid://rwcvm1sear8d" path="res://assets/materials/shaders/Stripes.gdshader" id="1_67ko1"]
+
+[resource]
+shader = ExtResource("1_67ko1")
+shader_parameter/colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+shader_parameter/color_count = 3
+shader_parameter/stripe_width = 0.1
+shader_parameter/angle_degrees = 45.0
+shader_parameter/scroll_speed = 0.0
