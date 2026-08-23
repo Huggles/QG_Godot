@@ -2,8 +2,8 @@ using Godot;
 
 /// <summary>
 /// An <see cref="OpaqueTextureRect"/> that also carries the "this is a selection target" behaviour
-/// <see cref="ClickableSprite"/> gives an Area2D: show/hide, a resting alpha wave, a hover tint, and
-/// a clickable/unclickable switch.
+/// <see cref="ClickableSprite"/> gives an Area2D: show/hide, the radar sweep, a hover tint, and a
+/// clickable/unclickable switch.
 ///
 /// It exists because ClickableSprite has to reimplement mouse picking by hand — a RectangleShape2D
 /// sized to the texture, a per-frame ToLocal, and a manual Image.GetPixel — and the target marker on
@@ -18,10 +18,14 @@ using Godot;
 public partial class ClickableTextureRect : OpaqueTextureRect
 {
     /// <summary>Tint while the cursor is on an opaque pixel of the marker.</summary>
-    public static readonly Color HoverColor = new Color(0.5f, 1, 0.5f, 0.8f);
+    public static readonly Color HoverColor = new Color(0.5f, 1, 0.5f, 1);
 
-    /// <summary>Resting tint of an ordinary offered target, before the alpha wave moves it.</summary>
-    public static readonly Color SelectableColor = new Color(1, 1, 1, 0.8f);
+    /// <summary>
+    /// Resting tint of an ordinary offered target. Fully opaque, because the alpha it is actually
+    /// drawn at comes from TargetRadarSweep.gdshader — a faint icon with an opaque slice sweeping over
+    /// it — which multiplies into this.
+    /// </summary>
+    public static readonly Color SelectableColor = new Color(1, 1, 1, 1);
 
     /// <summary>
     /// Resting tint of a secondary target — one offered alongside the ordinary ones for a rarer
@@ -34,11 +38,15 @@ public partial class ClickableTextureRect : OpaqueTextureRect
     private Color restingColor = SelectableColor;
 
     private bool isClickable;
-    private Tween alphaWaveTween;
+
+    /// <summary>This marker's own copy of the radar shader. See <see cref="TargetRadar.CreateMaterial"/>.</summary>
+    private ShaderMaterial radarMaterial;
 
     public override void _Ready()
     {
         base._Ready();
+        radarMaterial = TargetRadar.CreateMaterial();
+        Material = radarMaterial;
         Modulate = restingColor;
         MouseEntered += OnMouseEnteredOpaque;
         MouseExited += OnMouseExitedOpaque;
@@ -61,29 +69,25 @@ public partial class ClickableTextureRect : OpaqueTextureRect
     public void SetClickable()
     {
         restingColor = SelectableColor;
-        // Assign before the tween: a marker left faint by a previous subdued stint would otherwise
-        // stay faint for most of the 20-second leg it takes the wave to climb back.
         Modulate = restingColor;
         isClickable = true;
-        StartAlphaWaveAnimation();
+        StartRadarSweep();
     }
 
     /// <summary>
-    /// Clickable, but drawn as a secondary target: a flat faint alpha with NO pulse. Used for the
+    /// Clickable, but drawn as a secondary target: a flat faint alpha with NO radar sweep. Used for the
     /// rebuild-in-place deploy target on a unit, a rare option offered beside the ordinary ones that
     /// must not compete with them for attention.
     ///
-    /// Deliberately not a fainter version of the wave. One leg of that wave lasts
-    /// DurationLongSeconds * 10 — twenty seconds at Normal speed — so a subdued target starting from
-    /// <see cref="SelectableColor"/>'s 0.8 spent most of the selection at ordinary opacity and read
-    /// as an ordinary target. Holding still is also the clearer signal: the ordinary targets are the
-    /// ones that breathe. Hover still brightens to <see cref="HoverColor"/>, so the marker is
-    /// unambiguous under the mouse.
+    /// Deliberately not a fainter version of the sweep. Motion is what the eye goes to first, so a
+    /// slice turning over a dimmer icon would still be read before the ordinary targets beside it.
+    /// Holding still is the clearer signal: the ordinary targets are the ones that sweep. Hover still
+    /// brightens to <see cref="HoverColor"/>, so the marker is unambiguous under the mouse.
     /// </summary>
     public void SetClickableSubdued()
     {
         restingColor = SubduedColor;
-        StopAlphaWaveAnimation();
+        StopRadarSweep();
         Modulate = restingColor;
         isClickable = true;
     }
@@ -92,31 +96,21 @@ public partial class ClickableTextureRect : OpaqueTextureRect
     {
         restingColor = SelectableColor;
         isClickable = false;
-        StopAlphaWaveAnimation();
+        StopRadarSweep();
         Modulate = restingColor;
     }
 
-    public void StartAlphaWaveAnimation()
-    {
-        alphaWaveTween?.Kill();
-        alphaWaveTween = GetTree().CreateTween().SetLoops();
-        alphaWaveTween.TweenProperty(this, "modulate:a", 0.3, GameSettings.DurationLongSeconds * 10);
-        alphaWaveTween.TweenProperty(this, "modulate:a", 0.8, GameSettings.DurationLongSeconds * 10);
-    }
+    public void StartRadarSweep() => TargetRadar.Start(radarMaterial);
 
-    public void StopAlphaWaveAnimation()
-    {
-        alphaWaveTween?.Kill();
-        alphaWaveTween = null;
-    }
+    public void StopRadarSweep() => TargetRadar.Stop(radarMaterial);
 
     /// <summary>
     /// MouseEntered on a plain TextureRect fires anywhere in the rect; here <see cref="_HasPoint"/>
     /// has already restricted picking to opaque pixels, so the engine's own signal is the
     /// alpha-accurate one and there is nothing left to re-check.
     ///
-    /// The alpha wave is left running: it drives only modulate:a, so the hover hue survives it and an
-    /// ordinary target keeps breathing under the cursor, exactly as ClickableSprite behaves.
+    /// The radar sweep is left running: it lives in the shader and multiplies whatever alpha modulate
+    /// carries, so the hover hue and the turning slice coexist instead of overwriting each other.
     /// </summary>
     private void OnMouseEnteredOpaque()
     {

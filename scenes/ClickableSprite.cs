@@ -7,7 +7,9 @@ public partial class ClickableSprite : Area2D
 	private CollisionShape2D CollisionShape => GetNode<CollisionShape2D>("CollisionShape2D");
 
 	private bool IsClickable = false;
-	private Tween _alphaWaveTween;
+
+	/// <summary>This marker's own copy of the radar shader. See <see cref="TargetRadar.CreateMaterial"/>.</summary>
+	private ShaderMaterial _radarMaterial;
 
 	[Export]
 	private Texture2D texture;
@@ -34,8 +36,14 @@ public partial class ClickableSprite : Area2D
 	
 
 
-	public static Color HOVER_COLOR = new Color(0.5f, 1, 0.5f, .8f);
-    public static Color SELECTABLE_COLOR = new Color(1,1,1,.8f);
+	public static Color HOVER_COLOR = new Color(0.5f, 1, 0.5f, 1);
+
+	/// <summary>
+	/// Resting colour of an ordinary offered target. Fully opaque, because the alpha it is actually
+	/// drawn at comes from TargetRadarSweep.gdshader — a faint icon with an opaque slice sweeping over
+	/// it — which multiplies into this.
+	/// </summary>
+    public static Color SELECTABLE_COLOR = new Color(1,1,1,1);
 
 	/// <summary>
 	/// Resting colour for a secondary target — one offered alongside the ordinary ones for a rarer
@@ -56,6 +64,11 @@ public partial class ClickableSprite : Area2D
 
 	public override void _Ready()
 	{
+		// On the Sprite2D, not on this Area2D: the Area2D draws nothing, and a CanvasItem material does
+		// not carry down to children unless they ask for it with use_parent_material.
+		_radarMaterial = TargetRadar.CreateMaterial();
+		Sprite.Material = _radarMaterial;
+
 		Sprite.Modulate = SELECTABLE_COLOR;
 		InputEvent += OnInputEvent;
 		MouseEntered += OnMouseEntered;
@@ -79,30 +92,27 @@ public partial class ClickableSprite : Area2D
 	public void SetClickable()
 	{
 		_restingColor = SELECTABLE_COLOR;
-		// Assign before the tween: a sprite left faint by a previous subdued stint would otherwise stay
-		// faint for most of the 20-second leg it takes the wave to climb back.
 		Sprite.Modulate = _restingColor;
 		IsClickable = true;
 		CollisionShape.Disabled = false;
 		CollisionShape.Visible = true;
-		SpriteAlphaWaveAnimation();
+		StartRadarSweep();
 	}
 
 	/// <summary>
-	/// Clickable, but drawn as a secondary target: a flat faint alpha with NO pulse. Used for the
+	/// Clickable, but drawn as a secondary target: a flat faint alpha with NO radar sweep. Used for the
 	/// rebuild-in-place deploy target on a unit, a rare option offered beside the ordinary ones that
 	/// must not compete with them for attention.
 	///
-	/// Deliberately not a fainter version of the wave. One leg of that wave lasts
-	/// DurationLongSeconds * 10 — twenty seconds at Normal speed — so a subdued target starting from
-	/// SELECTABLE_COLOR's 0.8 spent most of the selection at ordinary opacity and read as an ordinary
-	/// target. Holding still is also the clearer signal: the ordinary targets are the ones that
-	/// breathe. Hover still brightens to HOVER_COLOR, so the sprite is unambiguous under the mouse.
+	/// Deliberately not a fainter version of the sweep. Motion is what the eye goes to first, so a
+	/// slice turning over a dimmer icon would still be read before the ordinary targets beside it.
+	/// Holding still is the clearer signal: the ordinary targets are the ones that sweep. Hover still
+	/// brightens to HOVER_COLOR, so the sprite is unambiguous under the mouse.
 	/// </summary>
 	public void SetClickableSubdued()
 	{
 		_restingColor = SUBDUED_COLOR;
-		StopAlphaWaveAnimation();
+		StopRadarSweep();
 		Sprite.Modulate = _restingColor;
 		IsClickable = true;
 		CollisionShape.Disabled = false;
@@ -115,22 +125,12 @@ public partial class ClickableSprite : Area2D
 		IsClickable = false;
 		CollisionShape.Disabled = true;
 		CollisionShape.Visible = false;
-		StopAlphaWaveAnimation();
+		StopRadarSweep();
 	}
 
-	public void SpriteAlphaWaveAnimation()
-	{
-		_alphaWaveTween?.Kill();
-		_alphaWaveTween = GetTree().CreateTween().SetLoops();
-		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.3, GameSettings.DurationLongSeconds * 10);
-		_alphaWaveTween.TweenProperty(Sprite, "modulate:a", 0.8, GameSettings.DurationLongSeconds * 10);
-	}
+	public void StartRadarSweep() => TargetRadar.Start(_radarMaterial);
 
-	public void StopAlphaWaveAnimation()
-	{
-		_alphaWaveTween?.Kill();
-		_alphaWaveTween = null;
-	}
+	public void StopRadarSweep() => TargetRadar.Stop(_radarMaterial);
 
 
 	private void OnMouseEnterSpriteOpaque()
