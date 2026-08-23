@@ -16,16 +16,21 @@ using System.Collections.Generic;
 /// fan. Carried so a re-draw after browsing reproduces the prompt as the player last saw it, rather
 /// than collapsing it back into one row.
 /// </param>
-/// <param name="PreviewCountryIdsByCardId">
-/// Which countries each drawn card could affect, for the hover preview — see
+/// <param name="PreviewsByCardId">
+/// What each drawn card could affect, for the hover preview — see
 /// <see cref="CardTargetPreviewDisplay"/>. Computed by the host and shipped on
 /// <see cref="InputRequest.CardTargetPreviews"/>; a client cannot re-derive it, for the same reasons
 /// it cannot re-derive <paramref name="SelectableCardIds"/>. A card absent from the map has nothing
 /// to show.
+///
+/// Holds the wire entry whole rather than one dictionary per target kind. Countries and units are
+/// already two lists and a third kind would be a third dictionary here, a third parameter, and a
+/// third thing for every caller to thread through — the same reasoning that makes
+/// <see cref="TargetSet"/> a list of <see cref="TargetRef"/> instead of a field per kind.
 /// </param>
 public sealed record ActiveCardPrompt(
     Faction Faction,
     List<int> DisplayCardIds,
     List<int> SelectableCardIds,
     bool SeparateNonHandCards = false,
-    Dictionary<int, List<int>> PreviewCountryIdsByCardId = null);
+    Dictionary<int, InputRequest.CardTargetPreview> PreviewsByCardId = null);

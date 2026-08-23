@@ -68,10 +68,13 @@ public enum Tag
     NeedsAttention,
 
     /// <summary>
-    /// On a COUNTRY: the player is hovering a card in an open card prompt and this country is one the
-    /// card could affect. Drawn with the same glow as an offered target, deliberately — the player is
-    /// being shown "this is what that card reaches" — but WITHOUT the click handler, because the game
-    /// is still waiting for a card, not a country.
+    /// On a COUNTRY or a UNIT: the player is hovering a card in an open card prompt and this is one of
+    /// the things the card could affect. Drawn with the same visual as an offered target, deliberately
+    /// — the player is being shown "this is what that card reaches" — but WITHOUT the click, because
+    /// the game is still waiting for a card, not for a country or a unit.
+    ///
+    /// A country glows; a unit puts up its own target marker and leaves its country dark, so a card
+    /// that reaches one army in Egypt says exactly that rather than lighting the whole country.
     ///
     /// Raised and cleared only by <see cref="CardTargetPreviewDisplay"/> on the hovering peer. Local
     /// like <see cref="Clickable"/> and <see cref="RebuildTarget"/>: it is pure presentation and is

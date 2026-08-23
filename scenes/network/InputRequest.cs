@@ -100,8 +100,13 @@ public abstract partial class InputRequest
     public List<int> DisplayCardIds { get; set; }
 
     /// <summary>
-    /// Per-card hover preview: which countries each card this prompt draws could affect, so hovering
-    /// a card in the hand lights its targets up on the board before the player commits to it.
+    /// Per-card hover preview: what each card this prompt draws could affect, so hovering a card in
+    /// the hand lights its targets up on the board before the player commits to it.
+    ///
+    /// Countries and units are carried apart rather than collapsed to countries, because they are
+    /// drawn differently: a targeted country glows, a targeted unit puts up its own target marker.
+    /// Collapsing a unit to the country it stands in — which is what this used to ship — lit the whole
+    /// of Egypt when the card could only reach the one army standing there.
     ///
     /// Computed on the host in <see cref="PopulateTargets"/>, where the window's reaction trigger and
     /// freshly calculated tags are both live, from each card's <see cref="CardLogic.Targets"/>. A
@@ -118,7 +123,19 @@ public abstract partial class InputRequest
     public sealed class CardTargetPreview
     {
         public int CardId { get; set; }
+
+        /// <summary>Countries the card names outright. NOT the countries its unit targets stand in.</summary>
         public List<int> CountryIds { get; set; }
+
+        /// <summary>Units the card names. Each lights its own marker, leaving its country dark.</summary>
+        public List<int> UnitIds { get; set; }
+
+        /// <summary>True when there is nothing to draw, so the host can leave the entry off the wire.</summary>
+        // Ignored rather than merely unused on the far side: System.Text.Json serializes get-only
+        // properties, so without this every entry would carry a field the reader recomputes anyway.
+        [JsonIgnore]
+        public bool IsEmpty => (CountryIds == null || CountryIds.Count == 0)
+                               && (UnitIds == null || UnitIds.Count == 0);
     }
 
     /// <summary>
@@ -290,15 +307,21 @@ public abstract partial class InputRequest
 
         CardTargetPreviews = cardIds
             .Distinct()
-            .Select(cardId => new CardTargetPreview
+            .Select(cardId =>
             {
-                CardId = cardId,
                 // TargetsOrNone, not Targets: a target expression evaluated a moment before its step
                 // can legitimately throw, and that must cost the preview and not the prompt.
-                CountryIds = CardState.ForId(cardId)?.CardLogic?.TargetsOrNone().ResolvedCountryIds()
-                             ?? new List<int>()
+                TargetSet targets = CardState.ForId(cardId)?.CardLogic?.TargetsOrNone() ?? TargetSet.None;
+                return new CardTargetPreview
+                {
+                    CardId = cardId,
+                    // The two kinds stay apart all the way to the board — see CardTargetPreview. Card
+                    // and Faction targets are dropped here: neither names a place to light up.
+                    CountryIds = targets.CountryIds.ToList(),
+                    UnitIds = targets.UnitIds.ToList(),
+                };
             })
-            .Where(preview => preview.CountryIds.Count > 0)
+            .Where(preview => !preview.IsEmpty)
             .ToList();
     }
 

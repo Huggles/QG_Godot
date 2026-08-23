@@ -87,24 +87,6 @@ public sealed record TargetSet
     public IEnumerable<int> UnitIds => IdsOf(TargetKind.Unit);
     public IEnumerable<int> CardIds => IdsOf(TargetKind.Card);
 
-    /// <summary>
-    /// The countries to light up on the board: the countries named outright, plus the country each
-    /// targeted unit is standing in. Card and Faction targets contribute nothing — they are not
-    /// places, so an action that only touches cards correctly leaves the board dark.
-    ///
-    /// A unit that has left the board (no CountryId) is skipped rather than resolving to country 0.
-    /// </summary>
-    public List<int> ResolvedCountryIds()
-    {
-        HashSet<int> countryIds = new(CountryIds);
-
-        foreach (UnitState unitState in UnitState.ForIds(UnitIds))
-            if (unitState != null && unitState.CountryId >= 0)
-                countryIds.Add(unitState.CountryId);
-
-        return countryIds.ToList();
-    }
-
     private static TargetSet Kind(TargetKind kind, IEnumerable<int> ids) =>
         new(ids?.Select(id => new TargetRef(kind, id)));
 }

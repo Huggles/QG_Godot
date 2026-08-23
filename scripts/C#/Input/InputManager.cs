@@ -66,7 +66,8 @@ public partial class InputManager : Node2D
 	/// </param>
 	/// <param name="cardTargetPreviews">
 	/// The host's per-card target preview, straight off <see cref="InputRequest.CardTargetPreviews"/>.
-	/// Drives the board glow when the player hovers a card — see <see cref="CardTargetPreviewDisplay"/>.
+	/// Lights the targeted countries and units when the player hovers a card — see
+	/// <see cref="CardTargetPreviewDisplay"/>.
 	/// Null is fine and means no card previews anything.
 	/// </param>
 	public InputHandlerPlayCard SetCardSelectionActive(
@@ -111,13 +112,13 @@ public partial class InputManager : Node2D
 	/// duplicate card ids: the host builds the list with Distinct(), but ToDictionary would throw on
 	/// the prompt rather than merely mis-drawing a preview if that ever changed.
 	/// </summary>
-	private static Dictionary<int, List<int>> ToPreviewMap(List<InputRequest.CardTargetPreview> previews)
+	private static Dictionary<int, InputRequest.CardTargetPreview> ToPreviewMap(List<InputRequest.CardTargetPreview> previews)
 	{
 		if (previews == null) return null;
 
-		Dictionary<int, List<int>> map = new();
+		Dictionary<int, InputRequest.CardTargetPreview> map = new();
 		foreach (InputRequest.CardTargetPreview preview in previews)
-			map[preview.CardId] = preview.CountryIds ?? new List<int>();
+			map[preview.CardId] = preview;
 		return map;
 	}
 

@@ -92,6 +92,24 @@ public partial class ClickableTextureRect : OpaqueTextureRect
         isClickable = true;
     }
 
+    /// <summary>
+    /// Drawn exactly as an offered target, but NOT clickable: the hover preview that shows what a card
+    /// the player is still only hovering would reach.
+    ///
+    /// Looking identical to a real target is the point — the player is being shown "this is what that
+    /// card reaches" — but the game is waiting for a card, not for a unit, so the marker must not take
+    /// the click. <see cref="_HasPoint"/> gating on the same flag is what makes that airtight: the
+    /// marker is not the picked control at all, so it cannot swallow the hover from the country
+    /// underneath it either.
+    /// </summary>
+    public void SetPreviewOnly()
+    {
+        restingColor = SelectableColor;
+        Modulate = restingColor;
+        isClickable = false;
+        StartRadarSweep();
+    }
+
     public void SetUnclickable()
     {
         restingColor = SelectableColor;

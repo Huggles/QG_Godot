@@ -2,13 +2,17 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// Lights up the countries a card could affect while the player hovers it in an open card prompt, so
-/// the targets are visible before the card is committed to rather than one click later.
+/// Lights up what a card could affect while the player hovers it in an open card prompt, so the
+/// targets are visible before the card is committed to rather than one click later.
+///
+/// Countries and units are lit separately, because they are drawn differently: a country glows, a
+/// unit puts up its own target marker. A card that reaches one army in Egypt lights that army, not
+/// the whole country — which is what makes a battle card's preview worth reading at all.
 ///
 /// Static rather than a node: it owns no scene of its own. The visual belongs to each
-/// <see cref="CountryScene"/>, reached by raising <see cref="Tag.PreviewTarget"/> — the same
-/// indirection <see cref="SelectCountryHandler"/> uses with <see cref="Tag.Clickable"/>, and the
-/// reason this needs no reference to the board at all.
+/// <see cref="CountryScene"/> and <see cref="UnitScene"/>, reached by raising
+/// <see cref="Tag.PreviewTarget"/> — the same indirection <see cref="SelectCountryHandler"/> uses with
+/// <see cref="Tag.Clickable"/>, and the reason this needs no reference to the board at all.
 ///
 /// The target sets are NOT computed here. They come from the host on
 /// <see cref="InputRequest.CardTargetPreviews"/> and are held on
@@ -33,6 +37,9 @@ public static class CardTargetPreviewDisplay
     /// </summary>
     private static List<int> litCountryIds = new();
 
+    /// <inheritdoc cref="litCountryIds"/>
+    private static List<int> litUnitIds = new();
+
     /// <summary>
     /// Light up what <paramref name="cardId"/> could reach. A no-op when no card prompt is open —
     /// hovering a card outside a prompt (browsing another faction's hand, the history popup) must not
@@ -43,31 +50,38 @@ public static class CardTargetPreviewDisplay
         if (cardId < 0) return;
 
         ActiveCardPrompt prompt = InputManager.CurrentCardPrompt;
-        if (prompt?.PreviewCountryIdsByCardId == null) return;
+        if (prompt?.PreviewsByCardId == null) return;
 
-        if (!prompt.PreviewCountryIdsByCardId.TryGetValue(cardId, out List<int> countryIds)
-            || countryIds == null || countryIds.Count == 0)
-        {
-            // The card is in the prompt but reaches nothing — a Status card with no declared preview,
-            // or a card whose targets have all gone. Clear whatever the last card lit and stop: an
-            // empty board IS the answer for a card that cannot do anything right now.
-            ClearAll();
-            owningCardId = cardId;
-            return;
-        }
-
+        // Cleared before the early return as well as after it: the card being hovered owns the board
+        // either way, and a card that reaches nothing must take the previous card's lights down with it.
         ClearAll();
         owningCardId = cardId;
 
-        // Resolved and filtered rather than passed straight to AddTag: CountryState.ForIds yields a
-        // null for an id it does not know, and the tag extensions dereference every element. These ids
-        // arrived over the wire, so an unresolvable one must cost the preview and not the prompt.
-        List<CountryState> countryStates = CountryState.ForIds(countryIds.Distinct())
+        if (!prompt.PreviewsByCardId.TryGetValue(cardId, out InputRequest.CardTargetPreview preview)
+            || preview == null || preview.IsEmpty)
+        {
+            // The card is in the prompt but reaches nothing — a Status card with no declared preview,
+            // or a card whose targets have all gone. An empty board IS the answer for a card that
+            // cannot do anything right now.
+            return;
+        }
+
+        // Resolved and filtered rather than passed straight to AddTag: ForIds yields a null for an id
+        // it does not know, and the tag extensions dereference every element. These ids arrived over
+        // the wire, so an unresolvable one must cost the preview and not the prompt.
+        List<CountryState> countryStates = CountryState.ForIds((preview.CountryIds ?? new List<int>()).Distinct())
             .Where(countryState => countryState != null)
             .ToList();
 
+        List<UnitState> unitStates = UnitState.ForIds((preview.UnitIds ?? new List<int>()).Distinct())
+            .Where(unitState => unitState != null)
+            .ToList();
+
         litCountryIds = countryStates.Select(countryState => countryState.Id).ToList();
+        litUnitIds = unitStates.Select(unitState => unitState.Id).ToList();
+
         countryStates.AddTag(Tag.PreviewTarget, Faction.ALL);
+        unitStates.AddTag(Tag.PreviewTarget, Faction.ALL);
     }
 
     /// <summary>
@@ -95,6 +109,16 @@ public static class CardTargetPreviewDisplay
                 .RemoveTag(Tag.PreviewTarget, Faction.ALL);
             litCountryIds = new List<int>();
         }
+
+        if (litUnitIds.Count > 0)
+        {
+            UnitState.ForIds(litUnitIds)
+                .Where(unitState => unitState != null)
+                .ToList()
+                .RemoveTag(Tag.PreviewTarget, Faction.ALL);
+            litUnitIds = new List<int>();
+        }
+
         owningCardId = -1;
     }
 }

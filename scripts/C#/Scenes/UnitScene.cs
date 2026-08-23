@@ -121,9 +121,52 @@ public partial class UnitScene : Node2D
 		TargetSprite.SetClickableSubdued();
 	}
 
+	/// <summary>True while this unit is an actually-offered selection target.</summary>
+	private bool IsOfferedTarget =>
+		UnitState.Tags.Has(Tag.Clickable, Faction.ALL) || UnitState.Tags.Has(Tag.RebuildTarget, Faction.ALL);
+
+	/// <summary>True while the player is hovering a card that could affect this unit.</summary>
+	private bool IsPreviewTarget => UnitState.Tags.Has(Tag.PreviewTarget, Faction.ALL);
+
+	/// <summary>
+	/// Draws (or clears) the hover preview: the same marker an offered target gets, with no click.
+	///
+	/// An offered target wins outright — it owns the click — so a preview arriving over the top of one
+	/// must not restyle it, and a preview clearing over the top of one must not put it away. That is
+	/// the same rule <see cref="CountryScene.SetPreviewTarget"/> follows, for the same reason: the two
+	/// tags are raised by different things (the selection handlers, and CardTargetPreviewDisplay) that
+	/// know nothing about each other and can overlap in either order.
+	/// </summary>
+	public void SetPreviewTarget(bool isPreviewTarget)
+	{
+		if (IsOfferedTarget) return;
+
+		if (isPreviewTarget)
+		{
+			TargetSprite.Scale = defaultTargetScale;
+			TargetSprite.ShowSprite();
+			TargetSprite.SetPreviewOnly();
+		}
+		else
+		{
+			SetUnclickable();
+		}
+	}
+
 	public void SetUnclickable()
 	{
 		TargetSprite.Scale = defaultTargetScale;
+
+		// A unit can stop being an offered target while still being a card's preview target — the
+		// selection prompt closes, the card prompt behind it is still open and still hovered. Hiding
+		// the marker unconditionally would blank a preview that is meant to stay up.
+		if (IsPreviewTarget)
+		{
+			TargetSprite.ShowSprite();
+			TargetSprite.SetPreviewOnly();
+			return;
+		}
+
 		TargetSprite.HideSprite();
 		TargetSprite.SetUnclickable();
 	}
@@ -159,6 +202,10 @@ public partial class UnitScene : Node2D
 		{
 			Callable.From(SetRebuildTarget).CallDeferred();
 		}
+		else if (tag == Tag.PreviewTarget)
+		{
+			Callable.From(() => SetPreviewTarget(true)).CallDeferred();
+		}
 		else if (tag == Tag.InSupply || tag == Tag.SuppliedForTurn)
 		{
 			Callable.From(HideOutOfSupply).CallDeferred();
@@ -174,6 +221,10 @@ public partial class UnitScene : Node2D
 		if (tag == Tag.Clickable || tag == Tag.RebuildTarget)
 		{
 			Callable.From(SetUnclickable).CallDeferred();
+		}
+		else if (tag == Tag.PreviewTarget)
+		{
+			Callable.From(() => SetPreviewTarget(false)).CallDeferred();
 		}
 		else if ((tag == Tag.InSupply || tag == Tag.SuppliedForTurn) && !UnitState.InSupply)
 		{
