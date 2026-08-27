@@ -227,6 +227,11 @@ public abstract partial class InputRequest
 
             InputTimerDisplay.Current?.Start(TimeoutSeconds, "Your input");
 
+            // Here rather than per handler, for the same reason the timer above is: every request
+            // subclass funnels through Execute(), so the faction tint covers card, country, unit and
+            // battle-target prompts as well as reaction windows without a call per Handle().
+            FactionFocus.Set(FactionFocusSource.InputRequest, TargetFaction);
+
             try
             {
                 // Through the seam rather than Handle() directly, so a headless/scripted peer can
@@ -240,6 +245,7 @@ public abstract partial class InputRequest
                 // than none.
                 if (showedBulletin) TriggerContextDisplay.Current?.Hide();
                 InputTimerDisplay.Current?.Hide();
+                FactionFocus.Clear(FactionFocusSource.InputRequest);
             }
         }
         else
@@ -278,6 +284,9 @@ public abstract partial class InputRequest
     /// <summary>Drop everything, for a session ending with prompts still nominally open.</summary>
     public static void ClearAwaitingInput()
     {
+        // Above the early return: this peer's own prompt puts nothing in AwaitedFactions (that set is
+        // the watcher's), so a client torn down mid-prompt would keep its tint with the game gone.
+        FactionFocus.Reset();
         if (AwaitedFactions.Count == 0) return;
         AwaitedFactions.Clear();
         RenderAwaitingText();

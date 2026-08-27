@@ -12,16 +12,34 @@
 [ext_resource type="Texture2D" uid="uid://sfhhmtjxiwqx" path="res://assets/textures/Units/QGArmyDetailed.png" id="9_army"]
 [ext_resource type="Texture2D" uid="uid://1gl1q0exfxm2" path="res://assets/textures/Units/QGNavyDetailed.png" id="10_navy"]
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kb8kt"]
+texture = ExtResource("2_s1j4j")
+axis_stretch_horizontal = 2
+axis_stretch_vertical = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xyivq"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+corner_detail = 5
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
 resource_local_to_scene = true
 resource_name = "default_style_box_flat"
 bg_color = Color(0.0820739, 0.699516, 0.566019, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
 border_color = Color(0, 0, 0, 1)
-border_blend = true
 
 [sub_resource type="Theme" id="Theme_gac4n"]
 
@@ -77,20 +95,14 @@ grow_vertical = 2
 mouse_default_cursor_shape = 2
 script = ExtResource("1_osvc4")
 
-[node name="FactionFlag" type="TextureRect" parent="." unique_id=98411546]
+[node name="FlagPanel" type="Panel" parent="." unique_id=146565445]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
+layout_mode = 0
 offset_right = 100.0
-offset_bottom = -25.0
-grow_vertical = 2
-texture = ExtResource("2_s1j4j")
-expand_mode = 3
-stretch_mode = 4
+offset_bottom = 50.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_kb8kt")
 
-[node name="ScoreLabel" type="Label" parent="FactionFlag" unique_id=1942955123]
+[node name="ScoreLabel" type="Label" parent="FlagPanel" unique_id=1942955123]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -102,6 +114,16 @@ text = "9"
 label_settings = ExtResource("3_gac4n")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Panel" type="Panel" parent="FlagPanel" unique_id=1168793567]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xyivq")
 
 [node name="BackgroundPanel" type="Panel" parent="." unique_id=52719779]
 unique_name_in_owner = true
@@ -218,9 +240,9 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_h8eod")
 
 [node name="CardsAnimationControl" type="Control" parent="." unique_id=1551812826]
 anchors_preset = 0
-offset_top = 85.0
+offset_top = 84.5
 offset_right = 50.0
-offset_bottom = 155.0
+offset_bottom = 154.5
 script = ExtResource("7_0r4er")
 
 [node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl" unique_id=1152488689]

@@ -18,7 +18,22 @@ public partial class BottomLeftMenu : Control
 
 	public bool VisibilityModalOpen = false;
 
-	/// <summary>The faction whose hand this menu put on the display, or NONE when it did not.</summary>
+	/// <summary>
+	/// The faction whose hand this menu put on the display, or NONE when it did not.
+	///
+	/// A property rather than a field so every one of the four places that ends browsing keeps
+	/// <see cref="FactionFocus"/> in step — browsing is claimed over a live input request rather than
+	/// instead of one, so dropping the claim is what hands the tint back to the prompt underneath.
+	/// </summary>
+	private Faction BrowsingFaction
+	{
+		get => _browsingFaction;
+		set
+		{
+			_browsingFaction = value;
+			FactionFocus.Set(FactionFocusSource.Browsing, value);
+		}
+	}
 	private Faction _browsingFaction = Faction.NONE;
 
 	// Called when the node enters the scene tree for the first time.
@@ -145,7 +160,7 @@ public partial class BottomLeftMenu : Control
 		// Pressing the card back of the hand already on the display puts it away again. This used to bail
 		// out instead of toggling, which left the button dead on the second press — and toggling off is now
 		// how a player gets back a prompt that browsing auto-parked.
-		if (_browsingFaction == faction)
+		if (BrowsingFaction == faction)
 		{
 			CloseBrowsing();
 			return;
@@ -165,7 +180,7 @@ public partial class BottomLeftMenu : Control
 		// never answers it.
 		ModalStack.Current?.ParkTopRequest();
 
-		_browsingFaction = faction;
+		BrowsingFaction = faction;
 		FactionHandDisplay.Current.Show(deckState.HandCardIds, faction, new List<int>());
 	}
 
@@ -176,7 +191,7 @@ public partial class BottomLeftMenu : Control
 	/// </summary>
 	private void CloseBrowsing()
 	{
-		_browsingFaction = Faction.NONE;
+		BrowsingFaction = Faction.NONE;
 		if (InputManager.ShowCurrentCardPrompt())
 		{
 			return;
@@ -188,14 +203,14 @@ public partial class BottomLeftMenu : Control
 
 	private void OnActiveInputRequestButtonPressed()
 	{
-		_browsingFaction = Faction.NONE;
+		BrowsingFaction = Faction.NONE;
 		RecallablePrompts.Recall();
 	}
 
 	private void OnCardPromptOpened(int faction)
 	{
 		// The prompt drew itself over whatever was being browsed.
-		_browsingFaction = Faction.NONE;
+		BrowsingFaction = Faction.NONE;
 		RefreshActiveInputRequestButton();
 	}
 

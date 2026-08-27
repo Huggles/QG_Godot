@@ -11,8 +11,8 @@ public partial class FactionInfoRow : Control
 	private MultiplayerGameState gameState { get { return GameSession.Current.GameState; } }
 	private Panel BackgroundPanel => GetNode<Panel>("%BackgroundPanel");
 	private Panel BackgroundPanel2 => GetNode<Panel>("%BackgroundPanel2");
-	private TextureRect FactionFlagNode => GetNode<TextureRect>("FactionFlag");    
-	private Label ScoreLabel => FactionFlagNode.GetNode<Label>("ScoreLabel");
+	private Panel FactionFlagPanel => GetNode<Panel>("%FlagPanel");    
+	private Label ScoreLabel => FactionFlagPanel.GetNode<Label>("ScoreLabel");
 	private Panel DetailPanel => GetNode<Panel>("DetailPanel");    
 	private Button FactionInfoButton => GetNode<Button>("FactionInfoButton");
 	private Button DiscardDeckButton => BackgroundPanel.GetNode<Button>("DiscardDeckButton");
@@ -70,8 +70,11 @@ public partial class FactionInfoRow : Control
 		BackgroundPanel.SelfModulate = Colors.White;
 		BackgroundPanel2.SelfModulate = Colors.White;
 
-		Texture2D factionFlag = FactionState.FactionData.FlagTexture;
-		FactionFlagNode.Texture = factionFlag;
+		// The flag lives in the panel's StyleBoxTexture, and that stylebox is shared by every instance
+		// of this scene - duplicate it first, or the last row painted would set the flag for all of them.
+		StyleBoxTexture flagStyleBox = (StyleBoxTexture)FactionFlagPanel.GetThemeStylebox("panel").Duplicate();
+		flagStyleBox.Texture = FactionState.FactionData.FlagTexture;
+		FactionFlagPanel.AddThemeStyleboxOverride("panel", flagStyleBox);
 
 
 		StyleBoxFlat styleBox = (StyleBoxFlat)BackgroundPanel.GetThemeStylebox("panel").Duplicate();

@@ -56,6 +56,10 @@ public partial class EventBus : GodotObject
     /// <summary>The open card prompt resolved (a card was chosen, passed or the host abandoned it).</summary>
     [Signal] public delegate void CardPromptClosedEventHandler();
 
+    /// <summary>What the local client is busy with changed — see <see cref="FactionFocus"/>. The
+    /// argument is the focused <see cref="Faction"/>, or <see cref="Faction.NONE"/> when idle.</summary>
+    [Signal] public delegate void FactionFocusChangedEventHandler(int faction);
+
     /// <summary>What the recall button can bring back changed — a prompt was parked, recalled or
     /// resolved. See <see cref="RecallablePrompts"/>.</summary>
     [Signal] public delegate void RecallablePromptChangedEventHandler();

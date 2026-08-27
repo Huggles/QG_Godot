@@ -29,6 +29,8 @@ corner_detail = 5
 shadow_color = Color(0, 0, 0, 0.41960785)
 shadow_size = 10
 
+[sub_resource type="LabelSettings" id="LabelSettings_hqeq6"]
+
 [node name="NinePatchButton" type="Button" unique_id=566933446]
 custom_minimum_size = Vector2(150, 80)
 offset_right = 150.0
@@ -82,5 +84,6 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Jingle Bells"
+label_settings = SubResource("LabelSettings_hqeq6")
 horizontal_alignment = 1
 vertical_alignment = 3
