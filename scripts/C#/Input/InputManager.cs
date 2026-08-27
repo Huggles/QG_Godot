@@ -269,16 +269,18 @@ public partial class InputManager : Node2D
 	/// </summary>
 	private void ApplyCameraBounds()
 	{
+
+		Vector2 margin = new Vector2(1500,1500);
 		if (Camera == null) return;
 
 		Rect2? bounds = NodeUtilities.Instance?.BoardBounds;
 		if (bounds == null) return;
 
 		Rect2 board = bounds.Value;
-		Camera.LimitLeft = Mathf.RoundToInt(board.Position.X);
-		Camera.LimitTop = Mathf.RoundToInt(board.Position.Y);
-		Camera.LimitRight = Mathf.RoundToInt(board.End.X);
-		Camera.LimitBottom = Mathf.RoundToInt(board.End.Y);
+		Camera.LimitLeft = Mathf.RoundToInt(board.Position.X) - Mathf.RoundToInt(margin.X);
+		Camera.LimitTop = Mathf.RoundToInt(board.Position.Y) - Mathf.RoundToInt(margin.Y);
+		Camera.LimitRight = Mathf.RoundToInt(board.End.X) + Mathf.RoundToInt(margin.X);
+		Camera.LimitBottom = Mathf.RoundToInt(board.End.Y) + Mathf.RoundToInt(margin.Y);
 
 		// AnchorMode is the default DragCenter, so Position is the centre of the view and the legal
 		// centres are the board inset by half a viewport. MinZoomLevel already keeps that half-extent
@@ -286,7 +288,11 @@ public partial class InputManager : Node2D
 		// otherwise snap the camera to the far edge.
 		Vector2 halfExtent = GetViewport().GetVisibleRect().Size / (2f * Camera.Zoom);
 		Vector2 min = board.Position + halfExtent;
+		min -= margin;
+
 		Vector2 max = board.End - halfExtent;
+		max += margin;
+
 		Camera.Position = new Vector2(
 			Mathf.Clamp(Camera.Position.X, min.X, Mathf.Max(min.X, max.X)),
 			Mathf.Clamp(Camera.Position.Y, min.Y, Mathf.Max(min.Y, max.Y)));

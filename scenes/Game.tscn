@@ -3,6 +3,10 @@
 [ext_resource type="PackedScene" uid="uid://ulu5d3pvyttl" path="res://scenes/World/WorldScene.tscn" id="1_qbsmt"]
 [ext_resource type="Script" uid="uid://cde0nvl8mrot5" path="res://scenes/network/PeerReadinessComponent.cs" id="2_qbsmt"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kb8kt"]
+resource_local_to_scene = true
+bg_color = Color(0, 0, 0, 1)
+
 [node name="Game" type="Node2D" unique_id=349124145]
 
 [node name="Players" type="Node2D" parent="." unique_id=1473019270]
@@ -14,3 +18,10 @@ unique_name_in_owner = true
 
 [node name="PeerReadinessComponent" type="Node" parent="." unique_id=2038907439]
 script = ExtResource("2_qbsmt")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1023654323]
+offset_left = -10000.0
+offset_top = -15000.0
+offset_right = 20000.0
+offset_bottom = 15000.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_kb8kt")
