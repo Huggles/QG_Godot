@@ -19,8 +19,10 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	private Panel Panel => GetNode<Panel>("%TriggerContextPanel");
 	private CardScene CardSceneNode => GetNode<CardScene>("%TriggerCard");
 	private RichTextLabel Label => GetNode<RichTextLabel>("%TriggerLabel");
-	private Panel TriggerLabelPanel => GetNode<Panel>("%TriggerLabelPanel");
-	
+	// Control, not Panel: the node is a PanelContainer so its height follows the text, and only
+	// Visible is ever touched here.
+	private Control TriggerLabelPanel => GetNode<Control>("%TriggerLabelPanel");
+
 
 	/// <summary>
 	/// The picture-in-picture camera, aimed at the trigger's target while this panel is up. Public
@@ -42,6 +44,14 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// </summary>
 	[Export] private float FocusZoom = 0.1f;
 
+	// The badge colours, warm for the window that can still stop something and cool for the one that
+	// can only answer it. Kept as BBCode hex rather than theme colours because they are only ever
+	// interpolated into this one label's text.
+	private const string BlockColour    = "#ff9d5c";
+	private const string AfterColour    = "#7fb3ff";
+	private const string BulletinColour = "#e0c980";
+	private const string CauseColour    = "#9a9a9a";
+
 	public override void _Ready()
 	{
 		if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
@@ -60,12 +70,20 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	}
 
 	/// <summary>Show a real card as the trigger — a played card being reacted to or blocked.</summary>
+	/// <param name="kind">
+	/// Which window this is, which decides the header and its tense — see <see cref="HeaderFor"/>.
+	/// </param>
+	/// <param name="causeText">
+	/// Straight off <see cref="InputRequest.TriggerCauseText"/>: which card caused the event, already
+	/// worded and redacted by <c>GameMessageDisplay.CauseText</c>. Null leaves the line off.
+	/// </param>
 	/// <param name="targetCountryIds">
 	/// Straight off <see cref="InputRequest.TriggerTargetCountryIds"/> — where the triggering event
 	/// landed. Null for a trigger that names no place, which leaves the focus viewport hidden.
 	/// </param>
 	/// <param name="targetUnitIds"><inheritdoc cref="targetCountryIds"/></param>
-	public void ShowCard(int cardId, string summaryText,
+	public void ShowCard(int cardId, string summaryText, TriggerKind kind = TriggerKind.NONE,
+						 string causeText = null,
 						 List<int> targetCountryIds = null, List<int> targetUnitIds = null)
 	{
 		if (Panel == null) return;
@@ -82,7 +100,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		}
 
 		ShowFocus(targetCountryIds, targetUnitIds);
-		Show(summaryText);
+		Show(summaryText, kind, causeText);
 	}
 
 	/// <summary>Show a Bulletin as the trigger — a scenario mutator asking this player for input.</summary>
@@ -95,15 +113,40 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		CardSceneNode.SetActivatable(true);
 		// No focus view: a Bulletin is a scenario asking a question, not an event that landed somewhere.
 		ShowFocus(null, null);
-		Show(summaryText);
+		Show(summaryText, TriggerKind.BULLETIN);
 	}
 
-	private void Show(string summaryText)
+	private void Show(string summaryText, TriggerKind kind, string causeText = null)
 	{
-		Label.Text = $"[b]Reacting to:[/b]\n{summaryText ?? string.Empty}";
+		string cause = string.IsNullOrWhiteSpace(causeText)
+			? string.Empty
+			: $"\n[color={CauseColour}]Cause: {causeText}[/color]";
+
+		Label.Text = $"{HeaderFor(kind)}\n{summaryText ?? string.Empty}{cause}";
 		Panel.Visible = true;
 		TriggerLabelPanel.Visible = true;
 	}
+
+	/// <summary>
+	/// The badge line over the summary: which window the player is in, and — the part the summary
+	/// itself gets wrong — whether the event has happened yet.
+	///
+	/// Every summary is written in the past tense, because they are the same lines the history strip
+	/// shows. In a BLOCK window the event has NOT been applied yet and the block is the chance to stop
+	/// it, so the badge has to supply the tense the sentence below it contradicts.
+	///
+	/// The wording lives here rather than on <see cref="TriggerKind"/>: it is UI copy, and the enum
+	/// travels over the wire to peers that may render it differently.
+	/// </summary>
+	private static string HeaderFor(TriggerKind kind) => kind switch
+	{
+		TriggerKind.BLOCK    => $"[color={BlockColour}][b]BLOCK WINDOW[/b] · about to happen[/color]",
+		TriggerKind.AFTER    => $"[color={AfterColour}][b]AFTER REACTION[/b] · just happened[/color]",
+		TriggerKind.BULLETIN => $"[color={BulletinColour}][b]BULLETIN[/b] · asking you[/color]",
+		// A prompt that carries a trigger without being a window of its own — the faction's own play,
+		// reached while a reaction is live. Neither tense would be true of it, so it claims neither.
+		_                    => "[b]Reacting to:[/b]",
+	};
 
 	public new void Hide()
 	{

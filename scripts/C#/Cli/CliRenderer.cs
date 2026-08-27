@@ -83,13 +83,22 @@ public sealed class CliRenderer
             e.Set("trigger_card", CardState.ForId(request.TriggerCardId)?.CardName ?? $"#{request.TriggerCardId}");
         if (!string.IsNullOrEmpty(request.TriggerSummaryText))
             e.Set("trigger", request.TriggerSummaryText);
+        // Which window and what caused it — the two things the summary alone leaves out. Raw enum
+        // name, like the other CLI views, because that is what .qgc scripts type.
+        if (request.TriggerReactionKind != TriggerKind.NONE)
+            e.Set("trigger_kind", request.TriggerReactionKind.ToString());
+        if (!string.IsNullOrEmpty(request.TriggerCauseText))
+            e.Set("trigger_cause", request.TriggerCauseText);
         if (!string.IsNullOrEmpty(request.TriggerBulletinLabel))
             e.Set("bulletin", request.TriggerBulletinLabel);
 
         StringBuilder sb = new();
         sb.Append($"PROMPT {spec.Kind}  faction={spec.Faction}  {spec.Title}");
         if (request.TriggerCardId > -1)
-            sb.Append($"\n  trigger: {CardState.ForId(request.TriggerCardId)?.CardName}");
+            sb.Append($"\n  trigger: {CardState.ForId(request.TriggerCardId)?.CardName}"
+                      + (request.TriggerReactionKind != TriggerKind.NONE ? $" ({request.TriggerReactionKind})" : ""));
+        if (!string.IsNullOrEmpty(request.TriggerCauseText))
+            sb.Append($"\n  cause: {request.TriggerCauseText}");
         if (!string.IsNullOrEmpty(request.TriggerBulletinLabel))
             sb.Append($"\n  bulletin: {request.TriggerBulletinLabel}");
 

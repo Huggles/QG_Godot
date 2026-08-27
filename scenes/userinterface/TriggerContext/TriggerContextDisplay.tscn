@@ -50,13 +50,28 @@ offset_top = 149.0
 offset_right = 1650.0
 offset_bottom = 699.0
 
-[node name="FocusContainerControl" type="Control" parent="Control" unique_id=836859973]
-unique_name_in_owner = true
-anchors_preset = 0
-offset_right = 350.0
-offset_bottom = 350.0
+[node name="TriggerContextColumn" type="VBoxContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = 10.0
+offset_right = 10.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 50
 
-[node name="ShadowPanel" type="Panel" parent="Control/FocusContainerControl" unique_id=508365856]
+[node name="TriggerContextRow" type="HBoxContainer" parent="Control/TriggerContextColumn"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 60
+
+[node name="FocusContainerControl" type="Control" parent="Control/TriggerContextColumn/TriggerContextRow" unique_id=836859973]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(350, 350)
+layout_mode = 2
+
+[node name="ShadowPanel" type="Panel" parent="Control/TriggerContextColumn/TriggerContextRow/FocusContainerControl" unique_id=508365856]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -67,7 +82,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_mq2j7")
 
-[node name="ParentSizedNinePatchRect" type="NinePatchRect" parent="Control/FocusContainerControl" unique_id=650059731]
+[node name="ParentSizedNinePatchRect" type="NinePatchRect" parent="Control/TriggerContextColumn/TriggerContextRow/FocusContainerControl" unique_id=650059731]
 layout_mode = 0
 offset_right = 350.0
 offset_bottom = 350.0
@@ -75,7 +90,7 @@ texture = ExtResource("5_71eah")
 script = ExtResource("5_mq2j7")
 metadata/_custom_type_script = "uid://c6xo03jw6k6gc"
 
-[node name="FocusContainer" type="SubViewportContainer" parent="Control/FocusContainerControl/ParentSizedNinePatchRect" unique_id=1774301882]
+[node name="FocusContainer" type="SubViewportContainer" parent="Control/TriggerContextColumn/TriggerContextRow/FocusContainerControl/ParentSizedNinePatchRect" unique_id=1774301882]
 unique_name_in_owner = true
 show_behind_parent = true
 layout_mode = 1
@@ -85,7 +100,7 @@ offset_bottom = 350.0
 mouse_filter = 2
 stretch = true
 
-[node name="FocusViewport" type="SubViewport" parent="Control/FocusContainerControl/ParentSizedNinePatchRect/FocusContainer" unique_id=2047669602]
+[node name="FocusViewport" type="SubViewport" parent="Control/TriggerContextColumn/TriggerContextRow/FocusContainerControl/ParentSizedNinePatchRect/FocusContainer" unique_id=2047669602]
 disable_3d = true
 handle_input_locally = false
 canvas_cull_mask = 1
@@ -93,24 +108,18 @@ size = Vector2i(350, 350)
 render_target_update_mode = 4
 script = ExtResource("4_wmvpt")
 
-[node name="FocusCamera" type="Camera2D" parent="Control/FocusContainerControl/ParentSizedNinePatchRect/FocusContainer/FocusViewport" unique_id=1806662231]
+[node name="FocusCamera" type="Camera2D" parent="Control/TriggerContextColumn/TriggerContextRow/FocusContainerControl/ParentSizedNinePatchRect/FocusContainer/FocusViewport" unique_id=1806662231]
 unique_name_in_owner = true
 zoom = Vector2(0.5, 0.5)
 
-[node name="TriggerContextPanel" type="Panel" parent="Control" unique_id=619802641]
+[node name="TriggerContextPanel" type="Panel" parent="Control/TriggerContextColumn/TriggerContextRow" unique_id=619802641]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -240.0
-offset_right = 10.0
-offset_bottom = 350.0
-grow_horizontal = 0
+custom_minimum_size = Vector2(250, 350)
+layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_7nkmn")
 
-[node name="TriggerCard" parent="Control/TriggerContextPanel" unique_id=1106938271 instance=ExtResource("2_tccard")]
+[node name="TriggerCard" parent="Control/TriggerContextColumn/TriggerContextRow/TriggerContextPanel" unique_id=1106938271 instance=ExtResource("2_tccard")]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
@@ -123,32 +132,19 @@ offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 350.0
 
-[node name="TriggerLabelPanel" type="Panel" parent="Control" unique_id=1520113763]
+[node name="TriggerLabelPanel" type="PanelContainer" parent="Control/TriggerContextColumn" unique_id=1520113763]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -150.0
-offset_right = 10.0
-grow_horizontal = 2
-grow_vertical = 0
+layout_mode = 2
 theme_override_styles/panel = ExtResource("3_t1u62")
 
-[node name="TriggerLabelContainer" type="MarginContainer" parent="Control/TriggerLabelPanel" unique_id=1912041232]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="TriggerLabelContainer" type="MarginContainer" parent="Control/TriggerContextColumn/TriggerLabelPanel" unique_id=1912041232]
+layout_mode = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
-[node name="TriggerLabel" type="RichTextLabel" parent="Control/TriggerLabelPanel/TriggerLabelContainer" unique_id=309435135]
+[node name="TriggerLabel" type="RichTextLabel" parent="Control/TriggerContextColumn/TriggerLabelPanel/TriggerLabelContainer" unique_id=309435135]
 unique_name_in_owner = true
 layout_mode = 2
 bbcode_enabled = true

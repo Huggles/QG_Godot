@@ -76,6 +76,32 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         return $"{ScriptName}-{Enum.GetName(typeof(Faction), TriggeringFaction)}-{CountryState.ForId(CountryId).Label}-{Enum.GetName(typeof(UnitType), UnitType)}";
     }
 
-    public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} deployed to {CountryState.ForId(CountryId).Label}";
+    /// <summary>
+    /// "Germany (Bob) built an Army in India" — how the unit arrived, not just that it did.
+    ///
+    /// The verb comes from <see cref="DeploymentType"/> and the noun from <see cref="UnitType"/>,
+    /// because a reaction window shows this line as the event being blocked or answered and "deployed
+    /// to India" left the player to guess whether they were looking at a build or a recruit.
+    ///
+    /// Falls back to the bare "deployed to {country}" if the country does not resolve: UnitType reads
+    /// CountryState.ForId(CountryId).Type, and SummaryText() goes on the wire as
+    /// InputRequest.TriggerSummaryText, so this must never throw — the same defence
+    /// <c>GameMessageDisplay.DeployIcon</c> documents.
+    /// </summary>
+    public override string SummaryText()
+    {
+        CountryState country = GameSession.Current != null ? CountryState.ForId(CountryId) : null;
+        if (country == null) return $"{TriggeringFaction.WithPlayer()} deployed to country {CountryId}";
+
+        string verb = DeploymentType switch
+        {
+            DeployType.BUILD   => "built",
+            DeployType.RECRUIT => "recruited",
+            _                  => "deployed",
+        };
+        string unit = UnitType == UnitType.NAVY ? "a Navy" : "an Army";
+        return $"{TriggeringFaction.WithPlayer()} {verb} {unit} in {country.Label}";
+    }
+
     public override string DebugText() => $"Deployed {Enum.GetName(typeof(Faction), TriggeringFaction)} {Enum.GetName(typeof(UnitType), UnitType)} to country: {CountryState.ForId(CountryId).Label}";
 }

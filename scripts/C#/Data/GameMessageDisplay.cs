@@ -107,6 +107,50 @@ public static class GameMessageDisplay
     }
 
     /// <summary>
+    /// What caused this event, named: "Build Army", "Blitzkrieg (Status card)", "a hidden Response
+    /// card". Null for an event with no source card — the turn structure's own draws and step changes
+    /// — which is the display's cue to leave the line off entirely.
+    ///
+    /// This is the half of the trigger context the summary cannot carry. "Germany deployed to India"
+    /// is true of a Build Army card and of a Status card firing alike, and the reaction window's card
+    /// image is easy to misread as an offer rather than as the cause, so the cause gets said in words.
+    /// The <c>Cause:</c> prefix is <see cref="TriggerContextDisplay"/>'s, not this fragment's.
+    ///
+    /// The type is spelled out only for STATUS/RESPONSE/EVENT: a Build Army card is already called
+    /// "Build Army", and "Build Army (Build Army card)" says nothing twice.
+    ///
+    /// A Response card that has not been revealed is redacted rather than named, the same split
+    /// <see cref="PlayCardChangeEvent.SummaryText"/> makes — this text goes to the reacting player
+    /// over the wire, and naming a face-down card there would hand them the one thing the
+    /// always-ask reaction window exists to hide.
+    ///
+    /// Must never throw: it rides <c>InputRequest.TriggerCauseText</c> beside SummaryText(), so a
+    /// lookup that threw here would cost a turn rather than a line of text.
+    /// </summary>
+    public static string CauseText(this ChangeEvent changeEvent)
+    {
+        // GameSession first, as in DeployIcon: CardState.ForId dereferences GameSession.Current
+        // without a guard of its own, so it NREs rather than answering null outside a game.
+        bool hasSourceCard = GameSession.Current != null && changeEvent?.SourceCardId > -1;
+        CardState card = hasSourceCard ? CardState.ForId(changeEvent.SourceCardId) : null;
+        CardData data = card?.CardData;
+        if (data == null) return null;
+
+        if (data.CardType == CardType.RESPONSE && !card.IsRevealed)
+            return "a hidden Response card";
+
+        string name = card.CardName;
+        if (string.IsNullOrEmpty(name)) return null;
+
+        return data.CardType switch
+        {
+            CardType.STATUS or CardType.RESPONSE or CardType.EVENT
+                => $"{name} ({data.CardType.Label()} card)",
+            _   => name,
+        };
+    }
+
+    /// <summary>
     /// The unit's owner, or <paramref name="fallback"/> if it cannot be resolved. Not UnitState.ForId,
     /// which indexes UnitStatesById directly and so throws KeyNotFoundException — unusable on a
     /// display path that must never throw.

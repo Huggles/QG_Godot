@@ -47,6 +47,30 @@ public abstract partial class InputRequest
     public string TriggerSummaryText { get; set; }
 
     /// <summary>
+    /// Which window this prompt is — block, after-reaction, or neither. Decides the header
+    /// <see cref="TriggerContextDisplay"/> writes over <see cref="TriggerSummaryText"/> and the banner
+    /// <c>InputManager.SetCardSelectionActive</c> shows, so the player can tell "this is about to
+    /// happen, stop it?" from "this happened, answer it?" — see <see cref="TriggerKind"/>.
+    ///
+    /// Stamped by the host where the window is opened, not inferred from the request subclass here: a
+    /// reaction window and a faction's own reaction-depth-0 play both arrive as
+    /// <see cref="ActivateCardRequestHandler"/>, and only the host knows which it built.
+    /// </summary>
+    public TriggerKind TriggerReactionKind { get; set; } = TriggerKind.NONE;
+
+    /// <summary>
+    /// What caused the triggering event, in words: "Build Army", "Blitzkrieg (Status card)". Straight
+    /// off <c>GameMessageDisplay.CauseText</c>, which owns the wording and the redaction of a
+    /// face-down Response card. Null for a trigger with no source card, which leaves the line off.
+    ///
+    /// Carried rather than derived from <see cref="TriggerCardId"/> on the client, for two reasons:
+    /// that id falls back to the last card in the play pool when the event has no source card of its
+    /// own, so it is the card to SHOW and not necessarily the cause; and a block window's trigger
+    /// event has not been broadcast yet, so the client cannot inspect it at all.
+    /// </summary>
+    public string TriggerCauseText { get; set; }
+
+    /// <summary>
     /// Where on the board the event that opened this prompt landed — the point the focus viewport
     /// centres on, and what it marks while the prompt is open. The two kinds are carried apart for the
     /// same reason <see cref="CardTargetPreview"/> keeps them apart: a country glows, a unit puts up
@@ -183,7 +207,10 @@ public abstract partial class InputRequest
             {
                 // A card put this mutator in play, so show that card — the same one the announcement
                 // modal just showed — rather than a Bulletin standing in for it.
-                TriggerContextDisplay.Current?.ShowCard(TriggerBulletinCardId, TriggerBulletinLabel);
+                // BULLETIN rather than TriggerReactionKind: this block is not a reaction window at all,
+                // and it knows that locally — no host field needed to tell it so.
+                TriggerContextDisplay.Current?.ShowCard(
+                    TriggerBulletinCardId, TriggerBulletinLabel, TriggerKind.BULLETIN);
                 showedBulletin = true;
             }
             else if (!string.IsNullOrEmpty(TriggerBulletinLabel))
@@ -455,10 +482,11 @@ public abstract partial class InputRequest
             // played yet, which is exactly when RequestPlay sends the hand-play request instead.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
-                cardTargetPreviews: CardTargetPreviews);
+                cardTargetPreviews: CardTargetPreviews, triggerKind: TriggerReactionKind);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(
-                    TriggerCardId, TriggerSummaryText, TriggerTargetCountryIds, TriggerTargetUnitIds);
+                    TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,
+                    TriggerTargetCountryIds, TriggerTargetUnitIds);
             DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
             Variant[] results = await AwaitCardSelection();
             ReactionSkipScope = PlayerScene.Current.InputManager.TakeReactionSkipScope();
@@ -750,6 +778,9 @@ public abstract partial class InputRequest
         public BlockReactionRequestHandler(Faction targetFaction) : base(targetFaction)
         {
             IsReactionWindow = true;
+            // Set here rather than at the one call site for the same reason as IsReactionWindow above:
+            // every block prompt is a block window, so the kind is a property of the type.
+            TriggerReactionKind = TriggerKind.BLOCK;
         }
 
         // TargetCardIds/DisplayCardIds are stamped by CardPlayRound.RequestBlock — a block window
@@ -763,10 +794,11 @@ public abstract partial class InputRequest
             // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
-                cardTargetPreviews: CardTargetPreviews);
+                cardTargetPreviews: CardTargetPreviews, triggerKind: TriggerReactionKind);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(
-                    TriggerCardId, TriggerSummaryText, TriggerTargetCountryIds, TriggerTargetUnitIds);
+                    TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,
+                    TriggerTargetCountryIds, TriggerTargetUnitIds);
             Variant[] results = await AwaitCardSelection();
             ReactionSkipScope = PlayerScene.Current.InputManager.TakeReactionSkipScope();
             if (results != null && results.Length > 0 && (int)results[0] > -1)

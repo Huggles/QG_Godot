@@ -578,6 +578,10 @@ public partial class CardPlayRound : GodotObject
                     TargetCardIds = reactionOptions,
                     DisplayCardIds = ReactionWindowDisplayCardIds(faction),
                     IsReactionWindow = true,
+                    // Only on this branch. The else branch below is the faction's own play, which can
+                    // carry a trigger too (the stamp under it is not gated on isReaction) — but it is
+                    // not a reaction window, and labelling it "after reaction" would say it was.
+                    TriggerReactionKind = TriggerKind.AFTER,
                 };
             }
             else
@@ -597,6 +601,9 @@ public partial class CardPlayRound : GodotObject
             {
                 request.TriggerCardId = GetTriggerCardId(CurrentReactionTrigger);
                 request.TriggerSummaryText = CurrentReactionTrigger.SummaryText();
+                // Not derivable from TriggerCardId above: that falls back to the last card in the pool
+                // when the event has no source card, so it is what to SHOW, not what caused this.
+                request.TriggerCauseText = CurrentReactionTrigger.CauseText();
                 StampTriggerTargets(request, CurrentReactionTrigger);
             }
 
@@ -651,7 +658,10 @@ public partial class CardPlayRound : GodotObject
             TargetCardIds = blockOptions,
             DisplayCardIds = ReactionWindowDisplayCardIds(faction),
             TriggerCardId = GetTriggerCardId(CurrentBlockTrigger),
-            TriggerSummaryText = CurrentBlockTrigger?.SummaryText()
+            TriggerSummaryText = CurrentBlockTrigger?.SummaryText(),
+            // See RequestPlay: the cause is the trigger's own source card, which TriggerCardId only
+            // coincides with when the event has one. The kind is BLOCK from the handler's constructor.
+            TriggerCauseText = CurrentBlockTrigger?.CauseText()
         };
         StampTriggerTargets(request, CurrentBlockTrigger);
 

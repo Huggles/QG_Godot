@@ -70,9 +70,16 @@ public partial class InputManager : Node2D
 	/// <see cref="CardTargetPreviewDisplay"/>.
 	/// Null is fine and means no card previews anything.
 	/// </param>
+	/// <param name="triggerKind">
+	/// Which window this prompt is, straight off <see cref="InputRequest.TriggerReactionKind"/> — it
+	/// only decides the banner wording. Kept separate from <paramref name="isReactionWindow"/>, which
+	/// decides whether the scoped skip buttons appear: a block and an after window agree on that and
+	/// differ here.
+	/// </param>
 	public InputHandlerPlayCard SetCardSelectionActive(
 		Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
-		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null)
+		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null,
+		TriggerKind triggerKind = TriggerKind.NONE)
 	{
 		_pendingReactionSkipScope = ReactionSkipScope.NONE;
 
@@ -85,7 +92,7 @@ public partial class InputManager : Node2D
 			faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards,
 			ToPreviewMap(cardTargetPreviews));
 
-		PlayerActionLabel.ShowText(cardIds.Count > 0 ? "Choose a card" : "No reaction available", faction);
+		PlayerActionLabel.ShowText(BannerText(triggerKind, cardIds.Count > 0), faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
 		// and would resolve Faction.NONE for an empty always-ask prompt.
 		FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds, separateNonHandCards);
@@ -106,6 +113,22 @@ public partial class InputManager : Node2D
 
 		return inputHandler;
 	}
+
+	/// <summary>
+	/// What the banner over the hand says. Names the window the player is in, because "Choose a card"
+	/// and "No reaction available" read the same whether the prompt is the one chance to stop an event
+	/// or the chance to answer one that already happened — and an empty always-ask window is exactly
+	/// where a player most needs to know which.
+	///
+	/// The trigger context panel says the same thing at more length; this is the line at the hand,
+	/// where the player is already looking to pick a card.
+	/// </summary>
+	private static string BannerText(TriggerKind kind, bool hasOptions) => kind switch
+	{
+		TriggerKind.BLOCK => hasOptions ? "Choose a block reaction" : "No block available",
+		TriggerKind.AFTER => hasOptions ? "Choose an after reaction" : "No reaction available",
+		_                 => hasOptions ? "Choose a card" : "No reaction available",
+	};
 
 	/// <summary>
 	/// Flattens the wire list into the by-card-id lookup the hover path wants. Defensive against
