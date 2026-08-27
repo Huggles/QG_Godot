@@ -12,7 +12,6 @@
         { "countryName": "WESTERN_EUROPE" }
       ],
       "initialCards": [
-        { "name": "StatusOccupationOfCzechoslovakia" },
         { "name": "StatusBlitzkrieg" },
         { "name": "StatusSyntheticFuel" },
         { "name": "StatusBiasForAction" },

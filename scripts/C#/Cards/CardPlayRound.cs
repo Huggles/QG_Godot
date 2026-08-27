@@ -161,28 +161,29 @@ public partial class CardPlayRound : GodotObject
             introEvent.IsTrigger = false;
             await introEvent.Apply();        
 
-            //We only let the faction that played the card react to the intro event, since it is the only one that can play a reaction to it.
-            //Any block of the entire card happens during the blockRequest of the first step of the card. 
-            //This makes sure we are not doing an extra reaction window for the intro event, which is not a trigger and cannot be blocked.
+            // An introduction event opens NO reaction window of its own. It is not a trigger, so it
+            // cannot be blocked, and it no longer opens an after-reaction window either: the
+            // "activation window" that used to run here cost two GameStateCalculator.CalculateAll()
+            // passes — each broadcasting a RecalculateTagsMessage to every peer — plus a blocking
+            // prompt, on every single card play, to serve two cards.
+            //
+            // Those cards now reach the windows the card's own resolution already opens:
+            //   - Reacting to the card being PLAYED (ResponseRationing, StatusWomenConscripts):
+            //     Condition.FactionPlayedCard scans the round's event pool, so they are offered in the
+            //     after-reaction window of any step of the played card.
+            //   - Reacting to the card being ACTIVATED, before its effect lands
+            //     (ResponseEnigmaCodeCracked): a real block reaction on the first blockable step, via
+            //     Condition.IsBlockRequestFromCard.
+            // Consequence, accepted: a play whose steps open no window at all — conditions unmet, the
+            // player cancels the selection, or the step's only event is IsTrigger = false — offers no
+            // reaction to it either. A card added with an IsTrigger = false first step silently takes
+            // that away from these reactions.
             _afterReactionPassedFactions.Clear();
-            if(introEvent is PlayCardChangeEvent)
-                await RequestAfterReactions(introEvent, new List<Faction>{cardState.Faction});
-            
 
             // Step 2: Execute the card's next unfinished step.
             // We use all unfinished steps (not just executable ones) so that Execute() can
             // show the "Unable to" skip message for steps whose conditions fail before
             // automatically cascading to the next step.
-            
-            // Activation window: fires immediately after the card is activated/played,
-            // before its own steps execute. CurrentReactionTrigger is set to introEvent so
-            // .Immediately() conditions like CardActivated (e.g. ResponseEnigmaCodeCracked
-            // discarding the activated card) fire here, ahead of any reactions to the change
-            // events this card's own steps are about to produce.
-
-            // ContinueWithNextSteps is intentionally not called here: this card's own steps
-            // are resumed by the loop right below, and any change event a triggered reaction
-            // produces already gets its own continuation handling via its nested DoCard call.           
 
             // A Status/Response card just played from hand stops here: it sits on the table until
             // its trigger fires, at which point it re-enters DoCard on the activation branch.
@@ -407,12 +408,7 @@ public partial class CardPlayRound : GodotObject
         }
     }
 
-    /// <param name="onlyFactions">
-    /// Restricts the window to these factions. A filter, not an order — the two teams still take
-    /// their turns in the rules' order, they just have fewer candidates. Used for the activation
-    /// window on a PlayCardChangeEvent, where only the playing faction can react.
-    /// </param>
-    private async Task<bool> RequestAfterReactions(ChangeEvent triggerEvent, List<Faction> onlyFactions = null)
+    private async Task<bool> RequestAfterReactions(ChangeEvent triggerEvent)
     {
         DebugUtilities.PrintPeer("RequestAfterReactions");
         var previousTrigger = CurrentReactionTrigger;
@@ -424,15 +420,6 @@ public partial class CardPlayRound : GodotObject
         var previousPassed = _afterReactionPassedFactions;
         _afterReactionPassedFactions = new HashSet<Faction>();
         bool anyEverPlayed = false;
-
-        // A card can never react to its own introduction. DeckState.PlayCard files a Response card
-        // into ResponseCardIds with IsRevealed = false BEFORE this window opens, so without this the
-        // player is prompted in the one window where the card they just played is provably
-        // unplayable — and, if it was their only hidden Response, prompted with nothing else to
-        // offer. Excluded from the offered options and from the always-ask cover count alike.
-        int excludedCardId = triggerEvent is PlayCardChangeEvent or ActivateReactionChangeEvent
-            ? triggerEvent.SourceCardId
-            : -1;
 
         // Whose turn it is. Fixed once, from the event that opened THIS window, and then tracked here
         // rather than re-derived: the flat RequestOrder this replaced read LastChangeEvent, which every
@@ -459,15 +446,13 @@ public partial class CardPlayRound : GodotObject
                 Dictionary<Faction, List<int>> offers = new();
                 foreach (Faction faction in StaticGameData.FactionsForTeam(teamToAct))
                 {
-                    if (onlyFactions != null && !onlyFactions.Contains(faction)) continue;
                     if (_afterReactionPassedFactions.Contains(faction)) continue;
 
                     List<int> options = GetAfterReactionOptions(faction);
-                    options.Remove(excludedCardId);
                     // A faction the gate declines is re-evaluated on this team's next turn rather than
                     // recorded as having passed, exactly as a faction with no options always has been —
                     // the gate is a local state read, so there is no round-trip to save by caching it.
-                    if (!ShouldOpenReactionWindow(faction, options, excludedCardId)) continue;
+                    if (!ShouldOpenReactionWindow(faction, options)) continue;
 
                     candidates.Add(faction);
                     offers[faction] = options;
@@ -697,15 +682,13 @@ public partial class CardPlayRound : GodotObject
     /// card reacts to exactly this event — and its absence proof that it does not. The empty prompt
     /// is the cover story; the player passes with Skip.
     ///
-    /// <paramref name="excludeCardId"/> drops one card from the count: inside an introduction
-    /// event's window the card being introduced cannot react to itself, so it must not be the reason
-    /// a cover window opens. The residual tell — that being prompted there implies you hold ANOTHER
-    /// hidden Response card — is accepted. It is a count, not an identity, and the alternative is
-    /// asking a question the player provably cannot answer.
+    /// A card cannot be its own window's cover, but that no longer needs handling here: introduction
+    /// events open no reaction window at all, so the only window a freshly played Response card could
+    /// have been asked about — its own — does not exist.
     /// </summary>
-    public static bool HasHiddenResponseCards(Faction faction, int excludeCardId = -1) =>
+    public static bool HasHiddenResponseCards(Faction faction) =>
         DeckState.ForFaction(faction).ResponseCardIds
-            .Any(id => id != excludeCardId && CardState.ForId(id)?.IsRevealed == false);
+            .Any(id => CardState.ForId(id)?.IsRevealed == false);
 
     /// <summary>
     /// Every event-triggered card the faction has on the table: the full set a reaction prompt puts
@@ -775,13 +758,8 @@ public partial class CardPlayRound : GodotObject
     /// <summary>
     /// Whether to open a reaction window for this faction, given the reactions it can actually play.
     /// The single gate for both the block and the after-reaction path.
-    ///
-    /// <paramref name="excludeCardId"/> is the card being introduced, when this is an introduction
-    /// event's window — it can neither be offered nor act as cover. The caller has already stripped
-    /// it from <paramref name="options"/>; this passes it on to the cover count. Block windows leave
-    /// it at -1: introduction events no longer open one, so there is nothing to exclude.
     /// </summary>
-    private static bool ShouldOpenReactionWindow(Faction faction, List<int> options, int excludeCardId = -1)
+    private static bool ShouldOpenReactionWindow(Faction faction, List<int> options)
     {
         // A scoped skip only silences the windows that exist to hide information. A face-up Status
         // card (or an already-revealed Response) is public knowledge, so the player keeps that
@@ -789,7 +767,7 @@ public partial class CardPlayRound : GodotObject
         if (GameFlow.Instance.IsSkippingReactions(faction))
             return options.Any(IsPubliclyVisibleTableCard);
 
-        return options.Count > 0 || HasHiddenResponseCards(faction, excludeCardId);
+        return options.Count > 0 || HasHiddenResponseCards(faction);
     }
 
     public List<T> GetChangeEvents<T>() where T : ChangeEvent

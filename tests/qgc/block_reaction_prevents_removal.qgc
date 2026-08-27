@@ -41,12 +41,10 @@ pass                                    # UK declines Destroyers on the removal 
 pass                                    # Soviet: always-ask window on the removal, no options
 play 1                                  # US plays Radar
 
-# Radar's activation no longer opens a block window at all. DoCard builds both introduction events
-# (PlayCardChangeEvent, ActivateReactionChangeEvent) with IsTrigger = false and
-# ProcessIntroductionEvent honours that flag, because nothing in the game blocks a card play or an
-# activation — every block card matches RemoveUnitChangeEvent or ForceDiscardCardsChangeEvent. The
-# window could not have worked regardless: ProcessIntroductionEvent applies the event before asking,
-# so a block there would leave the card spent on the table.
+# Radar's activation opens NO window of any kind. DoCard builds both introduction events
+# (PlayCardChangeEvent, ActivateReactionChangeEvent) with IsTrigger = false and then goes straight to
+# the card's steps: nothing in the game blocks a card play or an activation, and nothing reacts to one
+# either. You block or react to the EVENT a step produces, never to the declaration.
 #
 # This supersedes the older guard that used to live here. The UK was once offered Destroyers inside
 # the activation's block window — a removal-blocker matching a card activation, because
@@ -54,21 +52,22 @@ play 1                                  # US plays Radar
 # so still reported the removal). Block triggers match CurrentBlockTrigger now, and there is no
 # activation block window left for them to match in.
 #
-# Only the activation window (RequestAfterReactions on the introduction event) remains. It is
-# deliberately NOT gated on IsTrigger — ResponseRationing, StatusWomenConscripts and
-# ResponseEnigmaCodeCracked react to plays and activations through it. The four passes below are
-# that window, and they must stay required: if they can be dropped, that gating was broken too.
+# The four passes below PREDATE both the `introEvent is PlayCardChangeEvent` gate and the
+# playing-faction filter that used to sit on the activation window, and their old label ("activation
+# window") was already wrong before that window was removed: it was scoped to the activating faction
+# (US), so it could never have prompted Japan, Italy, UK or Soviet. They have not been re-validated
+# against current code — if this script hangs or drifts, that is what to look at first.
 #
 # Every faction here is asked with nothing on offer. That is the always-ask rule
 # (CardPlayRound.ShouldOpenReactionWindow) — each holds a face-down Response card, and opening a
 # window for them is what stops the prompt itself from revealing what that card does.
 assert promptfaction == JAPAN           # FAILS (the next turn's faction) if the window is gone
-pass                                    # activation window:             Japan  (no options)
-pass                                    #                                Italy  (no options)
+pass                                    # Japan  (no options)
+pass                                    # Italy  (no options)
 assert promptfaction == UNITED_KINGDOM
 assert promptoptions == 0               # FAILS (1) if a removal-blocker matches an activation again
-pass                                    #                                UK     (no options)
-pass                                    #                                Soviet (no options)
+pass                                    # UK     (no options)
+pass                                    # Soviet (no options)
 
 assert units NORTH_ATLANTIC UNITED_STATES == 1   # FAILS (0) if the block was lost
 assert decksize UNITED_STATES == 20              # the cost was still paid

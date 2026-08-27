@@ -1,39 +1,58 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>
 /// "Use when you play a Build Army card for your Play step. Place that Build Army card on the top of
 /// your draw deck instead of discarding it."
 ///
-/// Same shape as ResponseRationing, and deferred for the same reason: this fires in the Build Army
-/// card's introduction window, before that card's own CardSteps run. Recycling on the spot moved the
-/// card to the top of the deck and only then built the army. The text is about where the card ends
-/// up, so MutatorRecycleAfterStep does it once the play step has finished.
+/// Same shape as ResponseRationing, and deferred for the same reason: this can fire while the Build
+/// Army card is still resolving, so recycling on the spot would move the card to the top of the deck
+/// and only then build the army. The text is about where the card ends up, so MutatorRecycleAfterStep
+/// does it once the play step has finished.
 ///
-/// A face-up Status card, so the trigger is deliberately strict — only a Soviet Build Army play opens
-/// this. The window it produces is public information either way, so it needs no always-ask cover.
+/// Pool-scoped, not window-scoped. It used to key on CardPlayPool.CurrentReactionTrigger being the
+/// PlayCardChangeEvent itself, which needed an activation window opened on that event for every card
+/// play in the game to serve two cards. Condition.FactionPlayedCard scans the round's event pool
+/// instead, so this is offered in the after-reaction window of ANY step of the Build Army card —
+/// in practice the DeployUnitChangeEvent its single step produces.
+///
+/// IsGameFlowStep + IsFactionTurn carry the "for your Play step" half of the text. They also keep pool
+/// scope honest: a round is one faction's one turn step, and EventLendLease plays another faction's
+/// hand card inside the US's round.
+///
+/// A face-up Status card, so its window is public information either way — it never needed always-ask
+/// cover, and the StatusGuards path (which plays a Build Army card from inside its own step, on the
+/// Soviet's own Play step) still reaches it.
 /// </summary>
 public partial class StatusWomenConscripts : StatusCardLogic
 {
-    /// <summary>The Build Army card this activation is about, or null when there is none.</summary>
-    private PlayCardChangeEvent BuildArmyCard(ChangeEvent trigger) =>
-        trigger is PlayCardChangeEvent playCard
-        && playCard.TriggeringFaction == Faction
-        && CardState.ForId(playCard.SourceCardId)?.CardData.CardType == CardType.BUILD_ARMY
-        && DeckState.ForFaction(Faction).DiscardedCardIds.Contains(playCard.SourceCardId)
-            ? playCard
-            : null;
+    /// <summary>
+    /// The Build Army card this activation is about, or null when there is none.
+    ///
+    /// The trigger condition and the step must resolve it the SAME way. Under pool scope the window's
+    /// trigger is the deploy event, not the play, so the step can no longer read ActivationTrigger — it
+    /// would find no PlayCardChangeEvent and the card would be offered only to no-op. LastOrDefault,
+    /// not First: a round can hold two plays by the same faction (StatusGuards plays a Build Army card
+    /// from inside its own step), and the most recent is the one just played.
+    ///
+    /// The discard-pile clause excludes a Status/Response table play, as in ResponseRationing.
+    /// </summary>
+    private PlayCardChangeEvent BuildArmyCard() =>
+        CardPlayPool.ChangeEventsPool
+            .OfType<PlayCardChangeEvent>()
+            .LastOrDefault(playCard =>
+                playCard.TriggeringFaction == Faction
+                && CardState.ForId(playCard.SourceCardId)?.CardData.CardType == CardType.BUILD_ARMY
+                && DeckState.ForFaction(Faction).DiscardedCardIds.Contains(playCard.SourceCardId));
 
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            // .InReactionWindow() is load-bearing, not decoration. Without it CustomCondition reports
-            // RequiresEventContext = false, so HasEventBasedTrigger is false, so CanBeActivated
-            // rejects this card at any ReactionDepth > 0 — which every reaction window is. The card
-            // could never be offered at all.
-            Condition.Build(new Condition.CustomCondition(() =>
-                BuildArmyCard(CardPlayPool.CurrentReactionTrigger) != null
-            ).InReactionWindow(), this)
+            Condition.Build(new Condition.FactionPlayedCard(Faction), this),
+            Condition.Build(new Condition.IsGameFlowStep(TurnStep.PLAY_CARD), this),
+            Condition.Build(new Condition.IsFactionTurn(Faction), this),
+            Condition.Build(new Condition.CustomCondition(() => BuildArmyCard() != null), this)
         };
     }
 
@@ -41,7 +60,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                PlayCardChangeEvent playEvent = BuildArmyCard(ActivationTrigger);
+                PlayCardChangeEvent playEvent = BuildArmyCard();
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Women Conscripts: no Build Army card found to recycle");

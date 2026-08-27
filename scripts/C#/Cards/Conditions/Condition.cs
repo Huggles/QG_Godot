@@ -348,29 +348,32 @@ public abstract class Condition
     }
 
     /// <summary>
-    /// Matches an <see cref="ActivateReactionChangeEvent"/> from an optional faction and/or card type.
-    /// Use with <see cref="EventCondition.Immediately"/> in <c>CardTriggers()</c> to react to a
-    /// card being activated (fires in the activation window opened by DoCard, immediately after
-    /// the card is activated and block reactions resolve, before its own steps execute).
+    /// Matches a card play by <paramref name="faction"/> anywhere in this round's change event pool.
+    ///
+    /// Pool-scoped deliberately (the default <see cref="ConditionScope"/>): a card keyed on this is
+    /// offered in the after-reaction window of ANY step of the played card, not only the first. That
+    /// breadth is the point — it is what replaced the activation window DoCard used to open on the
+    /// PlayCardChangeEvent itself, which was paid for on every single card play to serve two cards.
+    ///
+    /// EventCondition's RequiresEventContext is always true, so a card using this passes
+    /// HasEventBasedTrigger without needing CustomCondition.InReactionWindow().
+    ///
+    /// The pool read is sound even though DoCard never calls RegisterChangeEvent for the introduction
+    /// event: every ChangeEvent.Apply() self-registers in ApplyMutation, and IsTrigger = false closes
+    /// the block and after-reaction windows, not the registration.
+    ///
+    /// A round is one faction's one turn step, so pair this with IsFactionTurn/IsGameFlowStep on a card
+    /// whose text scopes it to its owner's own Play step — EventLendLease makes another faction play a
+    /// card inside the US's round, and pool scope would otherwise honour it for the rest of that round.
     /// </summary>
-    public class CardActivated : EventCondition
+    public class FactionPlayedCard : EventCondition
     {
         private readonly Faction _faction;
-        private readonly CardType? _cardType;
 
-        public CardActivated(Faction faction = Faction.NONE, CardType? cardType = null)
-        {
-            _faction = faction;
-            _cardType = cardType;
-        }
+        public FactionPlayedCard(Faction faction) { _faction = faction; }
 
         public override bool IsMatch(ChangeEvent ce)
-        {
-            if (ce is not ActivateReactionChangeEvent) return false;
-            if (_faction != Faction.NONE && ce.TriggeringFaction != _faction) return false;
-            if (_cardType.HasValue && ce.SourceCardState?.CardData.CardType != _cardType.Value) return false;
-            return true;
-        }
+            => ce is PlayCardChangeEvent playCard && playCard.TriggeringFaction == _faction;
     }
 
     public class IsBlockRequest : Condition
@@ -385,19 +388,36 @@ public abstract class Condition
         
         public override bool MeetCondition()
         {
-            bool meetsCondition = this.TargetCardType != null ? CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData?.CardType == this.TargetCardType : true;
-            if(CardLogic.CardData.UniqueName == "ResponseASWTactics")
-            {
-                DebugUtilities.PrintPeer($"[DIAG] IsBlockRequest: Card {CardLogic.CardData.UniqueName} (Id {CardLogic.CardState.Id}) for faction {CardLogic.Faction} ");
-                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData?.CardType}");
-                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData}");
-                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardState}");
-                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.SourceCardId}");
-                DebugUtilities.PrintPeer($"[DIAG] {CardPlayPool.CurrentBlockTrigger?.ScriptName}");
-                DebugUtilities.PrintPeer($"[DIAG] {this.TargetCardType}");
-            }
-            return meetsCondition;
+            return this.TargetCardType != null
+                ? CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData?.CardType == this.TargetCardType
+                : true;
         }
+    }
+
+    /// <summary>
+    /// Block-reaction condition: the change event offered for block was produced by an ACTIVATED card
+    /// of the given faction and card type.
+    ///
+    /// It derives from <see cref="IsBlockRequest"/> rather than sitting beside it because
+    /// <see cref="CardLogic.IsBlockReaction"/> is a bare <c>is Condition.IsBlockRequest</c> test, and
+    /// that is what earns Tag.IsBlockReaction and so any place in a block window at all. A sibling
+    /// class would compile, read correctly, and never be offered.
+    ///
+    /// "Activated" needs no explicit test. A Status/Response card played from hand runs no steps at all
+    /// (DoCard's isTableCardPlay guard), and an introduction event is IsTrigger = false and never
+    /// reaches DoChangeEvent, so any block window whose source card is a played Status card is
+    /// necessarily an activation of it.
+    ///
+    /// Reads CurrentBlockTrigger, never LastNoneNewCardChangeEvent — see UnitAboutToBeRemoved for why.
+    /// </summary>
+    public class IsBlockRequestFromCard : IsBlockRequest
+    {
+        private readonly Faction _faction;
+
+        public IsBlockRequestFromCard(Faction faction, CardType cardType) : base(cardType) { _faction = faction; }
+
+        public override bool MeetCondition()
+            => base.MeetCondition() && CardPlayPool.CurrentBlockTrigger?.TriggeringFaction == _faction;
     }
 
     /// <summary>

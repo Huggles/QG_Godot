@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -6,32 +7,49 @@ using System.Threading.Tasks;
 /// shuffle it into your draw deck."
 ///
 /// The recycle is deferred to the end of the turn step via MutatorRecycleAfterStep rather than applied
-/// here. Rationing triggers in the played card's introduction window, which fires BEFORE that card's
-/// own CardSteps run — recycling on the spot would move the card into the draw deck and only then let
-/// it resolve, with Tag.IsPlayed no longer set for it and the card redrawable in the same turn. The
-/// card text is about where the card ends up, not whether it resolves.
+/// here. The card text is about where the played card ends up, not whether it resolves, and this can
+/// now fire while that card is still resolving — recycling on the spot would move it into the draw
+/// deck and only then let it resolve, with Tag.IsPlayed no longer set for it and the card redrawable
+/// in the same turn.
+///
+/// Pool-scoped, not window-scoped. It used to key on CardPlayPool.CurrentReactionTrigger being the
+/// PlayCardChangeEvent itself, which needed an activation window opened on that event for every card
+/// play in the game to serve two cards. Condition.FactionPlayedCard scans the round's event pool
+/// instead, so this is offered in the after-reaction window of ANY step of the played card.
+///
+/// IsGameFlowStep + IsFactionTurn carry the "during your Play step" half of the text, and are load
+/// bearing under pool scope: a round is one faction's one turn step, and EventLendLease makes the UK
+/// play a card inside the US's round, which would otherwise keep this offered for the rest of it.
 /// </summary>
 public partial class ResponseRationing : ResponseCardLogic
 {
     /// <summary>
-    /// The played card this activation is about, or null when there is none. Scoped to the event that
-    /// opened the current window rather than scanned out of the pool: a pool scan matched any earlier
-    /// play of ours still sitting in the discard pile, so the card had to guess which one the window
-    /// meant — and guessing wrong recycles the wrong card.
+    /// The played card this activation is about, or null when there is none.
+    ///
+    /// The trigger condition and the step must resolve it the SAME way. Under pool scope the window's
+    /// trigger is a step event (a deploy, a battle), not the play, so the step can no longer read
+    /// ActivationTrigger — it would find no PlayCardChangeEvent and the card would be offered only to
+    /// no-op. LastOrDefault, not First: a round can hold two plays by the same faction (see
+    /// MutatorReallocateResources, StatusGuards), and the most recent is the one just played.
+    ///
+    /// The discard-pile clause is what excludes a Status/Response card played onto the table —
+    /// DeckState.PlayCard files those into StatusCardIds/ResponseCardIds and only falls through to
+    /// DiscardCard for other types. Without it, pool scope would match a table play too.
     /// </summary>
-    private PlayCardChangeEvent PlayedCard(ChangeEvent trigger) =>
-        trigger is PlayCardChangeEvent playCard
-        && playCard.TriggeringFaction == Faction
-        && DeckState.ForFaction(Faction).DiscardedCardIds.Contains(playCard.SourceCardId)
-            ? playCard
-            : null;
+    private PlayCardChangeEvent PlayedCard() =>
+        CardPlayPool.ChangeEventsPool
+            .OfType<PlayCardChangeEvent>()
+            .LastOrDefault(playCard =>
+                playCard.TriggeringFaction == Faction
+                && DeckState.ForFaction(Faction).DiscardedCardIds.Contains(playCard.SourceCardId));
 
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.CustomCondition(() =>
-                PlayedCard(CardPlayPool.CurrentReactionTrigger) != null
-            ).InReactionWindow(), this)
+            Condition.Build(new Condition.FactionPlayedCard(Faction), this),
+            Condition.Build(new Condition.IsGameFlowStep(TurnStep.PLAY_CARD), this),
+            Condition.Build(new Condition.IsFactionTurn(Faction), this),
+            Condition.Build(new Condition.CustomCondition(() => PlayedCard() != null), this)
         };
     }
 
@@ -39,10 +57,7 @@ public partial class ResponseRationing : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                // ActivationTrigger, not the pool: DoCard pins the event this activation was offered
-                // against, and it survives any Apply() that lands between the card being chosen and
-                // this step running.
-                PlayCardChangeEvent playEvent = PlayedCard(ActivationTrigger);
+                PlayCardChangeEvent playEvent = PlayedCard();
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Rationing: no played card found to recycle");
