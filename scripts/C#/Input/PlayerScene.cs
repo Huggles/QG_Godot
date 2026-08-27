@@ -9,8 +9,8 @@ public partial class PlayerScene : CharacterBody2D
 
     public static PlayerScene Current { get; private set; }
 
-    private Camera2D _camera => GetNode<Camera2D>("Camera2D");
-    private Node _rootNode => GetNode("."); 
+    private Camera2D _camera => GetNode<Camera2D>("%MainGameCamera");
+    private Node _rootNode => GetNode(".");
 
     private CanvasLayer _interfaceLayer => GetNodeOrNull<CanvasLayer>("Interface");
     private bool _uiLoaded => GetChildren().ToList().Find(c => c.Name == "Interface") != null;
@@ -64,7 +64,24 @@ public partial class PlayerScene : CharacterBody2D
         }
         DebugUtilities.PrintPeerFinest($"PlayerScene ready: {PlayerName}");
         GetNode<PeerReadinessComponent>("PeerReadinessComponent").RegisterReady();
-        
+
+        AimFocusCameraAtMainCamera();
+    }
+
+    /// <summary>
+    /// Parks the picture-in-picture camera on whatever the main camera is looking at, so the PiP
+    /// opens on the board instead of on empty space: FocusCamera sits in the shared World2D at its
+    /// own coordinates, and (0, 0) is nowhere near the board.
+    /// </summary>
+    private void AimFocusCameraAtMainCamera()
+    {
+        // No render target headless, so the whole FocusLayer is dead weight there.
+        if (GameContext.IsHeadless) return;
+
+        Camera2D focusCamera = GetNodeOrNull<Camera2D>("%FocusCamera");
+        if (focusCamera == null) return;
+
+        focusCamera.GlobalPosition = _camera.GlobalPosition;
     }
 
     public override void _Notification(int what)

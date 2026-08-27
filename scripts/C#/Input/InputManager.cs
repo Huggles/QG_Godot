@@ -13,7 +13,7 @@ public partial class InputManager : Node2D
 	private const float MIN_ZOOM_LEVEL = 0.1f;
 	private const float MAX_ZOOM_LEVEL = 2;    
 	private float zoom = 0.2f;
-	public Camera2D Camera => GetNode<Camera2D>("%Camera2D"); 
+	public Camera2D Camera => GetNode<Camera2D>("%MainGameCamera"); 
 
 	public Vector2 MousePosition => GetViewport().GetMousePosition();
 

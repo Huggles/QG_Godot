@@ -6,6 +6,7 @@
 [node name="MenuModal" type="CanvasLayer" unique_id=97024396]
 process_mode = 3
 layer = 100
+visibility_layer = 2
 script = ExtResource("1_script")
 
 [node name="Root" type="Control" parent="." unique_id=563518941]

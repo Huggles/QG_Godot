@@ -24,6 +24,7 @@
 [ext_resource type="Script" uid="uid://uq8tqtb6j8iq" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
+visibility_layer = 2
 
 [node name="FactionHandDisplay" parent="." unique_id=1158523193 instance=ExtResource("2_ntnkv")]
 

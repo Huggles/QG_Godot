@@ -8,6 +8,13 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
     public Node UnitsNode => GameNode.GetNode("Units");
     public Node2D WorldNode => GameNode.GetNode<Node2D>("World");    
     public Node CountriesNode => WorldNode != null ? WorldNode.GetNode("Countries") : null;
+    /// <summary>
+    /// The picture-in-picture camera in the local player's scene, or null before a game exists
+    /// (menu, headless). Resolved from <see cref="PlayerScene.Current"/> rather than from
+    /// <see cref="GameNode"/>: "%FocusCamera" is unique within Player.tscn, and % names only
+    /// resolve inside the scene that owns them — Game.tscn cannot see it.
+    /// </summary>
+    public Camera2D FocusCamera => PlayerScene.Current?.GetNodeOrNull<Camera2D>("%FocusCamera");
 
     /// <summary>
     /// The board backdrop. Its rect is what the camera is bound to, so it is the single place that

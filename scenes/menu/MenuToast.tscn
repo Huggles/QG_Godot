@@ -6,6 +6,7 @@
 [node name="MenuToast" type="CanvasLayer"]
 process_mode = 3
 layer = 99
+visibility_layer = 2
 script = ExtResource("1_script")
 
 [node name="Root" type="Control" parent="."]
