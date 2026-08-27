@@ -46,13 +46,12 @@ theme_override_styles/panel = ExtResource("2_6h8hq")
 
 [node name="PlayerActionMessage" type="RichTextLabel" parent="MenuPanel" unique_id=2006746535]
 unique_name_in_owner = true
-custom_maximum_size = Vector2(600, 60)
 layout_mode = 2
 theme_override_colors/default_color = Color(0.7863468, 0.78634685, 0.78634685, 1)
 theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "ABC"
-fit_content = true
+scroll_active = false
 horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("1_gvner")

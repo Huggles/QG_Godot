@@ -5,7 +5,15 @@
 [ext_resource type="Texture2D" uid="uid://dy33p3st34r4r" path="res://assets/factions/AxisFlag.png" id="3_axis"]
 [ext_resource type="Texture2D" uid="uid://dq2mrgd1e7e6" path="res://assets/factions/AlliesFlag.png" id="4_allies"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t8s4d"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hqeq6"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+corner_detail = 5
 
 [sub_resource type="LabelSettings" id="LabelSettings_axis"]
 resource_local_to_scene = true
@@ -28,28 +36,28 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_s20bd")
 
-[node name="Panel" type="Panel" parent="." unique_id=82975379]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1258258784]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -330.0
-offset_right = 320.0
-offset_bottom = 75.0
+offset_left = -335.0
+offset_right = 335.0
+offset_bottom = 90.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_t8s4d")
+theme_override_styles/panel = SubResource("StyleBoxFlat_hqeq6")
 
-[node name="FactionsHorizontalContainer" type="HBoxContainer" parent="Panel" unique_id=1572403057]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=841353709]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="FactionsHorizontalContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer" unique_id=1572403057]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(650, 75)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 1.0
-offset_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
 
