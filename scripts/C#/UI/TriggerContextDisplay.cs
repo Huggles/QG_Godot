@@ -19,6 +19,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	private Panel Panel => GetNode<Panel>("%TriggerContextPanel");
 	private CardScene CardSceneNode => GetNode<CardScene>("%TriggerCard");
 	private RichTextLabel Label => GetNode<RichTextLabel>("%TriggerLabel");
+	private Panel TriggerLabelPanel => GetNode<Panel>("%TriggerLabelPanel");
 	
 
 	/// <summary>
@@ -101,6 +102,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	{
 		Label.Text = $"[b]Reacting to:[/b]\n{summaryText ?? string.Empty}";
 		Panel.Visible = true;
+		TriggerLabelPanel.Visible = true;
 	}
 
 	public new void Hide()
@@ -154,8 +156,11 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	private void HideFocus()
 	{
 		FocusTargetDisplay.Clear();
+		
 		if (FocusContainerControl != null)
 			FocusContainerControl.Visible = false;
+		if(TriggerLabelPanel != null)
+			TriggerLabelPanel.Visible = false;
 	}
 
 	/// <summary>

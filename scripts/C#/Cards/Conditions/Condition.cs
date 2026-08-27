@@ -590,6 +590,27 @@ public abstract class Condition
         public override bool MeetCondition() => CountryState.BuildableSea(Faction).Any(cs => !cs.HasUnit(Faction));
     }
 
+    /// <summary>
+    /// The faction still has a piece of this type in its pool. Intended as a
+    /// <see cref="CardStep.WithAdvisoryCondition"/>, not as a gate: deploying at zero pool is legal —
+    /// <see cref="UnitPoolShortfall.ResolveBeforeDeploy"/> asks the player to recall one of their own
+    /// units to fund it — it just costs a piece somewhere else, which is rarely what a player reaching
+    /// for a build card meant. Gating on it would make build cards silently unplayable at zero pool,
+    /// which <see cref="CountryState.CanBuild"/> deliberately avoids.
+    ///
+    /// Pass a real bucket, never <see cref="UnitType.ANY"/>: that is a filter wildcard, and
+    /// UnitPool.AvailableUnitCount counts nothing for it.
+    /// </summary>
+    public class HasAvailableUnits : Condition
+    {
+        public HasAvailableUnits(Faction faction, UnitType unitType)
+        {
+            this.Faction = faction;
+            this.UnitType = unitType;
+        }
+        public override bool MeetCondition() => UnitPool.FactionHasAvailableUnits(Faction, UnitType);
+    }
+
     public class HasRecruitableLand : Condition
     {
         public HasRecruitableLand(Faction faction) { this.Faction = faction; }
