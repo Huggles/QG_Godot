@@ -115,9 +115,8 @@ unique_name_in_owner = true
 show_behind_parent = true
 layout_mode = 1
 anchors_preset = -1
-offset_top = -1.0
 offset_right = 350.0
-offset_bottom = 349.0
+offset_bottom = 350.0
 mouse_filter = 2
 stretch = true
 

@@ -14,6 +14,21 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hv7sk"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5581r"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+shadow_color = Color(0, 0, 0, 0.41960785)
+shadow_size = 10
+
 [node name="NinePatchButton" type="Button" unique_id=566933446]
 custom_minimum_size = Vector2(150, 80)
 offset_right = 150.0
@@ -24,6 +39,16 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_q0r3r")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_13edg")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_hv7sk")
 script = ExtResource("2_script")
+
+[node name="ShadowPanel" type="Panel" parent="." unique_id=793073876]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5581r")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=171759037]
 layout_mode = 0
