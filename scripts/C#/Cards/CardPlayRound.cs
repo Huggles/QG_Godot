@@ -597,6 +597,7 @@ public partial class CardPlayRound : GodotObject
             {
                 request.TriggerCardId = GetTriggerCardId(CurrentReactionTrigger);
                 request.TriggerSummaryText = CurrentReactionTrigger.SummaryText();
+                StampTriggerTargets(request, CurrentReactionTrigger);
             }
 
             InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request, withdrawToken);
@@ -652,6 +653,7 @@ public partial class CardPlayRound : GodotObject
             TriggerCardId = GetTriggerCardId(CurrentBlockTrigger),
             TriggerSummaryText = CurrentBlockTrigger?.SummaryText()
         };
+        StampTriggerTargets(request, CurrentBlockTrigger);
 
         InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request, withdrawToken);
         // See RequestPlay: a withdrawn prompt carries no decision of this player's to record.
@@ -806,5 +808,21 @@ public partial class CardPlayRound : GodotObject
     {
         if (trigger?.SourceCardId > -1) return trigger.SourceCardId;
         return CardPool.LastOrDefault()?.Id ?? -1;
+    }
+
+    /// <summary>
+    /// Split the trigger's board targets by kind for the wire, so the prompt can show the player WHERE
+    /// the event they are reacting to landed and not just what caused it.
+    ///
+    /// TargetsOrNone, never Targets(): the removal events resolve a unit that the very next step may
+    /// have taken off the board, and a read that threw here would cost a turn rather than a preview.
+    /// Same rule <see cref="InputRequest.PopulateCardTargetPreviews"/> follows. A null trigger is fine
+    /// — RequestBlock's CurrentBlockTrigger is nullable and TargetsOrNone answers None for it.
+    /// </summary>
+    private static void StampTriggerTargets(InputRequest request, ChangeEvent trigger)
+    {
+        TargetSet targets = trigger.TargetsOrNone();
+        request.TriggerTargetCountryIds = targets.CountryIds.ToList();
+        request.TriggerTargetUnitIds = targets.UnitIds.ToList();
     }
 }

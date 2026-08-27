@@ -47,6 +47,23 @@ public abstract partial class InputRequest
     public string TriggerSummaryText { get; set; }
 
     /// <summary>
+    /// Where on the board the event that opened this prompt landed — the point the focus viewport
+    /// centres on, and what it marks while the prompt is open. The two kinds are carried apart for the
+    /// same reason <see cref="CardTargetPreview"/> keeps them apart: a country glows, a unit puts up
+    /// its own marker, and collapsing a unit to its country lights the whole of Russia when the event
+    /// only reached the one army standing there.
+    ///
+    /// Stamped on the host beside <see cref="TriggerCardId"/> from the trigger's
+    /// <see cref="ChangeEvent.Targets"/> — a client holds no CardPlayRound and has no trigger to ask.
+    /// Empty for a trigger that names no place (a card play, a Bulletin), which is what tells
+    /// <see cref="TriggerContextDisplay"/> to leave the viewport hidden.
+    /// </summary>
+    public List<int> TriggerTargetCountryIds { get; set; }
+
+    /// <inheritdoc cref="TriggerTargetCountryIds"/>
+    public List<int> TriggerTargetUnitIds { get; set; }
+
+    /// <summary>
     /// Set by <see cref="BroadCast"/> when this request is raised from inside a step mutator's Run(),
     /// so the player being asked to pick a unit or a country can see what is asking. Null for every
     /// other request. Serialized with the rest of the request — the base class carries the
@@ -440,7 +457,8 @@ public abstract partial class InputRequest
                 TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
                 cardTargetPreviews: CardTargetPreviews);
             if (TriggerCardId > -1)
-                TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
+                TriggerContextDisplay.Current?.ShowCard(
+                    TriggerCardId, TriggerSummaryText, TriggerTargetCountryIds, TriggerTargetUnitIds);
             DebugUtilities.PrintPeer($"ActivateCard: Waiting for player input.");
             Variant[] results = await AwaitCardSelection();
             ReactionSkipScope = PlayerScene.Current.InputManager.TakeReactionSkipScope();
@@ -747,7 +765,8 @@ public abstract partial class InputRequest
                 TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
                 cardTargetPreviews: CardTargetPreviews);
             if (TriggerCardId > -1)
-                TriggerContextDisplay.Current?.ShowCard(TriggerCardId, TriggerSummaryText);
+                TriggerContextDisplay.Current?.ShowCard(
+                    TriggerCardId, TriggerSummaryText, TriggerTargetCountryIds, TriggerTargetUnitIds);
             Variant[] results = await AwaitCardSelection();
             ReactionSkipScope = PlayerScene.Current.InputManager.TakeReactionSkipScope();
             if (results != null && results.Length > 0 && (int)results[0] > -1)

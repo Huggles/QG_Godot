@@ -3,8 +3,25 @@
 [ext_resource type="Script" uid="uid://xyxrkj14cjx" path="res://scripts/C#/UI/TriggerContextDisplay.cs" id="1_tctx"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_tccard"]
 [ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="3_t1u62"]
+[ext_resource type="Script" uid="uid://cdop1cruia11k" path="res://scripts/C#/UI/WorldMirrorViewport.cs" id="4_wmvpt"]
+[ext_resource type="Texture2D" uid="uid://dsycvfroltf5e" path="res://assets/textures/Other/Menu/Modal9Patch_1.png" id="5_71eah"]
+[ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_mq2j7"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tctx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mq2j7"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+shadow_size = 20
 
 [node name="TriggerContextDisplay" type="Control" unique_id=1151867651]
 custom_minimum_size = Vector2(0, 1080)
@@ -12,10 +29,13 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -1.0
+offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_tctx")
+FocusZoom = 0.15
 
 [node name="TriggerContextPanel" type="Panel" parent="." unique_id=619802641]
 unique_name_in_owner = true
@@ -64,3 +84,51 @@ offset_bottom = 130.0
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
+
+[node name="FocusContainerControl" type="Control" parent="." unique_id=836859973]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 900.0
+offset_top = 184.0
+offset_right = 1250.0
+offset_bottom = 534.0
+
+[node name="ShadowPanel" type="Panel" parent="FocusContainerControl" unique_id=508365856]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mq2j7")
+
+[node name="ParentSizedNinePatchRect" type="NinePatchRect" parent="FocusContainerControl" unique_id=650059731]
+layout_mode = 0
+offset_right = 350.0
+offset_bottom = 350.0
+texture = ExtResource("5_71eah")
+script = ExtResource("5_mq2j7")
+metadata/_custom_type_script = "uid://c6xo03jw6k6gc"
+
+[node name="FocusContainer" type="SubViewportContainer" parent="FocusContainerControl/ParentSizedNinePatchRect" unique_id=1774301882]
+unique_name_in_owner = true
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = -1
+offset_top = -1.0
+offset_right = 350.0
+offset_bottom = 349.0
+mouse_filter = 2
+stretch = true
+
+[node name="FocusViewport" type="SubViewport" parent="FocusContainerControl/ParentSizedNinePatchRect/FocusContainer" unique_id=2047669602]
+disable_3d = true
+handle_input_locally = false
+canvas_cull_mask = 1
+size = Vector2i(350, 350)
+render_target_update_mode = 4
+script = ExtResource("4_wmvpt")
+
+[node name="FocusCamera" type="Camera2D" parent="FocusContainerControl/ParentSizedNinePatchRect/FocusContainer/FocusViewport" unique_id=1806662231]
+unique_name_in_owner = true
+zoom = Vector2(0.5, 0.5)

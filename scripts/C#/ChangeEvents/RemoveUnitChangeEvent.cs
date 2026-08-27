@@ -38,6 +38,21 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
     }
 
     /// <summary>
+    /// The country, plus the unit for as long as it is still standing in it.
+    ///
+    /// The unit drops out on its own once the removal has applied, which is exactly right for the two
+    /// windows this feeds: a BLOCK window runs before Apply() and so points at the unit about to be
+    /// hit, an AFTER-REACTION window runs after it, by which point
+    /// <c>GameAPI.RemoveUnitFromCountry</c> has set CountryId to -1 and <c>CountryScene.RemoveUnit</c>
+    /// has parked the scene off-board — its position would aim a camera at nothing. The inherited
+    /// CountryId, captured at construction, survives both.
+    /// </summary>
+    public override TargetSet Targets() =>
+        UnitState.IsDeployedToCountry
+            ? base.Targets().Plus(TargetSet.Units(new[] { UnitId }))
+            : base.Targets();
+
+    /// <summary>
     /// Battle and eliminate removals get the deploy-style camera zoom; supply attrition does not.
     /// </summary>
     private bool ShouldZoom => Reason != UnitRemovalReason.SUPPLY;

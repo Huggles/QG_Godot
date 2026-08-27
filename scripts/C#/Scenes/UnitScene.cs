@@ -104,6 +104,7 @@ public partial class UnitScene : Node2D
 
 	public void SetClickable()
 	{
+		UpdateMarkerVisibilityLayer();
 		TargetSprite.Scale = defaultTargetScale;
 		TargetSprite.ShowSprite();
 		TargetSprite.SetClickable();
@@ -116,6 +117,7 @@ public partial class UnitScene : Node2D
 	/// </summary>
 	public void SetRebuildTarget()
 	{
+		UpdateMarkerVisibilityLayer();
 		TargetSprite.Scale = defaultTargetScale * SubduedTargetScaleFactor;
 		TargetSprite.ShowSprite();
 		TargetSprite.SetClickableSubdued();
@@ -128,39 +130,47 @@ public partial class UnitScene : Node2D
 	/// <summary>True while the player is hovering a card that could affect this unit.</summary>
 	private bool IsPreviewTarget => UnitState.Tags.Has(Tag.PreviewTarget, Faction.ALL);
 
-	/// <summary>
-	/// Draws (or clears) the hover preview: the same marker an offered target gets, with no click.
-	///
-	/// An offered target wins outright — it owns the click — so a preview arriving over the top of one
-	/// must not restyle it, and a preview clearing over the top of one must not put it away. That is
-	/// the same rule <see cref="CountryScene.SetPreviewTarget"/> follows, for the same reason: the two
-	/// tags are raised by different things (the selection handlers, and CardTargetPreviewDisplay) that
-	/// know nothing about each other and can overlap in either order.
-	/// </summary>
-	public void SetPreviewTarget(bool isPreviewTarget)
-	{
-		if (IsOfferedTarget) return;
+	/// <summary>True while the focus viewport is pointed at the country this unit stands in.</summary>
+	private bool IsFocusTarget => UnitState.Tags.Has(Tag.FocusTarget, Faction.ALL);
 
-		if (isPreviewTarget)
-		{
-			TargetSprite.Scale = defaultTargetScale;
-			TargetSprite.ShowSprite();
-			TargetSprite.SetPreviewOnly();
-		}
-		else
-		{
-			SetUnclickable();
-		}
+	/// <summary>
+	/// Which viewports draw the marker. The main board wins wherever it has a reason of its own — an
+	/// offered target or a card hover preview — so a unit that is both that and a focus target stays
+	/// visible on the board instead of disappearing into the focus view.
+	/// </summary>
+	private void UpdateMarkerVisibilityLayer()
+	{
+		TargetSprite.VisibilityLayer = IsOfferedTarget || IsPreviewTarget
+			? WorldMirrorViewport.WorldLayer
+			: WorldMirrorViewport.FocusOnlyLayer;
 	}
 
-	public void SetUnclickable()
+	/// <summary>
+	/// Show the marker if ANY of the three reasons wants it, and put it in the right viewports.
+	///
+	/// One resolver rather than each reason showing and hiding for itself. Offered (the selection
+	/// handlers), card hover preview (CardTargetPreviewDisplay) and focus view (FocusTargetDisplay) are
+	/// raised by parties that know nothing about each other and can overlap in either order, and every
+	/// pairwise "don't put away what the other one wants" guard was a bug waiting for the third —
+	/// which the focus view now is.
+	///
+	/// Reads the tags rather than taking a bool: the tag handlers dispatch through CallDeferred, so by
+	/// the time this runs the tag state is the authority and a parameter captured earlier could be stale.
+	/// </summary>
+	private void RefreshTargetMarker()
 	{
+		UpdateMarkerVisibilityLayer();
+
+		// An offered target owns its own styling — SetClickable and SetRebuildTarget draw the ordinary
+		// and the subdued variant, and a preview restyle would flatten the difference.
+		if (IsOfferedTarget) return;
+
 		TargetSprite.Scale = defaultTargetScale;
 
-		// A unit can stop being an offered target while still being a card's preview target — the
-		// selection prompt closes, the card prompt behind it is still open and still hovered. Hiding
-		// the marker unconditionally would blank a preview that is meant to stay up.
-		if (IsPreviewTarget)
+		// A unit off the board shows nothing whatever tags are still on it. A focus mark raised in a
+		// block window outlives the removal that window was about, and ResetToPoolState comes through
+		// here — without this it would bring a pooled unit's marker back with it.
+		if (UnitState.IsDeployedToCountry && (IsPreviewTarget || IsFocusTarget))
 		{
 			TargetSprite.ShowSprite();
 			TargetSprite.SetPreviewOnly();
@@ -170,6 +180,14 @@ public partial class UnitScene : Node2D
 		TargetSprite.HideSprite();
 		TargetSprite.SetUnclickable();
 	}
+
+	/// <summary>Draws (or clears) the card hover preview. <see cref="RefreshTargetMarker"/> decides.</summary>
+	public void SetPreviewTarget() => RefreshTargetMarker();
+
+	/// <summary>Draws (or clears) the focus-view indicator. <see cref="RefreshTargetMarker"/> decides.</summary>
+	public void SetFocusTarget() => RefreshTargetMarker();
+
+	public void SetUnclickable() => RefreshTargetMarker();
 
 	public void ShowOutOfSupply() => OutOfSupplyNode.Show();
 	public void HideOutOfSupply() => OutOfSupplyNode.Hide();
@@ -204,7 +222,11 @@ public partial class UnitScene : Node2D
 		}
 		else if (tag == Tag.PreviewTarget)
 		{
-			Callable.From(() => SetPreviewTarget(true)).CallDeferred();
+			Callable.From(SetPreviewTarget).CallDeferred();
+		}
+		else if (tag == Tag.FocusTarget)
+		{
+			Callable.From(SetFocusTarget).CallDeferred();
 		}
 		else if (tag == Tag.InSupply || tag == Tag.SuppliedForTurn)
 		{
@@ -224,7 +246,11 @@ public partial class UnitScene : Node2D
 		}
 		else if (tag == Tag.PreviewTarget)
 		{
-			Callable.From(() => SetPreviewTarget(false)).CallDeferred();
+			Callable.From(SetPreviewTarget).CallDeferred();
+		}
+		else if (tag == Tag.FocusTarget)
+		{
+			Callable.From(SetFocusTarget).CallDeferred();
 		}
 		else if ((tag == Tag.InSupply || tag == Tag.SuppliedForTurn) && !UnitState.InSupply)
 		{

@@ -82,4 +82,26 @@ public enum Tag
     /// serializes a Tag numerically, so inserting one would reinterpret every replicated tag.
     /// </summary>
     PreviewTarget,
+
+    /// <summary>
+    /// On a UNIT: the focus viewport beside a reaction window's trigger card is pointed at the country
+    /// this unit stands in, and this is the unit the triggering event reached. Drawn with the same
+    /// marker an offered target gets, but ONLY inside that viewport — see
+    /// <see cref="WorldMirrorViewport.FocusOnlyLayer"/> — and never clickable.
+    ///
+    /// Countries are deliberately never given this tag: the focus view frames the country and
+    /// indicates the unit, so glowing the country as well would say the same thing twice and drown the
+    /// one mark that identifies which unit is meant.
+    ///
+    /// Its own tag rather than a second use of <see cref="PreviewTarget"/> because the two want
+    /// different visibility layers on the same node — a card hover preview belongs on the real board,
+    /// this belongs only in the focus view — and because TagContainer does not reference count, so two
+    /// raisers of one tag cannot see each other.
+    ///
+    /// Raised and cleared only by <see cref="FocusTargetDisplay"/> on the peer being asked. Local like
+    /// <see cref="Clickable"/> and <see cref="PreviewTarget"/>: pure presentation, and not in
+    /// GameStateCalculator.ReplicatedTags. New values go at the END of this enum — TagEntry serializes
+    /// a Tag numerically, so inserting one would reinterpret every replicated tag.
+    /// </summary>
+    FocusTarget,
 }

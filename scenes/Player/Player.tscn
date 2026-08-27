@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://c8lyp2o4iq088" path="res://scripts/C#/Input/PlayerScene.cs" id="1_socpp"]
 [ext_resource type="Script" uid="uid://buus0001hcimh" path="res://scripts/C#/Input/InputManager.cs" id="2_fxc31"]
-[ext_resource type="Script" path="res://scripts/C#/UI/WorldMirrorViewport.cs" id="3_wmvpt"]
 [ext_resource type="Script" uid="uid://cde0nvl8mrot5" path="res://scenes/network/PeerReadinessComponent.cs" id="10_dqp0f"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xcisb"]
@@ -13,29 +12,6 @@ script = ExtResource("1_socpp")
 
 [node name="MainGameCamera" type="Camera2D" parent="." unique_id=1360650844]
 unique_name_in_owner = true
-
-[node name="FocusLayer" type="CanvasLayer" parent="." unique_id=1170458291]
-layer = 2
-visibility_layer = 2
-
-[node name="FocusContainer" type="SubViewportContainer" parent="FocusLayer" unique_id=462801885]
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 532.0
-offset_bottom = 532.0
-stretch = true
-
-[node name="FocusViewport" type="SubViewport" parent="FocusLayer/FocusContainer" unique_id=2047669602]
-disable_3d = true
-handle_input_locally = false
-canvas_cull_mask = 1
-size = Vector2i(512, 512)
-render_target_update_mode = 4
-script = ExtResource("3_wmvpt")
-
-[node name="FocusCamera" type="Camera2D" parent="FocusLayer/FocusContainer/FocusViewport" unique_id=1806662231]
-unique_name_in_owner = true
-zoom = Vector2(0.5, 0.5)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1495711428]
 position = Vector2(0, 1.81571)

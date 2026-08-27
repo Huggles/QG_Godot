@@ -216,7 +216,20 @@ public partial class CountryScene : Node2D
         }
     }
 
-    private void OnMouseEnteredOpaque() => SetCountryColor(Colors.Green);
+    /// <summary>
+    /// Only an offered target answers the cursor. The same overlay is also drawn for a card hover
+    /// preview, which is deliberately NOT clickable — the game is waiting for a card, not a country —
+    /// so tinting it said "click me" about a country nothing was asking for.
+    ///
+    /// The exit handler stays ungated: ShowTargetGlow and HideTargetGlow call it directly to set the
+    /// resting colour, not only on a real mouse exit.
+    /// </summary>
+    private void OnMouseEnteredOpaque()
+    {
+        if (!IsOfferedTarget) return;
+        SetCountryColor(Colors.Green);
+    }
+
     private void OnMouseExitedOpaque() => SetCountryColor(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Yellow : Colors.Red);
 
     private void OnMouseLeftClickOpaque()

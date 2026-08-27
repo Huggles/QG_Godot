@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 /// For a message whose whole effect is what the player sees, use <see cref="PresentationEvent"/>
 /// instead: it rides the same ordered channel without any of the machinery below.
 /// </summary>
-public abstract partial class ChangeEvent : GameMessage
+public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
 {
     public string HashAfterApplication { get; set; } = null;
     [JsonIgnore] public static int LatestAppliedId { get; set; } = -1;
@@ -52,6 +52,24 @@ public abstract partial class ChangeEvent : GameMessage
     public int SourceCardId { get; set; } = -1;
     public bool HasSourceCard => SourceCardId > -1;
     public CardState SourceCardState => CardState.ForId(SourceCardId);
+
+    /// <summary>
+    /// Where on the board this event lands, for the presentation that has to point at it — today the
+    /// focus viewport beside a reaction window's trigger card (see <c>TriggerContextDisplay</c>).
+    ///
+    /// The same contract <see cref="CardLogic"/> implements, and the tense difference is deliberate:
+    /// a card answers "what would I affect if used now", an event answers "what am I affecting". Both
+    /// are presentation only — nothing in the execution path reads a <see cref="TargetSet"/>.
+    ///
+    /// Declaring nothing is the correct answer for every event that does not name a place, which is
+    /// most of them, so the base returns <see cref="TargetSet.None"/> rather than making this
+    /// abstract. Overridden by the deploy, battle and removal events.
+    ///
+    /// Read through <see cref="ITargetSetProviderExtensions.TargetsOrNone"/>, never bare: an override
+    /// resolving a unit that has just been removed can legitimately throw, and that must cost the
+    /// preview and not the prompt it rides on.
+    /// </summary>
+    public virtual TargetSet Targets() => TargetSet.None;
 
     // Signal
     [Signal] public delegate void ChangeEventAppliedEventHandler(int changeEventId);

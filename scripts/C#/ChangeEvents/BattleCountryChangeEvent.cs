@@ -25,6 +25,12 @@ public partial class BattleCountryChangeEvent : ChangeEvent
     /// </summary>
     public bool IsBattle => this is not RemoveUnitChangeEvent removal || removal.Reason == UnitRemovalReason.BATTLE;
 
+    /// <summary>
+    /// The country the battle happened in. <see cref="RemoveUnitChangeEvent"/> widens this to the
+    /// unit as well while there still is one.
+    /// </summary>
+    public override TargetSet Targets() => TargetSet.Countries(new[] { CountryId });
+
     protected override List<ChangeEventAnimation> BeforeAnimations => new()
     {
         new ZoomToCountryAnimation(CountryId),
