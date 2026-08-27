@@ -1,0 +1,69 @@
+{
+  "title": "Debug Scenario Germany",
+  "description": "This scenario is for debugging purposes. It starts with all factions deployed to their home territories and pre-loaded with cards.",
+  "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [
+        { "countryName": "GERMANY" },
+        { "countryName": "WESTERN_EUROPE" }
+      ],
+      "initialCards": [
+        
+      ],
+      "initialHandCards": [
+        { "name": "EventMilitaryDictatorshipsInTheBalkans" }       
+      ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [
+        { "countryName": "UNITED_KINGDOM" }
+      ],
+      "initialCards": [
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [
+        { "countryName": "JAPAN" }
+      ],
+      "initialCards": [
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [
+        { "countryName": "MOSCOW" },
+        { "countryName": "UKRAINE" }
+      ],
+      "initialCards": [
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [
+        { "countryName": "ITALY" }
+      ],
+      "initialCards": [
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [
+        { "countryName": "US_EAST" }
+      ],
+      "initialCards": [
+      ],
+      "initialHandCards": [],
+      "startingVP": 0
+    }
+  }
+}
