@@ -21,8 +21,8 @@ script = ExtResource("2_qbsmt")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=1023654323]
 offset_left = -10000.0
-offset_top = -15013.0
+offset_top = -15026.0
 offset_right = 20000.0
-offset_bottom = 14987.0
+offset_bottom = 14974.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_kb8kt")

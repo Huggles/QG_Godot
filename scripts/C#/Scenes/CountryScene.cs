@@ -18,7 +18,6 @@ public partial class CountryScene : Node2D
     public Node2D UnitContainerNode => GetNode<Node2D>("UnitContainer");
     public Sprite2D SupplyStarSprite => GetNode<Sprite2D>("SupplyStarSprite");
     public Sprite2D StraightSpriteNode => GetNode<Sprite2D>("StraightSprite");
-    public ClickableSprite CountrySprite => GetNode<ClickableSprite>("CountryClickableSprite");
 
     public MarginContainer CountrySpriteTextureRectContainer => GetNode<MarginContainer>("%TextureRectContainer");
     public OpaqueTextureRect CountrySpriteTextureRect => GetNode<OpaqueTextureRect>("%TextureRect");
@@ -125,12 +124,8 @@ public partial class CountryScene : Node2D
 
     public override void _Ready()
     {
-        defaultTargetScale = CountrySprite.Scale;
         DebugUtilities.PrintPeer($"{this.StaticCountryData.Label}");
         Name = CountryState.Name;
-        if (StaticCountryData.Texture != null)
-            ApplyTexture();
-
         //SetUnclickable();
         if (CountryState.IsSupply)
             ShowSupplyStar();
@@ -141,7 +136,6 @@ public partial class CountryScene : Node2D
         
         StraightState.OnReady();
 
-        CountrySprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
         CountryLabel.Visible = GameSettings.ShowCountryLabels;
 
         EventBus.Instance.WorldPresentationViewChanged += OnWorldPresentationViewChanged;
@@ -236,13 +230,6 @@ public partial class CountryScene : Node2D
     {
         EventBus.Emit(EventBus.SignalName.CountryClicked, this.CountryState.Id);
     }
-
-
-    private void ApplyTexture()
-    {
-        CountrySprite.SetTexture(AssetRepository.TargetCountrySprite);
-    }
-
 
     /// <summary>
     /// The TextureRect's glow material, duplicated per country. Country.tscn's ShaderMaterial is a
@@ -593,33 +580,11 @@ public partial class CountryScene : Node2D
             // follows, in SetUnclickable. Removing a handler that is not attached is a safe no-op.
             CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
             CountrySpriteTextureRect.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
-        }
-        else if(targetPresentationMode == TargetPresentationMode.TargetSprite)
-        {
-            CountrySprite.Position = new Vector2(0,0) + StaticCountryData.LabelTransformData.Position2D;
-            CountrySprite.ShowSprite();
-
-            // A country the asked faction already occupies is a rebuild-in-place target: legal, but the rare
-            // option. This marker is the one doing the visual talking — it is authored larger than the unit
-            // marker and sits at the country label — so subduing only the unit's marker left the target
-            // looking exactly like an ordinary one. Both are subdued now.
-            if (CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL))
-            {
-                CountrySprite.Scale = defaultTargetScale * SubduedTargetScaleFactor;
-                CountrySprite.SetClickableSubdued();
-                return;
-            }
-            CountrySprite.Scale = defaultTargetScale;
-            CountrySprite.SetClickable();
-        }
+        }        
     }
 
     public void SetUnclickable()
     {
-        CountrySprite.Scale = defaultTargetScale;
-        CountrySprite.HideSprite();
-        CountrySprite.SetUnclickable();
-
         CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
 
         // The hover preview draws this same overlay, so hiding it unconditionally would blank a
