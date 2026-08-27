@@ -76,10 +76,16 @@ public partial class InputManager : Node2D
 	/// decides whether the scoped skip buttons appear: a block and an after window agree on that and
 	/// differ here.
 	/// </param>
+	/// <param name="isHandPlayPrompt">
+	/// True only for <see cref="InputRequest.HandCardPlayRequestHandler"/>'s prompt — the faction's own
+	/// play at reaction depth 0. Recorded on <see cref="ActiveCardPrompt.IsHandPlay"/>, where
+	/// <c>BottomLeftMenu</c> reads it; kept separate from <paramref name="separateNonHandCards"/>, which
+	/// happens to be true for the same one prompt today but is a statement about how the fan is drawn.
+	/// </param>
 	public InputHandlerPlayCard SetCardSelectionActive(
 		Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
 		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null,
-		TriggerKind triggerKind = TriggerKind.NONE)
+		TriggerKind triggerKind = TriggerKind.NONE, bool isHandPlayPrompt = false)
 	{
 		_pendingReactionSkipScope = ReactionSkipScope.NONE;
 
@@ -90,7 +96,7 @@ public partial class InputManager : Node2D
 
 		CurrentCardPrompt = new ActiveCardPrompt(
 			faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards,
-			ToPreviewMap(cardTargetPreviews));
+			isHandPlayPrompt, ToPreviewMap(cardTargetPreviews));
 
 		PlayerActionLabel.ShowText(BannerText(triggerKind, cardIds.Count > 0), faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]

@@ -166,10 +166,9 @@ public partial class BottomLeftMenu : Control
 			return;
 		}
 
-		// The open card prompt is already showing exactly this hand, so there is nothing to browse to.
-		if (InputManager.CurrentCardPrompt != null
-			&& faction == InputManager.CurrentCardPrompt.Faction
-			&& !InputManager.CurrentCardPrompt.DisplayCardIds.Except(deckState.HandCardIds).Any())
+		// The prompt this peer is being asked right now already covers this hand, so browse would only
+		// replace live choices with a dead copy of them. Show the prompt instead.
+		if (PromptCoversHand(faction, deckState))
 		{
 			CloseBrowsing();
 			return;
@@ -182,6 +181,30 @@ public partial class BottomLeftMenu : Control
 
 		BrowsingFaction = faction;
 		FactionHandDisplay.Current.Show(deckState.HandCardIds, faction, new List<int>());
+	}
+
+	/// <summary>
+	/// Whether the card prompt open on this peer is already a view of this faction's hand — in which case
+	/// pressing the card back must hand that prompt back rather than browse over it, since browsing draws
+	/// the same cards with nothing selectable.
+	///
+	/// <see cref="InputManager.CurrentCardPrompt"/> being non-null is what makes this "the request is for
+	/// this instance": the prompt is only ever opened from a request's Handle(), which runs on the target
+	/// peer alone, and it is cleared the moment the request is answered.
+	/// </summary>
+	private static bool PromptCoversHand(Faction faction, DeckState deckState)
+	{
+		ActiveCardPrompt prompt = InputManager.CurrentCardPrompt;
+		if (prompt == null || prompt.Faction != faction)
+		{
+			return false;
+		}
+
+		// The hand-play prompt is the hand, plus the table cards that can be activated instead of playing
+		// one — so it covers the hand even though its display set is deliberately wider than it. The
+		// card-id comparison below cannot see that, which is why the request says so itself.
+		return prompt.IsHandPlay
+			|| !prompt.DisplayCardIds.Except(deckState.HandCardIds).Any();
 	}
 
 	/// <summary>

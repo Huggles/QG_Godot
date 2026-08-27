@@ -455,9 +455,12 @@ public abstract partial class InputRequest
             // separateNonHandCards: this is the one prompt whose offer spans two zones, so the table
             // cards that activate instead of a hand play get their own smaller fan beside the hand
             // rather than being interleaved into it by card id.
+            // isHandPlayPrompt: tells the bottom-left card back that this prompt IS this faction's hand,
+            // so pressing it brings the prompt back instead of browsing an unclickable copy over it.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), false, DisplayCardIds,
-                separateNonHandCards: true, cardTargetPreviews: CardTargetPreviews);
+                separateNonHandCards: true, cardTargetPreviews: CardTargetPreviews,
+                isHandPlayPrompt: true);
             Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0)
             {

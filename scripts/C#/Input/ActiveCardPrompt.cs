@@ -16,6 +16,17 @@ using System.Collections.Generic;
 /// fan. Carried so a re-draw after browsing reproduces the prompt as the player last saw it, rather
 /// than collapsing it back into one row.
 /// </param>
+/// <param name="IsHandPlay">
+/// True for the one prompt <see cref="InputRequest.HandCardPlayRequestHandler"/> raises — the
+/// faction's own play at reaction depth 0, whose offer is the hand plus the table cards that
+/// activate instead of a play.
+///
+/// Carried rather than recognised from the drawn set: that set is deliberately wider than the hand,
+/// so comparing it against <see cref="DeckState.HandCardIds"/> cannot tell this prompt from one that
+/// merely happens to include a hand card. <c>BottomLeftMenu</c> reads it to know that a click on this
+/// faction's card back should hand the prompt back rather than browse a dead copy of the same hand
+/// over the top of it.
+/// </param>
 /// <param name="PreviewsByCardId">
 /// What each drawn card could affect, for the hover preview — see
 /// <see cref="CardTargetPreviewDisplay"/>. Computed by the host and shipped on
@@ -33,4 +44,5 @@ public sealed record ActiveCardPrompt(
     List<int> DisplayCardIds,
     List<int> SelectableCardIds,
     bool SeparateNonHandCards = false,
+    bool IsHandPlay = false,
     Dictionary<int, InputRequest.CardTargetPreview> PreviewsByCardId = null);
