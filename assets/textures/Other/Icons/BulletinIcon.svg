@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Bulletin: an exclamation disc. A scenario asking a question, not an event to react to.
+       evenodd punches the glyph out of the disc so the panel shows through it. -->
+  <path fill="#e0c980" fill-rule="evenodd" d="M12 1.6a10.4 10.4 0 1 0 0 20.8 10.4 10.4 0 0 0 0-20.8zM10.8 6.1h2.4v8.2h-2.4zM12 16.3a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+</svg>

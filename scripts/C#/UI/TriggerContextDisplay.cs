@@ -44,13 +44,23 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// </summary>
 	[Export] private float FocusZoom = 0.1f;
 
-	// The badge colours, warm for the window that can still stop something and cool for the one that
+	// The prompt colours, warm for the window that can still stop something and cool for the one that
 	// can only answer it. Kept as BBCode hex rather than theme colours because they are only ever
 	// interpolated into this one label's text.
 	private const string BlockColour    = "#ff9d5c";
 	private const string AfterColour    = "#7fb3ff";
 	private const string BulletinColour = "#e0c980";
 	private const string CauseColour    = "#9a9a9a";
+
+	// One icon per window kind, drawn inline in the label rather than as a node of its own: the label
+	// is the only thing in that panel, so a TextureRect beside it would need its own row and its own
+	// alignment for no gain. Each SVG is tinted to match the colour above it — see PromptFor.
+	private const string BlockIcon    = "res://assets/textures/Other/Icons/BlockWindowIcon.svg";
+	private const string AfterIcon    = "res://assets/textures/Other/Icons/AfterReactionIcon.svg";
+	private const string BulletinIcon = "res://assets/textures/Other/Icons/BulletinIcon.svg";
+
+	/// <summary>Icon edge in pixels, a little above the text so it reads as the line's marker.</summary>
+	private const int IconSize = 22;
 
 	public override void _Ready()
 	{
@@ -122,31 +132,54 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 			? string.Empty
 			: $"\n[color={CauseColour}]Cause: {causeText}[/color]";
 
-		Label.Text = $"{HeaderFor(kind)}\n{summaryText ?? string.Empty}{cause}";
+		(string prompt, bool summaryOnPromptLine) = PromptFor(kind);
+		// A prompt that asks its own question keeps the summary on the next line, as the answer to it.
+		// One that is only an icon takes the summary alongside, rather than leaving the icon floating on
+		// a line of its own.
+		string separator = summaryOnPromptLine ? " " : "\n";
+
+		Label.Text = $"{prompt}{separator}{summaryText ?? string.Empty}{cause}";
 		Panel.Visible = true;
 		TriggerLabelPanel.Visible = true;
 	}
 
 	/// <summary>
-	/// The badge line over the summary: which window the player is in, and — the part the summary
-	/// itself gets wrong — whether the event has happened yet.
+	/// The line over the summary: an icon for which window this is, and the question that window is
+	/// actually asking.
 	///
-	/// Every summary is written in the past tense, because they are the same lines the history strip
-	/// shows. In a BLOCK window the event has NOT been applied yet and the block is the chance to stop
-	/// it, so the badge has to supply the tense the sentence below it contradicts.
+	/// A question rather than a label, because it is the one framing the summary underneath cannot
+	/// contradict. Those summaries are the past-tense lines the history strip shows, and in a BLOCK
+	/// window the event has not been applied yet — "Do you want to block this action?" reads correctly
+	/// over a sentence describing the action either way, where a bare "BLOCK WINDOW" left the player to
+	/// work out whether they were being shown something done or something pending.
+	///
+	/// The icon carries the kind, in the same colour as the question, so the two windows are
+	/// distinguishable before either is read. Swapping the art means changing only the paths above.
 	///
 	/// The wording lives here rather than on <see cref="TriggerKind"/>: it is UI copy, and the enum
 	/// travels over the wire to peers that may render it differently.
 	/// </summary>
-	private static string HeaderFor(TriggerKind kind) => kind switch
+	/// <returns>
+	/// The prompt line, and whether the summary belongs on the same line as it — true when the prompt
+	/// asks nothing and is only an icon.
+	/// </returns>
+	private static (string Prompt, bool SummaryOnPromptLine) PromptFor(TriggerKind kind) => kind switch
 	{
-		TriggerKind.BLOCK    => $"[color={BlockColour}][b]BLOCK WINDOW[/b] · about to happen[/color]",
-		TriggerKind.AFTER    => $"[color={AfterColour}][b]AFTER REACTION[/b] · just happened[/color]",
-		TriggerKind.BULLETIN => $"[color={BulletinColour}][b]BULLETIN[/b] · asking you[/color]",
+		TriggerKind.BLOCK    => (Prompt(BlockIcon, BlockColour, "Do you want to block this action?"), false),
+		TriggerKind.AFTER    => (Prompt(AfterIcon, AfterColour, "Do you want to react to this action?"), false),
+		// No question of ours: a Bulletin is the scenario asking one of its own, and the summary IS that
+		// question — so the icon only says where it came from, and stands beside it.
+		TriggerKind.BULLETIN => (Prompt(BulletinIcon, BulletinColour, null), true),
 		// A prompt that carries a trigger without being a window of its own — the faction's own play,
-		// reached while a reaction is live. Neither tense would be true of it, so it claims neither.
-		_                    => "[b]Reacting to:[/b]",
+		// reached while a reaction is live. It asks nothing about the trigger, so it only names it.
+		_                    => ("[b]Reacting to:[/b]", false),
 	};
+
+	private static string Prompt(string iconPath, string colour, string question)
+	{
+		string icon = $"[img={IconSize}x{IconSize}]{iconPath}[/img]";
+		return question == null ? icon : $"{icon} [color={colour}][b]{question}[/b][/color]";
+	}
 
 	public new void Hide()
 	{
