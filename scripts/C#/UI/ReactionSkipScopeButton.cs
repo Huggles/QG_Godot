@@ -31,13 +31,18 @@ public partial class ReactionSkipScopeButton : MenuPanelButton
     {
         base._Ready();
 
-        ButtonText = Scope == ReactionSkipScope.ROUND
-            ? "Skip rest of round"
-            : "Skip rest of turn step";
+        ButtonText = Scope switch
+        {
+            ReactionSkipScope.ROUND => "Skip rest of round",
+            ReactionSkipScope.UNTIL_ACTIVATABLE => "Only ask when I can react",
+            _ => "Skip rest of turn step",
+        };
 
         // Spell the limit out: the button does not sign away the reactions everyone can already see
         // you holding, only the empty prompts that exist to cover your face-down cards.
-        TooltipText = "Stop asking me for reactions. You will still be asked when you have a face-up card that can react.";
+        TooltipText = Scope == ReactionSkipScope.UNTIL_ACTIVATABLE
+            ? "Stop showing me empty reaction windows. You will still be asked the moment any of your cards can actually react."
+            : "Stop asking me for reactions. You will still be asked when you have a face-up card that can react.";
 
         if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
         {

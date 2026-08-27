@@ -65,11 +65,21 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private readonly Dictionary<Faction, (int Turn, TurnStep Step)> reactionSkipTurnStep = new();
     private readonly Dictionary<Faction, int> reactionSkipRound = new();
 
-    /// <summary>Record a faction's scoped skip choice from a reaction prompt. NONE is a no-op.</summary>
+    /// <summary>
+    /// Record a faction's scoped skip choice from a reaction prompt. NONE is a no-op, and so is
+    /// UNTIL_ACTIVATABLE - see the case below.
+    /// </summary>
     public void RecordReactionSkip(Faction faction, ReactionSkipScope scope)
     {
         switch (scope)
         {
+            case ReactionSkipScope.UNTIL_ACTIVATABLE:
+                // Deliberately not recorded. That scope is enforced on the client, which answers its
+                // own empty windows; honouring it here would stop the window opening at all, and its
+                // appearance would then be proof that the faction holds a face-down Response card
+                // matching exactly this event. The always-ask rule exists to deny that inference.
+                break;
+
             case ReactionSkipScope.TURN_STEP:
                 reactionSkipTurnStep[faction] = (GameTurn, TurnStep);
                 DebugUtilities.PrintPeer($"{faction} is skipping reactions for the rest of turn {GameTurn} step {TurnStep}");

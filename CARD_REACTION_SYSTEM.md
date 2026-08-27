@@ -173,6 +173,11 @@ after-reaction path:
   (`ReactionSkipScope`, recorded by `GameFlow.RecordReactionSkip`). Those suppress **only** the
   information-hiding windows: a window where the faction holds a face-up Status card, or an
   already-revealed Response card, still opens.
+- A third scope, `UNTIL_ACTIVATABLE` ("only ask when I can really react"), is enforced on the
+  **client** — `GameFlow.RecordReactionSkip` ignores it on purpose, because suppressing the window
+  host-side would make its appearance proof of a matching face-down Response card. The peer answers
+  its own empty windows in `InputRequest.TryAutoPassArmedReactionWindow` instead. All four scopes can
+  also be pre-armed from the toggle in each local faction's info row (`ReactionSkipPreference`).
 
 #### `ContinueWithNextSteps()`
 Checks all cards in the pool for executable next steps:

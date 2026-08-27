@@ -114,6 +114,14 @@ layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 2
 
+[node name="SkipUntilActivatableButton" parent="Control/VBoxContainer" unique_id=1187079459 instance=ExtResource("14_skipscene")]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(280, 50)
+layout_mode = 2
+script = ExtResource("18_rskip")
+Scope = 3
+
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
 offset_bottom = -1005.0
 mouse_filter = 2

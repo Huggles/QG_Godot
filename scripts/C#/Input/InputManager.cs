@@ -164,6 +164,11 @@ public partial class InputManager : Node2D
 	private void OnReactionSkipScoped(int scope)
 	{
 		_pendingReactionSkipScope = (ReactionSkipScope)scope;
+		// Mirrored into the standing preference so the faction info row toggle shows what was just
+		// chosen, and so the choice keeps applying to the windows that follow. Read the faction
+		// BEFORE HandleItemSelected, which nulls CurrentCardPrompt.
+		if (CurrentCardPrompt != null)
+			ReactionSkipPreference.Set(CurrentCardPrompt.Faction, (ReactionSkipScope)scope);
 		HandleItemSelected(-1);
 	}
 

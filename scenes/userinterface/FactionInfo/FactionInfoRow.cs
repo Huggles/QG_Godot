@@ -24,6 +24,7 @@ public partial class FactionInfoRow : Control
 	private TextureRect NavyIcon => GetNode<TextureRect>("%NavyIcon");
 	private Label ArmyCountLabel => GetNode<Label>("%ArmyCountLabel");
 	private Label NavyCountLabel => GetNode<Label>("%NavyCountLabel");
+	private ReactionSkipToggleButton ReactionSkipToggleButton => GetNode<ReactionSkipToggleButton>("%ReactionSkipToggleButton");
 
 	private Timer hoverTimer;
 	private bool isMouseOver = false;
@@ -49,6 +50,8 @@ public partial class FactionInfoRow : Control
 			EventBus.Instance.GameStateRecalculated -= SetDeckCardCount;
 			EventBus.Instance.CardsDrawn -= OnCardsChanged;
 			EventBus.Instance.CardsDiscarded -= OnCardsChanged;
+			EventBus.Instance.ReactionSkipPreferenceChanged -= OnReactionSkipPreferenceChanged;
+			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
 			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
 			FactionInfoButton.Pressed -= OnFactionInfoButtonPressed;
 			DiscardDeckButton.Pressed -= OnDiscardDeckButtonPressed;
@@ -97,6 +100,9 @@ public partial class FactionInfoRow : Control
 		ArmyCountLabel.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
 		NavyCountLabel.LabelSettings = (LabelSettings)NavyCountLabel.LabelSettings.Duplicate();
 
+		ReactionSkipToggleButton.Faction = Faction;
+		ReactionSkipToggleButton.Refresh();
+
 		SetScore(FactionState.Score);
 		SetUnitCounts();
 		SetDeckCardCount();
@@ -108,6 +114,12 @@ public partial class FactionInfoRow : Control
 		EventBus.Instance.GameStateRecalculated += SetDeckCardCount;
 		EventBus.Instance.CardsDrawn += OnCardsChanged;
 		EventBus.Instance.CardsDiscarded += OnCardsChanged;
+		EventBus.Instance.ReactionSkipPreferenceChanged += OnReactionSkipPreferenceChanged;
+		// NextStepStarted, not NewTurnStarted: the latter is emitted inside GameFlow.StartNewTurn, which
+		// only the host runs. TurnStepCounter is a replicated property whose setter emits this on every
+		// peer, so it is the one turn-boundary signal a client can rely on — and it is exactly when a
+		// TURN_STEP arming expires and the toggle has to fall back to "always ask".
+		EventBus.Instance.NextStepStarted += OnNextStepStarted;
 		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		DiscardDeckButton.Pressed += OnDiscardDeckButtonPressed;
@@ -154,6 +166,20 @@ public partial class FactionInfoRow : Control
 		}
 	}
 
+	private void OnReactionSkipPreferenceChanged(int faction)
+	{
+		if ((Faction)faction == Faction) ReactionSkipToggleButton.Refresh();
+	}
+
+	/// <summary>
+	/// A TURN_STEP or ROUND arming can expire without anyone touching the toggle, so repaint it at
+	/// every step boundary rather than only when the setting is changed.
+	/// </summary>
+	private void OnNextStepStarted(int turnStep)
+	{
+		ReactionSkipToggleButton.Refresh();
+	}
+
 	private void OnFactionInfoButtonPressed()
 	{
 		ToggleDetails();
@@ -178,7 +204,13 @@ public partial class FactionInfoRow : Control
 	}
 	private void SetModulation()
 	{        
-		if (PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction))
+		bool isLocal = PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction);
+		// Re-tested here rather than once in LoadUI so a rejoin or a faction reassignment is picked up.
+		// A setting on a faction this peer does not control would do nothing, and hiding it leaves the
+		// other five rows exactly as they were.
+		ReactionSkipToggleButton.Visible = isLocal;
+
+		if (isLocal)
 		{            
 			Modulate = new Color(1, 1, 1, 1f); // Full opacity for factions controlled by the local player
 		} 

@@ -394,6 +394,45 @@ public abstract partial class InputRequest
         }
     }
 
+    /// <summary>
+    /// Answer this reaction window as a pass without ever drawing it, when the player has pre-armed a
+    /// <see cref="ReactionSkipPreference"/> and the window offers nothing. Returns true if it did, in
+    /// which case the caller must return immediately.
+    ///
+    /// <para>
+    /// Gated on an EMPTY offer on purpose. A window with real options must always reach the player,
+    /// including under <see cref="ReactionSkipScope.UNTIL_ACTIVATABLE"/> — being told the moment
+    /// something becomes usable is the whole point of that setting, and for TURN_STEP/ROUND the host
+    /// makes the same carve-out for a publicly visible table card in
+    /// <c>CardPlayRound.ShouldOpenReactionWindow</c>.
+    /// </para>
+    ///
+    /// <para>
+    /// The armed scope rides back on <see cref="ReactionSkipScope"/>. TURN_STEP and ROUND are recorded
+    /// by <see cref="GameFlow.RecordReactionSkip"/> and the host stops opening these windows from then
+    /// on; UNTIL_ACTIVATABLE is ignored there, so every window keeps opening and the "Waiting on X
+    /// input…" line the other players see stays exactly where it was. Empty ResponseCardIds is a pass.
+    /// </para>
+    ///
+    /// <para>
+    /// Called BEFORE <c>SetCardSelectionActive</c>, not from inside it: <see cref="AwaitCardSelection"/>
+    /// registers its awaiter only after that call returns, so a CardSelected emitted from within it
+    /// would be missed — and returning early is also what keeps this flicker-free, with no prompt
+    /// built and no trigger context shown.
+    /// </para>
+    /// </summary>
+    protected bool TryAutoPassArmedReactionWindow()
+    {
+        if (!IsReactionWindow || (TargetCardIds?.Count ?? 0) > 0) return false;
+
+        ReactionSkipScope armed = ReactionSkipPreference.ActiveScope(TargetFaction);
+        if (armed == ReactionSkipScope.NONE) return false;
+
+        DebugUtilities.PrintPeer($"{TargetFaction} auto-passed an empty reaction window ({armed})");
+        ReactionSkipScope = armed;
+        return true;
+    }
+
     public class SelectCountryRequestHandler : InputRequest
     {
         public SelectCountryRequestHandler(Faction targetFaction, List<int> targetCountryIds) : base(targetFaction)
@@ -484,6 +523,8 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
+            if (TryAutoPassArmedReactionWindow()) return;
+
             // The host's list, not a local re-derivation — same rule as BlockReactionRequestHandler.
             //
             // No separateNonHandCards here, unlike HandCardPlayRequestHandler: everything this prompt
@@ -802,6 +843,10 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
+            // Before the delay as well as before the UI — an auto-passed window should not stall the
+            // host for the prompt-pacing delay of a prompt nobody is going to see.
+            if (TryAutoPassArmedReactionWindow()) return;
+
             await Task.Delay(GameSettings.DurationMedium);
             // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
             PlayerScene.Current.InputManager.SetCardSelectionActive(

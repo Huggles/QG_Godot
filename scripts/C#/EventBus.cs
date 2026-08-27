@@ -47,6 +47,11 @@ public partial class EventBus : GodotObject
     /// window. The argument is a <see cref="ReactionSkipScope"/>.</summary>
     [Signal] public delegate void ReactionSkipScopedEventHandler(int scope);
 
+    /// <summary>Emitted when a faction's <see cref="ReactionSkipPreference"/> setting changes,
+    /// whether from the row toggle or from a scope pressed on a live prompt. The argument is a
+    /// <see cref="Faction"/>.</summary>
+    [Signal] public delegate void ReactionSkipPreferenceChangedEventHandler(int faction);
+
     [Signal] public delegate void GameChangeEventOccurredEventHandler();
 
     [Signal] public delegate void CardSelectedEventHandler(int cardId);
