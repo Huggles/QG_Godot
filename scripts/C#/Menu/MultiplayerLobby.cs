@@ -125,6 +125,23 @@ public partial class MultiplayerLobby : Control
 	private readonly Dictionary<int, TextureButton> _randomButtons = new();
 	/// <summary>Authoritative faction assignments: faction → owning peerId.</summary>
 	private readonly Dictionary<Faction, int> _assignments = new();
+
+	/// <summary>
+	/// The save this lobby is restoring, or null for an ordinary lobby. Host-only — a client learns
+	/// everything it needs through the sync RPCs that already exist, and never replays anything itself.
+	/// </summary>
+	private SaveGame _restoreSave;
+
+	/// <summary>
+	/// Factions a human has toggled since the pre-fill. ClaimSavedSeats never touches these again, which
+	/// is the whole mechanism behind "pre-filled from the save, but still yours to change".
+	/// </summary>
+	private readonly HashSet<Faction> _manuallyAssigned = new();
+
+	/// <summary>Saved seat index to peer id, rebuilt from scratch on every seat event.</summary>
+	private readonly Dictionary<int, int> _seatOwners = new();
+
+	private Label _restoreLabel;
 	/// <summary>
 	/// Authoritative set of peers that picked "Random" rather than naming factions. Turned into real
 	/// entries in <see cref="_assignments"/> by <see cref="DealRandomClaims"/> when the host starts the
@@ -156,6 +173,11 @@ public partial class MultiplayerLobby : Control
 		_seedInput           = GetNode<LineEdit>("%SeedInput");
 		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
 		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
+		_restoreLabel        = GetNode<Label>("%RestoreLabel");
+
+		// Read before anything else touches MainMenu.ClearLobbyIntent — which this method calls on itself
+		// further down, and which must therefore never be the thing that clears PendingSave.
+		_restoreSave = GameManager.PendingSave;
 
 		_startGameButton.Visible = false;
 
@@ -187,6 +209,17 @@ public partial class MultiplayerLobby : Control
 			UpdateScenarioDescription("No scenarios available. Make sure the scenario files are present in assets/data/scenarios.");
 		}
 
+		// Restoring: the scenario came with the save, so nothing is resolved against the local list —
+		// the file may have been renamed, edited or deleted since. Show its title as a one-off entry and
+		// let the picker stay locked.
+		if (_restoreSave != null)
+		{
+			_scenarioPicker.Clear();
+			_scenarioPicker.AddItem(_restoreSave.ScenarioTitle ?? "Saved scenario");
+			_scenarioPicker.Selected = 0;
+			UpdateScenarioDescription("This scenario is stored inside the save and cannot be changed.");
+		}
+
 		_scenarioPicker.Disabled = true;
 		_scenarioPicker.ItemSelected += OnScenarioSelected;
 
@@ -194,11 +227,18 @@ public partial class MultiplayerLobby : Control
 		// RPCs the value to every peer), so the box is locked alongside the scenario picker until
 		// this peer turns out to be the host. Clients still see the field, greyed out.
 		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
+
+		// AFTER Bind, which overwrites the field with a freshly rolled seed. A restore must run on the
+		// seed the save records: the log carries the deck order the original shuffle produced, and a
+		// different stream would only diverge visibly several turns later.
+		if (_restoreSave != null) _seedInput.Text = _restoreSave.Seed.ToString();
+
 		SetSeedFieldEnabled(false);
 
 		// Same story again: host-only, and its starting value is whatever the selected scenario says.
 		// Set before subscribing, so seeding the box does not look like the host toggling it.
-		_openingDiscardCheckBox.ButtonPressed = gameManager.SelectedScenario?.OpeningDiscard ?? true;
+		_openingDiscardCheckBox.ButtonPressed = _restoreSave?.OpeningDiscard
+			?? gameManager.SelectedScenario?.OpeningDiscard ?? true;
 		_openingDiscardCheckBox.Disabled = true;
 		_openingDiscardCheckBox.Toggled += OnOpeningDiscardToggled;
 
@@ -210,6 +250,10 @@ public partial class MultiplayerLobby : Control
 			&& Multiplayer.MultiplayerPeer.GetConnectionStatus() == MultiplayerPeer.ConnectionStatus.Connected
 			&& !Multiplayer.IsServer())
 		{
+			// Only the host restores. A client rebuilds the game from the broadcast stream exactly as it
+			// does for a fresh one, and never sees the save at all.
+			_restoreSave = null;
+
 			_isSteamSession = MainMenu.PendingLobbyIntent == MainMenu.LobbyIntent.JoinSteam;
 			_steamLobbyId   = MainMenu.PendingSteamLobbyId;
 			MainMenu.ClearLobbyIntent();
@@ -304,6 +348,10 @@ public partial class MultiplayerLobby : Control
 		_playerNames[sender]  = clean;
 		DebugUtilities.PrintPeer($"Peer {sender} reported \"{displayName}\", listed as \"{clean}\"");
 		Rpc(nameof(SyncPlayerList), GetPlayerListData());
+
+		// The load-bearing seating hook: this is the first moment the host knows who a peer actually is,
+		// and therefore the first moment a saved seat can be matched to them by name.
+		ReseatForRestore();
 	}
 
 	/// <summary>
@@ -449,16 +497,152 @@ public partial class MultiplayerLobby : Control
 	}
 
 	/// <summary>Shared by both host paths, so the ENet flow keeps behaving exactly as it did.</summary>
+	/// <summary>
+	/// Both host paths converge here, so it is the only place the host-editable controls need gating.
+	/// When a save is being restored all three of them come from the save and stay locked.
+	/// </summary>
 	private void EnterHostUiState()
 	{
 		AddPlayerRow(1, $"{LocalDisplayName()} (Host)", LocalDisplayName());
 		_startGameButton.Visible  = true;
 		_startGameButton.Disabled = true; // unlocks once all 6 factions are assigned
-		_scenarioPicker.Disabled  = false;
-		SetSeedFieldEnabled(true);
-		_openingDiscardCheckBox.Disabled = false;
+
+		bool restoring = _restoreSave != null;
+		_scenarioPicker.Disabled  = restoring;
+		SetSeedFieldEnabled(!restoring);
+		_openingDiscardCheckBox.Disabled = restoring;
+
+		if (!restoring) return;
+
+		ShowRestoreBanner(RestoreBannerText());
+		Rpc(nameof(SyncRestoreBanner), RestoreBannerText());
+		ClaimSavedSeats();
+		BroadcastFactionState();
 	}
 
+
+	// ══════════════════════════════════════════════════════════════════════════
+	// Restoring a save
+	// ══════════════════════════════════════════════════════════════════════════
+
+	private string RestoreBannerText()
+		=> $"Restoring \"{_restoreSave.DisplayName}\" — assign factions, then Start.";
+
+	private void ShowRestoreBanner(string text)
+	{
+		_restoreLabel.Text    = text;
+		_restoreLabel.Visible = !string.IsNullOrEmpty(text);
+	}
+
+	/// <summary>
+	/// Tells clients a save is being restored and what it is. They cannot work it out for themselves:
+	/// the save never leaves the host, and the scenario is not in their AvailableScenarios list.
+	/// An empty string means "not restoring".
+	/// </summary>
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
+	private void SyncRestoreBanner(string text) => ShowRestoreBanner(text);
+
+	/// <summary>
+	/// Hand each connected peer the seat it held in the saved game: matched on display name first, then
+	/// by join order, with everything left over folding onto the host. A solo restore therefore needs no
+	/// clicks, and a short-handed one is still startable.
+	///
+	/// Host-only, idempotent, and re-run on every seat event. It never touches a faction someone has
+	/// toggled since (see <see cref="_manuallyAssigned"/>), which is what makes the pre-fill a
+	/// suggestion rather than a lock.
+	///
+	/// Worth being clear about why this is only a convenience: the replay runs entirely on the host and
+	/// is keyed to nothing about peers. Who controls which faction now cannot change whether the board
+	/// reconstructs — only who gets asked the questions afterwards. That is also why locking the faction
+	/// grid to the saved layout would be the wrong call.
+	/// </summary>
+	private void ClaimSavedSeats()
+	{
+		if (_restoreSave == null || !Multiplayer.IsServer() || _gameStarting) return;
+
+		List<int> peers = _playerLabels.Keys.OrderBy(peerId => peerId).ToList();
+		List<SavedSeat> seats = _restoreSave.Seats;
+		HashSet<int> seated = new();
+
+		_seatOwners.Clear();
+
+		// Pass A — by name. Matched on the name before MakeNameUnique got at it: every local test
+		// instance reports the same Steam persona, so saved names routinely carry a " #2" that the same
+		// player will not necessarily be given again.
+		for (int i = 0; i < seats.Count; i++)
+		{
+			int match = peers.FirstOrDefault(
+				peerId => !seated.Contains(peerId) && NamesMatch(PlayerNameFor(peerId), seats[i].DisplayName),
+				-1);
+
+			if (match == -1) continue;
+			_seatOwners[i] = match;
+			seated.Add(match);
+		}
+
+		// Pass B — by join order, for anyone the names did not place.
+		for (int i = 0; i < seats.Count; i++)
+		{
+			if (_seatOwners.ContainsKey(i)) continue;
+
+			int next = peers.FirstOrDefault(peerId => !seated.Contains(peerId), -1);
+			if (next == -1) break;
+
+			_seatOwners[i] = next;
+			seated.Add(next);
+		}
+
+		// Pass C — the host absorbs every seat nobody turned up for, so all six factions stay covered
+		// and Start still unlocks with fewer players than the original game had.
+		for (int i = 0; i < seats.Count; i++)
+			if (!_seatOwners.ContainsKey(i)) _seatOwners[i] = 1;
+
+		foreach (KeyValuePair<int, int> seat in _seatOwners)
+			foreach (Faction faction in seats[seat.Key].Factions)
+				if (!_manuallyAssigned.Contains(faction))
+					_assignments[faction] = seat.Value;
+
+		// Random and named factions are mutually exclusive per row everywhere else; leaving both set
+		// would put the row's two refresh paths in contradictory states.
+		_randomClaims.RemoveWhere(peerId => _assignments.ContainsValue(peerId));
+
+		DebugUtilities.PrintPeer(
+			$"Restore: seated {_seatOwners.Count} saved seat(s) across {peers.Count} player(s)");
+	}
+
+	private string PlayerNameFor(int peerId)
+		=> _playerNames.TryGetValue(peerId, out string name) ? name : null;
+
+	/// <summary>
+	/// Compares two lobby names ignoring the " #2" / " #3" suffix MakeNameUnique appends, since which
+	/// duplicate gets the suffix depends on join order and can differ between the save and the restore.
+	/// </summary>
+	private static bool NamesMatch(string a, string b)
+	{
+		if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b)) return false;
+		return string.Equals(StripDuplicateSuffix(a), StripDuplicateSuffix(b),
+			StringComparison.OrdinalIgnoreCase);
+	}
+
+	private static string StripDuplicateSuffix(string name)
+	{
+		int hash = name.LastIndexOf(" #", StringComparison.Ordinal);
+		if (hash <= 0) return name;
+
+		string tail = name[(hash + 2)..];
+		return tail.Length > 0 && tail.All(char.IsDigit) ? name[..hash] : name;
+	}
+
+	/// <summary>
+	/// Re-seat and re-broadcast after anything that changes who is in the lobby. A no-op when not
+	/// restoring, so the call sites do not need to ask.
+	/// </summary>
+	private void ReseatForRestore()
+	{
+		if (_restoreSave == null || !Multiplayer.IsServer() || _gameStarting) return;
+		ClaimSavedSeats();
+		BroadcastFactionState();
+	}
 	private void OnInviteFriendsPressed() => InviteFriendsDialog.Show(this);
 
 	private void JoinAt(string ip)
@@ -502,10 +686,23 @@ public partial class MultiplayerLobby : Control
 			BroadcastFactionState();
 		}
 
-		// Only the host's field is read: the seed travels to the clients on the StartSession RPC,
-		// so a client's own box never affects its game.
-		MenuSeedField.Commit(_seedInput);
-		CommitOpeningDiscard();
+		if (_restoreSave != null)
+		{
+			// All of it comes from the save, not from the (locked, but still populated) fields. The replay
+			// only reproduces the original game if the scenario, the seed and the opening deal are the
+			// ones it was recorded against.
+			GameManager.PendingSave           = _restoreSave;
+			GameManager.PendingSeed           = _restoreSave.Seed;
+			GameManager.PendingOpeningDiscard = _restoreSave.OpeningDiscard;
+		}
+		else
+		{
+			// Only the host's field is read: the seed travels to the clients on the StartSession RPC,
+			// so a client's own box never affects its game.
+			MenuSeedField.Commit(_seedInput);
+			CommitOpeningDiscard();
+		}
+
 		Rpc(nameof(StartGame));
 	}
 
@@ -589,6 +786,10 @@ public partial class MultiplayerLobby : Control
 			}
 		}
 
+		// Whatever the outcome, a human has now had an opinion about this faction, so the saved seating
+		// must stop reasserting itself over it. This is what makes the restore pre-fill a suggestion.
+		_manuallyAssigned.Add(faction);
+
 		BroadcastFactionState();
 	}
 
@@ -621,6 +822,11 @@ public partial class MultiplayerLobby : Control
 			else if (!_assignments.ContainsValue(requester))
 				_randomClaims.Add(requester);
 		}
+
+		// Taking or dropping Random is a decision about that row as a whole, so nothing on it may be
+		// re-seated from the save afterwards. See ClaimSavedSeats.
+		foreach (Faction held in _assignments.Where(kv => kv.Value == targetPeerId).Select(kv => kv.Key).ToList())
+			_manuallyAssigned.Add(held);
 
 		BroadcastFactionState();
 	}
@@ -964,8 +1170,21 @@ public partial class MultiplayerLobby : Control
 		{
 			RpcId((int)peerId, nameof(SyncPlayerList),   GetPlayerListData());
 			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
-			RpcId((int)peerId, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
+			// Not while restoring: SyncScenarioSelection sends a PATH that the client looks up in its own
+			// AvailableScenarios, and a save carries its scenario rather than pointing at one — the file may
+			// not be there at all. The banner tells them what is being restored instead. Harmless either
+			// way: the scenario is read host-side only.
+			if (_restoreSave == null)
+				RpcId((int)peerId, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
+			else
+				RpcId((int)peerId, nameof(SyncRestoreBanner), RestoreBannerText());
+
 			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
+
+			// Cannot match by name yet — the peer has not reported one, so _playerNames holds nothing for
+			// it and only the "Player N" placeholder is on the label. Worth doing anyway: passes B and C
+			// rebalance immediately, so the new row is never sitting there blank until they report.
+			ReseatForRestore();
 
 			if (_dedicatedServer)
 			{
@@ -1055,6 +1274,10 @@ public partial class MultiplayerLobby : Control
 				.ToList();
 			foreach (var f in released) _assignments.Remove(f);
 			_randomClaims.Remove((int)peerId);
+
+			// Fold their seat back onto the host, so the lobby stays startable when someone drops.
+			// Broadcasts on its own when restoring; otherwise the call below does it.
+			ReseatForRestore();
 			BroadcastFactionState();
 		}
 	}
@@ -1260,7 +1483,12 @@ public partial class MultiplayerLobby : Control
 		int requester = Multiplayer.GetRemoteSenderId();
 		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());
 		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
-		RpcId(requester, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
+		// See OnPeerConnected: a restored game syncs its banner rather than a scenario path.
+		if (_restoreSave == null)
+			RpcId(requester, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
+		else
+			RpcId(requester, nameof(SyncRestoreBanner), RestoreBannerText());
+
 		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 	}
 

@@ -45,7 +45,7 @@ public partial class EventTheaterShift : EventCardLogic
     {
         return new CardStep(this, async () =>
         {
-            await Task.Delay(1000);
+            await ReplayContext.Pace(1000);
             var buildableIds = lastRemovedUnitWasNavy
                 ? CountryState.BuildableSea(Faction).Select(cs => cs.Id).ToList()
                 : CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();

@@ -642,7 +642,7 @@ public partial class CardPlayRound : GodotObject
         if (!ShouldOpenReactionWindow(faction, blockOptions))
         {
             DebugUtilities.PrintPeer($"{faction} is not offered a block window (no block reactions, and nothing hidden to cover for)");
-            await Task.Delay(10);
+            await ReplayContext.Pace(10);
             return -1;
         }
 

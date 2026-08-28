@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 /// <summary>
 /// Boots a single-process, terminal-driven game: one peer controlling every faction, no lobby, no
@@ -25,7 +26,9 @@ public static class CliBootstrap
     {
         DebugUtilities.PrintPeer("CLI: bootstrapping single-process game");
 
-        ResolveScenario(from);
+        // A save carries its own scenario, so it wins over the scenario= argument outright.
+        if (!ResolveSave())
+            ResolveScenario(from);
 
         // See the class comment. Must precede the scene change: GameManager watches for the Game node
         // and starts the readiness barrier as soon as it appears.
@@ -41,6 +44,36 @@ public static class CliBootstrap
         from.GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
 
         SceneFlow.ChangeScene(from, SceneFlow.GameScenePath);
+    }
+
+    /// <summary>
+    /// Honour a <c>load=</c> argument by arming the restore the same way LoadGameScreen does, and report
+    /// whether one was armed.
+    ///
+    /// There is no in-session load: restoring means building a whole new session, which is exactly what
+    /// booting with this argument does. It is also the cheapest way to test the feature — pair it with
+    /// the `save` verb and a fixed seed and the whole round trip is one shell pipeline.
+    /// </summary>
+    private static bool ResolveSave()
+    {
+        string path = CliArgs.Get("load");
+        if (string.IsNullOrEmpty(path)) return false;
+
+        SaveGame save = SaveGameService.Load(path);
+        if (save == null)
+            throw new Exception($"CLI: could not read the save at '{path}'.");
+
+        if (save.Version != SaveGame.CurrentVersion)
+            throw new Exception($"CLI: save at '{path}' is version {save.Version}, expected {SaveGame.CurrentVersion}.");
+
+        GameManager.PendingSave           = save;
+        GameManager.PendingSeed           = save.Seed;
+        GameManager.PendingOpeningDiscard = save.OpeningDiscard;
+        GameManager.PendingScenarioJson   =
+            Encoding.UTF8.GetString(Convert.FromBase64String(save.ScenarioJsonBase64));
+
+        DebugUtilities.PrintPeer($"CLI: restoring '{save.DisplayName}' ({save.Events.Count} event(s)) from {path}");
+        return true;
     }
 
     /// <summary>

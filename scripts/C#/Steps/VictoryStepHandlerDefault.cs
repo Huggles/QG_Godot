@@ -27,6 +27,12 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     public async Task ProcessVictoryStep(Faction faction)
     {
         Faction = faction;
+
+        // Normally seeded by HandleNewTurnStarted. Not after a save restore: the replay rebuilds state
+        // from events and never runs GameFlow.StartNewTurn, so the signal that creates this never fires
+        // and the resumed turn would reach its victory step with nothing to score into.
+        vpTurnSummary ??= new VPTurnSummary(gameFlow.GameTurn);
+
         vpTurnSummary.Faction = faction;
 
         ScoreSupplyCountryVPs();

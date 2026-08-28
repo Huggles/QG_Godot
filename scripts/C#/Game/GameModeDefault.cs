@@ -170,7 +170,7 @@ public partial class GameModeDefault : IGameMode
         await PlaceCards(initialStateData);
         ApplyStartingFaction(initialStateData);
 
-        await Task.Delay(100);
+        await ReplayContext.Pace(100);
     }
     private async Task DeployUnits(InitialGameStateData initialStateData)
     {

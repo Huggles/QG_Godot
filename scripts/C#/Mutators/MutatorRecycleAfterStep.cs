@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 /// Their text is about where the played card ENDS UP, not whether it resolves, so waiting for the
 /// step to end is what the cards actually say. Waiting also lets the CardPlayRound finish normally.
 /// </summary>
-public class MutatorRecycleAfterStep : StepMutator
+public class MutatorRecycleAfterStep : StepMutator, IUnsavedModifier
 {
     private readonly Faction _faction;
 

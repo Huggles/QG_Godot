@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 public partial class MainMenu : Control
 {
+	private const string LoadGameScenePath = "res://scenes/menu/LoadGameScreen.tscn";
 	private const string LobbyScenePath        = "res://scenes/menu/MultiplayerLobby.tscn";
 	private const string JoinScenePath         = "res://scenes/menu/JoinGameScreen.tscn";
 	private const string SteamLobbiesScenePath = "res://scenes/menu/SteamFriendLobbiesScreen.tscn";
@@ -78,19 +79,28 @@ public partial class MainMenu : Control
 	{
 		ErrorInjection.MaybeThrow(ErrorInjection.Site.MenuReady);
 
+		// You are on the main menu, so nothing is pending. Not folded into ClearLobbyIntent, which
+		// MultiplayerLobby.ReadyInternal calls on itself before hosting — clearing the save there would
+		// destroy the very payload the lobby had just arrived to restore.
+		GameManager.PendingSave = null;
+		GameManager.PendingScenarioJson = null;
+
 		var singlePlayer     = GetNode<MenuPanelButton>("%SinglePlayerButton");
+		var loadGame         = GetNode<MenuPanelButton>("%LoadGameButton");
 		var multiplayerHost  = GetNode<MenuPanelButton>("%MultiplayerHostButton");
 		var multiplayerJoin  = GetNode<MenuPanelButton>("%MultiplayerJoinButton");
 		var settings         = GetNode<MenuPanelButton>("%SettingsButton");
 		var quit             = GetNode<MenuPanelButton>("%QuitButton");
 
 		singlePlayer.ButtonText    = "Single Player";
+		loadGame.ButtonText        = "Load Game";
 		multiplayerHost.ButtonText = "Host Game";
 		multiplayerJoin.ButtonText = "Join Game";
 		settings.ButtonText        = "Settings";
 		quit.ButtonText            = "Quit";
 
 		singlePlayer.Pressed    += OnSinglePlayerPressed;
+		loadGame.Pressed        += OnLoadGamePressed;
 		multiplayerHost.Pressed += OnMultiplayerHostPressed;
 		multiplayerJoin.Pressed += OnMultiplayerJoinPressed;
 		settings.Pressed        += OnSettingsPressed;
@@ -204,6 +214,11 @@ public partial class MainMenu : Control
 		SceneFlow.ChangeScene(this, "res://scenes/menu/GameModeSelectionScreen.tscn");
 	}
 
+	private void OnLoadGamePressed()
+	{
+		SceneFlow.ChangeScene(this, LoadGameScenePath);
+	}
+
 	private void OnMultiplayerHostPressed()
 	{
 		if (_flowBusy) return;
@@ -243,23 +258,10 @@ public partial class MainMenu : Control
 	/// </summary>
 	private async Task StartSteamHostAsync(HostOptionsDialog.Result choice)
 	{
-		MenuNotice busy = MenuNotice.ShowBusy(this, "Creating Steam lobby...");
+		long lobbyId = await HostLaunch.CreateSteamLobbyAsync(
+			this, choice, GameManager.Instance?.SelectedScenario?.Title);
 
-		long lobbyId = await SteamworksApi.Instance.CreateLobbyAsync(choice.Privacy, choice.MaxPlayers);
-
-		if (!IsInstanceValid(this)) return;
-		busy.Dismiss();
-
-		if (lobbyId == 0)
-		{
-			await MenuNotice.ShowMessageAsync(this, "Could not create a Steam lobby",
-				"Steam did not create the lobby. You can still host over Godot networking.");
-			return;
-		}
-
-		// Stamped now so the lobby is already described correctly the moment a friend's list refreshes.
-		SteamworksApi.Instance.PublishLobbyMetadata(
-			GameManager.Instance?.SelectedScenario?.Title ?? string.Empty, choice.MaxPlayers);
+		if (!IsInstanceValid(this) || lobbyId == 0) return;   // the helper has already told the player
 
 		SetHostSteam(lobbyId, choice.MaxPlayers);
 		SceneFlow.ChangeScene(this, LobbyScenePath);

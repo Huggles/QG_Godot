@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -87,7 +88,9 @@ public abstract partial class GameMessage : GodotObject
     /// </summary>
     protected void EnqueueAnimations(Func<List<ChangeEventAnimation>> animations)
     {
-        if (!PlayAnimations || GameContext.IsHeadless) return;
+        // IsFastForwarding covers the save-game restore, and the factory shape is what makes it a real
+        // skip rather than a silent queue: a replay must not build presentation objects at all.
+        if (!PlayAnimations || GameContext.IsHeadless || ReplayContext.IsFastForwarding) return;
 
         foreach (ChangeEventAnimation anim in animations())
         {
@@ -98,6 +101,31 @@ public abstract partial class GameMessage : GodotObject
 
     /// <summary>Append to the local replay log, which is also what the history UI reads.</summary>
     protected void RecordApplied() => MultiplayerSession.Instance?.GameState.GameMessages.Add(this);
+
+    /// <summary>
+    /// Restart the id stream. Called once per game, beside GameRandom.Initialize, so a second game in
+    /// the same process does not continue the first one's numbering. Ids only have to be unique within
+    /// a session, so this is not a correctness fix — it is what makes two runs of the same seed produce
+    /// comparable logs, and what keeps SyncCounterToLatest easy to reason about after a save restore.
+    /// </summary>
+    public static void ResetStream() => messageCounter = 0;
+
+    /// <summary>
+    /// Advance the counter past the highest id already in the journal.
+    ///
+    /// Called after replaying a save. Replayed messages keep their ORIGINAL ids (ApplyDtoFields
+    /// overwrites Id from the wire) and they have to: ActivateReactionChangeEvent resolves its source
+    /// through ChangeEvent.ForId, which looks the id up in this very journal. Without this call the
+    /// first live message after a restore would collide with a replayed one.
+    /// </summary>
+    public static void SyncCounterToLatest()
+    {
+        List<GameMessage> journal = MultiplayerSession.Instance?.GameState.GameMessages;
+        if (journal == null || journal.Count == 0) return;
+
+        int highest = journal.Max(message => message.Id);
+        if (highest > messageCounter) messageCounter = highest;
+    }
 
     // ── Wire ─────────────────────────────────────────────────────────────────
 

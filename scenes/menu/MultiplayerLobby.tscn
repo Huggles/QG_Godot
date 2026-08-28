@@ -69,6 +69,15 @@ theme_override_font_sizes/font_size = 18
 text = "Waiting to host or join..."
 horizontal_alignment = 1
 
+[node name="RestoreLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1704412910]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="HSeparator" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1595872299]
 layout_mode = 2
 

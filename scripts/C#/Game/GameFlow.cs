@@ -9,13 +9,22 @@ public partial class GameFlow : SingletonNode<GameFlow>
 {
     [Export] private bool GameStarted { get; set; } = false;
     [Export] public int GameTurn { get; set; } = 0;
+    /// <summary>
+    /// While true, assigning <see cref="TurnStepCounter"/> does NOT run the step handler.
+    ///
+    /// Exists for one caller: <see cref="ApplyFlowSnapshot"/>, which has to put the counter back where
+    /// the save left it without re-executing the step it names. The resume that follows is what starts
+    /// the loop again.
+    /// </summary>
+    private bool _suppressStepHandler = false;
+
     [Export] public int TurnStepCounter { 
         get; 
         set
         {            
             field = value;
             DebugUtilities.PrintPeer($"TurnStepCounter: {field}");
-            if(field > 0)
+            if(field > 0 && !_suppressStepHandler)
             {
                 GameTurnStep gameTurnStep = gameTurnSteps[field - 1];
                 if(Multiplayer.IsServer())
@@ -228,7 +237,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
         TurnStepCounter = 0;
         DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
         EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
-        await Task.Delay(100);
+        await ReplayContext.Pace(100);
         StartNextStep();
     }
 
@@ -332,6 +341,12 @@ public partial class GameFlow : SingletonNode<GameFlow>
         Guard.FireAndForget(async () =>
         {
             await StepMutatorRunner.Run(completed, MutatorTiming.AFTER, CurrentFaction);
+
+            // The one moment in the loop that is reliably quiescent: the step is fully resolved, its
+            // round has been finished and nulled, and the next one has not opened. A save the player
+            // asked for mid-card lands here.
+            TryFlushDeferredSave();
+
             StartNextStep();
         }, $"AfterMutators {completed}", CurrentFaction, stallsLoop: true);
     }
@@ -396,9 +411,272 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     
 
+    // ── Save / load ─────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// How <see cref="ResumeAfterLoad"/> should pick the loop back up. Set by
+    /// <see cref="ApplyFlowSnapshot"/> from the save.
+    /// </summary>
+    private ResumeMode resumeMode = ResumeMode.NextStep;
+
+    /// <summary>
+    /// A save the player asked for at a moment the game could not honour, to be written at the next
+    /// quiescent boundary. Null when nothing is pending.
+    ///
+    /// The alternative — greying the button out mid-card and mid-reaction — is a wall in front of a
+    /// large share of the moments a player actually reaches for the menu, because the always-ask
+    /// reaction rule means they are very often sitting on a reaction prompt.
+    /// </summary>
+    private string deferredSaveName;
+
+    public bool HasDeferredSave => deferredSaveName != null;
+
+    /// <summary>
+    /// Fully quiescent: no card is resolving, nobody has been asked anything, and both queues are
+    /// drained. <see cref="ResumeMode.NextStep"/> — the restored game advances to the step after the
+    /// one recorded.
+    ///
+    /// <c>CardPlayRound.Current</c>, not <see cref="CurrentCardPlayRound"/>: the latter is the last
+    /// entry of the CardPlayRounds history, which stays non-null after its round has finished. The
+    /// static is nulled by CardPlayRound.Finish, so it is the one that answers "is a round in flight".
+    /// </summary>
+    public bool IsSafeToSave =>
+        CardPlayRound.Current == null
+        && QueuesIdle
+        && !HasPendingInput;
+
+    /// <summary>
+    /// The current step has opened but nothing has happened in it yet: its round exists, no card has
+    /// been played into it, no reaction is open. The board is therefore still exactly at step-start, so
+    /// the step.s BODY can simply be re-run — and re-running it re-issues whatever it asks.
+    /// <see cref="ResumeMode.ReRunCurrentStep"/>.
+    ///
+    /// Whether a prompt happens to be open right now is immaterial, which is why this does not test for
+    /// one: the step is equally re-runnable in the beat between BeginStep and its handler asking.
+    ///
+    /// The two clauses are what make it safe. An empty ChangeEventsPool rules out a prompt raised from
+    /// inside a card.s execution — every Apply registers into the pool, IsTrigger only suppresses the
+    /// reaction chain — and a zero ReactionDepth rules out a reaction window. Neither of those can be
+    /// resumed: the await holding them is a compiler-generated state machine partway through a lambda.
+    /// </summary>
+    public bool IsAtStepStart =>
+        CardPlayRound.Current != null
+        && CardPlayRound.Current.ChangeEventsPool.Count == 0
+        && CardPlayRound.Current.ReactionDepth == 0
+        && QueuesIdle;
+
+    /// <summary>
+    /// Whether the game can be captured right now.
+    ///
+    /// The ModifierRegistry clause is a backstop rather than a live concern — see
+    /// <see cref="IUnsavedModifier"/>. Both checkpoints above already fall outside the window in which
+    /// one can exist, so this only fires if a future card registers a step-local modifier somewhere new.
+    /// Better a refused save than a silently missing effect on reload.
+    /// </summary>
+    public bool CanSave =>
+        GameStarted
+        && (IsSafeToSave || IsAtStepStart)
+        && !ModifierRegistry.HasUnsavedModifiers;
+
+    /// <summary>
+    /// Why <see cref="CanSave"/> is false, or null when it is true. Exists so a refusal is actionable —
+    /// "not at a point that can be resumed" tells a player nothing about what to do next.
+    /// </summary>
+    public string SaveBlockedReason
+    {
+        get
+        {
+            if (!GameStarted)                        return "the game has not started yet";
+            if (ModifierRegistry.HasUnsavedModifiers) return "a card effect is still waiting for the end of this step";
+            if (IsSafeToSave || IsAtStepStart) return null;
+
+            if (!QueuesIdle)                         return "the board is still resolving the last action";
+            if (CardPlayRound.Current == null)       return "an action is in flight";
+            if (CardPlayRound.Current.ReactionDepth > 0)
+                                                     return "a card is resolving and reactions are open";
+            if (CardPlayRound.Current.ChangeEventsPool.Count > 0)
+                                                     return "a card has already been played this step";
+            return "the game is mid-action";
+        }
+    }
+
+    private static bool QueuesIdle =>
+        (!IsInstanceValid(ChangeEventQueue.Instance) || ChangeEventQueue.Instance.IsIdle)
+        && (!IsInstanceValid(AnimationQueue.Instance) || AnimationQueue.Instance.IsIdle);
+
+    private static bool HasPendingInput => NetworkApi.Instance?.HasPendingInput == true;
+
+    /// <summary>
+    /// The counter to persist, so that a single resume mechanism — advance one step — lands correctly
+    /// for both checkpoints.
+    ///
+    /// At a quiescent boundary the recorded step has completed, so the resume runs the NEXT one. At an
+    /// initial-decision checkpoint the current step has not really started, so the previous counter is
+    /// stored and the resume re-runs THIS step, re-issuing its prompt. This one line is the whole
+    /// reason two resume modes do not need two mechanisms.
+    /// </summary>
+    private int SaveStepCounter => IsAtStepStart ? TurnStepCounter - 1 : TurnStepCounter;
+
+    /// <summary>Turn-engine state a save needs and the ChangeEvent log does not carry.</summary>
+    public GameFlowSnapshot BuildFlowSnapshot()
+    {
+        GameFlowSnapshot snapshot = new()
+        {
+            GameStarted             = GameStarted,
+            GameTurn                = GameTurn,
+            TurnStepCounter         = SaveStepCounter,
+            TurnStep                = TurnStep,
+            MaxRound                = MaxRound,
+            CardsPlayedThisTurnStep = new Dictionary<Faction, int>(CardsPlayedThisTurnStep),
+            VictoryPointSummaries   = new Dictionary<Faction, List<VPTurnSummary>>(VictoryPointSummaries),
+            ReactionSkipRound       = new Dictionary<Faction, int>(reactionSkipRound)
+        };
+
+        foreach (KeyValuePair<Faction, (int Turn, TurnStep Step)> entry in reactionSkipTurnStep)
+            snapshot.ReactionSkipTurnStep[entry.Key] =
+                new ReactionSkipWindow { Turn = entry.Value.Turn, Step = entry.Value.Step };
+
+        return snapshot;
+    }
+
+    /// <summary>
+    /// Put the turn engine back where the save left it. The counter is restored WITHOUT firing its step
+    /// handler; <see cref="ResumeAfterLoad"/> is what starts the loop again.
+    /// </summary>
+    public void ApplyFlowSnapshot(GameFlowSnapshot snapshot, ResumeMode resume)
+    {
+        resumeMode  = resume;
+        GameStarted = snapshot.GameStarted;
+        GameTurn    = snapshot.GameTurn;
+        TurnStep    = snapshot.TurnStep;
+        MaxRound    = snapshot.MaxRound;
+
+        _suppressStepHandler = true;
+        try { TurnStepCounter = snapshot.TurnStepCounter; }
+        finally { _suppressStepHandler = false; }
+
+        CardsPlayedThisTurnStep = new Dictionary<Faction, int>(snapshot.CardsPlayedThisTurnStep);
+
+        VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
+        foreach (KeyValuePair<Faction, List<VPTurnSummary>> entry in snapshot.VictoryPointSummaries)
+            VictoryPointSummaries[entry.Key] = new List<VPTurnSummary>(entry.Value);
+
+        reactionSkipTurnStep.Clear();
+        foreach (KeyValuePair<Faction, ReactionSkipWindow> entry in snapshot.ReactionSkipTurnStep)
+            reactionSkipTurnStep[entry.Key] = (entry.Value.Turn, entry.Value.Step);
+
+        reactionSkipRound.Clear();
+        foreach (KeyValuePair<Faction, int> entry in snapshot.ReactionSkipRound)
+            reactionSkipRound[entry.Key] = entry.Value;
+    }
+
+    /// <summary>
+    /// Start the turn loop again after a restore. Host only, and called once the whole event log has
+    /// been replayed and the HUD is up.
+    /// </summary>
+    public void ResumeAfterLoad()
+    {
+        if (!Multiplayer.IsServer()) return;
+
+        // Adopt the current epoch, exactly as ResumeAfterFailure does: the loop we are about to start
+        // must not be mistaken for a stale one by StartNextStep's and FinishStep's gates.
+        stepEpoch = ErrorReporter.GameLoopEpoch;
+
+        DebugUtilities.PrintPeer(
+            $"ResumeAfterLoad: turn {GameTurn}, step {TurnStep}, counter {TurnStepCounter}, mode {resumeMode}");
+
+        if (resumeMode == ResumeMode.ReRunCurrentStep)
+            Guard.FireAndForget(() => RestartStepBody(TurnStep), $"resume:{TurnStep}", CurrentFaction, stallsLoop: true);
+        else
+            StartNextStep();
+    }
+
+    /// <summary>
+    /// Check that the first prompt raised after a restore is the one the save was taken on.
+    ///
+    /// A warning rather than a failure: the game is playable either way, and the honest thing is to say
+    /// the resume landed somewhere unexpected rather than to pretend or to refuse. Called from
+    /// NetworkApi.SendInputRequest for the first request after a load.
+    /// </summary>
+    public void VerifyResumedPrompt(PendingPrompt expected, InputRequest actual)
+    {
+        if (expected == null) return;
+
+        if (expected.Matches(actual))
+            DebugUtilities.PrintPeer($"Restore resumed on the saved prompt ({expected}).");
+        else
+            DebugUtilities.PrintPeerErrorRaw(
+                $"Restore resumed on {PendingPrompt.KindOf(actual)} for {actual.TargetFaction}, " +
+                $"but the save was taken on {expected}. The board is restored; the turn position may not be.");
+    }
+
+    /// <summary>
+    /// Ask for a save to be written at the next quiescent boundary. Used when the player presses Save
+    /// during a card or a reaction window, where a capture would have nothing resumable to point at.
+    /// </summary>
+    public void RequestDeferredSave(string displayName)
+    {
+        deferredSaveName = displayName;
+        DebugUtilities.PrintPeer($"Save deferred to the next safe point: '{displayName}'");
+    }
+
+    public void CancelDeferredSave() => deferredSaveName = null;
+
+    /// <summary>
+    /// Write a deferred save if one is waiting and the game has reached a point that can carry it.
+    /// Called from <see cref="FinishStep"/>, which is the moment a step's effects are fully resolved.
+    /// </summary>
+    private void TryFlushDeferredSave()
+    {
+        if (deferredSaveName == null || !CanSave) return;
+
+        string displayName = deferredSaveName;
+        deferredSaveName = null;
+        MultiplayerSession.Instance?.CaptureSave(displayName, deferred: true);
+    }
+
+    // ── Turn steps ──────────────────────────────────────────────────────────────
+    //
+    // Each step is split into the step method, which opens the step and then runs its body, and the
+    // body itself. The split exists for save/load: restoring a game that was saved on a step's opening
+    // prompt has to re-run the body WITHOUT re-running BeginStep, which would apply a second
+    // ChangeStepChangeEvent, start a second CardPlayRound, and — the one that actually breaks things —
+    // run the step's BEFORE mutators a second time. See RestartStepBody.
+
+    /// <summary>
+    /// Re-run a step's body without re-opening the step. Host-only, and only from
+    /// <see cref="ResumeAfterLoad"/>: everything the body needs (the round, the step, the BEFORE
+    /// mutators) is already in place from the replayed log, so all that is missing is the handler that
+    /// asks the player something.
+    /// </summary>
+    private async Task RestartStepBody(TurnStep step)
+    {
+        DebugUtilities.PrintPeer($"RestartStepBody({step}) — resuming the step the save was taken in");
+        switch (step)
+        {
+            case TurnStep.START:         StartTurnStepBody(); break;
+            case TurnStep.PLAY_CARD:     PlayCardStepBody(); break;
+            case TurnStep.SUPPLY:        SupplyStepBody(); break;
+            case TurnStep.VICTORY_POINT: await VictoryPointStepBody(); break;
+            case TurnStep.DISCARD:       DiscardStepBody(); break;
+            case TurnStep.DRAW:          DrawStepBody(); break;
+            default:
+                // TurnStep.END is StartNewTurn, which opens no step and raises no prompt, so it can
+                // never be what a save was taken in. Advance rather than stall the loop.
+                DebugUtilities.PrintPeerError($"RestartStepBody: {step} has no resumable body; advancing instead");
+                StartNextStep();
+                break;
+        }
+    }
+
     private async Task StartTurnStep()
     {
         await BeginStep(TurnStep.START);
+        StartTurnStepBody();
+    }
+
+    private void StartTurnStepBody()
+    {
         DebugUtilities.PrintPeer("StartTurnStep");
         startTurnStepHandler = new StartTurnStepHandler();
         startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;
@@ -414,6 +692,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task PlayCardStep()
     {
         await BeginStep(TurnStep.PLAY_CARD);
+        PlayCardStepBody();
+    }
+
+    private void PlayCardStepBody()
+    {
         DebugUtilities.PrintPeer("PlayCardStep");
         playStepHandlerDefault = new PlayStepHandlerDefault();
         playStepHandlerDefault.PlayStepFinished += PlayCardStepFinishedHandler;
@@ -429,6 +712,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task SupplyStep()
     {
         await BeginStep(TurnStep.SUPPLY);
+        SupplyStepBody();
+    }
+
+    private void SupplyStepBody()
+    {
         DebugUtilities.PrintPeer("SupplyStep");
         supplyStepHandler = new SupplyStepHandlerDefault();
         supplyStepHandler.SupplyStepFinished += SupplyStepFinishedHandler;
@@ -444,6 +732,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task VictoryPointStep()
     {
         await BeginStep(TurnStep.VICTORY_POINT);
+        await VictoryPointStepBody();
+    }
+
+    private async Task VictoryPointStepBody()
+    {
         DebugUtilities.PrintPeer("VictoryPointStep");
         await vpStepHandler.ProcessVictoryStep(CurrentFaction);
         FinishStep(TurnStep.VICTORY_POINT);
@@ -452,6 +745,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task DiscardStep()
     {
         await BeginStep(TurnStep.DISCARD);
+        DiscardStepBody();
+    }
+
+    private void DiscardStepBody()
+    {
         DebugUtilities.PrintPeer("DiscardStep");
         discardStepHandler = new DiscardStepHandlerDefault();
         discardStepHandler.DiscardStepFinished += DiscardStepFinishedHandler;
@@ -467,6 +765,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task DrawStep()
     {
         await BeginStep(TurnStep.DRAW);
+        DrawStepBody();
+    }
+
+    private void DrawStepBody()
+    {
         DebugUtilities.PrintPeer("DrawStep");
         drawStepHandler = new DrawStepHandlerDefault();
         drawStepHandler.DrawStepFinished += DrawStepFinishedHandler;

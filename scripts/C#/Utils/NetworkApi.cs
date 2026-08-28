@@ -310,6 +310,43 @@ public partial class NetworkApi : Node
         }
     }
 
+    /// <summary>
+    /// Whether the host is currently parked on any input request.
+    ///
+    /// GameFlow.CanSave needs this and _pendingInputs is private. Note this is the real answer, unlike
+    /// GameFlow.CurrentInputRequest, which holds the last ANSWERED response and is read by nothing.
+    /// </summary>
+    public bool HasPendingInput => !_pendingInputs.IsEmpty;
+
+    /// <summary>
+    /// The prompt a restored game is expected to reopen, armed by RestoreSavedGame and consumed by the
+    /// first request raised afterwards. Null the rest of the time.
+    /// </summary>
+    private PendingPrompt _expectedResumedPrompt;
+
+    /// <summary>
+    /// Arm the check that the first prompt after a restore is the one the save was taken on. A null
+    /// argument (the save was taken between actions) disarms it.
+    /// </summary>
+    public void ExpectResumedPrompt(PendingPrompt prompt) => _expectedResumedPrompt = prompt;
+
+    /// <summary>
+    /// The prompts open right now, as (kind, faction) pairs. A list rather than a single value because
+    /// a reaction window prompts a whole team at once and the opening discard prompts everyone.
+    ///
+    /// Stored in a save so that after a restore, the step that re-issues its opening prompt can be
+    /// checked against the one that was actually open when the save was taken.
+    /// </summary>
+    public List<PendingPrompt> DescribePendingInputs()
+        => _pendingInputs.Values
+            .Where(pending => pending.Request != null)
+            .Select(pending => new PendingPrompt
+            {
+                Kind = PendingPrompt.KindOf(pending.Request),
+                Faction = pending.Request.TargetFaction
+            })
+            .ToList();
+
     /// <param name="withdrawToken">
     /// Cancelled by the caller when this request no longer needs an answer. Used by the reaction
     /// system: a team's turn prompts every one of its factions at once and the first card chosen ends
@@ -330,6 +367,16 @@ public partial class NetworkApi : Node
         // and those build the very requests (HandCardPlay, ActivateCard) that need it. Outside the
         // retry loop: the option set must not shift between attempts at the same prompt.
         inputRequest.PopulateTargets();
+
+        // First prompt after a save restore: check the resume landed where the save was taken. Consumed
+        // here rather than checked at the resume site because the resume only starts a step handler — it
+        // is this call that proves the step got as far as asking the same question again.
+        if (_expectedResumedPrompt != null)
+        {
+            PendingPrompt expected = _expectedResumedPrompt;
+            _expectedResumedPrompt = null;
+            GameFlow.Instance?.VerifyResumedPrompt(expected, inputRequest);
+        }
 
         // Withdrawn before we ever reached the wire — the team turn was decided by another faction
         // while this one was still queued behind its peer's earlier prompt. Return without putting

@@ -54,6 +54,18 @@ public partial class GameMenuModal : MenuModal
         GetNode<MenuPanelButton>("%ResumeButton").Pressed     += Cancel;
         GetNode<MenuPanelButton>("%SettingsButton").Pressed   += OnSettingsPressed;
         GetNode<MenuPanelButton>("%QuitToMenuButton").Pressed += OnQuitToMenuPressed;
+
+        // Disabled with a reason rather than hidden. A menu whose item COUNT differs between host and
+        // client reads as a broken build; this way the answer to "why can I not?" is in the tooltip.
+        // Same shape HostOptionsDialog uses for its Steam button. Single player is covered for free —
+        // OfflineMultiplayerPeer has unique id 1, so IsServer() is true.
+        MenuPanelButton saveButton = GetNode<MenuPanelButton>("%SaveGameButton");
+        saveButton.Pressed += OnSaveGamePressed;
+        if (!Multiplayer.IsServer() || GameContext.IsDedicatedServer)
+        {
+            saveButton.Disabled    = true;
+            saveButton.TooltipText = "Only the host can save the game. Ask them to save it.";
+        }
     }
 
     /// <summary>
@@ -65,6 +77,72 @@ public partial class GameMenuModal : MenuModal
     {
         if (!Visible) return;
         base._UnhandledKeyInput(@event);
+    }
+
+    /// <summary>
+    /// <summary>
+    /// Save the game, or arrange for it to be saved the moment it can be.
+    ///
+    /// The capture is the FIRST thing this does, synchronously, before the flow goes async. This menu
+    /// deliberately does not pause the tree, so the turn loop keeps producing events while it is open —
+    /// but it runs on this same thread, so a straight-line capture inside a button callback is atomic
+    /// with respect to it. Await anything first and the log grows underneath you.
+    /// </summary>
+    private void OnSaveGamePressed()
+    {
+        if (Resolved || _flowBusy) return;
+        if (!Multiplayer.IsServer()) return;
+
+        _flowBusy = true;
+
+        string displayName = AutoSaveName();
+
+        // Mid-card and mid-reaction the game has nothing resumable to point at — the prompt is being
+        // held by an await deep inside a card step, and no save format can describe that. Rather than
+        // grey the button out for what, with the always-ask reaction rule, is a large share of the
+        // moments a player reaches for this menu, take the request now and honour it at the next step
+        // boundary. That is usually seconds away.
+        bool immediate = GameFlow.Instance.CanSave;
+        string path = immediate ? MultiplayerSession.Instance.CaptureSave(displayName) : null;
+
+        if (!immediate)
+            GameFlow.Instance.RequestDeferredSave(displayName);
+
+        Guard.FireAndForget(() => ReportSaveAsync(displayName, immediate, path), "GameMenuModal.SaveGame");
+    }
+
+    /// <summary>
+    /// The name a save gets. Not editable: there is no text-entry dialog in the menu family, and a name
+    /// derived from the position is more useful in the load list than whatever a player would type.
+    /// </summary>
+    private static string AutoSaveName()
+    {
+        string scenario = GameManager.ActiveScenarioTitle ?? "Game";
+        return $"{scenario} — Round {GameFlow.Instance.Round}, {GameFlow.Instance.CurrentFaction.Label()}";
+    }
+
+    private async Task ReportSaveAsync(string displayName, bool immediate, string path)
+    {
+        try
+        {
+            Visible = false;
+
+            if (!immediate)
+                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Save queued",
+                    $"'{displayName}' will be saved as soon as the current action finishes.");
+            else if (path != null)
+                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Game saved", displayName);
+            else
+                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Could not save",
+                    "The save file could not be written. See the log for details.");
+
+            if (!IsInstanceValid(this) || Resolved) return;
+            Visible = true;
+        }
+        finally
+        {
+            if (IsInstanceValid(this)) _flowBusy = false;
+        }
     }
 
     /// <summary>

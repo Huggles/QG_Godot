@@ -85,9 +85,18 @@ public partial class GameSettings : SingletonNode<GameSettings>
         {    1500,   1000,    500,   250,    100 },   // Fast
     };
 
-    /// <summary>Returns the duration in milliseconds for the current speed and the given scale.</summary>
+    /// <summary>
+    /// Duration in milliseconds for the current speed and the given scale.
+    ///
+    /// Zero while fast-forwarding a save-game restore, which is the single highest-leverage line in
+    /// that feature: nearly all pacing in the project reads a GameSettings.Duration* property, so this
+    /// collapses every tween and every Task.Delay pacing call at once, on the replaying host and on
+    /// every client draining its broadcast burst.
+    /// </summary>
     public static int GetDuration(DurationScale scale = DurationScale.Medium)
-        => GameContext.IsHeadless ? 0 : DurationTable[(int)Instance.PresentationSpeed, (int)scale];
+        => GameContext.IsHeadless || ReplayContext.IsFastForwarding
+            ? 0
+            : DurationTable[(int)Instance.PresentationSpeed, (int)scale];
 
     /// <summary>Returns the duration in seconds for the current speed and the given scale.</summary>
     public static double GetDurationSeconds(DurationScale scale = DurationScale.Medium)

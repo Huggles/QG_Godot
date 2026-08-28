@@ -54,6 +54,57 @@ public partial class GameManager : Node
     /// </summary>
     public static bool? PendingOpeningDiscard { get; set; } = null;
 
+    /// <summary>
+    /// Scenario JSON for the next session, overriding <see cref="PendingScenarioPath"/>. Set when a save
+    /// is being restored: a save carries its scenario rather than pointing at one, so it does not matter
+    /// whether the original file still exists, still lives at the same path, or still has the same
+    /// contents. Host-only, like PendingSeed and PendingOpeningDiscard.
+    /// </summary>
+    public static string PendingScenarioJson { get; set; } = null;
+
+    /// <summary>
+    /// When set, the next session restores this save instead of running fresh scenario setup. Consumed
+    /// and cleared by MultiplayerSession.StartSession; also cleared by SceneFlow when a session is left
+    /// and by MainMenu, so leaving a restored game and starting a fresh one does not re-restore it.
+    ///
+    /// Deliberately NOT cleared by MainMenu.ClearLobbyIntent: MultiplayerLobby.ReadyInternal calls that
+    /// itself, before it hosts, and would destroy its own payload on arrival.
+    /// </summary>
+    public static SaveGame PendingSave { get; set; } = null;
+
+    /// <summary>
+    /// The scenario text the RUNNING session was actually built from — what a save embeds. Captured at
+    /// setup rather than read from disk at save time, because the file may have been edited since, and
+    /// because a game that was itself restored from a save has no file to read at all.
+    /// </summary>
+    public static string ActiveScenarioJson { get; private set; }
+
+    /// <summary>Title parsed out of <see cref="ActiveScenarioJson"/>, for save names and the load list.</summary>
+    public static string ActiveScenarioTitle { get; private set; }
+
+    /// <summary>Human-readable identifier for whichever scenario source is in force. For error text.</summary>
+    public static string ScenarioDescription
+        => PendingScenarioJson != null ? $"embedded scenario '{ActiveScenarioTitle}'" : PendingScenarioPath;
+
+    /// <summary>Record the scenario text this session was built from, and pull its title out of it.</summary>
+    public static void SetActiveScenarioJson(string scenarioText)
+    {
+        ActiveScenarioJson = scenarioText;
+        ActiveScenarioTitle = "Unknown scenario";
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(scenarioText);
+            if (document.RootElement.TryGetProperty("title", out JsonElement title))
+                ActiveScenarioTitle = title.GetString();
+        }
+        catch (Exception e)
+        {
+            // Non-fatal: the title is a label. If the JSON were genuinely broken the deserialize that
+            // follows this call would be the one to say so, and it says it far more usefully.
+            DebugUtilities.PrintPeerError($"SetActiveScenarioJson: could not read the scenario title: {e.Message}");
+        }
+    }
+
     public List<ScenarioInfo> AvailableScenarios { get; private set; } = new();
     public ScenarioInfo SelectedScenario { get; private set; }
 
@@ -157,6 +208,9 @@ public partial class GameManager : Node
         // A new scenario brings its own opening-discard answer; drop any override held for the
         // previous one. The lobby re-commits the checkbox when the host starts the game.
         PendingOpeningDiscard = null;
+        // Picking a scenario explicitly means the picked one, not a scenario left embedded by a save the
+        // player looked at and backed out of.
+        PendingScenarioJson = null;
     }
 
     private void OnNodeAdded(Node node)
@@ -221,6 +275,16 @@ public partial class GameManager : Node
         _loadingScreenInstance = GameLoadTransitionScene.Instantiate<CanvasLayer>();
         AddChild(_loadingScreenInstance);
         DebugUtilities.PrintPeerFinest("Loading screen shown");
+    }
+
+    /// <summary>
+    /// Write a line under the loading cover, e.g. "Restoring… 400 / 1200". A no-op when no cover is up
+    /// or the scene has no label, so callers never have to check.
+    /// </summary>
+    public void SetLoadingStatus(string text)
+    {
+        Label label = _loadingScreenInstance?.GetNodeOrNull<Label>("Cover/StatusLabel");
+        if (label != null) label.Text = text;
     }
 
     public void HideLoadingScreen()

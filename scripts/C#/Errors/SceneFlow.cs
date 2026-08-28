@@ -49,8 +49,37 @@ public static class SceneFlow
 
         if (leaveSession)
         {
-            if (from.Multiplayer?.MultiplayerPeer != null)
+            // Close before nulling. ENetMultiplayerPeer is RefCounted, so assigning null only drops the
+            // engine's reference and the socket is released whenever the last one happens to go — which
+            // leaves port 7777 bound and makes the next CreateServer fail with a bare "Failed to host".
+            // Latent on the existing Quit-then-Host path; loading a save makes that round trip routine.
+            if (from.Multiplayer?.MultiplayerPeer is { } peer)
+            {
+                peer.Close();
                 from.Multiplayer.MultiplayerPeer = null;
+            }
+
+            // NetworkApi is an autoload, so its pending input requests outlive the game scene. Quitting
+            // while a prompt is open otherwise leaves a live awaiter holding a multi-minute backstop
+            // timer, which later resolves a TaskCompletionSource belonging to a dead loop and tries to
+            // abort input at peers that no longer exist. Save-then-quit-then-load makes this routine.
+            ErrorReporter.CancelPendingAwaiters();
+
+            // Client-local reaction-skip armings. UNTIL_ACTIVATABLE never expires, so without this an
+            // arming survives into the next game and silently auto-passes empty reaction windows for a
+            // faction the player may no longer control.
+            ReactionSkipPreference.ClearAll();
+
+            // A restore abandoned half way must not leave the next game silent and instant.
+            ReplayContext.Reset();
+
+            // Otherwise leaving a restored game and starting a fresh one restores it all over again.
+            GameManager.PendingSave = null;
+            GameManager.PendingScenarioJson = null;
+
+            // Idempotent and null-safe. Without it a restore that fails after the cover is up leaves the
+            // player looking at a permanent black screen with no way out.
+            GameManager.Instance?.HideLoadingScreen();
 
             // A barrier that never came up in the session being left still holds parked ready reports.
             // They are keyed by a node path that the next game reuses verbatim, so leaving them would

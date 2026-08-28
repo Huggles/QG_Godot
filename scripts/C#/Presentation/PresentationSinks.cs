@@ -104,3 +104,30 @@ public sealed class NullWorldPresenter : IWorldPresenter
     public void SpawnCountries() { }
     public void SpawnUnits() { }
 }
+
+// ── Save-game replay ─────────────────────────────────────────────────────────
+
+/// <summary>
+/// Wraps the real notification sink while a save is being restored: silences everything the player
+/// would see or have to dismiss, but forwards <see cref="LocalPlayerControls"/> unchanged.
+///
+/// That one method is why this exists instead of just using <see cref="NullNotificationSink"/>. It is
+/// not presentation plumbing — <c>GameAPI.DrawCards</c> and <c>CardState.IsFaceVisibleToLocalPlayer</c>
+/// both branch on it, so answering a flat false during a replay would make the restored game take
+/// different paths from the one that was saved.
+/// </summary>
+public sealed class ReplayNotificationSink : INotificationSink
+{
+    public INotificationSink Inner { get; }
+
+    public ReplayNotificationSink(INotificationSink inner) => Inner = inner;
+
+    public void ShowActionText(string text, Faction faction = (Faction)(-1)) { }
+    public void ShowActionText(string text, int duration, Faction faction = (Faction)(-1)) { }
+    public void HideActionText() { }
+
+    /// <summary>Never shown, and never awaited — a restore must not stop for a modal per drawn card.</summary>
+    public Task ShowModal(List<PresentationItem> items, string title) => Task.CompletedTask;
+
+    public bool LocalPlayerControls(Faction faction) => Inner.LocalPlayerControls(faction);
+}

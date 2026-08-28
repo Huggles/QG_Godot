@@ -76,7 +76,12 @@ public partial class RecycleCardChangeEvent : ChangeEvent
                 deckState.DeckCardIds.Add(CardId);
                 // Host shuffles and records the order; the client replays that exact order rather
                 // than shuffling for itself. See DeckState.ShuffleDeck.
-                ShuffledOrder = deckState.ShuffleDeck(IsServer ? null : ShuffledOrder);
+                //
+                // ...and so does the host while restoring a save. Replay re-applies recorded outcomes; it does
+                // not re-decide them. Shuffling afresh here would silently give the restored game a different
+                // deck order from the saved one, and MultiplayerGameState.ComputeHash covers deck COUNTS, not
+                // order, so nothing downstream would catch it.
+                ShuffledOrder = deckState.ShuffleDeck(IsServer && !ReplayContext.IsReplaying ? null : ShuffledOrder);
                 break;
             case RecycleDestination.Hand:
                 deckState.HandCardIds.Add(CardId);

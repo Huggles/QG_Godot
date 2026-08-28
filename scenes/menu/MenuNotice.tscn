@@ -30,4 +30,11 @@ custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
 text = "OK"
 
+[node name="ConfirmButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="1"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Confirm"
+
 [editable path="Root/Centre/Panel"]

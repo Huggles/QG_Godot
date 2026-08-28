@@ -162,11 +162,10 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// </summary>
     public virtual TargetSet Targets() => TargetSet.None;
 
-    public CardLogic()
-    {   
-        EventBus.Instance.NewTurnStarted += OnNewTurnStarted;
-    }    
-
+    /// <summary>
+    /// Re-arm this card for a new turn. Called by ChangeRoundChangeEvent rather than driven by the
+    /// EventBus NewTurnStarted signal, so it also reaches clients and a replayed save.
+    /// </summary>
     public void OnNewTurnStarted(int turnNumber)
     {
         if (IsStatus)

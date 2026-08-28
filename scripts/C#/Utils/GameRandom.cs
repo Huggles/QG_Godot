@@ -71,6 +71,19 @@ public static class GameRandom
             "this will silently diverge deck order from the host.");
     }
 
+    /// <summary>
+    /// Burn <paramref name="draws"/> values without using them, to move the stream to a known position.
+    ///
+    /// Used when restoring a save: the save records DrawCount alongside the seed, so re-seeding and then
+    /// fast-forwarding puts the restored game's randomness exactly where the saved one left it, instead
+    /// of handing the continuation the same numbers the opening shuffle already used.
+    /// </summary>
+    public static void FastForward(int draws)
+    {
+        for (int i = 0; i < draws; i++) _random.Next();
+        DrawCount = draws;
+    }
+
     public static int Range(int minInclusive, int maxInclusive)
     {
         DrawCount++;

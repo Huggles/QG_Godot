@@ -35,6 +35,13 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void PlayerLeftEventHandler();
     [Signal] public delegate void GameSessionStartedEventHandler();
 
+    /// <summary>
+    /// A save-game file was written. <c>deferred</c> is true when the player asked for it at a moment the
+    /// game could not honour and GameFlow flushed it at the next boundary, which is worth saying
+    /// differently in the confirmation.
+    /// </summary>
+    [Signal] public delegate void GameSavedEventHandler(string displayName, bool deferred);
+
     [Signal] public delegate void FactionsAssignedEventHandler();
 
     [Signal] public delegate void CountryClickedEventHandler(int countryClicked);

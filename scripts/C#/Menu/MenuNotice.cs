@@ -20,10 +20,14 @@ public partial class MenuNotice : MenuModal
 		GD.Load<PackedScene>("res://scenes/menu/MenuNotice.tscn");
 
 	private readonly TaskCompletionSource<bool> _dismissed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+	private readonly TaskCompletionSource<bool> _confirmed = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 	private string _title    = "";
 	private string _message  = "";
 	private bool   _showOk;
+
+	/// <summary>Label for the confirm button, or null for a plain OK-only message.</summary>
+	private string _confirmText;
 
 	/// <summary>
 	/// Opens a notice with no button. The caller keeps the reference and calls
@@ -49,13 +53,36 @@ public partial class MenuNotice : MenuModal
 		return notice._dismissed.Task;
 	}
 
+	/// <summary>
+	/// A yes/no question. Completes with true only if the player pressed the confirm button; Escape,
+	/// the cancel button and the node going away all answer false.
+	///
+	/// Here rather than on the game.s PresentationModal stack because that stack does not exist on the
+	/// menu at all — see MenuModal.s class comment.
+	/// </summary>
+	public static Task<bool> ShowConfirmAsync(Node parent, string title, string message, string confirmText)
+	{
+		MenuNotice notice = Scene.Instantiate<MenuNotice>();
+		notice._title       = title;
+		notice._message     = message;
+		notice._showOk      = true;
+		notice._confirmText = confirmText;
+		parent.AddChild(notice);
+		return notice._confirmed.Task;
+	}
+
 	public override void _Ready()
 	{
 		base._Ready();
 		Guard.Try(ReadyInternal, "MenuNotice._Ready");
 	}
 
-	public override void _ExitTree() => _dismissed.TrySetResult(true);
+	public override void _ExitTree()
+	{
+		_dismissed.TrySetResult(true);
+		// Default false: a confirm that goes away without its button being pressed is a "no".
+		_confirmed.TrySetResult(false);
+	}
 
 	private void ReadyInternal()
 	{
@@ -71,7 +98,24 @@ public partial class MenuNotice : MenuModal
 		if (!_showOk) return;
 
 		GetNode<HBoxContainer>("%ButtonRow").Visible = true;
-		GetNode<Button>("%OkButton").Pressed += Dismiss;
+
+		Button okButton = GetNode<Button>("%OkButton");
+		okButton.Pressed += Dismiss;
+
+		if (_confirmText == null) return;
+
+		// In confirm mode the OK button becomes the way OUT, and a second button carries the action, so
+		// the destructive choice is never the one under the cursor by default.
+		okButton.Text = "Cancel";
+
+		Button confirmButton = GetNode<Button>("%ConfirmButton");
+		confirmButton.Text    = _confirmText;
+		confirmButton.Visible = true;
+		confirmButton.Pressed += () =>
+		{
+			_confirmed.TrySetResult(true);
+			Dismiss();
+		};
 	}
 
 	/// <summary>Safe to call more than once, and after the node has already gone away.</summary>

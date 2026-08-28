@@ -46,7 +46,7 @@ public sealed class CliCommands
 	private static readonly HashSet<string> GameVerbs = new()
 	{
 		"state", "score", "hash", "board", "country", "hand", "deck", "cards", "log",
-		"api", "force", "continue", "assert",
+		"api", "force", "continue", "assert", "save",
 	};
 
 	public enum Readiness { Run, WaitForPrompt, WaitForGame }
@@ -85,6 +85,30 @@ public sealed class CliCommands
 											&& _session.IsSettled
 			? Readiness.Run : Readiness.WaitForGame;
 		return Readiness.Run;                                        // json / help / quit / unknown
+	}
+
+	/// <summary>
+	/// Write a save file. In GameVerbs so the gate has already waited for the game to settle, which is
+	/// also the state GameFlow.CanSave wants — a script can therefore just say `save` and get one.
+	///
+	/// Reload it with the `load=` bootstrap argument on the next run; there is no in-session load,
+	/// because restoring means building a whole new session from scratch.
+	/// </summary>
+	private void Save(List<string> args)
+	{
+		if (MultiplayerSession.Instance == null) { _out.Error("save: no game is running"); return; }
+
+		if (!GameFlow.Instance.CanSave)
+		{
+			_out.Error($"save: cannot save right now — {GameFlow.Instance.SaveBlockedReason}");
+			return;
+		}
+
+		string name = args.Count > 0 ? string.Join(" ", args) : "cli";
+		string path = MultiplayerSession.Instance.CaptureSave(name);
+
+		if (path == null) _out.Error("save: failed, see the log");
+		else              _out.Ok($"saved to {path}");
 	}
 
 	/// <summary>Subjects of <c>assert</c> that read the open prompt rather than game state.</summary>
@@ -153,6 +177,7 @@ public sealed class CliCommands
 			case "state":    Guarded(() => _out.Write(CliStateView.Summary())); return;
 			case "score":    Guarded(() => _out.Write(CliStateView.Score())); return;
 			case "hash":     Guarded(() => _out.Write(CliStateView.Hash())); return;
+			case "save":     Save(args); return;
 			case "board":    Guarded(() => _out.Write(CliStateView.Board(ParseFactionOrNull(args.FirstOrDefault())))); return;
 			case "country":  Country(args); return;
 			case "hand":     Cards(args, "hand"); return;

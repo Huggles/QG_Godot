@@ -169,16 +169,62 @@ public partial class GameModeMultiplayerDefault : IGameMode
         await SetupInitialGameState();        
     }
 
-    public async Task SetupInitialGameState()
+    /// <summary>
+    /// Read the scenario this session is being built from, and record the exact text it was parsed
+    /// from so a save can embed it.
+    ///
+    /// <see cref="GameManager.PendingScenarioJson"/> wins over the path, which is how a restored game
+    /// is built from the scenario carried inside its save rather than from whatever happens to be on
+    /// disk under that name — or from nothing at all, when the file has since been moved or deleted.
+    ///
+    /// GetAsText() rather than the raw bytes on purpose: it has already stripped any BOM, and it is
+    /// precisely the string handed to Deserialize. Embedding raw bytes would faithfully preserve a BOM
+    /// that then makes the deserialize throw on the way back in.
+    /// </summary>
+    private InitialGameStateData ReadScenario()
     {
-        // Load initial game state configuration from JSON
-        DebugUtilities.PrintPeer($"SetupInitialGameState");
-        
-        using var initialStateDataFile = FileAccess.Open(GameManager.PendingScenarioPath, FileAccess.ModeFlags.Read);
-        string initialStateDataString = initialStateDataFile.GetAsText();
-        InitialGameStateData initialStateData = JsonSerializer.Deserialize<InitialGameStateData>(initialStateDataString);
+        string scenarioText = GameManager.PendingScenarioJson;
 
+        if (scenarioText == null)
+        {
+            using var initialStateDataFile = FileAccess.Open(GameManager.PendingScenarioPath, FileAccess.ModeFlags.Read);
+            if (initialStateDataFile == null)
+                throw new Exception($"Scenario file could not be opened: {GameManager.PendingScenarioPath} ({FileAccess.GetOpenError()})");
+            scenarioText = initialStateDataFile.GetAsText();
+        }
 
+        GameManager.SetActiveScenarioJson(scenarioText);
+        return JsonSerializer.Deserialize<InitialGameStateData>(scenarioText);
+    }
+
+    /// <summary>
+    /// The half of setup that is NOT expressed as ChangeEvents, and so must run on a save restore too.
+    ///
+    /// MaxRound and OpeningDiscardEnabled are plain host-side configuration. Step mutators are the
+    /// reason this method has to exist at all: <see cref="RegisterMutators"/> puts them straight into
+    /// ModifierRegistry rather than emitting a ChangeEvent, so replaying a save's event log alone would
+    /// silently drop every scenario mutator with no error anywhere.
+    ///
+    /// Activatable mutators are skipped, because those DO reach the log — as the
+    /// RegisterBulletinCardChangeEvents that RegisterActivatableMutator emits — and registering them
+    /// again here would give every faction two identical Bulletins.
+    ///
+    /// One known imprecision, harmless but worth knowing: in a fresh game the scenario's step mutators
+    /// are registered after PlaceCards, so they sit behind the modifiers of any status card the
+    /// scenario itself puts on the table. On a restore they are registered before the replay, so they
+    /// sit ahead of those. Registry order is only the tie-break between two mutators sharing an Order,
+    /// so this can only matter to a scenario that both places a status-card modifier and declares a
+    /// step mutator with the same Order.
+    /// </summary>
+    public async Task ConfigureFromScenario()
+    {
+        InitialGameStateData initialStateData = ReadScenario();
+        ApplyScenarioConfiguration(initialStateData);
+        await RegisterMutators(initialStateData, skipActivatable: true);
+    }
+
+    private void ApplyScenarioConfiguration(InitialGameStateData initialStateData)
+    {
         GameFlow.Instance.MaxRound = initialStateData.MaxRounds;
 
         // The scenario states the intended rule; the host may override it in the lobby. Read here
@@ -186,6 +232,15 @@ public partial class GameModeMultiplayerDefault : IGameMode
         // is awaited before StartGame runs (MultiplayerSession.StartSession). Host-only, like MaxRound:
         // it gates work that reaches clients as replicated ChangeEvents, so it needs no synchronising.
         GameFlow.Instance.OpeningDiscardEnabled = GameManager.PendingOpeningDiscard ?? initialStateData.OpeningDiscard;
+    }
+
+    public async Task SetupInitialGameState()
+    {
+        // Load initial game state configuration from JSON
+        DebugUtilities.PrintPeer($"SetupInitialGameState");
+
+        InitialGameStateData initialStateData = ReadScenario();
+        ApplyScenarioConfiguration(initialStateData);
 
         GameStateCalculator.CalculateAll();
         GameStateCalculator.Enabled = false;
@@ -196,7 +251,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
         await SetStartingFaction(initialStateData);
         await RegisterMutators(initialStateData);
         GameStateCalculator.Enabled = true;
-        await Task.Delay(100);
+        await ReplayContext.Pace(100);
     }
 
     /// <summary>
@@ -214,7 +269,12 @@ public partial class GameModeMultiplayerDefault : IGameMode
     /// reach clients as replicated ChangeEvents, and the activatable ones reach clients as the
     /// RegisterBulletinCardChangeEvents emitted here.
     /// </summary>
-    private async Task RegisterMutators(InitialGameStateData initialStateData)
+    /// <param name="skipActivatable">
+    /// Register only the step mutators. Set when restoring a save: the activatable ones reach a
+    /// restored game through the replayed RegisterBulletinCardChangeEvents, so re-registering them here
+    /// would hand every faction a second copy of each Bulletin.
+    /// </param>
+    private async Task RegisterMutators(InitialGameStateData initialStateData, bool skipActivatable = false)
     {
         foreach (MutatorScenarioData entry in initialStateData.Mutators)
         {
@@ -230,13 +290,14 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
             if (mutatorType != null && typeof(ActivatableMutator).IsAssignableFrom(mutatorType))
             {
-                await RegisterActivatableMutator(entry, factionFilter);
+                if (!skipActivatable)
+                    await RegisterActivatableMutator(entry, factionFilter);
                 continue;
             }
 
             if (mutatorType == null || !typeof(StepMutator).IsAssignableFrom(mutatorType))
                 throw new Exception(
-                    $"Mutator '{entry.Name}' in {GameManager.PendingScenarioPath} was not found or does not extend StepMutator or ActivatableMutator.");
+                    $"Mutator '{entry.Name}' in {GameManager.ScenarioDescription} was not found or does not extend StepMutator or ActivatableMutator.");
 
             StepMutator mutator = (StepMutator)Activator.CreateInstance(mutatorType);
 
@@ -250,7 +311,8 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 $"Registered scenario mutator {entry.Name} ({mutator.Timing} {mutator.Step}, order {mutator.Order})");
         }
 
-        await RegisterAlwaysAvailableMutators(initialStateData);
+        if (!skipActivatable)
+            await RegisterAlwaysAvailableMutators(initialStateData);
     }
 
     /// <summary>

@@ -46,7 +46,8 @@ public partial class UnitState : StateObject
         Type = type;
         Faction = faction;
 
-        EventBus.Instance.NewTurnStarted += (int turnNumber) => { this.ImmuneForTurn = false; this.SuppliedForTurn = false; };
+        // The per-turn reset of ImmuneForTurn/SuppliedForTurn lives in ChangeRoundChangeEvent, not on a
+        // signal: both fields are in ComputeHash, and the signal is host-only.
     }
 
     

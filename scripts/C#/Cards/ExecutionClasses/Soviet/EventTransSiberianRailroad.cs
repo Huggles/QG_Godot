@@ -52,7 +52,7 @@ public partial class EventTransSiberianRailroad : EventCardLogic
     private CardStep MakeDeployStep() {
         return new CardStep(this, async () =>
         {
-            await Task.Delay(1000);
+            await ReplayContext.Pace(1000);
             var buildableIds = CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
             int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableIds).BroadCast()).ResponseCountryIds[0];
             DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
