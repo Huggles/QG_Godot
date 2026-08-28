@@ -71,6 +71,13 @@ public partial class MainMenu : Control
 	/// </summary>
 	private bool _invitePromptOpen;
 
+	/// <summary>
+	/// Whether Steam has confirmed the ranked ladder exists. The Leaderboard button's Disabled flag is
+	/// only the visual half of that gate — <see cref="MenuPanelButton"/> emits Pressed even while
+	/// Disabled — so this is what actually stops a greyed-out button opening the window.
+	/// </summary>
+	private bool _leaderboardAvailable;
+
 	// Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
 	// surfacing rather than a silent console line.
 	public override void _Ready() => Guard.Try(ReadyInternal, "MainMenu._Ready");
@@ -109,11 +116,11 @@ public partial class MainMenu : Control
 		settings.Pressed        += OnSettingsPressed;
 		quit.Pressed            += OnQuitPressed;
 
-		// Hidden until Steam confirms the ladder exists — see RevealLeaderboardIfAvailableAsync. Hidden
-		// rather than disabled: on a build without Steam there is nothing to explain to the player, and
-		// MenuPanelButton fires Pressed even while Disabled anyway.
-		leaderboard.Visible = false;
-		Guard.FireAndForget(RevealLeaderboardIfAvailableAsync, "MainMenu.LeaderboardProbe");
+		// Greyed out until Steam confirms the ladder exists — see EnableLeaderboardIfAvailableAsync.
+		// Disabled is only the visual half of that gate: MenuPanelButton fires Pressed even while
+		// Disabled, so _leaderboardAvailable is what actually blocks the click.
+		leaderboard.Disabled = true;
+		Guard.FireAndForget(EnableLeaderboardIfAvailableAsync, "MainMenu.LeaderboardProbe");
 
 		if (SteamworksApi.Instance != null)
 		{
@@ -336,16 +343,15 @@ public partial class MainMenu : Control
 	}
 
 	/// <summary>
-	/// Reveals the Leaderboard button, but only once Steam has confirmed the ladder is actually there.
+	/// Enables the Leaderboard button, but only once Steam has confirmed the ladder is actually there.
 	///
 	/// Without this the button would open a window that can only report failure — no Steam, or an app
-	/// whose Steamworks configuration has no <c>Ranked_Base_Game</c> leaderboard on it — so it is simply
-	/// not offered in the first place.
+	/// whose Steamworks configuration has no <c>Ranked_Base_Game</c> leaderboard on it.
 	///
 	/// Runs in the background rather than blocking <see cref="ReadyInternal"/>: the find is a round trip
 	/// to Steam, and a slow answer must not hold up the whole menu.
 	/// </summary>
-	private async Task RevealLeaderboardIfAvailableAsync()
+	private async Task EnableLeaderboardIfAvailableAsync()
 	{
 		if (!SteamworksApi.IsAvailable) return;
 
@@ -354,17 +360,18 @@ public partial class MainMenu : Control
 		// The player had the whole round trip in which to leave the menu.
 		if (!IsInstanceValid(this) || !exists) return;
 
-		GetNode<MenuPanelButton>("%LeaderboardButton").Visible = true;
+		_leaderboardAvailable = true;
+		GetNode<MenuPanelButton>("%LeaderboardButton").Disabled = false;
 	}
 
 	/// <summary>
-	/// Opens the ranked ladder. Guarded by <see cref="_flowBusy"/> like the other dialog flows:
-	/// MenuPanelButton fires Pressed even while Disabled, and a second click during the await would
-	/// stack a second window.
+	/// Opens the ranked ladder. Guarded by <see cref="_flowBusy"/> like the other dialog flows, and by
+	/// <see cref="_leaderboardAvailable"/>: MenuPanelButton fires Pressed even while Disabled, so the
+	/// greyed-out button would otherwise still open the window on a leaderboard that is not there.
 	/// </summary>
 	private void OnLeaderboardPressed()
 	{
-		if (_flowBusy) return;
+		if (_flowBusy || !_leaderboardAvailable) return;
 		_flowBusy = true;
 		Guard.FireAndForget(LeaderboardFlowAsync, "MainMenu.LeaderboardFlow");
 	}
