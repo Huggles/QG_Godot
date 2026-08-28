@@ -154,6 +154,7 @@ public static class PlayerFactionRegistry
     {
         if (!_factionToPeerId.TryGetValue(faction, out int peerId)) return null;
         if (!_peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene)) return null;
+        if (!GodotObject.IsInstanceValid(playerScene)) return null;
         return string.IsNullOrWhiteSpace(playerScene.DisplayName) ? null : playerScene.DisplayName;
     }
 
@@ -163,7 +164,8 @@ public static class PlayerFactionRegistry
     public static PlayerScene GetPlayerSceneForFaction(Faction faction)
     {
         int peerId = GetPeerIdForFaction(faction);
-        if (_peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene))
+        if (_peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene)
+            && GodotObject.IsInstanceValid(playerScene))
         {
             return playerScene;
         }
@@ -261,7 +263,10 @@ public static class PlayerFactionRegistry
     /// </summary>
     public static List<PlayerScene> GetAllPlayers()
     {
-        return new List<PlayerScene>(_peerIdToPlayerScene.Values);
+        // Filtered, not raw: this dictionary is static and outlives the game scene, so between one game
+        // ending and the next LoadPlayers clearing it, every entry is a freed node whose C# wrapper is
+        // still non-null and throws ObjectDisposedException on any read.
+        return _peerIdToPlayerScene.Values.Where(GodotObject.IsInstanceValid).ToList();
     }
 
     /// <summary>

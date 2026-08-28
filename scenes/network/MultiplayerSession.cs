@@ -137,7 +137,7 @@ public partial class MultiplayerSession : Node
             // Drop the cover on every peer, each once its own queue has caught up.
             if (Multiplayer.IsServer())
             {
-                Rpc(nameof(HideLoadingScreenWhenReady));
+                Rpc(nameof(HideLoadingScreenWhenReady), restore != null);
 
                 // After the cover comes down, so the player sees the restored board a beat before the
                 // prompt it was saved on reappears over it. Last, because it is the one call here that
@@ -174,7 +174,7 @@ public partial class MultiplayerSession : Node
     public void BeginFastForward() => ReplayContext.BeginFastForward();
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void HideLoadingScreenWhenReady()
+    public async void HideLoadingScreenWhenReady(bool afterRestore = false)
     {
         try
         {
@@ -192,6 +192,15 @@ public partial class MultiplayerSession : Node
             // peer stuck fast-forwarding for the rest of the game. By the time this Rpc arrives every
             // replayed message is already in this peer's queue, so the drain above is exact.
             ReplayContext.EndFastForward();
+
+            // Unit placement is the one piece of view state a suppressed animation owns (GameAPI enqueues
+            // DeployUnitAnimation, and CountryScene.AddUnit lives inside it), so a restored board would
+            // otherwise come up with no pieces on it. Rebuilt from state here, on every peer, at the last
+            // moment before the cover lifts. Passed as an argument rather than read off IsFastForwarding
+            // because the host clears that at the end of its replay, before this Rpc goes out.
+            if (afterRestore)
+                PresentationServices.World.PlaceDeployedUnits();
+
             GameManager.Instance?.HideLoadingScreen();
         }
     }
@@ -355,18 +364,12 @@ public partial class MultiplayerSession : Node
 
     private static string NameForSeat(IEnumerable<Faction> factions)
     {
+        // GetDisplayNameForFaction answers null for a freed or unnamed player, so an unclaimed seat
+        // simply goes in unnamed and matches by join order on load.
         foreach (Faction faction in factions)
         {
-            try
-            {
-                string name = PlayerFactionRegistry.GetDisplayNameForFaction(faction);
-                if (!string.IsNullOrWhiteSpace(name)) return name;
-            }
-            catch (ObjectDisposedException)
-            {
-                // A registry entry pointing at a freed node. The seat is still worth recording — the
-                // factions are what matter — it just goes in unnamed and matches by join order on load.
-            }
+            string name = PlayerFactionRegistry.GetDisplayNameForFaction(faction);
+            if (!string.IsNullOrWhiteSpace(name)) return name;
         }
         return null;
     }

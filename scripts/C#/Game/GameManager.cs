@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -85,6 +86,21 @@ public partial class GameManager : Node
     /// <summary>Human-readable identifier for whichever scenario source is in force. For error text.</summary>
     public static string ScenarioDescription
         => PendingScenarioJson != null ? $"embedded scenario '{ActiveScenarioTitle}'" : PendingScenarioPath;
+
+    /// <summary>
+    /// Point the next session at a save. The one place that knows which pending fields a restore has to
+    /// set, so the load screen, the CLI and the debug launch argument cannot drift apart.
+    ///
+    /// PendingScenarioPath is deliberately left alone: PendingScenarioJson takes precedence over it while
+    /// it is set, and the path is still the fallback a fresh game started later in this process needs.
+    /// </summary>
+    public static void ArmRestore(SaveGame save)
+    {
+        PendingSave           = save;
+        PendingSeed           = save.Seed;
+        PendingOpeningDiscard = save.OpeningDiscard;
+        PendingScenarioJson   = Encoding.UTF8.GetString(Convert.FromBase64String(save.ScenarioJsonBase64));
+    }
 
     /// <summary>Record the scenario text this session was built from, and pull its title out of it.</summary>
     public static void SetActiveScenarioJson(string scenarioText)

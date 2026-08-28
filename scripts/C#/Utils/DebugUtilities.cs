@@ -9,8 +9,16 @@ public partial class DebugUtilities : Node
 
 	// A headless dedicated server is the authority (peer 1) but controls no faction, so it has no
 	// local PlayerScene — label it [SERVER] directly instead of falling through to [UNKNOWN].
+	//
+	// IsInstanceValid, not a null check. PlayerScene.Current is a static that survives a scene change,
+	// and a freed Godot node leaves its C# wrapper non-null — reading it throws ObjectDisposedException.
+	// Between one game being torn down and the next PlayerScene._Ready (which is deferred) that window
+	// is wide open, and a logging helper that throws takes the caller down with it: this crashed
+	// CardPlayRound.Finish and stalled the turn loop.
 	public static string InstancePrefix => GameContext.IsHeadless ? "[SERVER]"
-		: PlayerScene.Current != null ? (PlayerScene.Current.GetMultiplayerAuthority() == 1 ? "[SERVER]" : "[CLIENT]") : "[UNKNOWN]";
+		: GodotObject.IsInstanceValid(PlayerScene.Current)
+			? (PlayerScene.Current.GetMultiplayerAuthority() == 1 ? "[SERVER]" : "[CLIENT]")
+			: "[UNKNOWN]";
 
 	public static string FormattedDateTime {
 		get {

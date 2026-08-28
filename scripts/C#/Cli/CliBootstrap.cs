@@ -66,11 +66,7 @@ public static class CliBootstrap
         if (save.Version != SaveGame.CurrentVersion)
             throw new Exception($"CLI: save at '{path}' is version {save.Version}, expected {SaveGame.CurrentVersion}.");
 
-        GameManager.PendingSave           = save;
-        GameManager.PendingSeed           = save.Seed;
-        GameManager.PendingOpeningDiscard = save.OpeningDiscard;
-        GameManager.PendingScenarioJson   =
-            Encoding.UTF8.GetString(Convert.FromBase64String(save.ScenarioJsonBase64));
+        GameManager.ArmRestore(save);
 
         DebugUtilities.PrintPeer($"CLI: restoring '{save.DisplayName}' ({save.Events.Count} event(s)) from {path}");
         return true;

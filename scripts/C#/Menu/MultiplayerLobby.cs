@@ -177,7 +177,7 @@ public partial class MultiplayerLobby : Control
 
 		// Read before anything else touches MainMenu.ClearLobbyIntent — which this method calls on itself
 		// further down, and which must therefore never be the thing that clears PendingSave.
-		_restoreSave = GameManager.PendingSave;
+		_restoreSave = GameManager.PendingSave ?? ArmDebugSaveFromCommandLine();
 
 		_startGameButton.Visible = false;
 
@@ -313,6 +313,31 @@ public partial class MultiplayerLobby : Control
 			MainMenu.ClearLobbyIntent();
 			StartSteamHost(lobbyId);
 		}
+	}
+
+	/// <summary>
+	/// Honour a <c>load=</c> command-line argument, so a debug launch can go straight into a restored
+	/// game with no clicking — the same affordance <c>scenario=</c> gives a fresh one.
+	///
+	/// Worth having beyond convenience: unit placement is view state that lives inside an animation a
+	/// restore suppresses (see IWorldPresenter.PlaceDeployedUnits), and that class of bug is invisible to
+	/// a headless run. This is how you look at a restored board without playing a game to get there.
+	/// </summary>
+	private static SaveGame ArmDebugSaveFromCommandLine()
+	{
+		string path = CliArgs.Get("load");
+		if (string.IsNullOrEmpty(path)) return null;
+
+		SaveGame save = SaveGameService.Load(path);
+		if (save == null)
+		{
+			DebugUtilities.PrintPeerError($"Lobby: could not read the save at '{path}'; starting a fresh game");
+			return null;
+		}
+
+		GameManager.ArmRestore(save);
+		DebugUtilities.PrintPeer($"Lobby: debug launch restoring '{save.DisplayName}' from {path}");
+		return save;
 	}
 
 	private void RequestLobbyStateFromHost()

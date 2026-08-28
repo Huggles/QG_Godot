@@ -203,13 +203,7 @@ public partial class LoadGameScreen : Control
     /// </summary>
     private void HandOff(SaveGame save)
     {
-        GameManager.PendingSave           = save;
-        GameManager.PendingSeed           = save.Seed;
-        GameManager.PendingOpeningDiscard = save.OpeningDiscard;
-        // Takes precedence over PendingScenarioPath, which is deliberately left alone: it is the
-        // fallback a fresh game started later in this process still needs, and nothing reads it while
-        // PendingScenarioJson is set.
-        GameManager.PendingScenarioJson   = Encoding.UTF8.GetString(Convert.FromBase64String(save.ScenarioJsonBase64));
+        GameManager.ArmRestore(save);
 
         DebugUtilities.PrintPeer($"LoadGameScreen: restoring '{save.DisplayName}' ({save.Events.Count} event(s))");
         SceneFlow.ChangeScene(this, LobbyScenePath);

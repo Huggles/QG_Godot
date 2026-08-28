@@ -70,6 +70,11 @@ public partial class PlayerScene : CharacterBody2D
     {
         if (what == NotificationPredelete)
         {
+            // Before the log line, not after: PrintPeerFinest reads DebugUtilities.InstancePrefix, which
+            // reads this very static. Leaving it pointing at a node being deleted is how a stale
+            // PlayerScene outlives its game and throws ObjectDisposedException at the next reader.
+            if (Current == this) Current = null;
+
             DebugUtilities.PrintPeerFinest($"Player deleted. Name: {_playerName}");
         }
     }

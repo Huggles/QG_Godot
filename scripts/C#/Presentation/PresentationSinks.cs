@@ -42,6 +42,20 @@ public interface IWorldPresenter
 {
     void SpawnCountries();
     void SpawnUnits();
+
+    /// <summary>
+    /// Put every deployed unit into its country.
+    ///
+    /// Normally this is a side effect of DeployUnitAnimation, which is where CountryScene.AddUnit is
+    /// actually called from — unit placement is one of the two pieces of VIEW state that live in an
+    /// animation rather than in game state (RemoveUnitAnimation is the other). That is fine while the
+    /// animations play, and wrong the moment they are skipped: a save-game restore suppresses
+    /// presentation, so without this the board comes back correct in every respect except that it has
+    /// no pieces on it.
+    ///
+    /// Idempotent — AddUnit early-returns for a unit already parented to the country it holds a slot in.
+    /// </summary>
+    void PlaceDeployedUnits();
 }
 
 // ── Godot (GUI) implementations ──────────────────────────────────────────────
@@ -80,6 +94,25 @@ public sealed class GodotWorldPresenter : IWorldPresenter
         foreach (UnitState unitState in GameState.UnitStates)
             UnitScene.SpawnUnit(unitState.Id);
     }
+
+    public void PlaceDeployedUnits()
+    {
+        int placed = 0;
+        int skipped = 0;
+
+        foreach (UnitState unitState in GameState.UnitStates)
+        {
+            if (!unitState.IsDeployedToCountry) continue;
+
+            CountryScene countryScene = CountryState.ForId(unitState.CountryId)?.CountryScene;
+            if (countryScene == null || unitState.UnitScene == null) { skipped++; continue; }
+
+            countryScene.AddUnit(unitState.UnitScene);
+            placed++;
+        }
+
+        DebugUtilities.PrintPeer($"PlaceDeployedUnits: placed {placed} unit(s) from state{(skipped > 0 ? $", skipped {skipped} with no scene" : "")}");
+    }
 }
 
 // ── Headless (no-op) implementations ─────────────────────────────────────────
@@ -103,6 +136,7 @@ public sealed class NullWorldPresenter : IWorldPresenter
 {
     public void SpawnCountries() { }
     public void SpawnUnits() { }
+    public void PlaceDeployedUnits() { }
 }
 
 // ── Save-game replay ─────────────────────────────────────────────────────────
