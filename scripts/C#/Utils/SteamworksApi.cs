@@ -51,6 +51,14 @@ public sealed record SteamFriend(
 	bool          AlreadyInLobby);
 
 /// <summary>
+/// One entry on a Steam leaderboard, as shown in <see cref="LeaderboardDialog"/>.
+///
+/// Carries no display name: on a global board almost nobody is a friend, so names arrive separately and
+/// late through <see cref="SteamworksApi.PersonaNameOrRequest"/>.
+/// </summary>
+public sealed record LeaderboardRow(int Rank, ulong SteamId, int Score);
+
+/// <summary>
 /// The only place in the game that talks to Steamworks. Everything else asks
 /// <see cref="IsAvailable"/> and calls the async helpers here, so a missing or signed-out Steam
 /// can never break the ENet path or the menu.
@@ -120,6 +128,11 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	public event Action LobbyMembershipChanged;
 	/// <summary>Steam finished downloading a user's avatar. Carries the user it belongs to.</summary>
 	public event Action<ulong> AvatarUpdated;
+	/// <summary>
+	/// Steam learned a user's persona name, after <see cref="PersonaNameOrRequest"/> asked for it.
+	/// Carries the user it is about.
+	/// </summary>
+	public event Action<ulong> UserInfoUpdated;
 
 	// ══════════════════════════════════════════════════════════════════════════
 	// Lifecycle
@@ -187,6 +200,11 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_steam.JoinRequestedSignal   += OnJoinRequested;
 		_steam.LobbyInviteSignal     += OnLobbyInvite;
 		_steam.AvatarLoadedSignal    += OnAvatarLoaded;
+
+		// Leaderboards, plus the persona-name answers the leaderboard window needs to label its rows.
+		_steam.LeaderboardFindResultSignal       += OnLeaderboardFindResult;
+		_steam.LeaderboardScoresDownloadedSignal += OnLeaderboardScoresDownloaded;
+		_steam.PersonaStateChangeSignal          += OnPersonaStateChange;
 
 		// Peer support is logged separately because it fails independently of Steam itself: the plain
 		// GodotSteam build initialises fine but ships no SteamMultiplayerPeer, and an export built
@@ -556,6 +574,181 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
+	// Leaderboards
+	// ══════════════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// Handles resolved so far, keyed by leaderboard name. Finding a leaderboard is a round trip to
+	/// Steam and the handle stays valid for the whole session, so reopening the leaderboard window only
+	/// costs the download.
+	/// </summary>
+	private readonly Dictionary<string, long> _leaderboardHandles = new();
+
+	/// <summary>
+	/// The find in flight, with the name it was asked for. Only one at a time, because
+	/// <c>leaderboard_find_result</c> carries the handle but NOT the name — with two finds outstanding
+	/// there would be no way to tell which answer belonged to which.
+	/// </summary>
+	private TaskCompletionSource<long> _pendingFind;
+	private string                     _pendingFindName;
+
+	/// <summary>Downloads in flight, keyed by handle. Safe to key that way: the signal carries it.</summary>
+	private readonly Dictionary<long, TaskCompletionSource<Godot.Collections.Array>> _pendingDownloads = new();
+
+	/// <summary>
+	/// Whether <paramref name="leaderboardName"/> exists on this app at all.
+	///
+	/// Answered by the same find <see cref="GetLeaderboardAsync"/> uses, and the handle is cached, so
+	/// gating a button on this costs the window that opens afterwards nothing.
+	/// </summary>
+	public async Task<bool> HasLeaderboardAsync(string leaderboardName)
+	{
+		if (!_available) return false;
+		return (await FindLeaderboardAsync(leaderboardName)) != 0;
+	}
+
+	/// <summary>
+	/// Every entry on <paramref name="leaderboardName"/>, best rank first.
+	///
+	/// Returns an empty list — never null — when Steam is unavailable, the leaderboard does not exist on
+	/// this app, or nobody has posted a score yet. The caller cannot tell those apart and does not need
+	/// to: all of them mean "there is nothing to show".
+	/// </summary>
+	public async Task<List<LeaderboardRow>> GetLeaderboardAsync(string leaderboardName)
+	{
+		var rows = new List<LeaderboardRow>();
+		if (!_available || string.IsNullOrWhiteSpace(leaderboardName)) return rows;
+
+		long handle = await FindLeaderboardAsync(leaderboardName);
+		if (handle == 0) return rows;
+
+		// Answered out of the find result Steam already sent, so this is local and free.
+		long count = _steam.GetLeaderboardEntryCount(handle);
+		if (count <= 0) return rows;
+
+		Godot.Collections.Array entries = await DownloadEntriesAsync(handle, count);
+		if (entries == null) return rows;
+
+		int index = 0;
+		foreach (Variant entry in entries)
+		{
+			index++;
+
+			// Every field is checked rather than assumed: this array comes straight from the
+			// GDExtension, and a missing key would otherwise throw from inside a UI rebuild.
+			Godot.Collections.Dictionary fields = entry.As<Godot.Collections.Dictionary>();
+			if (fields == null) continue;
+			if (!fields.TryGetValue("steam_id", out Variant idValue))    continue;
+			if (!fields.TryGetValue("score",    out Variant scoreValue)) continue;
+
+			// Steam hands entries back in rank order, so the position in the array is a sound fallback
+			// for a rank the payload happens not to carry.
+			int rank = fields.TryGetValue("global_rank", out Variant rankValue) ? rankValue.As<int>() : 0;
+
+			rows.Add(new LeaderboardRow(
+				Rank:    rank > 0 ? rank : index,
+				SteamId: (ulong)idValue.As<long>(),
+				Score:   scoreValue.As<int>()));
+		}
+
+		DebugUtilities.PrintPeer($"Steam: leaderboard '{leaderboardName}' returned {rows.Count} of {count} entries");
+		return rows;
+	}
+
+	/// <summary>
+	/// Resolves a leaderboard name to its Steam handle, caching the answer. Returns 0 when the
+	/// leaderboard does not exist on this app, or Steam did not answer in time.
+	/// </summary>
+	private async Task<long> FindLeaderboardAsync(string leaderboardName)
+	{
+		if (_leaderboardHandles.TryGetValue(leaderboardName, out long cached)) return cached;
+
+		// A second window opening while the first find is still out waits on that same call rather than
+		// asking Steam twice. A find for a *different* name has to wait its turn — see the comment on
+		// _pendingFind for why the two cannot overlap.
+		if (_pendingFind != null && _pendingFindName != leaderboardName)
+		{
+			DebugUtilities.PrintPeerError(
+				$"Steam: cannot look up leaderboard '{leaderboardName}' while '{_pendingFindName}' is in flight");
+			return 0;
+		}
+
+		TaskCompletionSource<long> source = _pendingFind;
+		if (source == null)
+		{
+			source           = NewSource<long>();
+			_pendingFind     = source;
+			_pendingFindName = leaderboardName;
+			_steam.FindLeaderboard(leaderboardName);
+		}
+
+		long handle = await WithTimeout(source, 0L, OpTimeoutSeconds);
+
+		// Only the caller holding the in-flight source clears it; a second caller awaiting the same one
+		// must not wipe a find that has since been restarted for another name.
+		if (ReferenceEquals(_pendingFind, source))
+		{
+			_pendingFind     = null;
+			_pendingFindName = null;
+		}
+
+		if (handle != 0) _leaderboardHandles[leaderboardName] = handle;
+		// Not an error: callers gate on HasLeaderboardAsync, so a missing board is a normal answer.
+		else DebugUtilities.PrintPeer($"Steam: leaderboard '{leaderboardName}' does not exist on this app");
+
+		return handle;
+	}
+
+	/// <summary>
+	/// Pulls ranks 1..<paramref name="count"/> — the whole board. Returns null when Steam did not answer
+	/// in time, which is deliberately distinct from the empty array an empty leaderboard gives back.
+	/// </summary>
+	private async Task<Godot.Collections.Array> DownloadEntriesAsync(long handle, long count)
+	{
+		if (_pendingDownloads.ContainsKey(handle)) return null;   // one download per board at a time
+
+		var source = NewSource<Godot.Collections.Array>();
+		_pendingDownloads[handle] = source;
+
+		// The type argument is a bare long in this binding: the generator could not name the enum.
+		_steam.DownloadLeaderboardEntries(1, count, (long)Steam.LeaderboardDataRequest.Global, handle);
+
+		Godot.Collections.Array entries = await WithTimeout(source, null, OpTimeoutSeconds);
+		_pendingDownloads.Remove(handle);
+
+		if (entries == null)
+			DebugUtilities.PrintPeerError($"Steam: leaderboard {handle} entries did not download in time");
+
+		return entries;
+	}
+
+	/// <summary>Users already asked about, so a name is only ever requested from Steam once.</summary>
+	private readonly HashSet<ulong> _requestedNames = new();
+
+	/// <summary>
+	/// Persona name for any Steam user at all, including one this client has never heard of — the normal
+	/// case on a global leaderboard, where hardly anybody is a friend. <see cref="PersonaNameFor"/> is no
+	/// use there: it answers out of the local friends cache, which those users are not in.
+	///
+	/// Returns null while the name is still unknown, having started the download;
+	/// <see cref="UserInfoUpdated"/> fires for that user once it lands, so callers can ask again. Same
+	/// shape as <see cref="SmallAvatarFor"/>.
+	/// </summary>
+	public string PersonaNameOrRequest(ulong steamId)
+	{
+		if (!_available || steamId == 0) return null;
+
+		string name = _steam.GetFriendPersonaName((long)steamId);
+		// GodotSteam answers "[unknown]" — not an empty string — for a user outside the local cache.
+		if (!string.IsNullOrWhiteSpace(name) && name != "[unknown]") return name;
+
+		if (_requestedNames.Add(steamId))
+			_steam.RequestUserInformation((long)steamId, true);
+
+		return null;
+	}
+
+	// ══════════════════════════════════════════════════════════════════════════
 	// Steam callbacks
 	// ══════════════════════════════════════════════════════════════════════════
 
@@ -613,6 +806,39 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		if (game != AppId) return;
 		DebugUtilities.PrintPeer($"Steam: {PersonaNameFor((ulong)inviter)} invited us to lobby {lobby}");
 		InviteReceived?.Invoke((ulong)inviter, lobby);
+	}
+
+	/// <summary>
+	/// <paramref name="found"/> is 0 when the app simply has no leaderboard by that name — a
+	/// configuration mistake rather than a transient failure, so it resolves as "no handle" instead of
+	/// leaving the caller waiting for its timeout.
+	/// </summary>
+	private void OnLeaderboardFindResult(long leaderboardHandle, long found)
+	{
+		DebugUtilities.PrintPeerFinest($"Steam: leaderboard_find_result handle={leaderboardHandle} found={found}");
+		_pendingFind?.TrySetResult(found != 0 ? leaderboardHandle : 0);
+	}
+
+	private void OnLeaderboardScoresDownloaded(string message, long leaderboardHandle, Godot.Collections.Array entries)
+	{
+		DebugUtilities.PrintPeerFinest(
+			$"Steam: leaderboard_scores_downloaded {message} ({entries?.Count ?? 0} entries)");
+
+		// Never null: the timeout in DownloadEntriesAsync uses null to mean "Steam never answered", and
+		// an empty board must not look like that.
+		if (_pendingDownloads.TryGetValue(leaderboardHandle, out TaskCompletionSource<Godot.Collections.Array> source))
+			source.TrySetResult(entries ?? new Godot.Collections.Array());
+	}
+
+	/// <summary>
+	/// Steam learned something new about a user — including the names
+	/// <see cref="PersonaNameOrRequest"/> asked for. Dropping the id from <see cref="_requestedNames"/>
+	/// lets a still-unknown user be asked about again later rather than being written off forever.
+	/// </summary>
+	private void OnPersonaStateChange(long steamId, long flags)
+	{
+		_requestedNames.Remove((ulong)steamId);
+		UserInfoUpdated?.Invoke((ulong)steamId);
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════

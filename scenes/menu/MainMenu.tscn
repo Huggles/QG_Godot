@@ -90,6 +90,10 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="LeaderboardButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=771203344 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="SettingsButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1815641807 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2

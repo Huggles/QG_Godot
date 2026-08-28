@@ -89,6 +89,7 @@ public partial class MainMenu : Control
 		var loadGame         = GetNode<MenuPanelButton>("%LoadGameButton");
 		var multiplayerHost  = GetNode<MenuPanelButton>("%MultiplayerHostButton");
 		var multiplayerJoin  = GetNode<MenuPanelButton>("%MultiplayerJoinButton");
+		var leaderboard      = GetNode<MenuPanelButton>("%LeaderboardButton");
 		var settings         = GetNode<MenuPanelButton>("%SettingsButton");
 		var quit             = GetNode<MenuPanelButton>("%QuitButton");
 
@@ -96,6 +97,7 @@ public partial class MainMenu : Control
 		loadGame.ButtonText        = "Load Game";
 		multiplayerHost.ButtonText = "Host Game";
 		multiplayerJoin.ButtonText = "Join Game";
+		leaderboard.ButtonText     = "Leaderboard";
 		settings.ButtonText        = "Settings";
 		quit.ButtonText            = "Quit";
 
@@ -103,8 +105,15 @@ public partial class MainMenu : Control
 		loadGame.Pressed        += OnLoadGamePressed;
 		multiplayerHost.Pressed += OnMultiplayerHostPressed;
 		multiplayerJoin.Pressed += OnMultiplayerJoinPressed;
+		leaderboard.Pressed     += OnLeaderboardPressed;
 		settings.Pressed        += OnSettingsPressed;
 		quit.Pressed            += OnQuitPressed;
+
+		// Hidden until Steam confirms the ladder exists — see RevealLeaderboardIfAvailableAsync. Hidden
+		// rather than disabled: on a build without Steam there is nothing to explain to the player, and
+		// MenuPanelButton fires Pressed even while Disabled anyway.
+		leaderboard.Visible = false;
+		Guard.FireAndForget(RevealLeaderboardIfAvailableAsync, "MainMenu.LeaderboardProbe");
 
 		if (SteamworksApi.Instance != null)
 		{
@@ -319,6 +328,52 @@ public partial class MainMenu : Control
 		try
 		{
 			await SettingsDialog.ShowAsync(this);
+		}
+		finally
+		{
+			if (IsInstanceValid(this)) _flowBusy = false;
+		}
+	}
+
+	/// <summary>
+	/// Reveals the Leaderboard button, but only once Steam has confirmed the ladder is actually there.
+	///
+	/// Without this the button would open a window that can only report failure — no Steam, or an app
+	/// whose Steamworks configuration has no <c>Ranked_Base_Game</c> leaderboard on it — so it is simply
+	/// not offered in the first place.
+	///
+	/// Runs in the background rather than blocking <see cref="ReadyInternal"/>: the find is a round trip
+	/// to Steam, and a slow answer must not hold up the whole menu.
+	/// </summary>
+	private async Task RevealLeaderboardIfAvailableAsync()
+	{
+		if (!SteamworksApi.IsAvailable) return;
+
+		bool exists = await SteamworksApi.Instance.HasLeaderboardAsync(LeaderboardDialog.LeaderboardName);
+
+		// The player had the whole round trip in which to leave the menu.
+		if (!IsInstanceValid(this) || !exists) return;
+
+		GetNode<MenuPanelButton>("%LeaderboardButton").Visible = true;
+	}
+
+	/// <summary>
+	/// Opens the ranked ladder. Guarded by <see cref="_flowBusy"/> like the other dialog flows:
+	/// MenuPanelButton fires Pressed even while Disabled, and a second click during the await would
+	/// stack a second window.
+	/// </summary>
+	private void OnLeaderboardPressed()
+	{
+		if (_flowBusy) return;
+		_flowBusy = true;
+		Guard.FireAndForget(LeaderboardFlowAsync, "MainMenu.LeaderboardFlow");
+	}
+
+	private async Task LeaderboardFlowAsync()
+	{
+		try
+		{
+			await LeaderboardDialog.ShowAsync(this);
 		}
 		finally
 		{
