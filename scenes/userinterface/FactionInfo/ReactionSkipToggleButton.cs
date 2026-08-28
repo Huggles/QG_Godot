@@ -17,10 +17,20 @@ public partial class ReactionSkipToggleButton : Button
     /// <summary>Set by <see cref="FactionInfoRow.LoadUI"/> before the first <see cref="Refresh"/>.</summary>
     public Faction Faction { get; set; }
 
+    /// <summary>
+    /// The glyph, in a full-rect child rather than in the Button's own Text.
+    ///
+    /// A Button is not a Container, so its Control children never contribute to its minimum size —
+    /// which is the point. With the text on the Button, the font and outline pushed its minimum to
+    /// 31px inside a 25px UnitsStrip, and because that strip carries grow_vertical = BEGIN the strip
+    /// grew UPWARDS to fit. This way the button is exactly its custom_minimum_size of 25x25 whatever
+    /// glyph is showing, so the row cannot shift.
+    /// </summary>
+    private Label Glyph => GetNode<Label>("Glyph");
+
     public override void _Ready()
     {
         FocusMode = FocusModeEnum.None;
-        Alignment = HorizontalAlignment.Center;
         Pressed += OnPressed;
         Refresh();
     }
@@ -54,8 +64,8 @@ public partial class ReactionSkipToggleButton : Button
                 ("?", Colors.White, "always ask me"),
         };
 
-        Text = glyph;
-        AddThemeColorOverride("font_color", colour);
+        Glyph.Text = glyph;
+        Glyph.AddThemeColorOverride("font_color", colour);
 
         // The caveat is the same one the in-prompt buttons carry: a scoped skip only silences the
         // windows that exist to hide information, never a reaction everyone can see you holding.

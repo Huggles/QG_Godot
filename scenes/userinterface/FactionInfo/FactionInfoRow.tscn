@@ -349,9 +349,24 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(25, 25)
 layout_mode = 2
 focus_mode = 0
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_rhpmq")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_rhpmq")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_rhpmq")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rhpmq")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_rhpmq")
+script = ExtResource("11_rskip")
+
+[node name="Glyph" type="Label" parent="BackgroundPanel2/UnitsStrip/ReactionSkipToggleButton" unique_id=633649373]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxEmpty_rhpmq")
 text = "?"
-script = ExtResource("11_rskip")
+horizontal_alignment = 1
+vertical_alignment = 1
