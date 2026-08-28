@@ -45,6 +45,18 @@ public partial class UnitPool : Object
         return unitCounter;
     }
 
+    /// <summary>
+    /// Put the id stream back to its starting position. Called once per game, before
+    /// InstantiateUnitStates runs — see MultiplayerSession.StartSession.
+    ///
+    /// Unlike GameMessage.ResetStream this IS needed for correctness, and a save is what makes it so.
+    /// The counter is a process static, so a second game in the same process would otherwise number its
+    /// pool from where the previous game stopped, and a restore into that shell would look up the unit
+    /// ids recorded in the log against a pool that no longer contains them. That is why loading worked
+    /// from a fresh client and threw KeyNotFoundException after quitting a session first.
+    /// </summary>
+    public static void ResetIdStream() => unitCounter = -1;
+
     public static bool FactionHasAvailableArmy(Faction faction)
     {
         return FactionHasAvailableUnits(faction, UnitType.ARMY);

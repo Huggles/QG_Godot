@@ -9,9 +9,9 @@ public partial class DeployUnitChangeEvent : ChangeEvent
     /// The deployed unit, or -1 until <see cref="ExecuteAsync"/> has created it — a block window runs
     /// before that and has no unit to name yet.
     ///
-    /// -1 rather than the default 0: unit ids start at 1 (<c>UnitPool.GetUniqueUnitId</c>
-    /// pre-increments), so 0 was only accidentally distinguishable from a real id, and
-    /// <see cref="Targets"/> has to tell the two apart.
+    /// -1 rather than the default 0: unit ids start at 0 (<c>UnitPool.GetUniqueUnitId</c>
+    /// pre-increments from -1), so 0 is a real id that <see cref="Targets"/> has to be able to tell
+    /// apart from "no unit yet".
     /// </summary>
     public int UnitId { get; set; } = -1;
     public int CountryId { get; set; }

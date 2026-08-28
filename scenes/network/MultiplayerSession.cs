@@ -87,6 +87,11 @@ public partial class MultiplayerSession : Node
             // runs of the same seed producing comparable logs, and it is what makes SyncCounterToLatest
             // after a restore easy to reason about.
             GameMessage.ResetStream();
+
+            // The other process-static id counter, and this one is load-bearing: unit ids are the
+            // handles a save's event log uses, so the pool the game mode is about to build must be
+            // numbered from zero again or a restore cannot resolve them. See UnitPool.ResetIdStream.
+            UnitPool.ResetIdStream();
             DebugUtilities.PrintPeer($"RNG seed: {GameRandom.Seed}");
 
             // Consumed here rather than read repeatedly, so a failure part-way through cannot leave the
