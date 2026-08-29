@@ -196,6 +196,21 @@ public abstract class Condition
             return CountryStates.Any(countryState => countryState.IsCountryEmpty);
         }
     }
+
+    public class CountryHasFactionUnit : Condition
+    {
+        public CountryHasFactionUnit(int countryId, Faction faction)
+        {
+            this.CountryIds = [countryId];
+            this.Faction = faction;
+        }
+
+        public override bool MeetCondition()
+        {
+            return CountryStates.Any(countryState => countryState.HasUnit(Faction));
+        }
+    }
+
     public class CountryHasEnemyUnit : Condition
     {
         public CountryHasEnemyUnit(int countryId, Faction faction)

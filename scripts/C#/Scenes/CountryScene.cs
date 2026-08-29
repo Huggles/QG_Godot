@@ -229,7 +229,7 @@ public partial class CountryScene : Control
 		SetCountryColor(Colors.Green);
 	}
 
-	private void OnMouseExitedOpaque() => SetCountryColor(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Yellow : Colors.Red);
+	private void OnMouseExitedOpaque() => SetCountryColor(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Orange : Colors.Yellow);
 
 	private void OnMouseLeftClickOpaque()
 	{

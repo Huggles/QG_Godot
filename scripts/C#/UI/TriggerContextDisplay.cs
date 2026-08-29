@@ -41,8 +41,12 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// <summary>
 	/// How far in the focus viewport sits. Wide enough to read the country the camera is pointed at,
 	/// which is what the frame is for — the unit inside it is identified by its indicator, not by scale.
+	///
+	/// The viewport is 350px square, so this is 350/zoom world units across: at 0.4 that is ~875, which
+	/// frames all but the largest countries whole. The board itself is 4269 wide — a zoom much below
+	/// this stops being a focus view and just shows half the map again.
 	/// </summary>
-	[Export] private float FocusZoom = 0.1f;
+	[Export] private float FocusZoom = 0.4f;
 
 	// The prompt colours, warm for the window that can still stop something and cool for the one that
 	// can only answer it. Kept as BBCode hex rather than theme colours because they are only ever

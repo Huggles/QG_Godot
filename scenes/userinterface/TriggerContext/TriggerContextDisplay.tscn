@@ -43,7 +43,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_tctx")
-FocusZoom = 0.15
+FocusZoom = 0.4
 
 [node name="Control" type="Control" parent="." unique_id=2069212147]
 anchors_preset = 0
