@@ -22,31 +22,69 @@ shader_parameter/fill_color = Color(1, 0.011764706, 0, 1)
 shader_parameter/pulse_speed = 4.0
 shader_parameter/pulse_min = 0.2570000122075
 
-[node name="CountryRoot" type="Container" unique_id=317448873]
+[node name="CountryRoot" type="Control" unique_id=2093193981]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 770.0
+offset_bottom = 870.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
 script = ExtResource("1_upkmi")
 
 [node name="UnitContainer" type="Control" parent="." unique_id=564969549]
 unique_name_in_owner = true
 z_index = 26
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="SupplyStarSprite" type="TextureRect" parent="." unique_id=1323490019]
 unique_name_in_owner = true
 visible = false
 z_index = 24
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -512.0
+offset_top = -512.0
+offset_right = 512.0
+offset_bottom = 512.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("5_twgbx")
 
 [node name="StraightSprite" type="TextureRect" parent="." unique_id=1827087014]
 unique_name_in_owner = true
 z_index = 22
 material = ExtResource("3_arroc")
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -323.5
+offset_top = -138.0
+offset_right = 323.5
+offset_bottom = 138.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("2_llf52")
 
 [node name="CountryLabel" type="Label" parent="." unique_id=1013654637]
 z_index = 30
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "ABC"
 label_settings = ExtResource("6_1hw3w")
 horizontal_alignment = 1
@@ -56,7 +94,12 @@ autowrap_mode = 2
 [node name="TVTextureRectContainer" type="MarginContainer" parent="." unique_id=1398882110]
 unique_name_in_owner = true
 visible = false
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 0
 
@@ -71,7 +114,12 @@ script = ExtResource("9_optr")
 
 [node name="TextureRectContainer" type="MarginContainer" parent="." unique_id=780481210]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 0
 

@@ -120,11 +120,45 @@ public partial class ErrorReporter : Node
     /// </summary>
     public IReadOnlyList<GameError> History => _history;
 
+    /// <summary>
+    /// Managed id of the Godot main thread, captured in <see cref="_Ready"/> (autoloads are readied
+    /// on it). Reports legitimately arrive off it — animation continuations, the finalizer backstop
+    /// — and <c>SceneTree.Multiplayer</c> may only be read on the main thread: doing so elsewhere
+    /// makes the engine print an error of its own, so the reporter itself becomes noise.
+    /// </summary>
+    private static int _mainThreadId = -1;
+
+    private static bool IsMainThread => System.Environment.CurrentManagedThreadId == _mainThreadId;
+
+    /// <summary>
+    /// Last origin read on the main thread. Off-thread reports are labelled from this instead of
+    /// touching the MultiplayerApi; it is refreshed on every session change and every main-thread
+    /// report, and the origin does not change in between.
+    /// </summary>
+    private static int _originPeer;
+    private static string _originLabel = "UNKNOWN";
+
     public override void _Ready()
     {
         Instance = this;
+        _mainThreadId = System.Environment.CurrentManagedThreadId;
         ProcessMode = ProcessModeEnum.Always;
         InstallBackstops();
+        RefreshOrigin();
+
+        // Keep the origin snapshot current for reports that cannot read it themselves. Joining or
+        // hosting is what changes it, and both ends of a session are covered here.
+        try
+        {
+            Multiplayer.PeerConnected += _ => RefreshOrigin();
+            Multiplayer.PeerDisconnected += _ => RefreshOrigin();
+            Multiplayer.ConnectedToServer += RefreshOrigin;
+            Multiplayer.ServerDisconnected += RefreshOrigin;
+        }
+        catch (Exception ex)
+        {
+            SafeLog($"ErrorReporter: could not watch multiplayer for the error origin: {ex.Message}");
+        }
 
         // Clear IsShuttingDown once a new scene root is in the tree, so failures in the incoming
         // scene are reported normally again. One hook instead of a SceneReady() call in every scene.
@@ -627,27 +661,38 @@ public partial class ErrorReporter : Node
         reporter.CallDeferred(MethodName.Ingest, error.ToJson(), allowBroadcast, stallsLoop);
     }
 
-    private static GameError Build(Exception e, string context, Faction? target, ErrorSeverity? forcedSeverity)
+    /// <summary>
+    /// Re-read which peer this process is. MAIN THREAD ONLY — see <see cref="_mainThreadId"/>.
+    /// </summary>
+    private static void RefreshOrigin()
     {
-        int originPeer = 0;
-        string originLabel = "UNKNOWN";
         try
         {
             MultiplayerApi mp = Instance?.Multiplayer;
-            originPeer = mp?.MultiplayerPeer != null ? mp.GetUniqueId() : 0;
+            int peer = mp?.MultiplayerPeer != null ? mp.GetUniqueId() : 0;
 
             // Godot reports a unique id of 1 even with no session, so "peer 1" alone does not mean
             // host — check for actual connected peers before claiming a multiplayer role. Otherwise a
             // failure in the main menu would be labelled HOST, which reads as a session problem.
             bool inSession = mp?.MultiplayerPeer != null
-                             && (mp.GetPeers().Length > 0 || originPeer != 1);
+                             && (mp.GetPeers().Length > 0 || peer != 1);
 
-            originLabel = GameContext.IsHeadless ? "SERVER"
+            _originPeer = peer;
+            _originLabel = GameContext.IsHeadless ? "SERVER"
                 : !inSession ? "LOCAL"
-                : originPeer == 1 ? "HOST"
-                : $"CLIENT {originPeer}";
+                : peer == 1 ? "HOST"
+                : $"CLIENT {peer}";
         }
-        catch { /* keep the defaults */ }
+        catch { /* keep the last known origin */ }
+    }
+
+    private static GameError Build(Exception e, string context, Faction? target, ErrorSeverity? forcedSeverity)
+    {
+        // Reading the MultiplayerApi is main-thread only; off it, use the snapshot the last
+        // main-thread pass left behind.
+        if (IsMainThread) RefreshOrigin();
+        int originPeer = _originPeer;
+        string originLabel = _originLabel;
 
         int targetPeer = 0;
         if (target.HasValue)

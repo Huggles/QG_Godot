@@ -7,7 +7,7 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
     public Node PlayersNode => GameNode.GetNode("Players");
     public PanelContainer UnitsNode => GameNode.GetNode<PanelContainer>("%Units");
     public PanelContainer WorldNode => GameNode.GetNode<PanelContainer>("%World");
-    public PanelContainer CountriesNode => WorldNode != null ? WorldNode.GetNode<PanelContainer>("Countries") : null;
+    public Control CountriesNode => WorldNode != null ? WorldNode.GetNode<Control>("%Countries") : null;
     /// <summary>
     /// The picture-in-picture camera, or null before the HUD exists (menu, headless). Read off
     /// <see cref="TriggerContextDisplay"/> rather than looked up here: the viewport lives inside that

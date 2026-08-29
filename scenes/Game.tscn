@@ -16,8 +16,8 @@ script = ExtResource("2_qbsmt")
 position = Vector2(973, 2887)
 
 [node name="BackgroundPanel" type="PanelContainer" parent="." unique_id=1023654323]
-offset_right = 3922.588
-offset_bottom = 2722.588
+offset_right = 4939.981
+offset_bottom = 3428.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_kb8kt")
 

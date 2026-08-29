@@ -22,7 +22,7 @@ public class ZoomToCountryAnimation : ChangeEventAnimation
     {
         Camera2D camera = InputManager.Current.Camera;
         CountryState country = CountryState.ForId(_countryId);
-        Vector2 targetPosition = country.CountryScene.GlobalPosition;
+        Vector2 targetPosition = country.CountryScene.GlobalCenter;
         Vector2 targetZoomVec  = new Vector2(_targetZoom, _targetZoom);
         double  duration       = GameSettings.DurationMediumSeconds;
 

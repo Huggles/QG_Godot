@@ -24,28 +24,13 @@ public partial class CountryData : DataObject
 
     public class DataNotFoundException : Exception { public DataNotFoundException(String message) : base(message) { } }
 
-    public Vector2 WorldPositionCenterUnscaled
-    {
-        get
-        {
-            return new Vector2(
-                WorldTransformData.XPosition,
-                WorldTransformData.YPosition
-            );
-        }
-    }
-
-    public Vector2 WorldPositionCenter
-    {
-        get
-        {
-            const float scale = 0.5f;
-            return new Vector2(
-                (WorldPositionCenterUnscaled.X) * scale,
-                (WorldPositionCenterUnscaled.Y) * scale
-            );
-        }
-    }
+    /// <summary>
+    /// Where the country's top-left corner sits on the board — the authored value straight from the
+    /// data file, which is a Control's Position as-is. It is NOT the middle of the country: offsets
+    /// that ARE authored from the middle (unit slots, the supply star, the straight icon) add half
+    /// the texture themselves.
+    /// </summary>
+    public Vector2 WorldPositionTopLeft => new Vector2(WorldTransformData.XPosition, WorldTransformData.YPosition);
 
     public override void LoadData()
     {

@@ -71,10 +71,15 @@ public partial class StraightState : StateObject
         sprite.Modulate = Colors.White;
         ChangeColorTeam(ControllingCountryState.OccupyingTeam);
 
+        // Authored from the middle of the country, and rotated and scaled around the icon's own middle
+        // — what the Sprite2D this replaced did for free. A Control does all three from its top-left
+        // corner instead, so the centre has to be put back by hand.
         var t = StaticStraightData.StraightTransform;
-        sprite.Position = new Vector2(t.XPosition, t.YPosition);
+        Vector2 countryCenter = ControllingCountryState.CountryScene.TextureSize / 2f;
+        sprite.PivotOffset = sprite.Size / 2f;
         sprite.RotationDegrees = t.ZRotation;
         sprite.Scale = new Vector2(t.Scale, t.Scale);
+        sprite.Position = countryCenter - (sprite.Size / 2f) + new Vector2(t.XPosition, t.YPosition);
     }
 
     public void HideStraightSprite()

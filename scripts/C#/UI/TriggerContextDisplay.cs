@@ -281,5 +281,5 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	}
 
 	private static Vector2? CountryPositionOf(int countryId)
-		=> CountryState.ForId(countryId)?.CountryScene?.GlobalPosition;
+		=> CountryState.ForId(countryId)?.CountryScene?.GlobalCenter;
 }

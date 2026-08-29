@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class CountryScene : Container
+public partial class CountryScene : Control
 {
 	public int CountryId { get; set; }
 	private CountryState CountryState => CountryState.ForId(CountryId);
@@ -15,7 +15,7 @@ public partial class CountryScene : Container
 	public UnitScene UnitScene2;
 	public UnitScene UnitScene3;
 
-	public Node2D UnitContainerNode => GetNode<Node2D>("UnitContainer");
+	public Control UnitContainerNode => GetNode<Control>("UnitContainer");
 	public TextureRect SupplyStarSprite => GetNode<TextureRect>("SupplyStarSprite");
 	public TextureRect StraightSpriteNode => GetNode<TextureRect>("StraightSprite");
 
@@ -28,8 +28,15 @@ public partial class CountryScene : Container
 	public Label CountryLabel => GetNode<Label>("CountryLabel");
 	public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
-	public Vector2 Size => new Vector2(this.CountryState.StaticCountryData.Texture.GetWidth(), this.CountryState.StaticCountryData.Texture.GetHeight());
-	public Rect2 Bounds => new Rect2(this.Position - (Size/2), Size);
+	public Vector2 TextureSize => new Vector2(this.CountryState.StaticCountryData.Texture.GetWidth(), this.CountryState.StaticCountryData.Texture.GetHeight());
+	/// <summary>The country's rect in the Countries node's space. Everything it owns sits inside this.</summary>
+	public Rect2 Bounds => new Rect2(Position, Size);
+
+	/// <summary>
+	/// Middle of the country. A Control's Position is its top-left corner, so anything aiming at "the
+	/// country" — the camera, the trigger preview — wants this rather than GlobalPosition.
+	/// </summary>
+	public Vector2 GlobalCenter => GlobalPosition + (Size / 2f);
 
 	public TargetPresentationMode targetPresentationMode = TargetPresentationMode.Glow;
 
@@ -60,18 +67,27 @@ public partial class CountryScene : Container
 		countrySceneInstance.CountryState.Tags.TagAdded += countrySceneInstance.OnTagAdded;
 		countrySceneInstance.CountryState.Tags.TagRemoved += countrySceneInstance.OnTagRemoved;
 		NodeUtilities.Instance.CountriesNode.AddChild(countrySceneInstance, false);
-		countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionCenter;
-		countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
-		
-		countrySceneInstance.CountryLabel.Size = countrySceneInstance.Bounds.Size;
-		Vector2 countryTopLeftPos = -(countrySceneInstance.Bounds.Size/2);
-		Vector2 labelPos = countryTopLeftPos + countrySceneInstance.StaticCountryData.LabelTransformData.Position2D;
 
-		countrySceneInstance.CountryLabel.Position = labelPos;
+		countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
+
+		// The label fills the country (anchors preset 15) and is nudged in from the top-left corner by
+		// the authored offset. Written as offsets rather than Position/Size: with stretching anchors
+		// those two are derived from the parent's rect, so assigning them is both overridden after
+		// _ready and warned about ("non-equal opposite anchors").
+		Vector2 labelOffset = countrySceneInstance.StaticCountryData.LabelTransformData?.Position2D ?? Vector2.Zero;
+		countrySceneInstance.CountryLabel.OffsetLeft = labelOffset.X;
+		countrySceneInstance.CountryLabel.OffsetTop = labelOffset.Y;
+
 		countrySceneInstance.CountrySpriteTextureRect.Texture = countrySceneInstance.StaticCountryData.Texture;
-		countrySceneInstance.CountrySpriteTextureRectContainer.Size = countrySceneInstance.Bounds.Size;
-		countrySceneInstance.CountrySpriteTextureRectContainer.Position = countryTopLeftPos;      
-		countrySceneInstance.CountrySpriteTextureRectContainer.Visible = false;        
+		countrySceneInstance.TVCountrySpriteTextureRect.Texture = countrySceneInstance.StaticCountryData.Texture;
+
+		// Only the country itself gets a rect. Every child is anchored to it, so they follow along and
+		// stay inside these bounds without a single position of their own. The authored position is
+		// the top-left corner, so it goes straight in.
+		countrySceneInstance.Size = countrySceneInstance.TextureSize;
+		countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionTopLeft;
+
+		countrySceneInstance.CountrySpriteTextureRectContainer.Visible = false;
 		return countrySceneInstance;
 	}
 
@@ -100,10 +116,6 @@ public partial class CountryScene : Container
 
 	private void ShowWorldPresentationTactical()
 	{
-		TVCountrySpriteTextureRect.Texture = StaticCountryData.Texture;
-		TVCountrySpriteTextureRectContainer.Size = Bounds.Size;
-		TVCountrySpriteTextureRectContainer.Position = -(Bounds.Size/2);
-
 		// The overlay is only repainted when a unit moves, so a country whose garrison has not changed
 		// since the last time tactical mode was off would come back with a stale palette.
 		UpdateOccupyingFactionColors();
@@ -459,7 +471,10 @@ public partial class CountryScene : Container
 		var key = $"Position{position}";
 		TransformData transform = (TransformData)transformData.GetValue(key);
 
-		unitScene.Position = new Vector2(transform.XPosition, transform.YPosition);        
+		// Slot offsets are measured from the middle of the country. UnitContainer used to be a Node2D
+		// sitting on that middle; as a Control its origin is the country's top-left corner, so the
+		// half-size has to be added back or every unit is drawn a corner away from its slot.
+		unitScene.Position = (TextureSize / 2f) + new Vector2(transform.XPosition, transform.YPosition);
 	}
 
 	private int GetUnitPosition(UnitScene unitScene)
@@ -602,8 +617,14 @@ public partial class CountryScene : Container
 		if (StaticCountryData.SupplyStarTransformData != null)
 		{
 			var data = StaticCountryData.SupplyStarTransformData;
-			SupplyStarSprite.Position = new Vector2(data.XPosition, data.YPosition);
+
+			// The star's offset is authored from the middle of the country, and its scale used to be a
+			// Sprite2D's — drawn around its own centre. A Control positions and scales from its
+			// top-left, so both have to be re-centred or the star lands in the corner at a fraction of
+			// the size it should be.
+			SupplyStarSprite.PivotOffset = SupplyStarSprite.Size / 2f;
 			SupplyStarSprite.Scale = new Vector2(data.Scale, data.Scale);
+			SupplyStarSprite.Position = (TextureSize / 2f) - (SupplyStarSprite.Size / 2f) + data.Position2D;
 		}
 	}
 

@@ -9,10 +9,6 @@ offset_right = 2922.588
 offset_bottom = 1722.588
 script = ExtResource("1_r63mr")
 
-[node name="Countries" type="PanelContainer" parent="." unique_id=1601687231]
-unique_name_in_owner = true
-layout_mode = 2
-
 [node name="Background" type="PanelContainer" parent="." unique_id=777121734]
 layout_mode = 2
 
@@ -39,6 +35,10 @@ theme_override_constants/margin_left = 134
 theme_override_constants/margin_top = 159
 theme_override_constants/margin_right = 135
 theme_override_constants/margin_bottom = 180
+
+[node name="Countries" type="Control" parent="Background/NinePatchRect/MarginContainer" unique_id=1702549295]
+unique_name_in_owner = true
+layout_mode = 2
 
 [node name="WorldSprite" type="TextureRect" parent="Background/NinePatchRect/MarginContainer" unique_id=1773006644]
 unique_name_in_owner = true

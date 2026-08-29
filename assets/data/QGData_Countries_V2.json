@@ -413,8 +413,8 @@
         },
         "WorldTransformData": {
             "Scale": 1,
-            "XPosition": 1024.64,
-            "YPosition": -431.07,
+            "XPosition": 0,
+            "YPosition": 0,
             "ZPosition": 0.0
         },
         "SupplyStarTransformData": {
@@ -1450,8 +1450,8 @@
         },
         "WorldTransformData": {
             "Scale": 1,
-            "XPosition": 1063.17,
-            "YPosition": 1673.42,
+            "XPosition": 0,
+            "YPosition": 727.62,
             "ZPosition": 0.0
         },
         "SupplyStarTransformData": {
@@ -2836,8 +2836,8 @@
         },
         "WorldTransformData": {
             "Scale": 1,
-            "XPosition": 613.71,
-            "YPosition": 2005.18,
+            "XPosition": 0,
+            "YPosition": 872.65,
             "ZPosition": 0.0
         },
         "SupplyStarTransformData": {
@@ -3222,8 +3222,8 @@
         },
         "WorldTransformData": {
             "Scale": 1,
-            "XPosition": 782.12,
-            "YPosition": 240.21,
+            "XPosition": 0,
+            "YPosition": 402,
             "ZPosition": 0.0
         },
         "SupplyStarTransformData": {
