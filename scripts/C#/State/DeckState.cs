@@ -102,6 +102,46 @@ public partial class DeckState : StateObject
         return cardId;
     }
 
+    /// <summary>
+    /// The id of a copy of <paramref name="cardName"/> that this faction could still discard, or -1.
+    ///
+    /// Covers every pile EXCEPT the discard pile, which is what makes a repeated name find a SECOND
+    /// copy: a faction holds six BuildArmy, and including the discard pile would find the copy the
+    /// previous call just discarded and re-discard it, leaving the pile one card short with nothing
+    /// to say so.
+    ///
+    /// Scoped to one faction's piles on purpose. CardState.ForName is a lookup over every card in the
+    /// game by UniqueName, and the generic cards (BuildArmy, LandBattle, ...) appear in several
+    /// factions' decks, so it answers with whichever faction's copy it happens to hold — it cannot be
+    /// used to decide whether THIS faction has the card.
+    ///
+    /// Same FindIndex-over-ids shape as DrawCardByName: List.Find would return 0 for "not found",
+    /// and 0 is a valid card id.
+    /// </summary>
+    public int FindDiscardableCardByName(string cardName)
+    {
+        List<int> searchableCardIds = DeckCardIds.Concat(HandCardIds)
+                                                 .Concat(ResponseCardIds)
+                                                 .Concat(StatusCardIds).ToList();
+        int index = searchableCardIds.FindIndex(id => CardState.ForId(id)?.CardData.UniqueName == cardName);
+        return index == -1 ? -1 : searchableCardIds[index];
+    }
+
+    /// <summary>
+    /// Put a named card into this faction's discard pile, wherever it is currently sitting — see
+    /// <see cref="FindDiscardableCardByName"/> for which piles that covers. Returns the moved card's
+    /// id, or -1 when the faction has no copy left to move.
+    /// </summary>
+    public int DiscardCardByName(string cardName)
+    {
+        int cardId = FindDiscardableCardByName(cardName);
+        if (cardId == -1)
+            return -1;
+
+        DiscardCard(cardId);
+        return cardId;
+    }
+
     public List<int> DrawCards(int number)
     {
         var response = new List<int>();

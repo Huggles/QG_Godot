@@ -112,6 +112,11 @@ public class DrawCardByNameChangeEventDto : ChangeEventDto
     public string CardName { get; set; }
 }
 
+public class DiscardCardByNameChangeEventDto : ChangeEventDto
+{
+    public string CardName { get; set; }
+}
+
 public class ChangeStepChangeEventDto : ChangeEventDto
 {
     public TurnStep NewStep { get; set; }

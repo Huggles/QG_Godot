@@ -131,7 +131,15 @@
         { "name": "StatusSuperiorShipyards" },
         { "name": "StatusWartimeProduction" }
       ],
-      "initialHandCards": [],
+       "initialDiscardedCards": [        
+        { "name": "BuildArmy" },
+        { "name": "BuildArmy" },
+        { "name": "EventLendLease" }
+      ],
+      "initialHandCards": [
+        { "name": "EventFlexibleResources" }
+      ],
+      
       "startingVP": 0
     }
   }

@@ -159,6 +159,7 @@ public abstract partial class GameMessage : GodotObject
             ForceDiscardHandCardsChangeEventDto d   => new ForceDiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
             DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards, d.ShowDrawnCards),
             DrawCardByNameChangeEventDto d   => new DrawCardByNameChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardName),
+            DiscardCardByNameChangeEventDto d => new DiscardCardByNameChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardName),
             ScorePointsChangeEventDto d      => new ScorePointsChangeEvent(d.VPTurnSummary),
             SetStartingScoreChangeEventDto d => new SetStartingScoreChangeEvent(d.TriggeringFaction, d.Score),
             ChangeStepChangeEventDto d        => new ChangeStepChangeEvent(d.NewStep),

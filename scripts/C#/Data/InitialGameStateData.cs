@@ -78,6 +78,15 @@ public class FactionScenarioData
     [JsonPropertyName("initialHandCards")]
     public List<InitialHandCardEntry> InitialHandCards { get; set; } = new List<InitialHandCardEntry>();
 
+    /// <summary>
+    /// Cards that start in this faction's discard pile, by UniqueName. Taken out of the draw deck
+    /// during setup, so they are gone from the opening deal as well as visibly played — which is the
+    /// point: it is how a scenario sets up a mid-game position for cards that read the discard pile
+    /// (StatusGuards, EventFlexibleResources, ResponseRationing).
+    /// </summary>
+    [JsonPropertyName("initialDiscardedCards")]
+    public List<InitialDiscardedCardEntry> InitialDiscardedCards { get; set; } = new List<InitialDiscardedCardEntry>();
+
     [JsonPropertyName("startingVP")]
     public int StartingVictoryPoints { get; set; } = 0;
 }
@@ -89,6 +98,12 @@ public class InitialCardEntry
 }
 
 public class InitialHandCardEntry
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+}
+
+public class InitialDiscardedCardEntry
 {
     [JsonPropertyName("name")]
     public string Name { get; set; }

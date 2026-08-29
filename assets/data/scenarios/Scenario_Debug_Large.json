@@ -13,8 +13,7 @@
         { "countryName": "ITALY" },
         { "countryName": "BALKANS" },
         { "countryName": "MEDITERRANEAN_SEA" },
-        { "countryName": "NORTH_AFRICA" },
-        { "countryName": "NORTH_SEA" },
+        { "countryName": "NORTH_AFRICA" },        
         { "countryName": "BALTIC_SEA" },
         { "countryName": "AFRICA" }
       ],
@@ -32,16 +31,24 @@
         { "name": "EventMilitaryDictatorshipsInTheBalkans" },
         { "name": "EWSubmarinesRaidMurmanskConvoy" }
       ],
+      "initialDiscardedCards": [
+        { "name": "EventGunsAndButter" },
+        { "name": "BuildArmy" },
+        { "name": "BuildArmy" }
+      ],
       "startingVP": 0
     },
     "UNITED_KINGDOM": {
       "unitDeployments": [
         { "countryName": "UNITED_KINGDOM" },
         { "countryName": "AUSTRALIA" },
-        { "countryName": "CHINA" }
+        { "countryName": "CHINA" },
+        { "countryName": "NORTH_SEA" }
       ],
       "initialCards": [
-        { "name": "ResponseEnigmaCodeCracked" }
+        { "name": "ResponseEnigmaCodeCracked" },
+        { "name": "StatusFreeFrance" },
+        { "name": "StatusResistance" }
       ],
       "initialHandCards": [
         { "name": "EWMaltaSubmarines" }

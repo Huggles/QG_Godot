@@ -32,8 +32,7 @@ public partial class StatusVolksturm : StatusCardLogic
             .WithGuidance("Recruit an army in Germany (in addition to your playstep)")
             // Hollow when Germany already holds a German unit: the recruit redeploys the piece
             // standing there and the board is unchanged (see CountryState.CanBuild).
-            .WithAdvisoryCondition(() => Condition.Build(
-                new Condition.Not(new Condition.CountryHasFactionUnit((int)Country.Germany, Faction)), this))
+            .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit((int)Country.Germany, Faction)), this))
         };
     }
 }

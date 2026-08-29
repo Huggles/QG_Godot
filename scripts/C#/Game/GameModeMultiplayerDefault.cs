@@ -510,8 +510,28 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 await new PlayCardChangeEvent(cs.Id) {  IsTrigger = false, BlockAnimationQueue = false, PlayAnimations = false }.Apply();
             }
 
-            // Move specified cards to the top of each faction's hand
             Faction faction = System.Enum.Parse<Faction>(factionKey);
+
+            // Cards that start already discarded. Applied before the hand draws so a scenario that
+            // names the same card in both places ends with it in hand rather than half in each — and
+            // before GameFlow deals the opening hands, so a discarded card can no longer be drawn.
+            foreach (InitialDiscardedCardEntry discardedCard in factionData.InitialDiscardedCards)
+            {
+                // Checked against this faction's own piles, not CardState.ForName: the generic cards
+                // (BuildArmy, LandBattle, ...) exist in several decks, so the global by-name lookup
+                // reports whichever faction's copy it holds and would call every one of them a
+                // Germany card. Re-checked per entry, so listing a name more copies than the faction
+                // owns fails on the entry that runs out.
+                if (DeckState.ForFaction(faction).FindDiscardableCardByName(discardedCard.Name) == -1)
+                    throw new Exception(
+                        $"initialDiscardedCards lists '{discardedCard.Name}' for {faction}, but they have no copy " +
+                        $"left to discard. Ensure the name matches the Name field in QGData_Cards_V2.json, that the " +
+                        $"card is in this faction's deck in QGData_Decks.json, and that it is not listed more times " +
+                        $"than they own.");
+                await new DiscardCardByNameChangeEvent(Faction.NONE, faction, discardedCard.Name) { IsTrigger = false }.Apply();
+            }
+
+            // Move specified cards to the top of each faction's hand
             foreach (InitialHandCardEntry handCard in factionData.InitialHandCards)
             {
                 var drawEvent = new DrawCardByNameChangeEvent(Faction.NONE, faction, handCard.Name) { IsTrigger = false };
