@@ -1,16 +1,31 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class EventFlexibleResources : EventCardLogic
 {
+    /// <summary>
+    /// The cards this may play out of the discard pile: everything in it EXCEPT this card.
+    ///
+    /// The exclusion is not a special case, it is the whole reason this helper exists. An Event is
+    /// discarded by DeckState.PlayCard the moment it is played — before its steps run — so by the
+    /// time the step below asks for the pile, this card is already sitting in it and would offer
+    /// itself. Choosing it recycles the card to hand and re-plays it, which re-discards it and offers
+    /// it again: a card that plays itself forever.
+    ///
+    /// Used by the step condition as well as the offer, so a pile holding nothing but this card
+    /// leaves the step unexecutable rather than raising a prompt with no valid choice.
+    /// </summary>
+    private List<int> PlayableDiscardedCardIds =>
+        DeckState.ForFaction(Faction).DiscardedCardIds.Where(id => id != CardState.Id).ToList();
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
             new CardStep(this, async () => {
-                var discardedIds = DeckState.ForFaction(Faction).DiscardedCardIds;
-                var resp = await new InputRequest.CardsRequestHandler(Faction, discardedIds).BroadCast();
+                var resp = await new InputRequest.CardsRequestHandler(Faction, PlayableDiscardedCardIds).BroadCast();
                 int selectedCardId = resp.ResponseCardIds[0];
 
                 RecycleCardChangeEvent recycleEvent = BuildChangeEvent(
@@ -21,7 +36,7 @@ public partial class EventFlexibleResources : EventCardLogic
                 await CardPlayPool.DoCard(selectedCardId);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-                DeckState.ForFaction(Faction).DiscardedCardIds.Count > 0), this))
+                PlayableDiscardedCardIds.Count > 0), this))
             .WithGuidance("Play a card of your choice from your discard pile")
         };
     }
