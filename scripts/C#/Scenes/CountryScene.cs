@@ -80,7 +80,7 @@ public partial class CountryScene : Control
 		countrySceneInstance.Size = countrySceneInstance.TextureSize;
 		countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionTopLeft;
 
-		countrySceneInstance.CountrySpriteTextureRectContainer.Visible = true;
+		countrySceneInstance.CountrySpriteTextureRectContainer.Visible = false;
 		return countrySceneInstance;
 	}
 
@@ -551,8 +551,8 @@ public partial class CountryScene : Control
 	/// <inheritdoc cref="ShowTargetGlow"/>
 	private void HideTargetGlow()
 	{
-		CountrySpriteTextureRect.Visible = true;
-		CountrySpriteTextureRectContainer.Visible = true;
+		CountrySpriteTextureRect.Visible = false;
+		CountrySpriteTextureRectContainer.Visible = false;
 		OnMouseExitedOpaque();
 	}
 

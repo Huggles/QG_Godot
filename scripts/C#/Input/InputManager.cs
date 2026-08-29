@@ -8,7 +8,7 @@ public partial class InputManager : Node2D
 	public static InputManager Current;
 	private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
 	private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(0.15f,0.15f);
-	private const float ZOOM_STEP = 0.01f;
+	private const float ZOOM_STEP = 0.05f;
 	private const float CAMERA_SPEED = 10f;
 	private const float MIN_ZOOM_LEVEL = 0.1f;
 	private const float MAX_ZOOM_LEVEL = 2;    
