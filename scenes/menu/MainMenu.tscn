@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://mkqa1n4o3kva"]
 
-[ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="Texture2D" uid="uid://btbye2p24vpo" path="res://assets/textures/Other/Menu/Background/Menu_Background.png" id="2_bvc5d"]
+[ext_resource type="Texture2D" uid="uid://lyafyyvari36" path="res://assets/textures/Other/Menu/Background/Menu_Middleground.png" id="3_ekkse"]
 [ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="3_mgsx5"]
 [ext_resource type="Script" uid="uid://bwx4k7nap2qnr" path="res://scripts/C#/Menu/MainMenu.cs" id="3_script"]
+[ext_resource type="Texture2D" uid="uid://cfn33is2arcti" path="res://assets/textures/Other/Menu/Background/Menu_Foreground.png" id="4_84lro"]
 [ext_resource type="StyleBox" uid="uid://di1jtwe77usf2" path="res://MenuPanelBackground.tres" id="4_e1dod"]
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_y6vun"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_e1dod"]
@@ -17,14 +19,42 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_script")
 
-[node name="TextureRect" type="TextureRect" parent="." unique_id=630335957]
+[node name="Parallax" type="Control" parent="." unique_id=1909299783]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1_m2yvp")
+
+[node name="Background" type="TextureRect" parent="Parallax" unique_id=1552785088]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bvc5d")
+expand_mode = 3
+
+[node name="MiddleGround" type="TextureRect" parent="Parallax" unique_id=68609342]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_ekkse")
+expand_mode = 3
+
+[node name="Foreground" type="TextureRect" parent="Parallax" unique_id=630335957]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_84lro")
 expand_mode = 3
 
 [node name="MenuPanel" type="Container" parent="." unique_id=438408597]
