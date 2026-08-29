@@ -242,6 +242,7 @@ public partial class InputManager : Node2D
 			Camera.Enabled = true;
 			// ApplyZoom re-frames through ApplyCameraBounds, so this also pulls the blind
 			// DEFAULT_POSITION/DEFAULT_ZOOM from _EnterTree onto the board.
+			CenterOnBoard();
 			ApplyZoom();
 		}
 		else
@@ -274,9 +275,15 @@ public partial class InputManager : Node2D
 	/// headless), which is why the call in <see cref="_Ready"/> is not enough on its own.
 	///
 	/// Position is clamped here rather than left to Camera2D's own limits: those clamp the rendered
-	/// transform but leave <c>Camera.Position</c> wherever it was written, so panning or a
+	/// transform but leave the camera's own position wherever it was written, so panning or a
 	/// <see cref="ZoomToCountryAnimation"/> tween aimed off-board would park the node out there and
 	/// the next keypress would appear to do nothing.
+	///
+	/// Everything here is global space, and <c>Camera.Position</c> is not: the camera hangs off the
+	/// Player scene, which is added under Game/Players — a Node2D at a non-zero offset. Clamping the
+	/// local Position against the global board rect therefore parks the camera off the board by exactly
+	/// that offset, and the (correctly global) Limit* then freeze the rendered view against a board
+	/// edge, which looks like a camera that cannot move at all. Hence GlobalPosition.
 	/// </summary>
 	private void ApplyCameraBounds()
 	{
@@ -291,16 +298,29 @@ public partial class InputManager : Node2D
 		Camera.LimitRight = Mathf.RoundToInt(board.End.X);
 		Camera.LimitBottom = Mathf.RoundToInt(board.End.Y);
 
-		// AnchorMode is the default DragCenter, so Position is the centre of the view and the legal
-		// centres are the board inset by half a viewport. MinZoomLevel already keeps that half-extent
-		// under half the board, but Max guards the degenerate case anyway — an inverted range would
-		// otherwise snap the camera to the far edge.
+		// AnchorMode is the default DragCenter, so the camera position is the centre of the view and the
+		// legal centres are the board inset by half a viewport. MinZoomLevel already keeps that
+		// half-extent under half the board, but Max guards the degenerate case anyway — an inverted
+		// range would otherwise snap the camera to the far edge.
 		Vector2 halfExtent = GetViewport().GetVisibleRect().Size / (2f * Camera.Zoom);
 		Vector2 min = board.Position + halfExtent;
 		Vector2 max = board.End - halfExtent;
-		Camera.Position = new Vector2(
-			Mathf.Clamp(Camera.Position.X, min.X, Mathf.Max(min.X, max.X)),
-			Mathf.Clamp(Camera.Position.Y, min.Y, Mathf.Max(min.Y, max.Y)));
+		Camera.GlobalPosition = new Vector2(
+			Mathf.Clamp(Camera.GlobalPosition.X, min.X, Mathf.Max(min.X, max.X)),
+			Mathf.Clamp(Camera.GlobalPosition.Y, min.Y, Mathf.Max(min.Y, max.Y)));
+	}
+
+	/// <summary>
+	/// Parks the camera on the middle of the board. Called once the board is in the tree, because
+	/// <see cref="DEFAULT_POSITION"/> is written blind in <see cref="_EnterTree"/> and would otherwise
+	/// be clamped to whichever board corner it happens to sit past. No-op with no board to measure.
+	/// </summary>
+	private void CenterOnBoard()
+	{
+		Rect2? bounds = NodeUtilities.Instance?.BoardBounds;
+		if (Camera == null || bounds == null) return;
+
+		Camera.GlobalPosition = bounds.Value.GetCenter();
 	}
 
 	/// <summary>
@@ -334,7 +354,8 @@ public partial class InputManager : Node2D
 		float xDelta = (-inputLeft + inputRight) * CAMERA_SPEED;
 		float yDelta = (-inputUp + inputDown) * CAMERA_SPEED;
 		Vector2 delta = new Vector2(xDelta, yDelta) * zoomMultiplier;
-		Camera.Position += delta;
+		// Global, to agree with ApplyCameraBounds — see the note there on the Player's parent offset.
+		Camera.GlobalPosition += delta;
 	}
 
 	public override void _UnhandledInput(InputEvent e)

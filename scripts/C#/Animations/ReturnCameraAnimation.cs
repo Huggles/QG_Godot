@@ -14,7 +14,9 @@ public class ReturnCameraAnimation : ChangeEventAnimation
     public ReturnCameraAnimation()
     {
         Camera2D camera = InputManager.Current.Camera;
-        _savedPosition = camera.Position;
+        // Global to match ZoomToCountryAnimation and InputManager's bounds clamp — the camera's local
+        // position is offset by Game/Players and means nothing on its own.
+        _savedPosition = camera.GlobalPosition;
         _savedZoom     = camera.Zoom;
     }
 
@@ -24,7 +26,7 @@ public class ReturnCameraAnimation : ChangeEventAnimation
         double   duration = GameSettings.DurationMediumSeconds;
 
         Tween tween = camera.CreateTween().SetParallel();
-        tween.TweenProperty(camera, "position", _savedPosition, duration)
+        tween.TweenProperty(camera, "global_position", _savedPosition, duration)
              .SetTrans(Tween.TransitionType.Sine)
              .SetEase(Tween.EaseType.InOut);
         tween.TweenProperty(camera, "zoom", _savedZoom, duration)

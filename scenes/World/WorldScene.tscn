@@ -5,8 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://dsgtbjipkhdsy" path="res://assets/textures/Countries/World_Clean_3.png" id="2_r63mr"]
 
 [node name="World" type="PanelContainer" unique_id=620002621]
-offset_right = 2922.588
-offset_bottom = 1722.588
+offset_right = 4269.0
+offset_bottom = 2435.0
 script = ExtResource("1_r63mr")
 
 [node name="Background" type="PanelContainer" parent="." unique_id=777121734]

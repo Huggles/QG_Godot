@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class WorldScene : PanelContainer
+public partial class WorldScene : Control
 {
 	// Called when the node enters the scene tree for the first time.
 

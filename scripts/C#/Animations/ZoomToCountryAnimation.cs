@@ -31,7 +31,9 @@ public class ZoomToCountryAnimation : ChangeEventAnimation
         DebugUtilities.PrintPeer("Zooming to country " + country.Label + " at position " + targetPosition + " with zoom " + _targetZoom);
 
         Tween tween = camera.CreateTween().SetParallel();
-        tween.TweenProperty(camera, "position", targetPosition, duration)
+        // global_position, not position: GlobalCenter is a global point and the camera sits under the
+        // Player scene, which Game/Players offsets. See InputManager.ApplyCameraBounds.
+        tween.TweenProperty(camera, "global_position", targetPosition, duration)
              .SetTrans(Tween.TransitionType.Sine)
              .SetEase(Tween.EaseType.InOut);
         tween.TweenProperty(camera, "zoom", targetZoomVec, duration)

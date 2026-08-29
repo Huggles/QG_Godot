@@ -5,8 +5,8 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
 {
     public Node GameNode => GetNode("/root/Game/");
     public Node PlayersNode => GameNode.GetNode("Players");
-    public PanelContainer UnitsNode => GameNode.GetNode<PanelContainer>("%Units");
-    public PanelContainer WorldNode => GameNode.GetNode<PanelContainer>("%World");
+    public Control UnitsNode => GameNode.GetNode<Control>("%Units");
+    public Control WorldNode => GameNode.GetNode<Control>("%World");
     public Control CountriesNode => WorldNode != null ? WorldNode.GetNode<Control>("%Countries") : null;
     /// <summary>
     /// The picture-in-picture camera, or null before the HUD exists (menu, headless). Read off

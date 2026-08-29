@@ -11,7 +11,6 @@ public partial class GameModeDefault : IGameMode
     const string FACTIONS_DATA_PATH = "res://assets/data/QGData_Factions_V2.json";
     const string CARDS_DATA_PATH = "res://assets/data/QGData_Cards_V2.json";
     const string DECKS_DATA_PATH = "res://assets/data/QGData_Decks.json";
-    const string WORLD_SCENE_FILE = "res://scenes/World/WorldScene.tscn";
     
     private MultiplayerGameState gameState = GameSession.Current.GameState;
 
