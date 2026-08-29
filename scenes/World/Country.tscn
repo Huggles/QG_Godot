@@ -22,40 +22,31 @@ shader_parameter/fill_color = Color(1, 0.011764706, 0, 1)
 shader_parameter/pulse_speed = 4.0
 shader_parameter/pulse_min = 0.2570000122075
 
-[node name="CountryRoot" type="Node2D" unique_id=413934646]
+[node name="CountryRoot" type="Container" unique_id=317448873]
 script = ExtResource("1_upkmi")
 
-[node name="UnitContainer" type="Node2D" parent="." unique_id=1070326305]
+[node name="UnitContainer" type="Control" parent="." unique_id=564969549]
 unique_name_in_owner = true
 z_index = 26
+layout_mode = 2
 
-[node name="SupplyStarSprite" type="Sprite2D" parent="." unique_id=1981111688]
+[node name="SupplyStarSprite" type="TextureRect" parent="." unique_id=1323490019]
 unique_name_in_owner = true
 visible = false
 z_index = 24
-position = Vector2(0, 10)
-scale = Vector2(0.1, 0.1)
+layout_mode = 2
 texture = ExtResource("5_twgbx")
 
-[node name="StraightSprite" type="Sprite2D" parent="." unique_id=146075532]
+[node name="StraightSprite" type="TextureRect" parent="." unique_id=1827087014]
 unique_name_in_owner = true
 z_index = 22
 material = ExtResource("3_arroc")
+layout_mode = 2
 texture = ExtResource("2_llf52")
 
 [node name="CountryLabel" type="Label" parent="." unique_id=1013654637]
 z_index = 30
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -51.0
-offset_top = -25.0
-offset_right = 66.0
-offset_bottom = 58.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 text = "ABC"
 label_settings = ExtResource("6_1hw3w")
 horizontal_alignment = 1
@@ -65,17 +56,7 @@ autowrap_mode = 2
 [node name="TVTextureRectContainer" type="MarginContainer" parent="." unique_id=1398882110]
 unique_name_in_owner = true
 visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -385.0
-offset_top = -435.0
-offset_right = 385.0
-offset_bottom = 435.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 0
 
@@ -90,17 +71,7 @@ script = ExtResource("9_optr")
 
 [node name="TextureRectContainer" type="MarginContainer" parent="." unique_id=780481210]
 unique_name_in_owner = true
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -385.0
-offset_top = -435.0
-offset_right = 385.0
-offset_bottom = 435.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 0
 

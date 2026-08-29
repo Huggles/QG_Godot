@@ -343,22 +343,34 @@ public partial class MainMenu : Control
 	}
 
 	/// <summary>
-	/// Enables the Leaderboard button, but only once Steam has confirmed the ladder is actually there.
+	/// Enables the Leaderboard button once Steam confirms the ladder exists, and makes sure the player is
+	/// on it before they can open it.
 	///
-	/// Without this the button would open a window that can only report failure — no Steam, or an app
-	/// whose Steamworks configuration has no <c>Ranked_Base_Game</c> leaderboard on it.
+	/// Without the existence check the button would open a window that can only report failure — no
+	/// Steam, or an app whose Steamworks configuration has no <c>Ranked_Base_Game</c> leaderboard on it.
 	///
-	/// Runs in the background rather than blocking <see cref="ReadyInternal"/>: the find is a round trip
-	/// to Steam, and a slow answer must not hold up the whole menu.
+	/// Runs in the background rather than blocking <see cref="ReadyInternal"/>: these are round trips to
+	/// Steam, and a slow answer must not hold up the whole menu. Nothing waits on the button, which
+	/// starts out disabled either way.
 	/// </summary>
 	private async Task EnableLeaderboardIfAvailableAsync()
 	{
 		if (!SteamworksApi.IsAvailable) return;
 
 		bool exists = await SteamworksApi.Instance.HasLeaderboardAsync(LeaderboardDialog.LeaderboardName);
-
-		// The player had the whole round trip in which to leave the menu.
 		if (!IsInstanceValid(this) || !exists) return;
+
+		// Seeded before the button goes live rather than alongside it. Steam answers every leaderboard
+		// request on one shared signal with nothing to tell two of them apart, so a player quick enough
+		// to open the window while the seeding round trip was still out would have seen an empty board.
+		//
+		// The result is deliberately ignored: a failed write leaves the board readable, and the window
+		// falls back to StartingElo for a missing entry anyway.
+		await SteamworksApi.Instance.EnsureRankedAsync(
+			LeaderboardDialog.LeaderboardName, LeaderboardDialog.StartingElo);
+
+		// The player had the whole probe in which to leave the menu.
+		if (!IsInstanceValid(this)) return;
 
 		_leaderboardAvailable = true;
 		GetNode<MenuPanelButton>("%LeaderboardButton").Disabled = false;

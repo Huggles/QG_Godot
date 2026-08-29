@@ -204,6 +204,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		// Leaderboards, plus the persona-name answers the leaderboard window needs to label its rows.
 		_steam.LeaderboardFindResultSignal       += OnLeaderboardFindResult;
 		_steam.LeaderboardScoresDownloadedSignal += OnLeaderboardScoresDownloaded;
+		_steam.LeaderboardScoreUploadedSignal    += OnLeaderboardScoreUploaded;
 		_steam.PersonaStateChangeSignal          += OnPersonaStateChange;
 
 		// Peer support is logged separately because it fails independently of Steam itself: the plain
@@ -596,6 +597,13 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	private readonly Dictionary<long, TaskCompletionSource<Godot.Collections.Array>> _pendingDownloads = new();
 
 	/// <summary>
+	/// The score upload in flight. One at a time, and not keyed by handle like the downloads:
+	/// <c>leaderboard_score_uploaded</c> carries the board but nothing to tell two writes to the same
+	/// board apart.
+	/// </summary>
+	private TaskCompletionSource<bool> _pendingUpload;
+
+	/// <summary>
 	/// Whether <paramref name="leaderboardName"/> exists on this app at all.
 	///
 	/// Answered by the same find <see cref="GetLeaderboardAsync"/> uses, and the handle is cached, so
@@ -616,43 +624,97 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	/// </summary>
 	public async Task<List<LeaderboardRow>> GetLeaderboardAsync(string leaderboardName)
 	{
-		var rows = new List<LeaderboardRow>();
-		if (!_available || string.IsNullOrWhiteSpace(leaderboardName)) return rows;
+		if (!_available || string.IsNullOrWhiteSpace(leaderboardName)) return new List<LeaderboardRow>();
 
 		long handle = await FindLeaderboardAsync(leaderboardName);
-		if (handle == 0) return rows;
+		if (handle == 0) return new List<LeaderboardRow>();
 
 		// Answered out of the find result Steam already sent, so this is local and free.
 		long count = _steam.GetLeaderboardEntryCount(handle);
-		if (count <= 0) return rows;
+		if (count <= 0) return new List<LeaderboardRow>();
 
-		Godot.Collections.Array entries = await DownloadEntriesAsync(handle, count);
-		if (entries == null) return rows;
+		// The request type is a bare long in this binding: the generator could not name the enum.
+		Godot.Collections.Array entries = await AwaitDownloadAsync(handle, () =>
+			_steam.DownloadLeaderboardEntries(1, count, (long)Steam.LeaderboardDataRequest.Global, handle));
 
-		int index = 0;
-		foreach (Variant entry in entries)
-		{
-			index++;
-
-			// Every field is checked rather than assumed: this array comes straight from the
-			// GDExtension, and a missing key would otherwise throw from inside a UI rebuild.
-			Godot.Collections.Dictionary fields = entry.As<Godot.Collections.Dictionary>();
-			if (fields == null) continue;
-			if (!fields.TryGetValue("steam_id", out Variant idValue))    continue;
-			if (!fields.TryGetValue("score",    out Variant scoreValue)) continue;
-
-			// Steam hands entries back in rank order, so the position in the array is a sound fallback
-			// for a rank the payload happens not to carry.
-			int rank = fields.TryGetValue("global_rank", out Variant rankValue) ? rankValue.As<int>() : 0;
-
-			rows.Add(new LeaderboardRow(
-				Rank:    rank > 0 ? rank : index,
-				SteamId: (ulong)idValue.As<long>(),
-				Score:   scoreValue.As<int>()));
-		}
-
+		List<LeaderboardRow> rows = ParseEntries(entries);
 		DebugUtilities.PrintPeer($"Steam: leaderboard '{leaderboardName}' returned {rows.Count} of {count} entries");
 		return rows;
+	}
+
+	/// <summary>
+	/// Puts the local player onto <paramref name="leaderboardName"/> at <paramref name="startingScore"/>
+	/// if they are not on it already.
+	///
+	/// Without this an unranked player is only ever a number a client makes up for its own display —
+	/// invisible to everyone else, and absent again the moment they look at the board from another
+	/// machine. Seeding turns them into a real entry that every other player can see.
+	///
+	/// Someone who already has an entry is left completely alone: their score is read, never written.
+	/// Returns true when the local player is on the board by the time this finishes.
+	/// </summary>
+	public async Task<bool> EnsureRankedAsync(string leaderboardName, int startingScore)
+	{
+		if (!_available || string.IsNullOrWhiteSpace(leaderboardName)) return false;
+
+		long handle = await FindLeaderboardAsync(leaderboardName);
+		if (handle == 0) return false;
+
+		LeaderboardRow existing = await GetLocalEntryAsync(handle);
+		if (existing != null)
+		{
+			DebugUtilities.PrintPeerFinest(
+				$"Steam: already ranked on '{leaderboardName}' at {existing.Score}, not seeding");
+			return true;
+		}
+
+		// keepBest, not force: this is the one write that can race another client seeding the same
+		// player, and losing that race must never cost a score that is already higher. The real Elo
+		// write at the end of a match will have to force instead — an Elo is allowed to go down.
+		bool posted = await UploadScoreAsync(handle, startingScore, keepBest: true);
+		if (posted) DebugUtilities.PrintPeer($"Steam: seeded '{leaderboardName}' entry at {startingScore}");
+
+		return posted;
+	}
+
+	/// <summary>
+	/// The local player's row on an already-resolved leaderboard, or null when they have no entry.
+	///
+	/// A targeted download rather than a scan of <see cref="GetLeaderboardAsync"/>: one user is one round
+	/// trip whatever the board has grown to, and this runs on every trip through the menu.
+	/// </summary>
+	private async Task<LeaderboardRow> GetLocalEntryAsync(long handle)
+	{
+		var users = new Godot.Collections.Array { (long)LocalSteamId };
+
+		Godot.Collections.Array entries = await AwaitDownloadAsync(handle, () =>
+			_steam.DownloadLeaderboardEntriesForUsers(users, handle));
+
+		// An unranked user comes back as an empty array, which is an answer rather than a failure.
+		List<LeaderboardRow> rows = ParseEntries(entries);
+		return rows.Count > 0 ? rows[0] : null;
+	}
+
+	/// <summary>
+	/// Posts a score to an already-resolved leaderboard. Returns false when Steam refused the upload or
+	/// never answered — either way the player is simply not on the board, which every reader handles.
+	/// </summary>
+	private async Task<bool> UploadScoreAsync(long handle, int score, bool keepBest)
+	{
+		// One at a time: leaderboard_score_uploaded carries the handle but nothing to tell two writes to
+		// the same board apart.
+		if (_pendingUpload != null) return false;
+
+		_pendingUpload = NewSource<bool>();
+
+		// Empty details rather than null: the binding hands this straight to a PackedInt32Array.
+		_steam.UploadLeaderboardScore(score, keepBest, System.Array.Empty<int>(), handle);
+
+		bool success = await WithTimeout(_pendingUpload, false, OpTimeoutSeconds);
+		_pendingUpload = null;
+
+		if (!success) DebugUtilities.PrintPeerError($"Steam: could not post {score} to leaderboard {handle}");
+		return success;
 	}
 
 	/// <summary>
@@ -700,18 +762,18 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	}
 
 	/// <summary>
-	/// Pulls ranks 1..<paramref name="count"/> — the whole board. Returns null when Steam did not answer
-	/// in time, which is deliberately distinct from the empty array an empty leaderboard gives back.
+	/// Issues a download through <paramref name="request"/> and waits for the answer, which arrives on
+	/// <c>leaderboard_scores_downloaded</c> whichever kind of download it was. Returns null when Steam
+	/// did not answer in time — deliberately distinct from the empty array an empty result gives back.
 	/// </summary>
-	private async Task<Godot.Collections.Array> DownloadEntriesAsync(long handle, long count)
+	private async Task<Godot.Collections.Array> AwaitDownloadAsync(long handle, Action request)
 	{
 		if (_pendingDownloads.ContainsKey(handle)) return null;   // one download per board at a time
 
 		var source = NewSource<Godot.Collections.Array>();
 		_pendingDownloads[handle] = source;
 
-		// The type argument is a bare long in this binding: the generator could not name the enum.
-		_steam.DownloadLeaderboardEntries(1, count, (long)Steam.LeaderboardDataRequest.Global, handle);
+		request();
 
 		Godot.Collections.Array entries = await WithTimeout(source, null, OpTimeoutSeconds);
 		_pendingDownloads.Remove(handle);
@@ -720,6 +782,39 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 			DebugUtilities.PrintPeerError($"Steam: leaderboard {handle} entries did not download in time");
 
 		return entries;
+	}
+
+	/// <summary>
+	/// Turns the signal's raw entry array into rows. Every field is checked rather than assumed: this
+	/// comes straight from the GDExtension, and a missing key would otherwise throw from inside a UI
+	/// rebuild. A null array — Steam never answered — reads as no rows.
+	/// </summary>
+	private static List<LeaderboardRow> ParseEntries(Godot.Collections.Array entries)
+	{
+		var rows = new List<LeaderboardRow>();
+		if (entries == null) return rows;
+
+		int index = 0;
+		foreach (Variant entry in entries)
+		{
+			index++;
+
+			Godot.Collections.Dictionary fields = entry.As<Godot.Collections.Dictionary>();
+			if (fields == null) continue;
+			if (!fields.TryGetValue("steam_id", out Variant idValue))    continue;
+			if (!fields.TryGetValue("score",    out Variant scoreValue)) continue;
+
+			// Steam hands entries back in rank order, so the position in the array is a sound fallback
+			// for a rank the payload happens not to carry.
+			int rank = fields.TryGetValue("global_rank", out Variant rankValue) ? rankValue.As<int>() : 0;
+
+			rows.Add(new LeaderboardRow(
+				Rank:    rank > 0 ? rank : index,
+				SteamId: (ulong)idValue.As<long>(),
+				Score:   scoreValue.As<int>()));
+		}
+
+		return rows;
 	}
 
 	/// <summary>Users already asked about, so a name is only ever requested from Steam once.</summary>
@@ -824,10 +919,21 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		DebugUtilities.PrintPeerFinest(
 			$"Steam: leaderboard_scores_downloaded {message} ({entries?.Count ?? 0} entries)");
 
-		// Never null: the timeout in DownloadEntriesAsync uses null to mean "Steam never answered", and
+		// Never null: the timeout in AwaitDownloadAsync uses null to mean "Steam never answered", and
 		// an empty board must not look like that.
 		if (_pendingDownloads.TryGetValue(leaderboardHandle, out TaskCompletionSource<Godot.Collections.Array> source))
 			source.TrySetResult(entries ?? new Godot.Collections.Array());
+	}
+
+	/// <summary>
+	/// <paramref name="thisScore"/> carries the score that landed and whether it changed the player's
+	/// standing. Neither is used: the only caller seeds a player who had no entry, so there is nothing to
+	/// compare against and nothing to tell them.
+	/// </summary>
+	private void OnLeaderboardScoreUploaded(bool success, long thisHandle, Godot.Collections.Dictionary thisScore)
+	{
+		DebugUtilities.PrintPeerFinest($"Steam: leaderboard_score_uploaded handle={thisHandle} success={success}");
+		_pendingUpload?.TrySetResult(success);
 	}
 
 	/// <summary>

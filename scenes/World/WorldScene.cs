@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class WorldScene : Node2D
+public partial class WorldScene : PanelContainer
 {
 	// Called when the node enters the scene tree for the first time.
 
@@ -17,7 +17,7 @@ public partial class WorldScene : Node2D
 		}
 	}
 
-	public Sprite2D WorldSprite => GetNode<Sprite2D>("%WorldSprite");
+	public TextureRect WorldSprite => GetNode<TextureRect>("%WorldSprite");
 
 	public override void _Ready()
 	{

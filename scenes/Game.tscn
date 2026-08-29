@@ -9,20 +9,29 @@ bg_color = Color(0, 0, 0, 1)
 
 [node name="Game" type="Node2D" unique_id=349124145]
 
-[node name="Players" type="Node2D" parent="." unique_id=1473019270]
-
-[node name="Units" type="Node2D" parent="." unique_id=1932789460]
-unique_name_in_owner = true
-
-[node name="World" parent="." unique_id=1100295779 instance=ExtResource("1_qbsmt")]
-
 [node name="PeerReadinessComponent" type="Node" parent="." unique_id=2038907439]
 script = ExtResource("2_qbsmt")
 
-[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1023654323]
-offset_left = -10000.0
-offset_top = -15026.0
-offset_right = 20000.0
-offset_bottom = 14974.0
+[node name="Players" type="Node2D" parent="." unique_id=1473019270]
+position = Vector2(973, 2887)
+
+[node name="BackgroundPanel" type="PanelContainer" parent="." unique_id=1023654323]
+offset_right = 3922.588
+offset_bottom = 2722.588
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_kb8kt")
+
+[node name="Board Margin" type="MarginContainer" parent="BackgroundPanel" unique_id=2129674864]
+layout_mode = 2
+theme_override_constants/margin_left = 500
+theme_override_constants/margin_top = 500
+theme_override_constants/margin_right = 500
+theme_override_constants/margin_bottom = 500
+
+[node name="Units" type="PanelContainer" parent="BackgroundPanel/Board Margin" unique_id=708440360]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="World" parent="BackgroundPanel/Board Margin" unique_id=1100295779 instance=ExtResource("1_qbsmt")]
+unique_name_in_owner = true
+layout_mode = 2

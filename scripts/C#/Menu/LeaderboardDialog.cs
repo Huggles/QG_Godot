@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 ///
 /// Read-only: nothing here uploads a score. Every entry Steam returns is listed, best rank first.
 ///
-/// A player who has never been ranked has no leaderboard entry at all, so there is nothing for Steam to
-/// tell us about them. They are shown at the bottom on <see cref="UnrankedRating"/>, which is the rating
-/// the ladder starts everyone at — rather than being left off a screen that is supposed to answer
-/// "where do I stand?".
+/// An unranked player is normally seeded onto the board at <see cref="StartingElo"/> before this window
+/// ever opens — see <c>MainMenu.EnableLeaderboardIfAvailableAsync</c>. The local row this class invents
+/// when they are still missing covers the cases where that did not happen: the seeding write failed, or
+/// Steam has not caught up yet.
 ///
 /// Layout lives in <c>res://scenes/menu/LeaderboardDialog.tscn</c>, an inherited scene of
 /// <see cref="MenuModal"/>'s shell — see that class for how the pair fit together.
@@ -20,8 +20,8 @@ public partial class LeaderboardDialog : MenuModal
 	/// <summary>Must match the leaderboard's name in the Steamworks partner site, exactly.</summary>
 	public const string LeaderboardName = "Ranked_Base_Game";
 
-	/// <summary>What a player is worth before they have ever been ranked.</summary>
-	public const int UnrankedRating = 1500;
+	/// <summary>The Elo every player starts on, and what an unranked player is seeded onto the board at.</summary>
+	public const int StartingElo = 1500;
 
 	private static readonly Color ColorInfo  = new(0.73f, 0.73f, 0.73f, 1.0f);
 	private static readonly Color ColorError = new(0.85f, 0.54f, 0.54f, 1.0f);
@@ -161,9 +161,9 @@ public partial class LeaderboardDialog : MenuModal
 
 		if (!localRanked)
 		{
-			// No entry means no score has ever been posted for this player, which is exactly the case
-			// UnrankedRating exists for. Shown with no rank, because they genuinely do not have one.
-			_entryList.AddChild(BuildRow("—", localId, UnrankedRating, isLocal: true));
+			// Seeding should already have given them an entry, so getting here means it did not land.
+			// Shown with no rank, because they genuinely do not have one yet.
+			_entryList.AddChild(BuildRow("—", localId, StartingElo, isLocal: true));
 		}
 
 		if (rows.Count == 0)
@@ -175,7 +175,7 @@ public partial class LeaderboardDialog : MenuModal
 		SetStatus(
 			localRanked
 				? $"{rows.Count} ranked player(s)."
-				: $"{rows.Count} ranked player(s). You are unranked, so you start at {UnrankedRating}.",
+				: $"{rows.Count} ranked player(s). Your entry has not appeared yet — you start at {StartingElo}.",
 			ColorInfo);
 	}
 
