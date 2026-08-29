@@ -69,14 +69,7 @@ public partial class CountryScene : Control
 		NodeUtilities.Instance.CountriesNode.AddChild(countrySceneInstance, false);
 
 		countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
-
-		// The label fills the country (anchors preset 15) and is nudged in from the top-left corner by
-		// the authored offset. Written as offsets rather than Position/Size: with stretching anchors
-		// those two are derived from the parent's rect, so assigning them is both overridden after
-		// _ready and warned about ("non-equal opposite anchors").
-		Vector2 labelOffset = countrySceneInstance.StaticCountryData.LabelTransformData?.Position2D ?? Vector2.Zero;
-		countrySceneInstance.CountryLabel.OffsetLeft = labelOffset.X;
-		countrySceneInstance.CountryLabel.OffsetTop = labelOffset.Y;
+		countrySceneInstance.CenterLabel(countrySceneInstance.StaticCountryData.LabelTransformData);
 
 		countrySceneInstance.CountrySpriteTextureRect.Texture = countrySceneInstance.StaticCountryData.Texture;
 		countrySceneInstance.TVCountrySpriteTextureRect.Texture = countrySceneInstance.StaticCountryData.Texture;
@@ -87,7 +80,7 @@ public partial class CountryScene : Control
 		countrySceneInstance.Size = countrySceneInstance.TextureSize;
 		countrySceneInstance.Position = countrySceneInstance.StaticCountryData.WorldPositionTopLeft;
 
-		countrySceneInstance.CountrySpriteTextureRectContainer.Visible = false;
+		countrySceneInstance.CountrySpriteTextureRectContainer.Visible = true;
 		return countrySceneInstance;
 	}
 
@@ -558,8 +551,8 @@ public partial class CountryScene : Control
 	/// <inheritdoc cref="ShowTargetGlow"/>
 	private void HideTargetGlow()
 	{
-		CountrySpriteTextureRect.Visible = false;
-		CountrySpriteTextureRectContainer.Visible = false;
+		CountrySpriteTextureRect.Visible = true;
+		CountrySpriteTextureRectContainer.Visible = true;
 		OnMouseExitedOpaque();
 	}
 
@@ -610,22 +603,70 @@ public partial class CountryScene : Control
 			HideTargetGlow();
 	}
 
+	/// <summary>
+	/// Places one of the country's overlay sprites the way its data describes it: centred on the
+	/// country, shifted by the authored offset, scaled about its own middle. Both the supply star and
+	/// the straight icon were Sprite2Ds, which drew centred on their position for free; a Control
+	/// draws, scales and rotates from its top-left corner instead.
+	///
+	/// Written as anchor offsets rather than Position/Size on purpose. The country's own rect is only
+	/// set after its children have entered the tree, and it is re-derived whenever the board resizes —
+	/// anchored to the middle (preset 8), these follow it. A position assigned once would not.
+	///
+	/// The sprite's authored rect in Country.tscn is the base size; the data's Scale multiplies it.
+	/// Re-running this is a no-op, so callers may place a sprite as often as they restyle it.
+	/// </summary>
+	public void CenterSprite(TextureRect sprite, TransformData transform)
+	{
+		if (sprite == null) return;
+
+		Vector2 size = sprite.Size;
+		Vector2 offset = transform?.Position2D ?? Vector2.Zero;
+		float scale = transform?.Scale ?? 1f;
+
+		// Anchors all at 0.5, so the offsets are measured from the middle of the country: half the
+		// sprite either side of the authored offset puts its centre exactly on that point.
+		sprite.SetAnchorsPreset(LayoutPreset.Center, false);
+		sprite.OffsetLeft = offset.X - (size.X / 2f);
+		sprite.OffsetRight = offset.X + (size.X / 2f);
+		sprite.OffsetTop = offset.Y - (size.Y / 2f);
+		sprite.OffsetBottom = offset.Y + (size.Y / 2f);
+
+		// Scale and rotation pivot on the middle too, or scaling would walk the sprite towards its
+		// own top-left corner and rotation would swing it around that corner.
+		sprite.PivotOffset = size / 2f;
+		sprite.Scale = new Vector2(scale, scale);
+	}
+
+	/// <summary>
+	/// The label's version of <see cref="CenterSprite"/>. It differs in one way on purpose: the box
+	/// keeps the country's own size (anchors preset 15) instead of a fixed one, because that width is
+	/// what the label wraps its text to — it is the offset that moves, all four sides by the same
+	/// amount. The text is centred in that box, so it lands on the middle of the country plus the
+	/// authored offset, which is what the data means: 29 countries sit at (0,0) and the rest nudge
+	/// their name off-centre by 50 to 300.
+	/// </summary>
+	public void CenterLabel(TransformData transform)
+	{
+		Vector2 offset = transform?.Position2D ?? Vector2.Zero;
+		float scale = transform?.Scale ?? 1f;
+
+		CountryLabel.SetAnchorsPreset(LayoutPreset.FullRect, false);
+		CountryLabel.OffsetLeft = offset.X;
+		CountryLabel.OffsetRight = offset.X;
+		CountryLabel.OffsetTop = offset.Y;
+		CountryLabel.OffsetBottom = offset.Y;
+
+		CountryLabel.PivotOffset = CountryLabel.Size / 2f;
+		CountryLabel.Scale = new Vector2(scale, scale);
+	}
+
 	private void ShowSupplyStar()
 	{
 		SupplyStarSprite.Visible = true;
 
 		if (StaticCountryData.SupplyStarTransformData != null)
-		{
-			var data = StaticCountryData.SupplyStarTransformData;
-
-			// The star's offset is authored from the middle of the country, and its scale used to be a
-			// Sprite2D's — drawn around its own centre. A Control positions and scales from its
-			// top-left, so both have to be re-centred or the star lands in the corner at a fraction of
-			// the size it should be.
-			SupplyStarSprite.PivotOffset = SupplyStarSprite.Size / 2f;
-			SupplyStarSprite.Scale = new Vector2(data.Scale, data.Scale);
-			SupplyStarSprite.Position = (TextureSize / 2f) - (SupplyStarSprite.Size / 2f) + data.Position2D;
-		}
+			CenterSprite(SupplyStarSprite, StaticCountryData.SupplyStarTransformData);
 	}
 
 	private void HideSupplyStar()
