@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c5j7tqqs2m4kt"]
+[gd_scene format=3 uid="uid://c5j7tqqs2m4kt"]
 
 [ext_resource type="Script" uid="uid://dacq1cixft1mg" path="res://scripts/C#/UI/CardScene.cs" id="1_cjw5f"]
 [ext_resource type="Texture2D" uid="uid://daayji5r2no4d" path="res://assets/factions/germany/cards/Germany_Status.png" id="2_mqccx"]
@@ -12,9 +12,9 @@ corner_radius_top_right = 25
 corner_radius_bottom_right = 25
 corner_radius_bottom_left = 25
 
-[node name="Root" type="Control"]
-clip_contents = true
+[node name="Root" type="Control" unique_id=891723995]
 custom_minimum_size = Vector2(250, 350)
+clip_contents = true
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -32,7 +32,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1_cjw5f")
 
-[node name="AspectRatioContainer" type="AspectRatioContainer" parent="."]
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="." unique_id=966316439]
 custom_minimum_size = Vector2(250, 350)
 layout_mode = 1
 anchors_preset = 15
@@ -43,14 +43,14 @@ grow_vertical = 2
 ratio = 0.714
 stretch_mode = 1
 
-[node name="Panel" type="Panel" parent="AspectRatioContainer"]
+[node name="Panel" type="Panel" parent="AspectRatioContainer" unique_id=1526256952]
 clip_children = 2
-clip_contents = true
 custom_minimum_size = Vector2(250, 350)
+clip_contents = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pe5wv")
 
-[node name="CardTexture" type="TextureRect" parent="AspectRatioContainer/Panel"]
+[node name="CardTexture" type="TextureRect" parent="AspectRatioContainer/Panel" unique_id=846074049]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 10
@@ -62,7 +62,7 @@ texture = ExtResource("2_mqccx")
 expand_mode = 5
 stretch_mode = 4
 
-[node name="TextBackgroundBox" type="VBoxContainer" parent="AspectRatioContainer/Panel"]
+[node name="TextBackgroundBox" type="VBoxContainer" parent="AspectRatioContainer/Panel" unique_id=779167295]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -73,14 +73,14 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 2
 
-[node name="TextBoxTexture" type="TextureRect" parent="AspectRatioContainer/Panel/TextBackgroundBox"]
+[node name="TextBoxTexture" type="TextureRect" parent="AspectRatioContainer/Panel/TextBackgroundBox" unique_id=464005571]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 255)
 layout_mode = 2
 texture = ExtResource("3_8a174")
 expand_mode = 5
 
-[node name="TextContainer" type="VBoxContainer" parent="AspectRatioContainer/Panel"]
+[node name="TextContainer" type="VBoxContainer" parent="AspectRatioContainer/Panel" unique_id=953166368]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 150)
 layout_mode = 1
@@ -91,12 +91,12 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 2
 
-[node name="TextInnerContainer" type="VBoxContainer" parent="AspectRatioContainer/Panel/TextContainer"]
+[node name="TextInnerContainer" type="VBoxContainer" parent="AspectRatioContainer/Panel/TextContainer" unique_id=1100861083]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 250)
 layout_mode = 2
 
-[node name="Title" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/TextInnerContainer"]
+[node name="Title" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/TextInnerContainer" unique_id=483734299]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
@@ -109,7 +109,7 @@ text = "Test Text
 fit_content = true
 autowrap_mode = 2
 
-[node name="Text" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/TextInnerContainer"]
+[node name="Text" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/TextInnerContainer" unique_id=1792087069]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
@@ -120,7 +120,7 @@ text = "Test Text
 fit_content = true
 autowrap_mode = 2
 
-[node name="CardButton" type="Button" parent="AspectRatioContainer/Panel"]
+[node name="CardButton" type="Button" parent="AspectRatioContainer/Panel" unique_id=1632230081]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -133,7 +133,7 @@ theme_override_styles/hover = ExtResource("4_cjw5f")
 theme_override_styles/disabled = ExtResource("5_mqccx")
 theme_override_styles/focus = ExtResource("5_mqccx")
 
-[node name="ActivatableColorOverlay" type="ColorRect" parent="."]
+[node name="ActivatableColorOverlay" type="ColorRect" parent="." unique_id=87323033]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
