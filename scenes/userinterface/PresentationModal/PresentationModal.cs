@@ -47,6 +47,13 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 	/// <summary>The player put this aside deliberately; only a recall brings it back.</summary>
 	public bool IsParked { get; private set; }
 
+	/// <summary>
+	/// The burn has been set going, so it - not <see cref="DismissAfterDelay"/> - decides when this
+	/// closes. Latched rather than read off the effects, because the host re-places a modal on every
+	/// relayout and each of those fades it back in.
+	/// </summary>
+	private bool _burning;
+
 	/// <summary>Asks the player for something, as opposed to only showing them something.</summary>
 	public bool IsRequest => _activeConfig != null && _activeConfig.Mode != ModalSelectionMode.Display;
 
@@ -160,12 +167,51 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 	private async Task DismissAfterDelay()
 	{
 		await Task.Delay(GameSettings.DurationLong);
-		if (!_closed) Close(ModalResult.Cancelled);
+		// A burn already under way owns the closing — it ends when the cards are gone, not on a clock.
+		// The timer still runs for a burn-away modal, because one that never got room on screen never
+		// starts its burn, and something is awaiting it.
+		if (!_closed && !_burning) Close(ModalResult.Cancelled);
 	}
 
 	private void ShowExitButton()
 	{
 		ExitButton.Visible = true;
+	}
+
+	/// <summary>
+	/// Set the items burning, and close this once the last of them has gone. Called at the end of every
+	/// fade-in and does nothing unless the config asked for it (see <see cref="ModalConfig.WithBurnAway"/>).
+	///
+	/// A burn per item rather than one over the modal: the shader burns a subtree in that subtree's own
+	/// coordinates, so this is what lets each card fray to its own shape instead of the whole panel —
+	/// title bar included — dissolving as one sheet.
+	/// </summary>
+	private void BurnItemsAway()
+	{
+		if (_burning || _closed || _activeConfig?.BurnAway != true) return;
+		if (!GameSettings.IsAutoDismissModal) return;
+
+		_burning = true;
+
+		float seconds = (float)GameSettings.DurationLongSeconds;
+		// Zero while headless or fast-forwarding a save-game restore, where there is nothing to watch and
+		// a zero-length tween would only cost a frame before closing anyway.
+		if (seconds <= 0 || PresentationItemControls.Count == 0)
+		{
+			Close(ModalResult.Cancelled);
+			return;
+		}
+
+		Tween burn = null;
+		foreach (Control control in PresentationItemControls)
+		{
+			if (!IsInstanceValid(control)) continue;
+			burn = BurnEffect.Attach(control).Play(seconds);
+		}
+
+		// They all run the same length, so whichever came last ends with the rest of them.
+		if (burn == null) Close(ModalResult.Cancelled);
+		else burn.Finished += () => { if (!_closed) Close(ModalResult.Cancelled); };
 	}
 
 	// ── Placement, parking and recall ────────────────────────────────────────
@@ -182,7 +228,9 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		if (placed)
 		{
 			Visible = true;
-			FadeIn();
+			// The burn waits for the fade rather than starting with it, so the player gets to read the
+			// cards at full opacity before they start going.
+			FadeIn(BurnItemsAway);
 		}
 		else
 		{

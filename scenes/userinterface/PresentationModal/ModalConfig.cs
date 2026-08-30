@@ -19,6 +19,12 @@ public class ModalConfig
 
     public bool AutoDismiss { get; private set; } = false;
 
+    /// <summary>
+    /// Whether the items burn away once the modal is on screen, the modal closing when the last of them
+    /// is gone. See <see cref="WithBurnAway"/>.
+    /// </summary>
+    public bool BurnAway { get; private set; } = false;
+
     /// <summary>This modal's identity, or null when it does not deduplicate. See <see cref="WithDedupeKey"/>.</summary>
     public string DedupeKey { get; private set; }
 
@@ -105,6 +111,28 @@ public class ModalConfig
         if (MinSelections > 0)
             throw new System.InvalidOperationException("Cannot auto-dismiss a modal that requires selection.");
         AutoDismiss = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Burn the items away as soon as the modal has faded in, and close it the moment the last of them
+    /// is gone. For a discard: the player sees which cards went, and then watches them go.
+    ///
+    /// This is a form of auto-dismiss rather than an addition to it — the burn replaces the timer, since
+    /// the modal now has a natural moment to close — so it carries the same restrictions, and a player
+    /// who has turned auto-dismiss off keeps their Close button and sees no burn. Burning to a modal
+    /// that then sat there empty waiting to be closed would be the worse reading of that setting.
+    ///
+    /// Info modals only, for the same reason auto-dismiss is: there is no answering a prompt whose
+    /// options have burnt away.
+    /// </summary>
+    public ModalConfig WithBurnAway()
+    {
+        if (Mode != ModalSelectionMode.Display)
+            throw new System.InvalidOperationException(
+                $"Only an info modal may burn its items away; this one is {Mode}.");
+        WithAutoDismiss();
+        BurnAway = true;
         return this;
     }
 }

@@ -75,6 +75,11 @@ public partial class BurnEffect : Node
 
 		Material.SetShaderParameter("group_space", true);
 		Material.SetShaderParameter("burn", burn);
+		// Cards burnt side by side are the same size and so measure the burn over the same coordinates,
+		// which without this makes every one of them burn to the identical shape. Randomised rather than
+		// asked of the caller because a burn is one-shot decoration: nothing replays it, and nothing
+		// across the network has to agree on it. Overwrite the uniform after Attach to pin it.
+		Material.SetShaderParameter("noise_offset", new Vector2(GD.Randf(), GD.Randf()) * 1000.0f);
 
 		Capture(target);
 		SyncGroupSpace();

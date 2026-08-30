@@ -27,6 +27,12 @@ uniform float burn : hint_range(0.0, 1.0) = 0.0;
 // large values make it roll in broad waves.
 uniform float noise_scale_pixels : hint_range(4.0, 512.0) = 48.0;
 
+// Slides the noise, in the same pixels as `noise_scale_pixels`. Several items
+// burning side by side are usually the same size and so measure the burn over
+// the same coordinates, which would burn all of them to one identical shape;
+// giving each a different offset is what makes them individual.
+uniform vec2 noise_offset = vec2(0.0, 0.0);
+
 // Width of the charred/glowing band trailing the hole, as a fraction of the
 // burn front's range. Larger values give a wider, softer scorch.
 uniform float edge_width : hint_range(0.001, 0.5) = 0.12;
@@ -132,7 +138,7 @@ void vertex() {
 void fragment() {
 	vec4 tex = texture(TEXTURE, UV);
 
-	float noise = fbm(burn_position / max(noise_scale_pixels, 1.0));
+	float noise = fbm((burn_position + noise_offset) / max(noise_scale_pixels, 1.0));
 	noise = clamp((noise - 0.5) * NOISE_CONTRAST + 0.5, 0.0, 1.0);
 
 	// Project onto the burn direction and rescale to 0..1 using the corner the

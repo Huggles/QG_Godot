@@ -6,7 +6,7 @@
 [ext_resource type="StyleBox" uid="uid://di1jtwe77usf2" path="res://MenuPanelBackground.tres" id="4_e1dod"]
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_y6vun"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_e1dod"]
-[ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
+[ext_resource type="PackedScene" uid="uid://c7l5nndh4p5c4" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 
 [node name="Control" type="Control" unique_id=533686469]
 layout_mode = 3
@@ -17,7 +17,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_script")
 
-[node name="Backdrop" parent="." instance=ExtResource("9_bdrop")]
+[node name="Backdrop" parent="." unique_id=325802814 instance=ExtResource("9_bdrop")]
 layout_mode = 1
 
 [node name="MenuPanel" type="Container" parent="." unique_id=438408597]

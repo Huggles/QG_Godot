@@ -23,7 +23,9 @@ public class ShowDiscardModalAnimation : ShowCardsModalAnimation
             return;
 
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(_cardIds, false);
-        await ModalStack.Current.Show(ModalConfig.Display(_title, presentationItems).WithAutoDismiss());
+        // Burns rather than only auto-dismissing: the cards are gone from the hand, so they leave the
+        // screen the same way. The burn is also what times the modal now - it closes when nothing is left.
+        await ModalStack.Current.Show(ModalConfig.Display(_title, presentationItems).WithBurnAway());
     }
 
     protected override async Task AnimateForEnemyFaction()
