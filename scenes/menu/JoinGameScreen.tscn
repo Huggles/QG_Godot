@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://bjoingamescr1"]
 
-[ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="1_m2yvp"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
 [ext_resource type="Script" uid="uid://dih02qchvrpns" path="res://scripts/C#/Menu/JoinGameScreen.cs" id="3_script"]
+[ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field"]
 content_margin_left = 12.0
@@ -45,15 +45,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_script")
 
-[node name="TextureRect" type="TextureRect" parent="." unique_id=1256107074]
+[node name="Backdrop" parent="." instance=ExtResource("9_bdrop")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("1_m2yvp")
-expand_mode = 3
 
 [node name="TitleLabel" type="RichTextLabel" parent="." unique_id=191252396]
 layout_mode = 1

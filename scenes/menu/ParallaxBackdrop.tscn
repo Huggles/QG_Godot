@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://c7l5nndh4p5c4"]
+
+[ext_resource type="Script" uid="uid://bucr4f3x87b77" path="res://scripts/C#/Menu/ParallaxBackdrop.cs" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://btbye2p24vpo" path="res://assets/textures/Other/Menu/Background/Menu_Background.png" id="2_back"]
+[ext_resource type="Texture2D" uid="uid://lyafyyvari36" path="res://assets/textures/Other/Menu/Background/Menu_Middleground.png" id="3_mid"]
+[ext_resource type="Texture2D" uid="uid://cfn33is2arcti" path="res://assets/textures/Other/Menu/Background/Menu_Foreground.png" id="4_fore"]
+
+[node name="ParallaxBackdrop" type="Control" unique_id=1360651441]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+DriftPixels = 4.0
+DriftSeconds = 5.0
+
+[node name="Background" type="Sprite2D" parent="." unique_id=1999622997]
+position = Vector2(960, 540)
+scale = Vector2(1.1544, 1.1544)
+texture = ExtResource("2_back")
+
+[node name="MiddleGround" type="Sprite2D" parent="." unique_id=1004047560]
+position = Vector2(960, 540)
+scale = Vector2(1.1635, 1.1635)
+texture = ExtResource("3_mid")
+
+[node name="Foreground" type="Sprite2D" parent="." unique_id=1763241637]
+position = Vector2(960, 540)
+scale = Vector2(1.1758, 1.1758)
+texture = ExtResource("4_fore")

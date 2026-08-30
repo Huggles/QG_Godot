@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://djinib8j6dupy"]
 
 [ext_resource type="Script" uid="uid://c5fpt5gbmo0lv" path="res://scripts/C#/Menu/MultiplayerLobby.cs" id="1_lobby"]
-[ext_resource type="Texture2D" uid="uid://hm2x67e6uump" path="res://assets/textures/Other/Menu_Background_QG.png" id="2_5rtyc"]
+[ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_description"]
 content_margin_left = 10.0
@@ -30,14 +30,7 @@ script = ExtResource("1_lobby")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="MultiplayerLobby" unique_id=238677946]
 
-[node name="TextureRect" type="TextureRect" parent="MultiplayerLobby/CanvasLayer" unique_id=1989378497]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("2_5rtyc")
-expand_mode = 1
+[node name="Backdrop" parent="MultiplayerLobby/CanvasLayer" instance=ExtResource("9_bdrop")]
 
 [node name="MarginContainer" type="MarginContainer" parent="MultiplayerLobby/CanvasLayer" unique_id=1232402464]
 anchors_preset = 15
