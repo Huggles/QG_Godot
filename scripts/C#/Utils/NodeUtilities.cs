@@ -24,22 +24,31 @@ public partial class NodeUtilities : SingletonNode<NodeUtilities>
     public Control BoardNode => GetNodeOrNull<Control>("/root/Game/BackgroundPanel");
 
     /// <summary>
+    /// The playing surface itself — the framed map inside the backdrop. Distinct from
+    /// <see cref="BoardNode"/>, which is the whole backdrop the camera may pan over: this is what the
+    /// player wants to see when the game opens, so it is what the opening framing is fitted to.
+    /// Null before the Game scene exists (menu, lobby) and headless.
+    /// </summary>
+    public Control BoardFrameNode => GetNodeOrNull<Control>("/root/Game/BackgroundPanel/Board Margin/World/Board");
+
+    /// <summary><see cref="BoardFrameNode"/>'s rect in world space, or null when it is not in the tree.</summary>
+    public Rect2? BoardFrameBounds => GlobalRectOf(BoardFrameNode);
+
+    /// <summary>
     /// <see cref="BoardNode"/>'s rect in world space, or null when the board is not in the tree.
     /// Built from the global transform rather than <c>GetGlobalRect()</c>: the board may sit under a
     /// scaled parent, and a Control's Size is in its own local space — only the transform
     /// carries that scale.
     /// </summary>
-    public Rect2? BoardBounds
-    {
-        get
-        {
-            Control board = BoardNode;
-            if (board == null) return null;
+    public Rect2? BoardBounds => GlobalRectOf(BoardNode);
 
-            Transform2D transform = board.GetGlobalTransform();
-            Vector2 topLeft = transform * Vector2.Zero;
-            Vector2 bottomRight = transform * board.Size;
-            return new Rect2(topLeft, bottomRight - topLeft).Abs();
-        }
+    private static Rect2? GlobalRectOf(Control control)
+    {
+        if (control == null) return null;
+
+        Transform2D transform = control.GetGlobalTransform();
+        Vector2 topLeft = transform * Vector2.Zero;
+        Vector2 bottomRight = transform * control.Size;
+        return new Rect2(topLeft, bottomRight - topLeft).Abs();
     }
 }

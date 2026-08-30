@@ -20,7 +20,11 @@ public class ZoomToCountryAnimation : ChangeEventAnimation
 
     protected override async Task AnimateForTargetFaction()
     {
-        Camera2D camera = InputManager.Current.Camera;
+        Camera2D camera = InputManager.Current?.Camera;
+        // No local camera means nothing to pan - a dedicated server, or a Player scene freed while this
+        // was still queued. Pairs with the same guard in ReturnCameraAnimation.
+        if (camera == null) return;
+
         CountryState country = CountryState.ForId(_countryId);
         Vector2 targetPosition = country.CountryScene.GlobalCenter;
         Vector2 targetZoomVec  = new Vector2(_targetZoom, _targetZoom);

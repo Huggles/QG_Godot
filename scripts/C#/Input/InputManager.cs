@@ -5,7 +5,19 @@ using System.Linq;
 
 public partial class InputManager : Node2D
 {
-	public static InputManager Current;
+	/// <summary>
+	/// The local player's InputManager, or null when there is none: a dedicated server, or the window
+	/// between one game's Player being freed and the next one entering the tree. Guarded rather than
+	/// handed out raw because a static handle to a freed Godot object throws ObjectDisposedException on
+	/// the next member access, not on the null check the caller wrote - see <see cref="PlayerScene.Current"/>,
+	/// which holds its static the same way and for the same reason.
+	/// </summary>
+	public static InputManager Current
+	{
+		get => IsInstanceValid(_current) ? _current : null;
+		private set => _current = value;
+	}
+	private static InputManager _current;
 	private static Godot.Vector2 DEFAULT_POSITION = new Godot.Vector2(6321,1584);
 	private static Godot.Vector2 DEFAULT_ZOOM = new Godot.Vector2(0.15f,0.15f);
 	private const float ZOOM_STEP = 0.05f;
@@ -13,7 +25,11 @@ public partial class InputManager : Node2D
 	private const float MIN_ZOOM_LEVEL = 0.1f;
 	private const float MAX_ZOOM_LEVEL = 2;    
 	private float zoom = 0.2f;
-	public Camera2D Camera => GetNode<Camera2D>("%MainGameCamera"); 
+	/// <summary>
+	/// GetNodeOrNull, not GetNode: every caller here already treats a missing camera as "nothing to do",
+	/// and during teardown the unique name stops resolving before the manager itself goes away.
+	/// </summary>
+	public Camera2D Camera => GetNodeOrNull<Camera2D>("%MainGameCamera");
 
 	public Vector2 MousePosition => GetViewport().GetMousePosition();
 
@@ -240,10 +256,9 @@ public partial class InputManager : Node2D
 		{
 			Current = this;
 			Camera.Enabled = true;
-			// ApplyZoom re-frames through ApplyCameraBounds, so this also pulls the blind
-			// DEFAULT_POSITION/DEFAULT_ZOOM from _EnterTree onto the board.
-			CenterOnBoard();
-			ApplyZoom();
+			// Deferred: the board sits under containers whose layout pass has not necessarily run by
+			// the time the Player scene is ready, and framing it means measuring its rect.
+			Callable.From(FrameBoard).CallDeferred();
 		}
 		else
 		{
@@ -253,8 +268,21 @@ public partial class InputManager : Node2D
 		}
 	}
 
+	/// <summary>
+	/// Drops the static the moment this node is deleted, so the next game (or the tail of this one)
+	/// never reaches through a freed handle. Predelete rather than _ExitTree: leaving the tree is not
+	/// the end of the node, and a reparent must not blank a live Current.
+	/// </summary>
+	public override void _Notification(int what)
+	{
+		if (what == NotificationPredelete && Current == this)
+			Current = null;
+	}
+
 	public override void _EnterTree()
 	{
+		if (Camera == null) return;
+
 		Camera.Position = DEFAULT_POSITION;
 		Camera.Zoom = DEFAULT_ZOOM;
 		zoom = DEFAULT_ZOOM.X;
@@ -272,7 +300,7 @@ public partial class InputManager : Node2D
 	/// BackgroundPanel. Re-derived every frame rather than cached once: it costs one transform multiply,
 	/// and it means moving or resizing the BackgroundPanel — in the editor or at runtime — retunes the
 	/// camera with no further wiring. A no-op while the board is not in the tree (menu, lobby,
-	/// headless), which is why the call in <see cref="_Ready"/> is not enough on its own.
+	/// headless), which is why the opening <see cref="FrameBoard"/> is not enough on its own.
 	///
 	/// Position is clamped here rather than left to Camera2D's own limits: those clamp the rendered
 	/// transform but leave the camera's own position wherever it was written, so panning or a
@@ -311,16 +339,36 @@ public partial class InputManager : Node2D
 	}
 
 	/// <summary>
-	/// Parks the camera on the middle of the board. Called once the board is in the tree, because
-	/// <see cref="DEFAULT_POSITION"/> is written blind in <see cref="_EnterTree"/> and would otherwise
-	/// be clamped to whichever board corner it happens to sit past. No-op with no board to measure.
+	/// The opening framing: the whole board — the framed map, not the backdrop it sits on — fitted into
+	/// the viewport and centred. This is also what pulls the blind DEFAULT_POSITION/DEFAULT_ZOOM written
+	/// in <see cref="_EnterTree"/> onto something meaningful. Falls back to the backdrop, and is a no-op
+	/// with neither to measure (menu, headless).
 	/// </summary>
-	private void CenterOnBoard()
+	private void FrameBoard()
 	{
-		Rect2? bounds = NodeUtilities.Instance?.BoardBounds;
+		Rect2? bounds = NodeUtilities.Instance?.BoardFrameBounds ?? NodeUtilities.Instance?.BoardBounds;
 		if (Camera == null || bounds == null) return;
 
+		zoom = FitZoom(bounds.Value);
+		// Zoom before position: ApplyCameraBounds derives the legal centres from the current zoom, so
+		// clamping at the old one would park the camera somewhere this zoom never asked for.
+		ApplyZoom();
 		Camera.GlobalPosition = bounds.Value.GetCenter();
+		ApplyCameraBounds();
+	}
+
+	/// <summary>
+	/// The zoom at which <paramref name="rect"/> fits entirely inside the viewport — Min, so the axis
+	/// that does not match the viewport aspect gets slack rather than being cropped. Contrast
+	/// <see cref="MinZoomLevel"/>, which takes the Max because it is asking the opposite question: how
+	/// far out the backdrop can still cover the viewport.
+	/// </summary>
+	private float FitZoom(Rect2 rect)
+	{
+		if (rect.Size.X <= 0 || rect.Size.Y <= 0) return zoom;
+
+		Vector2 viewport = GetViewport().GetVisibleRect().Size;
+		return Mathf.Min(viewport.X / rect.Size.X, viewport.Y / rect.Size.Y);
 	}
 
 	/// <summary>

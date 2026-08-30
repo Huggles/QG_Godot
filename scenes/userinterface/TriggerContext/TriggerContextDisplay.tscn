@@ -52,11 +52,6 @@ offset_right = 1650.0
 offset_bottom = 699.0
 mouse_filter = 2
 
-[node name="Panel" type="Panel" parent="Control" unique_id=1201061143]
-layout_mode = 1
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="TriggerContextColumn" type="VBoxContainer" parent="Control" unique_id=2002577784]
 layout_mode = 1
 anchors_preset = -1
