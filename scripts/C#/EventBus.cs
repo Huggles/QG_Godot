@@ -122,4 +122,8 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void GameStateRecalculatedEventHandler();
 
     [Signal] public delegate void WorldPresentationViewChangedEventHandler(WorldPresentationMode mode);
+
+    /// <summary>The player pressed continue on a commander message, so whatever is holding that
+    /// message on screen should move on. See <see cref="CommanderMessage"/>.</summary>
+    [Signal] public delegate void CommanderMessageContinuedEventHandler();
 }
