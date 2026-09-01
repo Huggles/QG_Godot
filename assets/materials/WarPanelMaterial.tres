@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://b52i0ui2pglfc"]
+
+[ext_resource type="Shader" uid="uid://u0tlfy4pcw5u" path="res://assets/materials/shaders/WarPanel.gdshader" id="1_warpanel"]
+
+[resource]
+shader = ExtResource("1_warpanel")
+shader_parameter/base_color = Color(0.105882354, 0.11372549, 0.09019608, 1)
+shader_parameter/stain_color = Color(0.21860188, 0.18687981, 0.07484154, 1)
+shader_parameter/stain_amount = 1.0
+shader_parameter/stain_scale_pixels = 255.8950113950125
+shader_parameter/stain_offset = Vector2(0, 0)
+shader_parameter/grain_amount = 0.0390000018525
+shader_parameter/grain_scale_pixels = 2.45200006897
+shader_parameter/grid_color = Color(0.42, 0.47, 0.35, 1)
+shader_parameter/grid_amount = 0.0
+shader_parameter/grid_spacing_pixels = 35.1430012892925
+shader_parameter/grid_line_pixels = 0.6430000067925
+shader_parameter/scratch_color = Color(0.40772828, 0.21155494, 0.064080134, 1)
+shader_parameter/scratch_amount = 0.474000022515
+shader_parameter/scratch_angle_degrees = 13.9410006621975
+shader_parameter/scratch_length_pixels = 46.55200069122
+shader_parameter/scratch_width_pixels = 33.750001555625
+shader_parameter/scratch_threshold = 0.54000002565
+shader_parameter/vignette_amount = 0.1450000068875
+shader_parameter/vignette_width = 0.53600002476148

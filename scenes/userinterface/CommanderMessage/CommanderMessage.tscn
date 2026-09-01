@@ -1,0 +1,86 @@
+[gd_scene format=3 uid="uid://bqcmndrmsg001"]
+
+[ext_resource type="Texture2D" uid="uid://d213ufoi1vu1l" path="res://assets/textures/CommanderHead.png" id="1_head"]
+[ext_resource type="Texture2D" uid="uid://cyjrg0c84skwb" path="res://assets/textures/Other/Modal9Patch.png" id="2_frame"]
+[ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="3_frame_script"]
+[ext_resource type="Material" uid="uid://b52i0ui2pglfc" path="res://assets/materials/WarPanelMaterial.tres" id="4_warpanel"]
+[ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="5_menupanel"]
+
+[node name="CommanderMessage" type="Control" unique_id=1932160186]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CommanderHead" type="TextureRect" parent="." unique_id=205884557]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 40.0
+offset_top = 40.0
+offset_right = 460.0
+offset_bottom = 600.0
+mouse_filter = 2
+texture = ExtResource("1_head")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextModal" type="Container" parent="." unique_id=1007079384]
+layout_mode = 1
+offset_left = 400.0
+offset_top = 470.0
+offset_right = 400.0
+offset_bottom = 470.0
+mouse_filter = 2
+script = ExtResource("5_menupanel")
+metadata/_custom_type_script = "uid://ha61ixra4smf"
+
+[node name="ContentContainer" type="MarginContainer" parent="TextModal" unique_id=852774228]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Background" type="ColorRect" parent="TextModal/ContentContainer" unique_id=1013684653]
+material = ExtResource("4_warpanel")
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ContentMargin" type="MarginContainer" parent="TextModal/ContentContainer" unique_id=1092820930]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="MessageLabel" type="RichTextLabel" parent="TextModal/ContentContainer/ContentMargin" unique_id=1333560857]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+mouse_filter = 2
+bbcode_enabled = true
+text = "Commander, the situation on the front demands a decision.
+"
+fit_content = true
+scroll_active = false
+autowrap_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Frame" type="NinePatchRect" parent="TextModal" unique_id=1739657984]
+layout_mode = 2
+texture = ExtResource("2_frame")
+draw_center = false
+patch_margin_left = 215
+patch_margin_top = 215
+patch_margin_right = 215
+patch_margin_bottom = 215
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+script = ExtResource("3_frame_script")
+TileScale = 0.16
+metadata/_custom_type_script = "uid://c6xo03jw6k6gc"
