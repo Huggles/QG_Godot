@@ -223,6 +223,47 @@ public partial class ModalStack : Control, LoadableUI, IRecallablePrompt
 
 		_modals.RemoveAll(modal => !IsInstanceValid(modal));
 
+		// A departing modal still occupies its slot in the row until its fade ends and it is hidden or
+		// freed, and the row is centred — so anything placed beside it now is laid out around width that
+		// is about to vanish, and jumps sideways the instant it does. That is what a modal opening on the
+		// heels of one that just closed used to look like: it faded in off-centre and then popped left.
+		// So the whole placement pass waits. Nothing is lost by waiting: the departing modal frees itself
+		// (ChildExitingTree) or finishes parking (OnModalVisibilityChanged), and both come straight back
+		// here. Crowd-out decisions wait with it — a modal that is only unplaced because of this hold has
+		// not been crowded out of anything and must not be closed for space.
+		if (!IsAnyFadingOut()) SettleLayout();
+
+		// Off the row's actual children rather than off _modals: a modal that has just been answered is
+		// already out of the priority order but still on screen playing its closing fade, and hiding the
+		// host would cut that fade off.
+		bool anythingOnScreen = false;
+		foreach (Node child in ModalRow.GetChildren())
+		{
+			if (child is Control { Visible: true })
+			{
+				anythingOnScreen = true;
+				break;
+			}
+		}
+		Visible = anythingOnScreen;
+
+		// Clear rather than Set(null): the slot may belong to an open card prompt, and this stack must
+		// only ever release its own claim on it.
+		if (HasParked) RecallablePrompts.Set(this);
+		else RecallablePrompts.Clear(this);
+	}
+
+	/// <summary>
+	/// Any modal still playing an outgoing fade, and so still holding width in the row. Read off the
+	/// row's children rather than off <c>_modals</c>: a modal that has already been answered is out of
+	/// the priority order while its closing fade runs, and that is exactly the case this exists for.
+	/// </summary>
+	private bool IsAnyFadingOut()
+		=> ModalRow.GetChildren().Any(child => child is PresentationModal { IsFadingOut: true });
+
+	/// <summary>Place what fits, and close whatever info modal was crowded out to make that true.</summary>
+	private void SettleLayout()
+	{
 		// A modal crowded off screen is closed to make the room it was denied, rather than left lingering
 		// hidden to reappear later out of nowhere. Closing mutates the list, so this is a retry loop
 		// rather than a single walk; each pass either settles or closes exactly one modal, so it cannot
@@ -249,25 +290,6 @@ public partial class ModalStack : Control, LoadableUI, IRecallablePrompt
 					$"ModalStack: '{held.Title}' does not fit and must not be closed — held in the stack until room appears.");
 			}
 		}
-
-		// Off the row's actual children rather than off _modals: a modal that has just been answered is
-		// already out of the priority order but still on screen playing its closing fade, and hiding the
-		// host would cut that fade off.
-		bool anythingOnScreen = false;
-		foreach (Node child in ModalRow.GetChildren())
-		{
-			if (child is Control { Visible: true })
-			{
-				anythingOnScreen = true;
-				break;
-			}
-		}
-		Visible = anythingOnScreen;
-
-		// Clear rather than Set(null): the slot may belong to an open card prompt, and this stack must
-		// only ever release its own claim on it.
-		if (HasParked) RecallablePrompts.Set(this);
-		else RecallablePrompts.Clear(this);
 	}
 
 	/// <summary>Walk the priority order, placing what fits and un-placing what does not.</summary>

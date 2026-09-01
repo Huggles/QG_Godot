@@ -48,6 +48,14 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 	public bool IsParked { get; private set; }
 
 	/// <summary>
+	/// Playing an outgoing fade: still visible, so still holding its slot in the host's row, but on its
+	/// way off screen. The host holds off placing anything new while this is true — a modal faded in
+	/// beside a departing neighbour is laid out around width that is about to vanish, and slides across
+	/// the moment it does.
+	/// </summary>
+	public bool IsFadingOut { get; private set; }
+
+	/// <summary>
 	/// The burn has been set going, so it - not <see cref="DismissAfterDelay"/> - decides when this
 	/// closes. Latched rather than read off the effects, because the host re-places a modal on every
 	/// relayout and each of those fades it back in.
@@ -228,6 +236,9 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		if (placed)
 		{
 			Visible = true;
+			// A recall lands here mid-park-fade and takes that fade's tween with it, so its callback will
+			// never clear this.
+			IsFadingOut = false;
 			// The burn waits for the fade rather than starting with it, so the player gets to read the
 			// cards at full opacity before they start going.
 			FadeIn(BurnItemsAway);
@@ -235,6 +246,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		else
 		{
 			_activeTween?.Kill();
+			IsFadingOut = false;
 			Visible = false;
 			Modulate = new Color(1, 1, 1, 0);
 		}
@@ -254,10 +266,12 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		// Cleared here rather than in the fade callback so the host's relayout sees it already unplaced
 		// and its SetPlaced(false) becomes a no-op, letting this fade play out.
 		_placed = false;
+		IsFadingOut = true;
 		FadeOut(() =>
 		{
 			// A recall during the fade wins: it has already put this back on screen.
 			if (!IsParked) return;
+			IsFadingOut = false;
 			Visible = false;
 			// The host measures "is anything on screen" off its row's visible children, so it cannot know
 			// this fade finished. Without telling it, the full-screen backdrop would stay up over a
@@ -457,8 +471,25 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		_tcs?.TrySetResult(result);
 
 		// Freed on the way out rather than at once, so an answered modal still fades like it always did.
-		if (IsInsideTree()) FadeOut(QueueFree);
-		else QueueFree();
+		// Only a modal that is actually on screen holds a slot worth waiting for; one closed while hidden
+		// (overflow, parked, never placed) must not stall the modal opening behind it.
+		if (IsInsideTree())
+		{
+			IsFadingOut = Visible;
+			FadeOut(() =>
+			{
+				// Hidden and cleared here rather than left to the free, which only lands at the end of the
+				// frame: a hidden child claims no width, so a relayout in that gap already sees the slot
+				// given up. Invisible either way — the fade just took the alpha to zero.
+				Visible = false;
+				IsFadingOut = false;
+				QueueFree();
+			});
+		}
+		else
+		{
+			QueueFree();
+		}
 	}
 
 	/// <summary>
