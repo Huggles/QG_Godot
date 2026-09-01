@@ -66,6 +66,14 @@ public partial class GameMenuModal : MenuModal
             saveButton.Disabled    = true;
             saveButton.TooltipText = "Only the host can save the game. Ask them to save it.";
         }
+        else if (GameFlow.Instance?.Program?.AllowsSaving == false)
+        {
+            // Same shape as above: disabled with the reason in the tooltip. Load-bearing rather than
+            // cosmetic — OnSaveGamePressed's deferred branch would otherwise accept a save that can
+            // never be honoured, since TryFlushDeferredSave short-circuits on the same flag.
+            saveButton.Disabled    = true;
+            saveButton.TooltipText = GameFlow.Instance.SaveBlockedReason;
+        }
     }
 
     /// <summary>

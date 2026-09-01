@@ -232,6 +232,10 @@ public partial class GameModeMultiplayerDefault : IGameMode
         // is awaited before StartGame runs (MultiplayerSession.StartSession). Host-only, like MaxRound:
         // it gates work that reaches clients as replicated ChangeEvents, so it needs no synchronising.
         GameFlow.Instance.OpeningDiscardEnabled = GameManager.PendingOpeningDiscard ?? initialStateData.OpeningDiscard;
+
+        // Armed here rather than installed here: this runs on the restore path too, and the program
+        // has to go in before StartGame but after the state exists. MultiplayerSession consumes it.
+        TutorialRuntime.PendingScriptPath = GameManager.PendingTutorialPath ?? initialStateData.TutorialScriptPath;
     }
 
     public async Task SetupInitialGameState()

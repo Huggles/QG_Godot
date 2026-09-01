@@ -267,3 +267,98 @@ public sealed class InputRequestSpec
             Label = CardState.ForId(id)?.CardName ?? $"card#{id}",
         }).ToList();
 }
+
+/// <summary>
+/// Name matching for the two scripted answerers — the CLI and the tutorial. Lifted out of
+/// CliInputProvider so both provably agree: a name that answers a prompt from a .qgc script must
+/// answer the same prompt from a tutorial file, and vice versa.
+///
+/// Every lookup runs against the prompt's OWN option list, never against the whole game. Choosing
+/// something that exists but is not legal here must be rejected rather than silently written into a
+/// Response* list — that is the rule CliInputProvider.AnswerById states, and it is the one thing
+/// keeping a scripted answer inside the rules.
+/// </summary>
+public static class CliOptionMatcher
+{
+    /// <summary>
+    /// Resolve one selector against the offered options. Cards are matched on their display Label
+    /// first and their CardData.UniqueName second, so a script may use either — the labeller emits
+    /// Label, while scenarios name cards by UniqueName, and an author will reach for whichever they
+    /// last read. Countries and everything else match on Label alone, exactly as the CLI does.
+    ///
+    /// Returns null when nothing matches or the name is ambiguous; <paramref name="error"/> then says
+    /// which, in the same wording the CLI uses.
+    /// </summary>
+    public static CliOption Resolve(InputRequestSpec spec, string name, out string error)
+    {
+        error = null;
+
+        List<CliOption> matches = spec.Options
+            .Where(o => Equals(o, name))
+            .ToList();
+
+        if (matches.Count == 0)
+            matches = spec.Options
+                .Where(o => o.Label.StartsWith(name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        if (matches.Count == 0)
+        {
+            error = $"no option matching '{name}' (offered: {Describe(spec)})";
+            return null;
+        }
+        if (matches.Count > 1)
+        {
+            error = $"'{name}' is ambiguous: {string.Join(", ", matches.Select(m => m.Label))}";
+            return null;
+        }
+
+        return matches[0];
+    }
+
+    /// <summary>
+    /// Exact match on the display label, or on the underlying data file's UniqueName.
+    ///
+    /// Both forms are accepted because both are what an author has just been reading. A scenario
+    /// names countries by UniqueName ("countryName": "WESTERN_EUROPE") and cards by UniqueName
+    /// ("BuildArmy"), while the prompt — and therefore the CLI — shows the Label ("Western Europe",
+    /// "Build Army"). Accepting only one of the two makes the file sitting next to this one wrong.
+    /// </summary>
+    private static bool Equals(CliOption option, string name)
+    {
+        if (option.Label.Equals(name, StringComparison.OrdinalIgnoreCase)) return true;
+
+        string uniqueName = option.Kind switch
+        {
+            CliOptionKind.Card    => CardState.ForId(option.Id)?.CardData?.UniqueName,
+            // CountryState.Name IS the UniqueName — see its constructor, which assigns
+            // Name = countryData.UniqueName and Label = countryData.Label separately.
+            CliOptionKind.Country => CountryState.ForId(option.Id)?.Name,
+            _ => null
+        };
+
+        return uniqueName != null && uniqueName.Equals(name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// The offered options, for an error message that is actionable rather than merely true. Shows a
+    /// differing UniqueName beside the label, since either is a legal way to name the thing and the
+    /// whole point of the message is to tell the author what to type.
+    /// </summary>
+    public static string Describe(InputRequestSpec spec)
+        => spec.Options.Count == 0 ? "nothing" : string.Join(", ", spec.Options.Select(Describe));
+
+    private static string Describe(CliOption option)
+    {
+        string uniqueName = option.Kind switch
+        {
+            CliOptionKind.Card    => CardState.ForId(option.Id)?.CardData?.UniqueName,
+            CliOptionKind.Country => CountryState.ForId(option.Id)?.Name,
+            _ => null
+        };
+
+        return uniqueName == null || uniqueName.Equals(option.Label, StringComparison.OrdinalIgnoreCase)
+            ? option.Label
+            : $"{option.Label} ({uniqueName})";
+    }
+}

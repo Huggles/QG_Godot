@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
 [ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
 [ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
+[ext_resource type="PackedScene" uid="uid://bqcmndrmsg001" path="res://scenes/userinterface/CommanderMessage/CommanderMessage.tscn" id="24_cmdrmsg"]
 [ext_resource type="Script" uid="uid://by4r72f7bleb0" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
 [ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="19_nfi4l"]
 [ext_resource type="Script" uid="uid://5xe5ni5ixdvo" path="res://scenes/userinterface/BottomLeftMenu.cs" id="19_x2nnb"]
@@ -67,6 +68,9 @@ layout_mode = 2
 theme_override_constants/separation = 40
 
 [node name="PlayerAction" parent="." unique_id=836962227 instance=ExtResource("4_dvfjj")]
+
+[node name="CommanderMessage" parent="." unique_id=1932160187 instance=ExtResource("24_cmdrmsg")]
+StartHidden = true
 
 [node name="Control" type="Control" parent="." unique_id=235064403]
 layout_mode = 3

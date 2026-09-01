@@ -1,0 +1,41 @@
+{
+  "title": "Tutorial 1 — Your First Turn",
+  "description": "A guided opening round. Fixed hands, no surprises, and the commander tells you what to do.",
+  "tutorial": "res://assets/data/tutorials/Tutorial_01.json",
+  "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 1,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [{ "countryName": "GERMANY" }],
+      "initialHandCards": [{ "name": "BuildArmy" }, { "name": "BuildNavy" }],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [{ "countryName": "UNITED_KINGDOM" }],
+      "initialHandCards": [{ "name": "BuildArmy" }],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [{ "countryName": "JAPAN" }],
+      "initialHandCards": [{ "name": "BuildNavy" }],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [{ "countryName": "MOSCOW" }],
+      "initialHandCards": [{ "name": "BuildArmy" }],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [{ "countryName": "ITALY" }],
+      "initialHandCards": [{ "name": "BuildArmy" }],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [{ "countryName": "US_EAST" }],
+      "initialHandCards": [{ "name": "BuildArmy" }],
+      "startingVP": 0
+    }
+  }
+}

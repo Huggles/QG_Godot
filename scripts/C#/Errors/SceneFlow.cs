@@ -70,6 +70,13 @@ public static class SceneFlow
             // faction the player may no longer control.
             ReactionSkipPreference.ClearAll();
 
+            // A tutorial's input provider is a static that nothing else clears, so without this the
+            // NEXT game's prompts would be answered from a script that ended with the last one.
+            // Reset() only drops the override when a tutorial actually installed it — a CLI session
+            // owns the same seam for the life of its process and must not be disturbed.
+            TutorialRuntime.Reset();
+            GameManager.PendingTutorialPath = null;
+
             // A restore abandoned half way must not leave the next game silent and instant.
             ReplayContext.Reset();
 

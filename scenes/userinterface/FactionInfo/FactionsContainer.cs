@@ -29,8 +29,14 @@ public partial class FactionsContainer : Control
 
     private Tween _tintTween;
 
+    /// <summary>
+    /// Whether <see cref="_Ready"/> got as far as connecting. Only the authority peer subscribes, so
+    /// tearing down unconditionally would disconnect signals that were never connected.
+    /// </summary>
+    private bool _subscribed;
+
     public override void _Ready()
-    {   
+    {
         if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
         {
             DebugUtilities.PrintPeerFinest($"Setting up FactionsContainer for local player: {GetMultiplayerAuthority()}");
@@ -38,30 +44,43 @@ public partial class FactionsContainer : Control
             SetUpFocusTint();
             EventBus.Instance.PlayerJoined += InitChildElements;
             EventBus.Instance.PlayerLeft += InitChildElements;
-            EventBus.Instance.FactionsAssigned += InitChildElements;        
+            EventBus.Instance.FactionsAssigned += InitChildElements;
             EventBus.Instance.GameSessionStarted += InitChildElements;
             EventBus.Instance.FactionFocusChanged += OnFactionFocusChanged;
-            EventBus.Instance.UserInterfaceReady += () => {
-                DebugUtilities.PrintPeerFinest("FactionsContainer received UserInterfaceReady signal, initializing child elements");
-                InitChildElements();
-            };
+            EventBus.Instance.UserInterfaceReady += OnUserInterfaceReady;
+            _subscribed = true;
         }
-        DebugUtilities.PrintPeerFinest($"FactionsContainer ready: {GetMultiplayerAuthority()}");  
+        DebugUtilities.PrintPeerFinest($"FactionsContainer ready: {GetMultiplayerAuthority()}");
     }
 
     public override void _ExitTree()
     {
-        // Unsubscribe from events
-        if (EventBus.Instance != null)
-        {
-            EventBus.Instance.PlayerJoined -= InitChildElements;
-            EventBus.Instance.PlayerLeft -= InitChildElements;
-            EventBus.Instance.FactionsAssigned -= InitChildElements;        
-            EventBus.Instance.GameSessionStarted -= InitChildElements;
-            EventBus.Instance.FactionFocusChanged -= OnFactionFocusChanged;
-        }
+        // EventBus is a process-wide static, so anything left connected here outlives the game scene.
+        // That is not merely a leak: a Godot C# signal invokes all of its handlers through ONE
+        // multicast delegate, so the first stale handler to throw ObjectDisposedException aborts the
+        // whole emission and every handler behind it — including the next game's — is silently
+        // skipped. That is exactly how quitting and loading a second game left the faction strip empty.
+        if (Current == this) Current = null;
+
+        if (!_subscribed || EventBus.Instance == null) return;
+        _subscribed = false;
+
+        EventBus.Instance.PlayerJoined -= InitChildElements;
+        EventBus.Instance.PlayerLeft -= InitChildElements;
+        EventBus.Instance.FactionsAssigned -= InitChildElements;
+        EventBus.Instance.GameSessionStarted -= InitChildElements;
+        EventBus.Instance.FactionFocusChanged -= OnFactionFocusChanged;
+        // A named method, not the lambda this used to be: `-=` can only match a delegate built from
+        // the same method, and there is no way to name an inline closure at teardown.
+        EventBus.Instance.UserInterfaceReady -= OnUserInterfaceReady;
     }
-    
+
+    private void OnUserInterfaceReady()
+    {
+        DebugUtilities.PrintPeerFinest("FactionsContainer received UserInterfaceReady signal, initializing child elements");
+        InitChildElements();
+    }
+
 
     private void InitChildElements()
     {

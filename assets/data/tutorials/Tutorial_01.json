@@ -1,0 +1,118 @@
+{
+  "id": "tutorial_01_first_turn",
+  "title": "Tutorial 1 — Your First Turn",
+  "learnerFaction": "GERMANY",
+  "onUnexpectedPrompt": "lenient",
+  "steps": [
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "Welcome, [b]General[/b]. Germany is yours.\n\nBefore we fight, learn to read the table. This will be brief."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "First, the [b]map[/b]. Every country you can hold, supply and score is on it.\n\nPan with [b]W A S D[/b] or the arrow keys. Zoom with the [b]mouse wheel[/b].\n\nGo on — look around. The war will wait."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "Six [b]factions[/b] fight this war.\n\n[b]Germany[/b], [b]Italy[/b] and [b]Japan[/b].\n[b]The United Kingdom[/b], [b]the Soviet Union[/b] and [b]the United States[/b].\n\nEach has its own hand, its own units and its own score."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "Those six form two [b]teams[/b].\n\nGermany, Italy and Japan are the [b]Axis[/b] — your side during this tutorial.\nThe UK, the Soviets and the US are the [b]Allies[/b].\n\nYou score for yourself, but you win as a team: the three factions' points are added together."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "A [b]round[/b] is one turn for each faction, always in the same order:\n\n[b]Germany[/b] → [b]UK[/b] → [b]Japan[/b] → [b]Soviet Union[/b] → [b]Italy[/b] → [b]United States[/b]\n\nSo you move first, and the enemy answers immediately."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "Every turn runs the same seven steps, in order:\n\n[b]1. Start[/b] — activate cards already in play\n[b]2. Play Card[/b] — play one card from your hand\n[b]3. Supply[/b] — units cut off from supply are removed\n[b]4. Victory Points[/b] — score the supply stars you hold\n[b]5. Discard[/b] — throw away any cards you do not want\n[b]6. Draw[/b] — refill your hand back up to seven\n[b]7. End[/b] — the turn passes to the next faction"
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "[b]Play Card[/b] is the heart of it — one card, once, and the turn is spent.\n\n[b]Discard[/b] and [b]Draw[/b] work as a pair: throw away what you cannot use, and the draw hands you fresh cards up to seven. A dead hand is your own fault, General.\n\nWatch the tracker as we go."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "But understand what you are spending.\n\nYour [b]draw deck[/b] is finite. Nothing shuffles your discards back into it — when the deck is empty, it is empty, and the Draw step hands you nothing at all. A faction that has burned through its deck fights on with whatever is still in its hand."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "And the enemy can burn it for you.\n\nSome cards force you to discard straight off the top of your [b]draw deck[/b], sight unseen. Once that deck has run dry, every card you are ordered to discard and cannot costs you [b]one victory point[/b].\n\nAn empty deck does not just starve you, General. It bleeds you."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "And the [b]goal[/b], General.\n\nA war runs at most [b]20 rounds[/b]. Score more than the enemy team over those rounds and it is yours.\n\nBut it can end sooner."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "The score is only judged at the [b]end of a round[/b] — after the [b]United States[/b] has finished its turn, the last of the six. Never in the middle.\n\nIf a team is [b]30 or more points ahead[/b] at that moment, the war stops there and then and that team has won. Otherwise the next round begins.\n\nThis lesson is a single round. Nobody wins today."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD" },
+      "text": "This is your [b]Play[/b] step — one card per turn, no more.\n\nPlay [b]Build Army[/b]. The rest of your hand is greyed out for now."
+    },
+    {
+      "type": "constrain",
+      "prompt": "HandCardPlay",
+      "faction": "GERMANY",
+      "cards": ["Build Army"],
+      "note": "Build Navy stays visible but unplayable, so the player can see what they are not doing yet."
+    },
+    {
+      "type": "constrain",
+      "prompt": "SelectCountry",
+      "faction": "GERMANY",
+      "countries": ["Western_Europe"]
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "An army in Germany. Supply, scoring, discard and draw now resolve on their own."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "VICTORY_POINT" },
+      "text": "The [b]Victory Point[/b] step — step four. You score for every [b]supply star[/b] you occupy, and the fewer rivals standing on it, the more it pays."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "START" },
+      "text": "Turn 2. The [b]United Kingdom[/b] answers — watch, you have nothing to do here."
+    },
+    { "type": "answer", "prompt": "HandCardPlay",  "faction": "UNITED_KINGDOM", "card": "Build Army" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "UNITED_KINGDOM", "country": "United Kingdom" },
+
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "JAPAN",         "pass": true },
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "SOVIET",        "pass": true },
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "ITALY",         "pass": true },
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "UNITED_STATES", "pass": true },
+
+    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "GERMANY",        "pass": true },
+    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "UNITED_KINGDOM", "pass": true },
+    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "JAPAN",          "pass": true },
+    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "SOVIET",         "pass": true },
+    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "ITALY",          "pass": true },
+    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "UNITED_STATES",  "pass": true },
+
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "DRAW", "timing": "AFTER" },
+      "text": "That is a full round — every faction has taken a turn.\n\nWell done, General. [b]Dismissed.[/b]"
+    },
+    { "type": "end" }
+  ]
+}

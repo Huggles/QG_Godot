@@ -31,6 +31,12 @@ public partial class FactionHandDisplay : Control
 	// Event handlers for cleanup
 	private Action onTestButtonPressed;
 
+	/// <summary>
+	/// Whether <see cref="LoadUI"/> connected. Only the authority peer does, so tearing down
+	/// unconditionally would disconnect signals that were never connected.
+	/// </summary>
+	private bool _subscribed;
+
 	
 
 
@@ -46,19 +52,24 @@ public partial class FactionHandDisplay : Control
 
 	public override void _ExitTree()
 	{
+		// Callers guard on `Current == null` (InputManager.RefreshCardPrompt, BottomLeftMenu) — a
+		// pointer left on a freed node from the previous game passes that guard and then throws.
+		if (Current == this) Current = null;
+
 		UnsubscribeFromEvents();
 	}
 
 	private void LoadUI()
 	{
-		Hide();        
-		EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
-		EventBus.Instance.NextStepStarted += OnNextStepStarted;
-		EventBus.Instance.CardsDrawn += OnCardsDrawn;
-		EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
+		Hide();
 
 		// Unsubscribe first to prevent duplicate connections
 		UnsubscribeFromEvents();
+
+		EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
+		EventBus.Instance.CardsDrawn += OnCardsDrawn;
+		EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
+		_subscribed = true;
 
 		onTestButtonPressed = () =>
 		{
@@ -93,6 +104,13 @@ public partial class FactionHandDisplay : Control
 	}
 
 
+	/// <summary>
+	/// Not connected. It used to be subscribed in <see cref="LoadUI"/> and then immediately dropped
+	/// again by the UnsubscribeFromEvents call on the next line, so it has never actually run; the
+	/// pair is gone but the handler is kept because the hand is meant to follow the turn step.
+	/// Reconnect it deliberately, not as a side effect of a cleanup fix — the default branch hides the
+	/// hand on every step that is not START or PLAY_CARD, which would change how prompts behave.
+	/// </summary>
 	private void OnNextStepStarted(int turnStep)
 	{
 		switch((TurnStep)turnStep)
@@ -382,12 +400,21 @@ public partial class FactionHandDisplay : Control
 		}
 	}
 
+	/// <summary>
+	/// Drops every EventBus connection this node holds. EventBus is a process-wide static, so a
+	/// connection left behind outlives the game scene — and because a Godot C# signal runs all of its
+	/// handlers through one multicast delegate, the first stale handler to throw
+	/// ObjectDisposedException aborts the emission for everyone behind it. Quitting and loading a
+	/// second game used to lose the faction strip that way: the previous game's hand display threw on
+	/// GameSessionStarted before the new FactionsContainer's handler was ever reached.
+	/// </summary>
 	private void UnsubscribeFromEvents()
 	{
-		// Unsubscribe from EventBus events
-		if (EventBus.Instance != null && OnNextStepStarted != null)
-		{
-			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
-		}
+		if (!_subscribed || EventBus.Instance == null) return;
+		_subscribed = false;
+
+		EventBus.Instance.GameSessionStarted -= OnGameSessionStarted;
+		EventBus.Instance.CardsDrawn -= OnCardsDrawn;
+		EventBus.Instance.CardsDiscarded -= OnCardsDiscarded;
 	}
 }

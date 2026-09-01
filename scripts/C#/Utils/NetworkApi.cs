@@ -368,6 +368,12 @@ public partial class NetworkApi : Node
         // retry loop: the option set must not shift between attempts at the same prompt.
         inputRequest.PopulateTargets();
 
+        // Narrow a tutorial-constrained prompt while the option set is being minted, so the GUI, the
+        // CLI and the tutorial provider all see the same offer. Here rather than in BroadCast for the
+        // same reason PopulateTargets is: CardPlayRound.RequestPlay and RequestBlock come straight
+        // here, and those build the very prompts a lesson most wants to constrain.
+        TutorialRuntime.Current?.ConstrainRequest(inputRequest);
+
         // First prompt after a save restore: check the resume landed where the save was taken. Consumed
         // here rather than checked at the resume site because the resume only starts a step handler — it
         // is this call that proves the step got as far as asking the same question again.

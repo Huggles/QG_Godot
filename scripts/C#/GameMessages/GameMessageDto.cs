@@ -42,6 +42,7 @@ using System.Text.Json.Serialization;
 // ── Presentation only (PresentationEvent) ────────────────────────────────────
 [JsonDerivedType(typeof(ShowBulletinPresentationEventDto),    "ShowBulletin")]
 [JsonDerivedType(typeof(ShowActionLabelPresentationEventDto), "ShowActionLabel")]
+[JsonDerivedType(typeof(ShowCommanderMessagePresentationEventDto), "ShowCommanderMessage")]
 public abstract class GameMessageDto
 {
     public int     Id                  { get; set; }
@@ -82,6 +83,14 @@ public class ShowBulletinPresentationEventDto : PresentationEventDto
 
     /// <summary>-1 for a scenario mutator; a card id when a card put the mutator in play.</summary>
     public int SourceCardId { get; set; } = -1;
+}
+
+public class ShowCommanderMessagePresentationEventDto : PresentationEventDto
+{
+    public string Text { get; set; }
+
+    /// <summary>False shows the message and carries straight on, without waiting for CONTINUE.</summary>
+    public bool Wait { get; set; } = true;
 }
 
 public class ShowActionLabelPresentationEventDto : PresentationEventDto

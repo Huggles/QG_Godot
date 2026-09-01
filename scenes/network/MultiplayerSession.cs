@@ -123,6 +123,11 @@ public partial class MultiplayerSession : Node
                 else
                 {
                     await gameMode.InitStartingState();
+
+                    // After the state is built (the script may name cards the scenario dealt) and
+                    // before the loop starts. A no-op unless the scenario armed a tutorial.
+                    TutorialRuntime.InstallIfRequested();
+
                     GameFlow.Instance.StartGame();
                 }
             }

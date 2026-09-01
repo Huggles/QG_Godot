@@ -79,6 +79,18 @@ public static class CliBootstrap
     /// </summary>
     private static void ResolveScenario(Node from)
     {
+        // Overrides whatever the scenario names, so a script can be exercised against any scenario —
+        // and `tutorial=none` runs a tutorial scenario as an ordinary game, which is how you tell a
+        // rules problem from a script problem.
+        if (CliArgs.Has("tutorial"))
+        {
+            // "none" rather than null: null means "the scenario decides", so it could not express
+            // "run this tutorial scenario as an ordinary game" — which is how you tell a rules
+            // problem from a script problem. TutorialRuntime.InstallIfRequested honours the sentinel.
+            GameManager.PendingTutorialPath = CliArgs.Get("tutorial");
+            DebugUtilities.PrintPeer($"CLI: tutorial {GameManager.PendingTutorialPath}");
+        }
+
         string requested = CliArgs.Get("scenario");
         if (string.IsNullOrEmpty(requested)) return;
 

@@ -64,6 +64,15 @@ public partial class GameManager : Node
     public static string PendingScenarioJson { get; set; } = null;
 
     /// <summary>
+    /// Overrides the tutorial script the next session runs, ignoring whatever the scenario names.
+    /// A debug and CLI affordance only — the normal route is the scenario's own "tutorial" field, so
+    /// picking a tutorial in the menu needs nothing here. Null means "use the scenario's answer".
+    ///
+    /// Host-only, like PendingSeed: a tutorial is single player, so there is no peer to tell.
+    /// </summary>
+    public static string PendingTutorialPath { get; set; } = null;
+
+    /// <summary>
     /// When set, the next session restores this save instead of running fresh scenario setup. Consumed
     /// and cleared by MultiplayerSession.StartSession; also cleared by SceneFlow when a session is left
     /// and by MainMenu, so leaving a restored game and starting a fresh one does not re-restore it.
@@ -188,6 +197,12 @@ public partial class GameManager : Node
                 if (root.TryGetProperty("openingDiscard", out JsonElement openingDiscardElement)
                     && (openingDiscardElement.ValueKind == JsonValueKind.True || openingDiscardElement.ValueKind == JsonValueKind.False))
                     info.OpeningDiscard = openingDiscardElement.GetBoolean();
+
+                // A scenario naming a tutorial script is a tutorial: single player only, so the
+                // multiplayer lobby filters these out of its picker.
+                if (root.TryGetProperty("tutorial", out JsonElement tutorialElement)
+                    && tutorialElement.ValueKind == JsonValueKind.String)
+                    info.TutorialPath = tutorialElement.GetString();
 
                 if (string.IsNullOrEmpty(info.Title))
                     info.Title = info.Name.Replace('_', ' ');

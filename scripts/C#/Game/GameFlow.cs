@@ -18,27 +18,43 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     private bool _suppressStepHandler = false;
 
-    [Export] public int TurnStepCounter { 
-        get; 
+    [Export] public int TurnStepCounter {
+        get;
         set
-        {            
+        {
             field = value;
             DebugUtilities.PrintPeer($"TurnStepCounter: {field}");
             if(field > 0 && !_suppressStepHandler)
             {
-                GameTurnStep gameTurnStep = gameTurnSteps[field - 1];
-                if(Multiplayer.IsServer())
-                {
-                    // Guard, not a bare call: Handler is a Func<Task> and the returned Task used to
-                    // be discarded, so any exception below it (card steps, ChangeEvent.Apply,
-                    // InputRequest, GameAPI) went into an unobserved Task and the loop simply stalled
-                    // forever with nothing logged. This is the single highest-leverage seam here.
-                    Guard.FireAndForget(gameTurnStep.Handler,
-                        $"TurnStep {gameTurnStep.TurnStep}", CurrentFaction, stallsLoop: true);
-                }
-                EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
+                DispatchTurnStep(field);
             }
         } } = 0;
+
+    /// <summary>
+    /// Run the step the counter now names.
+    ///
+    /// Extracted from the setter above rather than left inline because a property setter cannot be
+    /// overridden piecemeal, and <see cref="TurnStepCounter"/> must stay exactly as declared: it is an
+    /// [Export] addressed by name from GameFlowMultiplayerSynchronizer's SceneReplicationConfig, so
+    /// re-declaring it in a derived class — or making it virtual — puts the replication path in doubt.
+    ///
+    /// Only the dispatch is host-gated. The NextStepStarted emit below runs on every peer and is what
+    /// drives the HUD; a client's GameFlow does nothing else with the counter.
+    /// </summary>
+    protected virtual void DispatchTurnStep(int counter)
+    {
+        GameTurnStep gameTurnStep = TurnSteps[counter - 1];
+        if(Multiplayer.IsServer())
+        {
+            // Guard, not a bare call: Handler is a Func<Task> and the returned Task used to
+            // be discarded, so any exception below it (card steps, ChangeEvent.Apply,
+            // InputRequest, GameAPI) went into an unobserved Task and the loop simply stalled
+            // forever with nothing logged. This is the single highest-leverage seam here.
+            Guard.FireAndForget(gameTurnStep.Handler,
+                $"TurnStep {gameTurnStep.TurnStep}", CurrentFaction, stallsLoop: true);
+        }
+        EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
+    }
     [Export] public TurnStep TurnStep { get; set; } = 0;
     [Export] public int MaxRound { get; set; } = 20;
 
@@ -130,21 +146,72 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public List<CardPlayRound> CardPlayRounds { get; } = new();
     public CardPlayRound CurrentCardPlayRound => CardPlayRounds.LastOrDefault();
 
-    private List<GameTurnStep> gameTurnSteps;
+    private List<GameTurnStep> _turnSteps;
+
+    /// <summary>
+    /// The turn program's step table, indexed by <see cref="DispatchTurnStep"/> as [counter - 1].
+    ///
+    /// Built on first dispatch rather than in a constructor: <see cref="BuildTurnSteps"/> is virtual
+    /// and consults the installed <see cref="Program"/>, and a virtual call from a constructor runs
+    /// before the derived object — or the program — exists. Nothing reads this before the first
+    /// dispatch (<see cref="ApplyFlowSnapshot"/>'s restore sets the counter with the handler
+    /// suppressed), so the laziness is observationally identical to the eager build it replaces.
+    /// </summary>
+    protected List<GameTurnStep> TurnSteps => _turnSteps ??= BuildTurnSteps();
+
+    /// <summary>
+    /// The step table this session runs. A <see cref="ITurnProgram"/> may supply its own; returning
+    /// null from the program — which is what every program that only brackets the normal loop does —
+    /// keeps the seven steps below.
+    /// </summary>
+    protected virtual List<GameTurnStep> BuildTurnSteps()
+        => Program?.BuildTurnSteps(this) ?? DefaultTurnSteps();
+
+    protected List<GameTurnStep> DefaultTurnSteps() => new List<GameTurnStep> {
+        new GameTurnStep(TurnStep.START, StartTurnStep),
+        new GameTurnStep(TurnStep.PLAY_CARD, PlayCardStep),
+        new GameTurnStep(TurnStep.SUPPLY, SupplyStep),
+        new GameTurnStep(TurnStep.VICTORY_POINT, VictoryPointStep),
+        new GameTurnStep(TurnStep.DISCARD, DiscardStep),
+        new GameTurnStep(TurnStep.DRAW, DrawStep),
+        new GameTurnStep(TurnStep.END, StartNewTurn)
+    };
 
     public InputRequest CurrentInputRequest { get; set; }
-    
-    public GameFlow()
+
+    // ── The turn program ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// The scripted program driving this session, or null for a normal game — in which case every
+    /// hook that consults it takes the branch it took before this existed, statement for statement.
+    /// That is deliberate: "the normal game is unchanged" is then provable by running one, not argued.
+    ///
+    /// Host-only, and that is not a restriction. Every seam that consults it is already behind
+    /// Multiplayer.IsServer(), and the one thing that uses it — tutorial mode — is single player, so
+    /// the host is the only peer there is.
+    /// </summary>
+    public ITurnProgram Program { get; private set; }
+
+    /// <summary>
+    /// Install a turn program. Must happen before <see cref="StartGame"/>: the step table is built on
+    /// first dispatch and cached, so a program installed after the loop is running would be ignored
+    /// by <see cref="TurnSteps"/> and honoured by the hooks — the worst of both.
+    /// </summary>
+    public void InstallProgram(ITurnProgram program)
     {
-        gameTurnSteps = new List<GameTurnStep> {
-            new GameTurnStep(TurnStep.START, StartTurnStep),
-            new GameTurnStep(TurnStep.PLAY_CARD, PlayCardStep),
-            new GameTurnStep(TurnStep.SUPPLY, SupplyStep),
-            new GameTurnStep(TurnStep.VICTORY_POINT, VictoryPointStep),
-            new GameTurnStep(TurnStep.DISCARD, DiscardStep),
-            new GameTurnStep(TurnStep.DRAW, DrawStep),
-            new GameTurnStep(TurnStep.END, StartNewTurn)
-        };
+        if (!Multiplayer.IsServer())
+        {
+            DebugUtilities.PrintPeerError("InstallProgram: the turn program is host-only");
+            return;
+        }
+        if (GameStarted)
+        {
+            DebugUtilities.PrintPeerError("InstallProgram: too late, the game has already started");
+            return;
+        }
+
+        Program = program;
+        program?.Attach(this);
     }
 
     public StartTurnStepHandler startTurnStepHandler;
@@ -200,6 +267,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
             GameStarted = true;
 
+            // Before the first turn rather than after it: a program that opens with a message wants
+            // to say it over the dealt board, not over Germany's already-running START step.
+            if (Program != null) await Program.OnGameStarted();
 
             Guard.FireAndForget(StartNewTurn, "GameFlow.StartNewTurn", stallsLoop: true);
         }
@@ -237,6 +307,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
         TurnStepCounter = 0;
         DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
         EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
+        if (Program != null) await Program.OnTurnStarted(GameTurn, CurrentFaction);
         await ReplayContext.Pace(100);
         StartNextStep();
     }
@@ -315,6 +386,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private async Task BeginStep(TurnStep step)
     {
         await new ChangeStepChangeEvent(step).Apply();
+
+        // Ahead of the BEFORE mutators, not behind them: a program's narration introduces the step,
+        // so it must land before any mutator announces its own Bulletin over the top of it.
+        if (Program != null) await Program.BeforeStep(step, CurrentFaction);
+
         await StepMutatorRunner.Run(step, MutatorTiming.BEFORE, CurrentFaction);
     }
 
@@ -347,6 +423,10 @@ public partial class GameFlow : SingletonNode<GameFlow>
             // asked for mid-card lands here.
             TryFlushDeferredSave();
 
+            // After the flush, so the checkpoint above stays the quiescent moment it documents, and
+            // before the advance, so narration lands inside the step it is describing.
+            if (Program != null) await Program.AfterStep(completed, CurrentFaction);
+
             StartNextStep();
         }, $"AfterMutators {completed}", CurrentFaction, stallsLoop: true);
     }
@@ -363,15 +443,25 @@ public partial class GameFlow : SingletonNode<GameFlow>
         stepEpoch = ErrorReporter.GameLoopEpoch;
         DebugUtilities.PrintPeer($"ResumeAfterFailure at TurnStepCounter {TurnStepCounter}");
 
+        // Guard.Try, not a bare call: a program throwing while it stands down must not take the
+        // recovery path with it — the whole point here is to get the turn loop running again.
+        Guard.Try(() => Program?.OnResumeAfterFailure(), "GameFlow.Program.OnResumeAfterFailure");
+
         // Tags are not part of the replicated hash, so a plain recalculation is enough to make the
         // resumed step's condition checks see current state.
         GameStateCalculator.CalculateAll();
 
-        // The branch is required, not defensive. gameTurnSteps has 7 entries and the setter indexes
+        // The branch is required, not defensive. The table has 7 entries and the dispatch indexes
         // [counter - 1], so a failure during TurnStep.END (counter 7) would make TurnStepCounter++
         // index [7] and throw ArgumentOutOfRangeException from inside the recovery path itself.
-        if (TurnStepCounter >= gameTurnSteps.Count)
-            Guard.FireAndForget(StartNewTurn, "resume:StartNewTurn", stallsLoop: true);
+        //
+        // Re-running the LAST entry's handler rather than naming StartNewTurn: those are the same
+        // thing for the default table, and stay the same thing for a program that supplies its own.
+        if (TurnStepCounter >= TurnSteps.Count)
+        {
+            GameTurnStep last = TurnSteps[TurnSteps.Count - 1];
+            Guard.FireAndForget(last.Handler, $"resume:{last.TurnStep}", stallsLoop: true);
+        }
         else
             TurnStepCounter++;
     }
@@ -475,6 +565,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     public bool CanSave =>
         GameStarted
+        && Program?.AllowsSaving != false
         && (IsSafeToSave || IsAtStepStart)
         && !ModifierRegistry.HasUnsavedModifiers;
 
@@ -487,6 +578,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
         get
         {
             if (!GameStarted)                        return "the game has not started yet";
+            // Above the rest: a program that refuses saving refuses at every moment, so the honest
+            // answer is its reason and not whichever transient one happens to apply right now.
+            if (Program?.AllowsSaving == false)      return Program.SaveBlockedReason;
             if (ModifierRegistry.HasUnsavedModifiers) return "a card effect is still waiting for the end of this step";
             if (IsSafeToSave || IsAtStepStart) return null;
 
@@ -616,6 +710,15 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     public void RequestDeferredSave(string displayName)
     {
+        // A program that refuses saving refuses deferred ones too. Without this the request would be
+        // accepted and then silently never honoured — TryFlushDeferredSave short-circuits on CanSave,
+        // so the name would simply sit here for the rest of the game.
+        if (Program?.AllowsSaving == false)
+        {
+            DebugUtilities.PrintPeer($"Deferred save refused: {SaveBlockedReason}");
+            return;
+        }
+
         deferredSaveName = displayName;
         DebugUtilities.PrintPeer($"Save deferred to the next safe point: '{displayName}'");
     }

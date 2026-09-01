@@ -50,6 +50,7 @@ public partial class CommanderMessage : Control
 	public bool IsShown { get; private set; }
 
 	private Button _continueButton;
+	private RichTextLabel _messageLabel;
 	private Control _textModal;
 	private Vector2 _modalRestPosition;
 	private Tween _tween;
@@ -60,6 +61,8 @@ public partial class CommanderMessage : Control
 
 		_continueButton = GetNode<Button>("%ContinueButton");
 		_continueButton.Pressed += OnContinuePressed;
+
+		_messageLabel = GetNode<RichTextLabel>("%MessageLabel");
 
 		// Captured once, before anything can slide it: the panel is freely positioned rather than
 		// laid out by a container, so this is the only record of where it belongs once a hide has
@@ -89,6 +92,28 @@ public partial class CommanderMessage : Control
 	/// <see cref="ShowFinishedEventHandler"/> when that lands. Interrupts a hide in progress and
 	/// takes over from wherever it had got to, so a show/hide/show never leaves a half-faded panel.
 	/// </summary>
+	/// <summary>
+	/// What the panel says. BBCode — <c>%MessageLabel</c> is a RichTextLabel with bbcode enabled —
+	/// and the label grows the panel to fit, which is why <see cref="_modalRestPosition"/> is
+	/// captured once in <see cref="_Ready"/> rather than re-read.
+	/// </summary>
+	public string Text
+	{
+		get => _messageLabel.Text;
+		set => _messageLabel.Text = value;
+	}
+
+	/// <summary>
+	/// Set the text and bring the commander on screen in one call, which is what every caller that
+	/// has something to say actually wants. Equivalent to assigning <see cref="Text"/> and then
+	/// calling <see cref="ShowMessage(bool)"/>.
+	/// </summary>
+	public void ShowMessage(string text, bool instant = false)
+	{
+		Text = text;
+		ShowMessage(instant);
+	}
+
 	/// <param name="instant">Skip the animation and land on the end state, signal included.</param>
 	public void ShowMessage(bool instant = false)
 	{

@@ -37,6 +37,14 @@ public class InitialGameStateData
     [JsonPropertyName("randomStartingVPMax")]
     public int RandomStartingVPMax { get; set; } = 20;
 
+    /// <summary>
+    /// Tutorial script to run alongside this scenario, or null for a normal game. Host-only, like
+    /// MaxRounds and OpeningDiscard: the program it installs runs entirely server-side, and a tutorial
+    /// is single player, so there is no peer for it to reach.
+    /// </summary>
+    [JsonPropertyName("tutorial")]
+    public string TutorialScriptPath { get; set; } = null;
+
     // Step mutators active for this scenario. Empty by default, so a scenario that declares none
     // has none — the turn flow behaves exactly as it did before mutators existed.
     [JsonPropertyName("mutators")]

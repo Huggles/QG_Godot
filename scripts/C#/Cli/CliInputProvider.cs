@@ -94,25 +94,23 @@ public sealed class CliInputProvider : IInputProvider
         return Answer(chosen);
     }
 
-    /// <summary>Answer by name (country, card, or faction), matched against the option list.</summary>
+    /// <summary>
+    /// Answer by name (country, card, or faction), matched against the option list.
+    ///
+    /// Through <see cref="CliOptionMatcher"/> rather than inline, so this and the tutorial's scripted
+    /// answerer cannot drift apart: a name that answers a prompt from a .qgc script must answer the
+    /// same prompt from a tutorial file. Strictly wider than the exact-then-prefix label match this
+    /// replaces — a card or country's UniqueName is now accepted too, which is the form the data
+    /// files use — so no script that worked before stops working.
+    /// </summary>
     public string AnswerByName(string name)
     {
         if (_pending == null) return "no prompt is open";
 
-        List<CliOption> matches = _spec.Options
-            .Where(o => o.Label.Equals(name, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        CliOption match = CliOptionMatcher.Resolve(_spec, name, out string error);
+        if (match == null) return error;
 
-        if (matches.Count == 0)
-            matches = _spec.Options
-                .Where(o => o.Label.StartsWith(name, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-        if (matches.Count == 0) return $"no option matching '{name}'";
-        if (matches.Count > 1)
-            return $"'{name}' is ambiguous: {string.Join(", ", matches.Select(m => m.Label))}";
-
-        return Answer(matches);
+        return Answer(new List<CliOption> { match });
     }
 
     private string Answer(List<CliOption> chosen)
