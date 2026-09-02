@@ -53,6 +53,12 @@ public class TutorialStepData
     /// <summary>False shows the message and carries straight on, without waiting for CONTINUE.</summary>
     [JsonPropertyName("wait")] public bool Wait { get; set; } = true;
 
+    /// <summary>
+    /// Optional. An arrow to hold on screen for as long as this message is up. Unset means no arrow,
+    /// which is the normal case.
+    /// </summary>
+    [JsonPropertyName("arrow")] public TutorialArrowData Arrow { get; set; }
+
     // ── prompt-anchored ──────────────────────────────────────────────────────
     /// <summary>
     /// Exactly <c>InputRequestSpec.Kind</c> — the request class name with "RequestHandler" stripped:
@@ -92,4 +98,53 @@ public class TutorialAnchorData
 
     /// <summary>BEFORE (the step has opened) | AFTER (the step has fully resolved).</summary>
     [JsonPropertyName("timing")]  public string Timing { get; set; } = "BEFORE";
+}
+
+/// <summary>
+/// Where a message's arrow points: a place on the screen and a direction, rather than a reference to
+/// any particular node.
+///
+/// Deliberately not a node lookup. An arrow aimed at a named HUD element can only ever point at HUD
+/// elements — and half of what a lesson wants to indicate is on the map, or is a gap between two
+/// panels. A coordinate can point at all of it, and it needs no vocabulary to learn and no registry
+/// to keep in step with the scene tree. The cost is that these are hand-tuned numbers: move a panel
+/// and the arrows aimed at it go stale silently, because nothing here knows what it is pointing at.
+///
+/// The one POCO for this, rather than a parse-layer twin and a runtime one. It is read straight off
+/// the tutorial file AND carried on the GameMessage wire — the two shapes never diverged, so the
+/// copy between them was pure ceremony.
+/// </summary>
+public class TutorialArrowData
+{
+    /// <summary>Where the arrow's TIP lands across the viewport: 0 is the left edge, 1 the right.</summary>
+    [JsonPropertyName("x")] public float X { get; set; }
+
+    /// <summary>Where the arrow's TIP lands down the viewport: 0 is the top, 1 the bottom.</summary>
+    [JsonPropertyName("y")] public float Y { get; set; }
+
+    /// <summary>
+    /// Which way the arrow points, in degrees, clockwise from pointing right — the direction the
+    /// source texture already faces, so 0 needs no correction. 90 points down, 180 left, 270 up.
+    /// </summary>
+    [JsonPropertyName("rotation")] public float Rotation { get; set; }
+
+    /// <summary>
+    /// Throw unless this describes a point on screen. Called from TutorialStep.From, so a bad
+    /// coordinate is a loud failure at load rather than a message whose arrow is simply never seen.
+    ///
+    /// The mistake worth catching is pixels typed into a viewport-relative field: <c>"x": 960</c> is
+    /// not a visibly silly number, and without this it would put the arrow a long way off the right
+    /// edge with nothing to say so. Out of range is therefore an error, not a clamp.
+    /// </summary>
+    /// <exception cref="System.Exception">A coordinate is outside the viewport.</exception>
+    public void Validate()
+    {
+        if (X is < 0f or > 1f || Y is < 0f or > 1f)
+            throw new System.Exception(
+                $"Tutorial script has an arrow at ({X}, {Y}), which is off screen. " +
+                "Arrow x and y are fractions of the viewport, between 0 and 1 — " +
+                "0.5, 0.5 is the middle of the screen, not pixels.");
+    }
+
+    public override string ToString() => $"({X:0.###}, {Y:0.###}) at {Rotation:0}°";
 }

@@ -1,13 +1,13 @@
 {
   "id": "tutorial_01_first_turn",
   "title": "Tutorial 1 — Your First Turn",
-  "learnerFaction": "GERMANY",
+  "learnerFaction": "UNITED_KINGDOM",
   "onUnexpectedPrompt": "lenient",
   "steps": [
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
-      "text": "Welcome, [b]General[/b]. Germany is yours.\n\nBefore we fight, learn to read the table. This will be brief."
+      "text": "Welcome, [b]General[/b]. The United Kingdom is yours.\n\nBefore we fight, learn to read the table. This will be brief."
     },
     {
       "type": "message",
@@ -17,16 +17,19 @@
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
+      "arrow": { "x": 0.50, "y": 0.3, "rotation": 270 },
       "text": "Six [b]factions[/b] fight this war.\n\n[b]Germany[/b], [b]Italy[/b] and [b]Japan[/b].\n[b]The United Kingdom[/b], [b]the Soviet Union[/b] and [b]the United States[/b].\n\nEach has its own hand, its own units and its own score."
     },
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
+      "arrow": { "x": 0.85, "y": 0.3, "rotation": 270 },
       "text": "Those six form two [b]teams[/b].\n\nGermany, Italy and Japan are the [b]Axis[/b] — your side during this tutorial.\nThe UK, the Soviets and the US are the [b]Allies[/b].\n\nYou score for yourself, but you win as a team: the three factions' points are added together."
     },
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
+      "arrow": { "x": 0.50, "y": 0.3, "rotation": 270 },
       "text": "A [b]round[/b] is one turn for each faction, always in the same order:\n\n[b]Germany[/b] → [b]UK[/b] → [b]Japan[/b] → [b]Soviet Union[/b] → [b]Italy[/b] → [b]United States[/b]\n\nSo you move first, and the enemy answers immediately."
     },
     {
@@ -37,16 +40,18 @@
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
-      "text": "[b]Play Card[/b] is the heart of it — one card, once, and the turn is spent.\n\n[b]Discard[/b] and [b]Draw[/b] work as a pair: throw away what you cannot use, and the draw hands you fresh cards up to seven. A dead hand is your own fault, General.\n\nWatch the tracker as we go."
+      "text": "[b]Play Card[/b] is the heart of it — one card, once, and the turn is spent.\n\n[b]Discard[/b] and [b]Draw[/b] work as a pair: throw away what you cannot use, and the draw hands you fresh cards up to seven. A dead hand is your own fault, General.\n\nThe prompts will tell you when a step wants something from you."
     },
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
-      "text": "But understand what you are spending.\n\nYour [b]draw deck[/b] is finite. Nothing shuffles your discards back into it — when the deck is empty, it is empty, and the Draw step hands you nothing at all. A faction that has burned through its deck fights on with whatever is still in its hand."
+      "arrow": { "x": 0.34, "y": 0.24, "rotation": 270 },
+      "text": "But understand what you are spending.\n\nThat number is your [b]draw deck[/b], and it is finite. Nothing shuffles your discards back into it — when the deck is empty, it is empty, and the Draw step hands you nothing at all. A faction that has burned through its deck fights on with whatever is still in its hand."
     },
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
+      "arrow": { "x": 0.34, "y": 0.24, "rotation": 270 },
       "text": "And the enemy can burn it for you.\n\nSome cards force you to discard straight off the top of your [b]draw deck[/b], sight unseen. Once that deck has run dry, every card you are ordered to discard and cannot costs you [b]one victory point[/b].\n\nAn empty deck does not just starve you, General. It bleeds you."
     },
     {
@@ -57,11 +62,13 @@
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
+      "arrow": { "x": 0.8, "y": 0.3, "rotation": 270 },
       "text": "The score is only judged at the [b]end of a round[/b] — after the [b]United States[/b] has finished its turn, the last of the six. Never in the middle.\n\nIf a team is [b]30 or more points ahead[/b] at that moment, the war stops there and then and that team has won. Otherwise the next round begins.\n\nThis lesson is a single round. Nobody wins today."
     },
     {
       "type": "message",
       "at": { "turn": 1, "step": "PLAY_CARD" },
+      "arrow": { "x": 0.75, "y": 0.90, "rotation": 90 },
       "text": "This is your [b]Play[/b] step — one card per turn, no more.\n\nPlay [b]Build Army[/b]. The rest of your hand is greyed out for now."
     },
     {
@@ -72,6 +79,11 @@
       "note": "Build Navy stays visible but unplayable, so the player can see what they are not doing yet."
     },
     {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD" },
+      "text": "Western Europe is holding a supply star. You can build an army there, and it will be supplied and score for you. \n\n Select Western Europe to build an army."
+    },
+    {
       "type": "constrain",
       "prompt": "SelectCountry",
       "faction": "GERMANY",
@@ -80,11 +92,22 @@
     {
       "type": "message",
       "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
-      "text": "An army in Germany. Supply, scoring, discard and draw now resolve on their own."
+      "text": "Now you have an army in Western Europe. Congratulations! \n\n Because Western Europe has a Supply Star, this will score you an extra 2 points during the Victory Point step, and it will be supplied during the Supply step. You are ready to move on."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Each faction can only have one army or navy in a country at a time. \n\n You can not share a country with an enemy, but you can share it with an ally. A country holding two units will need to be battled twice to remove both units."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "If ever you share a supply star with an ally, you will score only 1 point during your Victory Point step. \n\n Your ally will also score 1 point during their Victory Point step. That is, if they still have an army there during their Victory Point step."
     },
     {
       "type": "message",
       "at": { "turn": 1, "step": "VICTORY_POINT" },
+      "arrow": { "x": 0.36, "y": 0.13, "rotation": 270 },
       "text": "The [b]Victory Point[/b] step — step four. You score for every [b]supply star[/b] you occupy, and the fewer rivals standing on it, the more it pays."
     },
 

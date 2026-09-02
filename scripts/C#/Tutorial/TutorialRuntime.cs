@@ -221,7 +221,7 @@ public sealed class TutorialRuntime : ITurnProgram
                 // A PresentationEvent rather than a direct call on CommanderMessage.Current: it lands
                 // at a defined point in the ordered message stream relative to the effects it narrates,
                 // and it earns a history row, which is the only way a player can re-read a message.
-                await new ShowCommanderMessagePresentationEvent(faction, step.Text, step.Wait).Apply();
+                await new ShowCommanderMessagePresentationEvent(faction, step.Text, step.Wait, step.Arrow).Apply();
                 break;
 
             case TutorialStepType.Highlight:

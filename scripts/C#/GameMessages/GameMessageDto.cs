@@ -91,6 +91,9 @@ public class ShowCommanderMessagePresentationEventDto : PresentationEventDto
 
     /// <summary>False shows the message and carries straight on, without waiting for CONTINUE.</summary>
     public bool Wait { get; set; } = true;
+
+    /// <summary>Where to point the arrow while the message is up, or null for none.</summary>
+    public TutorialArrowData Arrow { get; set; }
 }
 
 public class ShowActionLabelPresentationEventDto : PresentationEventDto

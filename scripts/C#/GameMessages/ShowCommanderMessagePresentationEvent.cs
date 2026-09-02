@@ -22,11 +22,19 @@ public partial class ShowCommanderMessagePresentationEvent : PresentationEvent
     /// <summary>False shows the message and carries straight on, for narration that paces itself.</summary>
     public bool Wait { get; set; }
 
-    public ShowCommanderMessagePresentationEvent(Faction activeFaction, string text, bool wait = true)
-        : base(activeFaction)
+    /// <summary>
+    /// Where to point the arrow while the message is up, or null for none. Carried on the wire like
+    /// the text: the arrow is part of what the message SAYS, and a peer replaying this from the DTO
+    /// has to show the same thing the host did.
+    /// </summary>
+    public TutorialArrowData Arrow { get; set; }
+
+    public ShowCommanderMessagePresentationEvent(Faction activeFaction, string text, bool wait = true,
+        TutorialArrowData arrow = null) : base(activeFaction)
     {
         Text = text;
         Wait = wait;
+        Arrow = arrow;
     }
 
     public override PresentationEventDto ToDto()
@@ -35,11 +43,12 @@ public partial class ShowCommanderMessagePresentationEvent : PresentationEvent
             PresentationEventDto.Build<ShowCommanderMessagePresentationEventDto>(this, Id);
         dto.Text = Text;
         dto.Wait = Wait;
+        dto.Arrow = Arrow;
         return dto;
     }
 
     protected override List<ChangeEventAnimation> Animations =>
-        new() { new ShowCommanderMessageAnimation(Text, Wait) };
+        new() { new ShowCommanderMessageAnimation(Text, Wait, Arrow) };
 
     public override string SummaryText() => $"Commander: {Text}";
 }

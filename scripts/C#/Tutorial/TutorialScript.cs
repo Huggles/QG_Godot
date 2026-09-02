@@ -85,6 +85,12 @@ public sealed class TutorialStep
     public string Text { get; private set; }
     public bool Wait { get; private set; } = true;
 
+    /// <summary>
+    /// Where to point an arrow while this message is up, or null for no arrow. Range-checked at load,
+    /// so a spec that survives parsing describes a point that is actually on screen.
+    /// </summary>
+    public TutorialArrowData Arrow { get; private set; }
+
     // prompt-anchored
     public string Prompt { get; private set; } = "*";
     public Faction PromptFaction { get; private set; } = Faction.NONE;
@@ -107,7 +113,13 @@ public sealed class TutorialStep
             PromptFaction = TutorialScript.ParseFaction(data.Faction, "a step's faction"),
             Pass          = data.Pass,
             Option        = data.Option,
+            Arrow         = data.Arrow,
         };
+
+        // Held by reference rather than copied: the parse layer's shape and the runtime's are the same
+        // three numbers, and nothing downstream mutates them. Range-checked here so an off-screen
+        // coordinate is a loud failure at load, the rule this file follows for every other field.
+        step.Arrow?.Validate();
 
         // One selector list per kind, so a script may write either the singular or the plural form.
         if (!string.IsNullOrWhiteSpace(data.Card)) step.Cards.Add(data.Card);
