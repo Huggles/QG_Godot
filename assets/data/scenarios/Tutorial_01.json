@@ -14,7 +14,7 @@
     },
     "UNITED_KINGDOM": {
       "unitDeployments": [{ "countryName": "UNITED_KINGDOM" }],
-      "initialHandCards": [{ "name": "BuildArmy" }],
+      "initialHandCards": [{ "name": "BuildNavy" }, { "name": "BuildArmy" }],
       "startingVP": 0
     },
     "JAPAN": {

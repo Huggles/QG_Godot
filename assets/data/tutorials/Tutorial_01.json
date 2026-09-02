@@ -24,13 +24,13 @@
       "type": "message",
       "at": { "turn": 1, "step": "START" },
       "arrow": { "x": 0.85, "y": 0.3, "rotation": 270 },
-      "text": "Those six form two [b]teams[/b].\n\nGermany, Italy and Japan are the [b]Axis[/b] — your side during this tutorial.\nThe UK, the Soviets and the US are the [b]Allies[/b].\n\nYou score for yourself, but you win as a team: the three factions' points are added together."
+      "text": "Those six form two [b]teams[/b].\n\nGermany, Italy and Japan are the [b]Axis[/b].\nThe UK, the Soviets and the US are the [b]Allies[/b] — your side.\n\nYou score for yourself, but you win as a team: the three factions' points are added together."
     },
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
       "arrow": { "x": 0.50, "y": 0.3, "rotation": 270 },
-      "text": "A [b]round[/b] is one turn for each faction, always in the same order:\n\n[b]Germany[/b] → [b]UK[/b] → [b]Japan[/b] → [b]Soviet Union[/b] → [b]Italy[/b] → [b]United States[/b]\n\nSo you move first, and the enemy answers immediately."
+      "text": "A [b]round[/b] is one turn for each faction, always in the same order:\n\n[b]Germany[/b] → [b]UK[/b] → [b]Japan[/b] → [b]Soviet Union[/b] → [b]Italy[/b] → [b]United States[/b]\n\nSo Germany moves first, and you answer immediately."
     },
     {
       "type": "message",
@@ -65,59 +65,75 @@
       "arrow": { "x": 0.8, "y": 0.3, "rotation": 270 },
       "text": "The score is only judged at the [b]end of a round[/b] — after the [b]United States[/b] has finished its turn, the last of the six. Never in the middle.\n\nIf a team is [b]30 or more points ahead[/b] at that moment, the war stops there and then and that team has won. Otherwise the next round begins.\n\nThis lesson is a single round. Nobody wins today."
     },
+
     {
       "type": "message",
       "at": { "turn": 1, "step": "PLAY_CARD" },
-      "arrow": { "x": 0.75, "y": 0.90, "rotation": 90 },
-      "text": "This is your [b]Play[/b] step — one card per turn, no more.\n\nPlay [b]Build Army[/b]. The rest of your hand is greyed out for now."
+      "text": "And [b]Germany[/b] opens, as they always do. There is nothing for you to do here but watch.\n\nWatch what they take, General. You will have to answer it."
     },
-    {
-      "type": "constrain",
-      "prompt": "HandCardPlay",
-      "faction": "GERMANY",
-      "cards": ["Build Army"],
-      "note": "Build Navy stays visible but unplayable, so the player can see what they are not doing yet."
-    },
-    {
-      "type": "message",
-      "at": { "turn": 1, "step": "PLAY_CARD" },
-      "text": "Western Europe is holding a supply star. You can build an army there, and it will be supplied and score for you. \n\n Select Western Europe to build an army."
-    },
-    {
-      "type": "constrain",
-      "prompt": "SelectCountry",
-      "faction": "GERMANY",
-      "countries": ["Western_Europe"]
-    },
+    { "type": "answer", "prompt": "HandCardPlay",  "faction": "GERMANY", "card": "Build Army" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "GERMANY", "country": "WESTERN_EUROPE" },
     {
       "type": "message",
       "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
-      "text": "Now you have an army in Western Europe. Congratulations! \n\n Because Western Europe has a Supply Star, this will score you an extra 2 points during the Victory Point step, and it will be supplied during the Supply step. You are ready to move on."
-    },
-    {
-      "type": "message",
-      "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
-      "text": "Each faction can only have one army or navy in a country at a time. \n\n You can not share a country with an enemy, but you can share it with an ally. A country holding two units will need to be battled twice to remove both units."
-    },
-    {
-      "type": "message",
-      "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
-      "text": "If ever you share a supply star with an ally, you will score only 1 point during your Victory Point step. \n\n Your ally will also score 1 point during their Victory Point step. That is, if they still have an army there during their Victory Point step."
-    },
-    {
-      "type": "message",
-      "at": { "turn": 1, "step": "VICTORY_POINT" },
-      "arrow": { "x": 0.36, "y": 0.13, "rotation": 270 },
-      "text": "The [b]Victory Point[/b] step — step four. You score for every [b]supply star[/b] you occupy, and the fewer rivals standing on it, the more it pays."
+      "text": "Germany has built an army in [b]Western Europe[/b] — one card, and the whole coast opposite you is theirs.\n\nThat country holds a [b]supply star[/b]. It keeps their army fed during the Supply step, and it pays them [b]2 victory points[/b] at every Victory Point step they are still standing on it.\n\nLeft alone, General, that one card pays them for the rest of the war."
     },
 
     {
       "type": "message",
       "at": { "turn": 2, "step": "START" },
-      "text": "Turn 2. The [b]United Kingdom[/b] answers — watch, you have nothing to do here."
+      "text": "Turn two. The [b]United Kingdom[/b] answers — and the United Kingdom is you.\n\nOne card. Make it count."
     },
-    { "type": "answer", "prompt": "HandCardPlay",  "faction": "UNITED_KINGDOM", "card": "Build Army" },
-    { "type": "answer", "prompt": "SelectCountry", "faction": "UNITED_KINGDOM", "country": "United Kingdom" },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD" },
+      "arrow": { "x": 0.75, "y": 0.90, "rotation": 90 },
+      "text": "This is your [b]Play[/b] step — one card per turn, no more.\n\nYou cannot march into Western Europe from an island. Before you can touch that army, you have to reach it.\n\nPlay [b]Build Navy[/b]. The rest of your hand is greyed out for now."
+    },
+    {
+      "type": "constrain",
+      "prompt": "HandCardPlay",
+      "faction": "UNITED_KINGDOM",
+      "cards": ["Build Navy"],
+      "note": "Build Army stays visible but unplayable, so the player can see what they are not doing yet."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD" },
+      "text": "The [b]North Sea[/b] touches both your home islands and Western Europe. It is the water between you and them, and for the moment nobody holds it.\n\nSelect the [b]North Sea[/b] to build your navy there."
+    },
+    {
+      "type": "constrain",
+      "prompt": "SelectCountry",
+      "faction": "UNITED_KINGDOM",
+      "countries": ["NORTH_SEA"]
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "The fleet is at sea. Well done, General.\n\nIt scores you nothing — the North Sea carries no supply star. What it buys is [b]position[/b]: a supplied unit of yours now stands next to Western Europe, and nothing can be attacked that none of your units stands next to.\n\nGermany took points. You took the reach to go and take them back."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "A navy needs a [b]harbour[/b]. A fleet can only be built in — and only stays supplied in — a sea that touches a coast your team holds. The North Sea touches the United Kingdom, so yours is fed from home.\n\nCut a fleet off from every friendly coast and the Supply step takes it off the board."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Each faction can only have one army or navy in a country at a time. \n\n You can not share a country with an enemy, but you can share it with an ally. A country holding two units will need to be battled twice to remove both units."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "If ever you share a supply star with an ally, you will score only 1 point during your Victory Point step. \n\n Your ally will also score 1 point during their Victory Point step. That is, if they still have an army there during their Victory Point step."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "VICTORY_POINT" },
+      "arrow": { "x": 0.36, "y": 0.13, "rotation": 270 },
+      "text": "The [b]Victory Point[/b] step — step four. You score for every [b]supply star[/b] you occupy, and the fewer rivals standing on it, the more it pays.\n\nThe North Sea pays nothing. Your points this turn come from the [b]United Kingdom[/b] itself, where your army has stood since the war began."
+    },
 
     { "type": "answer", "prompt": "HandCardPlay", "faction": "JAPAN",         "pass": true },
     { "type": "answer", "prompt": "HandCardPlay", "faction": "SOVIET",        "pass": true },
