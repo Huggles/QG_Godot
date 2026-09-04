@@ -317,6 +317,54 @@ public static class CliOptionMatcher
     }
 
     /// <summary>
+    /// Every option this name matches, treating several copies of the SAME card as one answer rather
+    /// than as an ambiguity.
+    ///
+    /// <see cref="Resolve"/> cannot do this: it answers "which single option did the operator mean",
+    /// and for the CLI a name matching two ids is a question worth asking back. A tutorial has nobody
+    /// to ask, and the case is not rare — a hand is dealt up to StaticGameData.HandSize out of a deck
+    /// holding five Build Navy, so "Build Navy" names two of them about half the time. Rejecting that
+    /// as ambiguous took the whole lesson down (see TutorialScriptException) over a distinction the
+    /// script does not care about: any copy of the card will do, and constraining the prompt should
+    /// leave all of them clickable.
+    ///
+    /// Genuinely different options sharing a prefix are still ambiguous — "Build" matching both Build
+    /// Army and Build Navy is the mistake this must keep reporting.
+    /// </summary>
+    public static List<CliOption> ResolveAll(InputRequestSpec spec, string name, out string error)
+    {
+        error = null;
+
+        List<CliOption> matches = spec.Options
+            .Where(o => Equals(o, name))
+            .ToList();
+
+        if (matches.Count == 0)
+            matches = spec.Options
+                .Where(o => o.Label.StartsWith(name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        if (matches.Count == 0)
+        {
+            error = $"no option matching '{name}' (offered: {Describe(spec)})";
+            return null;
+        }
+
+        List<string> distinctLabels = matches
+            .Select(m => m.Label)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (distinctLabels.Count > 1)
+        {
+            error = $"'{name}' is ambiguous: {string.Join(", ", distinctLabels)}";
+            return null;
+        }
+
+        return matches;
+    }
+
+    /// <summary>
     /// Exact match on the display label, or on the underlying data file's UniqueName.
     ///
     /// Both forms are accepted because both are what an author has just been reading. A scenario

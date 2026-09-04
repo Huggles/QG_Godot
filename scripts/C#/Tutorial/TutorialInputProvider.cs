@@ -86,9 +86,12 @@ public sealed class TutorialInputProvider : IInputProvider
         foreach (string name in claim.Cards.Concat(claim.Countries)
                      .Concat(claim.Option == null ? Enumerable.Empty<string>() : new[] { claim.Option }))
         {
-            CliOption option = CliOptionMatcher.Resolve(spec, name, out error);
-            if (option == null) return null;
-            chosen.Add(option);
+            // The first of however many copies the prompt offers. ResolveAll rather than Resolve for
+            // the reason it documents: "play Build Army" out of a hand holding three of them is one
+            // answer, not an ambiguity, and any copy plays the same.
+            List<CliOption> options = CliOptionMatcher.ResolveAll(spec, name, out error);
+            if (options == null) return null;
+            chosen.Add(options[0]);
         }
 
         if (chosen.Count == 0)

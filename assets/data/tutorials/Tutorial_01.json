@@ -2,7 +2,7 @@
   "id": "tutorial_01_first_turn",
   "title": "Tutorial 1 — Your First Turn",
   "learnerFaction": "UNITED_KINGDOM",
-  "onUnexpectedPrompt": "lenient",
+  "onUnexpectedPrompt": "pass",
   "steps": [
     {
       "type": "message",
@@ -134,23 +134,117 @@
       "arrow": { "x": 0.36, "y": 0.13, "rotation": 270 },
       "text": "The [b]Victory Point[/b] step — step four. You score for every [b]supply star[/b] you occupy, and the fewer rivals standing on it, the more it pays.\n\nThe North Sea pays nothing. Your points this turn come from the [b]United Kingdom[/b] itself, where your army has stood since the war began."
     },
-
-    { "type": "answer", "prompt": "HandCardPlay", "faction": "JAPAN",         "pass": true },
-    { "type": "answer", "prompt": "HandCardPlay", "faction": "SOVIET",        "pass": true },
-    { "type": "answer", "prompt": "HandCardPlay", "faction": "ITALY",         "pass": true },
-    { "type": "answer", "prompt": "HandCardPlay", "faction": "UNITED_STATES", "pass": true },
-
-    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "GERMANY",        "pass": true },
-    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "UNITED_KINGDOM", "pass": true },
-    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "JAPAN",          "pass": true },
-    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "SOVIET",         "pass": true },
-    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "ITALY",          "pass": true },
-    { "type": "answer", "prompt": "HandCardsDiscard", "faction": "UNITED_STATES",  "pass": true },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "DISCARD" },
+      "text": "Your [b]Discard[/b] step. Throw away anything you cannot use — or keep the lot; discarding nothing is a legal answer.\n\nWhatever you let go, the [b]Draw[/b] step behind it fills you back up to seven."
+    },
 
     {
       "type": "message",
+      "at": { "turn": 3, "step": "PLAY_CARD" },
+      "text": "[b]Japan[/b]. Watch this one closely, General — they are not going to build anything."
+    },
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "JAPAN", "card": "Destroyer Transport" },
+    {
+      "type": "message",
+      "at": { "turn": 3, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Japan spent its entire Play step laying one card [b]face down[/b] on the table. Nothing built, nothing attacked, turn over.\n\nThat is a [b]Response[/b] card. A Response can never be used out of hand — putting it on the table IS the Play step, and only from there can it ever be used."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 3, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "From now on it sits there waiting for the [b]trigger[/b] printed on its face. When that trigger happens — on anybody's turn — Japan may flip it and take the effect for free, without spending a Play step on it.\n\nThen it is spent: flipped face up, and into the discard pile. One card, one use."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 3, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "A Response goes down [b]face down[/b]. Across a real table you would see nothing but its back, and knowing that Japan holds [i]something[/i] is half of what the card is worth.\n\nIn this lesson you are holding all six seats yourself, so you can read it: [b]Destroyer Transport[/b] — [i]Use when you battle a sea space. Build 1 or 2 Armies adjacent to the space just battled.[/i]\n\nJapan needs a sea battle before it is worth anything. And nobody is ever forced to use a reaction, General."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 4, "step": "PLAY_CARD" },
+      "text": "[b]The Soviet Union[/b]. Another card to the table — and look at the difference."
+    },
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "SOVIET", "card": "Women Conscripts" },
+    {
+      "type": "message",
+      "at": { "turn": 4, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "The Soviets played [b]Women Conscripts[/b] — and played it [b]face up[/b]. That is a [b]Status[/b] card.\n\nSame price as a Response: the whole Play step, onto the table, before it does anything at all. Two differences, and both of them matter."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 4, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "First, everyone can read it. A Status card is public, so you can plan around it — and they can plan around yours.\n\nSecond, it [b]stays[/b]. A Response is flipped once and thrown away; a Status card sits on that table for the rest of the war and works every single time its trigger comes round."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 4, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "[b]Women Conscripts[/b] reads:\n\n[i]Use when you play a Build Army card for your Play step. Place that Build Army card on the top of your draw deck instead of discarding it.[/i]\n\nSo every time the Soviets build an army, that Build Army card goes back on top of their deck instead of into the discard pile — and they draw it again, and build again. Remember what I told you about a deck running dry, General. The Soviets have just made sure theirs does not."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD" },
+      "text": "[b]Italy[/b]. A navy — and they have picked their water carefully."
+    },
+    { "type": "answer", "prompt": "HandCardPlay",  "faction": "ITALY", "card": "Build Navy" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "ITALY", "country": "MEDITERRANEAN_SEA" },
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Italy has taken the [b]Mediterranean Sea[/b], which holds no supply star and will never pay them a single point.\n\nNow look at what it touches: [b]Western Europe[/b], [b]Italy[/b], the [b]Balkans[/b], [b]North Africa[/b], the [b]Middle East[/b]. Five coasts within reach of one square of water."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "And two of its exits are [b]straits[/b] — narrow water that a land space controls.\n\n[b]North Africa[/b] decides who may pass between the Mediterranean and the North Sea. The [b]Middle East[/b] decides who may pass between the Mediterranean and the Bay of Bengal. Whichever team holds that land holds the door; the other team's fleets simply cannot come through."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Neither of those two pays a point either, General.\n\nThat is the lesson. Some countries are worth holding for what they [b]score[/b]. Others are worth holding for what they [b]reach[/b] — or for what they deny the other side. The ones that score are not always the ones that decide the war."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "PLAY_CARD" },
+      "text": "[b]The United States[/b] — last of the six, and the furthest from anything."
+    },
+    { "type": "answer", "prompt": "HandCardPlay",  "faction": "UNITED_STATES", "card": "Build Army" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "UNITED_STATES", "country": "US_WEST" },
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "An army in [b]US West[/b] — a supply star, so it will pay them 2 points a turn for as long as they hold it. And nothing on this board can touch it.\n\nThe Americans are rich and they are safe. They are also nowhere near this war."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Count the road from [b]US East[/b] to the fighting: the [b]North Atlantic[/b], then the [b]North Sea[/b], then [b]Western Europe[/b]. Three plays, three turns, before one American soldier stands where the war is — and each of those turns is a card not spent on a battle.\n\nGermany reached a supply star on turn one. The United States cannot reach one of ours before turn four."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "That is the trade every faction makes, General. Each of the six is strong somewhere and helpless somewhere else — Germany fast and central, Japan spread across an ocean, the Americans slow and unreachable, and you on an island with the finest navy afloat.\n\nLearn which is which, and you will know who to fear, and when."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "VICTORY_POINT", "timing": "AFTER" },
+      "text": "Every faction has now scored. That is the end of the [b]round[/b] — and the only moment the war can be won.\n\nNobody is 30 points ahead, so it goes on."
+    },
+    {
+      "type": "message",
       "at": { "turn": 6, "step": "DRAW", "timing": "AFTER" },
-      "text": "That is a full round — every faction has taken a turn.\n\nWell done, General. [b]Dismissed.[/b]"
+      "text": "One full round, General, and you have seen the whole machine: the map, the seven steps, a build, a supply star, a Response, a Status, and five rivals who each want something different.\n\nTwo rounds left. Nobody will hold your hand through them — your hand is your own from here, and so are your mistakes."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 18, "step": "DRAW", "timing": "AFTER" },
+      "text": "Three rounds. That is the shape of every game you will play from here — the same seven steps, the same six factions, twenty rounds instead of three.\n\nWell done, General. [b]Dismissed.[/b]"
     },
     { "type": "end" }
   ]

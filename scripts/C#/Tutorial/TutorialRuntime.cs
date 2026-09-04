@@ -360,13 +360,15 @@ public sealed class TutorialRuntime : ITurnProgram
         List<int> ids = new();
         foreach (string name in names)
         {
-            CliOption option = CliOptionMatcher.Resolve(spec, name, out string error);
-            if (option == null)
+            // ResolveAll, not Resolve: a hand can hold several copies of the named card, and every one
+            // of them belongs in the offer — narrowing to one id would grey out a card the lesson just
+            // told the player to play. See CliOptionMatcher.ResolveAll.
+            List<CliOption> options = CliOptionMatcher.ResolveAll(spec, name, out string error);
+            if (options == null)
                 throw new TutorialScriptException(
                     $"constraining {spec.Kind} for {spec.Faction}: {error}");
 
-            if (option.Kind != kind) continue;
-            ids.Add(option.Id);
+            ids.AddRange(options.Where(o => o.Kind == kind).Select(o => o.Id));
         }
 
         if (ids.Count == 0)
