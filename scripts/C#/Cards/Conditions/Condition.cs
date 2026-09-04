@@ -211,25 +211,6 @@ public abstract class Condition
         }
     }
 
-    public class CountryHasEnemyUnit : Condition
-    {
-        public CountryHasEnemyUnit(int countryId, Faction faction)
-        {
-            this.CountryIds = [countryId];
-            this.Faction = faction;
-        }
-
-        public CountryHasEnemyUnit(List<int> countryIds, Faction faction)
-        {
-            this.CountryIds = countryIds;
-            this.Faction = faction;
-        }
-
-        public override bool MeetCondition()
-        {
-            return CountryStates.Any(countryState => countryState.Tags.Has(Tag.EnemyControlled, Faction));
-        }
-    }
     public class CountryHasAttackableNeighbor : Condition
     {
         public CountryHasAttackableNeighbor(int countryId)

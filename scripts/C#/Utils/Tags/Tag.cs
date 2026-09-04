@@ -4,8 +4,7 @@ using System;
 public enum Tag
 {   
     //Country Tags
-    Attackable,    
-    EnemyControlled,
+    Attackable,
     AlliedControlled,
     Empty,
     Buildable,
