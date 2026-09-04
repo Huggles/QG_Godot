@@ -240,7 +240,7 @@ A scoped skip silences **only** the windows that exist to hide information. `IsP
 
 `GameFlow`'s two registries are host-only and self-expiring: each records the turn/step or round it was set in and stops being honoured once the game moves past it, so there is no clearing hook to keep in step with the turn loop. `ChangeRoundChangeEvent` calls `DropOwnTurnReactionSkip()` so a round-scope skip never survives into its owner's own turn — reacting to your own battle (Destroyer Transport, Surprise Attack) is core play and must not be muted by a decision taken on somebody else's turn.
 
-**What the prompt shows.** A reaction window draws the faction's *whole* event-triggered table — `ReactionWindowDisplayCardIds`, carried as `InputRequest.DisplayCardIds` — and greys out everything not in `TargetCardIds`. Showing only the playable cards left the player guessing why a card they knew they held was absent, and an always-ask window showed an empty table, which reads as a bug rather than as "nothing of yours triggers here". The two piles are filtered differently. **Status** cards must have an event-based trigger (`HasEventBasedTrigger`), so a passive modifier — or a scoring card, or a Play-step activation — is not shown as a reaction that merely is not available. **Response** cards are shown unconditionally: a Response card is on the table precisely to be activated, and an unrevealed one is what opened the window in the first place, so filtering it out produced the exact empty prompt this list exists to explain. That is what kept the three purely state-based Response cards — Defense of the Motherland, Mobile Force, Truk (start step / own turn) — out of every reaction window while causing one on every event.
+**What the prompt shows.** A reaction window draws the faction's *whole* event-triggered table — `ReactionWindowDisplayCardIds`, carried as `InputRequest.DisplayCardIds` — and greys out everything not in `TargetCardIds`. Showing only the playable cards left the player guessing why a card they knew they held was absent, and an always-ask window showed an empty table, which reads as a bug rather than as "nothing of yours triggers here". The two piles are filtered differently. **Status** cards must have an event-based trigger (`HasEventBasedTrigger`), so a passive modifier — or a scoring card, or a Play-step activation — is not shown as a reaction that merely is not available. **Response** cards are shown unconditionally: a Response card is on the table precisely to be activated, and an unrevealed one is what opened the window in the first place, so filtering it out produced the exact empty prompt this list exists to explain. That is what kept the three purely state-based Response cards — Defense of the Motherland, Mobile Force, Truk (play step / own turn) — out of every reaction window while causing one on every event.
 
 `ReactionWindowDisplayCardIds` also takes the window's `TargetCardIds` and folds them in, so the display list is **always a superset of the offered set**. `FactionHandDisplay` draws only the display list, so an offered card missing from it is unclickable — reachable because `ReactionDepth` is incremented only in `DoCard`, so a trigger event raised outside a card play (a step mutator, the draw step) opens an after-reaction window at depth 0, where `CanBeActivated`'s `reactionDepth == 0` branch admits a purely state-based Status card that the Status filter above excludes.
 
@@ -597,6 +597,38 @@ Five things to copy:
 player cancels the selection, or the step's only event is `IsTrigger = false` — offers no reaction to
 the play either. Currently benign; a card added with an `IsTrigger = false` first step silently takes
 this away.
+
+### Acting at the beginning of your turn
+
+There is **no `TurnStep.START` card window.** A card that reads *"at the beginning of your turn"*
+(Volksturm, Superior Planning, Mobile Force, Defense of the Motherland) triggers on
+`Condition.IsPlayCardStep` + `Condition.IsFactionTurn`, and is offered in the play prompt's side fan
+alongside the hand:
+
+```csharp
+protected override List<Condition> CardTriggers() => new List<Condition> {
+    Condition.Build(new Condition.IsPlayCardStep(), this),
+    Condition.Build(new Condition.IsFactionTurn(Faction), this),
+    // …the card's own availability conditions
+};
+```
+
+- **`IsPlayCardStep` folds in `!HasPlayedCardThisTurnStep`**, so the card is only offered *before* the
+  hand card — which is what "beginning of your turn" means once START is gone. Do not add your own
+  `Not(HasPlayedCardThisTurnStep)`.
+- **`IsFactionTurn` is not optional.** `IsPlayCardStep` alone is true for every faction during anyone's
+  Play step, which tags the card `IsActivatable` off-turn and lets it surface in a depth-0
+  after-reaction window on somebody else's turn.
+- **Do not emit `SpendPlayActionChangeEvent`** unless the card really is played *instead of* a hand
+  card. These four are in addition to the play. `CardPlayRound.Start` loops until
+  `Condition.HasPlayedCardThisTurnStep.For(faction)` is true, so a free activation re-opens the play
+  prompt with the hand still playable; a card that spends the play ends the step.
+- **Why not a window of its own.** The START round only raised a prompt when
+  `DeckState.ForFaction(faction).ActivatableCardIds.Count > 0`, so the prompt appearing was proof the
+  faction held a start-step card — for a face-down Response, the exact secret. This is the same leak
+  the always-ask rule closes for reaction windows, and START was not covered by it. The play prompt
+  opens every turn regardless, so folding these cards into it divulges nothing.
+
 ### Prerequisite Change Events Within a Step
 
 Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `Apply()` directly — no need to split into two steps or go through `CardPlayPool.DoChangeEvent`.

@@ -214,7 +214,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
         program?.Attach(this);
     }
 
-    public StartTurnStepHandler startTurnStepHandler;
+    // No handler for TurnStep.START: it raises no prompt and finishes inline — see StartTurnStepBody.
     public PlayStepHandlerDefault playStepHandlerDefault;
     public IVictoryStepHandler vpStepHandler = new VictoryStepHandlerDefault();
     public IDiscardStepHandler discardStepHandler;
@@ -473,13 +473,11 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     public void CancelCurrentStepHandler()
     {
-        startTurnStepHandler?.Cancel();
+        // Nothing for TurnStep.START: it has no handler and no round to leave in flight.
         playStepHandlerDefault?.Cancel();
 
         // Detach GameFlow's own subscriptions too: the handler instances stay referenced by these
         // fields, so a late Finished emission would otherwise still reach us.
-        if (startTurnStepHandler != null)
-            startTurnStepHandler.StartTurnStepFinished -= StartTurnStepFinishedHandler;
         if (playStepHandlerDefault != null)
             playStepHandlerDefault.PlayStepFinished -= PlayCardStepFinishedHandler;
         if (supplyStepHandler != null)
@@ -489,7 +487,6 @@ public partial class GameFlow : SingletonNode<GameFlow>
         if (drawStepHandler != null)
             drawStepHandler.DrawStepFinished -= DrawStepFinishedHandler;
 
-        startTurnStepHandler = null;
         playStepHandlerDefault = null;
         supplyStepHandler = null;
         discardStepHandler = null;
@@ -778,17 +775,21 @@ public partial class GameFlow : SingletonNode<GameFlow>
         StartTurnStepBody();
     }
 
+    /// <summary>
+    /// The START step raises no prompt. It used to run a CardPlayRound of its own for the four cards
+    /// that read "at the beginning of your turn", and that round only opened a prompt when one of them
+    /// was activatable — so the prompt's existence told every opponent the faction held one, which for
+    /// a face-down Response card is the whole secret. Those cards carry Condition.IsPlayCardStep now
+    /// and are offered in the play prompt, which opens every turn regardless.
+    ///
+    /// The step itself stays: BeginStep still applies its ChangeStepChangeEvent (which starts the
+    /// round the PLAY_CARD step's ChangeStepChangeEvent will replace) and still runs its BEFORE
+    /// mutators, and FinishStep still runs its AFTER mutators. Kept as a body rather than folded into
+    /// StartTurnStep so RestartStepBody has something to resume a save taken in this step with.
+    /// </summary>
     private void StartTurnStepBody()
     {
-        DebugUtilities.PrintPeer("StartTurnStep");
-        startTurnStepHandler = new StartTurnStepHandler();
-        startTurnStepHandler.StartTurnStepFinished += StartTurnStepFinishedHandler;
-        startTurnStepHandler.Start(CurrentFaction);
-    }
-
-    public void StartTurnStepFinishedHandler()
-    {
-        startTurnStepHandler.StartTurnStepFinished -= StartTurnStepFinishedHandler;
+        DebugUtilities.PrintPeer("StartTurnStep (no card round)");
         FinishStep(TurnStep.START);
     }
 

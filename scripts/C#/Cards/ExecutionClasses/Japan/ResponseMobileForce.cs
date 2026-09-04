@@ -8,8 +8,17 @@ public partial class ResponseMobileForce : ResponseCardLogic
 {
     protected override List<Condition> CardTriggers()
     {
-        return new List<Condition> { 
-            Condition.Build(new Condition.IsStartStep(), this) 
+        return new List<Condition> {
+            // "At the beginning of your turn" = the Play step with the play still unspent. See
+            // StatusVolksturm for why this is not TurnStep.START — for a face-down Response card
+            // the leak was the worst: the start window only ever opened for the faction holding
+            // one, so its appearance identified the card. Activating it does not spend the play.
+            //
+            // IsFactionTurn is new. It was implied before (only CurrentFaction was prompted at
+            // START) but IsPlayCardStep is true for every faction during anyone's Play step, which
+            // would tag this activatable off-turn.
+            Condition.Build(new Condition.IsPlayCardStep(), this),
+            Condition.Build(new Condition.IsFactionTurn(Faction), this)
         };
     }
 

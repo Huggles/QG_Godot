@@ -70,15 +70,18 @@ public partial class CardPlayRound : GodotObject
     // ── Entry point ────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Start this round for the given faction. Assigns itself as Current, requests
-    /// the faction's card play, and finishes when no more actions remain.
-    /// During the start turn step, loops to allow multiple card activations.
+    /// Start this round for the given faction. Assigns itself as Current, requests the faction's card
+    /// play, and finishes when the play is spent or the faction passes.
     /// Returns the last step ID that was played, or -1 if the faction passed immediately.
     /// </summary>
+    /// <remarks>
+    /// The Play step is the only caller. TurnStep.START used to run a round of its own, looping so a
+    /// faction could take several start-step activations; it no longer raises a prompt at all — see
+    /// GameFlow.StartTurnStepBody.
+    /// </remarks>
     public async Task<int> Start(Faction faction)
     {
         Current = this;
-        bool isStartTurnStep = GameFlow.Instance.TurnStep == TurnStep.START;
         int lastStepId = -1;
 
         while (true)
@@ -88,12 +91,15 @@ public partial class CardPlayRound : GodotObject
             {
                 break;
             }
-            
+
             lastStepId = stepId;
 
-            // During the start turn step, keep looping to allow multiple activations.
-            // During any other step, one card play ends the round.
-            if (!isStartTurnStep)
+            // Spending the play ends the round; anything else leaves the faction with an action still
+            // to take and must ask again. Not every table card in the play prompt costs the play:
+            // Volksturm and the other "at the beginning of your turn" cards are explicitly in ADDITION
+            // to it, and ResponseTruk carries no play-step condition at all — before this, activating
+            // any of them ended the step with the hand card unplayed.
+            if (Condition.HasPlayedCardThisTurnStep.For(faction))
             {
                 break;
             }
@@ -519,8 +525,9 @@ public partial class CardPlayRound : GodotObject
     /// <summary>Request the faction's initial card play, then execute the chosen card.</summary>
     public async Task<int> RequestCardPlay(Faction faction)
     {        
-        // Recalculate at depth 0 so purely state-based cards (e.g. start-step status cards)
-        // are correctly reflected in ActivatableCardIds for subsequent START-step iterations.
+        // Recalculate at depth 0 so purely state-based cards (e.g. the "beginning of your turn"
+        // status cards) are correctly reflected in ActivatableCardIds on every iteration of the
+        // play-step loop — a free activation changes what is still available.
         GameStateCalculator.CalculateAll();
         int cardId = await RequestPlay(faction);
         if (cardId > -1)
@@ -591,8 +598,7 @@ public partial class CardPlayRound : GodotObject
                 bool hasPlayedHandCardThisTurnStep =
                     GameFlow.Instance.CardsPlayedThisTurnStep.TryGetValue(faction, out int cardsPlayedByFaction)
                     && cardsPlayedByFaction > 0;
-                bool isStartTurnStep = GameFlow.Instance.TurnStep == TurnStep.START;
-                request = hasPlayedHandCardThisTurnStep || isStartTurnStep
+                request = hasPlayedHandCardThisTurnStep
                     ? new InputRequest.ActivateCardRequestHandler(faction)
                     : new InputRequest.HandCardPlayRequestHandler(faction);
             }
@@ -723,7 +729,7 @@ public partial class CardPlayRound : GodotObject
     /// activated, and an unrevealed one is what opened this window in the first place
     /// (see <see cref="HasHiddenResponseCards"/>) — so filtering it out produced the exact empty
     /// prompt the display list exists to explain. Defense of the Motherland, Mobile Force and Truk
-    /// have purely state-based triggers (start step / own turn) and so were never drawn in any
+    /// have purely state-based triggers (play step / own turn) and so were never drawn in any
     /// reaction window, while causing one on every event.
     /// </summary>
     /// <param name="offeredCardIds">
@@ -746,8 +752,9 @@ public partial class CardPlayRound : GodotObject
     }
 
     /// <summary>
-    /// Every table card the faction can activate during its Play step instead of playing from hand —
-    /// what the hand-play prompt draws beside the hand, whether or not each one can be used right now.
+    /// Every table card the faction can activate during its Play step — instead of playing from hand,
+    /// or alongside it for the ones that do not spend the play (see Condition.IsPlayCardStep) — which
+    /// is what the hand-play prompt draws beside the hand, whether or not each can be used right now.
     /// The prompt greys out and un-clicks everything outside <see cref="ActivatableCardIds"/>.
     ///
     /// The same reasoning as <see cref="ReactionWindowDisplayCardIds"/>: a card the player knows they

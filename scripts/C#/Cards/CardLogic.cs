@@ -23,7 +23,10 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     public bool IsBlockReaction => CardTriggers().Any(triggerCondition => triggerCondition is Condition.IsBlockRequest);
 
     /// <summary>
-    /// This card activates during its faction's Play step instead of a card being played from hand.
+    /// This card activates during its faction's Play step, with the play still unspent — instead of a
+    /// card being played from hand, or (Volksturm, Superior Planning, Mobile Force, Defense of the
+    /// Motherland) in addition to it, which is how "at the beginning of your turn" is expressed since
+    /// the TurnStep.START window was removed. Either way it belongs beside the hand in the prompt.
     /// A structural test on the trigger list, deliberately NOT whether the trigger is currently met:
     /// it decides what the play prompt DISPLAYS beside the hand, and a card that cannot be used right
     /// now — cost unpayable, no legal target, play already spent — must be shown unusable rather than

@@ -709,12 +709,21 @@ public abstract class Condition
 
     /// <summary>
     /// The Play step, with the faction's play still unspent — the window in which a table card can be
-    /// activated INSTEAD of playing a card from hand.
+    /// activated instead of, or ahead of, playing a card from hand.
+    ///
+    /// Not every card carrying this spends the play. Most do (Conscription, Bravado, Guards, … each
+    /// emit SpendPlayActionChangeEvent as their first step, which is the literal "instead of playing
+    /// a card from hand"). The four that read "at the beginning of your turn" — Volksturm, Superior
+    /// Planning, Mobile Force, Defense of the Motherland — carry it purely for its TIMING and leave
+    /// the play intact; CardPlayRound.Start keeps re-asking until the play is actually spent. They
+    /// used to live in a TurnStep.START window of their own, which announced that the faction held a
+    /// start-step card — for a face-down Response, exactly the card it was hiding.
     ///
     /// The "not yet played" half is folded in rather than left to each card to add its own
-    /// Not(HasPlayedCardThisTurnStep): every card carrying this condition needs it (activating one
-    /// spends the play via SpendPlayActionChangeEvent, so a second activation would be a free extra
-    /// action), and a new card that forgot it would silently be activatable twice in a step.
+    /// Not(HasPlayedCardThisTurnStep): every card carrying this condition needs it (the play-spending
+    /// ones would otherwise grant a free extra action; the free ones would otherwise be usable after
+    /// the hand card, which is not "the beginning of your turn"), and a new card that forgot it would
+    /// silently be activatable twice in a step.
     /// The six cards that predate this keep their explicit Not(...) — it is now redundant, not wrong.
     ///
     /// This condition is also the marker for "belongs beside the hand in the play prompt" — see
@@ -738,10 +747,11 @@ public abstract class Condition
         }
     }
 
-    public class IsStartStep : Condition
-    {
-        public override bool MeetCondition() => GameFlow.Instance.TurnStep == TurnStep.START;
-    }
+    // An IsStartStep condition used to live here, for the four cards that read "at the beginning of
+    // your turn". It is gone with the TurnStep.START card round: those cards carry IsPlayCardStep
+    // now, so their window is the play prompt that opens every turn regardless of what anyone holds.
+    // Re-adding it would re-open the leak — a window that exists only when a card can use it is proof
+    // that the card is there.
 
     public class CustomCondition : Condition
     {

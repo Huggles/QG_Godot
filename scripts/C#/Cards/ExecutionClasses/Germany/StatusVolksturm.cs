@@ -8,7 +8,13 @@ public partial class StatusVolksturm : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.IsStartStep(), this),
+            // "At the beginning of your turn" is expressed as the Play step with the play still
+            // unspent, not as TurnStep.START: a window that only opened when someone held a
+            // start-step card announced that they held one. IsPlayCardStep also places the card
+            // beside the hand in the play prompt (CardLogic.IsPlayStepActivation) — but this one
+            // does NOT spend the play, per the card text.
+            Condition.Build(new Condition.IsPlayCardStep(), this),
+            Condition.Build(new Condition.IsFactionTurn(Faction), this),
             Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Germany], Faction), this)
         };
     }

@@ -10,7 +10,7 @@ different ways**:
 
 | Step | Handler | Completion idiom |
 |---|---|---|
-| START | `StartTurnStepHandler` | Godot `[Signal] StartTurnStepFinished` |
+| START | none — finishes inline | n/a (raises no prompt; see `GameFlow.StartTurnStepBody`) |
 | PLAY_CARD | `PlayStepHandlerDefault` | Godot `[Signal] PlayStepFinished` |
 | SUPPLY | `SupplyStepHandlerDefault` | C# `event Action SupplyStepFinished` |
 | VICTORY_POINT | `VictoryStepHandlerDefault` | none — plain awaited `Task` |
@@ -21,14 +21,16 @@ Each step method starts its handler and returns immediately; the handler later f
 back into `GameFlow` to advance the loop. So `Func<Task> GameTurnStep.Handler` completes long before the step
 it names actually finishes.
 
-The worst of it is START and PLAY_CARD, which do not use their own signal to detect completion — they
-subscribe to the **globally shared** `EventBus.CardPlayPoolFinished`, emitted by `CardPlayRound.Finish()`.
-Two handlers listening to one global signal is why all of the following exists:
+The worst of it is PLAY_CARD, which does not use its own signal to detect completion — it subscribes to the
+**globally shared** `EventBus.CardPlayPoolFinished`, emitted by `CardPlayRound.Finish()`. START used to
+subscribe to the same signal for its own card round; that round is gone (the "beginning of your turn" cards
+moved into the play prompt), so there is one listener now rather than two — but the hazard below survives,
+because an aborted play step's leftover subscription still fires on the next round to finish:
 
 - `GameFlow.stepEpoch` and the stale-epoch gate in `StartNextStep` — without it, an aborted step's leftover
   subscription fires on the *next* round to finish and silently skips a step.
 - `GameFlow.CancelCurrentStepHandler()`, which detaches every handler and every `GameFlow` subscription.
-- `PlayStepHandlerDefault.Cancel()` / `StartTurnStepHandler.Cancel()` and their `subscribed` bookkeeping.
+- `PlayStepHandlerDefault.Cancel()` and its `subscribed` bookkeeping.
 
 The comments at `GameFlow.cs:190-194` and `PlayStepHandlerDefault.cs:29-33` document the bugs that produced
 each of these.

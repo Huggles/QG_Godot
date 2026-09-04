@@ -32,7 +32,10 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.IsStartStep(), this),
+            // "At the beginning of your turn" = the Play step with the play still unspent. See
+            // StatusVolksturm for why this is not TurnStep.START. Activating it does not spend
+            // the play.
+            Condition.Build(new Condition.IsPlayCardStep(), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
             Condition.Build(new Condition.CountryIsRecruitable(MoscowAndAdjacentIds, Faction), this)
         };
