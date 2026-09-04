@@ -576,7 +576,7 @@ public partial class CardPlayRound : GodotObject
                 request = new InputRequest.ActivateCardRequestHandler(faction)
                 {
                     TargetCardIds = reactionOptions,
-                    DisplayCardIds = ReactionWindowDisplayCardIds(faction),
+                    DisplayCardIds = ReactionWindowDisplayCardIds(faction, reactionOptions),
                     IsReactionWindow = true,
                     // Only on this branch. The else branch below is the faction's own play, which can
                     // carry a trigger too (the stamp under it is not gated on isReaction) — but it is
@@ -656,7 +656,7 @@ public partial class CardPlayRound : GodotObject
             // Sent explicitly so the client prompt offers only block-eligible cards rather than
             // everything tagged IsActivatable. Tag.IsBlockReaction itself stays server-internal.
             TargetCardIds = blockOptions,
-            DisplayCardIds = ReactionWindowDisplayCardIds(faction),
+            DisplayCardIds = ReactionWindowDisplayCardIds(faction, blockOptions),
             TriggerCardId = GetTriggerCardId(CurrentBlockTrigger),
             TriggerSummaryText = CurrentBlockTrigger?.SummaryText(),
             // See RequestPlay: the cause is the trigger's own source card, which TriggerCardId only
@@ -713,16 +713,35 @@ public partial class CardPlayRound : GodotObject
     /// "nothing of yours triggers here". Both piles are on-table only: DeckState.DiscardCard removes
     /// a spent card from them.
     ///
-    /// Passive-modifier Status cards are excluded. HasEventBasedTrigger is the same property
-    /// CanBeActivated uses to keep them out of reaction chains, so a card that could never be a
-    /// reaction is not shown as one that merely is not available.
+    /// The two piles are filtered differently, deliberately:
+    ///
+    /// Status cards must have an event-based trigger. HasEventBasedTrigger is the same property
+    /// CanBeActivated uses to keep them out of reaction chains, so a passive modifier — or a scoring
+    /// card, or a Play-step activation — is not shown as a reaction that merely is not available.
+    ///
+    /// Response cards are shown unconditionally. A Response card is on the table precisely to be
+    /// activated, and an unrevealed one is what opened this window in the first place
+    /// (see <see cref="HasHiddenResponseCards"/>) — so filtering it out produced the exact empty
+    /// prompt the display list exists to explain. Defense of the Motherland, Mobile Force and Truk
+    /// have purely state-based triggers (start step / own turn) and so were never drawn in any
+    /// reaction window, while causing one on every event.
     /// </summary>
-    public static List<int> ReactionWindowDisplayCardIds(Faction faction)
+    /// <param name="offeredCardIds">
+    /// The window's TargetCardIds, folded in so the display list is always a superset of what the
+    /// host is offering. FactionHandDisplay draws only the display list, so an offered card missing
+    /// from it is unclickable. Reachable today: ReactionDepth is incremented only in DoCard, so a
+    /// trigger event raised outside a card play (a step mutator, the draw step) opens an
+    /// after-reaction window at depth 0, where CanBeActivated's reactionDepth == 0 branch admits a
+    /// purely state-based Status card (StatusVolksturm, StatusSuperiorPlanning) that this method's
+    /// Status filter excludes.
+    /// </param>
+    public static List<int> ReactionWindowDisplayCardIds(Faction faction, List<int> offeredCardIds = null)
     {
         DeckState deck = DeckState.ForFaction(faction);
         return deck.StatusCardIds
-            .Concat(deck.ResponseCardIds)
             .Where(id => CardState.ForId(id)?.CardLogic?.HasEventBasedTrigger == true)
+            .Concat(deck.ResponseCardIds)
+            .Union(offeredCardIds ?? Enumerable.Empty<int>())
             .ToList();
     }
 
