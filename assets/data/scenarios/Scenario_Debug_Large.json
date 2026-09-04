@@ -15,7 +15,8 @@
         { "countryName": "MEDITERRANEAN_SEA" },
         { "countryName": "NORTH_AFRICA" },        
         { "countryName": "BALTIC_SEA" },
-        { "countryName": "AFRICA" }
+        { "countryName": "AFRICA" },
+        { "countryName": "MIDDLE_EAST" }
       ],
       "initialCards": [
         { "name": "StatusSuperiorPlanning" },
@@ -24,16 +25,16 @@
         { "name": "StatusSyntheticFuel" },
         { "name": "StatusAtlanticWall" },
         { "name": "StatusDiveBombers" },
-        { "name": "StatusVolksturm" }
+        { "name": "StatusVolksturm" },
+        { "name": "StatusBiasForAction" }
       ],
-      "initialHandCards": [
-        { "name": "StatusBiasForAction" },
+      "initialHandCards": [        
         { "name": "EventMilitaryDictatorshipsInTheBalkans" },
-        { "name": "EWSubmarinesRaidMurmanskConvoy" }
+        { "name": "EWSubmarinesRaidMurmanskConvoy" },
+        { "name": "BuildArmy" }
       ],
       "initialDiscardedCards": [
-        { "name": "EventGunsAndButter" },
-        { "name": "BuildArmy" },
+        { "name": "EventGunsAndButter" },        
         { "name": "BuildArmy" }
       ],
       "startingVP": 0
