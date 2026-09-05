@@ -1,0 +1,19 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://ct1f7uc5i6gao"]
+
+[ext_resource type="Shader" uid="uid://b6hbamkrhtk34" path="res://assets/materials/shaders/CardReflection.gdshader" id="1_cardreflection"]
+
+[resource]
+shader = ExtResource("1_cardreflection")
+shader_parameter/gleam_color = Color(1, 1, 1, 1)
+shader_parameter/intensity = 0.45
+shader_parameter/period_seconds = 3.0
+shader_parameter/sweep_seconds = 0.7
+shader_parameter/start_time = 0.0
+shader_parameter/angle_degrees = 125.69101452032248
+shader_parameter/band_width = 0.22700001008398
+shader_parameter/band_softness = 2.5
+shader_parameter/streak_strength = 0.8
+shader_parameter/streak_width = 0.22
+shader_parameter/streak_offset = 0.16
+shader_parameter/sweep_ease = 0.6
+shader_parameter/corner_radius = 0.06
