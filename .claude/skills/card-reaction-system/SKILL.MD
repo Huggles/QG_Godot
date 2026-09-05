@@ -623,6 +623,11 @@ protected override List<Condition> CardTriggers() => new List<Condition> {
   card. These four are in addition to the play. `CardPlayRound.Start` loops until
   `Condition.HasPlayedCardThisTurnStep.For(faction)` is true, so a free activation re-opens the play
   prompt with the hand still playable; a card that spends the play ends the step.
+- **Override `CardLogic.IsFreePlayStepActivation => true`** on a card that leaves the play intact.
+  Nothing infers it — a trigger list does not say what a step will spend — and it is what earns the
+  card the foil-sweep emphasis in the play prompt (`FactionHandDisplay.LayoutFan` →
+  `CardScene.SetEmphasized`), shown only while the card is actually activatable. A free activation
+  that forgets it still works; it just sits in the fan looking like every card that costs the play.
 - **Why not a window of its own.** The START round only raised a prompt when
   `DeckState.ForFaction(faction).ActivatableCardIds.Count > 0`, so the prompt appearing was proof the
   faction held a start-step card — for a face-down Response, the exact secret. This is the same leak

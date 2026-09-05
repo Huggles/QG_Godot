@@ -34,6 +34,28 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// </summary>
     public bool IsPlayStepActivation => CardTriggers().Any(c => c is Condition.IsPlayCardStep);
 
+    /// <summary>
+    /// A play-step activation that does NOT consume the faction's play. True for the four cards that
+    /// read "at the beginning of your turn" — Volksturm, Superior Planning, Mobile Force, Defense of
+    /// the Motherland — which carry Condition.IsPlayCardStep purely for its timing and leave the hand
+    /// card still playable (CardPlayRound.Start keeps asking until the play is actually spent).
+    /// False for the ones that really are played INSTEAD of a hand card (Conscription, Bravado,
+    /// Guards, …), each of which emits SpendPlayActionChangeEvent as its first step.
+    ///
+    /// Declared rather than inferred, and therefore a SECOND statement of a fact the card's steps
+    /// already make: what actually spends the play is the three-line SpendPlayActionChangeEvent
+    /// prologue at the top of a play-spending card's first step. The two must agree, and nothing
+    /// enforces it — a step body is a Func<Task>, so the only way to read the cost off the card is to
+    /// run it, which is far too late for a prompt-time cue. Set this to match the prologue: true when
+    /// there is none, false when there is. Getting it wrong is cosmetic (a card gleams that should
+    /// not, or does not that should), never a rules bug — the prologue remains the mechanism.
+    ///
+    /// Drives the emphasis cue in the play prompt — see FactionHandDisplay.LayoutFan. A free
+    /// activation costs nothing to use, so missing one is a pure loss, and these four are newly
+    /// beside the hand: they used to get a prompt of their own at TurnStep.START.
+    /// </summary>
+    public virtual bool IsFreePlayStepActivation => false;
+
     public bool HasEventBasedTrigger => CardTriggers().Any(c => c.RequiresEventContext);
     public bool HasImmediateTrigger => CardTriggers().Any(c => c is Condition.EventCondition ec && ec.IsImmediate);
     public bool HasExecutableCardSteps => CardSteps.Count == 0 || ExecutableCardSteps.Count > 0;

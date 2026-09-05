@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 public partial class StatusVolksturm : StatusCardLogic
-{    
+{
+    /// <summary> "This is in addition to your Play step" — the recruit does not cost the hand card. </summary>
+    public override bool IsFreePlayStepActivation => true;
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

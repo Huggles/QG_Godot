@@ -6,6 +6,9 @@ using Godot;
 
 public partial class ResponseMobileForce : ResponseCardLogic
 {
+    /// <summary> A turn-start recruit, not a substitute for the hand card — the play is untouched. </summary>
+    public override bool IsFreePlayStepActivation => true;
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

@@ -29,6 +29,9 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
             })
             .ToList();
 
+    /// <summary> A turn-start recruit and elimination, not a substitute for the hand card. </summary>
+    public override bool IsFreePlayStepActivation => true;
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

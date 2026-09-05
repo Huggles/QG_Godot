@@ -354,6 +354,18 @@ public partial class FactionHandDisplay : Control
 				!selectable    ? CardScene.CardAvailability.Unavailable :
 				needsAttention ? CardScene.CardAvailability.Caution
 							   : CardScene.CardAvailability.Available);
+
+			// The foil sweep, reserved for the one thing in this prompt that is free: a play-step
+			// activation that does not spend the play (CardLogic.IsFreePlayStepActivation — the four
+			// cards that read "at the beginning of your turn"). Passing one over is a pure loss, and
+			// they are easy to miss now that they sit in the side fan rather than getting a prompt of
+			// their own at TurnStep.START.
+			//
+			// Only while it is genuinely usable: emphasising a card the player then cannot click reads
+			// as a bug, and the greyed-out copy is already explained by the availability scrim. Set on
+			// every card, not just the emphasised ones — a CardScene is fresh here, but SetEmphasized
+			// is what puts the overlay into a known state.
+			cardSceneInstance.SetEmphasized(selectable && cardState.CardLogic?.IsFreePlayStepActivation == true);
 		}
 	}
 

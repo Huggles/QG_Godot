@@ -6,6 +6,9 @@ using Godot;
 
 public partial class StatusSuperiorPlanning : StatusCardLogic
 {
+    /// <summary> A free look at the top of the deck: the play is untouched. </summary>
+    public override bool IsFreePlayStepActivation => true;
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
