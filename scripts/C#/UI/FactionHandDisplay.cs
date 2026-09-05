@@ -377,9 +377,16 @@ public partial class FactionHandDisplay : Control
 			// Gated on selectable either way: emphasising a card the player then cannot click reads as a
 			// bug, and the greyed-out copy is already explained by the availability scrim. A cautioned
 			// card still gleams — it IS usable, and Caution is a separate statement about its value.
+			//
+			// And gated on IsPlayed: the cue is only ever about a card ON THE TABLE. A Status/Response
+			// card still in hand is a normal hand play like any other, and both tests above would
+			// otherwise admit it — IsFreePlayStepActivation is a constant on the CardLogic that says
+			// nothing about where the card is (Defense of the Motherland gleamed in hand for exactly
+			// this reason), and a hand card can be selectable in the play prompt.
+			//
 			// Set on every card, not just the emphasised ones — a CardScene is fresh here, but
 			// SetEmphasized is what puts the overlay into a known state.
-			cardSceneInstance.SetEmphasized(selectable
+			cardSceneInstance.SetEmphasized(selectable && cardState.IsPlayed
 				&& (isReactionWindow || cardState.CardLogic?.IsFreePlayStepActivation == true));
 		}
 	}
