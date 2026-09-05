@@ -208,6 +208,45 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
         IsBlocked = false;
     }
 
+    /// <summary>
+    /// Re-arm this card as unused, for a card RETURNING to a deck or a hand from play — see
+    /// RecycleCardChangeEvent, its only caller.
+    ///
+    /// CardStep.StepFinished is set once and never cleared again for anything but a Status card
+    /// (<see cref="OnNewTurnStarted"/> re-arms those every turn, because their steps are meant to fire
+    /// once per turn from the table). A recycled card is a different case that looked the same: the
+    /// Build Army card Women Conscripts puts back on top of the draw deck kept every step marked
+    /// finished, so once drawn again it had no executable steps, CanBeActivated returned false, and it
+    /// sat in hand permanently unplayable. Same for Rationing shuffling a card back in, and for the
+    /// discarded Build Army card Guards recycles to hand and plays on the spot — that one would have
+    /// been discarded again without deploying anything.
+    ///
+    /// Deliberately does NOT touch CardState.ActivatedInTurns or PlayedInTurn: those gate real rules
+    /// (MultipleActivationsPerTurn, the once-per-turn conditions), and clearing them would let a card
+    /// recycled mid-turn be used a second time in the same turn. See the note on CardState.IsRevealed,
+    /// which is re-hidden for exactly the same reason this re-arms, and by the same event.
+    ///
+    /// IsBlocked is likewise left alone — OnNewTurnStarted clears it, and lifting a block the moment a
+    /// card moves piles would let a blocked card's remaining steps run in DoCard's loop.
+    ///
+    /// Ordering an in-round caller must respect: a card re-armed while it is still in the live
+    /// CardPlayRound's CardPool has executable steps again, and CardPlayRound.ContinueWithNextSteps
+    /// walks that pool. Guards and Flexible Resources both DoCard the recycled card immediately, which
+    /// finishes the steps before any window can reach them; Women Conscripts and Rationing recycle
+    /// from a step mutator, after the play step's round is already finished.
+    /// </summary>
+    public void OnReturnedToPlay()
+    {
+        CardSteps.ForEach(step =>
+        {
+            step.StepFinished = false;
+            step.StepSucceeded = false;
+        });
+        IsPlayFinished = false;
+        IsActivationFinished = false;
+        ActivationTrigger = null;
+    }
+
     public virtual string PlayActionGuidance() =>
         $"Play {GetType().Name}";
 

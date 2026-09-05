@@ -94,7 +94,13 @@ public partial class RecycleCardChangeEvent : ChangeEvent
         // Back in play means face down again: a Response card revealed by an earlier activation must
         // not stay revealed once it returns to a deck or a hand. Placed after the RemoveCardFromAnyPile
         // guard above, so a recycle that found nothing to move changes nothing here either.
-        CardState.ForId(CardId).IsRevealed = false;
+        CardState cardState = CardState.ForId(CardId);
+        cardState.IsRevealed = false;
+
+        // ...and unused again. A card whose steps are still marked finished is drawn as a dead card:
+        // no executable steps, so CanBeActivated is false and it is never playable or activatable
+        // again. See CardLogic.OnReturnedToPlay. Runs on both peers, like everything else in here.
+        cardState.CardLogic?.OnReturnedToPlay();
 
         await Task.CompletedTask;
         return true;
