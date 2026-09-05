@@ -112,12 +112,13 @@ public partial class InputManager : Node2D
 
 		CurrentCardPrompt = new ActiveCardPrompt(
 			faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards,
-			isHandPlayPrompt, ToPreviewMap(cardTargetPreviews));
+			isHandPlayPrompt, isReactionWindow, ToPreviewMap(cardTargetPreviews));
 
 		PlayerActionLabel.ShowText(BannerText(triggerKind, cardIds.Count > 0), faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
 		// and would resolve Faction.NONE for an empty always-ask prompt.
-		FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds, separateNonHandCards);
+		FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds, separateNonHandCards,
+			isReactionWindow);
 		FactionHandDisplay.Current.CardSelected += HandleItemSelected;
 		EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
 		// A card prompt is recallable for as long as it is open: the player can browse another faction's
@@ -224,7 +225,7 @@ public partial class InputManager : Node2D
 
 		FactionHandDisplay.Current.Show(
 			CurrentCardPrompt.DisplayCardIds, CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds,
-			CurrentCardPrompt.SeparateNonHandCards);
+			CurrentCardPrompt.SeparateNonHandCards, CurrentCardPrompt.IsReactionWindow);
 		return true;
 	}
 

@@ -27,6 +27,16 @@ using System.Collections.Generic;
 /// faction's card back should hand the prompt back rather than browse a dead copy of the same hand
 /// over the top of it.
 /// </param>
+/// <param name="IsReactionWindow">
+/// True for a block or after-reaction prompt — the two that offer the scoped skip buttons. Drives the
+/// foil-sweep emphasis on every selectable card in the window (see FactionHandDisplay.LayoutFan): a
+/// reaction is a fleeting chance the player is being offered mid-someone-else's-action, so the cards
+/// that can actually take it are worth pointing at.
+///
+/// Carried on the record rather than left as a SetCardSelectionActive argument so a prompt re-drawn
+/// by <see cref="InputManager.ShowCurrentCardPrompt"/> — the way back from browsing another faction's
+/// hand — comes back emphasised the way the player left it.
+/// </param>
 /// <param name="PreviewsByCardId">
 /// What each drawn card could affect, for the hover preview — see
 /// <see cref="CardTargetPreviewDisplay"/>. Computed by the host and shipped on
@@ -45,4 +55,5 @@ public sealed record ActiveCardPrompt(
     List<int> SelectableCardIds,
     bool SeparateNonHandCards = false,
     bool IsHandPlay = false,
+    bool IsReactionWindow = false,
     Dictionary<int, InputRequest.CardTargetPreview> PreviewsByCardId = null);

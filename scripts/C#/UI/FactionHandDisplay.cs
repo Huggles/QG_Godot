@@ -173,12 +173,16 @@ public partial class FactionHandDisplay : Control
 	/// ActivateCardRequestHandler or reaction window offers nothing from hand, so splitting one would
 	/// move every card to the side fan and leave the hand position empty.
 	/// </param>
+	/// <param name="isReactionWindow">
+	/// A block or after-reaction prompt. Every selectable card in one gets the foil sweep — see
+	/// LayoutFan. Nothing to do with how the fan is laid out; it is purely which cue the prompt earns.
+	/// </param>
 	public void Show(List<int> cardIds, Faction faction, List<int> selectableCardIds = null,
-		bool separateNonHandCards = false)
+		bool separateNonHandCards = false, bool isReactionWindow = false)
 	{
 		showingFaction = faction;
 		ResetVisibility();
-		InitCards(cardIds, selectableCardIds, separateNonHandCards);
+		InitCards(cardIds, selectableCardIds, separateNonHandCards, isReactionWindow);
 	}
 
 	private void ResetVisibility()
@@ -203,7 +207,7 @@ public partial class FactionHandDisplay : Control
 	}
 
 	private void InitCards(List<int> cardIds, List<int> selectableCardIds = null,
-		bool separateNonHandCards = false)
+		bool separateNonHandCards = false, bool isReactionWindow = false)
 	{
 		// Only initialize cards if LoadUI has been called
 		DebugUtilities.PrintPeerFinest($"Initializing cards {string.Join(", ", cardIds)}");
@@ -257,8 +261,10 @@ public partial class FactionHandDisplay : Control
 		float fanTopY = -CardScene.DEFAULT_SIZE.Y / 3f
 			+ CardScene.DEFAULT_SIZE.Y * 0.5f * (1f - HandCardScale);
 
-		LayoutFan(handIds, selectableCardIds, containerCentreX, fanTopY, HandCardStepSize, HandCardScale, 0);
-		LayoutFan(sideIds, selectableCardIds, miniCentreX, fanTopY, miniStepSize, MiniCardScale, handIds.Count);
+		LayoutFan(handIds, selectableCardIds, containerCentreX, fanTopY, HandCardStepSize, HandCardScale, 0,
+			isReactionWindow);
+		LayoutFan(sideIds, selectableCardIds, miniCentreX, fanTopY, miniStepSize, MiniCardScale, handIds.Count,
+			isReactionWindow);
 	}
 
 	/// <summary>
@@ -310,7 +316,7 @@ public partial class FactionHandDisplay : Control
 	/// Keeps the side fan above the hand wherever the clamp has had to overlap the two.
 	/// </param>
 	private void LayoutFan(List<int> cardIds, List<int> selectableCardIds, float centreX, float topY,
-		float stepSize, float scale, int zIndexOffset)
+		float stepSize, float scale, int zIndexOffset, bool isReactionWindow = false)
 	{
 		float totalRotationSize = (cardIds.Count - 1) * RotationStepSize;
 		float totalSizeX = (cardIds.Count - 1) * stepSize;
@@ -355,17 +361,26 @@ public partial class FactionHandDisplay : Control
 				needsAttention ? CardScene.CardAvailability.Caution
 							   : CardScene.CardAvailability.Available);
 
-			// The foil sweep, reserved for the one thing in this prompt that is free: a play-step
-			// activation that does not spend the play (CardLogic.IsFreePlayStepActivation — the four
-			// cards that read "at the beginning of your turn"). Passing one over is a pure loss, and
-			// they are easy to miss now that they sit in the side fan rather than getting a prompt of
-			// their own at TurnStep.START.
+			// The foil sweep marks a card worth acting on, in the two prompts where one is easy to miss:
 			//
-			// Only while it is genuinely usable: emphasising a card the player then cannot click reads
-			// as a bug, and the greyed-out copy is already explained by the availability scrim. Set on
-			// every card, not just the emphasised ones — a CardScene is fresh here, but SetEmphasized
-			// is what puts the overlay into a known state.
-			cardSceneInstance.SetEmphasized(selectable && cardState.CardLogic?.IsFreePlayStepActivation == true);
+			//   - Any reaction window (block or after): every card that can actually take the reaction.
+			//     The window is a fleeting chance offered mid-someone-else's-action, and the always-ask
+			//     rule means most of these prompts are pure cover with nothing to play — so the rare one
+			//     that does offer something should not look like the rest.
+			//   - The play prompt: only a play-step activation that does NOT spend the play
+			//     (CardLogic.IsFreePlayStepActivation — the four cards that read "at the beginning of
+			//     your turn"). Passing one over is a pure loss, and they are easy to miss now that they
+			//     sit in the side fan rather than getting a prompt of their own at TurnStep.START.
+			//     Deliberately not every activatable card here: the hand is the prompt's whole subject,
+			//     so gilding all of it would say nothing.
+			//
+			// Gated on selectable either way: emphasising a card the player then cannot click reads as a
+			// bug, and the greyed-out copy is already explained by the availability scrim. A cautioned
+			// card still gleams — it IS usable, and Caution is a separate statement about its value.
+			// Set on every card, not just the emphasised ones — a CardScene is fresh here, but
+			// SetEmphasized is what puts the overlay into a known state.
+			cardSceneInstance.SetEmphasized(selectable
+				&& (isReactionWindow || cardState.CardLogic?.IsFreePlayStepActivation == true));
 		}
 	}
 
