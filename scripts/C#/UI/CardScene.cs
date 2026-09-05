@@ -34,6 +34,9 @@ public partial class CardScene : Control
 
 	private bool mousePassthrough = false;
 
+	// Same holding pattern as availability above.
+	private bool emphasized = false;
+
 	private VBoxContainer textBackgroundContainerNode => GetNode<VBoxContainer>("%TextBackgroundBox");
 	private VBoxContainer textContainerNode => GetNode<VBoxContainer>("%TextContainer");
 	private VBoxContainer textInnerContainerNode => GetNode<VBoxContainer>("%TextInnerContainer");
@@ -43,6 +46,7 @@ public partial class CardScene : Control
 	private TextureRect textBoxTexture => GetNode<TextureRect>("%TextBoxTexture");
 	private Button cardButton => GetNode<Button>("%CardButton");
 	private ColorRect activatableColorOverlay => GetNode<ColorRect>("ActivatableColorOverlay");
+	private ColorRect emphasizeOverlay => GetNode<ColorRect>("EmphasizeOverlay");
 
 	[Signal] public delegate void SelectedEventHandler(int cardId);
 
@@ -53,6 +57,7 @@ public partial class CardScene : Control
 		cardButton.MouseExited += CardButton_MouseExited;
 
 		SetAvailability(availability);
+		SetEmphasized(emphasized);
 	}
 
 	private void CardButton_Pressed()
@@ -160,9 +165,34 @@ public partial class CardScene : Control
 	{
 		SetAvailability(activatable ? CardAvailability.Available : CardAvailability.Unavailable);
 	}
+	/// <summary>
+	/// Nothing to do with <see cref="SetEmphasized"/> despite the shared word: this is about whether
+	/// hovering the card drives the hand's enlarged preview and the board target overlay.
+	/// </summary>
 	public void TriggersEmphasis(bool triggersEmphasis)
 	{
 		this.triggersEmphasis = triggersEmphasis;
+	}
+
+	public bool IsEmphasized => emphasized;
+
+	/// <summary>
+	/// The "look at this card" cue: a foil reflection sweeps across the face every few seconds. Off by
+	/// default, and independent of the availability scrim, so an emphasised card can still be greyed out.
+	///
+	/// The sweep runs off the shader's own clock, which every card shares — so cards emphasised together
+	/// gleam together, and one turned on mid-cycle joins the sweep wherever it already is rather than
+	/// starting a pass of its own. See CardReflection.gdshader for why that clock cannot be reset.
+	///
+	/// Not to be confused with <see cref="TriggersEmphasis"/>.
+	/// </summary>
+	public void SetEmphasized(bool emphasized)
+	{
+		this.emphasized = emphasized;
+		if (emphasizeOverlay != null)
+		{
+			emphasizeOverlay.Visible = emphasized;
+		}
 	}
 
 	/// <summary>

@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://poytc7oh3ay1" path="res://scenes/userinterface/History/GameHistoryList.cs" id="9_oxwje"]
 [ext_resource type="PackedScene" uid="uid://bhqnymug3arir" path="res://scenes/userinterface/History/game_history_item.tscn" id="10_dvfjj"]
 [ext_resource type="Script" uid="uid://bqnash47ag2v1" path="res://scripts/C#/UI/DebugOverlay.cs" id="11_debugoverlay"]
+[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="11_fw0ih"]
 [ext_resource type="Script" uid="uid://cnu2sfmowg40f" path="res://scripts/C#/UI/GameStateDetailPanel.cs" id="12_gamestatedetail"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
@@ -129,6 +130,24 @@ Scope = 3
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
 offset_bottom = -1005.0
 mouse_filter = 2
+
+[node name="GameRoundLabel" type="Label" parent="." unique_id=1493888180]
+unique_name_in_owner = true
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -72.91504
+offset_top = -367.05
+offset_right = -0.91503906
+offset_bottom = -341.05
+grow_horizontal = 0
+grow_vertical = 2
+text = "Round 1"
+label_settings = ExtResource("11_fw0ih")
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="GameHistoryList" type="VBoxContainer" parent="." unique_id=703922686]
 clip_contents = true

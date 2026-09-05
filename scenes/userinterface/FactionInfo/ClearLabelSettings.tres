@@ -2,6 +2,6 @@
 
 [resource]
 resource_local_to_scene = true
-font_size = 36
+font_size = 18
 outline_size = 7
 outline_color = Color(0, 0, 0, 1)

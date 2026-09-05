@@ -29,11 +29,15 @@ uniform float period_seconds : hint_range(0.1, 30.0) = 3.0;
 // the pause. Clamped against the period below, so setting it longer than the
 // period gives a continuous sweep rather than breaking.
 uniform float sweep_seconds : hint_range(0.05, 30.0) = 0.7;
-// TIME at which the cycle is measured from, so a card can be dealt with the
-// gleam at a known point instead of joining a shared clock wherever it happens
-// to be. TIME rolls over every hour, which makes the difference negative;
-// fract() still returns a phase in [0, 1), so the sweep carries on from a
-// different point rather than breaking. Set it from script - see below.
+// Offsets the free-running clock, so two cards side by side are not in lockstep.
+// Any value works as a phase shift - it is NOT "the moment the sweep starts",
+// and there is no value that would mean that: TIME cannot be read from a script,
+// and Time.get_ticks_msec() does not share an origin with it (measured: seconds
+// apart, the gap engine start-up takes). A node that becomes visible mid-cycle
+// therefore joins the sweep wherever it already is, and may wait up to
+// period_seconds for its first pass. TIME rolls over every hour, which makes the
+// difference negative; fract() still returns a phase in [0, 1), so the sweep
+// carries on from a different point rather than breaking.
 uniform float start_time = 0.0;
 
 // Direction the band travels, in degrees clockwise from "left to right". 0 is a
