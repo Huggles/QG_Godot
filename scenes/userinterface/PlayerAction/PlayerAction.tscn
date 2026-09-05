@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="1_pjedk"]
 [ext_resource type="StyleBox" uid="uid://di1jtwe77usf2" path="res://MenuPanelBackground.tres" id="2_6h8hq"]
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_fchd6"]
+[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="4_n3k1v"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_n3k1v"]
 
 [node name="PlayerAction" type="Control" unique_id=2012666353]
@@ -44,14 +45,11 @@ theme_override_constants/margin_bottom = 1
 layout_mode = 2
 theme_override_styles/panel = ExtResource("2_6h8hq")
 
-[node name="PlayerActionMessage" type="RichTextLabel" parent="MenuPanel" unique_id=2006746535]
+[node name="PlayerActionMessage" type="Label" parent="MenuPanel" unique_id=1966011880]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/default_color = Color(0.7863468, 0.78634685, 0.78634685, 1)
-theme_override_font_sizes/normal_font_size = 20
-bbcode_enabled = true
 text = "ABC"
-scroll_active = false
+label_settings = ExtResource("4_n3k1v")
 horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("1_gvner")

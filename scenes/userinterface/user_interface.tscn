@@ -25,6 +25,7 @@
 [ext_resource type="PackedScene" uid="uid://blt1histpop01" path="res://scenes/userinterface/History/HistoryDetailPopup.tscn" id="26_histpop"]
 [ext_resource type="Script" uid="uid://uq8tqtb6j8iq" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
 [ext_resource type="Script" uid="uid://bhyk2pph2c0qf" path="res://scripts/C#/UI/TutorialArrow.cs" id="28_tutarrow"]
+[ext_resource type="Script" uid="uid://bqgrndlbl0001" path="res://scripts/C#/UI/GameRoundLabel.cs" id="30_roundlbl"]
 [ext_resource type="Texture2D" uid="uid://s1w8qwl20na2" path="res://assets/textures/Other/Icons/Arrow.png" id="29_tutarrowtex"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
@@ -131,19 +132,17 @@ Scope = 3
 offset_bottom = -1005.0
 mouse_filter = 2
 
-[node name="GameRoundLabel" type="Label" parent="." unique_id=1493888180]
+[node name="GameRoundPanel" type="PanelContainer" parent="." unique_id=102641007]
+offset_left = 1847.085
+offset_top = 156.445
+offset_right = 1919.085
+offset_bottom = 196.445
+
+[node name="GameRoundLabel" type="Label" parent="GameRoundPanel" unique_id=1493888180]
 unique_name_in_owner = true
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -72.91504
-offset_top = -367.05
-offset_right = -0.91503906
-offset_bottom = -341.05
-grow_horizontal = 0
-grow_vertical = 2
+layout_mode = 2
+script = ExtResource("30_roundlbl")
+size_flags_vertical = 1
 text = "Round 1"
 label_settings = ExtResource("11_fw0ih")
 horizontal_alignment = 2
