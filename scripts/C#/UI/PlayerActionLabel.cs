@@ -18,6 +18,14 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	private MenuPanel MenuPanel => GetNode<MenuPanel>("%MenuPanel");
 
 	/// <summary>
+	/// The plate behind the banner text. Tinted with whatever the client is busy with, so the banner
+	/// says whose prompt it is by colour as well as by wording — see <see cref="FactionFocusTint"/>.
+	/// </summary>
+	private Control BackgroundPanel => GetNode<Control>("%MenuPanel/BackgroundContainer/Panel");
+
+	private FactionFocusTint _focusTint;
+
+	/// <summary>
 	/// The size the banner was authored at, read off the scene before anything overrides it. Every fit
 	/// starts here and only goes down, so a short line still draws at the intended size.
 	/// </summary>
@@ -49,8 +57,21 @@ public partial class PlayerActionLabel : Label, LoadableUI
 		// again on every resize is what makes that case, and a later window resize, come out right.
 		Resized += FitTextToBox;
 
+		_focusTint = new FactionFocusTint(BackgroundPanel);
+		_focusTint.Attach();
+
 		// Hide by default until LoadUI is called
 		Visible = false;
+	}
+
+	/// <summary>
+	/// EventBus is a process-wide static, so the tint handler would outlive the game scene if it were
+	/// left connected — and one stale handler aborts the whole emission for every handler behind it.
+	/// </summary>
+	public override void _ExitTree()
+	{
+		_focusTint?.Detach();
+		_focusTint = null;
 	}
 
 	public void LoadUI()
