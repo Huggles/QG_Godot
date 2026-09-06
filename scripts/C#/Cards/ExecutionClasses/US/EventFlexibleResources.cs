@@ -20,6 +20,13 @@ public partial class EventFlexibleResources : EventCardLogic
     private List<int> PlayableDiscardedCardIds =>
         DeckState.ForFaction(Faction).DiscardedCardIds.Where(id => id != CardState.Id).ToList();
 
+    /// <summary>
+    /// The discard pile this may reach into. Card targets name no board space, so this lights nothing
+    /// on the map today — it is declared because the offer is genuinely a target set, and the CLI and
+    /// any future card-strip preview read the same field.
+    /// </summary>
+    public override TargetSet Targets() => TargetSet.Cards(PlayableDiscardedCardIds);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

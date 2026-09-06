@@ -11,6 +11,20 @@ public partial class EventTransSiberianRailroad : EventCardLogic
 
     private List<int> relocatedIds = new List<int>();
 
+    /// <summary>
+    /// The armies still awaiting relocation. Read by the removal step, its condition and
+    /// <see cref="Targets"/> alike, so the three cannot disagree about who is left.
+    /// </summary>
+    private List<int> EligibleArmyIds =>
+        GetSovietArmyIds
+            .Where(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0)
+            .ToList();
+
+    /// <summary>Every army this will pick up, and every space it could set one down in.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Units(EligibleArmyIds)
+            .Plus(TargetSet.Countries(CountryState.BuildableLand(Faction)));
+
     public override List<CardStep> OnActivate()
     {
         return MakeRelocationSteps();
@@ -25,27 +39,17 @@ public partial class EventTransSiberianRailroad : EventCardLogic
     {
         return new CardStep(this, async () =>
         {
-            var eligibleIds = GetSovietArmyIds
-                .Where(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0)
-                .ToList();
-
-            int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, eligibleIds).BroadCast()).ResponseUnitIds[0];
+            int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, EligibleArmyIds).BroadCast()).ResponseUnitIds[0];
             relocatedIds.Add(selectedUnitId);
 
-            bool hasMoreUnits = GetSovietArmyIds.Any(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0);
-            if (hasMoreUnits) CardSteps.AddRange(MakeRelocationSteps());
+            if (EligibleArmyIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
 
             RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
             removeEvent.IsTrigger = false;
             await CardPlayPool.DoChangeEvent(removeEvent);
         })
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-        {
-            var eligible = GetSovietArmyIds
-                .Where(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0)
-                .ToList();
-            return eligible.Count > 0 && CountryState.BuildableLand(Faction).Count > 0;
-        }), this))
+            EligibleArmyIds.Count > 0 && CountryState.BuildableLand(Faction).Count > 0), this))
         .WithGuidance("Select a Soviet Army to eliminate and rebuild");
     }
 

@@ -32,6 +32,10 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
     /// <summary> A turn-start recruit and elimination, not a substitute for the hand card. </summary>
     public override bool IsFreePlayStepActivation => true;
 
+    /// <summary>Where the new Army may go, and the Axis Armies in Moscow it may then clear out.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(RecruitableNearMoscowIds).Plus(TargetSet.Units(AxisArmiesInMoscow));
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

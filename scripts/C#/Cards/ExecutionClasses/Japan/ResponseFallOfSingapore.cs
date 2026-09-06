@@ -8,6 +8,11 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
     private CountryState SouthEastAsia => CountryState.ForEnum(Country.SouthEastAsia);
     private CountryState SouthChinaSea => CountryState.ForEnum(Country.SouthChinaSea);
 
+    /// <summary>What is attackable in the South China Sea, plus the space the recruit lands in.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.FromBattleTargets(SouthChinaSea.BattleTargets(Faction))
+            .Plus(TargetSet.Countries(new[] { SouthEastAsia }));
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).Immediately().WithCountries([SouthEastAsia.Id]), this) };

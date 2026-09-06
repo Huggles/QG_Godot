@@ -5,6 +5,13 @@ using Godot;
 
 public partial class StatusGuards : StatusCardLogic
 {
+    /// <summary>Where the recovered Build Army card could then build. The card it fishes out of the
+    /// discard pile is reported too, though a Card target names no board space.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(CountryState.BuildableLand(Faction))
+            .Plus(TargetSet.Cards(DeckState.ForFaction(Faction).DiscardedCardIds
+                .Where(id => CardState.ForId(id).CardData.CardType == CardType.BUILD_ARMY).ToList()));
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

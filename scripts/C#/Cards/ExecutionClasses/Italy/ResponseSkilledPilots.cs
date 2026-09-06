@@ -5,6 +5,9 @@ using Godot;
 
 public partial class ResponseSkilledPilots : ResponseCardLogic
 {
+    // No Targets() override: this changes how many cards a discard costs, and a deck has no place
+    // on the board. Nothing to preview.
+
 
     int NumberOfCardsReduction = 5;
     protected override List<Condition> CardTriggers()

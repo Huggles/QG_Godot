@@ -7,17 +7,12 @@ public partial class EventArdennesOffensive : EventCardLogic
 {
     private static readonly List<int> targetCountryIds = [(int)Country.WesternEurope];
 
-    private List<BattleTarget> BattleTargets =>
-        targetCountryIds.SelectMany(id => {
-            var cs = CountryState.ForId(id);
-            var list = new List<BattleTarget>();
-            if (cs.Tags.Has(Tag.Attackable, Faction))
-                list.Add(new BattleTarget(id, TargetType.COUNTRY));
-            list.AddRange(cs.Units.Values
-                .Where(uId => UnitState.ForId(uId).Tags.Has(Tag.Attackable, Faction))
-                .Select(uId => new BattleTarget(uId, TargetType.UNIT)));
-            return list;
-        }).ToList();
+    private List<BattleTarget> BattleTargets => BattleTarget.In(targetCountryIds, Faction);
+
+    /// <summary>Both steps operate in Western Europe: what is attackable there, and the space itself
+    /// for the build that follows.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.FromBattleTargets(BattleTargets).Plus(TargetSet.Countries(targetCountryIds));
 
     public override List<CardStep> OnActivate()
     {

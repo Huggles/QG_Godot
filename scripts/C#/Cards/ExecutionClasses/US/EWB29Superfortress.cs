@@ -5,10 +5,23 @@ using Godot;
 
 public partial class EWB29Superfortress : EWCardLogic
 {
-    private bool QualifyingUnitExists() =>
+    /// <summary>
+    /// The US Armies close enough to Germany to arm this card. Reuses the same
+    /// PathFindingService range test the condition always did — extracted so <see cref="Targets"/>
+    /// can show WHICH piece is arming it, which is the one thing the card text does not tell you.
+    /// </summary>
+    private List<UnitState> QualifyingUnits() =>
         FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
             .Where(us => us.Type == UnitType.ARMY)
-            .Any(us => PathFindingService.IsWithinGeographicDistance(us.CountryId, (int)Country.Germany, 3));
+            .Where(us => PathFindingService.IsWithinGeographicDistance(us.CountryId, (int)Country.Germany, 3))
+            .ToList();
+
+    private bool QualifyingUnitExists() => QualifyingUnits().Count > 0;
+
+    /// <summary>The pieces arming this card, and the home space they are bombing.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Units(QualifyingUnits())
+            .Plus(TargetSet.Countries(new List<Country> { Country.Germany }));
 
     public override List<CardStep> OnActivate()
     {

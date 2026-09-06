@@ -6,6 +6,9 @@ public partial class ResponseStalingrad : ResponseCardLogic
 {
     List<int> targetCountries = [(int)Country.Ukraine];
 
+    /// <summary>The Soviet Army in Ukraine about to be removed. The block window has already named it, so this card picks nothing.</summary>
+    public override TargetSet Targets() => BlockTargets();
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

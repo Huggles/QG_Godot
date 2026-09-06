@@ -16,6 +16,14 @@ public partial class EWMaltaSubmarines : EWCardLogic
                        && !UnitState.ForId(uId).ImmuneForTurn)
             .ToList();
 
+    /// <summary>The Axis navies in the Mediterranean that may be sunk instead of discarding. The
+    /// choice is the target's, not this card's, so both factions' navies are reported — the
+    /// Mediterranean itself too, since a discard-only outcome still happens there.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(new List<Country> { Country.MediterraneanSea })
+            .Plus(TargetSet.Units(MediterraneanNaviesFor(Faction.GERMANY)))
+            .Plus(TargetSet.Units(MediterraneanNaviesFor(Faction.ITALY)));
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {

@@ -27,6 +27,9 @@ using System.Threading.Tasks;
 /// </summary>
 public partial class StatusWomenConscripts : StatusCardLogic
 {
+    // No Targets() override: this changes where a played card goes afterwards — top of the draw
+    // deck instead of the discard pile. It touches no country and no unit.
+
     /// <summary>
     /// The Build Army card this activation is about, or null when there is none.
     ///

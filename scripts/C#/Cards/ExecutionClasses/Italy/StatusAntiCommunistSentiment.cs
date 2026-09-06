@@ -5,12 +5,19 @@ using Godot;
 
 public partial class StatusAntiCommunistSentiment : StatusCardLogic, IVPModifier
 {
+    private static readonly List<Country> scoringCountries = [Country.Ukraine, Country.Russia];
+
+    /// <summary>The pieces that score. Read by both the VP count and <see cref="Targets"/>.</summary>
+    private List<UnitState> ScoringUnits =>
+        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+            .Where(unitState => scoringCountries.Contains(unitState.CountryState.Country))
+            .ToList();
+
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+
     public virtual VPEntry AddVictoryPoints()
     {
-        List<Country> countries = [Country.Ukraine, Country.Russia];
-        List<Faction> factions = [Faction];
-        int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum());        
-        return new VPEntry(score, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} armies in {CountryState.ForEnum(countries[0]).Label} and {CountryState.ForEnum(countries[1]).Label}");
+        return new VPEntry(ScoringUnits.Count, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} armies in {CountryState.ForEnum(scoringCountries[0]).Label} and {CountryState.ForEnum(scoringCountries[1]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

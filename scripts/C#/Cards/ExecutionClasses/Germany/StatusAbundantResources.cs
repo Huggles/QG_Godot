@@ -5,11 +5,20 @@ using System.Linq;
 
 public partial class StatusAbundantResources : StatusCardLogic, IVPModifier
 {
+    private static readonly List<Country> scoringCountries = [Country.Ukraine, Country.Kazakhstan, Country.Russia];
+
+    /// <summary>The pieces that score. Read by both the VP count and <see cref="Targets"/>.</summary>
+    private List<UnitState> ScoringUnits =>
+        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+            .Where(unitState => scoringCountries.Contains(unitState.CountryState.Country))
+            .ToList();
+
+    /// <summary>Hovering shows which pieces are currently earning this card its points.</summary>
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+
     public virtual VPEntry AddVictoryPoints()
     {
-        List<Country> countries = [Country.Ukraine, Country.Kazakhstan, Country.Russia];
-        int score = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum();
-        return new VPEntry(score, "armies on Ukraine, Kazakhstan and/or Russia");
+        return new VPEntry(ScoringUnits.Count, "armies on Ukraine, Kazakhstan and/or Russia");
     }
 
     protected override List<Condition> CardTriggers()

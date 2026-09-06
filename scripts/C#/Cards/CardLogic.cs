@@ -80,7 +80,61 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// before activation and so cannot use this; they still read the pool directly.
     /// </summary>
     public ChangeEvent ActivationTrigger { get; set; }
-    
+
+    /// <summary>
+    /// The event this card is reacting to, resolved for whichever reaction window is actually open.
+    /// For <see cref="Targets"/>, which runs BEFORE activation and so cannot use ActivationTrigger.
+    ///
+    /// CardPlayRound keeps two triggers and they never overlap for one event: RequestBlockReactions
+    /// sets CurrentBlockTrigger, RequestAfterReactions sets CurrentReactionTrigger, and DoChangeEvent
+    /// runs the block window strictly before the after-reaction one. So a block card reading
+    /// CurrentReactionTrigger sees nothing at the top of a chain and the ENCLOSING window's event
+    /// inside a nested one. IsBlockReaction is the discriminator, and deliberately not a null-coalesce
+    /// down the two: ReactionWindowDisplayCardIds puts non-block Status cards into a block window's
+    /// display set, and a preview is computed for those too — they must not read the block trigger.
+    ///
+    /// ActivationTrigger still wins where it is set, so a part-resolved multi-step card previews
+    /// against the event it is actually mid-way through rather than a newer window's.
+    ///
+    /// Null outside a reaction, and on any peer — every caller must tolerate that, which for a
+    /// Targets() override means the null check it already needs to cast the event.
+    ///
+    /// A card says which window it belongs to by which of these it calls, rather than this asking
+    /// IsBlockReaction: that property answers by building CardTriggers(), and a card whose triggers
+    /// read the event back — StatusSyntheticFuel does — would recurse through here forever. Each card
+    /// already knows its own window statically, so choosing at the call site is both cheaper and
+    /// clearer than inferring it.
+    /// </summary>
+    protected ChangeEvent TriggerContext => ActivationTrigger ?? CardPlayPool.CurrentReactionTrigger;
+
+    /// <inheritdoc cref="TriggerContext"/>
+    protected T TriggerContextAs<T>() where T : ChangeEvent => TriggerContext as T;
+
+    /// <summary>
+    /// What the event being reacted to acts on — the whole answer for a card that chooses nothing
+    /// because its trigger has already chosen for it: the "do not remove your X this turn" blocks,
+    /// and the responses that hit or replace the very piece the trigger names.
+    ///
+    /// Delegates to the ChangeEvent's own Targets() rather than restating it, so these cards inherit
+    /// the distinctions the events already draw — RemoveUnitChangeEvent, for one, reports the unit
+    /// only while it is still on the board, which is what separates a block window (unit still there)
+    /// from an after-reaction one (unit already gone, country still meaningful).
+    ///
+    /// Null-safe: outside a reaction window there is no trigger and this is TargetSet.None.
+    /// </summary>
+    protected TargetSet TriggerTargets() => TriggerContext.TargetsOrNone();
+
+    /// <inheritdoc cref="TriggerContext"/>
+    /// <remarks>The block-window half: the event a "do not remove your X this turn" card is offered
+    /// against. RequestBlockReactions sets CurrentBlockTrigger and leaves CurrentReactionTrigger on
+    /// the ENCLOSING window, so a block card reading the wrong one sees nothing at the top of a chain
+    /// and the wrong region inside a nested one.</remarks>
+    protected ChangeEvent BlockContext => ActivationTrigger ?? CardPlayPool.CurrentBlockTrigger;
+
+    /// <inheritdoc cref="TriggerTargets"/>
+    /// <remarks>The block-window half — see <see cref="BlockContext"/>.</remarks>
+    protected TargetSet BlockTargets() => BlockContext.TargetsOrNone();
+
     // A Status/Response card still in hand is being PLAYED onto the table, not activated.
     // Its CardSteps are the later activation effect, so their executability must not gate the play.
     public bool IsTableCardInHand => (IsStatus || IsResponse) && !CardState.IsPlayed;

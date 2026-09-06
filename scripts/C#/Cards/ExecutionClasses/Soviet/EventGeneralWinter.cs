@@ -20,6 +20,9 @@ public partial class EventGeneralWinter : EventCardLogic
         }
     }
 
+    /// <summary>Both steps eliminate from this same list.</summary>
+    public override TargetSet Targets() => TargetSet.Units(AxisArmiesNearMoscow);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {

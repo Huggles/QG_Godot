@@ -36,7 +36,7 @@ public partial class MutatorSyntheticFuelAnyFaction : ActivatableMutator
     {
         get
         {
-            var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
+            var trigger = TriggerContextAs<DeployUnitChangeEvent>();
             if (trigger == null) return new List<CountryState>();
             return CountryState.ForId(trigger.CountryId).AdjacentCountryStates(Faction)
                 .Where(countryState => countryState.CanBuild(Faction) && countryState.IsLand)

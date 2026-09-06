@@ -12,13 +12,31 @@ public partial class EWB26Marauder : EWCardLogic
         (Country.Italy,   Faction.ITALY)
     ];
 
-    private List<Faction> QualifyingAxisFactions() =>
+    /// <summary>The Axis homes in reach, paired with the US Armies putting them there. One pass,
+    /// read by the faction list, the condition and <see cref="Targets"/> alike.</summary>
+    private List<(Country Home, List<UnitState> Armies, Faction AxisFaction)> QualifyingHomes() =>
         AxisHomes
-            .Where(pair => FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-                .Where(us => us.Type == UnitType.ARMY)
-                .Any(us => PathFindingService.IsWithinGeographicDistance(us.CountryId, (int)pair.HomeCountry, 3)))
-            .Select(pair => pair.AxisFaction)
+            .Select(pair => (
+                Home: pair.HomeCountry,
+                Armies: FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+                    .Where(us => us.Type == UnitType.ARMY)
+                    .Where(us => PathFindingService.IsWithinGeographicDistance(us.CountryId, (int)pair.HomeCountry, 3))
+                    .ToList(),
+                pair.AxisFaction))
+            .Where(entry => entry.Armies.Count > 0)
             .ToList();
+
+    private List<Faction> QualifyingAxisFactions() =>
+        QualifyingHomes().Select(entry => entry.AxisFaction).ToList();
+
+    /// <summary>The homes this card actually reaches, and the Armies putting them in range — which
+    /// is what the card text leaves you to work out for yourself.</summary>
+    public override TargetSet Targets()
+    {
+        var qualifying = QualifyingHomes();
+        return TargetSet.Countries(qualifying.Select(entry => entry.Home).ToList())
+            .Plus(TargetSet.Units(qualifying.SelectMany(entry => entry.Armies).ToList()));
+    }
 
     public override List<CardStep> OnActivate()
     {

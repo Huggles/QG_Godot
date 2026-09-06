@@ -35,6 +35,9 @@ public partial class StatusStavkaFormsArtilleryCorps : StatusCardLogic
         }
     }
 
+    /// <summary>The space just battled — the only place this may strike again.</summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(SameSpaceTargets);
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

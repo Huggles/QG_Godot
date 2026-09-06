@@ -5,17 +5,21 @@ using Godot;
 
 public partial class EWSubmarinesLeadtheBattleoftheAtlantic : EWCardLogic
 {
+    /// <summary>Every German Navy on the board: one VP and two UK discards each. Read by both the
+    /// step and <see cref="Targets"/>, so hovering shows exactly what this card is worth.</summary>
+    private List<UnitState> ScoringUnits =>
+        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+            .Where(u => u.Type == UnitType.NAVY)
+            .ToList();
+
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                // Count all German Navies on the board
-                var germanNavies = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-                    .Where(u => u.Type == UnitType.NAVY)
-                    .ToList();
-                
-                int count = germanNavies.Count;
+                int count = ScoringUnits.Count;
 
                 await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, "German Navies on the board"), Faction));
                 

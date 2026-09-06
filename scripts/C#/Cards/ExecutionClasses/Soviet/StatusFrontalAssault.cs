@@ -42,6 +42,9 @@ public partial class StatusFrontalAssault : StatusCardLogic
         }
     }
 
+    /// <summary>The space just battled and its land neighbours — what this may hit again.</summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(SameOrAdjacentTargets);
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

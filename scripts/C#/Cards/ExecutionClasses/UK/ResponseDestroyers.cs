@@ -4,6 +4,9 @@ using Godot;
 
 public partial class ResponseDestroyers : ResponseCardLogic
 {
+    /// <summary>The supplied UK or US Navy about to be removed. The block window has already named it, so this card picks nothing.</summary>
+    public override TargetSet Targets() => BlockTargets();
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

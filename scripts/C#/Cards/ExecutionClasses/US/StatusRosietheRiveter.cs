@@ -25,6 +25,9 @@ using System.Threading.Tasks;
 /// </summary>
 public partial class StatusRosietheRiveter : StatusCardLogic, IStepMutator
 {
+    // No Targets() override: this moves cards from your hand to the bottom of your draw deck. It
+    // touches no country and no unit, and TargetSet.Cards would name your own hand back to you.
+
     private const int MaxCards = 2;
 
     public TurnStep      Step   => TurnStep.DISCARD;

@@ -4,6 +4,9 @@ using Godot;
 
 public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLogic
 {
+    /// <summary>The space the Italian Army was removed from, where the German replacement lands. The removal has already applied by the time this window opens, so the event reports the country and no longer the unit.</summary>
+    public override TargetSet Targets() => TriggerTargets();
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

@@ -10,6 +10,13 @@ public partial class StatusAircraftCarriers : StatusCardLogic
         CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
             .LastOrDefault(ce => ce.IsBattle && ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.SEA);
 
+    /// <summary>The sea space just battled, where the new Navy appears. The trigger picks it:
+    /// this card offers no selection.</summary>
+    public override TargetSet Targets() =>
+        LastSeaBattle == null
+            ? TargetSet.None
+            : TargetSet.Countries(new List<int> { LastSeaBattle.CountryId });
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

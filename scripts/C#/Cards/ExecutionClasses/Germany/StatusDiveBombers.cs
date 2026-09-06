@@ -6,7 +6,7 @@ using System.Linq;
 public partial class StatusDiveBombers : StatusCardLogic
 {   
     private CountryState BattledCountryState =>
-        (CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent)?.CountryState;
+        TriggerContextAs<BattleCountryChangeEvent>()?.CountryState;
 
     protected override List<Condition> CardTriggers()
     {
@@ -60,6 +60,9 @@ public partial class StatusDiveBombers : StatusCardLogic
             return ids;
         }
     }
+
+    /// <summary>The space just battled and its land neighbours — what this may hit again.</summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(battleTargets);
 
     public override List<CardStep> OnActivate()
     {

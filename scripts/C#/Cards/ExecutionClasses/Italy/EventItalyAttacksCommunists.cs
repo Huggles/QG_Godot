@@ -5,6 +5,9 @@ using Godot;
 public partial class EventItalyAttacksCommunists : EventCardLogic
 {
     public List<Country> targetCountries = [Country.Ukraine, Country.Russia];
+
+    /// <summary>The two build spaces, in step order.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(targetCountries);
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

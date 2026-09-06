@@ -5,6 +5,10 @@ using Godot;
 
 public partial class EventOperationMagic : EventCardLogic
 {
+    // No Targets() override, deliberately — see EventDivisionAzul, which this mirrors for Japan.
+    // The discarded Response card is chosen at random from a face-down pile, so declaring it would
+    // leak hidden information over the wire.
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

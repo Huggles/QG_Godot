@@ -14,6 +14,9 @@ public partial class EventMaoTsetung : EventCardLogic
                        && !UnitState.ForId(uId).ImmuneForTurn)
             .ToList();
 
+    /// <summary>The armies this can eliminate.</summary>
+    public override TargetSet Targets() => TargetSet.Units(AxisArmiesInChinaOrSzechuan);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {

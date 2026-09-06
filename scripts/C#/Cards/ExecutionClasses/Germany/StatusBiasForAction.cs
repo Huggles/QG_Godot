@@ -12,7 +12,7 @@ public partial class StatusBiasForAction : StatusCardLogic
     /// Mirrors <see cref="MutatorSyntheticFuelAnyFaction"/>, which implements near-identical text.
     /// </summary>
     private CountryState BuiltCountryState =>
-        (CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent)?.CountryState;
+        TriggerContextAs<DeployUnitChangeEvent>()?.CountryState;
 
     protected override List<Condition> CardTriggers()
     {
@@ -65,6 +65,9 @@ public partial class StatusBiasForAction : StatusCardLogic
             return builtIn.AdjacentBattleTargets(Faction, CountryType.LAND);
         }
     }
+
+    /// <summary>The land spaces adjacent to the Army just built that this may attack.</summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(BattleTargets);
 
     public override List<CardStep> OnActivate()
     {

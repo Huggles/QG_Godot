@@ -8,7 +8,11 @@ public partial class StatusConscription : StatusCardLogic
     public List<int> BuildableLandCountries()
     {
         return CountryState.BuildableLand(Faction).ToCountryIds();
-    }    
+    }
+
+    /// <summary>Where the army may be built — the same list the step offers.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(BuildableLandCountries());
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

@@ -12,6 +12,9 @@ public partial class StatusTheRoyalNavy : StatusCardLogic
                 .Select(us => new BattleTarget(us.Id, TargetType.UNIT)))
             .ToList();
 
+    /// <summary>The sea spaces and enemy navies this may attack a second time.</summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(SeaBattleTargets);
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

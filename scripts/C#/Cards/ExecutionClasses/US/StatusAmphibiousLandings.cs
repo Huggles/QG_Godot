@@ -14,6 +14,13 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
             .Any(adj => FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
                 .Any(us => us.Type == UnitType.NAVY && us.CountryId == adj.Id && us.InSupply));
 
+    /// <summary>The land space just battled, where the new Army appears. The trigger picks it:
+    /// this card offers no selection.</summary>
+    public override TargetSet Targets() =>
+        LastLandBattle == null
+            ? TargetSet.None
+            : TargetSet.Countries(new List<int> { LastLandBattle.CountryId });
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

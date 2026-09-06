@@ -7,29 +7,25 @@ public partial class EventPattonAdvances : EventCardLogic
 {
     private static readonly List<int> battleCountryIds = [(int)Country.Germany, (int)Country.Italy];
 
-    private List<BattleTarget> BattleTargets =>
-        battleCountryIds.SelectMany(id => {
-            var cs = CountryState.ForId(id);
-            var list = new List<BattleTarget>();
-            if (cs.Tags.Has(Tag.Attackable, Faction))
-                list.Add(new BattleTarget(id, TargetType.COUNTRY));
-            list.AddRange(cs.Units.Values
-                .Where(uId => UnitState.ForId(uId).Tags.Has(Tag.Attackable, Faction))
-                .Select(uId => new BattleTarget(uId, TargetType.UNIT)));
-            return list;
-        }).ToList();
+    private static readonly List<int> buildCountryIds = [(int)Country.WesternEurope];
+
+    private List<BattleTarget> BattleTargets => BattleTarget.In(battleCountryIds, Faction);
+
+    /// <summary>The build space and the battlegrounds together — the card's two steps.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(buildCountryIds).Plus(TargetSet.FromBattleTargets(BattleTargets));
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.WesternEurope]).BroadCast()).ResponseCountryIds[0];
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployEvent);
             })
-            .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable([(int)Country.WesternEurope], Faction), this))
+            .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(buildCountryIds, Faction), this))
             .WithGuidance("Build an Army in Western Europe"),
             new CardStep(this, async() => {
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();

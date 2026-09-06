@@ -7,6 +7,9 @@ public partial class EventAfrikaKorps : EventCardLogic
     public List<Country> targetCountries = [Country.NorthAfrica, Country.MediterraneanSea];
     public Faction targetFaction = Faction.GERMANY;
 
+    /// <summary>The two spaces the German army and navy land in.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(targetCountries);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

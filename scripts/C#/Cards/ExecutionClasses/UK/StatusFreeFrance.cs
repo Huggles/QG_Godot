@@ -4,13 +4,18 @@ using Godot;
 
 public partial class StatusFreeFrance : StatusCardLogic
 {
+    private static readonly List<int> buildCountryIds = [(int)Country.WesternEurope];
+
+    /// <summary>Western Europe, the one space this builds into.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(buildCountryIds);
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
             Condition.Build(new Condition.IsPlayCardStep(), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
             Condition.Build(new Condition.Not(new Condition.HasPlayedCardThisTurnStep(Faction)), this),
-            Condition.Build(new Condition.CountryIsBuildable([(int)Country.WesternEurope], Faction), this)
+            Condition.Build(new Condition.CountryIsBuildable(buildCountryIds, Faction), this)
         };
     }
 
@@ -27,11 +32,11 @@ public partial class StatusFreeFrance : StatusCardLogic
                 await discardEvent.Apply();
 
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
-                    new DeployUnitChangeEvent(Faction, (int)Country.WesternEurope, DeployType.BUILD));
+                    new DeployUnitChangeEvent(Faction, buildCountryIds[0], DeployType.BUILD));
                 deployEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployEvent);
             })
-            .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable([(int)Country.WesternEurope], Faction), this))
+            .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(buildCountryIds, Faction), this))
             .WithGuidance("Discard top 2 deck cards to build an Army in Western Europe")
         };
     }

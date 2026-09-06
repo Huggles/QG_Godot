@@ -5,6 +5,9 @@ using Godot;
 
 public partial class ResponseRAF : ResponseCardLogic
 {
+    /// <summary>The UK piece in or beside the United Kingdom about to be removed. The block window has already named it, so this card picks nothing.</summary>
+    public override TargetSet Targets() => BlockTargets();
+
     protected override List<Condition> CardTriggers()
     {
         List<int> ukAndAdjacent = new List<int> { CountryState.ForEnum(Country.UnitedKingdom).Id }

@@ -4,6 +4,9 @@ using Godot;
 
 public partial class EWSubmarinesoftheMonsoonGroup : EWCardLogic
 {
+    // No Targets() override: see EWBomberCommand. A choice of which Allied faction discards names
+    // no country and no unit, and the VP is flat — no board state feeds it.
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

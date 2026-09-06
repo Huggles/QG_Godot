@@ -5,6 +5,11 @@ using System.Linq;
 
 public partial class StatusVolksturm : StatusCardLogic
 {
+    private static readonly List<int> recruitCountryIds = [(int)Country.Germany];
+
+    /// <summary>Germany, the one space this recruits into.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(recruitCountryIds);
+
     /// <summary> "This is in addition to your Play step" — the recruit does not cost the hand card. </summary>
     public override bool IsFreePlayStepActivation => true;
 
@@ -18,7 +23,7 @@ public partial class StatusVolksturm : StatusCardLogic
             // does NOT spend the play, per the card text.
             Condition.Build(new Condition.IsPlayCardStep(), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
-            Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Germany], Faction), this)
+            Condition.Build(new Condition.CountryIsRecruitable(recruitCountryIds, Faction), this)
         };
     }
 
@@ -33,7 +38,7 @@ public partial class StatusVolksturm : StatusCardLogic
                 // queue — so showing it again here displayed the discard modal twice.
                 await discardEvent.Apply();
 
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int>{(int)Country.Germany}).BroadCast()).ResponseCountryIds[0];
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitCountryIds).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
@@ -41,7 +46,7 @@ public partial class StatusVolksturm : StatusCardLogic
             .WithGuidance("Recruit an army in Germany (in addition to your playstep)")
             // Hollow when Germany already holds a German unit: the recruit redeploys the piece
             // standing there and the board is unchanged (see CountryState.CanBuild).
-            .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit((int)Country.Germany, Faction)), this))
+            .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit(recruitCountryIds[0], Faction)), this))
         };
     }
 }

@@ -8,17 +8,13 @@ public partial class EventLedoAndBurmaRoads : EventCardLogic
 {
     private static readonly List<int> BattleCountryIds = [(int)Country.China, (int)Country.Szechuan];
 
-    private List<BattleTarget> BattleTargets =>
-        BattleCountryIds.SelectMany(id => {
-            var cs = CountryState.ForId(id);
-            var list = new List<BattleTarget>();
-            if (cs.Tags.Has(Tag.Attackable, Faction))
-                list.Add(new BattleTarget(id, TargetType.COUNTRY));
-            list.AddRange(cs.Units.Values
-                .Where(uId => UnitState.ForId(uId).Tags.Has(Tag.Attackable, Faction))
-                .Select(uId => new BattleTarget(uId, TargetType.UNIT)));
-            return list;
-        }).ToList();
+    private static readonly List<int> BuildCountryIds = [(int)Country.SouthEastAsia];
+
+    private List<BattleTarget> BattleTargets => BattleTarget.In(BattleCountryIds, Faction);
+
+    /// <summary>The build space, and what is attackable in China and Szechuan.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(BuildCountryIds).Plus(TargetSet.FromBattleTargets(BattleTargets));
 
     public override List<CardStep> OnActivate()
     {
@@ -26,11 +22,11 @@ public partial class EventLedoAndBurmaRoads : EventCardLogic
             // Build an Army in Southeast Asia
             new CardStep(this, async () => {
                 DeployUnitChangeEvent deployEvent = BuildChangeEvent(
-                    new DeployUnitChangeEvent(Faction, (int)Country.SouthEastAsia, DeployType.BUILD));
+                    new DeployUnitChangeEvent(Faction, BuildCountryIds[0], DeployType.BUILD));
                 deployEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployEvent);
             })
-            .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable([(int)Country.SouthEastAsia], Faction), this))
+            .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(BuildCountryIds, Faction), this))
             .WithGuidance("Build an Army in Southeast Asia"),
 
             // Battle in China or Szechuan

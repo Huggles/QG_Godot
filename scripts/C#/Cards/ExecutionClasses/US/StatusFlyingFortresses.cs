@@ -4,6 +4,9 @@ using Godot;
 
 public partial class StatusFlyingFortresses : StatusCardLogic, IDiscardModifier
 {
+    // No Targets() override: this raises what your EW cards cost the Axis in discards. A deck has
+    // no place on the board, so there is nothing to light up.
+
     public int ModifyDiscard(ForceDiscardCardsChangeEvent discardEvent)
     {
         if (discardEvent.SourceCardState == null) return 0;

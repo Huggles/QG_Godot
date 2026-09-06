@@ -9,6 +9,11 @@ public partial class EventMilitaryDictatorshipsInTheBalkans : EventCardLogic
         CountryState.ForEnum(Country.Ukraine).Units.Values
         .Where(unitId => StaticGameData.FactionTeamForFaction(UnitState.ForId(unitId).Faction) == FactionTeam.ALLIES).ToList();
 
+    /// <summary>The Balkans recruit and the Ukraine elimination — the card's two steps.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(new List<Country> { Country.Balkans })
+            .Plus(TargetSet.Units(AlliedArmiesInUkraine()));
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

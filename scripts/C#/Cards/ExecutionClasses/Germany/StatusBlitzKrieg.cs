@@ -5,6 +5,10 @@ using System.Linq;
 
 public partial class StatusBlitzkrieg : StatusCardLogic
 {
+    /// <summary>The space just battled, which the new Army moves into. Chosen by the trigger:
+    /// this card offers no selection at all.</summary>
+    public override TargetSet Targets() => TriggerTargets();
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
@@ -12,7 +16,7 @@ public partial class StatusBlitzkrieg : StatusCardLogic
             // The space must be empty after the battle: if an enemy unit survived it is still
             // occupied and we cannot deploy an Army into it, so Blitzkrieg does not fire.
             Condition.Build(new Condition.CustomCondition(() => {
-                var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                var trigger = TriggerContextAs<BattleCountryChangeEvent>();
                 return trigger != null && trigger.CountryState.Units.Count == 0;
             }), this)
         };
@@ -26,7 +30,7 @@ public partial class StatusBlitzkrieg : StatusCardLogic
                 discardEvent.IsTrigger = false;
                 await CardPlayPool.DoChangeEvent(discardEvent);
 
-                var trigger = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                var trigger = TriggerContextAs<BattleCountryChangeEvent>();
                 if (trigger == null) return;
 
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, trigger.CountryId, DeployType.BUILD));

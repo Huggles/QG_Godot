@@ -12,15 +12,34 @@ public partial class EWFirestormBombing : EWCardLogic
         (Country.Italy,   Faction.ITALY)
     ];
 
-    private List<Faction> QualifyingAxisFactions()
+    /// <summary>The Axis homes with a US piece next door, paired with the pieces doing it. One pass,
+    /// read by the faction list, the condition and <see cref="Targets"/> alike.</summary>
+    private List<(Country Home, List<UnitState> Units, Faction AxisFaction)> QualifyingHomes()
     {
-        var usUnitCountryIds = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-            .Select(us => us.CountryId).ToHashSet();
+        var usUnits = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates();
         return AxisHomes
-            .Where(pair => CountryState.ForEnum(pair.HomeCountry).ConnectedCountryStates
-                .Any(adj => usUnitCountryIds.Contains(adj.Id)))
-            .Select(pair => pair.AxisFaction)
+            .Select(pair =>
+            {
+                var adjacentIds = CountryState.ForEnum(pair.HomeCountry).ConnectedCountryStates
+                    .Select(adj => adj.Id).ToHashSet();
+                return (
+                    Home: pair.HomeCountry,
+                    Units: usUnits.Where(us => adjacentIds.Contains(us.CountryId)).ToList(),
+                    pair.AxisFaction);
+            })
+            .Where(entry => entry.Units.Count > 0)
             .ToList();
+    }
+
+    private List<Faction> QualifyingAxisFactions() =>
+        QualifyingHomes().Select(entry => entry.AxisFaction).ToList();
+
+    /// <summary>The homes this card actually reaches, and the pieces putting them in range.</summary>
+    public override TargetSet Targets()
+    {
+        var qualifying = QualifyingHomes();
+        return TargetSet.Countries(qualifying.Select(entry => entry.Home).ToList())
+            .Plus(TargetSet.Units(qualifying.SelectMany(entry => entry.Units).ToList()));
     }
 
     public override List<CardStep> OnActivate()

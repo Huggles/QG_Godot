@@ -5,6 +5,17 @@ using Godot;
 
 public partial class StatusWolfPacks : StatusCardLogic, IDiscardModifier
 {
+    /// <summary>
+    /// The Army in Scandinavia that lifts this card from 2 discards to 3. The discard itself lands on
+    /// a deck and has no board place, so the piece that sets the rate is the only thing worth showing.
+    /// </summary>
+    private List<UnitState> BonusUnits =>
+        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+            .Where(u => u.Type == UnitType.ARMY && u.CountryState.Country == Country.Scandinavia)
+            .ToList();
+
+    public override TargetSet Targets() => TargetSet.Units(BonusUnits);
+
     public int ModifyDiscard(ForceDiscardCardsChangeEvent discardEvent)
     {
         if(discardEvent.SourceCardState == null) return 0; // If SourceCardState is null, this discard event is not caused by a card play and should not be modified
@@ -13,8 +24,6 @@ public partial class StatusWolfPacks : StatusCardLogic, IDiscardModifier
             && discardEvent.SourceCardState.CardData.Label.Contains("Submarines");
         if (!isSubmarineEW) return 0;
 
-        bool armyInScandinavia = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-            .Any(u => u.Type == UnitType.ARMY && u.CountryState.Country == Country.Scandinavia);
-        return armyInScandinavia ? 3 : 2;
+        return BonusUnits.Count > 0 ? 3 : 2;
     }
 }

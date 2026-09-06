@@ -14,6 +14,11 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
         Country.SouthEastAsia,
     });
 
+    /// <summary>The space just battled, where step 1 builds, plus the units step 2 may attack.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(EligibleAttackedCountries())
+            .Plus(TargetSet.Units(TargetCountries.Where(cs => cs.CanAttack(Faction)).ToList().ToUnitIds()));
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> { Condition.Build(new Condition.FactionBattled(Faction).Immediately().WithCountries(TargetCountries.ToCountryIds()), this) };
@@ -45,7 +50,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
 
     private List<int> EligibleAttackedCountries()
     {
-        if (CardPlayPool.CurrentReactionTrigger is BattleCountryChangeEvent trigger
+        if (TriggerContext is BattleCountryChangeEvent trigger
             && trigger.TriggeringFaction == Faction
             && TargetCountries.Contains(trigger.CountryState))
         {

@@ -13,6 +13,11 @@ public partial class EventTitosPartisans : EventCardLogic
                        && !UnitState.ForId(uId).ImmuneForTurn)
             .ToList();
 
+    /// <summary>The Axis armies step 1 clears out, and the space step 2 recruits into.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Units(AxisArmiesInBalkans)
+            .Plus(TargetSet.Countries(new List<Country> { Country.Balkans }));
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {

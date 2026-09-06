@@ -7,6 +7,9 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
 {
     private static readonly List<Country> TargetCountries = [Country.India, Country.Australia, Country.Canada];
 
+    /// <summary>The Axis Army just built in India, Australia or Canada — the piece this eliminates. Chosen by the trigger, not by the player.</summary>
+    public override TargetSet Targets() => TriggerTargets();
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

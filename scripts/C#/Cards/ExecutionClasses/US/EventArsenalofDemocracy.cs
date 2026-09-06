@@ -9,6 +9,15 @@ public partial class EventArsenalofDemocracy : EventCardLogic
     // Tracks which type was built first so step 2 offers only the other type.
     private bool _firstWasArmy;
 
+    /// <summary>
+    /// Everywhere the UK could put either piece. Step 1 offers both types and step 2 offers whichever
+    /// is left, so the union across the card is simply both — and the card acts on the UK, not on the
+    /// US, which is why the preview lights UK build spaces.
+    /// </summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(CountryState.BuildableLand(targetFaction))
+            .Plus(TargetSet.Countries(CountryState.BuildableSea(targetFaction)));
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

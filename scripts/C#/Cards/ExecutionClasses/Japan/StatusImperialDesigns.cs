@@ -5,13 +5,21 @@ using Godot;
 
 public partial class StatusImperialDesigns : StatusCardLogic, IVPModifier
 {
+    private static readonly List<Country> scoringCountries = [Country.IwoJima, Country.Philippines];
+
+    /// <summary>The pieces that score. Read by both the VP count and <see cref="Targets"/>, so
+    /// hovering shows exactly what is earning this card its points.</summary>
+    private List<UnitState> ScoringUnits =>
+        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+            .Where(unitState => scoringCountries.Contains(unitState.CountryState.Country))
+            .ToList();
+
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+
     public virtual VPEntry AddVictoryPoints()
     {
-        List<Country> countries = [Country.IwoJima, Country.Philippines];
-        List<Faction> factions = [Faction];
-        int score = factions.Sum((faction) => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates().Map(unitState => countries.Contains(unitState.CountryState.Country) ? 1 : 0).Sum());
-        score = Math.Min(score, 1);
-        return new VPEntry(score, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} army in {CountryState.ForEnum(countries[0]).Label} or {CountryState.ForEnum(countries[1]).Label}");
+        int score = Math.Min(ScoringUnits.Count, 1);
+        return new VPEntry(score, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} army in {CountryState.ForEnum(scoringCountries[0]).Label} or {CountryState.ForEnum(scoringCountries[1]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

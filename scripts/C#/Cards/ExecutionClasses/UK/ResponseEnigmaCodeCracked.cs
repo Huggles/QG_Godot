@@ -23,6 +23,18 @@ using System.Threading.Tasks;
 /// </summary>
 public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
 {
+    /// <summary>
+    /// The German Status card this discards. A Card target names no board space — the preview draws
+    /// only Country and Unit — so this lights nothing on the map; it is declared because the card
+    /// genuinely is what this acts on. BlockContext resolves to CurrentBlockTrigger, which is
+    /// the same event the step reads as ActivationTrigger once the card is actually chosen.
+    /// </summary>
+    public override TargetSet Targets()
+    {
+        int sourceCardId = BlockContext?.SourceCardId ?? -1;
+        return sourceCardId < 0 ? TargetSet.None : TargetSet.Cards(new List<int> { sourceCardId });
+    }
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

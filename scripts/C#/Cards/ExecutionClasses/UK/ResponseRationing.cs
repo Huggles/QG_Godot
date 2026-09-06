@@ -23,6 +23,9 @@ using System.Threading.Tasks;
 /// </summary>
 public partial class ResponseRationing : ResponseCardLogic
 {
+    // No Targets() override: this redirects a played card to your draw deck instead of the discard
+    // pile. It touches no country and no unit, so there is nothing to light up.
+
     /// <summary>
     /// The played card this activation is about, or null when there is none.
     ///

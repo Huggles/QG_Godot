@@ -21,6 +21,9 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
         }
     }
 
+    /// <summary>Where the additional Navy may be built — the same list the step offers.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(DeployableCountryIds);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {

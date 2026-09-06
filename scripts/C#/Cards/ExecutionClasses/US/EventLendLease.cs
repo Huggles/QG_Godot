@@ -5,6 +5,11 @@ using Godot;
 
 public partial class EventLendLease : EventCardLogic
 {
+    // No Targets() override: what this card offers is a CHOICE OF FACTION, and the board preview
+    // draws only Country and Unit targets (InputRequest.PopulateCardTargetPreviews drops the rest).
+    // Where the chosen ally then plays is not knowable at hover time — it depends on the card they
+    // pick from a hand this card cannot see. TargetSet.Factions would be inert noise.
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

@@ -5,6 +5,12 @@ using Godot;
 
 public partial class EventDivisionAzul : EventCardLogic
 {
+    // No Targets() override, deliberately. This discards a RANDOM Soviet Response card sight
+    // unseen, and those cards are face down. Targets() is evaluated on the host and its result is
+    // put on the wire in InputRequest.CardTargetPreviews, so naming the pile here would hand the
+    // Italian player the identity of cards the rules keep hidden. TargetSet.None is the correct
+    // answer, not a gap to be filled.
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

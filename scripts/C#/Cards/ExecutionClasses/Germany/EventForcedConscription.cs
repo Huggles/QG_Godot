@@ -13,6 +13,9 @@ public partial class EventForcedConscription : EventCardLogic
             .Where(id => CountryState.ForId(id).Tags.Has(Tag.LandCountry, Faction.ALL))
             .ToList();
 
+    /// <summary>Both recruits draw from the same list the steps select from.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(RecruitableCountryIds);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

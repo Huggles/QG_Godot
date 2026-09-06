@@ -6,6 +6,24 @@ using Godot;
 
 public partial class ResponseTruk : ResponseCardLogic
 {
+    /// <summary>
+    /// The pieces this puts back in supply: every Japanese unit in or beside the Central Pacific.
+    /// Read by the step and by <see cref="Targets"/>, so the preview lights exactly who benefits.
+    /// </summary>
+    private List<int> SupplyTargetUnitIds
+    {
+        get
+        {
+            var centralPacific = CountryState.ForEnum(Country.CentralPacific);
+            var targetCountries = centralPacific.ConnectedCountryStates.Append(centralPacific).Distinct().ToList();
+            return FactionState.ForEnum(Faction).ActiveUnitIds
+                .Where(uid => targetCountries.Contains(UnitState.ForId(uid).CountryState))
+                .ToList();
+        }
+    }
+
+    public override TargetSet Targets() => TargetSet.Units(SupplyTargetUnitIds);
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
@@ -17,15 +35,7 @@ public partial class ResponseTruk : ResponseCardLogic
     {
         return new List<CardStep> {
             new CardStep(this, async () => {
-                var centralPacific = CountryState.ForEnum(Country.CentralPacific);
-                var targetCountries = centralPacific.ConnectedCountryStates
-                    .Append(centralPacific)
-                    .Distinct()
-                    .ToList();
-
-                var unitIds = FactionState.ForEnum(Faction).ActiveUnitIds
-                    .Where(uid => targetCountries.Contains(UnitState.ForId(uid).CountryState))
-                    .ToList();
+                var unitIds = SupplyTargetUnitIds;
 
                 if (unitIds.Count > 0)
                 {

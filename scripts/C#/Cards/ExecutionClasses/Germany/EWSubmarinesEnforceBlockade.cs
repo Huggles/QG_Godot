@@ -5,20 +5,27 @@ using Godot;
 
 public partial class EWSubmarinesEnforceBlockade : EWCardLogic
 {
+    /// <summary>The German Armies beside the North Sea: one VP and two UK discards each. Read by
+    /// both the step and <see cref="Targets"/>.</summary>
+    private List<UnitState> ScoringUnits
+    {
+        get
+        {
+            CountryState northSea = CountryState.ForEnum(Country.NorthSea);
+            return FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+                .Where(u => u.Type == UnitType.ARMY && northSea.ConnectedCountryStates.Contains(u.CountryState))
+                .ToList();
+        }
+    }
+
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                // Find North Sea country
-                CountryState northSea = CountryState.ForEnum(Country.NorthSea);
-                
-                // Count German Armies adjacent to North Sea
-                var germanArmies = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-                    .Where(u => u.Type == UnitType.ARMY && northSea.ConnectedCountryStates.Contains(u.CountryState))
-                    .ToList();
-                
-                int count = germanArmies.Count;
+                int count = ScoringUnits.Count;
 
                 await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, "German Armies adjacent to North Sea"), Faction));
                 

@@ -6,6 +6,11 @@ using Godot;
 
 public partial class StatusSuperiorPlanning : StatusCardLogic
 {
+    // No Targets() override, deliberately. This examines the top 4 of the draw deck, which are
+    // hidden until the card resolves. Targets() runs on the host and its result goes on the wire in
+    // InputRequest.CardTargetPreviews, so naming those cards would leak them at hover time.
+    // TargetSet.None is the correct answer, not a gap to be filled.
+
     /// <summary> A free look at the top of the deck: the play is untouched. </summary>
     public override bool IsFreePlayStepActivation => true;
 

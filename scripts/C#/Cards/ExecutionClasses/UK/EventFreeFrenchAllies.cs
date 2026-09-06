@@ -6,22 +6,27 @@ using Godot;
 
 public partial class EventFreeFrenchAllies : EventCardLogic
 {
+    private static readonly List<Country> targetCountries = [Country.WesternEurope, Country.NorthAfrica, Country.Africa];
+
+    /// <summary>The spaces the recruit is actually available in right now — the same filtered list
+    /// the step offers, so the preview and the offer cannot disagree.</summary>
+    private List<CountryState> RecruitTargets =>
+        CountryState.RecruitableLand(Faction).Where(cs => targetCountries.Contains(cs.Country)).ToList();
+
+    public override TargetSet Targets() => TargetSet.Countries(RecruitTargets);
+
     public override List<CardStep> OnActivate()
     {
-        List<Country> targetCountries = [Country.WesternEurope, Country.NorthAfrica, Country.Africa];
 
         return new List<CardStep> {
             new CardStep(this, async() => {
-                var recruitableTargets = CountryState.RecruitableLand(Faction)
-                    .Where(cs => targetCountries.Contains(cs.Country))
-                    .ToList();
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitableTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
                 deployUnitChangeEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
-                return CountryState.RecruitableLand(Faction).Any(cs => targetCountries.Contains(cs.Country));
+                return RecruitTargets.Count > 0;
             }), this))
             .WithGuidance("Recruit an army in Western Europe, North Africa, or Africa"),
         };

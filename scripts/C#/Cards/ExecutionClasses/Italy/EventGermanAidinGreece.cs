@@ -14,6 +14,10 @@ public partial class EventGermanAidinGreece : EventCardLogic
                        && !UnitState.ForId(uId).ImmuneForTurn)
             .ToList();
 
+    /// <summary>The Allied armies step 1 clears out, and the space step 2 recruits into.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Units(AlliedArmiesInBalkans).Plus(TargetSet.Countries(targetCountries));
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

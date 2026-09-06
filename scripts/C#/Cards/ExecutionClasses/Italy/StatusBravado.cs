@@ -14,6 +14,9 @@ public partial class StatusBravado : StatusCardLogic
             .Distinct()
             .ToList();
 
+    /// <summary>Every land space and enemy army this may attack.</summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(LandBattleTargets);
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

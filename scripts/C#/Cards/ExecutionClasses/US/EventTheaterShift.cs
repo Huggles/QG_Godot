@@ -12,6 +12,22 @@ public partial class EventTheaterShift : EventCardLogic
     private List<int> relocatedIds = new List<int>();
     private bool lastRemovedUnitWasNavy = false;
 
+    /// <summary>
+    /// The pieces still awaiting relocation. Read by the removal step, its condition and
+    /// <see cref="Targets"/> alike, so the three cannot disagree about who is left.
+    /// </summary>
+    private List<int> EligibleUnitIds =>
+        GetUSUnitIds
+            .Where(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0)
+            .ToList();
+
+    /// <summary>Every piece this will pick up, and every space it could set one down in. Both types,
+    /// since which one the rebuild offers depends on the piece the player picks first.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Units(EligibleUnitIds)
+            .Plus(TargetSet.Countries(CountryState.BuildableLand(Faction)))
+            .Plus(TargetSet.Countries(CountryState.BuildableSea(Faction)));
+
     public override List<CardStep> OnActivate() => MakeRelocationSteps();
 
     private List<CardStep> MakeRelocationSteps() =>
@@ -21,23 +37,17 @@ public partial class EventTheaterShift : EventCardLogic
     {
         return new CardStep(this, async () =>
         {
-            var eligibleIds = GetUSUnitIds
-                .Where(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0)
-                .ToList();
-            int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, eligibleIds).BroadCast()).ResponseUnitIds[0];
+            int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, EligibleUnitIds).BroadCast()).ResponseUnitIds[0];
             lastRemovedUnitWasNavy = UnitState.ForId(selectedUnitId).Type == UnitType.NAVY;
             relocatedIds.Add(selectedUnitId);
-            bool hasMoreUnits = GetUSUnitIds.Any(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0);
-            if (hasMoreUnits) CardSteps.AddRange(MakeRelocationSteps());
+            if (EligibleUnitIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
             RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
             removeEvent.IsTrigger = false;
             await CardPlayPool.DoChangeEvent(removeEvent);
         })
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-        {
-            var eligible = GetUSUnitIds.Where(id => !relocatedIds.Contains(id) && (UnitState.ForId(id)?.CountryId ?? -1) >= 0).ToList();
-            return eligible.Count > 0 && (CountryState.BuildableLand(Faction).Count > 0 || CountryState.BuildableSea(Faction).Count > 0);
-        }), this))
+            EligibleUnitIds.Count > 0
+            && (CountryState.BuildableLand(Faction).Count > 0 || CountryState.BuildableSea(Faction).Count > 0)), this))
         .WithGuidance("Select a US Army or Navy to eliminate and rebuild");
     }
 

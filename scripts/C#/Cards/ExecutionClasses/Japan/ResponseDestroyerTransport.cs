@@ -10,6 +10,25 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
     // after CurrentReactionTrigger is restored between steps.
     private CountryState _triggerSeaLocation;
 
+    /// <summary>
+    /// The sea space that was battled. Step 1 caches it into the field above because
+    /// CurrentReactionTrigger is restored before step 2 runs; at hover time nothing is cached yet, so
+    /// this falls back to the live trigger — which is precisely what the preview needs.
+    /// </summary>
+    private CountryState TriggerSeaLocation =>
+        _triggerSeaLocation ?? TriggerContextAs<BattleCountryChangeEvent>()?.CountryState;
+
+    /// <summary>The land spaces beside that sea space that can actually take an Army. Both steps
+    /// offer this same list, and so does <see cref="Targets"/>.</summary>
+    private List<CountryState> AdjacentBuildable =>
+        TriggerSeaLocation == null
+            ? new List<CountryState>()
+            : CountryState.BuildableLand(Faction)
+                .Where(cs => TriggerSeaLocation.ConnectedCountryStates.Contains(cs))
+                .ToList();
+
+    public override TargetSet Targets() => TargetSet.Countries(AdjacentBuildable);
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> { 
@@ -22,39 +41,27 @@ public partial class ResponseDestroyerTransport : ResponseCardLogic
         return new List<CardStep> {
             // Build first Army adjacent to the battled sea space that triggered this reaction
             new CardStep(this, async() => {
-                var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
+                var triggerBattle = TriggerContextAs<BattleCountryChangeEvent>();
                 if (triggerBattle == null) return;
                 _triggerSeaLocation = triggerBattle.CountryState;
-                var adjacentBuildable = CountryState.BuildableLand(Faction)
-                    .Where(cs => _triggerSeaLocation.ConnectedCountryStates.Contains(cs))
-                    .ToList();
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, AdjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
-            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
-                var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
-                if (triggerBattle == null) return false;
-                return CountryState.BuildableLand(Faction).Any(cs => triggerBattle.CountryState.ConnectedCountryStates.Contains(cs));
-            }), this))
+            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => AdjacentBuildable.Count > 0), this))
             .WithGuidance("Build an army adjacent to a battled sea space"),
             
             // Build second Army also adjacent to the original battled sea space
             new CardStep(this, async() => {
                 if (_triggerSeaLocation == null) return;
-                var adjacentBuildable = CountryState.BuildableLand(Faction)
-                    .Where(cs => _triggerSeaLocation.ConnectedCountryStates.Contains(cs))
-                    .ToList();
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, adjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, AdjacentBuildable.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
                 DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
                 deployUnitChangeEvent.IsTrigger = true;
                 await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
             })
-            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
-                if (_triggerSeaLocation == null) return false;
-                return CountryState.BuildableLand(Faction).Any(cs => _triggerSeaLocation.ConnectedCountryStates.Contains(cs));
-            }), this))
+            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() =>
+                _triggerSeaLocation != null && AdjacentBuildable.Count > 0), this))
             .WithGuidance("Build another army adjacent to the same sea space"),
         }; 
     }

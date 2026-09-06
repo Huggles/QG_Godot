@@ -23,7 +23,7 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     {
         get 
         {
-            var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
+            var trigger = TriggerContextAs<DeployUnitChangeEvent>();
             if (trigger == null) return new List<CountryState>();
             return CountryState.ForId(trigger.CountryId).AdjacentCountryStates(Faction)
                 .Where(countryState => countryState.CanBuild(Faction) && countryState.IsLand)
@@ -31,6 +31,9 @@ public partial class StatusSyntheticFuel : StatusCardLogic
                 .ToList();
         }
     }
+
+    /// <summary>The spaces adjacent to the deploy that can take the second Army.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(DeployTargets);
 
     public override List<CardStep> OnActivate() 
     {

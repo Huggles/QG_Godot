@@ -6,6 +6,9 @@ using Godot;
 
 public partial class ResponseKamikaze : ResponseCardLogic
 {
+    /// <summary>The Allied Navy just built beside a Japanese piece — the one this eliminates. Chosen by the trigger, not by the player.</summary>
+    public override TargetSet Targets() => TriggerTargets();
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

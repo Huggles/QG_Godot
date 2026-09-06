@@ -5,22 +5,29 @@ using Godot;
 
 public partial class EWIndianOceanPatrols : EWCardLogic
 {
+    /// <summary>The Japanese Navies in or beside the Bay of Bengal: two VP and two discards each. Read by
+    /// both the step and <see cref="Targets"/>, so hovering shows exactly what this card is worth.</summary>
+    private List<UnitState> ScoringUnits
+    {
+        get
+        {
+            CountryState bayOfBengal = CountryState.ForEnum(Country.BayOfBengal);
+            return FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+                .Where(u => u.Type == UnitType.NAVY
+                         && (u.CountryState.Country == Country.BayOfBengal
+                             || bayOfBengal.ConnectedCountryStates.Contains(u.CountryState)))
+                .ToList();
+        }
+    }
+
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                // Find Bay of Bengal
-                CountryState bayOfBengal = CountryState.ForEnum(Country.BayOfBengal);
-                
-                // Count Japanese Navies in or adjacent to Bay of Bengal
-                var japaneseNavies = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-                    .Where(u => u.Type == UnitType.NAVY && 
-                               (u.CountryState.Country == Country.BayOfBengal || 
-                               bayOfBengal.ConnectedCountryStates.Contains(u.CountryState)))
-                    .ToList();
-                
-                int count = japaneseNavies.Count;
+                int count = ScoringUnits.Count;
                 
                 if (count > 0)
                 {

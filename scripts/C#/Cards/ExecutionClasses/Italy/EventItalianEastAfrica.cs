@@ -5,6 +5,9 @@ using Godot;
 public partial class EventItalianEastAfrica : EventCardLogic
 {
     public List<Country> targetCountries = [Country.NorthAfrica, Country.BayOfBengal];
+
+    /// <summary>The army space and the navy space, in step order.</summary>
+    public override TargetSet Targets() => TargetSet.Countries(targetCountries);
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>

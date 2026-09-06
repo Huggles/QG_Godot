@@ -6,6 +6,9 @@ using Godot;
 
 public partial class ResponseRasputitsa : ResponseCardLogic
 {
+    /// <summary>The Axis Army just built near Moscow — the piece this eliminates. Chosen by the trigger, not by the player.</summary>
+    public override TargetSet Targets() => TriggerTargets();
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

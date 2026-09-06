@@ -11,6 +11,19 @@ public partial class EventGunsAndButter : EventCardLogic
     private const string OPT_LAND_BATTLE = "Land Battle";
     private const string OPT_SEA_BATTLE  = "Sea Battle";
 
+    /// <summary>
+    /// The card offers a choice of four actions, so it reports the union of all four: every space it
+    /// could build in and everything it could attack. The same six expressions the option list and the
+    /// step's four branches are built from.
+    /// </summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(CountryState.BuildableLand(Faction))
+            .Plus(TargetSet.Countries(CountryState.BuildableSea(Faction)))
+            .Plus(TargetSet.Countries(CountryState.AttackableLandIds(Faction)))
+            .Plus(TargetSet.Units(UnitState.AttackableArmyIds(Faction)))
+            .Plus(TargetSet.Countries(CountryState.AttackableSeaIds(Faction)))
+            .Plus(TargetSet.Units(UnitState.AttackableNavyIds(Faction)));
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {

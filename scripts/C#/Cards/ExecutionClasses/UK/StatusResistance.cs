@@ -7,17 +7,10 @@ public partial class StatusResistance : StatusCardLogic
 {
     private static readonly List<int> TargetCountryIds = [(int)Country.WesternEurope, (int)Country.Italy];
 
-    private List<BattleTarget> BattleTargets =>
-        TargetCountryIds.SelectMany(id => {
-            var cs = CountryState.ForId(id);
-            var list = new List<BattleTarget>();
-            if (cs.Tags.Has(Tag.Attackable, Faction))
-                list.Add(new BattleTarget(id, TargetType.COUNTRY));
-            list.AddRange(cs.Units.Values
-                .Where(uId => UnitState.ForId(uId).Tags.Has(Tag.Attackable, Faction))
-                .Select(uId => new BattleTarget(uId, TargetType.UNIT)));
-            return list;
-        }).ToList();
+    private List<BattleTarget> BattleTargets => BattleTarget.In(TargetCountryIds, Faction);
+
+    /// <summary>What is attackable in Western Europe and Italy.</summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(BattleTargets);
 
     protected override List<Condition> CardTriggers()
     {

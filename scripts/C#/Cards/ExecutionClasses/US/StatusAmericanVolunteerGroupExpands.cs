@@ -18,6 +18,13 @@ public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICou
         CountryState.ForEnum(Country.Szechuan).AddTag(Tag.Recruitable, faction);
     }
 
+    /// <summary>Szechuan — the space this recruits into, and the space whose Allied Armies it keeps
+    /// in supply. Both halves of the card point at the same place.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(new List<Country> { Country.Szechuan })
+            .Plus(TargetSet.Units(CountryState.ForEnum(Country.Szechuan).Units.Values
+                .Select(UnitState.ForId).Where(GrantsSupply).ToList()));
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {

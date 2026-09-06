@@ -6,6 +6,13 @@ using Godot;
 
 public partial class ResponseSurpriseAttack : ResponseCardLogic
 {
+    /// <summary>Both battles, sea then land — the same board-wide lists the two steps offer.</summary>
+    public override TargetSet Targets() =>
+        TargetSet.Countries(CountryState.AttackableSeaIds(Faction))
+            .Plus(TargetSet.Units(UnitState.AttackableNavyIds(Faction)))
+            .Plus(TargetSet.Countries(CountryState.AttackableLandIds(Faction)))
+            .Plus(TargetSet.Units(UnitState.AttackableArmyIds(Faction)));
+
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> { 

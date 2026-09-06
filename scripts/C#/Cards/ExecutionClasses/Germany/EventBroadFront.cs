@@ -23,6 +23,13 @@ public partial class EventBroadFront : EventCardLogic
             .ToList();
     }
 
+    /// <summary>
+    /// The Soviet Armies in reach right now. Later battles run against a board this one has already
+    /// changed, and the steps for them do not exist yet at hover time — so this reports the first
+    /// battle's offer, which is the only one that is knowable.
+    /// </summary>
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(QualifyingTargets());
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> { MakeBattleStep() };
