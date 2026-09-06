@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://dgnm2d0n0ycdy"]
+
+[ext_resource type="Texture2D" uid="uid://cdvdsedpw7l2" path="res://assets/textures/Other/9Patches/free-to-use-nine-patch-rect-textures-v0-jlv0yj89wj1a1.webp" id="1_pq15n"]
+[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="2_j06xv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pq15n"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 1
+shadow_color = Color(0, 0, 0, 0.32941177)
+shadow_size = 25
+
+[node name="Control" type="PanelContainer" unique_id=894605607]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1732.0
+offset_bottom = -919.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pq15n")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=1505540548]
+modulate = Color(0.63375676, 0.6337568, 0.63375676, 1)
+layout_mode = 2
+offset_transform_enabled = true
+texture = ExtResource("1_pq15n")
+region_rect = Rect2(4, 268, 128, 128)
+patch_margin_left = 96
+patch_margin_top = 83
+patch_margin_right = 92
+patch_margin_bottom = 78
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1465999169]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="Label" type="Label" parent="MarginContainer" unique_id=1449993729]
+layout_mode = 2
+size_flags_vertical = 1
+text = "ABC"
+label_settings = ExtResource("2_j06xv")
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://cb05yfgtalgy8"]
+
+[ext_resource type="Texture2D" uid="uid://d1hf1kfmv8mvy" path="res://assets/textures/Other/Badges/TurnBadge.png" id="1_nnqxl"]
+[ext_resource type="Texture2D" uid="uid://nqrbw6q5e54x" path="res://assets/factions/japan/Japan_Flag.png" id="2_4coyv"]
+[ext_resource type="PackedScene" uid="uid://dgnm2d0n0ycdy" path="res://scenes/userinterface/PlayerAction/ScalableLabel.tscn" id="3_777ew"]
+
+[node name="TurnBadge" type="Control" unique_id=215012341]
+custom_minimum_size = Vector2(313, 265)
+custom_maximum_size = Vector2(313, 265)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1607.0
+offset_bottom = -815.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Badge" type="TextureRect" parent="." unique_id=299970176]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 939.0
+offset_bottom = 796.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_nnqxl")
+expand_mode = 5
+
+[node name="Flag" type="TextureRect" parent="Badge" unique_id=452821624]
+unique_name_in_owner = true
+show_behind_parent = true
+layout_mode = 0
+offset_left = 226.48
+offset_top = 283.62
+offset_right = 1037.0
+offset_bottom = 689.88
+texture = ExtResource("2_4coyv")
+expand_mode = 5
+stretch_mode = 4
+
+[node name="Label" parent="." unique_id=2024557800 instance=ExtResource("3_777ew")]
+layout_mode = 1
+offset_left = 209.0
+offset_top = 846.0
+offset_right = 695.0
+offset_bottom = 735.0
