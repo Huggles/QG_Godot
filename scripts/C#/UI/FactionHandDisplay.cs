@@ -26,6 +26,13 @@ public partial class FactionHandDisplay : Control
 	private List<CardScene> CardScenes = new List<CardScene>();
 	private Faction showingFaction;
 
+	/// <summary>
+	/// The faction the display is following on its own — see <see cref="OnTurnStepStarted"/>. Distinct
+	/// from <see cref="showingFaction"/>, which every prompt and every browse overwrites: this one only
+	/// ever moves when the upcoming faction does, so a turn's worth of steps is a no-op.
+	/// </summary>
+	private Faction followedFaction = Faction.NONE;
+
 	[Signal] public delegate void CardSelectedEventHandler(int cardId);
 
 	// Event handlers for cleanup
@@ -69,6 +76,7 @@ public partial class FactionHandDisplay : Control
 		EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
 		EventBus.Instance.CardsDrawn += OnCardsDrawn;
 		EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
+		EventBus.Instance.NextStepStarted += OnTurnStepStarted;
 		_subscribed = true;
 
 		onTestButtonPressed = () =>
@@ -99,8 +107,75 @@ public partial class FactionHandDisplay : Control
 
 	private void OnGameSessionStarted()
 	{
-		DebugUtilities.PrintPeerFinest($"Game session started, showing hand display for first faction: {PlayerScene.Current.ControlledFactions[0]}");
-		Show(PlayerScene.Current.ControlledFactions[0]);
+		Faction upcoming = UpcomingLocalFaction();
+		DebugUtilities.PrintPeerFinest($"Game session started, showing hand display for upcoming faction: {upcoming}");
+		if (upcoming == Faction.NONE) return;
+
+		followedFaction = upcoming;
+		Show(upcoming);
+	}
+
+	/// <summary>
+	/// Follow the hand of the next faction this peer will actually be asked to act for, so a player who
+	/// has just ended a turn is looking at what they will play next rather than at the hand they have
+	/// finished with. The cards are not selectable yet — the point is to be able to plan.
+	///
+	/// Driven by NextStepStarted rather than NewTurnStarted: the latter is emitted from
+	/// GameFlow.StartNewTurn, which only the host runs, while TurnStepCounter is a replicated property
+	/// whose setter emits this on every peer — and on the resume after a save restore, where the turn
+	/// has already moved before any new event lands.
+	///
+	/// The step itself is ignored. Only a change of upcoming faction acts, which is what keeps this out
+	/// of the way of the turn it is already in: every step of a running turn resolves to the same
+	/// faction, so the display stays exactly where that turn's prompts left it. It follows that a peer
+	/// controlling one faction never sees this move at all — its next action is always that same hand.
+	/// </summary>
+	private void OnTurnStepStarted(int turnStep)
+	{
+		Faction upcoming = UpcomingLocalFaction();
+		if (upcoming == Faction.NONE || upcoming == followedFaction) return;
+
+		// An open card prompt owns this display, and so does a hand pulled up from the bottom-left menu
+		// (which is claimed over a live request rather than instead of one, hence IsHeldBy rather than
+		// FactionFocus.Current). Deliberately not recorded as followed when skipped: the next step
+		// retries, so the display catches up as soon as it is free again.
+		if (InputManager.CurrentCardPrompt != null || FactionFocus.IsHeldBy(FactionFocusSource.Browsing))
+		{
+			return;
+		}
+
+		// Guarded through FactionState because Show -> DeckState.ForFaction dereferences it, and it is
+		// null until the game state has arrived on this peer.
+		if (FactionState.ForEnum(upcoming)?.DeckState == null) return;
+
+		followedFaction = upcoming;
+		Show(upcoming);
+	}
+
+	/// <summary>
+	/// The first faction at or after <see cref="GameFlow.CurrentFaction"/>, in turn order, that this
+	/// peer controls — the next hand it will be prompted to play from. Resolves to the current faction
+	/// for as long as its own turn is running, which is why ending that turn is what moves it on.
+	/// </summary>
+	private static Faction UpcomingLocalFaction()
+	{
+		List<Faction> controlledFactions = PlayerScene.Current?.ControlledFactions;
+		if (controlledFactions == null || controlledFactions.Count == 0 || GameFlow.Instance == null)
+		{
+			return Faction.NONE;
+		}
+
+		List<Faction> turnOrder = StaticGameData.PlayableFactions;
+		// Max(_, 0): CurrentFaction is GERMANY before the first turn has started, which is turnOrder[0]
+		// anyway, but an unplayable faction must not send the scan below off the front of the list.
+		int start = Mathf.Max(turnOrder.IndexOf(GameFlow.Instance.CurrentFaction), 0);
+
+		for (int offset = 0; offset < turnOrder.Count; offset++)
+		{
+			Faction candidate = turnOrder[(start + offset) % turnOrder.Count];
+			if (controlledFactions.Contains(candidate)) return candidate;
+		}
+		return Faction.NONE;
 	}
 
 
@@ -450,5 +525,6 @@ public partial class FactionHandDisplay : Control
 		EventBus.Instance.GameSessionStarted -= OnGameSessionStarted;
 		EventBus.Instance.CardsDrawn -= OnCardsDrawn;
 		EventBus.Instance.CardsDiscarded -= OnCardsDiscarded;
+		EventBus.Instance.NextStepStarted -= OnTurnStepStarted;
 	}
 }

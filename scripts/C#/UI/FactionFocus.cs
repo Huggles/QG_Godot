@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// What the local client is busy with, expressed as a faction — the one thing on screen the player is
@@ -31,6 +32,14 @@ public static class FactionFocus
         }
         Notify(before);
     }
+
+    /// <summary>
+    /// Whether <paramref name="source"/> holds a claim right now, at any depth — not only when it is
+    /// the one on top. Asked by the parts of the UI that must not draw over what a source is showing:
+    /// a browsed hand keeps its claim while parked under a newer one, and is still on screen.
+    /// </summary>
+    public static bool IsHeldBy(FactionFocusSource source)
+        => Claims.Any(claim => claim.Source == source);
 
     /// <summary>Give up <paramref name="source"/>'s claim; whatever it was covering comes back.</summary>
     public static void Clear(FactionFocusSource source) => Set(source, Faction.NONE);
