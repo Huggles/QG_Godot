@@ -27,6 +27,7 @@
 [ext_resource type="Script" uid="uid://bhyk2pph2c0qf" path="res://scripts/C#/UI/TutorialArrow.cs" id="28_tutarrow"]
 [ext_resource type="Texture2D" uid="uid://s1w8qwl20na2" path="res://assets/textures/Other/Icons/Arrow.png" id="29_tutarrowtex"]
 [ext_resource type="Script" uid="uid://bqgrndlbl0001" path="res://scripts/C#/UI/GameRoundLabel.cs" id="30_roundlbl"]
+[ext_resource type="PackedScene" uid="uid://cb05yfgtalgy8" path="res://scenes/userinterface/PlayerAction/TurnBadge.tscn" id="31_turnbadge"]
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -305,3 +306,5 @@ texture = ExtResource("29_tutarrowtex")
 centered = false
 offset = Vector2(-1235.19, -627)
 script = ExtResource("28_tutarrow")
+
+[node name="TurnBadge" parent="." unique_id=215012341 instance=ExtResource("31_turnbadge")]

@@ -43,6 +43,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(ShowBulletinPresentationEventDto),    "ShowBulletin")]
 [JsonDerivedType(typeof(ShowActionLabelPresentationEventDto), "ShowActionLabel")]
 [JsonDerivedType(typeof(ShowCommanderMessagePresentationEventDto), "ShowCommanderMessage")]
+[JsonDerivedType(typeof(ShowTurnBadgePresentationEventDto),   "ShowTurnBadge")]
 public abstract class GameMessageDto
 {
     public int     Id                  { get; set; }
@@ -99,6 +100,15 @@ public class ShowCommanderMessagePresentationEventDto : PresentationEventDto
 public class ShowActionLabelPresentationEventDto : PresentationEventDto
 {
     public string Text { get; set; }
+}
+
+/// <summary>
+/// Wire format for <see cref="ShowTurnBadgePresentationEvent"/>. No fields of its own: the faction it
+/// announces is the base's TriggeringFaction, and the flag and caption are looked up from that on
+/// each peer rather than sent.
+/// </summary>
+public class ShowTurnBadgePresentationEventDto : PresentationEventDto
+{
 }
 
 /// <summary>

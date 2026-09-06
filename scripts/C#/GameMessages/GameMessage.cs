@@ -177,6 +177,7 @@ public abstract partial class GameMessage : GodotObject
             ShowBulletinPresentationEventDto d   => new ShowBulletinPresentationEvent(d.TriggeringFaction, d.Label, d.BulletinText, d.SourceCardId),
             ShowActionLabelPresentationEventDto d => new ShowActionLabelPresentationEvent(d.TriggeringFaction, d.Text),
             ShowCommanderMessagePresentationEventDto d => new ShowCommanderMessagePresentationEvent(d.TriggeringFaction, d.Text, d.Wait, d.Arrow),
+            ShowTurnBadgePresentationEventDto d   => new ShowTurnBadgePresentationEvent(d.TriggeringFaction),
 
             _ => throw new NotSupportedException($"Unknown GameMessageDto type: {dto.GetType().Name}")
         };
