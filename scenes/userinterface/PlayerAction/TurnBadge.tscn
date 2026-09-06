@@ -41,9 +41,9 @@ texture = ExtResource("2_4coyv")
 expand_mode = 5
 stretch_mode = 4
 
-[node name="Label" parent="." unique_id=2024557800 instance=ExtResource("3_777ew")]
+[node name="Control" parent="Badge" unique_id=894605607 instance=ExtResource("3_777ew")]
 layout_mode = 1
-offset_left = 209.0
-offset_top = 846.0
-offset_right = 695.0
-offset_bottom = 735.0
+offset_left = 129.0
+offset_top = 776.0
+offset_right = -143.0
+offset_bottom = -124.0

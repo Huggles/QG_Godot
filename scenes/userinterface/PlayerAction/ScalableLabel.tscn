@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://cdvdsedpw7l2" path="res://assets/textures/Other/9Patches/free-to-use-nine-patch-rect-textures-v0-jlv0yj89wj1a1.webp" id="1_pq15n"]
 [ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="2_j06xv"]
+[ext_resource type="Material" uid="uid://cngflxxefdioy" path="res://assets/materials/InsetOutlineMaterial.tres" id="3_outline"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pq15n"]
 content_margin_left = 0.0
@@ -29,6 +30,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_pq15n")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="." unique_id=1505540548]
 modulate = Color(0.63375676, 0.6337568, 0.63375676, 1)
+material = ExtResource("3_outline")
 layout_mode = 2
 offset_transform_enabled = true
 texture = ExtResource("1_pq15n")

@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cngflxxefdioy"]
+
+[ext_resource type="Shader" uid="uid://b50g616iedkgd" path="res://assets/materials/shaders/InsetOutline.gdshader" id="1_insetoutline"]
+
+[resource]
+shader = ExtResource("1_insetoutline")
+shader_parameter/outline_color = Color(0.26536053, 0.26536053, 0.2653605, 1)
+shader_parameter/outline_amount = 1.0
+shader_parameter/outline_thickness_pixels = 8.9590004255525
+shader_parameter/region_rect_pixels = Vector4(4, 268, 128, 128)
+shader_parameter/outside_region_alpha = 0.0
+shader_parameter/edge_threshold = 0.490000023275
+shader_parameter/edge_softness = 0.25
+shader_parameter/source_pixels_per_screen_pixel = 0.5910000280725
