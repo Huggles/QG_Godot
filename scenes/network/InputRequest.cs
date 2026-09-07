@@ -256,6 +256,12 @@ public abstract partial class InputRequest
                 if (showedBulletin) TriggerContextDisplay.Current?.Hide();
                 InputTimerDisplay.Current?.Hide();
                 FactionFocus.Clear(FactionFocusSource.InputRequest);
+
+                // The player has answered and the game is moving on, so a turn announcement still
+                // fading out over the middle of the screen is behind the play — drop it rather than
+                // letting it ride out the rest of its fade. In the finally with the rest: a skipped or
+                // timed-out prompt is just as much a reason for the badge to be gone.
+                TurnBadge.DismissNow();
             }
         }
         else

@@ -33,6 +33,11 @@ public partial class GameMenuTrigger : Node
 
         if (@event is not InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape }) return;
 
+        // Above every bail-out below, and deliberately not conditional on this menu actually opening:
+        // reaching for Escape at all means the player has stopped watching the turn announcement, so
+        // the badge goes even when a prompt owns the key and the menu stays shut.
+        TurnBadge.DismissNow();
+
         if (GameMenuModal.IsOpen) return;
 
         // A pending input request owns Escape — see ModalStack.EscapeTarget. Opening this menu over

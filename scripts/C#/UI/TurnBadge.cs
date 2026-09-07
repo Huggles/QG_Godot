@@ -101,6 +101,28 @@ public partial class TurnBadge : Control
 		return badge.Run(faction);
 	}
 
+	/// <summary>
+	/// Take the badge down at once, mid-fade if need be. For the moments the player has visibly moved
+	/// on from the turn announcement — answering a prompt, or reaching for the menu — where holding a
+	/// flag over the middle of the screen for the rest of its fade only sits in the way.
+	///
+	/// Safe with no badge up, with none in the tree at all (headless, and between game scenes), and
+	/// repeatedly. Clearing <see cref="_fade"/> is also what tells a <see cref="Run"/> still waiting
+	/// out its timer that it no longer owns the badge, so it will not hide or dispose behind this.
+	/// </summary>
+	public static void DismissNow()
+	{
+		TurnBadge badge = Instance;
+		if (badge == null || !IsInstanceValid(badge)) return;
+
+		badge._fade?.Kill();
+		badge._fade?.Dispose();
+		badge._fade = null;
+
+		badge.Hide();
+		badge.Modulate = new Color(badge.Modulate, 0f);
+	}
+
 	private async Task Run(Faction faction)
 	{
 		// One announcement per turn. The turn change and the catch-up above can both reach here for
