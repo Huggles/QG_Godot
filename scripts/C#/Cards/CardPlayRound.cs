@@ -30,6 +30,22 @@ public partial class CardPlayRound : GodotObject
     private HashSet<Faction> _afterReactionPassedFactions = new();
 
     /// <summary>
+    /// True once the faction's own play prompt has come back from the player rather than from the host.
+    /// The gate on <see cref="ApplyPassedOnPlayPenalty"/>, because a -1 out of <see cref="RequestPlay"/>
+    /// is not always a pass:
+    ///
+    ///   - No PlayerScene controls the faction, so the prompt was never raised. A misconfiguration,
+    ///     not a decision — charging a card for it would be wrong and hard to trace.
+    ///   - The host RELEASED the prompt: input timeout answered with Skip, the answering peer
+    ///     disconnected, or the recovery sweep cancelled it. NetworkApi returns WasSkipped with an
+    ///     empty response on all three, which is indistinguishable from a pass at the card id alone.
+    ///
+    /// Round-scoped, like the round itself: a re-run of the step builds a fresh CardPlayRound and so
+    /// re-earns the penalty from scratch.
+    /// </summary>
+    private bool ownPlayPromptAnswered;
+
+    /// <summary>
     /// Game-loop epoch this round belongs to, captured at construction. Error recovery bumps the
     /// epoch, so a continuation that resumes from an await after a recovery can compare against this
     /// and unwind instead of mutating state alongside the resumed loop.
@@ -105,8 +121,78 @@ public partial class CardPlayRound : GodotObject
             }
         }
 
+        // The faction reached the end of its play step without spending its play: it passed the prompt
+        // outright, or only took activations that are explicitly in ADDITION to the play. Either way the
+        // action is still owed, and passing it costs something.
+        if (!Condition.HasPlayedCardThisTurnStep.For(faction))
+        {
+            await ApplyPassedOnPlayPenalty(faction);
+        }
+
         Finish();
         return lastStepId;
+    }
+
+    /// <summary>
+    /// The price of ending the play step without playing a card or taking an instead-of-play action:
+    /// discard one hand card, or lose 1 VP when the hand is empty and there is nothing to discard.
+    ///
+    /// A faction must always do one of the three, so the prompt that offers the choice now opens even
+    /// with a dead hand (see <see cref="RequestPlay"/>) and this is what makes passing it mean something.
+    ///
+    /// Applied here rather than where RequestPlay returns -1 so that it covers every way the loop above
+    /// can end — and so it cannot reach the one other place a HandCardPlayRequestHandler is raised:
+    /// EventLendLease grants an ally an out-of-turn play by broadcasting that request directly, and an
+    /// ally who declines a gift owes nobody a card.
+    /// </summary>
+    private async Task ApplyPassedOnPlayPenalty(Faction faction)
+    {
+        // A round the recovery has superseded penalises nobody. The throw must escape past Finish():
+        // an aborted round never emitted CardPlayPoolFinished before this change either, and the
+        // handler it would reach has already been detached.
+        ThrowIfAborted();
+
+        if (!ownPlayPromptAnswered)
+        {
+            DebugUtilities.PrintPeer($"{faction} owed a play action but was never asked (or the host released the prompt) — no penalty");
+            return;
+        }
+
+        List<int> handCardIds = DeckState.ForFaction(faction).HandCardIds;
+
+        // Belt and braces. AutoDiscardOnAbort below means a released discard prompt resolves itself
+        // rather than throwing, so this catch should be unreachable — but the failure it prevents is
+        // invisible: StepSkippedException escaping here would skip Finish(), so CardPlayPoolFinished
+        // never fires and the turn loop stalls with no popup and no log line, because
+        // ErrorReporter.IsBenign swallows it before ReportLoopStalled can report. Nothing broader is
+        // caught: a real failure must still stall visibly, and AbortedEpochException must propagate.
+        try
+        {
+            if (handCardIds.Count > 0)
+            {
+                await new ShowActionLabelPresentationEvent(faction,
+                    $"{faction.WithPlayer()} took no play action — discard 1 card").Apply();
+
+                ForceDiscardHandCardsChangeEvent discardEvent = new ForceDiscardHandCardsChangeEvent(faction, faction, 1);
+                discardEvent.IsTrigger = false;
+                discardEvent.AutoDiscardOnAbort = true;
+                await discardEvent.Apply();
+            }
+            else
+            {
+                await new ShowActionLabelPresentationEvent(faction,
+                    $"{faction.WithPlayer()} took no play action and holds no cards — loses 1 VP").Apply();
+
+                ScorePointsChangeEvent penaltyEvent = new ScorePointsChangeEvent(
+                    new VPEntry(-1, "took no play action with no cards in hand"), faction);
+                penaltyEvent.IsTrigger = false;
+                await penaltyEvent.Apply();
+            }
+        }
+        catch (StepSkippedException)
+        {
+            DebugUtilities.PrintPeer($"Play-action penalty for {faction} was released before it resolved");
+        }
     }
 
     // ── Core pipeline ──────────────────────────────────────────────────────────
@@ -566,10 +652,28 @@ public partial class CardPlayRound : GodotObject
         }
 
         bool isReaction = reactionOptions != null;
-        // In a reaction window the caller has already run ShouldOpenReactionWindow, and an empty
-        // option list is the whole point of the always-ask rule — an unanswerable prompt is the cover
-        // that stops the prompt itself from revealing a face-down Response card.
-        bool hasOptions = isReaction || DeckState.ForFaction(faction).ActivatableCardIds.Count > 0;
+
+        // Only this faction's own plays consume its hand-card play for the turn step; another faction
+        // playing must not hide this faction's hand cards.
+        bool hasSpentPlay =
+            GameFlow.Instance.CardsPlayedThisTurnStep.TryGetValue(faction, out int cardsPlayedByFaction)
+            && cardsPlayedByFaction > 0;
+
+        // Two of these three cases open a prompt with nothing on offer, deliberately, for different
+        // reasons:
+        //   - In a reaction window the caller has already run ShouldOpenReactionWindow, and an empty
+        //     option list is the whole point of the always-ask rule — an unanswerable prompt is the
+        //     cover that stops the prompt itself from revealing a face-down Response card.
+        //   - The faction's own play prompt, before the play is spent, always opens. A faction must
+        //     always play a card, take an instead-of-play action, or discard, so passing now costs
+        //     something (see ApplyPassedOnPlayPenalty) — the player has to be given the choice and told
+        //     the price. This gate used to exist to avoid an empty prompt; an empty prompt is now the
+        //     point, and it also stops the ABSENCE of the prompt from proving the hand is dead.
+        //   - Once the play is spent, passing is free again, so an empty prompt there is just a click
+        //     with nothing behind it and stays suppressed.
+        bool hasOptions = isReaction
+                       || !hasSpentPlay
+                       || DeckState.ForFaction(faction).ActivatableCardIds.Count > 0;
 
         int selectedId = -1;
         if(hasOptions)
@@ -593,14 +697,19 @@ public partial class CardPlayRound : GodotObject
             }
             else
             {
-                // Only this faction's own plays consume its hand-card play for the turn step; another
-                // faction playing must not hide this faction's hand cards.
-                bool hasPlayedHandCardThisTurnStep =
-                    GameFlow.Instance.CardsPlayedThisTurnStep.TryGetValue(faction, out int cardsPlayedByFaction)
-                    && cardsPlayedByFaction > 0;
-                request = hasPlayedHandCardThisTurnStep
+                request = hasSpentPlay
                     ? new InputRequest.ActivateCardRequestHandler(faction)
                     : new InputRequest.HandCardPlayRequestHandler(faction);
+
+                // What passing this prompt will cost, so the Skip button can say so. Stamped host-side
+                // from the authoritative hand rather than re-derived by the client, so a future modifier
+                // on the cost stays knowable by the only peer that can know it.
+                if (!hasSpentPlay)
+                {
+                    request.PassCostText = DeckState.ForFaction(faction).HandCardIds.Count > 0
+                        ? "discard 1 card"
+                        : "lose 1 VP";
+                }
             }
 
             if (CurrentReactionTrigger != null)
@@ -619,6 +728,10 @@ public partial class CardPlayRound : GodotObject
             // the turn step on a decision somebody else made.
             if (isReaction && !withdrawToken.IsCancellationRequested)
                 GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
+            // A pass is only the player's own if they were the one who answered. WasSkipped here means
+            // the HOST released the prompt — see the field's own note.
+            if (!isReaction && !responseDto.WasSkipped)
+                ownPlayPromptAnswered = true;
             selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
         }
 

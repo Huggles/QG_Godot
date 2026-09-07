@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -21,6 +22,19 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
     /// answered.
     /// </summary>
     public bool SelectionResolved { get; private set; }
+
+    /// <summary>
+    /// Pay the discard out of the front of the offered cards when the request is aborted without an
+    /// answer, instead of letting <see cref="StepSkippedException"/> abandon whatever raised it.
+    ///
+    /// Off by default, because for a card's own cost an abandoned step is the right outcome — the
+    /// player does not pay and the card does not resolve. It is opt-in for the callers where the
+    /// discard is a debt the game flow has already committed to and cannot leave unpaid, such as
+    /// CardPlayRound's penalty for ending a play step without taking the play action.
+    ///
+    /// Host-side only, like the request itself: a client is told the selection through the DTO.
+    /// </summary>
+    public bool AutoDiscardOnAbort { get; set; }
 
     public ForceDiscardHandCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards) : base(triggeringFaction)
     {
@@ -60,8 +74,34 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
     {
         if (!SelectionResolved)
         {
-            InputRequest response = await new InputRequest.ForceDiscardHandCardsRequestHandler(TargetFaction, NumberOfCards).BroadCast();
-            PreselectDiscards(response.ResponseCardIds);
+            // Held in a local so the offered set survives an abort: SendInputRequest calls
+            // PopulateTargets before anything reaches the wire, so TargetCardIds is filled on this
+            // instance even on the paths that throw.
+            InputRequest.ForceDiscardHandCardsRequestHandler request = new(TargetFaction, NumberOfCards);
+
+            List<int> selection;
+            try
+            {
+                selection = (await request.BroadCast()).ResponseCardIds;
+            }
+            catch (StepSkippedException) when (AutoDiscardOnAbort)
+            {
+                DebugUtilities.PrintPeer($"Forced discard for {TargetFaction} was released without an answer — paying it from the offered cards");
+                selection = new List<int>();
+            }
+
+            // Covers a short answer as well as a released one: whatever is still owed comes off the
+            // front of the offered cards. Gated on the same flag, so a caller that has not opted in
+            // keeps answering with exactly what came back.
+            if (AutoDiscardOnAbort && selection.Count < NumberOfCards)
+            {
+                selection = selection
+                    .Union(request.TargetCardIds ?? DeckState.ForFaction(TargetFaction).HandCardIds)
+                    .Take(NumberOfCards)
+                    .ToList();
+            }
+
+            PreselectDiscards(selection);
         }
         await GameAPI.DiscardHandCards(TargetFaction, DiscardedCardIds);
         return true;

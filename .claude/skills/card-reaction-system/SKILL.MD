@@ -636,6 +636,41 @@ protected override List<Condition> CardTriggers() => new List<Condition> {
   the always-ask rule closes for reaction windows, and START was not covered by it. The play prompt
   opens every turn regardless, so folding these cards into it divulges nothing.
 
+#### The play prompt always opens, and passing it costs something
+
+A faction must always play a card, take an instead-of-play action, **or discard**. So the faction's own
+play prompt (`HandCardPlayRequestHandler`) opens on every one of its Play steps, even with nothing
+activatable — `RequestPlay`'s gate is `isReaction || !hasSpentPlay || ActivatableCardIds.Count > 0`.
+This is the second reason a card prompt with nothing on offer is not a bug, alongside the always-ask
+rule: here the empty prompt is how a player with a dead hand is given, and shown, the only choice they
+have. It also means the prompt's *absence* can no longer prove the hand is dead.
+
+`CardPlayRound.ApplyPassedOnPlayPenalty` charges the pass once the loop ends with
+`!Condition.HasPlayedCardThisTurnStep.For(faction)` — so a played hand card or a
+`SpendPlayActionChangeEvent` clears it, while a free activation (above) does not:
+
+- hand not empty → `ForceDiscardHandCardsChangeEvent(faction, faction, 1)`, `AutoDiscardOnAbort = true`
+- hand empty → `ScorePointsChangeEvent(new VPEntry(-1, …), faction)`, no modal
+
+Three things about it are load-bearing:
+
+- **It hooks `Start`, not RequestPlay's `-1`.** `EventLendLease` grants an ally an out-of-turn play by
+  broadcasting a `HandCardPlayRequestHandler` directly, and an ally who declines a gift owes nothing.
+- **`ownPlayPromptAnswered` gates it.** A `-1` can also mean no `PlayerScene` controls the faction, or
+  that the *host* released the prompt (timeout Skip, disconnect, recovery sweep — all of which return
+  `WasSkipped` with an empty response). Neither is the player passing.
+- **`AutoDiscardOnAbort` exists so the debt cannot hang the loop.** `ForceDiscardHandCardsChangeEvent`
+  broadcasts its request, and a released request raises `StepSkippedException`; escaping `Start` with
+  it would skip `Finish()`, so `CardPlayPoolFinished` never fires and the turn loop stalls **silently**
+  (`ErrorReporter.IsBenign` swallows it before `ReportLoopStalled` can report). With the flag the
+  discard is instead paid off the front of the request's `TargetCardIds`. Leave it off for a card's own
+  cost, where an abandoned step is the right outcome.
+
+Client side: `InputRequest.PassCostText` carries the price ("discard 1 card" / "lose 1 VP") so the
+Skip button reads `Skip (discard 1 card)` and the hand banner says what passing will do. It is stamped
+host-side, from the authoritative hand. `InputManager.HandleItemSelected` resets the label — one shared
+`SelectionSkipButton` also serves the country/unit/battle-target selections.
+
 ### Prerequisite Change Events Within a Step
 
 Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `Apply()` directly — no need to split into two steps or go through `CardPlayPool.DoChangeEvent`.

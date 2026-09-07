@@ -4,6 +4,23 @@ description: Board game rules for how Status and Response cards are played, trig
 
 > **Authority:** This skill contains the official board game rules and takes **precedence over `card-reaction-system`** in any conflict. If the implementation described in `card-reaction-system` contradicts these rules, the rules here are correct and the implementation should be updated to match.
 
+# The Play step is never skipped
+
+On your Play step you must always do exactly one of three things:
+
+1. play a card from your hand,
+2. take an "instead of your play" card action, or
+3. discard 1 card from your hand.
+
+The third is the fallback, not a freely made choice: it is what happens when you pass, whether you
+passed because nothing was playable or because you would rather keep your hand. A card action that is
+explicitly *in addition* to your play does not satisfy the requirement — only spending the play does.
+
+**If you hold no cards**, there is nothing to discard, and you lose 1 victory point instead.
+
+Because passing always costs something, the play prompt is shown on every Play step, including when
+none of your cards can be played: you still have to be given the choice, and told what passing costs.
+
 # Using Status and Response Cards during Play
 
 Status and Response cards must be played onto the table during the **Play** step of your turn before being used—they can't be used directly from your hand. (Playing a Status or Response card on the table is your Play step for the turn.) Once on the table the card is available to be used whenever conditions permit.

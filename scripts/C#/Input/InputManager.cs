@@ -98,10 +98,17 @@ public partial class InputManager : Node2D
 	/// <c>BottomLeftMenu</c> reads it; kept separate from <paramref name="separateNonHandCards"/>, which
 	/// happens to be true for the same one prompt today but is a statement about how the fan is drawn.
 	/// </param>
+	/// <param name="passCostText">
+	/// What passing this prompt will cost, straight off <see cref="InputRequest.PassCostText"/> — the Skip
+	/// button and the banner both name it. Null means passing is free, which is every prompt but the
+	/// faction's own play: there, passing is the third of the three things a Play step may be, and it
+	/// costs a discard (or a VP with an empty hand), so the price has to be on the button before it is
+	/// pressed rather than in the modal that follows.
+	/// </param>
 	public InputHandlerPlayCard SetCardSelectionActive(
 		Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
 		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null,
-		TriggerKind triggerKind = TriggerKind.NONE, bool isHandPlayPrompt = false)
+		TriggerKind triggerKind = TriggerKind.NONE, bool isHandPlayPrompt = false, string passCostText = null)
 	{
 		_pendingReactionSkipScope = ReactionSkipScope.NONE;
 
@@ -114,7 +121,7 @@ public partial class InputManager : Node2D
 			faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards,
 			isHandPlayPrompt, isReactionWindow, ToPreviewMap(cardTargetPreviews));
 
-		PlayerActionLabel.ShowText(BannerText(triggerKind, cardIds.Count > 0), faction);
+		PlayerActionLabel.ShowText(BannerText(triggerKind, cardIds.Count > 0, isHandPlayPrompt, passCostText), faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
 		// and would resolve Faction.NONE for an empty always-ask prompt.
 		FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds, separateNonHandCards,
@@ -125,7 +132,13 @@ public partial class InputManager : Node2D
 		// hand over the top of it, and the recall button draws this one back.
 		RecallablePrompts.Set(CardPromptRecall.Instance);
 		// The Skip button now doubles as the "pass" affordance for choosing a card to play/activate.
-		SelectionSkipButton.Current?.Show();
+		// On the hand-play prompt passing is not free, so the button carries its price: a player who
+		// only finds out about the discard once the modal opens has already spent the choice.
+		if (SelectionSkipButton.Current != null)
+		{
+			SelectionSkipButton.Current.ButtonText = passCostText == null ? "Skip" : $"Skip ({passCostText})";
+			SelectionSkipButton.Current.Show();
+		}
 		EventBus.Instance.SelectionSkipped += OnPlayCardSkipped;
 
 		if (isReactionWindow)
@@ -146,10 +159,24 @@ public partial class InputManager : Node2D
 	/// The trigger context panel says the same thing at more length; this is the line at the hand,
 	/// where the player is already looking to pick a card.
 	/// </summary>
-	private static string BannerText(TriggerKind kind, bool hasOptions) => kind switch
+	/// <param name="isHandPlay">
+	/// The faction's own play prompt, which is the one prompt that opens with nothing on offer for a
+	/// reason other than reaction cover: a faction must always play a card, take an instead-of-play
+	/// action, or discard, so a dead hand still has to be shown and passed. "No reaction available"
+	/// describes a window this prompt is not, so it gets its own wording, naming the price from
+	/// <paramref name="passCostText"/> — the same one the Skip button carries.
+	/// </param>
+	private static string BannerText(TriggerKind kind, bool hasOptions, bool isHandPlay = false, string passCostText = null) => kind switch
 	{
 		TriggerKind.BLOCK => hasOptions ? "Choose a block reaction" : "No block available",
 		TriggerKind.AFTER => hasOptions ? "Choose an after reaction" : "No reaction available",
+		_ when isHandPlay => (hasOptions, passCostText) switch
+		{
+			(true,  null) => "Choose a card",
+			(true,  _)    => $"Choose a card, or pass ({passCostText})",
+			(false, null) => "Nothing you can play",
+			(false, _)    => $"Nothing you can play — you must pass ({passCostText})",
+		},
 		_                 => hasOptions ? "Choose a card" : "No reaction available",
 	};
 
@@ -242,6 +269,11 @@ public partial class InputManager : Node2D
 		// buttons live over the next prompt. Both are no-ops when they were never set up.
 		EventBus.Instance.ReactionSkipScoped -= OnReactionSkipScoped;
 		ReactionSkipScopeButton.HideAll();
+		// Back to the plain label. One shared button serves the country, unit and battle-target
+		// selections too, and none of those set their own text — a cost left on it would follow the
+		// hand-play prompt onto the very next board selection.
+		if (SelectionSkipButton.Current != null)
+			SelectionSkipButton.Current.ButtonText = "Skip";
 		SelectionSkipButton.Current?.Hide();
 		FactionHandDisplay.Current.Hide();
 		// The trigger context is its own node now, so hiding the hand no longer takes it down with it.

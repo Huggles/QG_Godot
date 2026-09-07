@@ -130,6 +130,16 @@ public abstract partial class InputRequest
     public bool IsReactionWindow { get; set; } = false;
 
     /// <summary>
+    /// What passing this prompt will cost the faction, phrased for the Skip button — "discard 1 card",
+    /// "lose 1 VP". Null when passing is free, which is every prompt but the faction's own play.
+    ///
+    /// Carried on the wire rather than worked out by the client: the cost depends on the host's
+    /// authoritative read of the hand, and keeping it here leaves room for a card to modify the cost
+    /// later without the client having to know the rule.
+    /// </summary>
+    public string PassCostText { get; set; }
+
+    /// <summary>
     /// Cards the prompt should DISPLAY, as opposed to <see cref="TargetCardIds"/>, which is what may
     /// be chosen. Everything here but not in TargetCardIds renders greyed out and unclickable.
     ///
@@ -496,10 +506,12 @@ public abstract partial class InputRequest
             // rather than being interleaved into it by card id.
             // isHandPlayPrompt: tells the bottom-left card back that this prompt IS this faction's hand,
             // so pressing it brings the prompt back instead of browsing an unclickable copy over it.
+            // passCostText: this is the one prompt where passing costs something, and the Skip button
+            // has to say so before it is pressed.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), false, DisplayCardIds,
                 separateNonHandCards: true, cardTargetPreviews: CardTargetPreviews,
-                isHandPlayPrompt: true);
+                isHandPlayPrompt: true, passCostText: PassCostText);
             Variant[] results = await AwaitCardSelection();
             if (results != null && results.Length > 0)
             {
