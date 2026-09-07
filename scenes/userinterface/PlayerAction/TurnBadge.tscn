@@ -3,11 +3,9 @@
 [ext_resource type="Texture2D" uid="uid://d1hf1kfmv8mvy" path="res://assets/textures/Other/Badges/TurnBadge.png" id="1_nnqxl"]
 [ext_resource type="Texture2D" uid="uid://nqrbw6q5e54x" path="res://assets/factions/japan/Japan_Flag.png" id="2_4coyv"]
 [ext_resource type="PackedScene" uid="uid://dgnm2d0n0ycdy" path="res://scenes/userinterface/PlayerAction/ScalableLabel.tscn" id="3_777ew"]
-[ext_resource type="Script" path="res://scripts/C#/UI/TurnBadge.cs" id="4_turnbadge"]
+[ext_resource type="Script" uid="uid://bbckp3nxnf63o" path="res://scripts/C#/UI/TurnBadge.cs" id="4_turnbadge"]
 
 [node name="TurnBadge" type="Control" unique_id=215012341]
-modulate = Color(1, 1, 1, 0)
-visible = false
 custom_minimum_size = Vector2(1252, 1061)
 custom_maximum_size = Vector2(1252, 1061)
 layout_mode = 3
@@ -22,8 +20,8 @@ offset_right = 626.0
 offset_bottom = 530.5
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(626, 530.5)
 scale = Vector2(0.5, 0.5)
+pivot_offset = Vector2(626, 530.5)
 mouse_filter = 2
 script = ExtResource("4_turnbadge")
 
@@ -55,7 +53,12 @@ stretch_mode = 4
 [node name="TurnLabel" parent="Badge" unique_id=894605607 instance=ExtResource("3_777ew")]
 unique_name_in_owner = true
 layout_mode = 1
-offset_left = 129.0
-offset_top = 776.0
-offset_right = -143.0
-offset_bottom = -124.0
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+offset_left = -250.0
+offset_top = -161.0
+offset_right = 250.0
+offset_bottom = -100.0
+grow_vertical = 0

@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dee08ewurrpis" path="res://scripts/C#/UI/PlayerActionLabel.cs" id="1_gvner"]
 [ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="1_pjedk"]
+[ext_resource type="LabelSettings" uid="uid://3d1gcyuerlkv" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsSmall.tres" id="2_pjedk"]
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_fchd6"]
-[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="4_n3k1v"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_n3k1v"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
@@ -50,10 +50,12 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 [node name="PlayerActionMessage" type="Label" parent="MenuPanel" unique_id=1966011880]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 1
 text = "ABC"
-label_settings = ExtResource("4_n3k1v")
+label_settings = ExtResource("2_pjedk")
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2
 script = ExtResource("1_gvner")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="MenuPanel" unique_id=779728291]

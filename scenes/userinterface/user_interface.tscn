@@ -308,3 +308,6 @@ offset = Vector2(-1235.19, -627)
 script = ExtResource("28_tutarrow")
 
 [node name="TurnBadge" parent="." unique_id=215012341 instance=ExtResource("31_turnbadge")]
+offset_top = -740.0
+offset_bottom = 321.0
+scale = Vector2(0.4, 0.4)
