@@ -6,10 +6,11 @@ using Godot;
 /// The turn announcement: the incoming faction's flag on a badge in the middle of the screen, faded
 /// in, held for a beat, and faded out again.
 ///
-/// Driven by <see cref="ShowTurnBadgePresentationEvent"/> rather than by an EventBus signal, so it
-/// takes a defined place in the animation stream instead of racing whatever else the turn boundary
-/// set off. It does not block that queue — the new turn's first step animates underneath it — which
-/// is also why nothing here may take a click; see <see cref="IgnoreMouseRecursively"/>.
+/// Driven by <see cref="ChangeRoundChangeEvent"/>'s AfterAnimations rather than by an EventBus
+/// signal, so it takes a defined place in the animation stream instead of racing whatever else the
+/// turn boundary set off — and so it cannot go missing separately from the turn change it announces.
+/// It does not block that queue — the new turn's first step animates underneath it — which is also
+/// why nothing here may take a click; see <see cref="IgnoreMouseRecursively"/>.
 /// </summary>
 public partial class TurnBadge : Control
 {
@@ -28,9 +29,16 @@ public partial class TurnBadge : Control
 	/// <summary>The fade currently running, kept so the next turn can cut it short.</summary>
 	private Tween _fade;
 
+	/// <summary>
+	/// The turn already announced, so the catch-up below cannot announce it a second time. -1 until
+	/// the first announcement, which is never turn -1.
+	/// </summary>
+	private int _announcedTurn = -1;
+
 	public override void _Ready()
 	{
 		Instance = this;
+		EventBus.Instance.GameSessionStarted += OnGameSessionStarted;
 
 		// The badge overlays a game the player is still playing, so anything here that could take a
 		// click would swallow one from the middle of the screen for as long as the badge is up. Set
@@ -42,9 +50,37 @@ public partial class TurnBadge : Control
 		Modulate = new Color(Modulate, 0f);
 	}
 
+	/// <summary>
+	/// EventBus is a process-wide static, so a handler left connected outlives this scene — and one
+	/// stale handler aborts the whole emission for every handler queued behind it.
+	/// </summary>
 	public override void _ExitTree()
 	{
+		if (EventBus.Instance != null) EventBus.Instance.GameSessionStarted -= OnGameSessionStarted;
 		if (Instance == this) Instance = null;
+	}
+
+	/// <summary>
+	/// Announce the opening turn if it has already happened by the time this badge exists.
+	///
+	/// GameFlow.StartGame is started fire-and-forget and only then does PlayerScene build the HUD, so
+	/// the two race. Nothing in StartGame is guaranteed to yield — the opening draw loop skips its
+	/// await when a scenario pre-dealt full hands, an empty opening discard completes synchronously,
+	/// OnGameStarted is only awaited when a program is installed, and ChangeRoundChangeEvent's own
+	/// ExecuteAsync awaits Task.CompletedTask — so on those configurations the first turn change lands
+	/// before this node exists, Announce finds a null Instance, and the opening badge is simply lost.
+	///
+	/// This signal is emitted immediately after the HUD is built, which makes it the first moment the
+	/// badge could have shown. The turn guard in <see cref="Run"/> is what keeps this from
+	/// double-announcing when the race comes out the other way and the ChangeEvent already got there.
+	/// </summary>
+	private void OnGameSessionStarted()
+	{
+		// GameTurn > 0 rather than GameFlow's private GameStarted flag, and a better test anyway: it
+		// is the turn change itself, which is the thing being announced. Still 0 when the HUD won the
+		// race, in which case there is nothing to catch up and the ChangeEvent will do it shortly.
+		if (GameFlow.Instance == null || GameFlow.Instance.GameTurn <= 0) return;
+		_ = Announce(GameFlow.Instance.CurrentFaction);
 	}
 
 	private static void IgnoreMouseRecursively(Node node)
@@ -67,6 +103,12 @@ public partial class TurnBadge : Control
 
 	private async Task Run(Faction faction)
 	{
+		// One announcement per turn. The turn change and the catch-up above can both reach here for
+		// the opening turn, depending on which of them won the race to build this node.
+		int turn = GameFlow.Instance?.GameTurn ?? -1;
+		if (turn == _announcedTurn) return;
+		_announcedTurn = turn;
+
 		// GetValueOrDefault rather than FactionData.FlagTexture: that indexer throws for NONE and
 		// ALL, and this runs off a turn boundary that error recovery can leave in an odd state.
 		Flag.Texture = StaticGameData.FactionDataMap.GetValueOrDefault(faction)?.FlagTexture;
@@ -85,9 +127,9 @@ public partial class TurnBadge : Control
 		// read rather than watched, so it is the one thing in the turn that can afford to take its
 		// time — and it still collapses to nothing under a fast-forwarded restore, because every
 		// Duration* property returns 0 there.
-		double fadeIn  = GameSettings.DurationVeryLongSeconds;
-		double hold    = GameSettings.DurationVeryLongSeconds;
-		double fadeOut = GameSettings.DurationVeryLongSeconds;
+		double fadeIn  = GameSettings.DurationLongSeconds;
+		double hold    = GameSettings.DurationLongSeconds;
+		double fadeOut = GameSettings.DurationLongSeconds;
 
 		Tween fade = CreateTween();
 		fade.TweenProperty(this, "modulate:a", 1f, fadeIn)

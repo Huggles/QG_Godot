@@ -307,10 +307,6 @@ public partial class GameFlow : SingletonNode<GameFlow>
         TurnStepCounter = 0;
         DebugUtilities.PrintPeer($"Game turn: {GameTurn} ( {Enum.GetName(typeof(Faction), CurrentFaction)} / {Enum.GetName(typeof(FactionTeam), CurrentFactionTeam)} )");
         EventBus.Emit(EventBus.SignalName.NewTurnStarted, GameTurn);
-        // After the round change, so CurrentFaction is the faction being announced; before the
-        // program's own turn hook, so a scenario that opens a turn with a commander message says it
-        // over the badge rather than having the badge land on top of it.
-        await new ShowTurnBadgePresentationEvent(CurrentFaction).Apply();
         if (Program != null) await Program.OnTurnStarted(GameTurn, CurrentFaction);
         await ReplayContext.Pace(100);
         StartNextStep();

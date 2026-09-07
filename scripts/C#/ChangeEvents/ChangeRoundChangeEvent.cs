@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public partial class ChangeRoundChangeEvent : ChangeEvent
@@ -59,6 +60,21 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
         foreach (CardState cardState in gameState.CardStates)
             cardState.CardLogic?.OnNewTurnStarted(NewTurn);
     }
+
+    /// <summary>
+    /// The turn announcement badge. It hangs off this event rather than off a presentation message of
+    /// its own because this event IS the turn changing — it is the one place the turn can move, it
+    /// already reaches every peer, and it already replays. A separate message would have been a second
+    /// thing to keep in step with this one, and the kind of thing nothing notices going missing: a
+    /// dropped ChangeEvent is caught by the state hash, a dropped PresentationEvent by nothing.
+    ///
+    /// Read off GameFlow rather than recomputed from NewTurn so the faction is derived in exactly one
+    /// place. Safe here: AfterAnimations is built lazily, after ExecuteAsync has moved GameTurn.
+    /// </summary>
+    protected override List<ChangeEventAnimation> AfterAnimations => new()
+    {
+        new ShowTurnBadgeAnimation(GameFlow.Instance.CurrentFaction)
+    };
 
     public override bool ToHistoryItem => true;
 
