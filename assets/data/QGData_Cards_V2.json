@@ -959,7 +959,7 @@
         "Type":  "STATUS",
         "ExecutionClass":  "StatusAircraftCarriers",
         "Label":  "Aircraft Carriers",
-        "Text":  "Use once per turn when you battle Ã  sea space. Discard the top 1 card of your draw deck to build a Navy in the space battled.",
+        "Text":  "Use once per turn when you battle a sea space. Discard the top 1 card of your draw deck to build a Navy in the space battled.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -995,7 +995,7 @@
         "Type":  "EW",
         "ExecutionClass":  "EWFirestormBombing",
         "Label":  "Firestorm Bombing",
-        "Text":  "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of in draw deck",
+        "Text":  "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck",
         "MultipleActivationsPerTurn":  false
     },
     {

@@ -29,8 +29,9 @@ public partial class EWB26Marauder : EWCardLogic
     private List<Faction> QualifyingAxisFactions() =>
         QualifyingHomes().Select(entry => entry.AxisFaction).ToList();
 
-    /// <summary>The homes this card actually reaches, and the Armies putting them in range — which
-    /// is what the card text leaves you to work out for yourself.</summary>
+    /// <summary>Every home this card could reach, and the Armies putting them in range — which is
+    /// what the card text leaves you to work out for yourself. These are the candidates the
+    /// selection modal offers; only the one the player picks is actually hit.</summary>
     public override TargetSet Targets()
     {
         var qualifying = QualifyingHomes();
@@ -43,15 +44,20 @@ public partial class EWB26Marauder : EWCardLogic
         return new List<CardStep>
         {
             new CardStep(this, async() => {
-                foreach (Faction targetFaction in QualifyingAxisFactions())
-                {
-                    ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, targetFaction, 4));
-                    discardEvent.IsTrigger = true;
-                    await CardPlayPool.DoChangeEvent(discardEvent);
-                }
+                // One target, not every qualifier: the card text's "that country" is singular, so the
+                // player chooses which reachable Axis power takes the hit. The step condition below
+                // already keeps the card unplayable while this list is empty, so the modal is never
+                // shown without options.
+                var factionResp = await new InputRequest.SelectFactionRequestHandler(
+                    Faction, QualifyingAxisFactions()).BroadCast();
+                Faction targetFaction = (Faction)factionResp.ResponseCardIds[0];
+
+                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, targetFaction, 4));
+                discardEvent.IsTrigger = true;
+                await CardPlayPool.DoChangeEvent(discardEvent);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => QualifyingAxisFactions().Count > 0), this))
-            .WithGuidance("Axis country with US Army within 3 spaces of its Home must discard 4 cards")
+            .WithGuidance("Choose an Axis country with a US Army within 3 spaces of its Home to discard 4 cards")
         };
     }
 }
