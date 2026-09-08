@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,27 +29,84 @@ public class MultiplayerGameState
 	// -------------------------------------------------------------------------
 	// Lookup caches — lazily populated from the lists above
 	// -------------------------------------------------------------------------
+	//
+	// These really are cached now. They used to be expression-bodied properties that ran ToDictionary
+	// on EVERY read, so CountryState.ForId(id) — one dictionary lookup, on its face — rebuilt a map of
+	// every country in the game, used one entry and threw the rest away. The same for units, cards,
+	// straits, factions and card steps. GameStateCalculator alone drives millions of those reads per
+	// game, so this was the single largest cost in a headless run.
+	//
+	// Invalidation is by source-list Count. That is sound because these lists are only ever APPENDED
+	// to — filled during setup, then the two exceptions are RegisterBulletinCardChangeEvent adding a
+	// CardState and the CardStep constructor adding a step. Nothing removes or replaces an element in
+	// place, so a Count that has not moved means the contents have not either. If that ever stops
+	// being true, this needs a real version counter instead.
 
-	[JsonIgnore] public Dictionary<int, CountryState> CountryStateById => CountryStates.ToDictionary(cs => cs.Id);
+	private sealed class Lookup<TKey, TValue>
+	{
+		private Dictionary<TKey, TValue> _map;
+		private int _builtFromCount = -1;
 
-	[JsonIgnore] public Dictionary<string, CountryState> CountryStateByName => CountryStates.ToDictionary(cs => cs.Name); // no lazy population needed since this is just a different view of the same data as CountryStateById
-   
-	[JsonIgnore] public Dictionary<int, UnitState> UnitStatesById => UnitStates.ToDictionary(us => us.Id);
+		public Dictionary<TKey, TValue> Get<TSource>(List<TSource> source, Func<IEnumerable<TSource>, Dictionary<TKey, TValue>> build)
+		{
+			// Fast path is a reference read and an int compare, no lock: the six faction threads in
+			// GameStateCalculator hit these constantly and must not serialise on a lookup.
+			Dictionary<TKey, TValue> map = _map;
+			if (map != null && _builtFromCount == source.Count) return map;
 
-	[JsonIgnore] public Dictionary<int, CardState> CardStatesById => CardStates.ToDictionary(cs => cs.Id);
+			lock (this)
+			{
+				if (_map == null || _builtFromCount != source.Count)
+				{
+					_map = build(source);
+					_builtFromCount = source.Count;
+				}
+				return _map;
+			}
+		}
+	}
 
-	[JsonIgnore] public Dictionary<string, CardState> CardStatesByName => CardStates.ToDictionary(cs => cs.CardData.UniqueName + cs.Id);
+	private readonly Lookup<int, CountryState> _countryStateById = new();
+	private readonly Lookup<string, CountryState> _countryStateByName = new();
+	private readonly Lookup<int, UnitState> _unitStatesById = new();
+	private readonly Lookup<int, CardState> _cardStatesById = new();
+	private readonly Lookup<string, CardState> _cardStatesByName = new();
+	private readonly Lookup<int, StraightState> _straightStateById = new();
+	private readonly Lookup<int, StraightState> _straightStateByControllingCountryId = new();
+	private readonly Lookup<Faction, FactionState> _factionStatesByFaction = new();
+	private readonly Lookup<Faction, FactionState> _playableFactionStatesByFaction = new();
+	private readonly Lookup<int, CardStep> _cardStepsById = new();
 
-	[JsonIgnore] public Dictionary<int, StraightState> StraightStateById => StraightStates.ToDictionary(ss => ss.Id);
+	[JsonIgnore] public Dictionary<int, CountryState> CountryStateById
+		=> _countryStateById.Get(CountryStates, s => s.ToDictionary(cs => cs.Id));
 
-	[JsonIgnore] public Dictionary<int, StraightState> StraightStateByControllingCountryId => StraightStates.ToDictionary(ss => ss.ControllingCountryId);
+	[JsonIgnore] public Dictionary<string, CountryState> CountryStateByName // a different view of the same data as CountryStateById
+		=> _countryStateByName.Get(CountryStates, s => s.ToDictionary(cs => cs.Name));
 
-	[JsonIgnore] public Dictionary<Faction, FactionState> FactionStatesByFaction => FactionStates.ToDictionary(fs => fs.Faction);
+	[JsonIgnore] public Dictionary<int, UnitState> UnitStatesById
+		=> _unitStatesById.Get(UnitStates, s => s.ToDictionary(us => us.Id));
 
-	[JsonIgnore] public Dictionary<Faction, FactionState> PlayableFactionStatesByFaction => FactionStates.Where(fs => fs.Playable).ToDictionary(fs => fs.Faction);
+	[JsonIgnore] public Dictionary<int, CardState> CardStatesById
+		=> _cardStatesById.Get(CardStates, s => s.ToDictionary(cs => cs.Id));
 
-	[JsonIgnore] public Dictionary<int, CardStep> CardStepsById => CardSteps.ToDictionary(cs => cs.Id);
-	
+	[JsonIgnore] public Dictionary<string, CardState> CardStatesByName
+		=> _cardStatesByName.Get(CardStates, s => s.ToDictionary(cs => cs.CardData.UniqueName + cs.Id));
+
+	[JsonIgnore] public Dictionary<int, StraightState> StraightStateById
+		=> _straightStateById.Get(StraightStates, s => s.ToDictionary(ss => ss.Id));
+
+	[JsonIgnore] public Dictionary<int, StraightState> StraightStateByControllingCountryId
+		=> _straightStateByControllingCountryId.Get(StraightStates, s => s.ToDictionary(ss => ss.ControllingCountryId));
+
+	[JsonIgnore] public Dictionary<Faction, FactionState> FactionStatesByFaction
+		=> _factionStatesByFaction.Get(FactionStates, s => s.ToDictionary(fs => fs.Faction));
+
+	[JsonIgnore] public Dictionary<Faction, FactionState> PlayableFactionStatesByFaction
+		=> _playableFactionStatesByFaction.Get(FactionStates, s => s.Where(fs => fs.Playable).ToDictionary(fs => fs.Faction));
+
+	[JsonIgnore] public Dictionary<int, CardStep> CardStepsById
+		=> _cardStepsById.Get(CardSteps, s => s.ToDictionary(cs => cs.Id));
+
 	[JsonIgnore] public List<FactionState> PlayableFactionStates => FactionStates.Where(fs => fs.Playable).ToList();
 
 

@@ -228,7 +228,12 @@ public partial class CountryState : StateObject
     /**
     * Static helpers
     */
-    public static List<CountryState> AllCountryStates => GameSession.Current.GameState.CountryStateById.Values.ToList();
+    /// <summary>
+    /// Every country. Returns the live list rather than copying it — the set of countries is fixed at
+    /// setup, callers only ever read it, and the copy this replaced was allocated on every read from
+    /// inside GameStateCalculator's per-faction loops.
+    /// </summary>
+    public static List<CountryState> AllCountryStates => GameSession.Current.GameState.CountryStates;
     public static CountryState ForId(int id) => GameSession.Current.GameState.CountryStateById.GetValueOrDefault(id) ?? null;
 
     public static List<CountryState> ForIds(IEnumerable<int> ids) => ids.Select(ForId).ToList();
