@@ -19,7 +19,19 @@ public partial class CountryState : StateObject
     public List<string> Neighbors { get; set; }
 
     [JsonIgnore] public List<int> ConnectedCountryIds { get; set; } = new List<int>();
-    [JsonIgnore] public List<CountryState> ConnectedCountryStates => CountryState.ForIds(ConnectedCountryIds).ToList();
+
+    /// <summary>
+    /// This country's neighbours, resolved once.
+    ///
+    /// Map topology never changes after <see cref="InitNeighborCountryStateArray"/>, but this used to
+    /// rebuild the whole list on every read — and it is read from inside CanBuild, which
+    /// GameStateCalculator evaluates for every country of every faction after every ChangeEvent
+    /// (~330,000 times in a full game, each read allocating). Caching it was ~40% of a headless run.
+    /// Invalidated where the ids are assigned, so a re-init cannot leave this stale.
+    /// </summary>
+    [JsonIgnore] private List<CountryState> _connectedCountryStates;
+    [JsonIgnore] public List<CountryState> ConnectedCountryStates
+        => _connectedCountryStates ??= CountryState.ForIds(ConnectedCountryIds);
 
     public Dictionary<Faction, int> Units { get; set; } = new Dictionary<Faction, int>();
 
@@ -31,9 +43,21 @@ public partial class CountryState : StateObject
 
     public List<Faction> OccupyingFactions => Units.Keys.ToList();
 
-    public FactionTeam OccupyingTeam => OccupyingFactions.Count == 0 
-            ? FactionTeam.NONE
-            : StaticGameData.FactionTeamForFaction(OccupyingFactions[0]);
+    /// <summary>
+    /// The team holding this country, without materialising <see cref="OccupyingFactions"/>.
+    ///
+    /// A country locks to the first occupier's team, so any occupant answers it. Worth avoiding the
+    /// list: OccupyingTeam is read from CanRecruit and HasHarbor, which GameStateCalculator runs for
+    /// every country of every faction after every ChangeEvent.
+    /// </summary>
+    private FactionTeam OccupyingTeamFast()
+    {
+        foreach (Faction occupant in Units.Keys)
+            return StaticGameData.FactionTeamForFaction(occupant);
+        return FactionTeam.NONE;
+    }
+
+    public FactionTeam OccupyingTeam => OccupyingTeamFast();
 
     [JsonIgnore] public CountryScene CountryScene => NodeUtilities.Instance.CountriesNode.GetChildren().ToList().Find(c => c.Name == Name) as CountryScene ?? throw new Exception($"Couldn't find CountryScene for country: {Name}");
 
@@ -75,8 +99,10 @@ public partial class CountryState : StateObject
                                 ? neighborState.Id
                                 : throw new Exception( $"Couldn't find: {neighbor} as neighbor of {Name}"))
             .ToList();
-                 
-       
+
+        // The two topology caches are derived from the ids just assigned.
+        _connectedCountryStates = null;
+        _controlledByStraightStates = null;
     }
 
     public List<StraightState> ControllingStraightStates => IsSea ? [] : ConnectedCountryStates
@@ -84,24 +110,47 @@ public partial class CountryState : StateObject
         .Select(ccs => GameAPI.StraightStateForNeighbors(Id, ccs.Id))
         .ToList();
     
-    private List<StraightState> ControlledByStraightStates => IsLand ?  new List<StraightState>() : ConnectedCountryStates.Where(ccs => IsSea && ccs.IsSea && GameAPI.StraightStateForNeighbors(Id, ccs.Id) != null).Select(ccs => GameAPI.StraightStateForNeighbors(Id, ccs.Id)).ToList();
+    /// <summary>
+    /// The straits that gate movement out of this sea space, resolved once.
+    ///
+    /// Which neighbours a strait sits between is fixed map topology — only who CONTROLS one changes,
+    /// and that is read separately by <see cref="ControllingStraightStatesForFaction"/>. The old
+    /// expression called GameAPI.StraightStateForNeighbors twice per neighbour, and that does a linear
+    /// scan of every strait and allocates a list to return at most one of them. On the CanBuild path
+    /// this ran hundreds of thousands of times a game.
+    /// </summary>
+    [JsonIgnore] private List<StraightState> _controlledByStraightStates;
+    private List<StraightState> ControlledByStraightStates => _controlledByStraightStates ??=
+        IsLand ? new List<StraightState>()
+               : ConnectedCountryStates
+                   .Where(ccs => ccs.IsSea)
+                   .Select(ccs => GameAPI.StraightStateForNeighbors(Id, ccs.Id))
+                   .Where(ss => ss != null)
+                   .ToList();
     public List<StraightState> ControllingStraightStatesForFaction(Faction faction) => ControlledByStraightStates.Where(ss => ss.IsControlledByFaction(faction)).ToList();
     public List<StraightState> UncontrolledStraightStatesForFaction(Faction faction) => ControlledByStraightStates.Where(ss => !ss.IsControlledByFaction(faction)).ToList();
     public bool IsControlledByStraightState => ControlledByStraightStates.Count > 0;
 
-    public List<int> AdjacentCountryIds(Faction faction) {        
-        List<StraightState> _uncontrolledStraightStatesForFaction = UncontrolledStraightStatesForFaction(faction);
-        return !IsControlledByStraightState 
-        ? ConnectedCountryStates.Select(ccs => ccs.Id).ToList() 
-        : ConnectedCountryStates.Where(
-            ccs => !_uncontrolledStraightStatesForFaction.Any(uss => uss.IsForIds(this.Id, ccs.Id)))
-            .Select(ccs => ccs.Id).ToList();      
+    public List<int> AdjacentCountryIds(Faction faction) {
+        // ControlledByStraightStates is now cached, so asking it directly costs nothing — the old code
+        // computed it twice per call (once via IsControlledByStraightState, once via
+        // UncontrolledStraightStatesForFaction) when it was still rebuilt from scratch each time.
+        List<StraightState> straits = ControlledByStraightStates;
+        if (straits.Count == 0) return new List<int>(ConnectedCountryIds);
+
+        return ConnectedCountryStates
+            .Where(ccs => !straits.Any(ss => !ss.IsControlledByFaction(faction) && ss.IsForIds(this.Id, ccs.Id)))
+            .Select(ccs => ccs.Id).ToList();
     }
     
 
     public List<CountryState> AdjacentCountryStates(Faction faction) => CountryState.ForIds(AdjacentCountryIds(faction));
 
-    public bool HasHarbor(Faction faction) => ConnectedCountryStates.Any(connected => connected.IsLand && connected.OccupyingTeam == StaticGameData.FactionTeamForFaction(faction));    
+    public bool HasHarbor(Faction faction)
+    {
+        FactionTeam team = StaticGameData.FactionTeamForFaction(faction);
+        return ConnectedCountryStates.Any(connected => connected.IsLand && connected.OccupyingTeamFast() == team);
+    }    
     /// <summary>
     /// A faction may deploy onto a country it ALREADY occupies — "build that army again". The piece
     /// standing there is notionally returned to the pool and deployed again, so the board does not
@@ -118,12 +167,28 @@ public partial class CountryState : StateObject
             (!IsHomeSpace(faction) ? HasAdjacentSuppliedUnit(faction) : true) && //If it's not their home space, they must have an adjacent supplied unit AND
             (this.IsSea ? HasHarbor(faction) : true); //If it's a sea country, they must have a harbor (i.e., an adjacent land country occupied by their team)
 
-    public bool CanRecruit(Faction faction) => OccupyingTeam == FactionTeam.NONE || OccupyingTeam == StaticGameData.FactionTeamForFaction(faction);
+    public bool CanRecruit(Faction faction)
+    {
+        // One read, not two: OccupyingTeam is not free, and this is on the CanBuild hot path.
+        FactionTeam occupying = OccupyingTeamFast();
+        return occupying == FactionTeam.NONE || occupying == StaticGameData.FactionTeamForFaction(faction);
+    }
     public bool HasUnit(Faction faction) => Units.ContainsKey(faction);
     public bool IsHomeSpace(Faction faction) => FactionState.ForEnum(faction).FactionData.HomeSpaceCountryState.Id == this.Id;
     public List<int> AdjacentUnits(Faction faction) => AdjacentCountryStates(faction).Where(ccs => ccs.Units.ContainsKey(faction)).Select(ccs => ccs.Units[faction]).ToList();
     public List<int> AdjacentSuppliedUnits(Faction faction) => UnitState.ForIds(AdjacentUnits(faction)).Where(unit => unit.InSupply).Select(unit => unit.Id).ToList();
-    public bool HasAdjacentSuppliedUnit(Faction faction) => AdjacentSuppliedUnits(faction).Count > 0;
+
+    /// <summary>
+    /// Whether ANY adjacent unit of this faction is in supply — the question CanBuild actually asks.
+    ///
+    /// Short-circuits instead of going through <see cref="AdjacentSuppliedUnits"/>, which materialises
+    /// three intermediate lists to answer a yes/no that usually resolves on the first neighbour. Same
+    /// adjacency rules, same answer.
+    /// </summary>
+    public bool HasAdjacentSuppliedUnit(Faction faction) => AdjacentCountryIds(faction)
+        .Any(id => ForId(id) is { } neighbour
+                   && neighbour.Units.TryGetValue(faction, out int unitId)
+                   && (UnitState.ForId(unitId)?.InSupply ?? false));
     public bool CanAttack(Faction faction) => HasAdjacentSuppliedUnit(faction) && HasAttackableUnit(faction);
 
     

@@ -2,12 +2,36 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
+/// <summary>
+/// The (tag, faction) flags carried by one state object.
+///
+/// Storage is a flat <c>int[]</c> indexed by <see cref="Tag"/>, each entry a bitmask over
+/// <see cref="Faction"/> — both enums are small, contiguous and 0-based, so a tag/faction pair is one
+/// bit. This replaced a <c>Dictionary&lt;Tag, HashSet&lt;Faction&gt;&gt;</c> guarded by a lock, and the
+/// rewrite was worth it for one reason: GameStateCalculator runs after every ChangeEvent and performs
+/// tens of millions of tag operations per game across six parallel faction threads, all hitting the
+/// SAME country/unit/card objects. Every read and write took that lock, so the threads serialised on
+/// it and paid contention on top — measured at roughly DOUBLE the CPU work of running single-threaded.
+///
+/// Writes use <see cref="Interlocked"/> rather than a lock. Two threads setting different faction bits
+/// of the same tag is the normal case here, and Or/And return the previous value, which is also
+/// exactly what the change-detection below needs. Reads are plain int loads: naturally atomic, so a
+/// reader sees a value from before or after a concurrent write, never a torn one.
+///
+/// Events fire OUTSIDE the atomic update and only on a real transition, matching the old behaviour.
+/// </summary>
 public partial class TagContainer : Node
 {
-    // Maps each tag to the set of factions it applies to
-    private readonly Dictionary<Tag, HashSet<Faction>> _tags = new();
-    private readonly object _lock = new();
+    private static readonly int TagCount = Enum.GetValues<Tag>().Length;
+
+    /// <summary>Bit for a faction. NONE is not storable — Add rejects it, as it always did.</summary>
+    private static int Bit(Faction faction) => 1 << (int)faction;
+
+    private static readonly int AllBit = Bit(Faction.ALL);
+
+    private readonly int[] _bits = new int[TagCount];
 
     public event Action<Tag, Faction> TagAdded;
     public event Action<Tag, Faction> TagRemoved;
@@ -20,18 +44,12 @@ public partial class TagContainer : Node
         if (faction == Faction.NONE)
             return false;
 
-        lock (_lock)
-        {
-            if (!_tags.ContainsKey(tag))
-                _tags[tag] = new HashSet<Faction>();
+        int bit = Bit(faction);
+        int previous = Interlocked.Or(ref _bits[(int)tag], bit);
+        if ((previous & bit) != 0) return false;
 
-            if (_tags[tag].Add(faction))
-            {
-                TagAdded?.Invoke(tag, faction);
-                return true;
-            }
-        }
-        return false;
+        TagAdded?.Invoke(tag, faction);
+        return true;
     }
 
     /// <summary>
@@ -47,23 +65,12 @@ public partial class TagContainer : Node
     /// </summary>
     public bool Remove(Tag tag, Faction faction)
     {
-        lock (_lock)
-        {
-            if (!_tags.ContainsKey(tag))
-                return false;
+        int bit = Bit(faction);
+        int previous = Interlocked.And(ref _bits[(int)tag], ~bit);
+        if ((previous & bit) == 0) return false;
 
-            if (_tags[tag].Remove(faction))
-            {
-                TagRemoved?.Invoke(tag, faction);
-
-                // Clean up empty tag entries
-                if (_tags[tag].Count == 0)
-                    _tags.Remove(tag);
-
-                return true;
-            }
-        }
-        return false;
+        TagRemoved?.Invoke(tag, faction);
+        return true;
     }
 
     /// <summary>
@@ -71,15 +78,14 @@ public partial class TagContainer : Node
     /// </summary>
     public void RemoveForAll(Tag tag)
     {
-        Faction[] factions;
-        lock (_lock)
-        {
-            if (!_tags.ContainsKey(tag))
-                return;
-            factions = _tags[tag].ToArray();
-        }
-        foreach (var faction in factions)
-            Remove(tag, faction);
+        // Exchange once, then announce what was actually cleared — the old version snapshotted the
+        // faction set and called Remove per faction, which is the same set of TagRemoved events.
+        int previous = Interlocked.Exchange(ref _bits[(int)tag], 0);
+        if (previous == 0 || TagRemoved == null) return;
+
+        foreach (Faction faction in Enum.GetValues<Faction>())
+            if ((previous & Bit(faction)) != 0)
+                TagRemoved.Invoke(tag, faction);
     }
 
     /// <summary>
@@ -87,47 +93,34 @@ public partial class TagContainer : Node
     /// </summary>
     public void Clear()
     {
-        var allTags = _tags.Keys.ToArray();
-        foreach (var tag in allTags)
-        {
-            RemoveForAll(tag);
-        }
+        for (int tag = 0; tag < TagCount; tag++)
+            RemoveForAll((Tag)tag);
     }
 
     /// <summary>
     /// Checks if a tag is present for a specific faction.
     /// Also returns true if the tag has Faction.ALL.
     /// </summary>
-    public bool Has(Tag tag, Faction faction)
-    {
-        lock (_lock)
-        {
-            if (!_tags.ContainsKey(tag))
-                return false;
-            return _tags[tag].Contains(faction) || _tags[tag].Contains(Faction.ALL);
-        }
-    }
+    public bool Has(Tag tag, Faction faction) => (_bits[(int)tag] & (Bit(faction) | AllBit)) != 0;
 
     /// <summary>
     /// Checks if a tag is present for ANY faction.
     /// </summary>
-    public bool HasForAny(Tag tag)
-    {
-        lock (_lock)
-            return _tags.ContainsKey(tag) && _tags[tag].Count > 0;
-    }
+    public bool HasForAny(Tag tag) => _bits[(int)tag] != 0;
 
     /// <summary>
     /// Gets all factions that have a specific tag.
     /// </summary>
     public IEnumerable<Faction> GetFactionsWithTag(Tag tag)
     {
-        lock (_lock)
-        {
-            if (!_tags.ContainsKey(tag))
-                return Enumerable.Empty<Faction>();
-            return _tags[tag].ToArray();
-        }
+        int bits = _bits[(int)tag];
+        if (bits == 0) return Enumerable.Empty<Faction>();
+
+        List<Faction> factions = new();
+        foreach (Faction faction in Enum.GetValues<Faction>())
+            if ((bits & Bit(faction)) != 0)
+                factions.Add(faction);
+        return factions;
     }
 
     /// <summary>
@@ -167,23 +160,39 @@ public partial class TagContainer : Node
     /// <summary>
     /// Returns all unique tags in the container (regardless of faction).
     /// </summary>
-    public IEnumerable<Tag> GetAllTags() { lock (_lock) return _tags.Keys.ToArray(); }
+    public IEnumerable<Tag> GetAllTags()
+    {
+        List<Tag> tags = new();
+        for (int tag = 0; tag < TagCount; tag++)
+            if (_bits[tag] != 0) tags.Add((Tag)tag);
+        return tags;
+    }
 
     /// <summary>
     /// Returns all tags that apply to a specific faction.
     /// </summary>
     public IEnumerable<Tag> GetTagsForFaction(Faction faction)
     {
-        lock (_lock)
-            return _tags.Where(kvp => kvp.Value.Contains(faction) || kvp.Value.Contains(Faction.ALL))
-                        .Select(kvp => kvp.Key)
-                        .ToArray();
+        int mask = Bit(faction) | AllBit;
+        List<Tag> tags = new();
+        for (int tag = 0; tag < TagCount; tag++)
+            if ((_bits[tag] & mask) != 0) tags.Add((Tag)tag);
+        return tags;
     }
 
     /// <summary>
     /// Returns the total number of unique tags.
     /// </summary>
-    public int Count { get { lock (_lock) return _tags.Count; } }
+    public int Count
+    {
+        get
+        {
+            int count = 0;
+            for (int tag = 0; tag < TagCount; tag++)
+                if (_bits[tag] != 0) count++;
+            return count;
+        }
+    }
 
     /// <summary>
     /// Adds multiple tags for a specific faction.

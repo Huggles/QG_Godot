@@ -56,8 +56,7 @@ public partial class FactionState : StateObject
 	public List<int> SuppliedUnitIds => ActiveUnitIds.Where(id => GameState.UnitStatesById[id].InSupply).ToList();
 	public List<int> UnsuppliedUnitIds => ActiveUnitIds.Where(id => !GameState.UnitStatesById[id].InSupply).ToList();
 
-	public static FactionState ForEnum(Faction factionEnum) => 
-		MultiplayerSession.Instance.GameState.FactionStatesByFaction.ContainsKey(factionEnum) 
-		? MultiplayerSession.Instance.GameState.FactionStatesByFaction[factionEnum] 
-		: null;    
+	public static FactionState ForEnum(Faction factionEnum)
+		=> MultiplayerSession.Instance.GameState.FactionStatesByFaction
+			.TryGetValue(factionEnum, out FactionState state) ? state : null;    
 }
