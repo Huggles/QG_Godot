@@ -28,6 +28,12 @@ public partial class DrawCardsChangeEvent : ChangeEvent
         return true;
     }
 
+    /// <summary>
+    /// Cards move from the draw pile to the hand (and, on a reshuffle, from the discard back to the
+    /// draw pile). Piles only — no piece moves and no turn/step/trigger context shifts.
+    /// </summary>
+    public override RecalcScope RecalcScope => RecalcScope.Decks;
+
     public override string SummaryText()
     {
         return $"{TargetFaction.WithPlayer()} drew {NumberOfCards} card(s) from the deck";

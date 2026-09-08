@@ -23,7 +23,13 @@ public partial class SpendPlayActionChangeEvent : ChangeEvent
     }
 
     /// <summary>
-    /// Kept out of the history strip. 
+    /// Increments the per-step play counter and nothing else. Card conditions read that counter, so
+    /// step executability and card availability can shift; the board and the piles cannot.
+    /// </summary>
+    public override RecalcScope RecalcScope => RecalcScope.Flow;
+
+    /// <summary>
+    /// Kept out of the history strip.
     /// </summary>
     public override bool ToHistoryItem => false;
 }

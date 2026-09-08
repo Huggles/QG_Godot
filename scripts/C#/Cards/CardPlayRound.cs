@@ -478,7 +478,9 @@ public partial class CardPlayRound : GodotObject
                 // this is strictly fewer CalculateAll calls. Inside the loop, not before it: block
                 // trigger conditions read CurrentBlockTrigger (set above), and a block card resolved
                 // below runs nested windows that recalculate under a different trigger.
-                GameStateCalculator.CalculateAll();
+                // Flow only: what changed is CurrentBlockTrigger, not the board or the piles. Anything a
+                // resolved block card goes on to move arrives as its own ChangeEvent with its own scope.
+                GameStateCalculator.CalculateAll(RecalcScope.Flow);
 
                 List<Faction> candidates = StaticGameData.FactionsForTeam(team)
                     .Where(f => f != changeEvent.TriggeringFaction)   // nobody blocks their own action
@@ -532,7 +534,8 @@ public partial class CardPlayRound : GodotObject
                 // EventConditions always evaluate against the current (possibly restored)
                 // CurrentReactionTrigger — including after a nested reaction card resolves
                 // and the trigger is restored from the finally block.
-                GameStateCalculator.CalculateAll();
+                // Flow only: the reaction trigger moved, nothing else. See the block-window loop above.
+                GameStateCalculator.CalculateAll(RecalcScope.Flow);
 
                 List<Faction> candidates = new();
                 Dictionary<Faction, List<int>> offers = new();
@@ -614,7 +617,8 @@ public partial class CardPlayRound : GodotObject
         // Recalculate at depth 0 so purely state-based cards (e.g. the "beginning of your turn"
         // status cards) are correctly reflected in ActivatableCardIds on every iteration of the
         // play-step loop — a free activation changes what is still available.
-        GameStateCalculator.CalculateAll();
+        // Flow only: a free activation changes activation counts and step state, not the board.
+        GameStateCalculator.CalculateAll(RecalcScope.Flow);
         int cardId = await RequestPlay(faction);
         if (cardId > -1)
         {

@@ -345,8 +345,14 @@ public class GameStateCalculator
         => MultiplayerSession.Instance?.Multiplayer?.MultiplayerPeer != null
            && MultiplayerSession.Instance.Multiplayer.GetPeers().Length > 0;
 
-    public static void CalculateAll()
+    /// <summary>
+    /// Re-derive the tag state. <paramref name="scope"/> names which sources of truth moved; see
+    /// <see cref="RecalcScope"/> for why the default is everything.
+    /// </summary>
+    public static void CalculateAll(RecalcScope scope = RecalcScope.All)
     {
+        if (scope == RecalcScope.None) return;
+
         if (!Enabled)
         {
             DebugUtilities.PrintPeer("[SKIP] GameStateCalculator is disabled");
@@ -364,30 +370,49 @@ public class GameStateCalculator
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
-            DebugUtilities.PrintPeer("Calculating game state for all factions");
-            // Three phases rather than six independent per-faction passes, because the middle one is
-            // shared. The ordering board tags -> executable steps -> card tags is the same order a
-            // single faction's pass used, so each phase still sees what it used to.
+            DebugUtilities.PrintPeer($"Calculating game state for all factions (scope {scope})");
+            // Phases rather than six independent per-faction passes, because the step evaluation in
+            // the middle is shared. The ordering — board -> played cards -> executable steps -> card
+            // tags — is the order a single faction's pass used, so each phase still sees what it used
+            // to, and it is a real dependency chain, not a convention:
+            //
+            //   board       feeds the step conditions (HasBuildableLand and friends read Tag.Buildable)
+            //   playedCards feeds them too (Condition.CardIsPlayed reads Tag.IsPlayed)
+            //   steps       feed the card tags (CanBeActivated consults HasExecutableCardSteps)
+            //
+            // That chain is why `scope` only says which SOURCE moved: everything downstream of it has
+            // to be redone regardless, so only the two independent heads are actually optional.
             //
             // It is also the order the old code only APPEARED to have. Six factions ran the whole
-            // sequence in parallel, so one faction's CardStep conditions (which read Tag.Buildable)
-            // could be evaluated while another faction's thread was still writing those very tags —
-            // the answer depended on thread scheduling. Splitting the phases makes it deterministic.
-            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
-                CalculateBoardTagsForFaction);
+            // sequence in parallel, so one faction's CardStep conditions could be evaluated while
+            // another faction's thread was still writing the tags they read — the answer depended on
+            // thread scheduling. Splitting the phases makes it deterministic.
+            if (scope.HasFlag(RecalcScope.Board))
+            {
+                System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                    CalculateBoardTagsForFaction);
 
-            // Straight control writes global (non-faction-scoped) tags — run once after parallel work,
-            // and before the conditions below, which may read them.
-            CalculateStraightControlForFaction();
+                // Straight control writes global (non-faction-scoped) tags — run once after parallel
+                // work, and before the conditions below, which may read them.
+                CalculateStraightControlForFaction();
+            }
 
-            // Once for everyone. See EvaluateExecutableSteps for why this is not per faction.
-            List<CardStep> steps = CardStep.All;
-            bool[] executable = EvaluateExecutableSteps(steps);
-            foreach (Faction faction in StaticGameData.PlayableFactions)
-                ApplyExecutableStepTags(steps, executable, faction);
+            if (scope.HasFlag(RecalcScope.Decks))
+                System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                    CalculatePlayedCardsForFaction);
 
-            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
-                CalculateCardTagsForFaction);
+            // Downstream of both heads, so it runs whenever anything at all moved.
+            if (scope != RecalcScope.None)
+            {
+                // Once for everyone. See EvaluateExecutableSteps for why this is not per faction.
+                List<CardStep> steps = CardStep.All;
+                bool[] executable = EvaluateExecutableSteps(steps);
+                foreach (Faction faction in StaticGameData.PlayableFactions)
+                    ApplyExecutableStepTags(steps, executable, faction);
+
+                System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                    CalculateCardTagsForFaction);
+            }
 
             // Build the snapshot, apply it locally, and replicate it to clients as an ordered
             // RecalculateTagsMessage. Because ChangeEvent.Apply() broadcasts the change
@@ -521,8 +546,13 @@ public class GameStateCalculator
 
     /// <summary>
     /// Board-derived tags: supply, and what this faction may attack, build and recruit into. Depends
-    /// only on unit positions, so it must run before anything that reads those tags — notably
-    /// CardStep conditions such as <c>HasBuildableLand</c>, which read Tag.Buildable.
+    /// only on unit positions and strait control, so it must run before anything that reads those
+    /// tags — notably CardStep conditions such as <c>HasBuildableLand</c>, which read Tag.Buildable.
+    ///
+    /// CalculatePlayedCardsForFaction deliberately does NOT live here, though it used to: it reads
+    /// deck piles and the play pool, not the board, and leaving it in this group would have forced
+    /// every draw, discard and play — about a quarter of all ChangeEvents — to re-derive supply and
+    /// buildability for six factions to answer a question about which cards are on the table.
     /// </summary>
     private static void CalculateBoardTagsForFaction(Faction faction)
     {
@@ -532,7 +562,6 @@ public class GameStateCalculator
         CalculateBuildableCountriesForFaction(faction);
         CalculateRecruitableCountriesForFaction(faction);
         ApplyCountryTagModifiersForFaction(faction);
-        CalculatePlayedCardsForFaction(faction);
     }
 
     /// <summary>

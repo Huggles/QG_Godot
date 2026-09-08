@@ -61,7 +61,15 @@ public partial class PlayCardChangeEvent : ChangeEvent
         return true;
     }
 
-    public override string SummaryText() => 
+    /// <summary>
+    /// Decks because DeckState.PlayCard moves the card out of hand and into the pool or discard; Flow
+    /// because it bumps CardsPlayedThisTurnStep and stamps PlayedInTurn, both of which card conditions
+    /// read. Whatever the card then DOES arrives as its own nested ChangeEvents, each carrying its own
+    /// scope — a card that deploys a unit raises a DeployUnitChangeEvent, and that one is Board.
+    /// </summary>
+    public override RecalcScope RecalcScope => RecalcScope.Decks | RecalcScope.Flow;
+
+    public override string SummaryText() =>
         SourceCardState.CardData.CardType == CardType.RESPONSE ? 
         $"{TriggeringFaction.WithPlayer()} played a response card (hidden)" :
         $"{TriggeringFaction.WithPlayer()} played {SourceCardState.CardData.CardType.Label()} card {SourceCardState.CardName}";

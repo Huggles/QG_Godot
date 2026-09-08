@@ -23,6 +23,21 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
     public bool IsTrigger { get; set; } = true;
 
     /// <summary>
+    /// Which sources of derived state this event's <c>ExecuteAsync</c> disturbs, and so how much of
+    /// the tag recalculation that follows it actually has to run.
+    ///
+    /// Defaults to <see cref="RecalcScope.All"/> — the behaviour every event had before this existed.
+    /// Override it only where you can say precisely what the event touches, and describe only what
+    /// THIS event's own ExecuteAsync does: effects a card goes on to cause arrive as their own nested
+    /// ChangeEvents, each carrying its own scope, so the scopes compose without anyone having to
+    /// reason about the whole chain.
+    ///
+    /// Getting one wrong leaves a stale tag rather than throwing, which is why the bar for narrowing
+    /// is high and the default is deliberately pessimistic.
+    /// </summary>
+    [JsonIgnore] public virtual RecalcScope RecalcScope => RecalcScope.All;
+
+    /// <summary>
     /// Whether this event joins the round's <c>ChangeEventsPool</c>. False for a mechanical mutation
     /// that is not a game event at all: nothing may react to it AND nothing may read it back as
     /// history. <see cref="IsTrigger"/> = false only closes the block and after-reaction windows;
@@ -186,7 +201,7 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         // On a client there is nothing to broadcast — it is replaying an event the server already
         // sent — so the divergence window does not apply and this is set unconditionally.
         ErrorReporter.BroadcastSent = true;
-        GameStateCalculator.CalculateAll();
+        GameStateCalculator.CalculateAll(RecalcScope);
         EmitSignal(SignalName.ChangeEventApplied, Id);
         EnqueueAnimations(() => AfterAnimations);
         DebugUtilities.PrintPeer($"Awaiting)");
