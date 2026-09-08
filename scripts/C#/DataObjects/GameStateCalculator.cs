@@ -250,15 +250,61 @@ public class GameStateCalculator
         return false;
     }
 
-    private static void CalculateExecutableStepsForFaction(Faction faction)
-    {        
-        CardStep.All.ForEach(step => step.Tags.Remove(Tag.IsExecutable, faction));
-        CardStep.All.ForEach(step =>
+    /// <summary>
+    /// Which steps could run right now. Evaluated ONCE per pass, not once per faction.
+    ///
+    /// <see cref="CardStep.MeetAllConditions"/> does not depend on who is asking: a step's conditions
+    /// are built from its own card's faction, so all six factions were computing the identical answer
+    /// and throwing five copies away. That duplication was ~77% of all CalculateAll time — invisible
+    /// in wall-clock because the six copies ran in parallel with each other, which is exactly how it
+    /// survived this long.
+    ///
+    /// Parallel over STEPS rather than over factions, so the one remaining copy still uses the cores
+    /// the five redundant ones were using. <c>CardStep.All</c> is materialised once because it is a
+    /// property that rebuilds the whole list from every CardState on every access, and the old code
+    /// touched it twice per faction — about 13,000 rebuilds in a full game.
+    /// </summary>
+    private static bool[] EvaluateExecutableSteps(List<CardStep> steps)
+    {
+        // Cards still face-down in a draw pile are skipped rather than evaluated. Nothing can activate
+        // one — CalculateActivatableCardsForFaction only ever considers hand, status, response,
+        // played-this-turn and mutator cards, and CardPlayRound only asks about cards in its pool — so
+        // their conditions are computed and thrown away. They are the majority of the deck for most of
+        // a game, and MeetAllConditions is the single most expensive thing here.
+        //
+        // Skipped means FALSE, not "left alone": clearing keeps the tag well defined, so a card
+        // shuffled back into the deck cannot carry a stale IsExecutable from when it was last in play.
+        HashSet<int> inDrawPile = new();
+        foreach (Faction faction in StaticGameData.PlayableFactions)
+            foreach (int cardId in DeckState.ForFaction(faction).DeckCardIds)
+                inDrawPile.Add(cardId);
+
+        bool[] executable = new bool[steps.Count];
+        System.Threading.Tasks.Parallel.For(0, steps.Count, i =>
         {
-            bool isExecutable = !step.StepFinished && step.MeetAllConditions;
-            if (isExecutable)
-                step.Tags.Add(Tag.IsExecutable, faction);
+            CardStep step = steps[i];
+            executable[i] = !inDrawPile.Contains(step.CardLogic.CardState.Id)
+                            && !step.StepFinished
+                            && step.MeetAllConditions;
         });
+        return executable;
+    }
+
+    /// <summary>
+    /// Stamp one faction's copy of <see cref="Tag.IsExecutable"/> from a shared evaluation.
+    ///
+    /// The per-faction dimension of this tag carries no information — every faction gets the same
+    /// answer — but it is preserved rather than collapsed because the tag state stays byte-identical
+    /// to what the per-faction loop produced. The only reader, <c>CardLogic.ExecutableCardSteps</c>,
+    /// asks <c>HasTagForAny</c> and never names a faction.
+    /// </summary>
+    private static void ApplyExecutableStepTags(List<CardStep> steps, bool[] executable, Faction faction)
+    {
+        for (int i = 0; i < steps.Count; i++)
+        {
+            if (executable[i]) steps[i].Tags.Add(Tag.IsExecutable, faction);
+            else               steps[i].Tags.Remove(Tag.IsExecutable, faction);
+        }
     }
 
     private static void CalculateStraightControlForFaction()
@@ -285,6 +331,20 @@ public class GameStateCalculator
     
     
 
+    /// <summary>
+    /// Whether any OTHER peer needs to be told about derived state.
+    ///
+    /// False for a solo GUI game and for every headless/CLI run, which use OfflineMultiplayerPeer:
+    /// it reports unique id 1 so IsServer() is true, but GetPeers() is empty. False is therefore
+    /// "authoritative and alone", not "not started" — a real host with clients has a non-empty
+    /// GetPeers() from the readiness barrier onward, i.e. well before the first CalculateAll.
+    ///
+    /// Null peer means the session is not up yet; nothing to send to either.
+    /// </summary>
+    private static bool HasRemotePeers
+        => MultiplayerSession.Instance?.Multiplayer?.MultiplayerPeer != null
+           && MultiplayerSession.Instance.Multiplayer.GetPeers().Length > 0;
+
     public static void CalculateAll()
     {
         if (!Enabled)
@@ -305,26 +365,56 @@ public class GameStateCalculator
         try
         {
             DebugUtilities.PrintPeer("Calculating game state for all factions");
-            var calculators = new System.Collections.Concurrent.ConcurrentBag<GameStateCalculator>();
-            
-            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions, faction =>
-            {
-                calculators.Add(CalculateAllForFaction(faction));
-            });
+            // Three phases rather than six independent per-faction passes, because the middle one is
+            // shared. The ordering board tags -> executable steps -> card tags is the same order a
+            // single faction's pass used, so each phase still sees what it used to.
+            //
+            // It is also the order the old code only APPEARED to have. Six factions ran the whole
+            // sequence in parallel, so one faction's CardStep conditions (which read Tag.Buildable)
+            // could be evaluated while another faction's thread was still writing those very tags —
+            // the answer depended on thread scheduling. Splitting the phases makes it deterministic.
+            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                CalculateBoardTagsForFaction);
 
-            // Straight control writes global (non-faction-scoped) tags — run once after parallel work
+            // Straight control writes global (non-faction-scoped) tags — run once after parallel work,
+            // and before the conditions below, which may read them.
             CalculateStraightControlForFaction();
+
+            // Once for everyone. See EvaluateExecutableSteps for why this is not per faction.
+            List<CardStep> steps = CardStep.All;
+            bool[] executable = EvaluateExecutableSteps(steps);
+            foreach (Faction faction in StaticGameData.PlayableFactions)
+                ApplyExecutableStepTags(steps, executable, faction);
+
+            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                CalculateCardTagsForFaction);
 
             // Build the snapshot, apply it locally, and replicate it to clients as an ordered
             // RecalculateTagsMessage. Because ChangeEvent.Apply() broadcasts the change
             // event BEFORE calling CalculateAll(), this tags message is enqueued on clients right
             // behind that change event and always applies to post-change state in queue order.
-            var snapshot = BuildTagsSnapshot();
-            ApplyComputedTags(snapshot);
-
-            if (MultiplayerSession.Instance?.Multiplayer.IsServer() == true)
+            // The snapshot exists ONLY to reach clients. On the server it is a round trip:
+            // BuildTagsSnapshot reads back the tags CalculateAllForFaction has just written, and
+            // ApplyComputedTags clears every replicated tag and writes those same values in again.
+            // With nobody to send it to, both halves are pure cost — and this runs after every
+            // ChangeEvent (~1100 times in a full game), so it dominates an automated run.
+            //
+            // Gated on the absence of REMOTE peers rather than on a CLI/sim flag: the saving is just
+            // as real for a solo GUI game, and the condition is the honest statement of why it is
+            // safe. Nothing else consumes the snapshot — RecalculateTagsMessage is not recorded in
+            // GameMessages, not counted in LatestAppliedId, not hashed, and not written to saves.
+            if (HasRemotePeers)
             {
+                var snapshot = BuildTagsSnapshot();
+                ApplyComputedTags(snapshot);
                 _ = new RecalculateTagsMessage(snapshot).BroadCast();
+            }
+            else
+            {
+                // The two things ApplyComputedTags does that are NOT the round trip, so a peerless
+                // server behaves identically to one with clients.
+                CalculateStraightControlForFaction();
+                EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
             }
 
             stopwatch.Stop();
@@ -420,23 +510,43 @@ public class GameStateCalculator
     public static GameStateCalculator CalculateAllForFaction(Faction faction)
     {
         GameStateCalculator calculator = new GameStateCalculator { Faction = faction };
-        
-        // Calculate supply first - it's needed by buildable/attackable checks
-        CalculateInSupplyForFaction(faction);        
+        List<CardStep> steps = CardStep.All;
+
+        CalculateBoardTagsForFaction(faction);
+        ApplyExecutableStepTags(steps, EvaluateExecutableSteps(steps), faction);
+        CalculateCardTagsForFaction(faction);
+
+        return calculator;
+    }
+
+    /// <summary>
+    /// Board-derived tags: supply, and what this faction may attack, build and recruit into. Depends
+    /// only on unit positions, so it must run before anything that reads those tags — notably
+    /// CardStep conditions such as <c>HasBuildableLand</c>, which read Tag.Buildable.
+    /// </summary>
+    private static void CalculateBoardTagsForFaction(Faction faction)
+    {
+        // Supply first — buildable/attackable both consult it.
+        CalculateInSupplyForFaction(faction);
         CalculateAttackableForFaction(faction);
         CalculateBuildableCountriesForFaction(faction);
         CalculateRecruitableCountriesForFaction(faction);
         ApplyCountryTagModifiersForFaction(faction);
         CalculatePlayedCardsForFaction(faction);
+    }
 
-        CalculateExecutableStepsForFaction(faction);
+    /// <summary>
+    /// Card-derived tags. Runs after <see cref="Tag.IsExecutable"/> is settled, because
+    /// CalculateActivatableCardsForFaction resolves CardLogic.CanBeActivated, which consults
+    /// HasExecutableCardSteps — i.e. the executable tags stamped immediately before it.
+    /// </summary>
+    private static void CalculateCardTagsForFaction(Faction faction)
+    {
         CalculateActivatableCardsForFaction(faction);
         CalculateAfterReactionCardsForFaction(faction);
         CalculateBlockReactionCardsForFaction(faction);
         CalculatePlayableCardsForFaction(faction);
         CalculateAttentionCardsForFaction(faction);
-
-        return calculator;
     }
 
     private static void ApplyCountryTagModifiersForFaction(Faction faction)
