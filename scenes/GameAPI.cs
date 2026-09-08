@@ -133,9 +133,18 @@ public partial class GameAPI : Node
         // Fullness cannot block a rebuild in place: the slot being filled is the faction's own, and it
         // is the one being vacated. Checked before anything mutates, so a refused deploy leaves the
         // board untouched.
+        // Reported as two distinct reasons rather than one "full or not deployable" string. They have
+        // completely different causes — a full country is a board that filled up, an undeployable one
+        // is usually a target that was legal when it was offered and stopped being legal before the
+        // deploy landed (a unit recalled to fund this very build can break the supply chain reaching
+        // it; see UnitPool.RecallCandidates). Conflating them sends anyone reading the log after the
+        // fact looking at occupancy for a problem that was never about occupancy.
         if ((countryState.IsCountryFull && !rebuildInPlace) || !deployable)
         {
-            string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. Country is full or not deployable.";
+            string reason = !deployable
+                ? $"Country is not {(deployType == DeployType.BUILD ? "buildable" : "recruitable")} for {faction}"
+                : $"Country is full ({countryState.Units.Count}/3 factions: {string.Join(", ", countryState.OccupyingFactions)})";
+            string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. {reason}.";
             DebugUtilities.PrintPeer(exceptionMessage);
             throw new GameAPIException(exceptionMessage);
         }

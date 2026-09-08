@@ -33,6 +33,13 @@ public partial class EventFlexibleResources : EventCardLogic
         {
             new CardStep(this, async () => {
                 var resp = await new InputRequest.CardsRequestHandler(Faction, PlayableDiscardedCardIds).BroadCast();
+
+                // Declining leaves an EMPTY response rather than setting WasSkipped — that is
+                // CardsRequestHandler's pass idiom (PassMode.EmptyResponse), so BroadCast does not
+                // throw for it and this is the only place the decline can be noticed. Without the
+                // guard the next line indexed [0] on an empty list and took the turn loop down.
+                if (resp.ResponseCardIds.Count == 0) throw new StepSkippedException();
+
                 int selectedCardId = resp.ResponseCardIds[0];
 
                 RecycleCardChangeEvent recycleEvent = BuildChangeEvent(

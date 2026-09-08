@@ -1,0 +1,234 @@
+using Godot;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.Json;
+
+/// <summary>
+/// Drives one unattended full game and reports its outcome as a single line. Entered from
+/// <see cref="CliSession"/> when <c>sim=true</c>.
+///
+/// The point is volume: run this a few thousand times with a fixed <c>seed</c> and a varying
+/// <c>decision_seed</c> and the result lines aggregate into balance statistics — who won, what each
+/// faction scored, how long the game ran.
+///
+/// A sim run answers to nothing on stdin, so it needs its own ending. There are exactly three, and
+/// keeping them distinguishable is the whole reliability story of a batch:
+///   0 — the game reached a win condition and a result was emitted
+///   2 — the game ended but rules errors were seen along the way (CliSession's own exit rule)
+///   3 — nothing happened for a long time and no result ever arrived (see the watchdog)
+/// A run that hangs instead of exiting 3 would stall a batch behind it, which is why the watchdog is
+/// not optional.
+/// </summary>
+public sealed class CliSimRunner
+{
+    /// <summary>
+    /// Frames of total silence — no ChangeEvent, no prompt — before a run is called stalled.
+    ///
+    /// Generous because it must never fire on a slow-but-live game: the cost of being wrong is a
+    /// discarded run, and a game that is genuinely progressing resets this on every applied event
+    /// through CliSession.MarkBusy. Override with <c>sim_stall_frames</c>.
+    /// </summary>
+    private const int DefaultStallFrames = 3000;
+
+    private readonly CliSession _session;
+    private readonly CliRenderer _renderer;
+    private readonly RandomInputProvider _bot;
+    private readonly Stopwatch _clock = Stopwatch.StartNew();
+
+    private readonly int _decisionSeed;
+    private readonly int _stallFrames;
+
+    /// <summary>
+    /// Press Continue automatically for recoverable failures. On by default; <c>sim_resume=false</c>
+    /// turns it off, which is what you want when hunting one specific failure — the run then stops at
+    /// the first one with the board still standing, instead of carrying on past it.
+    /// </summary>
+    private readonly bool _autoResume;
+
+    private int _frames;
+    private int _resumes;
+    private bool _finished;
+    private bool _subscribed;
+
+    public CliSimRunner(CliSession session, CliRenderer renderer)
+    {
+        _session = session;
+        _renderer = renderer;
+
+        _decisionSeed = CliArgs.GetInt("decision_seed", 0);
+        _stallFrames = CliArgs.GetInt("sim_stall_frames", DefaultStallFrames);
+        _autoResume = CliArgs.GetBool("sim_resume", true);
+
+        double passChance = Probability("bot_pass");
+        double discardChance = Probability("bot_discard");
+
+        _bot = new RandomInputProvider(_decisionSeed, passChance, discardChance,
+            CliArgs.GetInt("bot_yield_every", 64), CliArgs.Verbose ? renderer : null);
+
+        // Replaces the CliInputProvider CliSession would otherwise install: nothing is reading stdin
+        // for answers, so every prompt has to be resolved by the bot or the run parks forever.
+        InputServices.Override(_bot);
+
+        EventBus.Instance.GameEnded += OnGameEnded;
+        _subscribed = true;
+
+        _renderer.Emit(new CliEvent("sim_started")
+            .Set("seed", GameRandom.Seed)
+            .Set("decision_seed", _decisionSeed)
+            .Set("bot_pass", passChance)
+            .Set("bot_discard", discardChance)
+            .Text($"SIM  decision_seed {_decisionSeed}, bot_pass {passChance}, bot_discard {discardChance}"));
+    }
+
+    /// <summary>
+    /// A 0..1 argument. Invariant culture explicitly, so <c>bot_pass=0.2</c> means the same thing on a
+    /// machine with a comma decimal separator as it does in the scripts that write it.
+    /// </summary>
+    private static double Probability(string key)
+        => double.TryParse(CliArgs.Get(key, "0"), System.Globalization.NumberStyles.Float,
+                           System.Globalization.CultureInfo.InvariantCulture, out double parsed)
+            ? Math.Clamp(parsed, 0, 1)
+            : 0;
+
+    /// <summary>
+    /// Called once per frame from <see cref="CliSession._Process"/>. Only the watchdog lives here —
+    /// the run itself is driven entirely by the game loop.
+    /// </summary>
+    public void Tick()
+    {
+        _frames++;
+        if (_finished) return;
+        if (TryResumeAfterRecoverableFailure()) return;
+        if (_session.QuietFrames < _stallFrames) return;
+
+        _finished = true;
+        GameFlow flow = GameFlow.Instance;
+        _renderer.Emit(new CliEvent("sim_stalled")
+            .Set("decision_seed", _decisionSeed)
+            .Set("turn", flow?.GameTurn ?? -1)
+            .Set("round", flow?.Round ?? -1)
+            .Set("step", flow?.TurnStep.ToString() ?? "?")
+            .Set("prompts", _bot.Answered)
+            .Set("frames", _frames)
+            .Text($"STALLED after {_stallFrames} quiet frame(s) at turn {flow?.GameTurn}, " +
+                  $"round {flow?.Round}, step {flow?.TurnStep} ({_bot.Answered} prompt(s) answered)"));
+
+        // Deliberately not 0/1/2: a stall is neither a result nor a rules error, and a batch that
+        // cannot tell them apart would silently count hung runs as losses for whoever was behind.
+        _session.Quit(3);
+    }
+
+    /// <summary>
+    /// Press Continue for the absent player, and report whether it was pressed.
+    ///
+    /// A Recoverable failure parks the turn loop on a popup offering Continue — that is the design
+    /// (see GameRuleException, and UnitPool.RecallCandidates, which knowingly leaves one such case in
+    /// on the strength of it). Headless there is no popup and nobody to click it, so without this the
+    /// loop would sit there until the watchdog killed the run, and a whole class of ordinary rule
+    /// refusals would read as a stalled game.
+    ///
+    /// Recoverable ONLY. An Unrecoverable stall means state was mutated but never replicated, so the
+    /// board can no longer be vouched for; resuming would still produce a result line, which is worse
+    /// than producing none. Those fall through to the watchdog and end the run at exit 3.
+    ///
+    /// The run is still not clean — CliSession.ErrorsSeen counts the failure, so the result line
+    /// carries errors > 0 and the process exits 2. A batch therefore gets the game's outcome AND the
+    /// seed pair needed to reproduce the bug, instead of having to choose between them.
+    /// </summary>
+    private bool TryResumeAfterRecoverableFailure()
+    {
+        if (!_autoResume) return false;
+
+        ErrorReporter reporter = ErrorReporter.Instance;
+        if (reporter == null || !reporter.HasPendingStall) return false;
+        if (reporter.PendingSeverity != ErrorSeverity.Recoverable) return false;
+
+        _resumes++;
+        GameFlow flow = GameFlow.Instance;
+        _renderer.Emit(new CliEvent("sim_resumed")
+            .Set("decision_seed", _decisionSeed)
+            .Set("turn", flow?.GameTurn ?? -1)
+            .Set("round", flow?.Round ?? -1)
+            .Set("step", flow?.TurnStep.ToString() ?? "?")
+            .Text($"RESUME after a recoverable failure at turn {flow?.GameTurn}, " +
+                  $"round {flow?.Round}, step {flow?.TurnStep} (resume #{_resumes})"));
+
+        ErrorReporter.RequestResume();
+        return true;
+    }
+
+    /// <summary>
+    /// Emit the outcome and stop. Ends the process before MultiplayerSession finishes its drain and
+    /// switches to the victory screen — there is no screen here, and the result is already final.
+    /// </summary>
+    private void OnGameEnded(string resultJson)
+    {
+        if (_finished) return;
+        _finished = true;
+
+        GameResult result;
+        try
+        {
+            result = JsonSerializer.Deserialize<GameResult>(resultJson);
+        }
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "CliSimRunner.OnGameEnded");
+            _session.Quit(2);
+            return;
+        }
+
+        // A flat faction -> score map rather than the GameResult itself: FactionResult carries
+        // FactionData (labels, colours, flag paths) that a statistics run has no use for, and at
+        // thousands of lines the difference is the whole file size.
+        Dictionary<string, object> factions = new();
+        foreach (FactionResult faction in result.Factions)
+            factions[faction.Faction.ToString()] = faction.Total;
+
+        _renderer.Emit(new CliEvent("game_result")
+            .Set("seed", GameRandom.Seed)
+            .Set("decision_seed", _decisionSeed)
+            .Set("scenario", GameManager.PendingScenarioPath)
+            .Set("winner", result.WinningTeam.ToString())
+            .Set("axis", result.AxisTotal)
+            .Set("allies", result.AlliesTotal)
+            .Set("final_round", result.FinalRound)
+            .Set("end_reason", result.EndReason)
+            .Set("factions", factions)
+            .Set("prompts", _bot.Answered)
+            .Set("passed", _bot.Passed)
+            .Set("errors", _session.ErrorsSeen)
+            .Set("resumes", _resumes)
+            .Set("rng_draws", GameRandom.DrawCount)
+            .Text($"RESULT {result.WinningTeam} wins {result.AxisTotal}-{result.AlliesTotal} " +
+                  $"after round {result.FinalRound} ({result.EndReason})  " +
+                  $"[{_bot.Answered} prompts]"));
+
+        // Separate event, deliberately. Everything above is a statement about the GAME and is
+        // reproducible from (seed, decision_seed) alone, so two runs of the same pair produce
+        // byte-identical game_result lines and a batch can be diffed as a regression baseline.
+        // Wall-clock never reproduces, and mixing it in would have made that diff always fail.
+        // Frames and milliseconds sit together because they answer different questions: whether a run
+        // is slow because the loop does a lot, or merely because it waits a lot.
+        _renderer.Emit(new CliEvent("sim_perf")
+            .Set("decision_seed", _decisionSeed)
+            .Set("frames", _frames)
+            .Set("elapsed_ms", (int)_clock.ElapsedMilliseconds)
+            .Text($"PERF  {_frames} frame(s), {_clock.ElapsedMilliseconds} ms"));
+
+        _session.Quit(0);
+    }
+
+    /// <summary>
+    /// EventBus is a process-wide static that outlives every scene, and a Godot signal runs all its
+    /// handlers through one multicast delegate — so a stale handler that throws aborts the emission
+    /// for everyone behind it. Unsubscribing is not optional bookkeeping.
+    /// </summary>
+    public void Dispose()
+    {
+        if (!_subscribed) return;
+        _subscribed = false;
+        EventBus.Instance.GameEnded -= OnGameEnded;
+    }
+}

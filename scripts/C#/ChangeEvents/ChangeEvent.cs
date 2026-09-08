@@ -129,7 +129,22 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
             // time: this finally block unwinds the counters as the stack unwinds, so by the time the
             // Guard catch at the top of the loop sees the exception, the state that identified the
             // divergence window is already gone. The marker travels with the exception instead.
-            if (!ErrorReporter.BroadcastSent)
+            //
+            // GameRuleException is excluded because "escaped before BroadCast" is only a PROXY for
+            // "mutated but did not replicate", and for this one type the proxy is wrong: a rule
+            // refusal is thrown by a precondition guard that runs before anything is touched (see
+            // GameRuleException's own summary, and the "Checked before anything mutates" comment on
+            // GameAPI.DeployUnitToCountry). Marking it diverged made ErrorReporter.Classify call a
+            // harmless refusal Unrecoverable, which stops the turn loop instead of offering the popup
+            // + Continue those refusals are designed around — UnitPool.RecallCandidates knowingly
+            // leaves one such case in precisely because it was believed to be recoverable.
+            //
+            // The contract this relies on: a GameRuleException MUST be thrown before mutating state.
+            // All three throw sites honour it (GameAPI.DeployUnitToCountry,
+            // UnitPool.GetAvailableUnitForFaction, UnitPoolShortfall.ResolveBeforeDeploy). A new throw
+            // site that mutates first would be silently misclassified as recoverable — throw a plain
+            // Exception there instead.
+            if (!ErrorReporter.BroadcastSent && e is not GameRuleException)
                 ErrorReporter.MarkDiverged(e);
             throw;
         }

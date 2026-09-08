@@ -229,6 +229,11 @@ public partial class MultiplayerSession : Node
             DebugUtilities.PrintPeer("BeginEndGame received — draining local queues before victory screen");
             VictoryScreen.PendingResult = JsonSerializer.Deserialize<GameResult>(resultJson);
 
+            // Before the drain, not after: a headless run has no victory screen to reach, and this
+            // is its only game-over notification. Announcing it here lets an automated run report the
+            // result and exit instead of paying for a scene switch it will never look at.
+            EventBus.Emit(EventBus.SignalName.GameEnded, resultJson);
+
             // Drain change events first (applying one may enqueue animations), then animations.
             // WhenDrained() replaces `if (!IsIdle) await ToSignal(QueueDrained)`, which was a
             // check-then-await race that hung forever if the queue drained in between.

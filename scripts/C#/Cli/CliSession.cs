@@ -19,10 +19,17 @@ public partial class CliSession : Node
     private CliRenderer _renderer;
     private CliInputProvider _input;
     private CliCommands _commands;
+    private CliSimRunner _sim;
     private bool _subscribed;
 
     public CliRenderer Renderer => _renderer;
     public CliInputProvider Input => _input;
+
+    /// <summary>
+    /// True for an unattended statistics run (<c>sim=true</c>): a bot answers every prompt, nothing
+    /// reads stdin, and the run ends on the game-over signal rather than on EOF.
+    /// </summary>
+    public static bool IsSim => GameContext.IsCli && CliArgs.GetBool("sim");
 
     public override void _Ready()
     {
@@ -41,6 +48,10 @@ public partial class CliSession : Node
         // Replace the bootstrap auto-pass provider now that there is somewhere to ask.
         InputServices.Override(_input);
 
+        // ...unless nobody is asking. A sim run installs the bot over the top and owns the ending;
+        // constructed after the input provider so the override order is unambiguous.
+        if (IsSim) _sim = new CliSimRunner(this, _renderer);
+
         // The popup is suppressed headless, so without this a rules violation or a stalled loop would
         // be completely invisible — the CLI would just look like it ignored the command.
         ErrorReporter.ErrorIngested += OnError;
@@ -52,6 +63,25 @@ public partial class CliSession : Node
             .Text($"QG CLI ready — scenario {GameManager.PendingScenarioPath}\nType `help` for commands."));
     }
 
+    /// <summary>
+    /// EventBus is a process-wide static that outlives every scene, and a Godot signal runs all of its
+    /// handlers through ONE multicast delegate — so the first stale handler that throws aborts the
+    /// emission and every handler behind it is skipped, with only a push_error to show for it.
+    /// This autoload normally lives as long as the process, but leaving the subscriptions dangling is
+    /// the failure mode the project has already been bitten by, and a future in-process second game
+    /// would walk straight into it.
+    /// </summary>
+    public override void _ExitTree()
+    {
+        _sim?.Dispose();
+        _sim = null;
+
+        if (!_subscribed) return;
+        _subscribed = false;
+        EventBus.Instance.NewTurnStarted -= OnNewTurn;
+        EventBus.Instance.GameChangeEventAfter -= OnChangeEventAfter;
+    }
+
     public override void _Process(double delta)
     {
         if (!GameContext.IsCli) return;
@@ -59,6 +89,11 @@ public partial class CliSession : Node
         SubscribeOnce();
         AnnounceStartOnce();
         _quietFrames++;
+
+        // Before the stdin drain: a sim run has no script, so stdin is at EOF from the first frame
+        // and the rule at the bottom of this method would quit before the game ever started. The
+        // runner's own two endings — the game-over signal and the stall watchdog — replace it.
+        if (_sim != null) { _sim.Tick(); return; }
 
         // Drain the reader thread's queue on the main thread. Everything downstream — command
         // handlers, prompt answers, ChangeEvent application — runs here, same as the rest of the game.
@@ -111,6 +146,9 @@ public partial class CliSession : Node
     /// <summary>Reset the quiet counter — something happened, so state is in motion again.</summary>
     public void MarkBusy() => _quietFrames = 0;
 
+    /// <summary>Frames since anything last happened. The sim watchdog's stall signal.</summary>
+    public int QuietFrames => _quietFrames;
+
     /// <summary>
     /// Report the scenario once the game exists. Not in _Ready: this autoload starts before
     /// MainScene runs CliBootstrap, so PendingScenarioPath is still the default there.
@@ -142,8 +180,19 @@ public partial class CliSession : Node
         // authoritative, correctly-ordered step boundary, so the banner is derived from it below.
     }
 
+    /// <summary>
+    /// Whether to mirror the game's event stream to stdout.
+    ///
+    /// A full game emits thousands of lines. That is the point in an interactive or scripted session,
+    /// but a sim run wants one result line — at batch sizes the transcript costs more than the game
+    /// does and buries the line worth reading. <c>verbose=true</c> brings it back for a single run
+    /// you actually intend to read.
+    /// </summary>
+    private bool Chatty => _sim == null || CliArgs.Verbose;
+
     private void OnNewTurn(int turn)
     {
+        if (!Chatty) return;
         GameFlow flow = GameFlow.Instance;
         _renderer.Emit(new CliEvent("turn")
             .Set("turn", turn).Set("round", flow.Round)
@@ -162,6 +211,10 @@ public partial class CliSession : Node
     private void OnChangeEventAfter(string changeEventName)
     {
         MarkBusy();
+
+        // After MarkBusy, never before it: this is the sim watchdog's only proof that the game is
+        // still alive, so muting the output must not also mute the heartbeat.
+        if (!Chatty) return;
 
         List<GameMessage> messages = MultiplayerSession.Instance?.GameState?.GameMessages;
         GameMessage last = messages != null && messages.Count > 0 ? messages[^1] : null;

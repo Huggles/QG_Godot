@@ -114,6 +114,17 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void NewTurnStartedEventHandler(int turnNumber);
     [Signal] public delegate void NextStepStartedEventHandler(int turnStep);
 
+    /// <summary>
+    /// A win condition was met and the serialized <see cref="GameResult"/> is final. Emitted on every
+    /// peer at the top of MultiplayerSession.BeginEndGame, i.e. BEFORE the queue drain and the switch
+    /// to the victory screen.
+    ///
+    /// Early on purpose: it is the only game-over notification a process with no UI can observe, and
+    /// an automated run wants to report the result and exit rather than load VictoryScreen.tscn.
+    /// Carries the JSON rather than the object because GameResult is a plain class, not a Variant.
+    /// </summary>
+    [Signal] public delegate void GameEndedEventHandler(string resultJson);
+
     [Signal] public delegate void FactionScoredPointsEventHandler(Faction faction, int points);
 
     [Signal] public delegate void UnitDeployedEventHandler(int unitId, int countryId);
