@@ -205,6 +205,8 @@ public sealed class CliSimRunner
                   $"after round {result.FinalRound} ({result.EndReason})  " +
                   $"[{_bot.Answered} prompts]"));
 
+        EmitRoundScores(result);
+
         // Separate event, deliberately. Everything above is a statement about the GAME and is
         // reproducible from (seed, decision_seed) alone, so two runs of the same pair produce
         // byte-identical game_result lines and a batch can be diffed as a regression baseline.
@@ -218,6 +220,69 @@ public sealed class CliSimRunner
             .Text($"PERF  {_frames} frame(s), {_clock.ElapsedMilliseconds} ms"));
 
         _session.Quit(0);
+    }
+
+    /// <summary>
+    /// Each faction's victory points round by round: what it scored in the round, and what it stood at
+    /// when the round closed.
+    ///
+    /// A separate event from <c>game_result</c> on purpose. The result line is one row per game and
+    /// gets read by eye; this is <c>factions x rounds</c> numbers and would have swamped it — the same
+    /// reasoning that keeps FactionData out of the result's faction map. It is still reproducible from
+    /// (seed, decision_seed) like everything above, so it belongs before <c>sim_perf</c>, not after.
+    ///
+    /// Shape is one array per faction indexed by round 1..FinalRound, rather than a list of per-round
+    /// objects: a batch aggregating hundreds of games wants to add column N to a running total, and
+    /// that read should not cost a dictionary lookup and a null check per round.
+    ///
+    /// Zero-filled, which the source data is not — GameFlow builds PerRound by grouping the rounds a
+    /// faction actually has a VP summary for, so a round it did not score in is simply absent. Left as
+    /// gaps these would average as "no data" instead of "no points" and quietly inflate every mean.
+    /// Deltas can also be negative (a forced discard against an empty deck costs a VP), so the running
+    /// total is not monotonic and must be summed rather than tracked as a maximum.
+    ///
+    /// Team travels with each faction so a consumer can roll AXIS and ALLIES up without hardcoding
+    /// who is on which side.
+    /// </summary>
+    private void EmitRoundScores(GameResult result)
+    {
+        Dictionary<string, object> factions = new();
+        List<string> textRows = new();
+
+        foreach (FactionResult faction in result.Factions)
+        {
+            Dictionary<int, int> deltaByRound = new();
+            foreach (RoundScore scored in faction.PerRound)
+                deltaByRound[scored.Round] = scored.Points;
+
+            List<int> deltas = new();
+            List<int> totals = new();
+            int running = 0;
+            for (int round = 1; round <= result.FinalRound; round++)
+            {
+                int delta = deltaByRound.GetValueOrDefault(round, 0);
+                running += delta;
+                deltas.Add(delta);
+                totals.Add(running);
+            }
+
+            factions[faction.Faction.ToString()] = new Dictionary<string, object>
+            {
+                ["team"] = faction.Team.ToString(),
+                ["deltas"] = deltas,
+                ["totals"] = totals,
+            };
+
+            textRows.Add($"  {faction.Faction,-16} {string.Join(" ", totals)}");
+        }
+
+        _renderer.Emit(new CliEvent("round_scores")
+            .Set("seed", GameRandom.Seed)
+            .Set("decision_seed", _decisionSeed)
+            .Set("final_round", result.FinalRound)
+            .Set("factions", factions)
+            .Text($"ROUNDS  cumulative VP by round 1..{result.FinalRound}\n"
+                  + string.Join("\n", textRows)));
     }
 
     /// <summary>

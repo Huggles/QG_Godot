@@ -61,6 +61,23 @@ public enum SimOutcome
     Crashed,
 }
 
+/// <summary>
+/// One faction's victory points across the rounds of a single game, straight from the run's
+/// <c>round_scores</c> event. Both series are indexed by round 1..N at offset 0..N-1 and are
+/// zero-filled by the emitter, so a round the faction did not score in reads 0 rather than being
+/// absent — an average over these needs no gap handling.
+/// </summary>
+public sealed class RoundSeries
+{
+    public required string Team { get; init; }
+
+    /// <summary>Points scored IN each round. Can be negative — a forced discard on an empty deck costs a VP.</summary>
+    public required int[] Deltas { get; init; }
+
+    /// <summary>Running total AT THE END OF each round.</summary>
+    public required int[] Totals { get; init; }
+}
+
 /// <summary>The outcome of one job: the parsed <c>game_result</c> plus how the process itself fared.</summary>
 public sealed class SimResult
 {
@@ -89,6 +106,9 @@ public sealed class SimResult
 
     /// <summary>First <c>game_error</c> message seen, for the failure summary.</summary>
     public string? FirstError { get; init; }
+
+    /// <summary>Per-faction VP by round, keyed by faction name. Empty when the run emitted no result.</summary>
+    public Dictionary<string, RoundSeries> Rounds { get; init; } = new();
 
     public bool HasResult => ResultJson != null;
 }

@@ -142,6 +142,7 @@ internal sealed class ResultAccumulator
     private string? _winner, _endReason, _firstError;
     private int _axis, _allies, _finalRound, _prompts, _errors, _resumes;
     private readonly Dictionary<string, int> _factions = new();
+    private readonly Dictionary<string, RoundSeries> _rounds = new();
 
     public bool HasResult => _resultJson != null;
 
@@ -182,10 +183,33 @@ internal sealed class ResultAccumulator
                         _factions[p.Name] = p.Value.TryGetInt32(out int v) ? v : 0;
                 break;
 
+            case "round_scores":
+                if (root.TryGetProperty("factions", out JsonElement rounds)
+                    && rounds.ValueKind == JsonValueKind.Object)
+                    foreach (JsonProperty faction in rounds.EnumerateObject())
+                        _rounds[faction.Name] = new RoundSeries
+                        {
+                            Team = Str(faction.Value, "team") ?? "UNKNOWN",
+                            Deltas = IntArray(faction.Value, "deltas"),
+                            Totals = IntArray(faction.Value, "totals"),
+                        };
+                break;
+
             case "game_error":
                 _firstError ??= Str(root, "message");
                 break;
         }
+    }
+
+    private static int[] IntArray(JsonElement e, string name)
+    {
+        if (!e.TryGetProperty(name, out JsonElement arr) || arr.ValueKind != JsonValueKind.Array)
+            return Array.Empty<int>();
+
+        List<int> values = new();
+        foreach (JsonElement item in arr.EnumerateArray())
+            values.Add(item.TryGetInt32(out int v) ? v : 0);
+        return values.ToArray();
     }
 
     private static string? Str(JsonElement e, string name)
@@ -212,5 +236,6 @@ internal sealed class ResultAccumulator
         Resumes = _resumes,
         Factions = _factions,
         FirstError = _firstError,
+        Rounds = _rounds,
     };
 }

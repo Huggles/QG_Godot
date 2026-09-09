@@ -56,7 +56,15 @@ Each run writes to `sim/runs/<timestamp>/` (gitignored):
   `game_result` carries no wall-clock, so the same batch renders the same bytes every time; sorting
   extends that from one line to the whole file, which makes a batch diffable as a balance baseline.
   Wall-clock lives in the `sim_perf` event, deliberately kept out.
-- **`summary.txt`** — win rates, average score by faction, end reasons.
+- **`summary.txt`** — win rates, average score by faction, end reasons, and the average team VP
+  trajectory round by round.
+- **`round_scores.csv`** — `round,faction,team,games,avg_delta,avg_total`. What each faction scored in
+  a round and what it stood at when the round closed, averaged across the batch.
+  The `games` column is the denominator and it shrinks with the round: games end on a 30-point lead,
+  so a batch mixes 11-round and 20-round games. Averaging round 20 over the whole batch would report
+  a number nobody scored, dragged to zero by every game that had already finished — so each round is
+  averaged over the games that actually reached it, and the count is written out so a thin tail is
+  visible rather than implied.
 - **`failures.txt`** — every non-clean run with its exact re-run arguments.
 - **`logs/`** — raw stdout per run. Clean runs are pruned unless `--keep-logs`; failures always kept.
 

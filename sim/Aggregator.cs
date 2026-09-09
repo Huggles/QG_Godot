@@ -37,7 +37,116 @@ public static class Aggregator
         Console.Write(summary);
 
         WriteFailureIndex(config, ordered);
+        WriteRoundScores(config, ordered);
     }
+
+    /// <summary>
+    /// round_scores.csv — average victory points per faction per round across the batch.
+    ///
+    /// The denominator is games that REACHED the round, not all games, and it is written out as its
+    /// own column. Games end when a team takes a 30-point lead, so a batch mixes 11-round and
+    /// 20-round games; dividing round 20 by the whole batch would report an average nobody scored,
+    /// dragged toward zero by every game that had already finished. Reading avg_total at round 18
+    /// therefore means "of the games still running at round 18, this was the average" — which is the
+    /// honest number, and the games column is there so a thin tail is visible rather than implied.
+    /// </summary>
+    private static void WriteRoundScores(SimConfig config, List<SimResult> results)
+    {
+        // faction -> round index -> running sums
+        Dictionary<string, string> teamOf = new();
+        Dictionary<string, List<long>> deltaSum = new();
+        Dictionary<string, List<long>> totalSum = new();
+        Dictionary<string, List<int>> gameCount = new();
+        int maxRounds = 0;
+
+        foreach (SimResult result in results.Where(r => r.HasResult))
+            foreach ((string faction, RoundSeries series) in result.Rounds)
+            {
+                teamOf[faction] = series.Team;
+                List<long> deltas = Series(deltaSum, faction);
+                List<long> totals = Series(totalSum, faction);
+                List<int> counts = Counts(gameCount, faction);
+
+                for (int round = 0; round < series.Totals.Length; round++)
+                {
+                    while (deltas.Count <= round) { deltas.Add(0); totals.Add(0); counts.Add(0); }
+                    if (round < series.Deltas.Length) deltas[round] += series.Deltas[round];
+                    totals[round] += series.Totals[round];
+                    counts[round]++;
+                }
+                maxRounds = Math.Max(maxRounds, series.Totals.Length);
+            }
+
+        string path = Path.Combine(config.OutputDirectory, "round_scores.csv");
+        if (maxRounds == 0)
+        {
+            File.WriteAllText(path, "round,faction,team,games,avg_delta,avg_total\n");
+            return;
+        }
+
+        using (StreamWriter w = new(path, append: false))
+        {
+            w.WriteLine("round,faction,team,games,avg_delta,avg_total");
+            // Faction order fixed alphabetically so two batches produce diffable files, the same
+            // reason results.jsonl is sorted by job identity rather than completion order.
+            foreach (string faction in teamOf.Keys.OrderBy(k => k, StringComparer.Ordinal))
+                for (int round = 0; round < gameCount[faction].Count; round++)
+                {
+                    int games = gameCount[faction][round];
+                    if (games == 0) continue;
+                    w.WriteLine($"{round + 1},{faction},{teamOf[faction]},{games},"
+                                + $"{(double)deltaSum[faction][round] / games:F2},"
+                                + $"{(double)totalSum[faction][round] / games:F2}");
+                }
+        }
+
+        AppendTeamTrajectory(config, teamOf, totalSum, gameCount, maxRounds);
+        Console.WriteLine($"  rounds   {path}");
+    }
+
+    /// <summary>
+    /// The team-level view, appended to summary.txt rather than the CSV: two columns over twenty rows
+    /// is the thing you actually read to see when a lead opens up, and it fits on screen.
+    /// </summary>
+    private static void AppendTeamTrajectory(
+        SimConfig config,
+        Dictionary<string, string> teamOf,
+        Dictionary<string, List<long>> totalSum,
+        Dictionary<string, List<int>> gameCount,
+        int maxRounds)
+    {
+        StringBuilder sb = new();
+        sb.AppendLine();
+        sb.AppendLine("--- AVERAGE TEAM VP BY ROUND ---");
+        sb.AppendLine();
+        sb.AppendLine("    round   games      AXIS    ALLIES      lead");
+
+        for (int round = 0; round < maxRounds; round++)
+        {
+            double axis = 0, allies = 0;
+            int games = 0;
+            foreach ((string faction, string team) in teamOf)
+            {
+                if (round >= gameCount[faction].Count || gameCount[faction][round] == 0) continue;
+                double avg = (double)totalSum[faction][round] / gameCount[faction][round];
+                if (team == "AXIS") axis += avg; else allies += avg;
+                games = Math.Max(games, gameCount[faction][round]);
+            }
+            if (games == 0) continue;
+
+            sb.AppendLine($"    {round + 1,5}   {games,5}   {axis,7:F1}   {allies,7:F1}   {axis - allies,7:F1}");
+        }
+
+        string summaryPath = Path.Combine(config.OutputDirectory, "summary.txt");
+        File.AppendAllText(summaryPath, sb.ToString());
+        Console.Write(sb.ToString());
+    }
+
+    private static List<long> Series(Dictionary<string, List<long>> map, string key)
+        => map.TryGetValue(key, out List<long>? list) ? list : map[key] = new List<long>();
+
+    private static List<int> Counts(Dictionary<string, List<int>> map, string key)
+        => map.TryGetValue(key, out List<int>? list) ? list : map[key] = new List<int>();
 
     private static string BuildSummary(SimConfig config, List<SimResult> results, TimeSpan elapsed)
     {
