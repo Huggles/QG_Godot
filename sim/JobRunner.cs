@@ -143,7 +143,7 @@ internal sealed class ResultAccumulator
 {
     private string? _resultJson;
     private string? _winner, _endReason, _firstError;
-    private int _axis, _allies, _finalRound, _prompts, _errors, _resumes;
+    private int _axis, _allies, _finalRound, _prompts, _botDraws, _errors, _resumes;
     private readonly Dictionary<string, int> _factions = new();
     private readonly Dictionary<string, RoundSeries> _rounds = new();
     private readonly List<CardStat> _cards = new();
@@ -180,6 +180,7 @@ internal sealed class ResultAccumulator
                 _allies = Int(root, "allies");
                 _finalRound = Int(root, "final_round");
                 _prompts = Int(root, "prompts");
+                _botDraws = Int(root, "bot_draws");
                 _errors = Int(root, "errors");
                 _resumes = Int(root, "resumes");
                 if (root.TryGetProperty("factions", out JsonElement f) && f.ValueKind == JsonValueKind.Object)
@@ -252,6 +253,7 @@ internal sealed class ResultAccumulator
         FinalRound = _finalRound,
         EndReason = _endReason,
         Prompts = _prompts,
+        BotDraws = _botDraws,
         Errors = _errors,
         Resumes = _resumes,
         Factions = _factions,

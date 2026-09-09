@@ -14,7 +14,8 @@ public sealed record SimJob(
     int DecisionSeed,
     double BotPass,
     double BotDiscard,
-    double BotHollow)
+    double BotHollow,
+    string BotRules)
 {
     /// <summary>Stable, filesystem-safe identity. Also the sort key that makes a run diffable.</summary>
     public string Id => $"{Scenario}_s{Seed}_d{DecisionSeed}";
@@ -37,6 +38,9 @@ public sealed record SimJob(
         yield return $"bot_pass={BotPass.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         yield return $"bot_discard={BotDiscard.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         yield return $"bot_hollow={BotHollow.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        // Conditional, unlike the probabilities: an empty bot_rules= is a value the game would have to
+        // interpret, and "absent means the registry defaults" is the cleaner contract.
+        if (!string.IsNullOrWhiteSpace(BotRules)) yield return $"bot_rules={BotRules}";
     }
 }
 
@@ -125,6 +129,14 @@ public sealed class SimResult
     public int FinalRound { get; init; }
     public string? EndReason { get; init; }
     public int Prompts { get; init; }
+
+    /// <summary>
+    /// Draws the bot took from its own decision RNG. A pure function of (Seed, DecisionSeed) and the
+    /// bot's configuration, so an unexplained change between two batches of the same matrix means the
+    /// decision stream moved — see RandomInputProvider.Draws.
+    /// </summary>
+    public int BotDraws { get; init; }
+
     public int Errors { get; init; }
     public int Resumes { get; init; }
     public Dictionary<string, int> Factions { get; init; } = new();

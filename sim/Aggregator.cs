@@ -296,6 +296,10 @@ public static class Aggregator
         sb.AppendLine($"  seeds          {Summarise(config.Seeds)}");
         sb.AppendLine($"  decision seeds {Summarise(config.DecisionSeeds)}");
         sb.AppendLine($"  bot_pass       {config.BotPass}   bot_discard {config.BotDiscard}   bot_hollow {config.BotHollow}");
+        // Its own line: unlike the three probabilities this is a long string, and it is the one field
+        // that says which POLICY produced these numbers. A run directory whose summary does not name
+        // its policy cannot be compared against anything later.
+        sb.AppendLine($"  bot_rules      {(string.IsNullOrWhiteSpace(config.BotRules) ? "(defaults)" : config.BotRules)}");
         sb.AppendLine($"  workers        {config.Workers}");
         sb.AppendLine();
 

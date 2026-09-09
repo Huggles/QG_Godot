@@ -13,11 +13,15 @@ using System.Threading.Tasks;
 /// tutorial, so a bot built on it cannot drift out of the rules or answer into the wrong Response*
 /// bucket, and a 15th request subclass costs nothing here.
 ///
-/// What is WISE lives here and must never move into that table. The CLI is a scripted human and has
-/// to be offered exactly what the game offers; the moment a preference of this bot's is folded into
-/// InputRequestSpec, a .qgc script and the game disagree about what is answerable. Two such
-/// preferences exist so far, both narrowed to one request shape each: <see cref="IsOptionalCost"/>
-/// and <see cref="DropHollowOptions"/>.
+/// What is WISE lives in <see cref="BotRuleEngine"/> and its rules, and must never move into that
+/// table. The CLI is a scripted human and has to be offered exactly what the game offers; the moment
+/// a preference of this bot's is folded into InputRequestSpec, a .qgc script and the game disagree
+/// about what is answerable.
+///
+/// This class keeps only the two decisions the rules are not allowed to make: how MANY options to
+/// take, and whether the end-of-turn discard is worth taking at all (<see cref="IsOptionalCost"/> —
+/// a statement about what the prompt is, not about which option is better). Everything else is a
+/// rule, and every random draw is <see cref="Draw"/>.
 ///
 /// Two properties are load-bearing and worth stating outright:
 ///
@@ -45,17 +49,17 @@ public sealed class RandomInputProvider : IInputProvider
     private readonly double _discardChance;
 
     /// <summary>
-    /// Probability of ignoring <see cref="Tag.NeedsAttention"/> and picking uniformly over every legal
-    /// card, hollow ones included. Default 0 — the bot prefers a card that does something.
+    /// The rules that veto and rank options; see <see cref="BotRuleEngine"/>. Never null — an empty
+    /// rule set is an engine that abstains on every prompt, which is uniform random play.
     ///
-    /// A knob rather than a hard rule because the sim serves two masters. A balance run wants plays a
-    /// player might plausibly make, and a bot that rebuilds an army onto a country it already occupies
-    /// is measuring itself rather than the card. A fuzzing run wants the opposite: the hollow branch is
-    /// still a real code path — a rebuild in place raises a reactable DeployUnitChangeEvent like any
-    /// other deploy — and somebody has to walk it. <c>bot_hollow=1</c> restores the uniform behaviour
-    /// this file shipped with, which is also what makes an A/B against it mean anything.
+    /// Built HERE rather than passed in fully formed because the engine needs this provider's
+    /// <see cref="Draw"/> for its suppression rolls, and routing them through the same counted stream
+    /// is what keeps <see cref="Draws"/> the whole truth about the decision RNG.
     /// </summary>
-    private readonly double _hollowChance;
+    private readonly BotRuleEngine _engine;
+
+    /// <inheritdoc cref="_engine"/>
+    public BotRuleEngine Engine => _engine;
 
     /// <summary>
     /// Where a per-prompt trace goes under <c>verbose=true</c>, and null otherwise.
@@ -85,38 +89,79 @@ public sealed class RandomInputProvider : IInputProvider
     /// </summary>
     public int Passed { get; private set; }
 
+    /// <summary>
+    /// Draws taken from <see cref="_rng"/> this run, reported on <c>game_result</c> beside
+    /// <see cref="Answered"/>.
+    ///
+    /// Worth carrying because the decision stream is the one thing about a sim run that is supposed to
+    /// be a pure function of <c>decision_seed</c>, and when a refactor breaks that the symptom is a
+    /// whole game diverging with no clue where. Two runs of the same seed pair that disagree on this
+    /// number disagree about how many CHOICES were made, which localises the change to a prompt count
+    /// instead of a 400-line transcript diff.
+    ///
+    /// Every draw goes through <see cref="Draw()"/> / <see cref="Draw(int,int)"/> rather than being
+    /// counted at its call site, so an _rng use added later cannot forget to count itself.
+    /// </summary>
+    public int Draws { get; private set; }
+
+    /// <inheritdoc cref="Draws"/>
+    private double Draw()
+    {
+        Draws++;
+        return _rng.NextDouble();
+    }
+
+    /// <inheritdoc cref="Draws"/>
+    private int Draw(int minInclusive, int maxExclusive)
+    {
+        Draws++;
+        return _rng.Next(minInclusive, maxExclusive);
+    }
+
     public RandomInputProvider(int decisionSeed, double passChance, double discardChance,
-                               double hollowChance, int yieldEvery, CliRenderer trace)
+                               List<IBotRule> rules, Dictionary<string, BotRuleConfig> ruleConfig,
+                               double tierWidth, int yieldEvery, CliRenderer trace)
     {
         _rng = new Random(decisionSeed);
         _passChance = passChance;
         _discardChance = discardChance;
-        _hollowChance = hollowChance;
         _yieldEvery = yieldEvery;
         _trace = trace;
+        _engine = new BotRuleEngine(rules, ruleConfig, Draw, tierWidth);
     }
+
 
     public async Task Resolve(InputRequest request)
     {
         InputRequestSpec spec = InputRequestSpec.For(request);
         Answered++;
 
-        // Before the pass decision, not after: whether anything worth doing is on offer is an INPUT to
-        // that decision. Dropping every option here is how "all my plays are hollow" reaches ShouldPass
-        // as the empty set it already knows to pass on.
-        int hollow = DropHollowOptions(spec, request);
+        BotDecision decision = BotDecision.Build(spec, request);
+        BotAdvice advice = _engine.Consult(decision);
 
-        if (ShouldPass(spec, request))
+        // Narrowing happens BEFORE the pass decision, not after: whether anything worth doing is on
+        // offer is an INPUT to that decision. An option set the rules emptied is how "everything I
+        // could play here is pointless" reaches ShouldPass as the empty set it already knows to pass
+        // on — and the engine has already refused to empty it where that would leave the prompt
+        // unanswerable.
+        List<ScoredOption> scored = _engine.Survivors(decision, advice);
+        if (advice.AnyVetoes)
+        {
+            spec.Options = new List<CliOption>(scored.Count);
+            foreach (ScoredOption option in scored) spec.Options.Add(option.Option);
+        }
+
+        if (ShouldPass(spec, request, advice))
         {
             spec.ApplyPass(request);
             Passed++;
-            Trace(spec, null, hollow);
+            Trace(spec, null, advice);
         }
         else
         {
-            List<CliOption> chosen = Choose(spec);
+            List<CliOption> chosen = Choose(spec, scored, advice);
             spec.Apply(request, chosen);
-            Trace(spec, chosen, hollow);
+            Trace(spec, chosen, advice);
         }
 
         if (_yieldEvery > 0 && Answered % _yieldEvery == 0)
@@ -124,83 +169,47 @@ public sealed class RandomInputProvider : IInputProvider
     }
 
     /// <summary>
-    /// Drop the offered cards that <see cref="Tag.NeedsAttention"/> marks as hollow — legal to play,
-    /// but with no effect on the board in front of them. Returns how many went, for the trace.
+    /// One line per decision. Reports the counts alongside the pick, because "passed" covers three
+    /// different things — declined a real choice, had none to make, or had none left once the rules had
+    /// spoken — and only the counts tell them apart.
     ///
-    /// Only for the three prompts that PLAY or ACTIVATE a card. A discard prompt asks the opposite
-    /// question, where a hollow card is the one you WANT to throw away, and the tag never appears on
-    /// what the other prompts offer anyway: GameStateCalculator only raises it on cards already
-    /// carrying <see cref="Tag.IsActivatable"/>. Naming the three is still worth it over relying on
-    /// that — the check then says what it means instead of depending on a rule set elsewhere.
-    ///
-    /// The list is left ALONE when every option is hollow and passing would cost something. The
-    /// faction's own play prompt charges a discard or a VP to pass (see InputRequest.PassCostText), and
-    /// a hollow play is the cheaper of those two bad answers — it at least keeps the card economy
-    /// intact. Where passing is free (a reaction window, an activate prompt once the play is spent)
-    /// emptying the list is exactly the point: a Response card burnt on a hollow activation is gone for
-    /// the rest of the game, and that was the most expensive thing this bot did.
+    /// `offered` is the set the bot actually chose from and `vetoed` is what the rules removed, so the
+    /// two together reconstruct what the game put on the table. `hollow` is kept as its own field, even
+    /// though it is now just no_hollow's share of `vetoed`, so a script written against the pre-engine
+    /// trace still reads.
     /// </summary>
-    private int DropHollowOptions(InputRequestSpec spec, InputRequest request)
-    {
-        if (request is not (InputRequest.HandCardPlayRequestHandler
-                         or InputRequest.ActivateCardRequestHandler
-                         or InputRequest.BlockReactionRequestHandler))
-            return 0;
-
-        // Guarded so a default run burns no draws here at all. The stream still shifts the moment the
-        // filter changes a pick, so this is not about keeping old decision seeds reproducible — only
-        // about not paying for a knob nobody turned.
-        if (_hollowChance > 0 && _rng.NextDouble() < _hollowChance) return 0;
-
-        List<CliOption> real = spec.Options.Where(option => !IsHollow(option, spec.Faction)).ToList();
-        if (real.Count == spec.Options.Count) return 0;
-        if (real.Count == 0 && request.PassCostText != null) return 0;
-
-        int dropped = spec.Options.Count - real.Count;
-        spec.Options = real;
-        return dropped;
-    }
-
-    /// <summary>
-    /// Whether this option is a card whose every executable step would achieve nothing right now.
-    ///
-    /// Read straight off the replicated tag GameStateCalculator raises from the steps' advisory
-    /// conditions — the same signal the hand draws its caution scrim from. Deliberately not a second
-    /// judgement of its own: the bot then declines exactly what a human player is warned about, and the
-    /// two cannot drift apart as cards gain advisory conditions.
-    ///
-    /// Queried for <paramref name="faction"/>, the faction being asked, which is also the owner of
-    /// every card these three prompts offer — the tag is raised per owning faction.
-    /// </summary>
-    private static bool IsHollow(CliOption option, Faction faction)
-        => option.Kind == CliOptionKind.Card
-        && CardState.ForId(option.Id)?.HasTag(Tag.NeedsAttention, faction) == true;
-
-    /// <summary>
-    /// One line per decision. Reports the size of the option set alongside the pick, because "passed"
-    /// covers three different things — declined a real choice, had none to make, or had none left once
-    /// the hollow ones went — and only the counts tell them apart.
-    ///
-    /// <paramref name="hollow"/> is what <see cref="DropHollowOptions"/> removed, so `offered` is the
-    /// set the bot actually chose from and the two together reconstruct what the game put on the table.
-    /// </summary>
-    private void Trace(InputRequestSpec spec, List<CliOption> chosen, int hollow)
+    private void Trace(InputRequestSpec spec, List<CliOption> chosen, BotAdvice advice)
     {
         if (_trace == null) return;
 
+        int vetoed = advice.VetoCount;
+
         string picked = chosen == null
             ? (spec.Options.Count > 0 ? "pass"
-             : hollow > 0 ? "pass (all hollow)"
+             : vetoed > 0 ? "pass (all vetoed)"
              : "pass (nothing offered)")
             : string.Join(", ", chosen.Select(c => c.Label));
 
-        _trace.Emit(new CliEvent("bot_answer")
+        CliEvent e = new CliEvent("bot_answer")
             .Set("kind", spec.Kind)
             .Set("faction", spec.Faction.ToString())
             .Set("offered", spec.Options.Count)
-            .Set("hollow", hollow)
-            .Set("chosen", chosen?.Select(c => c.Label).ToList())
-            .Text($"BOT {spec.Kind,-26} {spec.Faction,-15} offered={spec.Options.Count,-3} hollow={hollow,-3} <- {picked}"));
+            .Set("hollow", advice.VetoesBy("no_hollow"))
+            .Set("vetoed", vetoed)
+            .Set("chosen", chosen?.Select(c => c.Label).ToList());
+
+        // Conditional, so an ordinary line stays readable: on most prompts the rules have nothing to
+        // say, and a run is hundreds of prompts long.
+        if (vetoed > 0) e.Set("by", advice.RulesThatVetoed.ToList());
+        if (advice.AnyScores) e.Set("scored", advice.NonZeroScores());
+        if (advice.Floored) e.Set("floor", true);
+        if (advice.PassBy != null) e.Set("pass_by", advice.PassBy);
+
+        string flags = (advice.Floored ? " FLOOR" : "")
+                     + (advice.PassBy != null ? $" pass_by={advice.PassBy}" : "");
+
+        _trace.Emit(e.Text($"BOT {spec.Kind,-26} {spec.Faction,-15} " +
+                           $"offered={spec.Options.Count,-3} vetoed={vetoed,-3} <- {picked}{flags}"));
     }
 
     /// <summary>
@@ -208,14 +217,21 @@ public sealed class RandomInputProvider : IInputProvider
     /// and passing is the only legal answer, so that check comes before the roll. ReorderCards is
     /// the other exception: its "pass" echoes the original order, which is a real (and boring)
     /// choice rather than a decline, so let <see cref="Choose"/> shuffle instead.
+    ///
+    /// The two rule hooks sit AFTER those three structural returns, deliberately: no rule may make a
+    /// mandatory prompt pass or a reorder prompt skip, however strongly it feels. A refusal beats a
+    /// force because wrongly forcing a pass is silent passivity — the failure this bot exists to avoid
+    /// — while wrongly refusing one is a bad play that shows up in the statistics.
     /// </summary>
-    private bool ShouldPass(InputRequestSpec spec, InputRequest request)
+    private bool ShouldPass(InputRequestSpec spec, InputRequest request, BotAdvice advice)
     {
         if (spec.Options.Count == 0) return true;
         if (!spec.CanPass) return false;
         if (spec.Pass == PassMode.EchoTargets) return false;
-        if (IsOptionalCost(request)) return _rng.NextDouble() >= _discardChance;
-        return _passChance > 0 && _rng.NextDouble() < _passChance;
+        if (advice.RefusesPass) return false;
+        if (advice.ForcesPass) return true;
+        if (IsOptionalCost(request)) return Draw() >= _discardChance;
+        return _passChance > 0 && Draw() < _passChance;
     }
 
     /// <summary>
@@ -228,6 +244,13 @@ public sealed class RandomInputProvider : IInputProvider
     /// recovers: measured over a full 20-round game that left factions with nothing playable on
     /// roughly half their turns, suppressing card plays far more than any rules interaction did. A
     /// statistics run built on that would be measuring the bot, not the game.
+    ///
+    /// Kept here as a private predicate rather than moved into the rule registry, unlike the hollow
+    /// filter. It is not a statement about OPTIONS — it is a statement about what the prompt IS — and
+    /// it only ever feeds the pass decision, so expressing it as a rule would mean either giving rules
+    /// a third power or re-deriving bot_discard as a probabilistic ForcePass, which the no-randomness-
+    /// in-rules invariant forbids. Rules can still SCORE this prompt's options, which composes with
+    /// bot_discard instead of replacing it, and that is the useful half.
     ///
     /// Deliberately NOT <see cref="InputRequest.CardsRequestHandler"/>, which shares this row in
     /// InputRequestSpec and inherits its "Select cards to discard" title but is not a discard at all:
@@ -242,25 +265,49 @@ public sealed class RandomInputProvider : IInputProvider
         => request is InputRequest.HandCardsDiscardRequestHandler;
 
     /// <summary>
-    /// Pick a legal number of distinct options at random.
+    /// Pick a legal number of distinct options, uniformly among the ones the rules ranked highest.
     ///
     /// The lower bound is <c>max(MinSelections, 1)</c>: having already decided not to pass, choosing
     /// zero would be a pass by another route, and for the prompts whose MinSelections is 0 (playing a
     /// card, activating one) that is exactly the passivity this bot exists to avoid.
+    ///
+    /// HOW MANY to take is drawn first, from the same distribution and the same single draw as before
+    /// this method learned about rules — that is the sampler's business, and rules steer only WHICH.
+    /// The unscored path below is then byte-for-byte the original: an early return rather than a
+    /// single-tier special case, so the equivalence is visible instead of argued.
     /// </summary>
-    private List<CliOption> Choose(InputRequestSpec spec)
+    private List<CliOption> Choose(InputRequestSpec spec, List<ScoredOption> scored, BotAdvice advice)
     {
         int max = Math.Min(spec.MaxSelections, spec.Options.Count);
         int min = Math.Min(Math.Max(spec.MinSelections, 1), max);
-        int count = min == max ? min : _rng.Next(min, max + 1);
+        int count = min == max ? min : Draw(min, max + 1);
 
-        // Fisher-Yates over a copy, taking the first `count`. A partial shuffle rather than repeated
-        // rejection sampling so that ReorderCards — which takes every option — gets a genuinely
-        // uniform permutation from the same code path as a one-of-N pick.
-        List<CliOption> pool = new(spec.Options);
+        if (!advice.AnyScores) return PartialShuffle(new List<CliOption>(spec.Options), count);
+
+        // Fill from the best tier down. A prompt taking more options than the top tier holds spills
+        // into the next one, which is the right reading of a multi-select: take everything you prefer,
+        // then make up the number at random from what is left.
+        List<CliOption> picked = new(count);
+        foreach (List<CliOption> tier in _engine.Tiers(scored))
+        {
+            if (picked.Count >= count) break;
+            picked.AddRange(PartialShuffle(tier, Math.Min(count - picked.Count, tier.Count)));
+        }
+        return picked;
+    }
+
+    /// <summary>
+    /// Fisher-Yates over the list, returning the first <paramref name="count"/>.
+    ///
+    /// A partial shuffle rather than repeated rejection sampling so that ReorderCards — which takes
+    /// every option — gets a genuinely uniform permutation from the same code path as a one-of-N pick.
+    /// Mutates the list it is given, so pass a copy of anything you still need in its original order.
+    /// </summary>
+    private List<CliOption> PartialShuffle(List<CliOption> pool, int count)
+    {
         for (int i = 0; i < count; i++)
         {
-            int j = _rng.Next(i, pool.Count);
+            int j = Draw(i, pool.Count);
             (pool[i], pool[j]) = (pool[j], pool[i]);
         }
         return pool.Take(count).ToList();

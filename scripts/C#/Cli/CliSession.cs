@@ -48,6 +48,17 @@ public partial class CliSession : Node
         // Replace the bootstrap auto-pass provider now that there is somewhere to ask.
         InputServices.Override(_input);
 
+        // Answer "what rules exist?" and stop, before any game is set up. Its own early exit because
+        // it is the only way to discover the rule names — and because the sim orchestrator calls it to
+        // validate a --bot-rules argument before spawning a batch, which is the one moment a typo is
+        // still cheap to fix.
+        if (CliArgs.GetBool("bot_rules_list"))
+        {
+            EmitBotRuleList();
+            Quit(0);
+            return;
+        }
+
         // ...unless nobody is asking. A sim run installs the bot over the top and owns the ending;
         // constructed after the input provider so the override order is unambiguous.
         if (IsSim) _sim = new CliSimRunner(this, _renderer);
@@ -61,6 +72,37 @@ public partial class CliSession : Node
         _renderer.Emit(new CliEvent("ready")
             .Set("scenario", GameManager.PendingScenarioPath)
             .Text($"QG CLI ready — scenario {GameManager.PendingScenarioPath}\nType `help` for commands."));
+    }
+
+    /// <summary>
+    /// The registered bot rules, one event per rule plus a machine-readable roll-up.
+    ///
+    /// Emitted as data rather than prose because two consumers read it: a person running
+    /// <c>bot_rules_list=true</c> to find out what they can turn on, and sim/SimConfig validating a
+    /// --bot-rules argument against the real registry instead of a second copy of the list that would
+    /// drift.
+    /// </summary>
+    private void EmitBotRuleList()
+    {
+        List<IBotRule> rules = BotRuleRegistry.All();
+        List<object> described = new();
+
+        foreach (IBotRule rule in rules)
+        {
+            described.Add(new Dictionary<string, object>
+            {
+                ["name"] = rule.Name,
+                ["description"] = rule.Description,
+                ["default_enabled"] = rule.EnabledByDefault,
+                ["default_weight"] = rule.DefaultWeight,
+                ["kinds"] = rule.Kinds == null ? new List<string>() : rule.Kinds.ToList(),
+            });
+        }
+
+        _renderer.Emit(new CliEvent("bot_rules_list")
+            .Set("rules", described)
+            .Text(string.Join("\n", rules.Select(r =>
+                $"  {(r.EnabledByDefault ? "on " : "off")} {r.Name,-28} {r.Description}"))));
     }
 
     /// <summary>
@@ -85,6 +127,12 @@ public partial class CliSession : Node
     public override void _Process(double delta)
     {
         if (!GameContext.IsCli) return;
+
+        // GetTree().Quit is deferred to the end of the frame, so this runs at least once more after a
+        // quit has been asked for. Everything below would then narrate a shutdown as if it were a
+        // session: the stdin-EOF rule at the bottom reports "stdin ended before the game started" on
+        // a run that ended deliberately, and AnnounceStartOnce announces a game nobody is playing.
+        if (_quitting) return;
 
         SubscribeOnce();
         AnnounceStartOnce();

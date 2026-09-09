@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 
 /// <summary>
@@ -64,7 +65,42 @@ public sealed class CliSimRunner
         double discardChance = Probability("bot_discard");
         double hollowChance = Probability("bot_hollow");
 
-        _bot = new RandomInputProvider(_decisionSeed, passChance, discardChance, hollowChance,
+        List<IBotRule> rules = BotRuleRegistry.All();
+        string kindError = BotRuleRegistry.ValidateKinds(rules);
+        Dictionary<string, BotRuleConfig> ruleConfig = kindError != null
+            ? null
+            : BotRuleRegistry.Parse(CliArgs.Get("bot_rules"), rules, out kindError);
+
+        // Before the game, not during it. A misspelled rule name that only surfaced as "no effect"
+        // would let a batch of thousands of games quietly measure the default policy and answer a
+        // question nobody asked — which is worse than a crash, because the number it produces looks
+        // real. Exit 2 puts the run in failures.txt with its own arguments attached.
+        if (ruleConfig == null)
+        {
+            renderer.Emit(new CliEvent("bot_config_error")
+                .Set("error", kindError)
+                .Text($"BOT CONFIG ERROR  {kindError}"));
+            _session.Quit(2);
+            ruleConfig = BotRuleRegistry.Parse(null, rules, out _);
+        }
+        else if (hollowChance > 0)
+        {
+            // bot_hollow keeps its name: it is what the verified 200-game baseline was run with, and
+            // it appears in SimJob.ToUserArgs and the aggregator's summary header. It is now exactly
+            // sugar for no_hollow:suppress=X.
+            if (CliArgs.Has("bot_rules") && CliArgs.Get("bot_rules").Contains("suppress"))
+            {
+                renderer.Emit(new CliEvent("bot_config_error")
+                    .Set("error", "bot_hollow and an explicit suppress= are the same setting")
+                    .Text("BOT CONFIG ERROR  bot_hollow=X is sugar for bot_rules=no_hollow:suppress=X " +
+                          "— set one or the other, not both"));
+                _session.Quit(2);
+            }
+            ruleConfig["no_hollow"].Suppress = hollowChance;
+        }
+
+        _bot = new RandomInputProvider(_decisionSeed, passChance, discardChance,
+            rules, ruleConfig, Probability("bot_rule_temp"),
             CliArgs.GetInt("bot_yield_every", 64), CliArgs.Verbose ? renderer : null);
 
         // Replaces the CliInputProvider CliSession would otherwise install: nothing is reading stdin
@@ -80,7 +116,73 @@ public sealed class CliSimRunner
             .Set("bot_pass", passChance)
             .Set("bot_discard", discardChance)
             .Set("bot_hollow", hollowChance)
-            .Text($"SIM  decision_seed {_decisionSeed}, bot_pass {passChance}, bot_discard {discardChance}, bot_hollow {hollowChance}"));
+            // The active rule set, not the raw argument: with defaults and sugar both in play, the raw
+            // string does not say what actually ran, and this line is the run's self-description.
+            .Set("bot_rules", string.Join(",", ActiveRuleNames()))
+            .Text($"SIM  decision_seed {_decisionSeed}, bot_pass {passChance}, bot_discard {discardChance}, " +
+                  $"bot_hollow {hollowChance}, bot_rules [{string.Join(" ", ActiveRuleNames())}]"));
+    }
+
+    /// <summary>Names of the rules actually enabled this run, in registry order.</summary>
+    private IEnumerable<string> ActiveRuleNames() => _bot.Engine.Rules
+        .Where(rule => _bot.Engine.ConfigFor(rule.Name).Enabled)
+        .Select(rule => rule.Name);
+
+    /// <summary>
+    /// Per-rule counters for the game just finished.
+    ///
+    /// Emitted with the game facts and BEFORE sim_perf for the reason stated there: it is reproducible
+    /// from (seed, decision_seed) plus the rule configuration, so it belongs on the diffable side of
+    /// the line and not with the wall-clock.
+    ///
+    /// Every REGISTERED rule is reported, including the disabled ones at all zeroes — the opposite of
+    /// card_stats, which omits the cards nothing happened to. With ten rules rather than a hundred and
+    /// twenty cards the size argument does not apply, and stable columns are worth more: two batches
+    /// run with different rule sets have to line up in one spreadsheet.
+    /// </summary>
+    private void EmitBotRuleStats()
+    {
+        BotRuleEngine engine = _bot.Engine;
+        List<object> rows = new();
+
+        foreach (IBotRule rule in engine.Rules)
+        {
+            BotRuleConfig config = engine.ConfigFor(rule.Name);
+            BotRuleStats stats = engine.StatsFor(rule.Name);
+            rows.Add(new Dictionary<string, object>
+            {
+                ["name"] = rule.Name,
+                ["enabled"] = config.Enabled,
+                ["weight"] = config.Weight,
+                ["suppress"] = config.Suppress,
+                ["considered"] = stats.Considered,
+                ["fired"] = stats.Fired,
+                ["vetoed"] = stats.Vetoed,
+                ["scored"] = stats.Scored,
+                ["forced_pass"] = stats.ForcedPass,
+                ["refused_pass"] = stats.RefusedPass,
+                ["suppressed"] = stats.Suppressed,
+                ["floored"] = stats.Floored,
+                ["failed"] = stats.Failed,
+            });
+        }
+
+        _renderer.Emit(new CliEvent("bot_rules_stats")
+            .Set("seed", GameRandom.Seed)
+            .Set("decision_seed", _decisionSeed)
+            .Set("prompts", _bot.Answered)
+            .Set("passed", _bot.Passed)
+            .Set("safety_overrides", engine.SafetyOverrides)
+            .Set("rules", rows)
+            .Text($"RULES  {engine.SafetyOverrides} safety override(s); " +
+                  string.Join("  ", engine.Rules
+                      .Where(r => engine.ConfigFor(r.Name).Enabled)
+                      .Select(r => {
+                          BotRuleStats s = engine.StatsFor(r.Name);
+                          return $"{r.Name} fired={s.Fired}/{s.Considered} vetoed={s.Vetoed}" +
+                                 (s.Floored > 0 ? $" FLOORED={s.Floored}" : "") +
+                                 (s.Failed > 0 ? $" FAILED={s.Failed}" : "");
+                      }))));
     }
 
     /// <summary>
@@ -200,6 +302,10 @@ public sealed class CliSimRunner
             .Set("factions", factions)
             .Set("prompts", _bot.Answered)
             .Set("passed", _bot.Passed)
+            // The BOT's draw count, distinct from rng_draws below, which is GameRandom's. Two runs of
+            // one seed pair must agree on this; when they do not, the decision stream diverged and this
+            // says by how much. See RandomInputProvider.Draws.
+            .Set("bot_draws", _bot.Draws)
             .Set("errors", _session.ErrorsSeen)
             .Set("resumes", _resumes)
             .Set("rng_draws", GameRandom.DrawCount)
@@ -209,6 +315,7 @@ public sealed class CliSimRunner
 
         EmitRoundScores(result);
         EmitCardStats();
+        EmitBotRuleStats();
 
         // Separate event, deliberately. Everything above is a statement about the GAME and is
         // reproducible from (seed, decision_seed) alone, so two runs of the same pair produce
