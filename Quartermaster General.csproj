@@ -5,4 +5,15 @@
     <RootNamespace>QuartermasterGeneral</RootNamespace>
     <LangVersion>14.0</LangVersion>
   </PropertyGroup>
+
+  <!--
+    sim/ is a standalone console app (the parallel sim orchestrator), not game code. The Godot SDK
+    globs **/*.cs, so without this its sources would be compiled into the game assembly - where they
+    would collide on Program/Main and drag a second entry point into the Godot build. sim/ also
+    carries a .gdignore so the resource importer skips its bin/obj churn.
+  -->
+  <ItemGroup>
+    <Compile Remove="sim/**" />
+    <None Remove="sim/**" />
+  </ItemGroup>
 </Project>

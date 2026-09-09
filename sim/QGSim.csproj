@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>QGSim</RootNamespace>
+    <AssemblyName>qgsim</AssemblyName>
+    <LangVersion>12.0</LangVersion>
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!--
+      Deliberately NOT in "Quartermaster General.sln". That solution carries Godot's ExportDebug /
+      ExportRelease configurations, which this project does not define - adding it there would break
+      `dotnet build` on the solution for those configurations. Build this one by path instead.
+    -->
+  </PropertyGroup>
+
+</Project>

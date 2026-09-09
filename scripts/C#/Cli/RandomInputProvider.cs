@@ -92,7 +92,7 @@ public sealed class RandomInputProvider : IInputProvider
         }
 
         if (_yieldEvery > 0 && Answered % _yieldEvery == 0)
-            await Task.Yield();
+        await Task.Yield();
     }
 
     /// <summary>

@@ -4,3 +4,7 @@ export/
 exports/
 *export*.zip
 Builds/*
+# sim orchestrator (sim/ is a standalone console app, not game code)
+sim/bin/
+sim/obj/
+sim/runs/
