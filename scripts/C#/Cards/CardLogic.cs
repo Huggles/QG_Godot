@@ -244,8 +244,14 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// <summary>
     /// Re-arm this card for a new turn. Called by ChangeRoundChangeEvent rather than driven by the
     /// EventBus NewTurnStarted signal, so it also reaches clients and a replayed save.
+    ///
+    /// Virtual for the card that has to photograph the board at turn start rather than read it later:
+    /// EventBroadFront qualifies its targets "at the beginning of the turn". An override runs on every
+    /// peer and in replay for exactly the reason above, so a snapshot taken here stays in step
+    /// everywhere. Note this method runs alongside the SuppliedForTurn reset in
+    /// ChangeRoundChangeEvent.ResetPerTurnState — an override must not read supply state.
     /// </summary>
-    public void OnNewTurnStarted(int turnNumber)
+    public virtual void OnNewTurnStarted(int turnNumber)
     {
         if (IsStatus)
             CardSteps.ForEach(step =>

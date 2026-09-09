@@ -13,11 +13,17 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.FactionBattled(Faction), this).Immediately(),
-            // The space must be empty after the battle: if an enemy unit survived it is still
-            // occupied and we cannot deploy an Army into it, so Blitzkrieg does not fire.
+            // The space must be one we can actually BUILD in after the battle, which is the question
+            // GameAPI.DeployUnitToCountry will ask when the step runs.
+            //
+            // This used to test Units.Count == 0 — "is the space empty" — which is only half of it.
+            // CanBuild is occupancy AND, off a home space, an adjacent SUPPLIED unit. A space could
+            // therefore come up empty, fire Blitzkrieg, and then refuse the build for want of supply:
+            // the faction paid the discard (a VP, on an empty deck) and the once-per-turn activation
+            // and got no Army. Asking CanBuild means the card simply does not offer itself instead.
             Condition.Build(new Condition.CustomCondition(() => {
                 var trigger = TriggerContextAs<BattleCountryChangeEvent>();
-                return trigger != null && trigger.CountryState.Units.Count == 0;
+                return trigger != null && trigger.CountryState.CanBuild(Faction);
             }), this)
         };
     }
