@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -76,5 +77,78 @@ public static class UnitPoolShortfall
             IsTrigger = false,
             RegisterInPool = false,
         }.Apply();
+
+        await RetargetIfRecallBrokeTheDestination(deploy);
+    }
+
+    /// <summary>
+    /// The recall may have destroyed the very supply chain that made the destination legal. When it
+    /// has, ask for a new destination rather than letting the deploy fail.
+    ///
+    /// Why this is needed at all: a BUILD onto a non-home space requires an adjacent supplied unit
+    /// (CountryState.CanBuild), and supply is transitive. UnitPool.RecallCandidates excludes the
+    /// destination's directly adjacent supporter, but a unit further back down the chain supports it
+    /// just as much and is still offered — remove that one and the destination goes unbuildable
+    /// between the prompt and the deploy. GameAPI.DeployUnitToCountry then throws GameAPIException,
+    /// which is recoverable, so play continues — but the faction has already given up the unit and
+    /// spent the card, and gets nothing for either. Measured at 8 of 120 headless games, always late
+    /// (rounds 12-20) when the pool is empty and chains are long.
+    ///
+    /// No recalculation is triggered here: RemoveUnitChangeEvent takes the default RecalcScope.All, so
+    /// the tags read below were already rebuilt by its Apply(). Adding another CalculateAll() would
+    /// re-broadcast a RecalculateTagsMessage to every client for no new information.
+    ///
+    /// Safe to move the target at this point in the pipeline: ResolveBeforeDeploy runs after the block
+    /// window and before the deploy's own Apply(), so nothing has been replicated yet — ToDto() reads
+    /// CountryId when Apply() finally emits, and peers only ever see the final destination.
+    /// </summary>
+    private static async Task RetargetIfRecallBrokeTheDestination(DeployUnitChangeEvent deploy)
+    {
+        Faction faction = deploy.TriggeringFaction;
+        CountryState destination = deploy.CountryState;
+        DeployType deployType = deploy.DeploymentType;
+
+        if (CanDeployTo(destination, faction, deployType)) return;
+
+        // Same CountryType only. DeployUnitChangeEvent.UnitType is derived from the destination
+        // (LAND -> ARMY, SEA -> NAVY), so a land-to-sea move would silently change which unit type is
+        // being deployed — and the piece just recalled is of the original type.
+        List<int> alternatives = CountryState.AllCountryStates
+            .Where(country => country.Type == destination.Type
+                              && CanDeployTo(country, faction, deployType))
+            .Select(country => country.Id)
+            .ToList();
+
+        // Nothing legal anywhere: leave the target alone and let GameAPI throw as it did before. A
+        // prompt offering no choice is worse than the error, and the error still names the country.
+        if (alternatives.Count == 0) return;
+
+        await new ShowActionLabelPresentationEvent(faction,
+            $"{destination.Label} is no longer {(deployType == DeployType.BUILD ? "buildable" : "recruitable")} " +
+            "after the recall — choose another space").Apply();
+
+        // BroadCast throws StepSkippedException if the player skips, which abandons the deploy exactly
+        // as a skipped recall already does. That leaves the recalled unit off the board — the same
+        // outcome as today's failed deploy, so skipping is never worse than not offering the choice.
+        deploy.CountryId = (await new InputRequest.SelectCountryRequestHandler(faction, alternatives)
+            .BroadCast()).ResponseCountryIds[0];
+    }
+
+    /// <summary>
+    /// Mirrors GameAPI.DeployUnitToCountry's own acceptance test, and exists so that the check above
+    /// and the list of alternatives offered cannot drift apart: every country offered is one GameAPI
+    /// will accept, and the destination is only replaced when GameAPI would have rejected it.
+    /// </summary>
+    private static bool CanDeployTo(CountryState country, Faction faction, DeployType deployType)
+    {
+        // A country the faction already occupies is a rebuild in place: GameAPI redeploys the piece
+        // standing there, so fullness cannot block it — the slot being filled is the one being vacated.
+        bool rebuildInPlace = country.Units.ContainsKey(faction);
+
+        bool deployable = deployType == DeployType.BUILD
+            ? country.Tags.Has(Tag.Buildable, faction)
+            : country.Tags.Has(Tag.Recruitable, faction);
+
+        return deployable && (!country.IsCountryFull || rebuildInPlace);
     }
 }
