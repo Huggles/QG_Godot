@@ -295,7 +295,7 @@ public static class Aggregator
         sb.AppendLine($"  scenarios      {string.Join(", ", config.Scenarios)}");
         sb.AppendLine($"  seeds          {Summarise(config.Seeds)}");
         sb.AppendLine($"  decision seeds {Summarise(config.DecisionSeeds)}");
-        sb.AppendLine($"  bot_pass       {config.BotPass}   bot_discard {config.BotDiscard}");
+        sb.AppendLine($"  bot_pass       {config.BotPass}   bot_discard {config.BotDiscard}   bot_hollow {config.BotHollow}");
         sb.AppendLine($"  workers        {config.Workers}");
         sb.AppendLine();
 

@@ -62,8 +62,9 @@ public sealed class CliSimRunner
 
         double passChance = Probability("bot_pass");
         double discardChance = Probability("bot_discard");
+        double hollowChance = Probability("bot_hollow");
 
-        _bot = new RandomInputProvider(_decisionSeed, passChance, discardChance,
+        _bot = new RandomInputProvider(_decisionSeed, passChance, discardChance, hollowChance,
             CliArgs.GetInt("bot_yield_every", 64), CliArgs.Verbose ? renderer : null);
 
         // Replaces the CliInputProvider CliSession would otherwise install: nothing is reading stdin
@@ -78,7 +79,8 @@ public sealed class CliSimRunner
             .Set("decision_seed", _decisionSeed)
             .Set("bot_pass", passChance)
             .Set("bot_discard", discardChance)
-            .Text($"SIM  decision_seed {_decisionSeed}, bot_pass {passChance}, bot_discard {discardChance}"));
+            .Set("bot_hollow", hollowChance)
+            .Text($"SIM  decision_seed {_decisionSeed}, bot_pass {passChance}, bot_discard {discardChance}, bot_hollow {hollowChance}"));
     }
 
     /// <summary>

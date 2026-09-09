@@ -13,7 +13,8 @@ public sealed record SimJob(
     int Seed,
     int DecisionSeed,
     double BotPass,
-    double BotDiscard)
+    double BotDiscard,
+    double BotHollow)
 {
     /// <summary>Stable, filesystem-safe identity. Also the sort key that makes a run diffable.</summary>
     public string Id => $"{Scenario}_s{Seed}_d{DecisionSeed}";
@@ -35,6 +36,7 @@ public sealed record SimJob(
         yield return $"scenario={Scenario}";
         yield return $"bot_pass={BotPass.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         yield return $"bot_discard={BotDiscard.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+        yield return $"bot_hollow={BotHollow.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
     }
 }
 

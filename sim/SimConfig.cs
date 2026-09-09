@@ -18,6 +18,13 @@ public sealed class SimConfig
     public double BotPass { get; private set; }
     public double BotDiscard { get; private set; }
 
+    /// <summary>
+    /// Chance the bot considers a card the board has made pointless. 0 (the default) keeps hollow plays
+    /// out of a balance sample; 1 restores uniform play, which is the wider net for a fuzzing sweep.
+    /// See RandomInputProvider._hollowChance.
+    /// </summary>
+    public double BotHollow { get; private set; }
+
     public int Workers { get; private set; }
     public TimeSpan JobTimeout { get; private set; } = TimeSpan.FromMinutes(5);
 
@@ -68,7 +75,7 @@ public sealed class SimConfig
         foreach (string scenario in Scenarios)
             foreach (int seed in Seeds)
                 foreach (int decisionSeed in DecisionSeeds)
-                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard));
+                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow));
         return jobs;
     }
 
@@ -100,6 +107,7 @@ public sealed class SimConfig
                     case "--decision-seeds": c.DecisionSeeds.AddRange(ParseRange(Next(arg))); break;
                     case "--bot-pass": c.BotPass = ParseProbability(Next(arg), arg); break;
                     case "--bot-discard": c.BotDiscard = ParseProbability(Next(arg), arg); break;
+                    case "--bot-hollow": c.BotHollow = ParseProbability(Next(arg), arg); break;
                     case "--workers" or "-j": workers = int.Parse(Next(arg)); break;
                     case "--timeout": c.JobTimeout = TimeSpan.FromSeconds(double.Parse(Next(arg),
                         System.Globalization.CultureInfo.InvariantCulture)); break;
@@ -198,6 +206,7 @@ public sealed class SimConfig
               --decision-seeds RANGE   bot seeds                 (default 1-10)
               --bot-pass 0..1          chance to pass a prompt   (default 0)
               --bot-discard 0..1       chance to take the optional end-of-turn discard (default 0)
+              --bot-hollow 0..1        chance to play a card the board has made pointless (default 0)
               -j, --workers N          concurrent Godot processes (default cores/2)
               --timeout SECONDS        hard kill per job         (default 300)
               --out DIR                results directory         (default sim/runs/<timestamp>)
