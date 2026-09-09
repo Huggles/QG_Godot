@@ -113,6 +113,9 @@ public sealed class JobRunner
             : exitCode == 0 && parsed.HasResult ? SimOutcome.Clean
             : exitCode == 2 ? SimOutcome.ResultWithErrors
             : exitCode == 3 ? SimOutcome.Stalled
+            // An exit code the CLI never emits, but a result line already on stdout: the game finished
+            // and only the teardown failed. Distinguished from a real crash, which has no result.
+            : parsed.HasResult ? SimOutcome.ResultThenCrash
             : SimOutcome.Crashed;
 
         return parsed.ToResult(job, outcome, exitCode, clock.ElapsedMilliseconds, logPath);
@@ -143,6 +146,7 @@ internal sealed class ResultAccumulator
     private int _axis, _allies, _finalRound, _prompts, _errors, _resumes;
     private readonly Dictionary<string, int> _factions = new();
     private readonly Dictionary<string, RoundSeries> _rounds = new();
+    private readonly List<CardStat> _cards = new();
 
     public bool HasResult => _resultJson != null;
 
@@ -195,6 +199,22 @@ internal sealed class ResultAccumulator
                         };
                 break;
 
+            case "card_stats":
+                if (root.TryGetProperty("cards", out JsonElement cards)
+                    && cards.ValueKind == JsonValueKind.Array)
+                    foreach (JsonElement card in cards.EnumerateArray())
+                        _cards.Add(new CardStat
+                        {
+                            Name = Str(card, "name") ?? "?",
+                            Faction = Str(card, "faction") ?? "?",
+                            Type = Str(card, "type") ?? "?",
+                            Drawn = card.TryGetProperty("drawn", out JsonElement d)
+                                    && d.ValueKind == JsonValueKind.True,
+                            Played = Int(card, "played"),
+                            Activated = Int(card, "activated"),
+                        });
+                break;
+
             case "game_error":
                 _firstError ??= Str(root, "message");
                 break;
@@ -237,5 +257,6 @@ internal sealed class ResultAccumulator
         Factions = _factions,
         FirstError = _firstError,
         Rounds = _rounds,
+        Cards = _cards,
     };
 }

@@ -54,6 +54,18 @@ public enum SimOutcome
     /// <summary>exit 3 - the in-game watchdog fired: no result.</summary>
     Stalled,
 
+    /// <summary>
+    /// The game ran to a win condition and emitted a valid result, then the PROCESS died on its way
+    /// out - Godot's Mono finalizer racing at teardown (0xC000001D amid "Leaked unsafe reference"),
+    /// which shows up roughly once in 300 runs and lands on a different seed every time.
+    ///
+    /// Its own outcome because it is not a failure and re-running it proves nothing: the result is
+    /// already final and byte-identical to what a clean re-run produces. Filed next to genuine crashes
+    /// it would put ~20 phantom entries in a 6000-game failure list and understate the clean rate.
+    /// The result still counts toward every statistic - only the process epilogue was faulty.
+    /// </summary>
+    ResultThenCrash,
+
     /// <summary>Killed by the orchestrator's own clock, before the in-game watchdog could fire.</summary>
     Timeout,
 
@@ -76,6 +88,17 @@ public sealed class RoundSeries
 
     /// <summary>Running total AT THE END OF each round.</summary>
     public required int[] Totals { get; init; }
+}
+
+/// <summary>What one card did in one game, from the run's <c>card_stats</c> event.</summary>
+public sealed class CardStat
+{
+    public required string Name { get; init; }
+    public required string Faction { get; init; }
+    public required string Type { get; init; }
+    public required bool Drawn { get; init; }
+    public required int Played { get; init; }
+    public required int Activated { get; init; }
 }
 
 /// <summary>The outcome of one job: the parsed <c>game_result</c> plus how the process itself fared.</summary>
@@ -109,6 +132,9 @@ public sealed class SimResult
 
     /// <summary>Per-faction VP by round, keyed by faction name. Empty when the run emitted no result.</summary>
     public Dictionary<string, RoundSeries> Rounds { get; init; } = new();
+
+    /// <summary>Per-card outcome for this game. Only cards that were drawn or played are listed.</summary>
+    public List<CardStat> Cards { get; init; } = new();
 
     public bool HasResult => ResultJson != null;
 }

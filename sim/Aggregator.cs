@@ -38,7 +38,144 @@ public static class Aggregator
 
         WriteFailureIndex(config, ordered);
         WriteRoundScores(config, ordered);
+        WriteCardImpact(config, ordered);
     }
+
+    /// <summary>
+    /// Running statistics for one card, within one board seed.
+    ///
+    /// Sums rather than a retained sample: 2000 games x ~170 cards is 340k observations, and every
+    /// figure below needs only first and second moments.
+    /// </summary>
+    private sealed class CardAccumulator
+    {
+        public string Team = "", Type = "";
+        public int Games;
+        public double SumX, SumY, SumXX, SumYY, SumXY;   // x = copies played, y = team-relative delta
+        public int PlayedGames;
+        public double PlayedDeltaSum, UnplayedDeltaSum;
+
+        public void Add(double copiesPlayed, double delta)
+        {
+            Games++;
+            SumX += copiesPlayed; SumY += delta;
+            SumXX += copiesPlayed * copiesPlayed;
+            SumYY += delta * delta;
+            SumXY += copiesPlayed * delta;
+            if (copiesPlayed > 0) { PlayedGames++; PlayedDeltaSum += delta; }
+            else UnplayedDeltaSum += delta;
+        }
+
+        /// <summary>
+        /// Pearson r between copies played and the delta. Handles multi-copy cards naturally - a deck
+        /// holding four Build Army is played "at least once" in nearly every game, so a played/not
+        /// split would have almost no variance to work with, while the COUNT still varies usefully.
+        /// NaN when either side is constant, which is the honest answer: no variance, no correlation.
+        /// </summary>
+        public double Correlation()
+        {
+            double n = Games;
+            double covariance = SumXY - SumX * SumY / n;
+            double varX = SumXX - SumX * SumX / n;
+            double varY = SumYY - SumY * SumY / n;
+            if (varX <= 0 || varY <= 0) return double.NaN;
+            return covariance / Math.Sqrt(varX * varY);
+        }
+    }
+
+    /// <summary>
+    /// card_impact.csv - how each card's play relates to the final score gap, per board seed.
+    ///
+    /// The delta is TEAM-RELATIVE: (owner's team score - opposing team score). Using the raw
+    /// Axis-minus-Allies gap would rank every Axis card "good" and every Allied card "bad" purely from
+    /// the Axis side's ~10-point baseline advantage, which says nothing about the card. Flipping the
+    /// sign for Allied cards puts both sides on one scale, where a positive number means "the owner's
+    /// team did better than usual when this card got played".
+    ///
+    /// Grouped per SEED, not pooled across seeds. The deal is fixed within a seed, so every game there
+    /// shares one opening position and one deck order - which makes play the only thing that varies
+    /// and the comparison a fair one. Pooling seeds would mix in "this board favours the Axis" and
+    /// attribute it to whichever cards that board happens to hold.
+    ///
+    /// Correlation is NOT causation here, and the direction is genuinely ambiguous: a faction that is
+    /// winning takes more turns and therefore plays more cards, so a positive r can mean the card
+    /// helped OR merely that its owner was already ahead. Reading these as card strength needs the
+    /// exogenous signal (which opening hand was dealt) to confirm it.
+    /// </summary>
+    private static void WriteCardImpact(SimConfig config, List<SimResult> results)
+    {
+        // seed -> "faction|card" -> stats
+        Dictionary<int, Dictionary<string, CardAccumulator>> bySeed = new();
+
+        foreach (SimResult result in results.Where(r => r.HasResult && r.Cards.Count > 0))
+        {
+            if (!bySeed.TryGetValue(result.Job.Seed, out var perCard))
+                perCard = bySeed[result.Job.Seed] = new Dictionary<string, CardAccumulator>();
+
+            // Copies of one card are interchangeable, so they are summed into a single count.
+            Dictionary<string, (int played, string type, string faction)> perGame = new();
+            foreach (CardStat card in result.Cards)
+            {
+                string key = card.Faction + "|" + card.Name;
+                (int played, string type, string faction) prior =
+                    perGame.TryGetValue(key, out var existing) ? existing : (0, card.Type, card.Faction);
+                perGame[key] = (prior.played + card.Played, prior.type, prior.faction);
+            }
+
+            foreach ((string key, (int played, string type, string faction)) in perGame)
+            {
+                string team = result.Rounds.TryGetValue(faction, out RoundSeries? series) ? series.Team : "UNKNOWN";
+                double delta = team == "AXIS"
+                    ? result.AxisTotal - result.AlliesTotal
+                    : result.AlliesTotal - result.AxisTotal;
+
+                if (!perCard.TryGetValue(key, out CardAccumulator? acc))
+                    acc = perCard[key] = new CardAccumulator();
+                acc.Team = team;
+                acc.Type = type;
+                acc.Add(played, delta);
+            }
+        }
+
+        string path = Path.Combine(config.OutputDirectory, "card_impact.csv");
+        using StreamWriter w = new(path, append: false);
+        w.WriteLine("seed,faction,card,type,team,games,avg_copies_played,pct_games_played,"
+                    + "avg_delta_played,avg_delta_unplayed,impact,correlation");
+
+        foreach (int seed in bySeed.Keys.OrderBy(s => s))
+            foreach ((string key, CardAccumulator acc) in bySeed[seed]
+                         .OrderByDescending(kv => Math.Abs(Impact(kv.Value))))
+            {
+                string[] parts = key.Split('|', 2);
+                int unplayed = acc.Games - acc.PlayedGames;
+                w.WriteLine($"{seed},{parts[0]},{Escape(parts[1])},{acc.Type},{acc.Team},{acc.Games},"
+                            + $"{acc.SumX / acc.Games:F2},"
+                            + $"{100.0 * acc.PlayedGames / acc.Games:F1},"
+                            + $"{(acc.PlayedGames > 0 ? (acc.PlayedDeltaSum / acc.PlayedGames).ToString("F2") : "")},"
+                            + $"{(unplayed > 0 ? (acc.UnplayedDeltaSum / unplayed).ToString("F2") : "")},"
+                            + $"{(acc.PlayedGames > 0 && unplayed > 0 ? Impact(acc).ToString("F2") : "")},"
+                            + $"{(double.IsNaN(acc.Correlation()) ? "" : acc.Correlation().ToString("F3"))}");
+            }
+
+        Console.WriteLine($"  cards    {path}");
+    }
+
+    /// <summary>
+    /// Mean delta when the card was played minus mean delta when it was not. Zero when one side of the
+    /// comparison is empty - a card played in every single game has nothing to be compared against.
+    /// </summary>
+    private static double Impact(CardAccumulator acc)
+    {
+        int unplayed = acc.Games - acc.PlayedGames;
+        if (acc.PlayedGames == 0 || unplayed == 0) return 0;
+        return acc.PlayedDeltaSum / acc.PlayedGames - acc.UnplayedDeltaSum / unplayed;
+    }
+
+    /// <summary>Card labels contain commas ("Guns, not Butter"), so the CSV field needs quoting.</summary>
+    private static string Escape(string field)
+        => field.Contains(',') || field.Contains('"')
+            ? "\"" + field.Replace("\"", "\"\"") + "\""
+            : field;
 
     /// <summary>
     /// round_scores.csv — average victory points per faction per round across the batch.
@@ -219,7 +356,7 @@ public static class Aggregator
             sb.AppendLine($"    {g.Key,-40} {g.Count(),5}   {Percent(g.Count(), scored.Count)}");
         sb.AppendLine();
 
-        List<SimResult> bad = results.Where(r => r.Outcome != SimOutcome.Clean).ToList();
+        List<SimResult> bad = results.Where(NeedsAttention).ToList();
         if (bad.Count > 0)
         {
             sb.AppendLine($"--- {bad.Count} RUN(S) NEEDING ATTENTION ---");
@@ -246,7 +383,7 @@ public static class Aggregator
     /// </summary>
     private static void WriteFailureIndex(SimConfig config, List<SimResult> results)
     {
-        List<SimResult> bad = results.Where(r => r.Outcome != SimOutcome.Clean).ToList();
+        List<SimResult> bad = results.Where(NeedsAttention).ToList();
         string path = Path.Combine(config.OutputDirectory, "failures.txt");
         if (bad.Count == 0)
         {
@@ -267,9 +404,18 @@ public static class Aggregator
         }
     }
 
+    /// <summary>
+    /// Whether a run is worth a human looking at it. ResultThenCrash is deliberately NOT: the game
+    /// reached a win condition and its result is as valid as any clean run's, so listing it for
+    /// re-running would send someone chasing a Godot teardown race that no seed reproduces.
+    /// </summary>
+    public static bool NeedsAttention(SimResult result)
+        => result.Outcome != SimOutcome.Clean && result.Outcome != SimOutcome.ResultThenCrash;
+
     public static string Label(SimOutcome outcome) => outcome switch
     {
         SimOutcome.Clean => "clean",
+        SimOutcome.ResultThenCrash => "result+teardown",
         SimOutcome.ResultWithErrors => "result+errors",
         SimOutcome.Stalled => "stalled",
         SimOutcome.Timeout => "timeout",

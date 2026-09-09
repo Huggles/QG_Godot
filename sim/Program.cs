@@ -61,7 +61,12 @@ public static class Program
         PruneLogs(config, results);
         Aggregator.Write(config, results, clock.Elapsed);
 
-        return results.Any(r => r.Outcome != SimOutcome.Clean) ? 1 : 0;
+        // The sorted results.jsonl now holds everything the partial did, so the safety net has served
+        // its purpose. Left behind it would be a second, worse copy for someone to pick up by mistake.
+        try { File.Delete(Path.Combine(config.OutputDirectory, "results.partial.jsonl")); }
+        catch (IOException) { /* not worth failing a finished batch over */ }
+
+        return results.Any(Aggregator.NeedsAttention) ? 1 : 0;
     }
 
     /// <summary>
@@ -81,6 +86,18 @@ public static class Program
         int completed = 0;
 
         object gate = new();
+
+        // Crash insurance. Everything else is written once, at the end, from memory - which is fine
+        // for a 60-game batch and not fine for a 6000-game one that runs for an hour: an orchestrator
+        // that dies at game 5500 would otherwise have nothing to show for any of it. Ctrl+C is already
+        // handled gracefully; this covers the ways a process ends without asking.
+        //
+        // Unsorted, because it is written in completion order and concurrency makes that arbitrary.
+        // That is exactly why it is a separate file: results.jsonl is sorted so it can be diffed
+        // between batches, and half-sorting it here would quietly cost that. Main deletes this once
+        // the real output is safely written.
+        string partialPath = Path.Combine(config.OutputDirectory, "results.partial.jsonl");
+        await using StreamWriter partial = new(partialPath, append: false) { AutoFlush = true };
 
         async Task Worker()
         {
@@ -116,6 +133,7 @@ public static class Program
                 lock (gate)
                 {
                     results.Add(result);
+                    if (result.ResultJson != null) partial.WriteLine(result.ResultJson);
                     Report(result, ++completed, jobs.Count);
                 }
             }
@@ -137,6 +155,9 @@ public static class Program
         {
             SimOutcome.Clean => previous,
             SimOutcome.ResultWithErrors => ConsoleColor.Yellow,
+            // Not red: the game finished and its result counts. Dimmed only so a batch scrolling past
+            // does not read it as a run that needs chasing.
+            SimOutcome.ResultThenCrash => ConsoleColor.DarkGray,
             _ => ConsoleColor.Red,
         };
 

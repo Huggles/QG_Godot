@@ -206,6 +206,7 @@ public sealed class CliSimRunner
                   $"[{_bot.Answered} prompts]"));
 
         EmitRoundScores(result);
+        EmitCardStats();
 
         // Separate event, deliberately. Everything above is a statement about the GAME and is
         // reproducible from (seed, decision_seed) alone, so two runs of the same pair produce
@@ -283,6 +284,58 @@ public sealed class CliSimRunner
             .Set("factions", factions)
             .Text($"ROUNDS  cumulative VP by round 1..{result.FinalRound}\n"
                   + string.Join("\n", textRows)));
+    }
+
+    /// <summary>
+    /// What happened to every card this game: whether it was ever drawn, how often it was played, and
+    /// how often it was activated. The input to asking which cards move the final score.
+    ///
+    /// Read off CardState at game end rather than accumulated from events. PlayedInTurn and
+    /// ActivatedInTurns are already per-card lists of the turns involved and they survive the whole
+    /// game, so the tally is a read, not a subscription — nothing to keep in step and nothing to leak.
+    ///
+    /// "Drawn" is derived rather than tracked: a card still sitting in DeckCardIds at the end never
+    /// left the deck, and anything else (hand, discard, played, status, response) did. That avoids
+    /// hooking DrawCardsChangeEvent for a fact the final piles already state.
+    ///
+    /// Cards that were never drawn and never played are omitted. In a 124-card pool that is most of
+    /// the tail in a short game, and a consumer can recover absence anyway — it knows the game count,
+    /// so "not listed" is "not involved". Emitting them would cost several MB across a large batch to
+    /// say nothing.
+    ///
+    /// NOT the opening hand. That is fixed by `seed` alone, so it is one fact per board rather than
+    /// per game, and capturing it here would be too late regardless: the bot answers synchronously for
+    /// bot_yield_every prompts before the frame loop regains control, by which point several turns of
+    /// draws and discards have already churned the hand.
+    /// </summary>
+    private void EmitCardStats()
+    {
+        List<object> cards = new();
+
+        foreach (CardState card in CardState.All.Values)
+        {
+            int played = card.PlayedInTurn.Count;
+            int activated = card.ActivatedInTurns.Count;
+            bool drawn = !DeckState.ForFaction(card.Faction).DeckCardIds.Contains(card.Id);
+
+            if (!drawn && played == 0 && activated == 0) continue;
+
+            cards.Add(new Dictionary<string, object>
+            {
+                ["name"] = card.CardName,
+                ["faction"] = card.Faction.ToString(),
+                ["type"] = card.CardData?.CardType.ToString() ?? "UNKNOWN",
+                ["drawn"] = drawn,
+                ["played"] = played,
+                ["activated"] = activated,
+            });
+        }
+
+        _renderer.Emit(new CliEvent("card_stats")
+            .Set("seed", GameRandom.Seed)
+            .Set("decision_seed", _decisionSeed)
+            .Set("cards", cards)
+            .Text($"CARDS  {cards.Count} card(s) drawn or played"));
     }
 
     /// <summary>
