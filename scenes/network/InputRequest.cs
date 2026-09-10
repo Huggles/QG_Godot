@@ -140,6 +140,36 @@ public abstract partial class InputRequest
     public string PassCostText { get; set; }
 
     /// <summary>
+    /// The card whose step raised this prompt, or -1 when no step did (a turn-step handler, a mutator,
+    /// the opening discard). Stamped host-side in <see cref="NetworkApi.SendInputRequest"/> from
+    /// <see cref="PromptOrigin.Current"/>.
+    ///
+    /// Deliberately not <see cref="TriggerCardId"/>, which is the card being REACTED TO and is only
+    /// populated inside a reaction window. This is the card doing the asking.
+    /// </summary>
+    public int OriginCardId { get; set; } = -1;
+
+    /// <summary>
+    /// Which of the origin card's steps is asking. For telemetry and per-card special cases; the
+    /// purpose below is what policy should key off, because a step INDEX means nothing to a reader.
+    /// </summary>
+    public int OriginStepId { get; set; } = -1;
+
+    /// <summary>
+    /// What this prompt is for — the one field a bot rule or a UI hint should branch on. See
+    /// <see cref="PromptPurpose"/> for why it must be declared rather than inferred, and why
+    /// <see cref="PromptPurpose.NONE"/> has to mean "do not act".
+    ///
+    /// Carried on the request rather than read from the ambient static by the consumer, for a reason
+    /// that is not obvious: <see cref="NetworkApi.ReceiveInputRequest"/> deserialises a FRESH COPY of
+    /// the request before resolving it, so a consumer reading PromptOrigin.Current would be reasoning
+    /// about a different object graph than the one it is answering — and on any peer that is not the
+    /// host there is no CardPlayRound at all, so the static would be empty. Stamping also means the GUI
+    /// could one day scrim already-occupied build targets from the same signal the bot uses.
+    /// </summary>
+    public PromptPurpose OriginPurpose { get; set; } = PromptPurpose.NONE;
+
+    /// <summary>
     /// Cards the prompt should DISPLAY, as opposed to <see cref="TargetCardIds"/>, which is what may
     /// be chosen. Everything here but not in TargetCardIds renders greyed out and unclickable.
     ///

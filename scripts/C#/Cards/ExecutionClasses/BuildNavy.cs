@@ -28,6 +28,7 @@ public partial class BuildNavy : CardLogic
                 Condition.Build(new Condition.HasVacantBuildableSea(Faction), this),
                 Condition.Build(new Condition.HasAvailableUnits(Faction, UnitType.NAVY), this)
             })
+            .WithPurpose(PromptPurpose.DEPLOY_TARGET)
             .WithGuidance("Build a navy")
         }; 
     }

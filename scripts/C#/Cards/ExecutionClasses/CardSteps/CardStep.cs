@@ -57,6 +57,19 @@ public partial class CardStep : ITaggable
 
     public string ActionGuidance;
 
+    /// <summary>
+    /// What this step's prompts are FOR, so a bot rule can tell a deploy-target country selection from
+    /// the thirty-odd other reasons a card asks for a country. Declared with
+    /// <see cref="WithPurpose"/>; <see cref="PromptPurpose.NONE"/> until it is.
+    ///
+    /// [JsonIgnore] is mandatory, not tidiness. Steps register themselves into
+    /// GameSession.Current.GameState.CardSteps, and Id / StepFinished / StepSucceeded / ActionGuidance
+    /// are all public and serialised — so a bare public field here would enter the saved game and the
+    /// state hash. This is a property of the AUTHORED CARD, identical on every peer and across every
+    /// save, and it must never be state.
+    /// </summary>
+    [JsonIgnore] public PromptPurpose Purpose = PromptPurpose.NONE;
+
     public CardStep(CardLogic cardLogic, Func<Task> stepLogic)
     {
         this.CardLogic = cardLogic;
@@ -110,6 +123,21 @@ public partial class CardStep : ITaggable
         return this;
     }
 
+    /// <summary>
+    /// Declare what this step's prompts are for. Sibling of <see cref="WithGuidance"/>, and the
+    /// sturdy counterpart to it: guidance is prose for the player and changes with a copy edit, this
+    /// is an enum the compiler checks.
+    ///
+    /// One purpose per step. Where a single step raises prompts of two different kinds — see
+    /// EventGunsandButter — leave this unset and wrap each branch in
+    /// <see cref="PromptOrigin.Narrow"/> instead, so the declaration sits where the truth is.
+    /// </summary>
+    public CardStep WithPurpose(PromptPurpose purpose)
+    {
+        this.Purpose = purpose;
+        return this;
+    }
+
     public CardStep WithGuidance(string actionGuidance)
     {
         this.ActionGuidance = actionGuidance;
@@ -132,6 +160,13 @@ public partial class CardStep : ITaggable
 
     public async Task Execute()
     {
+        // Publish which step is running so SendInputRequest can stamp it onto every prompt raised
+        // below. A `using` DECLARATION, so the compiler wraps the whole rest of the method in the
+        // try/finally this method otherwise lacks: the frame is restored on the normal path, on the
+        // StepSkippedException path, and before the rethrow in the general catch. See PromptOrigin for
+        // why restoring the displaced frame — rather than clearing — is the load-bearing part.
+        using PromptOrigin.Scope origin = PromptOrigin.Enter(this);
+
         StepFinished = true;
         // A re-run — a Status card's steps are re-armed every turn — must not inherit the last run's result.
         StepSucceeded = false;

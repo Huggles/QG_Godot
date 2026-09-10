@@ -368,6 +368,20 @@ public partial class NetworkApi : Node
         // retry loop: the option set must not shift between attempts at the same prompt.
         inputRequest.PopulateTargets();
 
+        // Stamp which card step is asking, for the same three reasons PopulateTargets is here: this is
+        // the one point every request passes through (RequestPlay and RequestBlock bypass BroadCast),
+        // the answer must not shift between retry attempts at one prompt, and the request should be
+        // self-describing to a scripted peer.
+        //
+        // Guarded on the default so an explicit stamp at a call site wins over the ambient one —
+        // mirroring how BroadCast only fills the Bulletin fields when TriggerCardId is still -1.
+        if (inputRequest.OriginPurpose == PromptPurpose.NONE && PromptOrigin.Current is { } origin)
+        {
+            inputRequest.OriginCardId = origin.CardId;
+            inputRequest.OriginStepId = origin.StepId;
+            inputRequest.OriginPurpose = origin.Purpose;
+        }
+
         // Narrow a tutorial-constrained prompt while the option set is being minted, so the GUI, the
         // CLI and the tutorial provider all see the same offer. Here rather than in BroadCast for the
         // same reason PopulateTargets is: CardPlayRound.RequestPlay and RequestBlock come straight

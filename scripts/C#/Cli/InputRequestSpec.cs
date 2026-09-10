@@ -48,6 +48,21 @@ public sealed class InputRequestSpec
     public int MaxSelections;
     public PassMode Pass;
 
+    /// <summary>
+    /// What the prompt is for and which card asked, copied verbatim off the request. PASS-THROUGH
+    /// ONLY — no field here changes what may be chosen.
+    ///
+    /// That distinction is the whole reason they are allowed in this file at all: this table is the
+    /// legality contract shared by the interactive CLI, the .qgc scripts and the tutorial, and a
+    /// PREFERENCE folded in here would make a script and the game disagree about what is answerable.
+    /// Carrying the origin lets a bot rule read it through the spec like everything else, instead of
+    /// reaching into the request behind the table's back.
+    /// </summary>
+    public int OriginCardId;
+
+    /// <inheritdoc cref="OriginCardId"/>
+    public PromptPurpose OriginPurpose;
+
     public bool CanPass => Pass != PassMode.NotAllowed;
 
     // ── Construction ─────────────────────────────────────────────────────────
@@ -58,6 +73,8 @@ public sealed class InputRequestSpec
         {
             Kind = request.GetType().Name.Replace("RequestHandler", ""),
             Faction = request.TargetFaction,
+            OriginCardId = request.OriginCardId,
+            OriginPurpose = request.OriginPurpose,
         };
 
         switch (request)

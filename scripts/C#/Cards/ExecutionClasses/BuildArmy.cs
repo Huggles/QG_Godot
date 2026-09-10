@@ -28,6 +28,7 @@ public partial class BuildArmy : CardLogic
                 Condition.Build(new Condition.HasVacantBuildableLand(Faction), this),
                 Condition.Build(new Condition.HasAvailableUnits(Faction, UnitType.ARMY), this)
             })
+            .WithPurpose(PromptPurpose.DEPLOY_TARGET)
             .WithGuidance("Build an army")
         }; 
     }

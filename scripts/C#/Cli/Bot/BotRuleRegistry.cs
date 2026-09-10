@@ -30,6 +30,8 @@ public static class BotRuleRegistry
         new NoHollowRule(),
         new AvoidEmptyBattleRule(),
         new AvoidDeadBattleCardRule(),
+        new PreferVacantDeployRule(),
+        new PreferSupplyStarDeployRule(),
     };
 
     /// <summary>

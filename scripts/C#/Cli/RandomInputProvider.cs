@@ -200,6 +200,15 @@ public sealed class RandomInputProvider : IInputProvider
 
         // Conditional, so an ordinary line stays readable: on most prompts the rules have nothing to
         // say, and a run is hundreds of prompts long.
+        // Who is asking, and what for. Present only on prompts a card step raised, and the card NAME
+        // rather than its id because the point of this field is to be read: it is what turns "some
+        // SelectCountry prompt is unclassified" into a worklist of cards to annotate.
+        if (spec.OriginCardId >= 0)
+        {
+            e.Set("origin_card", CardState.ForId(spec.OriginCardId)?.CardName ?? $"card#{spec.OriginCardId}");
+            e.Set("purpose", spec.OriginPurpose.ToString());
+        }
+
         if (vetoed > 0) e.Set("by", advice.RulesThatVetoed.ToList());
         if (advice.AnyScores) e.Set("scored", advice.NonZeroScores());
         if (advice.Floored) e.Set("floor", true);
@@ -208,8 +217,12 @@ public sealed class RandomInputProvider : IInputProvider
         string flags = (advice.Floored ? " FLOOR" : "")
                      + (advice.PassBy != null ? $" pass_by={advice.PassBy}" : "");
 
+        string origin = spec.OriginCardId >= 0
+            ? $" [{CardState.ForId(spec.OriginCardId)?.CardName ?? "?"}/{spec.OriginPurpose}]"
+            : "";
+
         _trace.Emit(e.Text($"BOT {spec.Kind,-26} {spec.Faction,-15} " +
-                           $"offered={spec.Options.Count,-3} vetoed={vetoed,-3} <- {picked}{flags}"));
+                           $"offered={spec.Options.Count,-3} vetoed={vetoed,-3} <- {picked}{flags}{origin}"));
     }
 
     /// <summary>
