@@ -77,6 +77,11 @@ public static class SceneFlow
             TutorialRuntime.Reset();
             GameManager.PendingTutorialPath = null;
 
+            // Same seam, same rule: the AI seats' provider is a static, and each seat's bot holds a
+            // decision stream that must not follow a player into their next game. Reset() only drops
+            // the override when AiSeatRuntime installed it.
+            AiSeatRuntime.Reset();
+
             // A restore abandoned half way must not leave the next game silent and instant.
             ReplayContext.Reset();
 

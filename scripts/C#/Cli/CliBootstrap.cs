@@ -34,16 +34,68 @@ public static class CliBootstrap
         // and starts the readiness barrier as soon as it appears.
         from.Multiplayer.MultiplayerPeer = new OfflineMultiplayerPeer();
 
-        // One player, every playable faction — the same shape MultiplayerLobby's debug-solo path uses.
-        // Every InputRequest then targets peer 1, so IsForCurrentPeer is true and the CLI resolver
-        // gets asked for all of them.
-        List<PlayerFactionAssignment> assignments = new()
-        {
-            new PlayerFactionAssignment(1, new List<Faction>(StaticGameData.PlayableFactions))
-        };
-        from.GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(assignments);
+        from.GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(BuildAssignments());
 
         SceneFlow.ChangeScene(from, SceneFlow.GameScenePath);
+    }
+
+    /// <summary>
+    /// One player, every playable faction — the same shape MultiplayerLobby's debug-solo path uses.
+    /// Every InputRequest then targets peer 1, so IsForCurrentPeer is true and the CLI resolver gets
+    /// asked for all of them.
+    ///
+    /// <c>ai_factions=JAPAN,ITALY</c> instead seats those factions on their own AI PlayerScenes. Note
+    /// the CLI still ANSWERS them itself — AiSeatRuntime declines to install wherever
+    /// GameContext.HasScriptedInput, because a CLI session owns the input seam for the life of its
+    /// process. So this argument is not a way to run bots headlessly (<c>sim=true</c> already answers
+    /// every faction); it exists to exercise the SEAT machinery — the synthetic peer id, the second
+    /// PlayerScene, the readiness barrier and the TargetPeer translation — with an assertable
+    /// transcript and no GUI. That is the half of the feature most likely to break the game outright.
+    /// </summary>
+    private static List<PlayerFactionAssignment> BuildAssignments()
+    {
+        List<Faction> aiFactions = ParseAiFactions();
+        List<Faction> humanFactions = StaticGameData.PlayableFactions
+            .Where(faction => !aiFactions.Contains(faction))
+            .ToList();
+
+        List<PlayerFactionAssignment> assignments = new()
+        {
+            new PlayerFactionAssignment(1, humanFactions),
+        };
+
+        for (int i = 0; i < aiFactions.Count; i++)
+        {
+            assignments.Add(new PlayerFactionAssignment(
+                PlayerFactionRegistry.AiSeatIdBase + i,
+                new List<Faction> { aiFactions[i] }));
+        }
+
+        return assignments;
+    }
+
+    /// <inheritdoc cref="BuildAssignments"/>
+    private static List<Faction> ParseAiFactions()
+    {
+        string spec = CliArgs.Get("ai_factions");
+        if (string.IsNullOrWhiteSpace(spec)) return new List<Faction>();
+
+        List<Faction> parsed = new();
+        foreach (string name in spec.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (Enum.TryParse(name, ignoreCase: true, out Faction faction)
+                && StaticGameData.PlayableFactions.Contains(faction))
+            {
+                parsed.Add(faction);
+            }
+            else
+            {
+                DebugUtilities.PrintPeerErrorRaw(
+                    $"ai_factions: '{name}' is not a playable faction. Known: " +
+                    string.Join(", ", StaticGameData.PlayableFactions));
+            }
+        }
+        return parsed.Distinct().ToList();
     }
 
     /// <summary>

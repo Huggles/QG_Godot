@@ -53,6 +53,17 @@ public static class FactionDisplay
     /// </summary>
     public static string PlayerNameFor(Faction faction)
     {
+        // Above the single-player suppression, and both orderings are load-bearing:
+        //
+        //  - Above IsSinglePlayer, because a solo game against bots is exactly where naming them
+        //    matters most, and that guard would otherwise return null and hide it.
+        //  - At all, because an AI seat is registered under a synthetic id owned by the host — so
+        //    GetDisplayNameForFaction would answer with the HOST'S name, labelling every bot in a
+        //    multiplayer game "Germany (Alice)". This class is the single source of user-facing
+        //    faction text, so this one line covers history rows, action banners, modal titles and the
+        //    "Waiting on…" label at once.
+        if (PlayerFactionRegistry.IsFactionAi(faction)) return "AI";
+
         if (PlayerFactionRegistry.IsSinglePlayer) return null;
         return PlayerFactionRegistry.GetDisplayNameForFaction(faction);
     }

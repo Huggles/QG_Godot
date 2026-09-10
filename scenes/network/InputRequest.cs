@@ -24,10 +24,43 @@ using System.Threading.Tasks;
 public abstract partial class InputRequest
 {   
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    public int TargetPeer => PlayerFactionRegistry.GetPeerIdForFaction(TargetFaction);
+
+    /// <summary>
+    /// The peer that will answer this prompt.
+    ///
+    /// Not the same as the registry id of the seat that owns the faction: an AI seat carries a
+    /// synthetic id that matches no live peer, and its prompts are answered inside the host's process.
+    /// GetAnsweringPeerForFaction performs that one translation so everything downstream of this
+    /// property — IsForCurrentPeer here, the RpcId targets in NetworkApi.AbortRemoteInput,
+    /// PendingInput.Peer, SafeTargetPeer — needs no knowledge of AI seats.
+    /// </summary>
+    public int TargetPeer => PlayerFactionRegistry.GetAnsweringPeerForFaction(TargetFaction);
+
     // A dedicated/headless server controls no faction and has no local PlayerScene, so no input
     // request is ever "for" it — guard the null so the server can run this on its CallLocal path.
     public bool IsForCurrentPeer => PlayerScene.Current != null && TargetPeer == PlayerScene.Current.GetMultiplayerAuthority();
+
+    /// <summary>
+    /// This peer answers the prompt, but a bot will — not the person at the keyboard.
+    ///
+    /// The one predicate the presentation in <see cref="Execute"/> branches on. Everything it gates
+    /// there says "you are being asked" in some form — the input chime, the "Your input" countdown,
+    /// the focus tint, dismissing the turn badge — and none of that is true when a bot is deciding.
+    /// </summary>
+    public bool IsForLocalBot => IsForCurrentPeer && PlayerFactionRegistry.IsFactionAi(TargetFaction);
+
+    /// <summary>
+    /// A reaction window that offers nothing — the always-ask rule at work. A faction holding a
+    /// face-down Response card is prompted on every qualifying event so that being asked stops proving
+    /// anything, which means dozens of these a turn with only one legal answer.
+    ///
+    /// Named because three places need exactly this test and must agree: the armed auto-pass below,
+    /// the prompt-pacing delay in BlockReactionRequestHandler.Handle, and AiSeatInputProvider's think
+    /// time — a bot pausing to consider each of dozens of unanswerable prompts would be unbearable.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsEmptyReactionWindow => IsReactionWindow && (TargetCardIds?.Count ?? 0) == 0;
+
     public Faction TargetFaction { get; set; }
 
     public List<int> TargetCountryIds { get; set; }
@@ -260,17 +293,26 @@ public abstract partial class InputRequest
                 showedBulletin = true;
             }
 
+            // Everything in this block says "you are being asked" in one form or another, so none of
+            // it is true when a bot on this peer is the one deciding. One flag rather than four
+            // conditionals, and the same flag guards the matching teardown in the finally — two of
+            // those are concurrency fixes rather than cosmetics, see there.
+            bool asked = !IsForLocalBot;
+
             // Inside the IsForCurrentPeer branch on purpose: only the player actually being asked
             // hears it. Every request subclass funnels through here, so this covers card, country,
             // unit and battle-target prompts without a cue per handler.
-            AudioManager.PlaySfxSetting(AudioManager.InputRequestSetting);
+            if (asked) AudioManager.PlaySfxSetting(AudioManager.InputRequestSetting);
 
-            InputTimerDisplay.Current?.Start(TimeoutSeconds, "Your input");
+            // Suppressed rather than relabelled for a bot: TimeoutSeconds is the host's 15-minute
+            // backstop, and a fifteen-minute countdown over a decision that takes a second misinforms.
+            // AiSeatInputProvider renders "Waiting on <faction> input…" instead, which carries no clock.
+            if (asked) InputTimerDisplay.Current?.Start(TimeoutSeconds, "Your input");
 
             // Here rather than per handler, for the same reason the timer above is: every request
             // subclass funnels through Execute(), so the faction tint covers card, country, unit and
             // battle-target prompts as well as reaction windows without a call per Handle().
-            FactionFocus.Set(FactionFocusSource.InputRequest, TargetFaction);
+            if (asked) FactionFocus.Set(FactionFocusSource.InputRequest, TargetFaction);
 
             try
             {
@@ -282,22 +324,35 @@ public abstract partial class InputRequest
             finally
             {
                 // Also on skip and on throw — a stale Bulletin next to an unrelated prompt is worse
-                // than none.
+                // than none. Not gated on `asked`: the bulletin IS shown for a bot's prompt, because
+                // "Blitzkrieg — Germany is deciding" is exactly the narration a watching human wants.
                 if (showedBulletin) TriggerContextDisplay.Current?.Hide();
-                InputTimerDisplay.Current?.Hide();
-                FactionFocus.Clear(FactionFocusSource.InputRequest);
+
+                // Both gated for correctness, not tidiness. A team reaction window opens prompts for a
+                // whole team at once, so on a host holding one human faction and one bot faction on the
+                // same team these run while the HUMAN's prompt is still open — an ungated Hide() would
+                // clear their live countdown, and an ungated Clear() would drop their focus claim
+                // outright, since FactionFocus keys claims by source and both prompts use
+                // FactionFocusSource.InputRequest.
+                if (asked) InputTimerDisplay.Current?.Hide();
+                if (asked) FactionFocus.Clear(FactionFocusSource.InputRequest);
 
                 // The player has answered and the game is moving on, so a turn announcement still
                 // fading out over the middle of the screen is behind the play — drop it rather than
                 // letting it ride out the rest of its fade. In the finally with the rest: a skipped or
                 // timed-out prompt is just as much a reason for the badge to be gone.
-                TurnBadge.DismissNow();
+                //
+                // Gated, and this single line is what makes a bot's turn legible: the badge runs
+                // fadeIn+hold+fadeOut over three DurationLongs, and a bot answers its first prompt in
+                // the same frame the badge starts — so without this the human never sees whose turn it
+                // is for any AI faction. ShowTurnBadgeAnimation sets BlockQueue = false, so letting it
+                // ride costs the turn loop nothing.
+                if (asked) TurnBadge.DismissNow();
             }
         }
         else
         {
-            AwaitedFactions.Add(TargetFaction);
-            RenderAwaitingText();
+            MarkInputOpen(TargetFaction);
 
             // No finally to hide it here: this branch returns immediately rather than awaiting anything,
             // so the countdown is cleared where the waiting text already is — NetworkApi's
@@ -316,6 +371,21 @@ public abstract partial class InputRequest
     // NetworkApi.InputRequestAnswered removes as each prompt closes.
 
     private static readonly HashSet<Faction> AwaitedFactions = new();
+
+    /// <summary>
+    /// Start showing this peer that a faction is being waited on.
+    ///
+    /// The watcher branch of <see cref="Execute"/> does this inline for a REMOTE faction's prompt. It
+    /// is extracted so a bot seat can borrow the same treatment while it thinks: from the human's
+    /// point of view "Waiting on Germany input…" is exactly true, even though the prompt is being
+    /// answered inside their own process. Paired with <see cref="MarkInputClosed"/>, which is
+    /// idempotent, so the later AnnounceInputClosed broadcast is harmless.
+    /// </summary>
+    public static void MarkInputOpen(Faction faction)
+    {
+        if (!AwaitedFactions.Add(faction)) return;
+        RenderAwaitingText();
+    }
 
     /// <summary>One of the prompts this peer was watching has closed — answered, withdrawn or given up on.</summary>
     public static void MarkInputClosed(Faction faction)
@@ -469,7 +539,7 @@ public abstract partial class InputRequest
     /// </summary>
     protected bool TryAutoPassArmedReactionWindow()
     {
-        if (!IsReactionWindow || (TargetCardIds?.Count ?? 0) > 0) return false;
+        if (!IsEmptyReactionWindow) return false;
 
         ReactionSkipScope armed = ReactionSkipPreference.ActiveScope(TargetFaction);
         if (armed == ReactionSkipScope.NONE) return false;

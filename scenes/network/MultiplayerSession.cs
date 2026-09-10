@@ -107,6 +107,11 @@ public partial class MultiplayerSession : Node
 
             if(Multiplayer.IsServer())
             {
+                // Above the restore branch, not inside its else like the tutorial below: a loaded save
+                // has AI seats exactly as a fresh game does, so installing there would leave a restored
+                // game with its bots silently absent. A no-op unless this session has AI seats.
+                AiSeatRuntime.InstallIfRequested();
+
                 if (restore != null)
                 {
                     // The HUD goes up BEFORE the replay rather than after it. A restore applies its whole

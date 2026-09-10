@@ -22,7 +22,30 @@ public static class PlayerFactionRegistry
     private static Dictionary<Faction, int> _factionToPeerId = new Dictionary<Faction, int>();
     private static Dictionary<int, PlayerScene> _peerIdToPlayerScene = new Dictionary<int, PlayerScene>();
     private static Dictionary<int, List<Faction>> _peerIdToFactions = new Dictionary<int, List<Faction>>();
-    
+
+    /// <summary>
+    /// First id handed to an AI seat. An AI seat is an ordinary <see cref="PlayerScene"/> registered
+    /// under an id in this range, which is what makes it invisible with no special cases:
+    ///
+    ///  - PlayerScene._Ready only assigns <see cref="PlayerScene.Current"/> when the local peer id
+    ///    equals the node's authority, and no real peer is ever numbered from here — so an AI seat
+    ///    never becomes Current on ANY peer. Everything that renders "my factions" reads Current, so
+    ///    the bot's hand and its face-down Response cards stay off the human's screen for free.
+    ///  - NetworkApi.LoadPlayers names the node Player_{peerId}, which is the RPC NodePath, so the id
+    ///    must be unique and identical on every peer. Every peer deserialises the same assignment
+    ///    list, so it is.
+    ///  - RegisterPlayer rejects a duplicate id, so an AI seat cannot share one with the host.
+    ///
+    /// Godot peer ids are positive and the host is 1, so a high base cannot collide. Deliberately not
+    /// a negative sentinel: -1 already means "no card"/"no unit" in several places, and a negative
+    /// here would read as an error rather than as a seat.
+    /// </summary>
+    public const int AiSeatIdBase = 1000;
+
+    /// <summary>Whether this registry id belongs to an AI seat rather than a network peer.</summary>
+    public static bool IsAiSeatId(int peerId) => peerId >= AiSeatIdBase;
+
+
     /// <summary>
     /// Check if we're in single player mode (one player controls all factions)
     /// </summary>
@@ -203,6 +226,56 @@ public static class PlayerFactionRegistry
         int localPeerId = GetLocalPeerId();
         return GetFactionsForPeerId(localPeerId);
     }
+
+    /// <summary>
+    /// Whether this faction is played by a bot rather than a person.
+    ///
+    /// Deliberately NOT routed through <see cref="GetPeerIdForFaction"/>, for the same reason
+    /// <see cref="GetDisplayNameForFaction"/> is not: that logs an error and falls back to the host on
+    /// a miss, which is right for input routing and wrong for a question about a label. An unregistered
+    /// faction is not an AI faction.
+    ///
+    /// Fails toward "human" on purpose. Every consumer treats false as "a person is answering", and
+    /// wrongly handing a person's seat to a bot is far worse than wrongly showing a bot a chime.
+    /// </summary>
+    public static bool IsFactionAi(Faction faction)
+        => _factionToPeerId.TryGetValue(faction, out int peerId) && IsAiSeatId(peerId);
+
+    /// <summary>
+    /// The peer that will actually ANSWER for this faction — as opposed to
+    /// <see cref="GetPeerIdForFaction"/>, which returns the registry id of the seat that owns it.
+    ///
+    /// The two differ only for an AI seat, whose id is synthetic and matches no live peer. Its prompts
+    /// are resolved inside the host's process, so the host is the answering peer.
+    ///
+    /// This is the single place that translation happens, and it needs to stay that way: every
+    /// consumer downstream of <see cref="InputRequest.TargetPeer"/> — IsForCurrentPeer, the RpcId
+    /// targets in AbortRemoteInput, PendingInput.Peer, SafeTargetPeer — is then correct with no
+    /// knowledge of AI seats at all. Letting a synthetic id past here means special-casing it in every
+    /// one of them.
+    /// </summary>
+    public static int GetAnsweringPeerForFaction(Faction faction)
+    {
+        int peerId = GetPeerIdForFaction(faction);
+        return IsAiSeatId(peerId) ? HostPeerId : peerId;
+    }
+
+    /// <summary>
+    /// The local player's own factions, excluding any AI seat that happens to be hosted here.
+    ///
+    /// What the HUD wants wherever it means "these are mine": the seat list, the hand buttons, the
+    /// opening music. <see cref="GetLocalPlayerFactions"/> answers the different question "which seats
+    /// does this peer hold", which for the host includes every bot.
+    /// </summary>
+    public static List<Faction> GetLocalHumanFactions()
+        => GetLocalPlayerFactions().Where(f => !IsFactionAi(f)).ToList();
+
+    /// <summary>Every faction played by a bot, in registry order.</summary>
+    public static List<Faction> GetAiFactions()
+        => _factionToPeerId.Where(entry => IsAiSeatId(entry.Value)).Select(entry => entry.Key).ToList();
+
+    /// <summary>The host, which is also the peer that answers for every AI seat.</summary>
+    public const int HostPeerId = 1;
 
     /// <summary>
     /// Check if a specific peer can control a faction

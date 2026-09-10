@@ -24,7 +24,27 @@ public partial class PlayerScene : CharacterBody2D
     /// </summary>
     private List<Faction> _controlledFactions = new List<Faction>();
     
-    public InputManager InputManager => GetNode("%InputManager") as InputManager; 
+    public InputManager InputManager => GetNode("%InputManager") as InputManager;
+
+    /// <summary>
+    /// Whether this seat is played by a bot rather than by a person on some peer.
+    ///
+    /// Derived from the node's own authority, which NetworkApi.LoadPlayers set from the assignment's
+    /// peer id — so it needs no extra field and is identically true on every peer. See
+    /// <see cref="PlayerFactionRegistry.AiSeatIdBase"/> for why that id also keeps this scene from
+    /// ever becoming <see cref="Current"/>.
+    /// </summary>
+    public bool IsAiSeat => PlayerFactionRegistry.IsAiSeatId(GetMultiplayerAuthority());
+
+    /// <summary>
+    /// The bot answering for this seat, or null for a human seat and on any peer that is not the one
+    /// answering (only the host runs bots).
+    ///
+    /// Held on the seat rather than in one process-wide table so that each AI faction gets its own
+    /// decision stream and its own configuration — two bots on one board are then genuinely two
+    /// players rather than one object answering twice. Installed by <c>AiSeatRuntime</c>.
+    /// </summary>
+    public IInputProvider Bot { get; set; }
 
     /// <summary>
     /// Get the factions controlled by this player
