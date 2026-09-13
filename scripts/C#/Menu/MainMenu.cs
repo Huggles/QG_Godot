@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 public partial class MainMenu : Control
 {
+	private const string SkirmishScenePath     = "res://scenes/menu/SkirmishScreen.tscn";
 	private const string LoadGameScenePath = "res://scenes/menu/LoadGameScreen.tscn";
 	private const string LobbyScenePath        = "res://scenes/menu/MultiplayerLobby.tscn";
 	private const string JoinScenePath         = "res://scenes/menu/JoinGameScreen.tscn";
@@ -92,7 +93,7 @@ public partial class MainMenu : Control
 		GameManager.PendingSave = null;
 		GameManager.PendingScenarioJson = null;
 
-		var singlePlayer     = GetNode<MenuPanelButton>("%SinglePlayerButton");
+		var skirmish         = GetNode<MenuPanelButton>("%SkirmishButton");
 		var loadGame         = GetNode<MenuPanelButton>("%LoadGameButton");
 		var multiplayerHost  = GetNode<MenuPanelButton>("%MultiplayerHostButton");
 		var multiplayerJoin  = GetNode<MenuPanelButton>("%MultiplayerJoinButton");
@@ -100,7 +101,7 @@ public partial class MainMenu : Control
 		var settings         = GetNode<MenuPanelButton>("%SettingsButton");
 		var quit             = GetNode<MenuPanelButton>("%QuitButton");
 
-		singlePlayer.ButtonText    = "Single Player";
+		skirmish.ButtonText        = "Skirmish";
 		loadGame.ButtonText        = "Load Game";
 		multiplayerHost.ButtonText = "Host Game";
 		multiplayerJoin.ButtonText = "Join Game";
@@ -108,7 +109,7 @@ public partial class MainMenu : Control
 		settings.ButtonText        = "Settings";
 		quit.ButtonText            = "Quit";
 
-		singlePlayer.Pressed    += OnSinglePlayerPressed;
+		skirmish.Pressed        += OnSkirmishPressed;
 		loadGame.Pressed        += OnLoadGamePressed;
 		multiplayerHost.Pressed += OnMultiplayerHostPressed;
 		multiplayerJoin.Pressed += OnMultiplayerJoinPressed;
@@ -225,9 +226,9 @@ public partial class MainMenu : Control
 		}
 	}
 
-	private void OnSinglePlayerPressed()
+	private void OnSkirmishPressed()
 	{
-		SceneFlow.ChangeScene(this, "res://scenes/menu/GameModeSelectionScreen.tscn");
+		SceneFlow.ChangeScene(this, SkirmishScenePath);
 	}
 
 	private void OnLoadGamePressed()

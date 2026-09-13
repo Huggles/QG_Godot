@@ -198,8 +198,10 @@ public partial class GameManager : Node
                     && (openingDiscardElement.ValueKind == JsonValueKind.True || openingDiscardElement.ValueKind == JsonValueKind.False))
                     info.OpeningDiscard = openingDiscardElement.GetBoolean();
 
-                // A scenario naming a tutorial script is a tutorial: single player only, so the
-                // multiplayer lobby filters these out of its picker.
+                // A scenario naming a tutorial script is a tutorial: single player only. The
+                // multiplayer lobby filters these out of its picker; the Skirmish screen keeps them —
+                // it is the only route to one — and locks its seat grid instead, because a script
+                // plays every faction itself and leaves nothing for a bot to do.
                 if (root.TryGetProperty("tutorial", out JsonElement tutorialElement)
                     && tutorialElement.ValueKind == JsonValueKind.String)
                     info.TutorialPath = tutorialElement.GetString();

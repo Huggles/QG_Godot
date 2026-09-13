@@ -25,7 +25,8 @@ public class ScenarioInfo
     /// <summary>
     /// Tutorial script this scenario runs, or null for an ordinary game. Mirrored here for the same
     /// reason as OpeningDiscard: the menus need to tell a tutorial from a normal scenario without
-    /// deserializing the whole file. The multiplayer lobby uses it to keep tutorials out of its picker.
+    /// deserializing the whole file. The multiplayer lobby uses it to keep tutorials out of its picker,
+    /// and the Skirmish screen to lock its seat grid when one is chosen.
     /// </summary>
     [JsonPropertyName("tutorial")]
     public string TutorialPath { get; set; }

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cscreengmd5k3"]
 
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
-[ext_resource type="Script" uid="uid://bscreengmd5k3" path="res://scripts/C#/Menu/GameModeSelectionScreen.cs" id="3_script"]
+[ext_resource type="Script" uid="uid://bscreengmd5k3" path="res://scripts/C#/Menu/SkirmishScreen.cs" id="3_script"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_bg"]
@@ -44,7 +44,7 @@ offset_bottom = 150.0
 grow_horizontal = 2
 theme_override_font_sizes/normal_font_size = 36
 bbcode_enabled = true
-text = "[center][font_size=42][b]Single Player — Select Game Mode[/b][/font_size][/center]"
+text = "[center][font_size=42][b]Skirmish[/b][/font_size][/center]"
 scroll_active = false
 
 [node name="ButtonContainer" type="VBoxContainer" parent="." unique_id=746547968]
@@ -77,18 +77,31 @@ size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="DescriptionPanel" type="PanelContainer" parent="ButtonContainer" unique_id=2129022782]
-custom_minimum_size = Vector2(600, 220)
+custom_minimum_size = Vector2(600, 140)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_bg")
 
 [node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="ButtonContainer/DescriptionPanel" unique_id=476860882]
-custom_minimum_size = Vector2(0, 200)
+custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 22
 bbcode_enabled = true
 text = "[color=#bbbbbb]Select a scenario to see its description.[/color]"
 fit_content = true
+
+[node name="SeatsLabel" type="Label" parent="ButtonContainer" unique_id=311420001]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "Your Factions"
+horizontal_alignment = 1
+
+[node name="SeatGrid" type="GridContainer" parent="ButtonContainer" unique_id=311420002]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 2
 
 [node name="SeedRow" type="HBoxContainer" parent="ButtonContainer" unique_id=2112580064]
 layout_mode = 2
@@ -113,7 +126,19 @@ custom_minimum_size = Vector2(180, 56)
 layout_mode = 2
 text = "Randomize"
 
+[node name="OpeningDiscardCheckBox" type="CheckBox" parent="ButtonContainer" unique_id=311420004]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+button_pressed = true
+text = "Discard 3 cards at start"
+
 [node name="StartGameButton" parent="ButtonContainer" unique_id=163641719 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(600, 50)
+layout_mode = 2
+
+[node name="BackButton" parent="ButtonContainer" unique_id=311420003 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(600, 50)
 layout_mode = 2

@@ -67,7 +67,7 @@ layout_mode = 2
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="SinglePlayerButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=409954901 instance=ExtResource("2_btn")]
+[node name="SkirmishButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=409954901 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 layout_mode = 2
 

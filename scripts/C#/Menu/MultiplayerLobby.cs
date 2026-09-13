@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static FactionMenuVisuals;
 
 /// <summary>
 /// Multiplayer lobby: host/join + per-player faction selection.
@@ -15,57 +16,6 @@ public partial class MultiplayerLobby : Control
 	/// <summary>Shared so JoinGameScreen and GameSettings use one source of truth for the port.</summary>
 	public const int DEFAULT_PORT = 7777;
 	private const string DEFAULT_SERVER_IP = "127.0.0.1";
-
-	// ── Faction metadata ───────────────────────────────────────────────────────
-	private static readonly List<Faction> AllPlayableFactions = new()
-	{
-		Faction.GERMANY, Faction.JAPAN, Faction.ITALY,
-		Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES
-	};
-
-	private static readonly HashSet<Faction> AxisSet = new()
-		{ Faction.GERMANY, Faction.JAPAN, Faction.ITALY };
-
-	private static readonly Dictionary<Faction, string> FlagPaths = new()
-	{
-		{ Faction.GERMANY,        "res://assets/factions/germany/Germany_Flag.png" },
-		{ Faction.JAPAN,          "res://assets/factions/japan/Japan_Flag.png" },
-		{ Faction.ITALY,          "res://assets/factions/italy/Italy_Flag.png" },
-		{ Faction.UNITED_KINGDOM, "res://assets/factions/united_kingdom/UK_Flag.png" },
-		{ Faction.SOVIET,         "res://assets/factions/soviet/Soviet_Flag.png" },
-		{ Faction.UNITED_STATES,  "res://assets/factions/united_states/US_Flag.png" },
-	};
-
-	/// <summary>
-	/// The "Random" pick's icon: the composite all-factions flag, already used elsewhere to mean
-	/// "every faction at once" (see GameMessageDisplay's next-round flag).
-	/// </summary>
-	private const string RandomFlagPath = "res://assets/textures/Other/NextRoundFlag.png";
-
-	private static readonly Dictionary<Faction, string> FactionNames = new()
-	{
-		{ Faction.GERMANY,        "Germany" },
-		{ Faction.JAPAN,          "Japan" },
-		{ Faction.ITALY,          "Italy" },
-		{ Faction.UNITED_KINGDOM, "United Kingdom" },
-		{ Faction.SOVIET,         "Soviet Union" },
-		{ Faction.UNITED_STATES,  "United States" },
-	};
-
-	// ── Visual colours for button states ──────────────────────────────────────
-	private static readonly Color ColClaimed     = new(1.0f, 0.85f, 0.2f, 1.0f);  // gold  – claimed by this row's player
-	private static readonly Color ColAvailable   = Colors.White;                    // white – available & team-compatible
-	private static readonly Color ColUnavailable = new(0.30f, 0.30f, 0.30f, 0.55f); // dark grey – wrong team
-	private static readonly Color ColOtherOwned  = new(0.50f, 0.50f, 0.50f, 0.75f); // mid grey  – owned by another player
-
-	// ── Player row sizing ─────────────────────────────────────────────────────
-	/// <summary>
-	/// Height of a row's faction flags, and so of the row itself — nothing else in the row is taller.
-	/// 60 rather than the original 96 because the player list is ~389px tall, so a full six-player
-	/// lobby (6 x 60 + 5px separations = 385) has to fit without pushing the last rows behind a
-	/// scrollbar.
-	/// </summary>
-	private const int FlagHeight = 60;
 
 	// ── Scene node references ─────────────────────────────────────────────────
 	private VBoxContainer _playerListContainer;
@@ -193,20 +143,37 @@ public partial class MultiplayerLobby : Control
 		UpdateStatusLabel("Waiting to host or join...");
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
-		_scenarioPicker.Clear();
-		foreach (var scenario in gameManager.AvailableScenarios)
-			_scenarioPicker.AddItem(scenario.Title);
+
+		// Tutorials are excluded here and nowhere else: a tutorial drives five factions from a script,
+		// and TutorialRuntime refuses to start one with peers attached, so offering it in a lobby can
+		// only produce a game nobody chose to play that way. The Skirmish screen keeps them.
+		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios, includeTutorials: false);
 
 		if (gameManager.SelectedScenario != null)
 		{
-			int selectedIndex = gameManager.AvailableScenarios.FindIndex(s => s.Path == gameManager.SelectedScenario.Path);
-			if (selectedIndex >= 0)
-				_scenarioPicker.Selected = selectedIndex;
+			// A selection this picker cannot show is a real case now that it filters: the player may
+			// have chosen a tutorial on the Skirmish screen and come here instead, leaving the static
+			// pointing at something with no item. Falling back only in the WIDGET would leave the two
+			// disagreeing and silently start the tutorial scenario, so the fallback is pushed into the
+			// static as well.
+			//
+			// Not while restoring: that branch below replaces the picker wholesale with the save's own
+			// scenario, and SetSelectedScenarioByIndex would also drop PendingScenarioJson, which the
+			// restore still needs.
+			bool shown = MenuScenarioPicker.SelectByPath(
+				_scenarioPicker, gameManager.AvailableScenarios, gameManager.SelectedScenario.Path);
+
+			if (!shown && _restoreSave == null && _scenarioPicker.ItemCount > 0)
+			{
+				_scenarioPicker.Selected = 0;
+				gameManager.SetSelectedScenarioByIndex(MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, 0));
+			}
+
 			UpdateScenarioDescription(gameManager.SelectedScenario.Description);
 		}
 		else
 		{
-			UpdateScenarioDescription("No scenarios available. Make sure the scenario files are present in assets/data/scenarios.");
+			UpdateScenarioDescription(MenuScenarioPicker.NoScenariosMessage);
 		}
 
 		// Restoring: the scenario came with the save, so nothing is resolved against the local list —
@@ -215,7 +182,10 @@ public partial class MultiplayerLobby : Control
 		if (_restoreSave != null)
 		{
 			_scenarioPicker.Clear();
-			_scenarioPicker.AddItem(_restoreSave.ScenarioTitle ?? "Saved scenario");
+			// id -1: this item resolves against no local scenario, so ScenarioIndexAt answers -1 and the
+			// handlers return early. Defensive — the picker is Disabled on this path — but it keeps the
+			// invariant "an item's id is its AvailableScenarios index" true with no exceptions.
+			_scenarioPicker.AddItem(_restoreSave.ScenarioTitle ?? "Saved scenario", -1);
 			_scenarioPicker.Selected = 0;
 			UpdateScenarioDescription("This scenario is stored inside the save and cannot be changed.");
 		}
@@ -1534,7 +1504,8 @@ public partial class MultiplayerLobby : Control
 		if (!_isHost) return;
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
-		int index = (int)selectedIndex;
+		// The item's id, not its position: the picker filters tutorials out, so the two differ.
+		int index = MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, (int)selectedIndex);
 		if (index < 0 || index >= gameManager.AvailableScenarios.Count) return;
 
 		gameManager.SetSelectedScenarioByIndex(index);
@@ -1578,9 +1549,7 @@ public partial class MultiplayerLobby : Control
 
 	private void UpdateScenarioDescription(string description)
 	{
-		if (_scenarioDescriptionLabel == null) return;
-		_scenarioDescriptionLabel.BbcodeEnabled = true;
-		_scenarioDescriptionLabel.Text = $"[color=#bbbbbb]{description}[/color]";
+		MenuScenarioPicker.ShowDescription(_scenarioDescriptionLabel, description);
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
@@ -1594,7 +1563,11 @@ public partial class MultiplayerLobby : Control
 		if (selectedIndex < 0) return;
 
 		gameManager.SetSelectedScenarioByIndex(selectedIndex);
-		_scenarioPicker.Selected = selectedIndex;
+		// By path rather than by assigning the index: this picker filters, so the scenario's index in
+		// AvailableScenarios is not its position in the list. A host cannot send a tutorial here (its
+		// own picker has none), so a miss means a scenario this client does not have — leave the widget
+		// alone rather than pointing it at something arbitrary.
+		MenuScenarioPicker.SelectByPath(_scenarioPicker, gameManager.AvailableScenarios, selectedScenarioPath);
 		UpdateScenarioDescription(gameManager.SelectedScenario.Description);
 	}
 
