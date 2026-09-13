@@ -52,7 +52,26 @@ public sealed class BotDecision
     /// </summary>
     public Dictionary<string, object> Scratch { get; } = new();
 
-    private BotDecision(InputRequest request, InputRequestSpec spec)
+    /// <summary>
+    /// What this faction is trying to achieve on the board, or null when no agent is configured.
+    ///
+    /// The one piece of context here that is NOT about this prompt. Everything else on this class is
+    /// discarded when the prompt is answered — see <see cref="Scratch"/> — which is precisely why an
+    /// intention had nowhere to live: a card play and the country selection it causes are two separate
+    /// prompts, and nothing could connect them. The agenda is rebuilt from the board for each prompt by
+    /// the provider (which outlives them) and handed in here, so a rule can act on a goal without
+    /// becoming stateful itself.
+    ///
+    /// **Nothing reads this yet**, deliberately — see <see cref="BotAgenda"/>. It is the seam, placed so
+    /// that a future rule needs no further plumbing.
+    ///
+    /// Rules that do read it must keep treating <see cref="Spec"/> as the only authority on legality. A
+    /// goal says what would be worth having, never what may be chosen; the agenda is computed from the
+    /// whole board and has no idea what this particular prompt is offering.
+    /// </summary>
+    public BotAgenda Agenda { get; }
+
+    private BotDecision(InputRequest request, InputRequestSpec spec, BotAgenda agenda)
     {
         Request = request;
         Spec = spec;
@@ -60,9 +79,15 @@ public sealed class BotDecision
         Options = spec.Options;
         Round = GameFlow.Instance?.Round ?? 0;
         Step = GameFlow.Instance?.TurnStep ?? default;
+        Agenda = agenda;
     }
 
-    public static BotDecision Build(InputRequestSpec spec, InputRequest request) => new(request, spec);
+    public static BotDecision Build(InputRequestSpec spec, InputRequest request)
+        => new(request, spec, null);
+
+    /// <inheritdoc cref="Build(InputRequestSpec, InputRequest)"/>
+    public static BotDecision Build(InputRequestSpec spec, InputRequest request, BotAgenda agenda)
+        => new(request, spec, agenda);
 
     /// <summary>
     /// Memoise a per-prompt state read. The key is the caller's business; prefix it with the rule name

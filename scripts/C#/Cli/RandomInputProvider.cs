@@ -118,9 +118,32 @@ public sealed class RandomInputProvider : IInputProvider
         return _rng.Next(minInclusive, maxExclusive);
     }
 
+    /// <summary>
+    /// Supplies the profile for a faction, or null to run with no agent at all.
+    ///
+    /// A function rather than a single profile because the two surfaces instance this class differently:
+    /// CliSimRunner installs ONE provider that answers for all six factions, while AiSeatRuntime builds
+    /// one per seat. Keying on the asking faction is correct under both, and it lets a single sim run one
+    /// faction on a different profile from the rest.
+    /// </summary>
+    private readonly Func<Faction, BotProfile> _profileFor;
+
+    /// <summary>
+    /// Profiles are immutable and a prompt asks for one every time, so they are resolved once per faction
+    /// rather than rebuilt 500-1000 times a game.
+    /// </summary>
+    private readonly Dictionary<Faction, BotProfile> _profiles = new();
+
+    /// <summary>Per-kind goal counters, or null when no agent is configured. See <see cref="BotGoalStats"/>.</summary>
+    public BotGoalStats GoalStats { get; }
+
+    /// <summary>Whether an agent is configured at all. False restores the pre-agent code path exactly.</summary>
+    public bool HasAgent => _profileFor != null;
+
     public RandomInputProvider(int decisionSeed, double passChance, double discardChance,
                                List<IBotRule> rules, Dictionary<string, BotRuleConfig> ruleConfig,
-                               double tierWidth, int yieldEvery, CliRenderer trace)
+                               double tierWidth, int yieldEvery, CliRenderer trace,
+                               Func<Faction, BotProfile> profileFor = null)
     {
         _rng = new Random(decisionSeed);
         _passChance = passChance;
@@ -128,6 +151,36 @@ public sealed class RandomInputProvider : IInputProvider
         _yieldEvery = yieldEvery;
         _trace = trace;
         _engine = new BotRuleEngine(rules, ruleConfig, Draw, tierWidth);
+        _profileFor = profileFor;
+        GoalStats = profileFor == null ? null : new BotGoalStats();
+    }
+
+    /// <summary>
+    /// Build this faction's agenda for the prompt about to be answered, or null when no agent is
+    /// configured.
+    ///
+    /// Rebuilt per prompt rather than cached across a turn: a card step can change the board in the
+    /// middle of its own resolution, and an agenda held over would then describe a board that no longer
+    /// exists. It is an O(countries + units) read against a GameStateCalculator sweep that is already far
+    /// more expensive, so the freshness is close to free — see BoardAssessment.
+    ///
+    /// Cannot draw from <see cref="_rng"/>, directly or transitively. That is what keeps
+    /// <see cref="Draws"/> identical to a run with no agent, which is the detector for exactly this
+    /// mistake.
+    /// </summary>
+    private BotAgenda BuildAgenda(Faction faction)
+    {
+        if (_profileFor == null) return null;
+
+        if (!_profiles.TryGetValue(faction, out BotProfile profile))
+        {
+            profile = _profileFor(faction) ?? BotProfile.Generic();
+            _profiles[faction] = profile;
+        }
+
+        BotAgenda agenda = BotAgenda.Build(faction, profile);
+        GoalStats.Record(agenda);
+        return agenda;
     }
 
 
@@ -136,7 +189,8 @@ public sealed class RandomInputProvider : IInputProvider
         InputRequestSpec spec = InputRequestSpec.For(request);
         Answered++;
 
-        BotDecision decision = BotDecision.Build(spec, request);
+        BotAgenda agenda = BuildAgenda(spec.Faction);
+        BotDecision decision = BotDecision.Build(spec, request, agenda);
         BotAdvice advice = _engine.Consult(decision);
 
         // Narrowing happens BEFORE the pass decision, not after: whether anything worth doing is on
@@ -155,13 +209,13 @@ public sealed class RandomInputProvider : IInputProvider
         {
             spec.ApplyPass(request);
             Passed++;
-            Trace(spec, null, advice);
+            Trace(spec, null, advice, agenda);
         }
         else
         {
             List<CliOption> chosen = Choose(spec, scored, advice);
             spec.Apply(request, chosen);
-            Trace(spec, chosen, advice);
+            Trace(spec, chosen, advice, agenda);
         }
 
         if (_yieldEvery > 0 && Answered % _yieldEvery == 0)
@@ -178,7 +232,7 @@ public sealed class RandomInputProvider : IInputProvider
     /// though it is now just no_hollow's share of `vetoed`, so a script written against the pre-engine
     /// trace still reads.
     /// </summary>
-    private void Trace(InputRequestSpec spec, List<CliOption> chosen, BotAdvice advice)
+    private void Trace(InputRequestSpec spec, List<CliOption> chosen, BotAdvice advice, BotAgenda agenda)
     {
         if (_trace == null) return;
 
@@ -209,6 +263,16 @@ public sealed class RandomInputProvider : IInputProvider
             e.Set("purpose", spec.OriginPurpose.ToString());
         }
 
+        // The agenda is the whole output of the agent layer right now — nothing acts on it — so the
+        // trace is the only place its correctness is observable. Emitted as one flat string rather than
+        // structured fields because it is read by eye against the board, and because it has to stay
+        // byte-stable for a given (seed, decision_seed) to be diffable between runs.
+        if (agenda != null)
+        {
+            e.Set("agenda", agenda.Headline);
+            if (agenda.Top is { } top) e.Set("goal", top.Kind.ToString());
+        }
+
         if (vetoed > 0) e.Set("by", advice.RulesThatVetoed.ToList());
         if (advice.AnyScores) e.Set("scored", advice.NonZeroScores());
         if (advice.Floored) e.Set("floor", true);
@@ -223,6 +287,14 @@ public sealed class RandomInputProvider : IInputProvider
 
         _trace.Emit(e.Text($"BOT {spec.Kind,-26} {spec.Faction,-15} " +
                            $"offered={spec.Options.Count,-3} vetoed={vetoed,-3} <- {picked}{flags}{origin}"));
+
+        // Its own line, indented under the decision it belongs to: the headline carries the board read
+        // AND the top goals, which does not fit the single-line BOT format without making the common
+        // case unreadable.
+        if (agenda != null) _trace.Emit(new CliEvent("bot_agenda")
+            .Set("faction", spec.Faction.ToString())
+            .Set("goals", agenda.Goals.Count)
+            .Text($"    AGENDA {agenda.Headline}"));
     }
 
     /// <summary>

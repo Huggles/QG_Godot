@@ -99,9 +99,24 @@ public sealed class CliSimRunner
             ruleConfig["no_hollow"].Suppress = hollowChance;
         }
 
+        string profileName = CliArgs.Get("bot_profile") ?? "none";
+        Func<Faction, BotProfile> profileFor = ParseProfile(profileName, out string profileError);
+
+        // Same treatment as an unknown rule name, and for the same reason: a typo that merely "had no
+        // effect" would let a batch run with no agent at all and report the numbers as if it had one.
+        if (profileError != null)
+        {
+            renderer.Emit(new CliEvent("bot_config_error")
+                .Set("error", profileError)
+                .Text($"BOT CONFIG ERROR  {profileError}"));
+            _session.Quit(2);
+            profileFor = null;
+        }
+
         _bot = new RandomInputProvider(_decisionSeed, passChance, discardChance,
             rules, ruleConfig, Probability("bot_rule_temp"),
-            CliArgs.GetInt("bot_yield_every", 64), CliArgs.Verbose ? renderer : null);
+            CliArgs.GetInt("bot_yield_every", 64), CliArgs.Verbose ? renderer : null,
+            profileFor);
 
         // Replaces the CliInputProvider CliSession would otherwise install: nothing is reading stdin
         // for answers, so every prompt has to be resolved by the bot or the run parks forever.
@@ -119,14 +134,87 @@ public sealed class CliSimRunner
             // The active rule set, not the raw argument: with defaults and sugar both in play, the raw
             // string does not say what actually ran, and this line is the run's self-description.
             .Set("bot_rules", string.Join(",", ActiveRuleNames()))
+            .Set("bot_profile", profileName)
             .Text($"SIM  decision_seed {_decisionSeed}, bot_pass {passChance}, bot_discard {discardChance}, " +
-                  $"bot_hollow {hollowChance}, bot_rules [{string.Join(" ", ActiveRuleNames())}]"));
+                  $"bot_hollow {hollowChance}, bot_rules [{string.Join(" ", ActiveRuleNames())}], " +
+                  $"bot_profile {profileName}"));
+    }
+
+    /// <summary>
+    /// Resolves <c>bot_profile=</c> to a per-faction profile source, or null for no agent at all.
+    ///
+    /// Three values, because they answer three different questions:
+    ///   <c>none</c>     no agent. No agenda is built and nothing is traced — the pre-agent code path,
+    ///                   byte for byte. The default, so every existing baseline keeps reproducing.
+    ///   <c>generic</c>  every faction values goals at exactly their victory-point worth. The control:
+    ///                   it isolates the agent layer from any per-faction opinion.
+    ///   <c>faction</c>  each faction gets <see cref="BotProfile.ForFaction"/>. Identical to generic
+    ///                   today, since no faction has weights yet, and it exists so that a batch can be
+    ///                   run through the per-faction path before there is anything to see in it.
+    ///
+    /// Note that <c>faction</c> producing the same games as <c>generic</c> is currently the CORRECT
+    /// result, and worth checking rather than assuming: if the two ever diverge before a profile has
+    /// been given weights, something is reading a profile it should not.
+    /// </summary>
+    private static Func<Faction, BotProfile> ParseProfile(string name, out string error)
+    {
+        error = null;
+        switch ((name ?? "none").Trim().ToLowerInvariant())
+        {
+            case "none": return null;
+            case "generic": return _ => BotProfile.Generic();
+            case "faction": return BotProfile.ForFaction;
+            default:
+                error = $"unknown bot_profile '{name}' — expected none, generic or faction";
+                return null;
+        }
     }
 
     /// <summary>Names of the rules actually enabled this run, in registry order.</summary>
     private IEnumerable<string> ActiveRuleNames() => _bot.Engine.Rules
         .Where(rule => _bot.Engine.ConfigFor(rule.Name).Enabled)
         .Select(rule => rule.Name);
+
+    /// <summary>
+    /// Per-goal-kind counters for the game just finished, or nothing at all when no agent ran.
+    ///
+    /// Skipped entirely rather than emitted at zero, which is the opposite of the choice made for
+    /// bot_rules_stats just below — deliberately. Stable columns matter there because every batch has
+    /// rules; here, an agent is the exception, and a run with <c>bot_profile=none</c> emitting a block of
+    /// zeroed goal rows would put noise in every existing baseline for the sake of a case that has
+    /// nothing to report.
+    ///
+    /// Nothing consumes the agenda yet, so these counters ARE the result of the agent layer: they are
+    /// what says whether the goal model saw the board. A kind that never fires across a full game, or one
+    /// that tops every agenda in every game, is the signal to go and look.
+    /// </summary>
+    private void EmitBotGoalStats()
+    {
+        BotGoalStats stats = _bot.GoalStats;
+        if (stats == null) return;
+
+        List<object> rows = new();
+        foreach (GoalKind kind in BotGoalStats.Kinds)
+        {
+            rows.Add(new Dictionary<string, object>
+            {
+                ["kind"] = kind.ToString(),
+                ["proposed"] = stats.Proposed(kind),
+                ["topped"] = stats.Topped(kind),
+                ["agendas_containing"] = stats.AgendasContaining(kind),
+            });
+        }
+
+        _renderer.Emit(new CliEvent("bot_goal_stats")
+            .Set("seed", GameRandom.Seed)
+            .Set("decision_seed", _decisionSeed)
+            .Set("agendas", stats.AgendasBuilt)
+            .Set("empty_agendas", stats.EmptyAgendas)
+            .Set("goals", rows)
+            .Text($"GOALS  {stats.AgendasBuilt} agenda(s), {stats.EmptyAgendas} empty;  " +
+                  string.Join("  ", System.Array.ConvertAll(BotGoalStats.Kinds,
+                      kind => $"{kind}={stats.Proposed(kind)}/top{stats.Topped(kind)}"))));
+    }
 
     /// <summary>
     /// Per-rule counters for the game just finished.
@@ -316,6 +404,7 @@ public sealed class CliSimRunner
         EmitRoundScores(result);
         EmitCardStats();
         EmitBotRuleStats();
+        EmitBotGoalStats();
 
         // Separate event, deliberately. Everything above is a statement about the GAME and is
         // reproducible from (seed, decision_seed) alone, so two runs of the same pair produce

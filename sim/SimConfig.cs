@@ -35,6 +35,12 @@ public sealed class SimConfig
     /// </summary>
     public string BotRules { get; private set; } = "";
 
+    /// <summary>
+    /// Which goal profile the bot runs, passed through verbatim to <c>bot_profile=</c>. Empty means the
+    /// game default, which is no agent at all.
+    /// </summary>
+    public string BotProfile { get; private set; } = "";
+
     public int Workers { get; private set; }
     public TimeSpan JobTimeout { get; private set; } = TimeSpan.FromMinutes(5);
 
@@ -85,7 +91,7 @@ public sealed class SimConfig
         foreach (string scenario in Scenarios)
             foreach (int seed in Seeds)
                 foreach (int decisionSeed in DecisionSeeds)
-                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules));
+                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules, BotProfile));
         return jobs;
     }
 
@@ -119,6 +125,7 @@ public sealed class SimConfig
                     case "--bot-discard": c.BotDiscard = ParseProbability(Next(arg), arg); break;
                     case "--bot-hollow": c.BotHollow = ParseProbability(Next(arg), arg); break;
                     case "--bot-rules": c.BotRules = Next(arg); break;
+                    case "--bot-profile": c.BotProfile = Next(arg); break;
                     case "--workers" or "-j": workers = int.Parse(Next(arg)); break;
                     case "--timeout": c.JobTimeout = TimeSpan.FromSeconds(double.Parse(Next(arg),
                         System.Globalization.CultureInfo.InvariantCulture)); break;
@@ -219,6 +226,7 @@ public sealed class SimConfig
               --bot-discard 0..1       chance to take the optional end-of-turn discard (default 0)
               --bot-hollow 0..1        chance to play a card the board has made pointless (default 0)
               --bot-rules LIST         policy rules: name, name:2.0, name:suppress=0.3, -name, all, none
+              --bot-profile NAME       goal profile: none, generic, faction  (default none)
                                        (run the game with bot_rules_list=true to see them)
               -j, --workers N          concurrent Godot processes (default cores/2)
               --timeout SECONDS        hard kill per job         (default 300)

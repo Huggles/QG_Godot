@@ -300,6 +300,7 @@ public static class Aggregator
         // that says which POLICY produced these numbers. A run directory whose summary does not name
         // its policy cannot be compared against anything later.
         sb.AppendLine($"  bot_rules      {(string.IsNullOrWhiteSpace(config.BotRules) ? "(defaults)" : config.BotRules)}");
+        sb.AppendLine($"  bot_profile    {(string.IsNullOrWhiteSpace(config.BotProfile) ? "(none)" : config.BotProfile)}");
         sb.AppendLine($"  workers        {config.Workers}");
         sb.AppendLine();
 

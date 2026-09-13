@@ -118,9 +118,16 @@ public static class AiSeatRuntime
     /// <summary>
     /// The bot for one seat.
     ///
-    /// M1 uses <see cref="SeatRules"/> with a wall-clock seed. The difficulty presets and the per-seat
-    /// configuration that this shape exists to allow arrive with BotProfile in M2; until then every
-    /// seat plays the same way, which is enough to play against.
+    /// Uses <see cref="SeatRules"/> with a wall-clock seed, and passes each seat its
+    /// <see cref="BotProfile"/> — the per-seat configuration this shape was built to allow.
+    ///
+    /// The profile changes nothing a player can see yet. It gives the seat a <see cref="BotAgenda"/>,
+    /// which is rebuilt from the board on every prompt and which no rule consults, so the seat still
+    /// plays purely on SeatRules. It is wired anyway because the alternative — building the agent only in
+    /// the headless sim — would leave the live path untested until the first rule depended on it, and the
+    /// costs are small and bounded: the agenda is an O(countries + units) read, and
+    /// <see cref="BotAgenda.Build"/> is documented never to throw, so a seat cannot be stalled by a
+    /// perception bug.
     ///
     /// yieldEvery is small and non-zero rather than the CLI's 64: the empty-reaction-window path
     /// deliberately awaits nothing at all, and a long reaction chain is exactly where those pile up
@@ -157,7 +164,8 @@ public static class AiSeatRuntime
             config,
             tierWidth: 0,
             yieldEvery: 16,
-            trace: null);
+            trace: null,
+            profileFor: BotProfile.ForFaction);
     }
 
     /// <summary>
