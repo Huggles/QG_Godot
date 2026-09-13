@@ -97,9 +97,28 @@ public static class AiSeatRuntime
     }
 
     /// <summary>
+    /// The rules an AI seat plays with, in <c>bot_rules</c> syntax.
+    ///
+    /// Spelled out here rather than left to <see cref="IBotRule.EnabledByDefault"/>, because the
+    /// registry's defaults answer a different question than this one. A rule defaults OFF until an A/B
+    /// run says it improves the MEASURED game — that discipline protects the sim baseline, where an
+    /// unannounced default flip silently re-answers every balance question asked before it. An opponent
+    /// a person is sitting across from is not a measurement: it should play as well as it knows how,
+    /// and a rule that is off here is simply absent, with no counter and no trace to say so. Leaving
+    /// this null is what made a seat with two deploy rules written, registered and tested still rebuild
+    /// its own unit in place instead of taking the empty supply star next door.
+    ///
+    /// A POSITIVE list, so it switches off every rule it does not name — <c>no_hollow</c> is listed
+    /// even though it is default-on, and a rule added to the registry plays for the sim before it plays
+    /// here. That is the intended direction: measure first, then name it here. See
+    /// <see cref="BotRuleRegistry.Parse"/>.
+    /// </summary>
+    private const string SeatRules = "no_hollow,prefer_vacant_deploy,prefer_supply_star_deploy";
+
+    /// <summary>
     /// The bot for one seat.
     ///
-    /// M1 uses the registry defaults with a wall-clock seed. The difficulty presets and the per-seat
+    /// M1 uses <see cref="SeatRules"/> with a wall-clock seed. The difficulty presets and the per-seat
     /// configuration that this shape exists to allow arrive with BotProfile in M2; until then every
     /// seat plays the same way, which is enough to play against.
     ///
@@ -110,12 +129,19 @@ public static class AiSeatRuntime
     private static IInputProvider BuildBot(PlayerScene seat)
     {
         List<IBotRule> rules = BotRuleRegistry.All();
-        Dictionary<string, BotRuleConfig> config = BotRuleRegistry.Parse(null, rules, out string error);
+
+        // Validated here as well as in the CLI runner: a rule whose Kinds name a prompt type that does
+        // not exist loads, reports itself enabled, and is then never consulted — indistinguishable at
+        // the table from a bot that simply had nothing to say.
+        string error = BotRuleRegistry.ValidateKinds(rules);
+        Dictionary<string, BotRuleConfig> config = error != null
+            ? null
+            : BotRuleRegistry.Parse(SeatRules, rules, out error);
 
         if (config == null)
         {
-            // Cannot happen for a null spec, which is "just the defaults" — but a registry that fails
-            // its own validation should say so rather than NRE one prompt later.
+            // Reachable only when SeatRules names a rule that has since been renamed or removed —
+            // which is exactly when failing loudly beats a seat that quietly plays at random.
             throw new InvalidOperationException($"AI seat rule configuration rejected: {error}");
         }
 
