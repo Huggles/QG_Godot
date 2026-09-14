@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,19 +22,27 @@ public partial class EWDecimaFlottigliaMASFrogmen : EWCardLogic
         TargetSet.Countries(new List<Country> { Country.MediterraneanSea })
             .Plus(TargetSet.Units(BlockingUnits));
 
+    /// <summary>
+    /// Captured by the scoring step and read by the discard step, rather than recomputed. The two
+    /// are separate steps now, and a reaction played in the scoring step's after-reaction window can
+    /// move the board between them -- recomputing would make the discard disagree with the VP that
+    /// was actually awarded.
+    /// </summary>
+    private int _totalDiscards;
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
-                int totalDiscards = 1 + (BlockingUnits.Count == 0 ? 1 : 0);
+            new ResultStep(this, () => {
+                _totalDiscards = 1 + (BlockingUnits.Count == 0 ? 1 : 0);
+                return Task.FromResult<CardStepResult>(
+                    new ScorePointsChangeEvent(new VPEntry(1, "Decima Flottiglia MAS Frogmen"), Faction));
+            }),
 
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "Decima Flottiglia MAS Frogmen"), Faction));
-
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, totalDiscards));
-                discardEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardEvent);
-            })
+            new ResultStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, _totalDiscards)))
+            .RequiringPreviousStep()
         };
     }
 }

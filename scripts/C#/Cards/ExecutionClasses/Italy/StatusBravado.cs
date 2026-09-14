@@ -30,25 +30,24 @@ public partial class StatusBravado : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
-                spendEvent.IsTrigger = false;
-                await spendEvent.Apply();
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new SpendPlayActionChangeEvent(Faction)))
+            .WithGuidance("Discard the top 2 cards of your draw deck to battle a land space"),
 
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            .RequiringPreviousStep(),
 
+            new ResultStep(this, async () => {
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, LandBattleTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
 
-                BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
-                battleEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(battleEvent);
+                BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
+                return battleEvent;
             })
-            .WithGuidance("Discard the top 2 cards of your draw deck to battle a land space")
+            .RequiringPreviousStep()
         };
     }
 }

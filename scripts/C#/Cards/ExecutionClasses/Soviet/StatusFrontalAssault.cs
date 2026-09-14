@@ -57,21 +57,20 @@ public partial class StatusFrontalAssault : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
+            .WithGuidance("Discard 2 cards from hand to battle the same or adjacent land space")
+            .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(SameOrAdjacentCountryIds, Faction), this)),
 
+            new ResultStep(this, async () => {
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, SameOrAdjacentTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
-                battleEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(battleEvent);
+                BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
+                return battleEvent;
             })
-            .WithGuidance("Discard 2 cards from hand to battle the same or adjacent land space")
-            .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(SameOrAdjacentCountryIds, Faction), this))
+            .RequiringPreviousStep()
         };
     }
 }

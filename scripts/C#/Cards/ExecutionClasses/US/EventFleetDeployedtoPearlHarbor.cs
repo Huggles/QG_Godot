@@ -22,19 +22,17 @@ public partial class EventFleetDeployedtoPearlHarbor : EventCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, anchorCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployUnitChangeEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(anchorCountryIds, Faction), this))
             .WithGuidance("Recruit an Army in Hawaii"),
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, AdjacentNavyTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
+                return deployUnitChangeEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 return AdjacentNavyTargets.Count > 0;

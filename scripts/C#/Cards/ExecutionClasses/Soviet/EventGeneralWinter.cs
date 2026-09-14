@@ -26,20 +26,18 @@ public partial class EventGeneralWinter : EventCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesNearMoscow).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
-                removeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(removeEvent);
+                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
+                return removeEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesNearMoscow.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in or adjacent to Moscow"),
 
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesNearMoscow).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
-                removeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(removeEvent);
+                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
+                return removeEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesNearMoscow.Count > 0), this))
             .WithGuidance("Eliminate a second Axis Army in or adjacent to Moscow")

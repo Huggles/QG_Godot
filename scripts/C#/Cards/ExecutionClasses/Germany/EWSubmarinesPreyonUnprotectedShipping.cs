@@ -24,20 +24,25 @@ public partial class EWSubmarinesPreyonUnprotectedShipping : EWCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int discardCount = BlockingUnits.Count > 0 ? 2 : 5;
                 
                 // UK discards cards
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, discardCount));
-                discardEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardEvent);
+                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, discardCount);
+                return discardEvent;
             }),
-            new CardStep(this, async() => {               
-                // Score 1 VP       
-                ScorePointsChangeEvent scorePointsEvent = BuildChangeEvent(new ScorePointsChangeEvent(new VPEntry(1, "Submarines Prey on Unprotected Shipping"), Faction));                
-                scorePointsEvent.IsTrigger = false;
-                await CardPlayPool.DoChangeEvent(scorePointsEvent);
+            // A ResultStep, so the VP is a trigger like the scoring step of every other two-event
+            // Economic Warfare card. It used to carry IsTrigger = false, alone among the ten, which
+            // meant no reaction window opened on the points -- the typed steps made the
+            // disagreement visible and this is the side it was resolved on.
+            new ResultStep(this, async() => {
+                // Score 1 VP
+                ScorePointsChangeEvent scorePointsEvent = new ScorePointsChangeEvent(new VPEntry(1, "Submarines Prey on Unprotected Shipping"), Faction);
+                return scorePointsEvent;
             })
+            // Gated like every other two-event EW card: without it ContinueWithNextSteps can hoist
+            // this VP into the discard step's own after-reaction window.
+            .RequiringPreviousStep()
         }; 
     }
 }

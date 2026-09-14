@@ -17,11 +17,10 @@ public partial class BuildNavy : CardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildTargets).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.HasBuildableSea(Faction), this))
             .WithAdvisoryConditions(()=> new List<Condition> {

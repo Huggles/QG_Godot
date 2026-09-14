@@ -30,10 +30,16 @@ public partial class ResponseASWTactics : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                ActivationTrigger.IsBlocked = true;
-                ActivationTrigger.IsCardBlocked = true;
-                PresentationServices.Notification.ShowActionText("Axis EW card effect ignored", Faction);                
+            // BlockStep<ChangeEvent>: this is the one blocker that does not care WHICH event it was
+            // offered — the trigger already scopes it to an Axis Economic Warfare card, and the card
+            // text is about that whole card rather than any one of its effects. BlockCard() is what
+            // sets IsCardBlocked, which CardPlayRound.DoCard reads to stop the rest of its steps.
+            //
+            // The old body dereferenced ActivationTrigger bare; BlockStep now does the cast, so a
+            // mismatch is a logged no-op rather than a NullReferenceException that halts the turn.
+            new BlockStep<ChangeEvent>(this, blockedEvent => {
+                PresentationServices.Notification.ShowActionText("Axis EW card effect ignored", Faction);
+                return Task.FromResult(CardStepResult.BlockCard());
             })
         };
     }

@@ -380,6 +380,7 @@ public partial class NetworkApi : Node
             inputRequest.OriginCardId = origin.CardId;
             inputRequest.OriginStepId = origin.StepId;
             inputRequest.OriginPurpose = origin.Purpose;
+            inputRequest.OriginStepKind = origin.Kind;
         }
 
         // Narrow a tutorial-constrained prompt while the option set is being minted, so the GUI, the

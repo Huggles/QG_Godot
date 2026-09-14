@@ -272,20 +272,29 @@ public partial class CardPlayRound : GodotObject
             // that away from these reactions.
             _afterReactionPassedFactions.Clear();
 
-            // Step 2: Execute the card's next unfinished step.
-            // We use all unfinished steps (not just executable ones) so that Execute() can
-            // show the "Unable to" skip message for steps whose conditions fail before
-            // automatically cascading to the next step.
+            // Step 2: Execute the card's steps, in list order, one at a time.
+            //
+            // Unfinished steps, not EXECUTABLE ones, so that Execute() can show the "Unable to"
+            // label for a step whose conditions fail rather than passing over it silently.
+            //
+            // This loop is the sole owner of step advancement. CardStep.Execute used to cascade into
+            // NextCardStep.Execute() from its skip branch as well, which was a second and weaker copy
+            // of this: it did not consult cardLogic.IsBlocked, so a card blocked mid-resolution kept
+            // running the rest of its steps.
+            //
+            // cardLogic.CardSteps is re-read on every iteration, and that is load-bearing rather than
+            // incidental: EventBroadFront, EventTheAutobahn, EventTheaterShift and
+            // EventTransSiberianRailroad all append steps to themselves from inside a running step,
+            // and those appends have to be picked up here.
 
             // A Status/Response card just played from hand stops here: it sits on the table until
             // its trigger fires, at which point it re-enters DoCard on the activation branch.
             if (!isTableCardPlay)
             {
-                List<CardStep> allSteps = cardLogic.CardSteps;
-                while (allSteps.Where(s => !s.StepFinished).ToList().Count > 0 && cardLogic.IsBlocked == false)
+                while (!cardLogic.IsBlocked
+                       && cardLogic.CardSteps.FirstOrDefault(s => !s.StepFinished) is { } nextStep)
                 {
-                    List<CardStep> nextSteps = allSteps.Where(s => !s.StepFinished ).ToList();
-                    await nextSteps[0].Execute();
+                    await nextStep.Execute();
                 }
             }
         }

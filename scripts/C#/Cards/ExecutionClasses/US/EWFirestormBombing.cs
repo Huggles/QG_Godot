@@ -47,7 +47,7 @@ public partial class EWFirestormBombing : EWCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 // One target, not every qualifier: the card text's "that country" is singular, so the
                 // player chooses which reachable Axis power takes the hit. The step condition below
                 // already keeps the card unplayable while this list is empty, so the modal is never
@@ -56,9 +56,8 @@ public partial class EWFirestormBombing : EWCardLogic
                     Faction, QualifyingAxisFactions()).BroadCast();
                 Faction targetFaction = (Faction)factionResp.ResponseCardIds[0];
 
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, targetFaction, 7));
-                discardEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardEvent);
+                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, targetFaction, 7);
+                return discardEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => QualifyingAxisFactions().Count > 0), this))
             .WithGuidance("Choose an Axis country with a US unit adjacent to its Home space to discard 7 cards")

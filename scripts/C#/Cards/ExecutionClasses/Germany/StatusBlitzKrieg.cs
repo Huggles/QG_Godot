@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -31,18 +32,18 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
-                discardEvent.IsTrigger = false;
-                await CardPlayPool.DoChangeEvent(discardEvent);
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            .WithGuidance("Deploy an army in the country where you just battled"),
 
+            new ResultStep(this, async () => {
                 var trigger = TriggerContextAs<BattleCountryChangeEvent>();
-                if (trigger == null) return;
+                if (trigger == null) return CardStepResult.Nothing;
 
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, trigger.CountryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-            }).WithGuidance("Deploy an army in the country where you just battled") 
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, trigger.CountryId, DeployType.BUILD);
+                return deployUnitChangeEvent;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

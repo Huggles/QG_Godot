@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -72,27 +73,30 @@ public partial class StatusBiasForAction : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                // Resolved before the discard: the cost must not be paid for a prompt with nothing in
-                // it. The trigger gate reads tags while this reads AdjacentBattleTargets, so the two
-                // can disagree at the margin (ImmuneForTurn, supply).
-                List<BattleTarget> battleTargets = BattleTargets;
-                if (battleTargets.Count == 0) return;
+            // The cost, gated on there being something to spend it on. That gate used to be an
+            // `if (battleTargets.Count == 0) return;` at the top of the fused step, resolved before
+            // the discard so the cost was not paid for a prompt with nothing in it. As a step
+            // condition it says the same thing and is visible to Tag.IsExecutable as well.
+            //
+            // It stays a condition of its OWN, rather than leaning on the card trigger: the trigger
+            // gate reads tags while this reads BattleTargets, so the two can disagree at the margin
+            // (ImmuneForTurn, supply).
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => BattleTargets.Count > 0), this))
+            .WithGuidance("Battle a land space adjacent to the Army just built"),
 
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
-
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, battleTargets).BroadCast();
-                if (resp.ResponseCountryIds.Count == 0 && resp.ResponseUnitIds.Count == 0) return;
+            new ResultStep(this, async () => {
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
+                if (resp.ResponseCountryIds.Count == 0 && resp.ResponseUnitIds.Count == 0) return CardStepResult.Nothing;
 
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
-                battleCountryChange.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(battleCountryChange);
-            }).WithGuidance("Battle a land space adjacent to the Army just built")
+                BattleCountryChangeEvent battleCountryChange = battleTarget.ToAttackChangeEvent(Faction);
+                return battleCountryChange;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

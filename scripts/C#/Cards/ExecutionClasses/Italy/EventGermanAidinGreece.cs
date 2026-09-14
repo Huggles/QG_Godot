@@ -22,19 +22,17 @@ public partial class EventGermanAidinGreece : EventCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AlliedArmiesInBalkans).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
-                removeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(removeEvent);
+                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
+                return removeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => AlliedArmiesInBalkans.Count > 0),this))
             .WithGuidance($"Eliminate an Allied army in {CountryState.ForEnum(targetCountries[0]).Label}"),
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction.GERMANY, selectedCountryId, DeployType.RECRUIT));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.GERMANY, selectedCountryId, DeployType.RECRUIT);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)targetCountries[0]], Faction.GERMANY),this))
             .WithGuidance($"Recruit a German army in {CountryState.ForEnum(targetCountries[0]).Label}"),

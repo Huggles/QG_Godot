@@ -72,8 +72,17 @@ public enum PromptPurpose
 /// </summary>
 public static class PromptOrigin
 {
-    /// <summary>Who is asking, and what for. Null outside any card step.</summary>
-    public readonly record struct Frame(int CardId, int StepId, PromptPurpose Purpose);
+    /// <summary>
+    /// Who is asking, and what for. Null outside any card step.
+    ///
+    /// <c>Kind</c> is the structural half of the answer and <c>Purpose</c> the semantic one: Purpose
+    /// says what is being chosen (a deploy target, a battle target), Kind says why the step is asking
+    /// at all — a <see cref="StepKind.Requirement"/> prompt is a COST the card is charging, a
+    /// <see cref="StepKind.Result"/> prompt is the payoff. A bot needs both to price "discard 2 to
+    /// deploy 1", and before the typed steps there was no way to tell them apart without running the
+    /// step. <see cref="StepKind.Result"/> is the neutral default for a synthesised frame.
+    /// </summary>
+    public readonly record struct Frame(int CardId, int StepId, PromptPurpose Purpose, StepKind Kind);
 
     /// <summary>
     /// The innermost step currently executing. Host-side only and never serialised — the request
@@ -96,7 +105,8 @@ public static class PromptOrigin
         Current = new Frame(
             step?.CardLogic?.CardState?.Id ?? -1,
             step?.Id ?? -1,
-            step?.Purpose ?? PromptPurpose.NONE);
+            step?.Purpose ?? PromptPurpose.NONE,
+            step?.Kind ?? StepKind.Result);
         return new Scope(displaced);
     }
 
@@ -113,8 +123,8 @@ public static class PromptOrigin
     {
         Frame? displaced = Current;
         Current = displaced is { } frame
-            ? new Frame(frame.CardId, frame.StepId, purpose)
-            : new Frame(-1, -1, purpose);
+            ? new Frame(frame.CardId, frame.StepId, purpose, frame.Kind)
+            : new Frame(-1, -1, purpose, StepKind.Result);
         return new Scope(displaced);
     }
 

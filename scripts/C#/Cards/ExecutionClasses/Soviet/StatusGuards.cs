@@ -27,30 +27,34 @@ public partial class StatusGuards : StatusCardLogic
         };
     }
 
+    /// <summary>The Build Army card recovered from the discard pile, played by the final step.</summary>
+    private int _buildArmyCardId = -1;
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
-                spendEvent.IsTrigger = false;
-                await spendEvent.Apply();
-
-                ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
-
-                // Play a BuildArmy card from discard so that reaction cards (e.g. Women Conscripts)
-                // trigger correctly on the resulting PlayCardChangeEvent.
-                int buildArmyCardId = DeckState.ForFaction(Faction).DiscardedCardIds
-                    .First(id => CardState.ForId(id).CardData.CardType == CardType.BUILD_ARMY);
-                RecycleCardChangeEvent recycleEvent = BuildChangeEvent(
-                    new RecycleCardChangeEvent(Faction, Faction, buildArmyCardId, RecycleDestination.Hand));
-                recycleEvent.IsTrigger = false;
-                await recycleEvent.Apply();
-                await CardPlayPool.DoCard(buildArmyCardId);
-            })
-            .WithGuidance("Discard 2 cards from hand to play a Build Army card from your discard pile")
+            // The card's gate lives on the FIRST step, which is also the one that spends the play.
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
+            .WithGuidance("Discard 2 cards from hand to play a Build Army card from your discard pile"),
+
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
+            .RequiringPreviousStep(),
+
+            // Recycled to hand first, then PLAYED from there, so the play emits a real
+            // PlayCardChangeEvent — which is what lets reaction cards (Women Conscripts) trigger on it.
+            new RequirementStep(this, () => {
+                _buildArmyCardId = DeckState.ForFaction(Faction).DiscardedCardIds
+                    .First(id => CardState.ForId(id).CardData.CardType == CardType.BUILD_ARMY);
+                return Task.FromResult<CardStepResult>(
+                    new RecycleCardChangeEvent(Faction, Faction, _buildArmyCardId, RecycleDestination.Hand));
+            })
+            .RequiringPreviousStep(),
+
+            new PlayCardStep(this, () => Task.FromResult(CardStepResult.PlayCard(_buildArmyCardId)))
+            .RequiringPreviousStep()
         };
     }
 }

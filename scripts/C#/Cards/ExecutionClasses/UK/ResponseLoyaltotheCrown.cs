@@ -25,14 +25,13 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 var deployEvent = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
-                if (deployEvent == null) return;
+                if (deployEvent == null) return CardStepResult.Nothing;
 
-                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
-                    new RemoveUnitChangeEvent(Faction, deployEvent.UnitId, UnitRemovalReason.ELIMINATE));
-                removeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(removeEvent);
+                RemoveUnitChangeEvent removeEvent = 
+                    new RemoveUnitChangeEvent(Faction, deployEvent.UnitId, UnitRemovalReason.ELIMINATE);
+                return removeEvent;
             })
             .WithGuidance("Eliminate the Axis Army just built")
         };

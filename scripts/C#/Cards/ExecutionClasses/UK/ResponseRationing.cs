@@ -59,12 +59,12 @@ public partial class ResponseRationing : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new EffectStep(this, async () => {
                 PlayCardChangeEvent playEvent = PlayedCard();
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Rationing: no played card found to recycle");
-                    return;
+                    return CardStepResult.Nothing;
                 }
 
                 ModifierRegistry.Register(new MutatorRecycleAfterStep(
@@ -78,6 +78,7 @@ public partial class ResponseRationing : ResponseCardLogic
 
                 await Task.CompletedTask;
                 // the mutator does the work once the step ends
+                return CardStepResult.Nothing;
             })
             .WithGuidance("Shuffle last played card into your draw deck at the end of this step")
         };

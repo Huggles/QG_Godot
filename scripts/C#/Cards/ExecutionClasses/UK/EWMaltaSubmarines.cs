@@ -32,9 +32,14 @@ public partial class EWMaltaSubmarines : EWCardLogic
         };
     }
 
+    /// <summary>
+    /// One step per Axis faction. NOT split: statically there are two possible event types here, but
+    /// at runtime the target picks one, so exactly one event is produced -- which is the case that
+    /// justifies a step RETURNING its event rather than declaring it up front.
+    /// </summary>
     private CardStep MakeFactionStep(Faction targetFaction)
     {
-        return new CardStep(this, async () => {
+        return new ResultStep(this, async () => {
             List<int> navies = MediterraneanNaviesFor(targetFaction);
 
             List<string> penaltyLabels = new() { "Discard top 2 cards from draw deck" };
@@ -52,19 +57,15 @@ public partial class EWMaltaSubmarines : EWCardLogic
 
             if (choice == CHOICE_ELIMINATE && navies.Count > 0)
             {
+                // Narrowed rather than declared with .WithPurpose: this step raises a SelectOption
+                // and then, on one branch only, a unit selection. PromptOrigin.Narrow puts the
+                // declaration where the truth is.
+                using PromptOrigin.Scope purpose = PromptOrigin.Narrow(PromptPurpose.REMOVE_TARGET);
                 int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(targetFaction, navies).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
-                    new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
-                removeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(removeEvent);
+                return new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
             }
-            else
-            {
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(
-                    new ForceDiscardCardsChangeEvent(Faction, targetFaction, 2));
-                discardEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardEvent);
-            }
+
+            return new ForceDiscardCardsChangeEvent(Faction, targetFaction, 2);
         })
         .WithGuidance($"{targetFaction}: discard 2 cards or eliminate a Mediterranean Navy");
     }

@@ -44,11 +44,10 @@ public partial class ResponseMobileForce : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => RecruitTargets.Count > 0), this))
             .WithGuidance("Recruit a navy in or adjacent to the North Pacific"),

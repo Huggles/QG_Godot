@@ -23,13 +23,13 @@ public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLog
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent) {
                     int countryId = removeEvent.CountryId;
-                    DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction.GERMANY, countryId, DeployType.RECRUIT));
-                    deployEvent.IsTrigger = true;
-                    await CardPlayPool.DoChangeEvent(deployEvent);
+                    DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction.GERMANY, countryId, DeployType.RECRUIT);
+                    return deployEvent;
                 }
+                return CardStepResult.Nothing;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)

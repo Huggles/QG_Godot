@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -25,22 +26,21 @@ public partial class StatusConscription : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
-                spendEvent.IsTrigger = false;
-                await spendEvent.Apply();
-
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
-
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildableLandCountries()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-            })
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(BuildableLandCountries(), Faction),this))            
-            .WithGuidance("Build an army")
+            .WithGuidance("Build an army"),
+
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            .RequiringPreviousStep(),
+
+            new ResultStep(this, async () => {
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildableLandCountries()).BroadCast()).ResponseCountryIds[0];
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
+                return deployUnitChangeEvent;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

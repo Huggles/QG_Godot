@@ -35,15 +35,14 @@ public partial class EventTheaterShift : EventCardLogic
 
     private CardStep MakeRemovalStep()
     {
-        return new CardStep(this, async () =>
+        return new RequirementStep(this, async () =>
         {
             int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, EligibleUnitIds).BroadCast()).ResponseUnitIds[0];
             lastRemovedUnitWasNavy = UnitState.ForId(selectedUnitId).Type == UnitType.NAVY;
             relocatedIds.Add(selectedUnitId);
             if (EligibleUnitIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
-            RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
-            removeEvent.IsTrigger = false;
-            await CardPlayPool.DoChangeEvent(removeEvent);
+            RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
+            return removeEvent;
         })
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
             EligibleUnitIds.Count > 0
@@ -53,16 +52,15 @@ public partial class EventTheaterShift : EventCardLogic
 
     private CardStep MakeDeployStep()
     {
-        return new CardStep(this, async () =>
+        return new ResultStep(this, async () =>
         {
             await ReplayContext.Pace(1000);
             var buildableIds = lastRemovedUnitWasNavy
                 ? CountryState.BuildableSea(Faction).Select(cs => cs.Id).ToList()
                 : CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
             int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableIds).BroadCast()).ResponseCountryIds[0];
-            DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
-            deployEvent.IsTrigger = true;
-            await CardPlayPool.DoChangeEvent(deployEvent);
+            DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
+            return deployEvent;
         })
         // Rebuilding is the other half of the removal, not an effect of its own: a skipped removal
         // finishes the card instead of granting a free piece.

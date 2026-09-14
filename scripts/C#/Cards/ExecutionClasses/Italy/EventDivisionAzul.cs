@@ -15,20 +15,19 @@ public partial class EventDivisionAzul : EventCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 var sovietResponseCardIds = DeckState.ForFaction(Faction.SOVIET).ResponseCardIds;
                 int randomIndex = GameRandom.Next(sovietResponseCardIds.Count);
                 int randomCardId = sovietResponseCardIds[randomIndex];
 
-                DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(
-                    new DiscardHandCardsChangeEvent(Faction, Faction.SOVIET, new List<int> { randomCardId }))
+                DiscardHandCardsChangeEvent discardEvent = 
+                    new DiscardHandCardsChangeEvent(Faction, Faction.SOVIET, new List<int> { randomCardId })
                     .WithoutAnimations();
-                discardEvent.IsTrigger = true;
 
                 PresentationServices.Notification.ShowActionText("Division Azul: A random Soviet Response card has been discarded.", Faction);
                 await Task.Delay(GameSettings.DurationMedium);
 
-                await CardPlayPool.DoChangeEvent(discardEvent);
+                return discardEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction.SOVIET).ResponseCardIds.Count > 0), this))

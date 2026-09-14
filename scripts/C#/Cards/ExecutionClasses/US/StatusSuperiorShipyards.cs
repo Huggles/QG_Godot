@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,16 +28,16 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            .WithGuidance("Discard top 1 deck card to build an additional Navy"),
 
+            new ResultStep(this, async () => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-            }).WithGuidance("Discard top 1 deck card to build an additional Navy")
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
+                return deployUnitChangeEvent;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

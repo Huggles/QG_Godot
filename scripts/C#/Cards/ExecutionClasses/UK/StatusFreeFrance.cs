@@ -22,22 +22,21 @@ public partial class StatusFreeFrance : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
-                spendEvent.IsTrigger = false;
-                await spendEvent.Apply();
-
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
-
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(
-                    new DeployUnitChangeEvent(Faction, buildCountryIds[0], DeployType.BUILD));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
-            })
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(buildCountryIds, Faction), this))
-            .WithGuidance("Discard top 2 deck cards to build an Army in Western Europe")
+            .WithGuidance("Discard top 2 deck cards to build an Army in Western Europe"),
+
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            .RequiringPreviousStep(),
+
+            new ResultStep(this, async () => {
+                DeployUnitChangeEvent deployEvent = 
+                    new DeployUnitChangeEvent(Faction, buildCountryIds[0], DeployType.BUILD);
+                return deployEvent;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

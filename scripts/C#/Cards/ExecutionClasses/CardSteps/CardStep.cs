@@ -5,7 +5,20 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-public partial class CardStep : ITaggable
+/// <summary>
+/// One step of a card's effect. Abstract: a step declares WHAT IT IS by its type — see
+/// <see cref="StepKind"/> and the concrete subclasses — and the type, not a line inside the body,
+/// decides <c>IsTrigger</c>, the dispatch route and the recalculation scope.
+///
+/// The body returns a <see cref="CardStepResult"/> and dispatches nothing itself. That is the whole
+/// point of the split: a step used to be a <c>Func&lt;Task&gt;</c> that emitted its own events, so
+/// nothing stopped one step doing two things, and 32 of them did. A cost and the effect it paid for
+/// were one opaque body distinguished only by an <c>IsTrigger</c> flag and statement order, which
+/// made both invisible to the three mechanisms that work at step granularity: reaction windows,
+/// <c>CardPlayRound.ContinueWithNextSteps</c> re-entry, and
+/// <see cref="CardStepBuilders.RequiringPreviousStep"/>.
+/// </summary>
+public abstract partial class CardStep : ITaggable
 {
     [JsonIgnore] private readonly TagContainer _tags = new();
     [JsonIgnore] public TagContainer Tags => _tags;
@@ -16,147 +29,154 @@ public partial class CardStep : ITaggable
     /// True only once this step's logic has run to completion. Narrower than StepFinished, which is
     /// set before the logic runs and so means "done, no matter how": a step that was skipped —
     /// conditions not met, or the player cancelling its selection — is finished but not succeeded.
-    /// Read by <see cref="RequiringPreviousStep"/> to keep the second half of a single action from
-    /// happening on its own.
+    /// Read by <see cref="CardStepBuilders.RequiringPreviousStep"/> to keep the second half of a
+    /// single action from happening on its own.
+    ///
+    /// It means "the body ran and its result was dispatched", NOT "the effect landed": a blocked
+    /// event still leaves this true, so the effect half of a cost+effect card still runs after a
+    /// blocked cost — which is what the fused single step did before the two were split.
+    ///
+    /// **When it flips is load-bearing**, and not only for the prerequisite check. It is set only
+    /// after dispatch and every window that dispatch opened have fully returned, so while step N's
+    /// after-reaction window is open, a step N+1 gated on it is not executable. That is what stops
+    /// CardPlayRound.ContinueWithNextSteps hoisting the second half of a split card into the first
+    /// half's reaction window and emitting an extra ActivateReactionChangeEvent into the replicated
+    /// stream, where today's fused step emits its second event strictly after the window closes.
     /// </summary>
     public bool StepSucceeded { get; set; } = false;
-    public int Id { get; set; } = 0;
-    [JsonIgnore] public CardStep NextCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) + 1);
-    // ElementAtOrDefault returns null for a negative index, so the card's first step has none.
-    [JsonIgnore] public CardStep PreviousCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) - 1);
-    [JsonIgnore] public CardLogic CardLogic;    
-    protected Func<Task> StepLogic;
-    protected Func<List<Condition>> GetConditionsMethod;
-    protected Func<List<Condition>> GetAdvisoryConditionsMethod;
-    private bool _requiresPreviousStep = false;
-    protected Faction TriggeringFaction { get { return CardLogic.Faction; } }
-    [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod != null ? GetConditionsMethod() : null;
 
     /// <summary>
-    /// The prerequisite from <see cref="RequiringPreviousStep"/>. Folded into MeetAllConditions rather
-    /// than into Conditions so the single gate that Execute and
-    /// GameStateCalculator.CalculateExecutableStepsForFaction already consult stays the whole truth
-    /// about whether this step can run.
+    /// Position in <c>GameState.CardSteps</c>, assigned by the constructor.
+    ///
+    /// This used to be 0 for every step in the game: a <c>WithId()</c> builder existed and no card
+    /// ever called it. So <see cref="PromptOrigin"/>'s Frame.StepId and InputRequest.OriginStepId
+    /// carried 0 game-wide — a prompt could not say WHICH step of a card raised it — ErrorReporter's
+    /// <c>CardStep "name" #0</c> named no step, and MultiplayerGameState.CardStepsById would have
+    /// thrown on a duplicate key had anything ever read it.
+    ///
+    /// Deterministic: steps are constructed in a fixed order during setup, so the same step has the
+    /// same id on every peer and across a replayed save.
     /// </summary>
-    [JsonIgnore] private bool PreviousStepRequirementMet => !_requiresPreviousStep || (PreviousCardStep?.StepSucceeded ?? false);
-    [JsonIgnore] public bool MeetAllConditions => (Conditions == null || Conditions.All(condition => condition.MeetCondition())) && PreviousStepRequirementMet;
+    public int Id { get; set; } = 0;
+
+    public string ActionGuidance;
+
+    // ElementAtOrDefault returns null for a negative index, so the card's first step has none.
+    [JsonIgnore] public CardStep NextCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) + 1);
+    [JsonIgnore] public CardStep PreviousCardStep => CardLogic.CardSteps.ElementAtOrDefault(CardLogic.CardSteps.IndexOf(this) - 1);
+    [JsonIgnore] public CardLogic CardLogic;
+
+    // internal, not private: the fluent builders are generic extension methods — see
+    // CardStepBuilders for why they cannot be instance methods. One assembly, so internal costs
+    // nothing, and System.Text.Json ignores non-public members, which strengthens the rule on
+    // Purpose below that authored card data must never enter the saved game.
+    [JsonIgnore] internal Func<List<Condition>> GetConditionsMethod;
+    [JsonIgnore] internal Func<List<Condition>> GetAdvisoryConditionsMethod;
+    [JsonIgnore] internal bool RequiresPreviousStep;
+
+    [JsonIgnore] protected Faction TriggeringFaction => CardLogic.Faction;
+    [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod?.Invoke();
+
+    /// <summary>
+    /// The prerequisite from <see cref="CardStepBuilders.RequiringPreviousStep"/>. Folded into
+    /// MeetAllConditions rather than into Conditions so the single gate that Execute and
+    /// GameStateCalculator.EvaluateExecutableSteps already consult stays the whole truth about
+    /// whether this step can run.
+    /// </summary>
+    [JsonIgnore] private bool PreviousStepRequirementMet => !RequiresPreviousStep || (PreviousCardStep?.StepSucceeded ?? false);
+
+    [JsonIgnore] public bool MeetAllConditions
+    {
+        get
+        {
+            // Resolved ONCE. GetConditionsMethod is a card author's lambda that allocates a fresh
+            // List<Condition> of fresh Condition objects on every call, and the expression this
+            // replaces read the property twice — once for the null test, once for the All() — so
+            // every evaluation built the list twice and threw one copy away.
+            List<Condition> conditions = Conditions;
+            return (conditions == null || conditions.All(condition => condition.MeetCondition()))
+                   && PreviousStepRequirementMet;
+        }
+    }
 
     [JsonIgnore] protected List<Condition> AdvisoryConditions => GetAdvisoryConditionsMethod?.Invoke();
 
     /// <summary>
     /// Whether this step, if run right now, would do something worth doing — see
-    /// <see cref="WithAdvisoryCondition"/>. Deliberately NOT folded into
+    /// <see cref="CardStepBuilders.WithAdvisoryCondition"/>. Deliberately NOT folded into
     /// <see cref="MeetAllConditions"/>, unlike <see cref="PreviousStepRequirementMet"/> just above: an
     /// advisory condition must never stop the step or make it unexecutable, it only reports that the
     /// step's effect would be hollow. Read by
     /// GameStateCalculator.CalculateAttentionCardsForFaction to raise
     /// <see cref="Tag.NeedsAttention"/>, and by nothing in the execution path.
     /// </summary>
-    [JsonIgnore] public bool MeetAllAdvisoryConditions =>
-        AdvisoryConditions == null || AdvisoryConditions.All(condition => condition.MeetCondition());
-
-    public string ActionGuidance;
+    [JsonIgnore] public bool MeetAllAdvisoryConditions
+    {
+        get
+        {
+            List<Condition> advisory = AdvisoryConditions;   // once — see MeetAllConditions
+            return advisory == null || advisory.All(condition => condition.MeetCondition());
+        }
+    }
 
     /// <summary>
     /// What this step's prompts are FOR, so a bot rule can tell a deploy-target country selection from
     /// the thirty-odd other reasons a card asks for a country. Declared with
-    /// <see cref="WithPurpose"/>; <see cref="PromptPurpose.NONE"/> until it is.
+    /// <see cref="CardStepBuilders.WithPurpose"/>; <see cref="PromptPurpose.NONE"/> until it is.
     ///
     /// [JsonIgnore] is mandatory, not tidiness. Steps register themselves into
     /// GameSession.Current.GameState.CardSteps, and Id / StepFinished / StepSucceeded / ActionGuidance
     /// are all public and serialised — so a bare public field here would enter the saved game and the
     /// state hash. This is a property of the AUTHORED CARD, identical on every peer and across every
-    /// save, and it must never be state.
+    /// save, and it must never be state. The same rule governs <see cref="Kind"/> and
+    /// <see cref="RecalcScope"/> below.
     /// </summary>
     [JsonIgnore] public PromptPurpose Purpose = PromptPurpose.NONE;
 
-    public CardStep(CardLogic cardLogic, Func<Task> stepLogic)
+    /// <summary>What kind of step this is, structurally. See <see cref="StepKind"/>.</summary>
+    [JsonIgnore] public abstract StepKind Kind { get; }
+
+    /// <summary>
+    /// What this step disturbs, for the <c>CalculateAll()</c> that closes <see cref="Execute"/>.
+    ///
+    /// Declared per TYPE and pessimistic by default, exactly as <see cref="ChangeEvent.RecalcScope"/>
+    /// is and for the same reason: getting one wrong leaves a stale tag rather than throwing, so
+    /// narrowing has to be opt-in and one small reviewable claim at a time.
+    ///
+    /// The two event-producing kinds narrow to <see cref="RecalcScope.None"/> — their event's own
+    /// <c>Apply()</c> already ran CalculateAll at the event's own declared scope, and this call used
+    /// to run a SECOND, full-scope pass on top of it after every step in the game.
+    /// </summary>
+    [JsonIgnore] public virtual RecalcScope RecalcScope => RecalcScope.All;
+
+    protected CardStep(CardLogic cardLogic)
     {
         this.CardLogic = cardLogic;
-        this.StepLogic = stepLogic;
+        Id = GameSession.Current.GameState.CardSteps.Count;
         GameSession.Current.GameState.CardSteps.Add(this);
-    }    
-
-    public CardStep WithId(int id)
-    {
-        this.Id = id;
-        return this;
-    }
-
-    public CardStep WithStepLogic(Func<Task> stepLogic)
-    {
-        this.StepLogic = stepLogic;
-        return this;
-    }
-
-    public CardStep WithConditions(Func<List<Condition>> getConditionsMethod)
-    {
-        this.GetConditionsMethod = getConditionsMethod;
-        return this;
-    }
-    public CardStep WithCondition(Func<Condition> getConditionMethod)
-    {
-        this.GetConditionsMethod = () => new List<Condition> { getConditionMethod() };
-        return this;
     }
 
     /// <summary>
-    /// An advisory condition: when it is NOT met the step still runs exactly as before, but the card is
-    /// flagged <see cref="Tag.NeedsAttention"/> and drawn with a caution scrim so the player notices
-    /// that the play, while legal, would achieve nothing on the current board.
-    ///
-    /// Use it for "the effect is hollow", never for "the effect is illegal" — that is
-    /// <see cref="WithCondition"/>. A build card whose only targets are countries the faction already
-    /// occupies is the motivating case: CountryState.CanBuild permits the deploy, GameAPI rebuilds in
-    /// place, and the board is identical afterwards.
+    /// Run the card author's body and hand back what it produced. The subclass owns this because the
+    /// delegate's shape is the subclass's business — <see cref="BlockStep{TTrigger}"/> passes the
+    /// typed trigger in, every other kind takes no argument.
     /// </summary>
-    public CardStep WithAdvisoryCondition(Func<Condition> getConditionMethod)
-    {
-        this.GetAdvisoryConditionsMethod = () => new List<Condition> { getConditionMethod() };
-        return this;
-    }
-
-    /// <inheritdoc cref="WithAdvisoryCondition"/>
-    public CardStep WithAdvisoryConditions(Func<List<Condition>> getConditionsMethod)
-    {
-        this.GetAdvisoryConditionsMethod = getConditionsMethod;
-        return this;
-    }
+    protected abstract Task<CardStepResult> RunCoreAsync();
 
     /// <summary>
-    /// Declare what this step's prompts are for. Sibling of <see cref="WithGuidance"/>, and the
-    /// sturdy counterpart to it: guidance is prose for the player and changes with a copy edit, this
-    /// is an enum the compiler checks.
-    ///
-    /// One purpose per step. Where a single step raises prompts of two different kinds — see
-    /// EventGunsandButter — leave this unset and wrap each branch in
-    /// <see cref="PromptOrigin.Narrow"/> instead, so the declaration sits where the truth is.
+    /// Apply the result. One seam per step kind, and the only place a step's effect reaches the game.
     /// </summary>
-    public CardStep WithPurpose(PromptPurpose purpose)
-    {
-        this.Purpose = purpose;
-        return this;
-    }
-
-    public CardStep WithGuidance(string actionGuidance)
-    {
-        this.ActionGuidance = actionGuidance;
-        return this;
-    }
+    protected abstract Task DispatchAsync(CardStepResult result);
 
     /// <summary>
-    /// This step is one half of a single action and must not happen on its own: if the step before it
-    /// in the card was skipped — its conditions not met, or the player cancelling its selection — this
-    /// step is skipped too, quietly, which for a two-step card ends the card.
-    ///
-    /// Without it, a card that eliminates one of your units and then rebuilds it elsewhere hands out a
-    /// free unit whenever the removal half is skipped, because the two steps are otherwise independent.
+    /// A result arm this step kind cannot dispatch. Reported and ignored rather than thrown: the
+    /// price of the uniform <see cref="CardStepResult"/> is that this is a runtime question, and
+    /// turning a card-authoring slip into a halted turn loop would be a worse answer than a loud log
+    /// line naming the card and the step.
     /// </summary>
-    public CardStep RequiringPreviousStep()
-    {
-        this._requiresPreviousStep = true;
-        return this;
-    }
+    protected void ReportWrongArm(CardStepResult result)
+        => DebugUtilities.PrintPeerError(
+            $"{CardLogic?.CardState?.CardName} #{Id}: a {Kind} step returned {result.Outcome}, which it cannot dispatch");
 
     public async Task Execute()
     {
@@ -165,48 +185,56 @@ public partial class CardStep : ITaggable
         // try/finally this method otherwise lacks: the frame is restored on the normal path, on the
         // StepSkippedException path, and before the rethrow in the general catch. See PromptOrigin for
         // why restoring the displaced frame — rather than clearing — is the load-bearing part.
+        //
+        // Dispatch happens INSIDE this scope, deliberately: a cost event raises its own prompt from
+        // inside ExecuteAsync (ForceDiscardHandCardsChangeEvent does), and that prompt has to carry
+        // this step's card id, step id and purpose.
         using PromptOrigin.Scope origin = PromptOrigin.Enter(this);
 
         StepFinished = true;
         // A re-run — a Status card's steps are re-armed every turn — must not inherit the last run's result.
         StepSucceeded = false;
-        bool CanExecuteStep = MeetAllConditions;
 
-        if (!CanExecuteStep)
+        if (!MeetAllConditions)
         {
             //Should skip step
             DebugUtilities.PrintPeer("SKIPPING STEP");
             // A step skipped only because its prerequisite step did not happen says nothing: the player
             // was already told about that step, and "Unable to: rebuild the unit" on top of it reads as
             // a second, separate failure.
-            if (PreviousStepRequirementMet)
+            if (PreviousStepRequirementMet && !string.IsNullOrEmpty(ActionGuidance))
             {
                 await new ShowActionLabelPresentationEvent(TriggeringFaction, "Unable to: " + ActionGuidance).Apply();
                 await Task.Delay(GameSettings.DurationLong);
             }
-            if (NextCardStep != null)
-            {
-                await NextCardStep.Execute();
-            }
-            else
-            {
-                DebugUtilities.PrintPeer("NO MORE STEPS LEFT");
-            }
+            // No cascade to NextCardStep.Execute(). CardPlayRound.DoCard's while loop owns
+            // advancement, and the cascade this replaces was a second, weaker copy of it: it did not
+            // re-check cardLogic.IsBlocked, so a card blocked mid-resolution kept running its
+            // remaining steps; it made stack depth grow with the step count; and it was one of the
+            // two reentrancy cases PromptOrigin has to defend against by name. DoCard captures the
+            // same List reference and re-queries !StepFinished every iteration, so removing it
+            // changes neither which steps run nor their order.
         }
         else
         {
             try
             {
-                DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName}");
-                await new ShowActionLabelPresentationEvent(TriggeringFaction, ActionGuidance).Apply();
+                DebugUtilities.PrintPeer($"Invoking step: {CardLogic.CardState.CardName} #{Id} ({Kind})");
+                // Guarded on guidance being set, which is what makes splitting a fused step free:
+                // the cost half keeps the card's single label and the effect half declares none, so
+                // the player still sees exactly one line per action rather than two. It also stops
+                // the handful of steps that never had a .WithGuidance at all from announcing
+                // themselves with an empty label.
+                if (!string.IsNullOrEmpty(ActionGuidance))
+                    await new ShowActionLabelPresentationEvent(TriggeringFaction, ActionGuidance).Apply();
                 ErrorInjection.MaybeThrow(ErrorInjection.Site.CardStep, CardLogic?.CardState?.CardName);
-                await StepLogic();
+                await DispatchAsync(await RunCoreAsync());
                 StepSucceeded = true;
             }
             catch (StepSkippedException)
             {
                 // Player chose to skip this step's selection. Only the current step is
-                // abandoned (result stays null so no change event fires); StepFinished is
+                // abandoned (nothing is dispatched, so no change event fires); StepFinished is
                 // already true, so DoCard advances to the card's next step (if any).
                 DebugUtilities.PrintPeer("Player skipped step");
                 await new ShowActionLabelPresentationEvent(TriggeringFaction, "Skipped: " + ActionGuidance).Apply();
@@ -228,18 +256,15 @@ public partial class CardStep : ITaggable
                 throw;
             }
         }
-        
-        // Recalculate game state after step completes
-        // Note: ChangeEvent.Apply() also recalculates, but this ensures tags are fresh
-        // for any immediate condition checks or UI updates
-        GameStateCalculator.CalculateAll();
-    }
 
-    public T BuildChangeEvent<T>(T changeEvent) where T : ChangeEvent
-    {
-        changeEvent.SourceCardId = CardLogic.CardState.Id;
-        changeEvent.TriggeringFaction = CardLogic.CardState.Faction;
-        return changeEvent;
+        // After the if/else and deliberately NOT in a finally: the rethrow path above must escape
+        // before this runs, as it always has.
+        //
+        // Scoped by the step's kind rather than the blanket CalculateAll() this replaces. For a step
+        // whose whole effect is one ChangeEvent that is RecalcScope.None, because the event's own
+        // Apply() already recalculated at its own declared scope — this was a second, full-scope
+        // pass on top of it, after every step in the game.
+        GameStateCalculator.CalculateAll(RecalcScope);
     }
 
     public static List<CardStep> All => CardState.All.Values.SelectMany(cardState => cardState.CardLogic.CardSteps).ToList();

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -97,37 +98,37 @@ public partial class MutatorReallocateResources : ActivatableMutator
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                // Spent up front: the play must already read as gone while the prompts below are open,
-                // and a host timeout can end the step with no card played at all. The taken card's own
-                // PlayCardChangeEvent increments the same counter again, which is harmless —
-                // CardsPlayedThisTurnStep is only ever tested > 0 and is cleared each round.
-                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
-                spendEvent.IsTrigger = false;
-                await spendEvent.Apply();
+            // Spent up front: the play must already read as gone while the prompts below are open,
+            // and a host timeout can end the sequence with no card played at all. The taken card's own
+            // PlayCardChangeEvent increments the same counter again, which is harmless —
+            // CardsPlayedThisTurnStep is only ever tested > 0 and is cleared each round.
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new SpendPlayActionChangeEvent(Faction)))
+            .WithGuidance($"Discard {DiscardCost} cards to take a Build or Battle card from your deck and play it"),
 
-                // Raises its own required selection and round-trips the picks to clients.
-                ForceDiscardHandCardsChangeEvent discardEvent =
-                    BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
+            // Raises its own required selection and round-trips the picks to clients.
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost)))
+            .RequiringPreviousStep(),
 
-                // Recomputed rather than captured before the discard: the discard only moves hand
-                // cards so the answer is the same, but the deck is live state and the read belongs
-                // next to its use.
+            // The full pipeline, deliberately: this play triggers responses like any other.
+            // DeckState.PlayCard takes the card out of DeckCardIds, so the card goes from deck to
+            // table without ever passing through hand.
+            //
+            // DrawOptions() is read here rather than captured before the discard: the discard only
+            // moves hand cards so the answer is the same, but the deck is live state and the read
+            // belongs next to its use.
+            new PlayCardStep(this, async () => {
                 InputRequest pick = await new InputRequest.SelectCardRequestHandler(
                     Faction, DrawOptions(), "Take a card from your draw deck and play it").BroadCast();
 
                 // Only reachable through a host timeout / Skip decision — the modal has no Cancel
                 // while the pick is required, and MutatorTriggers guarantees at least one option.
-                if (pick.ResponseCardIds.Count == 0) return;
-
-                // The full pipeline, deliberately: this play triggers responses like any other.
-                // DeckState.PlayCard takes the card out of DeckCardIds, so the card goes from deck to
-                // table without ever passing through hand.
-                await CardPlayPool.DoCard(pick.ResponseCardIds[0]);
+                return pick.ResponseCardIds.Count == 0
+                    ? CardStepResult.Nothing
+                    : CardStepResult.PlayCard(pick.ResponseCardIds[0]);
             })
-            .WithGuidance($"Discard {DiscardCost} cards to take a Build or Battle card from your deck and play it")
+            .RequiringPreviousStep()
         };
     }
 }

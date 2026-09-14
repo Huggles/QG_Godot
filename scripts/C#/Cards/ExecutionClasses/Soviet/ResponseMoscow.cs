@@ -22,13 +22,11 @@ public partial class ResponseMoscow : ResponseCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async ()=>{
-                if(ActivationTrigger is RemoveUnitChangeEvent removeEvent){
-                    removeEvent.IsBlocked = true;
-                    removeEvent.UnitState.ImmuneForTurn = true;
-                    PresentationServices.Notification.ShowActionText($"{Faction.WithPlayer()} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);
-                    await Task.Delay(GameSettings.DurationMedium);
-                }
+            new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
+                removeEvent.UnitState.ImmuneForTurn = true;
+                PresentationServices.Notification.ShowActionText($"{Faction.WithPlayer()} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);
+                await Task.Delay(GameSettings.DurationMedium);
+                return CardStepResult.Block();
             })
             .WithGuidance("Do not remove your Army in Moscow this turn")
         };

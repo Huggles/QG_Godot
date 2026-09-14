@@ -19,11 +19,10 @@ public partial class EventIncreasedCommonwealthSupport : EventCardLogic
     {
         
         return new List<CardStep> {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 return RecruitTargets.Count > 0;

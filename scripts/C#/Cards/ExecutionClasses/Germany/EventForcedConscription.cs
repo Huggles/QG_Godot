@@ -20,19 +20,17 @@ public partial class EventForcedConscription : EventCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitableCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
+                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => RecruitableCountryIds.Count > 0), this))
             .WithGuidance("Recruit an Army in or adjacent to Germany"),
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitableCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
+                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => RecruitableCountryIds.Count > 0), this))
             .WithGuidance("Recruit a second Army in or adjacent to Germany"),

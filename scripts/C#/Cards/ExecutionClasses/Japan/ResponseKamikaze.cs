@@ -25,13 +25,12 @@ public partial class ResponseKamikaze : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
-                if (trigger == null) return;
-                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(
-                    new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE));
-                removeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(removeEvent);
+                if (trigger == null) return CardStepResult.Nothing;
+                RemoveUnitChangeEvent removeEvent = 
+                    new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE);
+                return removeEvent;
             })
             .WithGuidance("Eliminate the Allied Navy just built"),
         };

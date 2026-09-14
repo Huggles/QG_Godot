@@ -34,21 +34,27 @@ public partial class ResponseTruk : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                var unitIds = SupplyTargetUnitIds;
+            new RequirementStep(this, () => {
+                // Guarded INSIDE the step, not with .WithCondition. A step condition would make this
+                // the card's only executable step when it fails, HasExecutableCardSteps false, and
+                // the card unactivatable -- where before it simply announced itself and granted
+                // nothing. Same trap as the EW cards above.
+                List<int> unitIds = SupplyTargetUnitIds;
+                return unitIds.Count == 0
+                    ? Task.FromResult(CardStepResult.Nothing)
+                    : Task.FromResult<CardStepResult>(new GrantSupplyChangeEvent(Faction, unitIds));
+            })
+            .WithGuidance("Grant supply to all Japanese pieces in or adjacent to the Central Pacific"),
 
-                if (unitIds.Count > 0)
-                {
-                    GrantSupplyChangeEvent grantEvent = BuildChangeEvent(new GrantSupplyChangeEvent(Faction, unitIds));
-                    grantEvent.IsTrigger = false;
-                    await grantEvent.Apply();
-                }
-
+            // Announcement only — no ChangeEvent, so an EffectStep. Deliberately NOT gated on the
+            // step above: the card tells the table what it did whether or not anything needed the
+            // supply, exactly as before.
+            new EffectStep(this, async () => {
                 PresentationServices.Notification.ShowActionText("Truk: Japanese pieces in or adjacent to the Central Pacific are in supply this turn.", Faction);
                 await Task.Delay(GameSettings.DurationLong);
                 PresentationServices.Notification.HideActionText();
+                return CardStepResult.Nothing;
             })
-            .WithGuidance("Grant supply to all Japanese pieces in or adjacent to the Central Pacific"),
         };
     }
 }

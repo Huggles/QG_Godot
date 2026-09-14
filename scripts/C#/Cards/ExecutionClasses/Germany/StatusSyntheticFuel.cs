@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -38,17 +39,16 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                DebugUtilities.PrintPeer("StatusSyntheticFuel react step");
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await CardPlayPool.DoChangeEvent(discardEvent);
-                
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            .WithGuidance("Deploy an army adjacent to where you've deployed an army this turn"),
+
+            new ResultStep(this, async () => {
                 int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-            }).WithGuidance("Deploy an army adjacent to where you've deployed an army this turn")
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
+                return deployUnitChangeEvent;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

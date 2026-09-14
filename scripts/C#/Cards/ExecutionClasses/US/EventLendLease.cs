@@ -10,33 +10,47 @@ public partial class EventLendLease : EventCardLogic
     // Where the chosen ally then plays is not knowable at hover time — it depends on the card they
     // pick from a hand this card cannot see. TargetSet.Factions would be inert noise.
 
+    /// <summary>
+    /// The ally chosen by the first step, read by the draw step. Captured rather than re-prompted:
+    /// the play and the draw are separate steps now and the US must not be asked twice.
+    /// </summary>
+    private Faction _selectedFaction;
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new CardStep(this, async () => {
+            new PlayCardStep(this, async () => {
                 var factionResp = await new InputRequest.SelectFactionRequestHandler(
                     Faction, new List<Faction> { Faction.UNITED_KINGDOM, Faction.SOVIET }).BroadCast();
-                Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
+                _selectedFaction = (Faction)factionResp.ResponseCardIds[0];
 
                 // The whole hand, set explicitly: this is a granted out-of-turn play, so the handler's
                 // default offer (ActivatableCardIds) is empty for the receiving faction — its play
                 // conditions include IsFactionTurn, which fails on the US turn.
-                var cardResp = await new InputRequest.HandCardPlayRequestHandler(selectedFaction)
+                var cardResp = await new InputRequest.HandCardPlayRequestHandler(_selectedFaction)
                 {
-                    TargetCardIds = DeckState.ForFaction(selectedFaction).HandCardIds
+                    TargetCardIds = DeckState.ForFaction(_selectedFaction).HandCardIds
                 }.BroadCast();
-                if (cardResp.ResponseCardIds.Count > 0)
-                    await CardPlayPool.DoCard(cardResp.ResponseCardIds[0]);
 
-                DrawCardsChangeEvent drawEvent = BuildChangeEvent(new DrawCardsChangeEvent(Faction, selectedFaction, 1, true));
-                drawEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(drawEvent);
+                // Nothing, not StepSkippedException: an ally who declines the gift still gets the
+                // card draw below, which is what the fused step did. Returning Nothing keeps
+                // StepSucceeded true, so the RequiringPreviousStep gate on the draw still opens.
+                return cardResp.ResponseCardIds.Count > 0
+                    ? CardStepResult.PlayCard(cardResp.ResponseCardIds[0])
+                    : CardStepResult.Nothing;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 DeckState.ForFaction(Faction.UNITED_KINGDOM).HandCardIds.Count > 0 ||
                 DeckState.ForFaction(Faction.SOVIET).HandCardIds.Count > 0), this))
-            .WithGuidance("Select an Allied faction to play a card and draw a card")
+            .WithGuidance("Select an Allied faction to play a card and draw a card"),
+
+            // Gated, and the gate is doing real work rather than tidiness: while the ally's card is
+            // resolving, step one's StepSucceeded is still false, so a ContinueWithNextSteps fired
+            // from inside THAT card's reaction windows cannot hoist this draw into the middle of it.
+            new ResultStep(this, () => Task.FromResult<CardStepResult>(
+                new DrawCardsChangeEvent(Faction, _selectedFaction, 1, true)))
+            .RequiringPreviousStep()
         };
     }
 }

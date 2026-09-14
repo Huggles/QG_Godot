@@ -27,7 +27,7 @@ public partial class EventGunsAndButter : EventCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 // Build available options
                 List<string> options = new();
                 if (CountryState.BuildableLand(Faction).Any())                                           options.Add(OPT_BUILD_ARMY);
@@ -44,12 +44,12 @@ public partial class EventGunsAndButter : EventCardLogic
                 if (selected == OPT_BUILD_ARMY)
                 {
                     int armyCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, CountryState.BuildableLand(Faction).ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                    result = BuildChangeEvent(new DeployUnitChangeEvent(Faction, armyCountryId, DeployType.BUILD));
+                    result = new DeployUnitChangeEvent(Faction, armyCountryId, DeployType.BUILD);
                 }
                 else if (selected == OPT_BUILD_NAVY)
                 {
                     int navyCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, CountryState.BuildableSea(Faction).ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                    result = BuildChangeEvent(new DeployUnitChangeEvent(Faction, navyCountryId, DeployType.BUILD));
+                    result = new DeployUnitChangeEvent(Faction, navyCountryId, DeployType.BUILD);
                 }
                 else if (selected == OPT_LAND_BATTLE)
                 {
@@ -57,7 +57,7 @@ public partial class EventGunsAndButter : EventCardLogic
                     BattleTarget landTarget = landResp.ResponseCountryIds.Count > 0
                         ? new BattleTarget(landResp.ResponseCountryIds[0], TargetType.COUNTRY)
                         : new BattleTarget(landResp.ResponseUnitIds[0], TargetType.UNIT);
-                    result = BuildChangeEvent(landTarget.ToAttackChangeEvent(Faction));
+                    result = landTarget.ToAttackChangeEvent(Faction);
                 }
                 else if (selected == OPT_SEA_BATTLE)
                 {
@@ -65,14 +65,11 @@ public partial class EventGunsAndButter : EventCardLogic
                     BattleTarget seaTarget = seaResp.ResponseCountryIds.Count > 0
                         ? new BattleTarget(seaResp.ResponseCountryIds[0], TargetType.COUNTRY)
                         : new BattleTarget(seaResp.ResponseUnitIds[0], TargetType.UNIT);
-                    result = BuildChangeEvent(seaTarget.ToAttackChangeEvent(Faction));
+                    result = seaTarget.ToAttackChangeEvent(Faction);
                 }
+                // null degrades to CardStepResult.Nothing - see the implicit conversion.
 
-                if (result != null)
-                {
-                    result.IsTrigger = true;
-                    await CardPlayPool.DoChangeEvent(result);
-                }
+                return result;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 CountryState.BuildableLand(Faction).Any()

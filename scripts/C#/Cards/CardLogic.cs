@@ -313,9 +313,4 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     public virtual string ActivateActionGuidance() =>
         $"Activate {GetType().Name}";
 
-    public T BuildChangeEvent<T>(T changeEvent) where T : ChangeEvent
-    {
-        changeEvent.SourceCardId = this.CardState.Id;
-        return changeEvent;
-    }
 }

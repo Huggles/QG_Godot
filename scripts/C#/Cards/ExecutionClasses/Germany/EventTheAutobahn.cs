@@ -32,14 +32,13 @@ public partial class EventTheAutobahn : EventCardLogic
 
     private CardStep MakeRemovalStep()
     {
-        return new CardStep(this, async () =>
+        return new RequirementStep(this, async () =>
         {
             int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, EligibleArmyIds).BroadCast()).ResponseUnitIds[0];
             relocatedIds.Add(selectedUnitId);
             if (EligibleArmyIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
-            RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE));
-            removeEvent.IsTrigger = false;
-            await CardPlayPool.DoChangeEvent(removeEvent);
+            RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
+            return removeEvent;
         })
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
             EligibleArmyIds.Count > 0 && CountryState.BuildableLand(Faction).Count > 0), this))
@@ -48,14 +47,13 @@ public partial class EventTheAutobahn : EventCardLogic
 
     private CardStep MakeDeployStep()
     {
-        return new CardStep(this, async () =>
+        return new ResultStep(this, async () =>
         {
             await ReplayContext.Pace(1000);
             var buildableIds = CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
             int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableIds).BroadCast()).ResponseCountryIds[0];
-            DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
-            deployEvent.IsTrigger = true;
-            await CardPlayPool.DoChangeEvent(deployEvent);
+            DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
+            return deployEvent;
         })
         // Rebuilding is the other half of the removal, not an effect of its own: a skipped removal
         // finishes the card instead of granting a free army.

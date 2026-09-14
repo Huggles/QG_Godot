@@ -51,20 +51,18 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitableNearMoscowIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
+                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT);
+                return deployEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(MoscowAndAdjacentIds, Faction), this))
             .WithGuidance("Recruit an Army in or adjacent to Moscow"),
 
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 int unitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesInMoscow).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = BuildChangeEvent(new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE));
-                removeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(removeEvent);
+                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE);
+                return removeEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInMoscow.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in Moscow")

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -30,23 +31,22 @@ public partial class StatusVolksturm : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 1));
-                discardEvent.IsTrigger = false;
+            new RequirementStep(this, () =>
                 // No ShowModal here: ForceDiscardCardsChangeEvent.AfterAnimations already queues a
                 // ShowDiscardModalAnimation for the same cards, and Apply awaits the animation
                 // queue — so showing it again here displayed the discard modal twice.
-                await discardEvent.Apply();
-
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-            })
+                Task.FromResult<CardStepResult>(new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
             .WithGuidance("Recruit an army in Germany (in addition to your playstep)")
             // Hollow when Germany already holds a German unit: the recruit redeploys the piece
             // standing there and the board is unchanged (see CountryState.CanBuild).
-            .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit(recruitCountryIds[0], Faction)), this))
+            .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit(recruitCountryIds[0], Faction)), this)),
+
+            new ResultStep(this, async () => {
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitCountryIds).BroadCast()).ResponseCountryIds[0];
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployUnitChangeEvent;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

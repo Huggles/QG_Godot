@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,19 +21,27 @@ public partial class EWSubmarinesEnforceBlockade : EWCardLogic
 
     public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
 
+    /// <summary>
+    /// Captured by the scoring step and read by the discard step, rather than recomputed. The two
+    /// are separate steps now, and a reaction played in the scoring step's after-reaction window can
+    /// move the board between them -- recomputing would make the discard disagree with the VP that
+    /// was actually awarded.
+    /// </summary>
+    private int _scoringCount;
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
-                int count = ScoringUnits.Count;
+            new ResultStep(this, () => {
+                _scoringCount = ScoringUnits.Count;
+                return Task.FromResult<CardStepResult>(
+                    new ScorePointsChangeEvent(new VPEntry(_scoringCount, "German Armies adjacent to North Sea"), Faction));
+            }),
 
-                await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(new VPEntry(count, "German Armies adjacent to North Sea"), Faction));
-                
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, count * 2));
-                discardEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardEvent);
-            })
-        }; 
+            new ResultStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, _scoringCount * 2)))
+            .RequiringPreviousStep()
+        };
     }
 }

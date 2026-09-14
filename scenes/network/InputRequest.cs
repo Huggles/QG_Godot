@@ -203,6 +203,22 @@ public abstract partial class InputRequest
     public PromptPurpose OriginPurpose { get; set; } = PromptPurpose.NONE;
 
     /// <summary>
+    /// What KIND of step raised this prompt — the structural companion to
+    /// <see cref="OriginPurpose"/>. Purpose says what is being chosen; this says why the card is
+    /// asking: a <see cref="StepKind.Requirement"/> prompt is a cost the card is charging, a
+    /// <see cref="StepKind.Result"/> prompt is the payoff it charges for.
+    ///
+    /// Before card steps were typed there was no way to tell the two apart without running the step
+    /// — the complaint CardLogic.IsFreePlayStepActivation's summary spells out — so a bot could not
+    /// price "discard 2 cards to deploy 1 army" and a UI could not warn about one.
+    ///
+    /// Defaults to <see cref="StepKind.Result"/> rather than to a "none" member: every prompt that
+    /// is not a declared cost is, as far as a consumer is concerned, part of the effect, and a
+    /// request raised outside any card step at all is not a cost either.
+    /// </summary>
+    public StepKind OriginStepKind { get; set; } = StepKind.Result;
+
+    /// <summary>
     /// Cards the prompt should DISPLAY, as opposed to <see cref="TargetCardIds"/>, which is what may
     /// be chosen. Everything here but not in TargetCardIds renders greyed out and unclickable.
     ///

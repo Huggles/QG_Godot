@@ -22,21 +22,19 @@ public partial class EventGeneralSmutsStrengthensTiestoUK : EventCardLogic
     {
         return new List<CardStep> {
             // Recruit an Army in Africa
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, armyCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable(armyCountryIds, Faction), this))
             .WithGuidance("Recruit an army in Africa"),
             
             // Recruit a Navy in Southern Ocean or Bay of Bengal
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, NavyTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
+                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployUnitChangeEvent;
             })
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 return NavyTargets.Count > 0;

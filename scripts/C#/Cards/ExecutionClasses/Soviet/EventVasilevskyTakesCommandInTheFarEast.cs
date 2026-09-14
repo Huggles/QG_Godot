@@ -38,25 +38,23 @@ public partial class EventVasilevskyTakesCommandInTheFarEast : EventCardLogic
     {
         return new List<CardStep> {
             // Step 1: Recruit an Army in Vladivostok
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, recruitCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(
-                    new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
+                DeployUnitChangeEvent deployEvent = 
+                    new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(recruitCountryIds, Faction), this))
             .WithGuidance("Recruit an Army in Vladivostok"),
 
             // Step 2: Battle in China
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, ChinaBattleTargets).BroadCast();
                 BattleTarget target = resp.ResponseCountryIds.Count > 0
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleCountryChange = BuildChangeEvent(target.ToAttackChangeEvent(Faction));
-                battleCountryChange.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(battleCountryChange);
+                BattleCountryChangeEvent battleCountryChange = target.ToAttackChangeEvent(Faction);
+                return battleCountryChange;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => ChinaBattleTargets.Count > 0), this))
             .WithGuidance("Battle in China")

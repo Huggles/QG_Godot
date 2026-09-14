@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,11 +28,14 @@ public partial class EventFlexibleResources : EventCardLogic
     /// </summary>
     public override TargetSet Targets() => TargetSet.Cards(PlayableDiscardedCardIds);
 
+    /// <summary>The discard-pile card chosen by the first step, played by the second.</summary>
+    private int _selectedCardId = -1;
+
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new CardStep(this, async () => {
+            new RequirementStep(this, async () => {
                 var resp = await new InputRequest.CardsRequestHandler(Faction, PlayableDiscardedCardIds).BroadCast();
 
                 // Declining leaves an EMPTY response rather than setting WasSkipped — that is
@@ -40,18 +44,15 @@ public partial class EventFlexibleResources : EventCardLogic
                 // guard the next line indexed [0] on an empty list and took the turn loop down.
                 if (resp.ResponseCardIds.Count == 0) throw new StepSkippedException();
 
-                int selectedCardId = resp.ResponseCardIds[0];
-
-                RecycleCardChangeEvent recycleEvent = BuildChangeEvent(
-                    new RecycleCardChangeEvent(Faction, Faction, selectedCardId, RecycleDestination.Hand));
-                recycleEvent.IsTrigger = false;
-                await recycleEvent.Apply();
-
-                await CardPlayPool.DoCard(selectedCardId);
+                _selectedCardId = resp.ResponseCardIds[0];
+                return new RecycleCardChangeEvent(Faction, Faction, _selectedCardId, RecycleDestination.Hand);
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 PlayableDiscardedCardIds.Count > 0), this))
-            .WithGuidance("Play a card of your choice from your discard pile")
+            .WithGuidance("Play a card of your choice from your discard pile"),
+
+            new PlayCardStep(this, () => Task.FromResult(CardStepResult.PlayCard(_selectedCardId)))
+            .RequiringPreviousStep()
         };
     }
 }

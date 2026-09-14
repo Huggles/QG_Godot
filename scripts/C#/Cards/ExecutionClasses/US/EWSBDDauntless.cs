@@ -27,10 +27,9 @@ public partial class EWSBDDauntless : EWCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction.JAPAN, 4));
-                discardEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardEvent);
+            new ResultStep(this, async() => {
+                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction.JAPAN, 4);
+                return discardEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(QualifyingUnitExists), this))
             .WithGuidance("Japan must discard 4 cards")

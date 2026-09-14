@@ -29,16 +29,15 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async ()=>{
-                if(ActivationTrigger is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
-                    int newNumberOfCards = Math.Max(ForceDiscardCardsChangeEvent.NumberOfCards - this.NumberOfCardsReduction, 0);
-                    ForceDiscardCardsChangeEvent.NumberOfCards = newNumberOfCards;
-                    PresentationServices.Notification.ShowActionText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);
-                    await Task.Delay(GameSettings.DurationMedium);
-                    return;
-                }else {
-                    throw new Exception("Reaction should be to a discard change event");
-                }
+            // A BlockStep that does not block. It is offered in the block window — that is the only
+            // window whose trigger it can reach — but its effect is to make the discard SMALLER, so
+            // it returns Nothing and lets the reduced event apply.
+            new BlockStep<ForceDiscardCardsChangeEvent>(this, async discardEvent => {
+                int newNumberOfCards = Math.Max(discardEvent.NumberOfCards - NumberOfCardsReduction, 0);
+                discardEvent.NumberOfCards = newNumberOfCards;
+                PresentationServices.Notification.ShowActionText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);
+                await Task.Delay(GameSettings.DurationMedium);
+                return CardStepResult.Nothing;
             })
         };
     }

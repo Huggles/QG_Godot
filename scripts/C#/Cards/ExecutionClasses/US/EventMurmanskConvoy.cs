@@ -18,20 +18,18 @@ public partial class EventMurmanskConvoy : EventCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(targetFaction, recruitCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.RECRUIT));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
+                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.RECRUIT);
+                return deployEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(recruitCountryIds, targetFaction), this))
             .WithGuidance("Recruit a Soviet Army in Russia"),
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
                 var buildableLand = CountryState.BuildableLand(targetFaction).ToCountryIds();
                 int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(targetFaction, buildableLand).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.BUILD));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
+                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.BUILD);
+                return deployEvent;
             })
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(targetFaction), this))
             .WithGuidance("Soviet Union may build an Army"),

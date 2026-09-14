@@ -45,7 +45,7 @@ public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new ResultStep(this, async () => {
                 // ActivationTrigger, not CurrentReactionTrigger: DoCard pins the event this activation
                 // was offered against — here the step event being blocked — and it survives any Apply()
                 // landing between the card being chosen and this step running. CurrentReactionTrigger is
@@ -54,13 +54,12 @@ public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
                 if (blockedEvent == null || blockedEvent.SourceCardId < 0)
                 {
                     DebugUtilities.PrintPeerError("Enigma Code Cracked: no source card on the blocked event");
-                    return;
+                    return CardStepResult.Nothing;
                 }
 
-                DiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(
-                    new DiscardHandCardsChangeEvent(Faction, Faction.GERMANY, new List<int> { blockedEvent.SourceCardId }));
-                discardEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(discardEvent);
+                DiscardHandCardsChangeEvent discardEvent = 
+                    new DiscardHandCardsChangeEvent(Faction, Faction.GERMANY, new List<int> { blockedEvent.SourceCardId });
+                return discardEvent;
             })
             .WithGuidance("Discard Germany's Status card")
         };

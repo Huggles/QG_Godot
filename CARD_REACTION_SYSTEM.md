@@ -240,38 +240,44 @@ Checks all cards in the pool for executable next steps:
 ### Single-Step Action Card
 
 ```csharp
-public override List<CardStep> InitializePlayCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
-            int selectedCountryId = await new SelectCountryHandler(targetCountries).Handle();
-            DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-            deployEvent.IsTrigger = true;  // Allows reactions
-            return deployEvent;
+        new ResultStep(this, async() => {
+            int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildTargets).BroadCast()).ResponseCountryIds[0];
+            return new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
         })
         .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
+        .WithPurpose(PromptPurpose.DEPLOY_TARGET)
         .WithGuidance("Build an army")
     };
 }
 ```
 
+No `IsTrigger =` line and no `BuildChangeEvent(...)` wrapper: `ResultStep` sets the flag, and
+`SourceCardId` / `TriggeringFaction` are stamped centrally for every event a step returns.
+
+A card that charges a cost and then does something is **two** steps — a `RequirementStep` carrying
+the card's gating condition, then a `ResultStep` with `.RequiringPreviousStep()`. See the
+`card-reaction-system` skill for the three rules that go with that split.
+
 ### Multi-Step Action Card
 
 ```csharp
-public override List<CardStep> InitializePlayCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // First step: Attack
             BattleTarget target = await new SelectBattleTargetHandler(targets).Handle();
-            return BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+            return target.ToAttackChangeEvent(Faction);
         })
         .WithGuidance("Attack a country"),
         
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // Second step: Deploy (happens after attack and all reactions)
             int countryId = await new SelectCountryHandler(countries).Handle();
-            return BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
+            return new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
         })
         .WithGuidance("Build after attacking")
     };
@@ -289,10 +295,10 @@ protected override List<Condition> CardTriggers()
     };
 }
 
-public override List<CardStep> InitializeReactCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // Block the attack by marking the last change event as blocked
             CardPlayPool.LastChangeEvent.IsBlocked = true;
             await Task.CompletedTask;
@@ -314,20 +320,20 @@ protected override List<Condition> CardTriggers()
     };
 }
 
-public override List<CardStep> InitializeReactCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // First react step: Counter-attack
             BattleTarget target = await new SelectBattleTargetHandler(targets).Handle();
-            return BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+            return target.ToAttackChangeEvent(Faction);
         })
         .WithGuidance("Counter-attack"),
         
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // Second react step: Reinforce (can be triggered later in the reaction chain)
             int countryId = await new SelectCountryHandler(countries).Handle();
-            return BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT));
+            return new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT);
         })
         .WithGuidance("Recruit reinforcements")
     };
@@ -344,7 +350,7 @@ public override List<CardStep> InitializeReactCardSteps()
 
 ## Common Pitfalls
 
-1. **Forgetting `IsTrigger = true`**: ChangeEvents must have this flag to allow reactions
+1. **Choosing the wrong step type**: `IsTrigger` is no longer a line a card writes — `ResultStep` sets it true, `RequirementStep` false. Picking `RequirementStep` for something that should be reactable silently closes both windows, and a card whose FIRST step is a `RequirementStep` offers no Kind A or Kind B reaction to being played at all.
 2. **Not marking block reactions**: Block reactions need `IsBlockRequest` in their triggers
 3. **Infinite loops**: Ensure reaction triggers have conditions that eventually become false
 4. **Blocking yourself**: The system prevents self-blocking, but be aware of the rules

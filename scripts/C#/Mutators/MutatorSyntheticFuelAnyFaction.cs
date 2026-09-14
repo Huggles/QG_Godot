@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -58,17 +59,18 @@ public partial class MutatorSyntheticFuelAnyFaction : ActivatableMutator
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async() => {
+            new RequirementStep(this, () => {
                 DebugUtilities.PrintPeer("MutatorSyntheticFuelAnyFaction react step");
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await CardPlayPool.DoChangeEvent(discardEvent);
+                return Task.FromResult<CardStepResult>(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
+            })
+            .WithGuidance("Deploy an army adjacent to where you've deployed an army this turn"),
 
+            new ResultStep(this, async() => {
                 int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
-                deployUnitChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployUnitChangeEvent);
-            }).WithGuidance("Deploy an army adjacent to where you've deployed an army this turn")
+                return new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
+            })
+            .RequiringPreviousStep()
+            .WithPurpose(PromptPurpose.DEPLOY_TARGET)
         };
     }
 }

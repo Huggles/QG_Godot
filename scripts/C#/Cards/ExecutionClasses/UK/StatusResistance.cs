@@ -26,24 +26,23 @@ public partial class StatusResistance : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
-                spendEvent.IsTrigger = false;
-                await spendEvent.Apply();
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new SpendPlayActionChangeEvent(Faction)))
+            .WithGuidance("Discard 2 cards from hand to battle in Western Europe or Italy"),
 
-                ForceDiscardHandCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
+            .RequiringPreviousStep(),
 
+            new ResultStep(this, async () => {
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
                     ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
                     : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleEvent = BuildChangeEvent(battleTarget.ToAttackChangeEvent(Faction));
-                battleEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(battleEvent);
+                BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
+                return battleEvent;
             })
-            .WithGuidance("Discard 2 cards from hand to battle in Western Europe or Italy")
+            .RequiringPreviousStep()
         };
     }
 }

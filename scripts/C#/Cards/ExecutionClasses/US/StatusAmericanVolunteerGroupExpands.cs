@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,22 +39,21 @@ public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICou
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                SpendPlayActionChangeEvent spendEvent = BuildChangeEvent(new SpendPlayActionChangeEvent(Faction));
-                spendEvent.IsTrigger = false;
-                await spendEvent.Apply();
-
-                ForceDiscardCardsChangeEvent discardEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
-                discardEvent.IsTrigger = false;
-                await discardEvent.Apply();
-
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.Szechuan]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT));
-                deployEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(deployEvent);
-            })
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Szechuan], Faction), this))
-            .WithGuidance("Discard top 2 deck cards to recruit an Army in Szechuan")
+            .WithGuidance("Discard top 2 deck cards to recruit an Army in Szechuan"),
+
+            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            .RequiringPreviousStep(),
+
+            new ResultStep(this, async () => {
+                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.Szechuan]).BroadCast()).ResponseCountryIds[0];
+                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
+                return deployEvent;
+            })
+            .RequiringPreviousStep()
         };
     }
 }

@@ -62,12 +62,12 @@ public partial class StatusWomenConscripts : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
+            new EffectStep(this, async () => {
                 PlayCardChangeEvent playEvent = BuildArmyCard();
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Women Conscripts: no Build Army card found to recycle");
-                    return;
+                    return CardStepResult.Nothing;
                 }
 
                 ModifierRegistry.Register(new MutatorRecycleAfterStep(
@@ -81,6 +81,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
 
                 await Task.CompletedTask;
                 // the mutator does the work once the step ends
+                return CardStepResult.Nothing;
             })
             .WithGuidance("Place Build Army card on top of your draw deck at the end of this step")
         };

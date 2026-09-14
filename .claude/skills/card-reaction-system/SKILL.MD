@@ -14,11 +14,27 @@ The card reaction system allows factions to respond to actions taken during the 
 
 ### 1. Card Steps
 
-Each card can have multiple steps:
-- **Play Steps**: Executed when a card is played from hand
-- **React Steps**: Executed when a reaction card is activated
+Each card's effect is a list of `CardStep`s, executed **in list order**, one at a time. A step's body
+returns a single `CardStepResult` and dispatches nothing itself — the framework does that, and the
+step's TYPE decides how:
 
-Steps execute sequentially, and each step can trigger reactions from other players.
+| Type | Body returns | `IsTrigger` | Dispatch |
+|---|---|---|---|
+| `ResultStep` | a `ChangeEvent` | `true` | `CardPlayPool.DoChangeEvent` — block + after-reaction windows |
+| `RequirementStep` | a `ChangeEvent` | `false` | `Apply()` — no window. Costs, and the first half of one action |
+| `BlockStep<TTrigger>` | `CardStepResult.Block()` / `.BlockCard()` | — | marks the event this activation was offered |
+| `EffectStep` | `CardStepResult.Nothing` | — | registers a modifier; no ChangeEvent |
+| `PlayCardStep` | `CardStepResult.PlayCard(id)` | — | a nested `CardPlayPool.DoCard` |
+
+A `ChangeEvent` converts to a `CardStepResult` implicitly, so the common case just returns its event.
+`CardStepResult.Nothing` means "the step ran and there was nothing to do" and leaves
+`StepSucceeded` **true**; to abandon a step and everything gated behind it, throw
+`StepSkippedException`.
+
+**One step, one ChangeEvent.** This is the rule the types exist to enforce. A step that both charges
+a cost and delivers an effect is two steps — see *Costs* below.
+
+Steps execute sequentially, and each `ResultStep` can trigger reactions from other players.
 
 ### 2. Reaction Timing
 
@@ -351,38 +367,91 @@ Tracks which factions have explicitly passed in the current reaction chain:
 ### Single-Step Action Card
 
 ```csharp
-public override List<CardStep> InitializePlayCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
-            int selectedCountryId = await new SelectCountryHandler(targetCountries).Handle();
-            DeployUnitChangeEvent deployEvent = BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
-            deployEvent.IsTrigger = true;  // Allows reactions
-            return deployEvent;
+        new ResultStep(this, async() => {
+            int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildTargets).BroadCast()).ResponseCountryIds[0];
+            return new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
         })
         .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
+        .WithPurpose(PromptPurpose.DEPLOY_TARGET)
         .WithGuidance("Build an army")
     };
 }
 ```
 
+No `IsTrigger =` line and no `BuildChangeEvent(...)` wrapper: `ResultStep` sets the flag, and
+`SourceCardId` / `TriggeringFaction` are stamped centrally for every event a step returns. That
+centralisation is not tidiness — eleven events used to be built without the wrapper and shipped
+`SourceCardId = -1`, which kept their card out of `CardPool` (so `ContinueWithNextSteps` could not
+resume it) and made `ResponseASWTactics` unofferable against them.
+
+### Costs: `RequirementStep`
+
+A card that charges something and then does something is **two steps**, not one body with a prologue:
+
+```csharp
+public override List<CardStep> OnActivate()
+{
+    return new List<CardStep> {
+        new RequirementStep(this, () => Task.FromResult<CardStepResult>(
+            new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+        .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
+        .WithGuidance("Discard top 1 deck card to build an additional Army"),
+
+        new ResultStep(this, async() => {
+            int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
+            return new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
+        })
+        .RequiringPreviousStep()
+    };
+}
+```
+
+Three rules, each of which has already bitten:
+
+- **The card's gating condition goes on the FIRST step.** A condition on the later half is evaluated
+  after the cost applied and after `CalculateAll` ran, which is how you get "cost paid, effect
+  skipped". `Not(HasPlayedCardThisTurnStep)` after a `SpendPlayActionChangeEvent` cost is the
+  sharpest case — it is false by then.
+- **Never read `ActivationTrigger` from a step condition.** Step conditions are evaluated by
+  `GameStateCalculator.EvaluateExecutableSteps` *before* the card is activated, and
+  `CardPlayRound.DoCard` binds `ActivationTrigger` only once it has been. Pre-activation it is null,
+  so the condition is always false, the step is never `IsExecutable`, `HasExecutableCardSteps` is
+  false, and `CanBeActivated` stops offering the card **at all**. `StatusRadar` vanished from every
+  game this way. A condition that must consult the trigger reads `BlockContext` / `TriggerContext`,
+  which fall back to the live window.
+- **Do not promote an in-body `if (x.Count == 0) return;` to a step condition without checking what
+  it gates.** On a card with one event-producing step, a failing condition makes
+  `HasExecutableCardSteps` false and the card **unplayable** — where before it was playable and
+  simply did nothing. Three EW cards lost their no-op play that way. Guard inside the step and
+  return `CardStepResult.Nothing` instead; promote only when the guard exists to stop a COST being
+  paid (`StatusBiasForAction`).
+- **Later steps carry `.RequiringPreviousStep()`.** It keeps the effect from happening without the
+  cost — and it preserves event ORDER: while step N's after-reaction window is open, step N+1 gated
+  on it is not executable, so `ContinueWithNextSteps` cannot hoist it into that window and emit an
+  extra `ActivateReactionChangeEvent` into the replicated stream.
+
+Nothing can be interposed between the two: a `RequirementStep`'s `IsTrigger = false` event opens no
+block and no after-reaction window, and `DoCard`'s loop runs the steps back to back.
+
 ### Multi-Step Action Card
 
 ```csharp
-public override List<CardStep> InitializePlayCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
-            // First step: Attack
-            BattleTarget target = await new SelectBattleTargetHandler(targets).Handle();
-            return BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+        new ResultStep(this, async() => {
+            BattleTarget target = await SelectBattleTarget(targets);
+            return target.ToAttackChangeEvent(Faction);
         })
         .WithGuidance("Attack a country"),
-        
-        new CardStep(this, async() => {
-            // Second step: Deploy (happens after attack and all reactions)
-            int countryId = await new SelectCountryHandler(countries).Handle();
-            return BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
+
+        new ResultStep(this, async() => {
+            // Runs after the attack AND all reactions to it
+            int countryId = await SelectCountry(countries);
+            return new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
         })
         .WithGuidance("Build after attacking")
     };
@@ -406,10 +475,10 @@ protected override List<Condition> CardTriggers()
     };
 }
 
-public override List<CardStep> InitializeReactCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // Block by marking the event THIS activation was offered to block. Read it from
             // ActivationTrigger, never from CardPlayPool.LastChangeEvent /
             // LastNoneNewCardChangeEvent — those are live pool reads that any intervening
@@ -436,20 +505,20 @@ protected override List<Condition> CardTriggers()
     };
 }
 
-public override List<CardStep> InitializeReactCardSteps()
+public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // First react step: Counter-attack
             BattleTarget target = await new SelectBattleTargetHandler(targets).Handle();
-            return BuildChangeEvent(target.ToAttackChangeEvent(Faction));
+            return target.ToAttackChangeEvent(Faction);
         })
         .WithGuidance("Counter-attack"),
         
-        new CardStep(this, async() => {
+        new ResultStep(this, async() => {
             // Second react step: Reinforce (can be triggered later in the reaction chain)
             int countryId = await new SelectCountryHandler(countries).Handle();
-            return BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT));
+            return new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT);
         })
         .WithGuidance("Recruit reinforcements")
     };
@@ -477,14 +546,14 @@ protected override List<Condition> CardTriggers()
 }
 
 // Step logic: targets derived from the specific triggering event
-new CardStep(this, async() => {
+new ResultStep(this, async() => {
     var triggerBattle = CardPlayPool.CurrentReactionTrigger as BattleCountryChangeEvent;
     if (triggerBattle == null) return null;
     var adjacentBuildable = CountryState.BuildableLand(Faction)
         .Where(cs => triggerBattle.CountryState.ConnectedCountryStates.Contains(cs))
         .ToList();
     int selectedCountryId = await new SelectCountryHandler(adjacentBuildable.ToCountryIds()).Handle();
-    return BuildChangeEvent(new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD));
+    return new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
 })
 ```
 
@@ -562,7 +631,7 @@ protected override List<Condition> CardTriggers() => new List<Condition> {
     Condition.Build(new Condition.CustomCondition(() => PlayedCard() != null), this)
 };
 
-new CardStep(this, async () => {
+new ResultStep(this, async () => {
     PlayCardChangeEvent playEvent = PlayedCard();   // the SAME helper the trigger used
     if (playEvent == null) return;
     ModifierRegistry.Register(new MutatorRecycleAfterStep(
@@ -671,34 +740,24 @@ Skip button reads `Skip (discard 1 card)` and the hand banner says what passing 
 host-side, from the authoritative hand. `InputManager.HandleItemSelected` resets the label — one shared
 `SelectionSkipButton` also serves the country/unit/battle-target selections.
 
-### Prerequisite Change Events Within a Step
+### Costs and prerequisites: use a `RequirementStep`
 
-Sometimes a card step must apply a mandatory side-effect (e.g. discard cards, pay a cost) before returning its main change event. Because the step is `async`, you can apply that prerequisite inline using `Apply()` directly — no need to split into two steps or go through `CardPlayPool.DoChangeEvent`.
+A card step must produce at most one ChangeEvent, so a mandatory side-effect (discard cards, pay a
+cost) is **its own step** rather than a prologue inside the body — see *Costs* under "Implementing
+Cards" above for the shape and the three rules that go with it.
 
-> **`Apply()` always registers the event into the round's `ChangeEventsPool`** (`ChangeEvent.ApplyMutation`). `IsTrigger = false` suppresses the block/reaction chain, *not* the registration. So after a prerequisite `Apply()`, `CardPlayPool.LastNoneNewCardChangeEvent` and `LastChangeEvent` point at the prerequisite. Resolve anything you need from `ActivationTrigger` (or capture it into a local) **before** applying the prerequisite.
+> `Apply()` always registers the event into the round's `ChangeEventsPool`
+> (`ChangeEvent.ApplyMutation`). `IsTrigger = false` suppresses the block/reaction chain, *not* the
+> registration. So after a cost step, `CardPlayPool.LastNoneNewCardChangeEvent` and `LastChangeEvent`
+> point at the cost. This is exactly why step logic reads `ActivationTrigger` and never re-reads the
+> pool: `StatusRadar` used to discard its 2 cards and then fail to block the Navy removal.
 
-```csharp
-new CardStep(this, async() => {
-    // Prerequisite: discard 2 cards and sync to clients
-    ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction, 2);
-    discardEvent.IsTrigger = false;   // not blockable, no reactions
-    await discardEvent.ApplyChange(); // executes, broadcasts, and populates DiscardedCardIds
+`RequirementStep` dispatches through `Apply()` rather than `CardPlayPool.DoChangeEvent`. Both are
+equivalent for an `IsTrigger = false` event as far as the windows go, but `DoChangeEvent` registers
+the event and then `Apply()` registers it again, so costs routed that way sat in `ChangeEventsPool`
+twice. The one thing `DoChangeEvent` does that `Apply()` does not — freeing a unit for a faction with
+an empty pool before a deploy lands — `RequirementStep` does explicitly.
 
-    // Use runtime results from the prerequisite if needed
-    List<PresentationItem> items = PresentationItemCard.FromCardIds(discardEvent.DiscardedCardIds, false);
-    await ModalStack.Current.Show(ModalConfig.Display("Discarded cards", items).WithAutoDismiss());
-
-    // Main action
-    int countryId = await new SelectCountryHandler(targets.ToCountryIds()).Handle();
-    return BuildChangeEvent(new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD));
-})
-```
-
-**Rules for prerequisite change events:**
-- Set `IsTrigger = false` so no block/reaction chain is triggered
-- Call `Apply()` directly (not `CardPlayPool.DoChangeEvent`) — no block/after-reaction chain is opened
-- **Resolve `ActivationTrigger` (or any pool read) into a local BEFORE the `Apply()`** — `Apply()` registers the event into `ChangeEventsPool` and moves `LastNoneNewCardChangeEvent`/`LastChangeEvent` onto it
-- Any runtime results (e.g. `DiscardedCardIds`) are available on the local instance immediately after `await`
 
 ## Key Design Principles
 
@@ -722,7 +781,7 @@ new CardStep(this, async() => {
 
 ## Common Pitfalls
 
-1. **Forgetting `IsTrigger = true`**: ChangeEvents produced by a card step must have this flag to be blockable and to open an after-reaction window. This is now load-bearing twice over: a first step whose only event is `IsTrigger = false` opens no window at all, so the Kind A and Kind B reactions to that card being played are silently never offered
+1. **Choosing the wrong step type**: `IsTrigger` is no longer a line a card writes — `ResultStep` sets it true, `RequirementStep` false. Picking `RequirementStep` for something that should be reactable silently closes both windows, and a card whose FIRST step is a `RequirementStep` offers no Kind A or Kind B reaction to being played at all.
 2. **Not marking block reactions**: Block reactions need `IsBlockRequest` in their triggers
 3. **Infinite loops**: Ensure reaction triggers have conditions that eventually become false
 4. **Blocking yourself**: The system prevents self-blocking, but be aware of the rules

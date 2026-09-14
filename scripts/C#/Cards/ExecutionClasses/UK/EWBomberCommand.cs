@@ -15,15 +15,14 @@ public partial class EWBomberCommand : EWCardLogic
     {
         return new List<CardStep>
         {
-            new CardStep(this, async() => {
+            new ResultStep(this, async() => {
 
                 var factionResp = await new InputRequest.SelectFactionRequestHandler(
                     Faction, new List<Faction> { Faction.GERMANY, Faction.ITALY }).BroadCast();
                 Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
 
-                ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent = BuildChangeEvent(new ForceDiscardCardsChangeEvent(Faction, selectedFaction, 4));
-                ForceDiscardCardsChangeEvent.IsTrigger = true;
-                await CardPlayPool.DoChangeEvent(ForceDiscardCardsChangeEvent);
+                ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent = new ForceDiscardCardsChangeEvent(Faction, selectedFaction, 4);
+                return ForceDiscardCardsChangeEvent;
             })
         };
     }

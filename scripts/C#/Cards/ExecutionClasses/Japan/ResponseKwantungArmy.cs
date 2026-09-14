@@ -33,13 +33,11 @@ public partial class ResponseKwantungArmy : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new CardStep(this, async () => {
-                if (ActivationTrigger is RemoveUnitChangeEvent removeEvent) {
-                    removeEvent.IsBlocked = true;
-                    removeEvent.UnitState.ImmuneForTurn = true;
-                    PresentationServices.Notification.ShowActionText("Kwantung Army: Japanese Army will not be removed this turn", Faction);
-                    await Task.Delay(GameSettings.DurationMedium);
-                }
+            new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
+                removeEvent.UnitState.ImmuneForTurn = true;
+                PresentationServices.Notification.ShowActionText("Kwantung Army: Japanese Army will not be removed this turn", Faction);
+                await Task.Delay(GameSettings.DurationMedium);
+                return CardStepResult.Block();
             })
             .WithGuidance("Do not remove your supplied Army in China, Szechuan, Mongolia, or Vladivostok")
         };

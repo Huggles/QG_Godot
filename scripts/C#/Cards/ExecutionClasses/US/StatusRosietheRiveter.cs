@@ -84,8 +84,8 @@ public partial class StatusRosietheRiveter : StatusCardLogic, IStepMutator
             // used to apply first was both unnecessary and wrong — it filed the cards as discarded
             // this turn before moving them out again.
             await this.Do(
-                BuildChangeEvent(new RecycleCardChangeEvent(
-                    Faction, Faction, cardId, RecycleDestination.BottomOfDeck)),
+                new RecycleCardChangeEvent(
+                    Faction, Faction, cardId, RecycleDestination.BottomOfDeck),
                 isTrigger: false);
         }
     }

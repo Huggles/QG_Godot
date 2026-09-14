@@ -63,6 +63,13 @@ public sealed class InputRequestSpec
     /// <inheritdoc cref="OriginCardId"/>
     public PromptPurpose OriginPurpose;
 
+    /// <summary>
+    /// Whether this prompt belongs to a COST step or an effect step — see
+    /// <see cref="InputRequest.OriginStepKind"/>. Surfaced here so a bot rule reads it through the
+    /// spec like every other prompt fact, rather than reaching into the request behind this table.
+    /// </summary>
+    public StepKind OriginStepKind;
+
     public bool CanPass => Pass != PassMode.NotAllowed;
 
     // ── Construction ─────────────────────────────────────────────────────────
@@ -75,6 +82,7 @@ public sealed class InputRequestSpec
             Faction = request.TargetFaction,
             OriginCardId = request.OriginCardId,
             OriginPurpose = request.OriginPurpose,
+            OriginStepKind = request.OriginStepKind,
         };
 
         switch (request)
