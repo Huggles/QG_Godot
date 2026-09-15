@@ -146,8 +146,6 @@ public partial class GameAPI : Node
                 : $"Country is full ({countryState.Units.Count}/3 factions: {string.Join(", ", countryState.OccupyingFactions)})";
             string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. {reason}.";
             DebugUtilities.PrintPeer(exceptionMessage);
-            // TEMP-DIAG
-            DebugUtilities.PrintPeer($"TEMPDIAG tagBuildable={countryState.Tags.Has(Tag.Buildable, faction)} liveCanBuild={countryState.CanBuild(faction)} canRecruit={countryState.CanRecruit(faction)} hasAdjSupplied={countryState.HasAdjacentSuppliedUnit(faction)} occupying={countryState.OccupyingTeam} isHome={countryState.IsHomeSpace(faction)} isSea={countryState.IsSea} tagAttackable={countryState.Tags.Has(Tag.Attackable, faction)} adj=[{string.Join(",", countryState.AdjacentCountryIds(faction).Select(id => { var n = CountryState.ForId(id); string u = n.Units.TryGetValue(faction, out int uid) ? $"unit{uid}:{(UnitState.ForId(uid)?.InSupply ?? false ? "supplied" : "UNSUPPLIED")}" : "none"; return $"{n.StaticCountryData.Label}={u}"; }))}]");
             throw new GameAPIException(exceptionMessage);
         }
 
