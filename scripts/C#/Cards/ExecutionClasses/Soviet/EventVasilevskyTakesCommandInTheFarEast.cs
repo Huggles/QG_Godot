@@ -8,27 +8,10 @@ public partial class EventVasilevskyTakesCommandInTheFarEast : EventCardLogic
 {
     private static readonly List<int> recruitCountryIds = [(int)Country.Vladivostok];
 
-    /// <summary>
-    /// Step 2's offer: the Axis armies standing in China, or China itself when it is empty and
-    /// reachable. Kept as one expression so the step, its condition and <see cref="Targets"/> agree —
-    /// note this is narrower than BattleTarget.In, which does not require the country to be empty.
-    /// </summary>
-    private List<BattleTarget> ChinaBattleTargets
-    {
-        get
-        {
-            var china = CountryState.ForEnum(Country.China);
-            var targets = china.Units.Values
-                .Where(uId => StaticGameData.FactionTeamForFaction(UnitState.ForId(uId).Faction) == FactionTeam.AXIS
-                           && UnitState.ForId(uId).IsArmy
-                           && !UnitState.ForId(uId).ImmuneForTurn)
-                .Select(uId => new BattleTarget(uId, TargetType.UNIT))
-                .ToList();
-            if (CountryState.AttackableLandIds(Faction).Contains((int)Country.China) && china.Units.Count == 0)
-                targets.Add(new BattleTarget((int)Country.China, TargetType.COUNTRY));
-            return targets;
-        }
-    }
+    private static readonly List<int> battleCountryIds = [(int)Country.China];
+
+    /// <summary>Whatever China offers for the battle: the empty country, or the Axis armies in it.</summary>
+    private List<BattleTarget> ChinaBattleTargets => BattleTarget.In(battleCountryIds, Faction);
 
     /// <summary>Vladivostok for the recruit, and whatever China offers for the battle.</summary>
     public override TargetSet Targets() =>
@@ -56,7 +39,7 @@ public partial class EventVasilevskyTakesCommandInTheFarEast : EventCardLogic
                 BattleCountryChangeEvent battleCountryChange = target.ToAttackChangeEvent(Faction);
                 return battleCountryChange;
             })
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => ChinaBattleTargets.Count > 0), this))
+            .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(battleCountryIds, Faction), this))
             .WithGuidance("Battle in China")
         };
     }
