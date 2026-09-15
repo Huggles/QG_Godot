@@ -165,10 +165,36 @@ public partial class GameAPI : Node
 
         return unitId;
     }
-    public static void RemoveUnitFromCountry(int unitId, bool awaitAnimation = true)
-    {   
+    /// <summary>
+    /// The block window runs before Apply(), so the board can move between offer and removal. Throw
+    /// GameAPIException above the mutation line only — an NRE here is graded Unrecoverable.
+    /// </summary>
+    public static void RemoveUnitFromCountry(int unitId, UnitRemovalReason reason, Faction removingFaction, bool awaitAnimation = true)
+    {
         UnitState unitState = UnitState.ForId(unitId);
+
+        if (!unitState.IsDeployedToCountry)
+            throw new GameAPIException(
+                $"Cannot remove {unitState.Faction} {unitState.Type} (unit {unitId}) for {reason}: it is not on the board.");
+
         CountryState countryState = CountryState.ForId(unitState.CountryId);
+
+        switch (reason)
+        {
+            case UnitRemovalReason.SUPPLY when unitState.InSupply:
+                throw new GameAPIException(
+                    $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for SUPPLY: the unit is in supply.");
+
+            // Not ELIMINATE: whether immunity stops an elimination is an open rules question.
+            case UnitRemovalReason.BATTLE when unitState.ImmuneForTurn:
+                throw new GameAPIException(
+                    $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for BATTLE: the unit is immune this turn.");
+
+            // Tag.Attackable means removingFaction has a supplied unit that can reach this target.
+            case UnitRemovalReason.BATTLE when !unitState.Tags.Has(Tag.Attackable, removingFaction):
+                throw new GameAPIException(
+                    $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for BATTLE: {removingFaction} has no supplied unit able to attack it.");
+        }
 
         _ = PresentationServices.Animation.Enqueue(new RemoveUnitAnimation(unitId, countryState.Id){ BlockQueue = awaitAnimation });
 

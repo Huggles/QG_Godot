@@ -14,10 +14,12 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
         Country.SouthEastAsia,
     });
 
-    /// <summary>The space just battled, where step 1 builds, plus the units step 2 may attack.</summary>
+    private List<BattleTarget> BattleTargets => BattleTarget.In(TargetCountries.ToCountryIds(), Faction);
+
+    /// <summary>The space just battled, where step 1 builds, plus what step 2 may attack.</summary>
     public override TargetSet Targets() =>
         TargetSet.Countries(EligibleAttackedCountries())
-            .Plus(TargetSet.Units(TargetCountries.Where(cs => cs.CanAttack(Faction)).ToList().ToUnitIds()));
+            .Plus(TargetSet.FromBattleTargets(BattleTargets));
 
     protected override List<Condition> CardTriggers()
     {
@@ -36,14 +38,16 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
             .WithGuidance("Build an army in the country just battled"), 
 
             new ResultStep(this, async() => {
-                List<int> targets = TargetCountries.Where(targetCountry=>targetCountry.CanAttack(Faction)).ToList().ToUnitIds();
-                int selectedCountryId = (await new InputRequest.SelectUnitRequestHandler(Faction, targets).BroadCast()).ResponseUnitIds[0];
-                BattleUnitChangeEvent battleUnitChangeEvent = new BattleUnitChangeEvent(Faction, selectedCountryId);
-                return battleUnitChangeEvent;
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
+                BattleTarget target = resp.ResponseCountryIds.Count > 0
+                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
+                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
+                BattleCountryChangeEvent battleEvent = target.ToAttackChangeEvent(Faction);
+                return battleEvent;
             })
             .WithCondition(
                 ()=>{ return Condition.Build(new Condition.CountryIsAttackable(TargetCountries.ToCountryIds(), Faction), this); }
-            ).WithGuidance("Attack an army in China or an adjacent country"),
+            ).WithGuidance("Battle in China or an adjacent land space"),
         };
     }
 
