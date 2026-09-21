@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 /// <summary>
 /// What one history badge and its hover popup need, captured at the moment the message was applied.
 ///
@@ -20,6 +22,7 @@ public readonly record struct GameHistoryEntry(
     string  Summary,
     Faction Faction,
     int     SourceCardId,    // -1 when the message has no source card
+    IReadOnlyList<int> TargetCardIds, // cards the message acted ON; never null, usually empty
     string  BulletinLabel,   // non-null only for ShowBulletinPresentationEvent
     string  BulletinText)
 {
@@ -28,6 +31,10 @@ public readonly record struct GameHistoryEntry(
     /// ShowBulletinPresentationEvent, the one presentation message that reaches history: a mutator a
     /// card put in play names that card, so the popup draws the real card, and only a scenario
     /// mutator falls through to the Bulletin face built from the two fields below.
+    ///
+    /// TargetCardIds is the other half of that: the cards the event moved rather than the card that
+    /// caused it. Copied here, not referenced, for the same reason the summary is — see
+    /// <see cref="GameMessageDisplay.HistoryTargetCardIds"/>.
     /// </summary>
     public static GameHistoryEntry For(GameMessage message, int sequence) => new(
         sequence,
@@ -38,6 +45,7 @@ public readonly record struct GameHistoryEntry(
         message.HistoryFaction(),
         (message as ChangeEvent)?.SourceCardId
             ?? (message as ShowBulletinPresentationEvent)?.SourceCardId ?? -1,
+        message.HistoryTargetCardIds(),
         (message as ShowBulletinPresentationEvent)?.Label,
         (message as ShowBulletinPresentationEvent)?.BulletinText);
 }
