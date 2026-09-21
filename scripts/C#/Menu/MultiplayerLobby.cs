@@ -146,7 +146,8 @@ public partial class MultiplayerLobby : Control
 
 		// Tutorials are excluded here and nowhere else: a tutorial drives five factions from a script,
 		// and TutorialRuntime refuses to start one with peers attached, so offering it in a lobby can
-		// only produce a game nobody chose to play that way. The Skirmish screen keeps them.
+		// only produce a game nobody chose to play that way. The Skirmish screen keeps them. Debug
+		// scenarios are dropped from both pickers in a release build — Populate decides that itself.
 		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios, includeTutorials: false);
 
 		if (gameManager.SelectedScenario != null)
@@ -1565,8 +1566,11 @@ public partial class MultiplayerLobby : Control
 		gameManager.SetSelectedScenarioByIndex(selectedIndex);
 		// By path rather than by assigning the index: this picker filters, so the scenario's index in
 		// AvailableScenarios is not its position in the list. A host cannot send a tutorial here (its
-		// own picker has none), so a miss means a scenario this client does not have — leave the widget
-		// alone rather than pointing it at something arbitrary.
+		// own picker has none), so a miss means either a scenario this client does not have, or — on a
+		// release build — a debug one its picker hides while the host's shows it. Either way the
+		// selection above has already landed against the FULL list, so the game still starts on the
+		// host's scenario; only the widget is left alone rather than pointed at something arbitrary,
+		// and the description below still names what is about to be played.
 		MenuScenarioPicker.SelectByPath(_scenarioPicker, gameManager.AvailableScenarios, selectedScenarioPath);
 		UpdateScenarioDescription(gameManager.SelectedScenario.Description);
 	}

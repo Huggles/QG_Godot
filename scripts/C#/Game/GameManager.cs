@@ -198,6 +198,12 @@ public partial class GameManager : Node
                     && (openingDiscardElement.ValueKind == JsonValueKind.True || openingDiscardElement.ValueKind == JsonValueKind.False))
                     info.OpeningDiscard = openingDiscardElement.GetBoolean();
 
+                // Marks a test fixture rather than a scenario anyone would choose to play. Absent
+                // means false, so the standard game and the tutorial need say nothing.
+                if (root.TryGetProperty("debug", out JsonElement debugElement)
+                    && (debugElement.ValueKind == JsonValueKind.True || debugElement.ValueKind == JsonValueKind.False))
+                    info.IsDebug = debugElement.GetBoolean();
+
                 // A scenario naming a tutorial script is a tutorial: single player only. The
                 // multiplayer lobby filters these out of its picker; the Skirmish screen keeps them —
                 // it is the only route to one — and locks its seat grid instead, because a script

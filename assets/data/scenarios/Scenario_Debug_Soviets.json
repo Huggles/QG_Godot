@@ -1,6 +1,7 @@
 {
   "title": "Debug Scenario SOVIETS",
   "description": "",
+  "debug": true,
   "startingFaction": "SOVIET",
   "startingRound": 1,
   "maxRounds": 20,

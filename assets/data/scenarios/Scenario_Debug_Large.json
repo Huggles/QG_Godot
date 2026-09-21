@@ -1,6 +1,7 @@
 {
   "title": "Debug Scenario Large",
   "description": "Germany starts with pre-loaded status cards, making it easier to test card effects without full deployments.",
+  "debug": true,
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 20,

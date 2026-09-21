@@ -1,6 +1,7 @@
 {
   "title": "Debug Scenario Germany",
   "description": "This scenario is for debugging purposes. It starts with all factions deployed to their home territories and pre-loaded with cards.",
+  "debug": true,
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 20,

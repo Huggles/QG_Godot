@@ -1,6 +1,7 @@
 {
   "title": "Debug Scenario USA",
   "description": "This scenario is for debugging purposes. It starts with all factions deployed to their home territories and pre-loaded with cards.",
+  "debug": true,
   "startingFaction": "UNITED_STATES",
   "startingRound": 1,
   "maxRounds": 20,
