@@ -20,16 +20,22 @@ public partial class MainScene : Node
         }
 
         // Go straight to the multiplayer lobby for: a dedicated server (auto-hosts there),
-        // an auto-joining test client, or the F6 debug flow. Everything else opens the beta
-        // disclaimer, which hands over to the main menu once its terms are accepted — these paths
-        // skip it because nobody is sitting there to press the button.
+        // an auto-joining test client, or the F6 debug flow. Everything else opens the main menu.
         bool toLobby = GameContext.IsDedicatedServer
                        || userArgs.Contains("is_debug_multiplayer=true")
                        || userArgs.Contains("auto_join=true");
 
+        // The beta disclaimer is for whoever receives an exported build, and it hands over to the
+        // main menu once accepted. Only a release export shows it: in the editor and in a debug
+        // export it would be a click between every run and the menu, and the lobby paths never see
+        // it at all because nobody is sitting there to press the button.
+        string menuScene = GameContext.IsProductionBuild
+            ? "res://scenes/menu/DisclaimerScreen.tscn"
+            : "res://scenes/menu/Menu.tscn";
+
         string targetScene = toLobby
             ? "res://scenes/menu/MultiplayerLobby.tscn"
-            : "res://scenes/menu/DisclaimerScreen.tscn";
+            : menuScene;
 
         // Boot goes straight to ChangeSceneToFile rather than through SceneFlow (which owns the
         // shutting-down flag and has nothing to tear down yet), so the menu music has to start here.
