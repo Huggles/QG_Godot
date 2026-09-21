@@ -63,9 +63,12 @@ public sealed class NoHollowRule : IBotRule
             CliOption option = decision.Options[i];
             if (option.Kind != CliOptionKind.Card) continue;
 
-            // Queried for the asked faction, which is also the owner of every card these three prompts
-            // offer — the tag is raised per owning faction.
-            if (CardState.ForId(option.Id)?.HasTag(Tag.NeedsAttention, decision.Faction) == true)
+            // Queried for the card's OWN faction, because the tag is raised per owning faction and the
+            // asked faction is no longer always the owner: a reaction window merges every faction one
+            // seat controls into a single prompt, so this option set can span three of them. Asking
+            // about the wrong faction returns false and the veto silently stops firing.
+            CardState card = CardState.ForId(option.Id);
+            if (card?.HasTag(Tag.NeedsAttention, card.Faction) == true)
                 sink.Veto(i, "hollow");
         }
     }

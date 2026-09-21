@@ -485,10 +485,14 @@ public partial class ErrorReporter : Node
             ? ""
             : $" for Bulletin \"{request.TriggerBulletinLabel}\"";
 
+        // Every faction the prompt asked, not just its representative: a reaction window can cover a
+        // whole seat's share of a team, and "Germany did not answer" names a third of the real prompt.
+        string asked = request == null ? "Nobody" : string.Join(", ", request.Answering);
+
         string cause = forced
-            ? $"You timed out {request?.TargetFaction}'s {request?.GetType().Name}{bulletin} " +
+            ? $"You timed out {asked}'s {request?.GetType().Name}{bulletin} " +
               $"early (Id {request?.Id})."
-            : $"{request?.TargetFaction} did not answer {request?.GetType().Name}{bulletin} " +
+            : $"{asked} did not answer {request?.GetType().Name}{bulletin} " +
               $"within {NetworkApi.InputResponseTimeoutMinutes} minutes (Id {request?.Id}).";
 
         return new InputTimeoutException(

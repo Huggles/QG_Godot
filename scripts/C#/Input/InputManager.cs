@@ -105,12 +105,27 @@ public partial class InputManager : Node2D
 	/// costs a discard (or a VP with an empty hand), so the price has to be on the button before it is
 	/// pressed rather than in the modal that follows.
 	/// </param>
+	/// <param name="answeringFactions">
+	/// Every faction this one prompt answers for, straight off <see cref="InputRequest.Answering"/>.
+	/// More than one when a player holds several factions of the reacting team: their reaction windows
+	/// are merged into a single prompt offering everything all of them can play, rather than asking
+	/// once per faction. Null means the prompt answers for <paramref name="faction"/> alone, which is
+	/// every prompt but a merged reaction window.
+	///
+	/// <paramref name="faction"/> stays the representative — the tint, the recall and CardPromptOpened
+	/// all keep using it — because those are all "which hand is this" questions with one answer.
+	/// </param>
 	public InputHandlerPlayCard SetCardSelectionActive(
 		Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
 		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null,
-		TriggerKind triggerKind = TriggerKind.NONE, bool isHandPlayPrompt = false, string passCostText = null)
+		TriggerKind triggerKind = TriggerKind.NONE, bool isHandPlayPrompt = false, string passCostText = null,
+		IReadOnlyList<Faction> answeringFactions = null)
 	{
 		_pendingReactionSkipScope = ReactionSkipScope.NONE;
+
+		List<Faction> answering = answeringFactions is { Count: > 0 }
+			? answeringFactions.ToList()
+			: new List<Faction> { faction };
 
 		// A previous prompt's glow must never survive into this one. SetCardSelectionActive is also
 		// reached without HandleItemSelected having run in between (a retried request opens a fresh
@@ -119,13 +134,14 @@ public partial class InputManager : Node2D
 
 		CurrentCardPrompt = new ActiveCardPrompt(
 			faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards,
-			isHandPlayPrompt, isReactionWindow, ToPreviewMap(cardTargetPreviews));
+			isHandPlayPrompt, isReactionWindow, ToPreviewMap(cardTargetPreviews), answering);
 
-		PlayerActionLabel.ShowText(BannerText(triggerKind, cardIds.Count > 0, isHandPlayPrompt, passCostText), faction);
+		PlayerActionLabel.ShowText(
+			BannerText(triggerKind, cardIds.Count > 0, isHandPlayPrompt, passCostText, answering), faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
 		// and would resolve Faction.NONE for an empty always-ask prompt.
 		FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds, separateNonHandCards,
-			isReactionWindow);
+			isReactionWindow, answering);
 		FactionHandDisplay.Current.CardSelected += HandleItemSelected;
 		EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
 		// A card prompt is recallable for as long as it is open: the player can browse another faction's
@@ -166,19 +182,35 @@ public partial class InputManager : Node2D
 	/// describes a window this prompt is not, so it gets its own wording, naming the price from
 	/// <paramref name="passCostText"/> — the same one the Skip button carries.
 	/// </param>
-	private static string BannerText(TriggerKind kind, bool hasOptions, bool isHandPlay = false, string passCostText = null) => kind switch
+	/// <param name="answering">
+	/// The factions the prompt answers for. Named in the banner when there is more than one, because a
+	/// merged window puts several factions' cards in one fan and "Choose an after reaction" alone does
+	/// not say whose chance this is — the player has to know which of their countries are being asked
+	/// before they read the cards.
+	/// </param>
+	private static string BannerText(TriggerKind kind, bool hasOptions, bool isHandPlay = false,
+		string passCostText = null, List<Faction> answering = null)
 	{
-		TriggerKind.BLOCK => hasOptions ? "Choose a block reaction" : "No block available",
-		TriggerKind.AFTER => hasOptions ? "Choose an after reaction" : "No reaction available",
-		_ when isHandPlay => (hasOptions, passCostText) switch
+		string text = kind switch
 		{
-			(true,  null) => "Choose a card",
-			(true,  _)    => $"Choose a card, or pass ({passCostText})",
-			(false, null) => "Nothing you can play",
-			(false, _)    => $"Nothing you can play — you must pass ({passCostText})",
-		},
-		_                 => hasOptions ? "Choose a card" : "No reaction available",
-	};
+			TriggerKind.BLOCK => hasOptions ? "Choose a block reaction" : "No block available",
+			TriggerKind.AFTER => hasOptions ? "Choose an after reaction" : "No reaction available",
+			_ when isHandPlay => (hasOptions, passCostText) switch
+			{
+				(true,  null) => "Choose a card",
+				(true,  _)    => $"Choose a card, or pass ({passCostText})",
+				(false, null) => "Nothing you can play",
+				(false, _)    => $"Nothing you can play — you must pass ({passCostText})",
+			},
+			_                 => hasOptions ? "Choose a card" : "No reaction available",
+		};
+
+		if (answering == null || answering.Count < 2) return text;
+		return $"{text} — {string.Join(", ", answering.Select(FactionLabel))}";
+	}
+
+	private static string FactionLabel(Faction faction) =>
+		FactionState.ForEnum(faction)?.FactionLabel ?? faction.ToString();
 
 	/// <summary>
 	/// Flattens the wire list into the by-card-id lookup the hover path wants. Defensive against
@@ -209,10 +241,16 @@ public partial class InputManager : Node2D
 	{
 		_pendingReactionSkipScope = (ReactionSkipScope)scope;
 		// Mirrored into the standing preference so the faction info row toggle shows what was just
-		// chosen, and so the choice keeps applying to the windows that follow. Read the faction
+		// chosen, and so the choice keeps applying to the windows that follow. Read the factions
 		// BEFORE HandleItemSelected, which nulls CurrentCardPrompt.
+		//
+		// Every faction the prompt answers for, not just its representative: on a merged window the
+		// player pressed one button about one prompt, and arming only one of their factions would keep
+		// the merged prompts coming and make the button look broken. The per-faction control is the
+		// toggle in each faction's info row, which writes this same dictionary.
 		if (CurrentCardPrompt != null)
-			ReactionSkipPreference.Set(CurrentCardPrompt.Faction, (ReactionSkipScope)scope);
+			foreach (Faction faction in CurrentCardPrompt.Answering)
+				ReactionSkipPreference.Set(faction, (ReactionSkipScope)scope);
 		HandleItemSelected(-1);
 	}
 
@@ -252,7 +290,8 @@ public partial class InputManager : Node2D
 
 		FactionHandDisplay.Current.Show(
 			CurrentCardPrompt.DisplayCardIds, CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds,
-			CurrentCardPrompt.SeparateNonHandCards, CurrentCardPrompt.IsReactionWindow);
+			CurrentCardPrompt.SeparateNonHandCards, CurrentCardPrompt.IsReactionWindow,
+			CurrentCardPrompt.Answering);
 		return true;
 	}
 

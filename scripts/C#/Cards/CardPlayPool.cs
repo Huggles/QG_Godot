@@ -85,8 +85,8 @@ public static class CardPlayPool
     public static Task<int> RequestPlay(Faction faction) =>
         CardPlayRound.Current?.RequestPlay(faction) ?? Task.FromResult(-1);
 
-    public static Task<int> RequestBlock(Faction faction) =>
-        CardPlayRound.Current?.RequestBlock(faction) ?? Task.FromResult(-1);
+    // No RequestBlock facade: a block prompt is raised for a whole seat at once now, from inside
+    // CardPlayRound.RequestBlockReactions, and nothing outside the round can sensibly ask for one.
 
     public static List<int> GetAfterReactionOptions(Faction faction) =>
         CardPlayRound.Current?.GetAfterReactionOptions(faction) ?? new();

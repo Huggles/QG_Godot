@@ -63,6 +63,35 @@ public abstract partial class InputRequest
 
     public Faction TargetFaction { get; set; }
 
+    /// <summary>
+    /// Every faction this one prompt answers for, when it answers for more than one.
+    ///
+    /// A reaction window takes a whole team's turn at once, and the factions of that team controlled by
+    /// the SAME seat are now merged into a single request — see CardPlayRound.TakeTeamTurn. A player
+    /// holding Germany, Japan and Italy answers once with every reaction the three of them can make
+    /// instead of clicking through three prompts, two of which are usually empty always-ask windows.
+    ///
+    /// <see cref="TargetFaction"/> stays the representative of the group and keeps doing all the
+    /// routing: every faction in a group shares a seat, so <see cref="TargetPeer"/>,
+    /// <see cref="IsForCurrentPeer"/> and <see cref="IsForLocalBot"/> answer the same for any of them.
+    /// This list is what the parts that speak to or about the PLAYER need — the banner, the scoped skip,
+    /// the "Waiting on …" label and the host's per-faction skip recording.
+    ///
+    /// Null or empty on every other request in the game, which is what <see cref="Answering"/> covers.
+    /// Deliberately not <see cref="TargetFactions"/>: that one is an OPTION set (the factions a
+    /// SelectFaction prompt offers to choose between), and InputRequestSpec reads it as such.
+    /// </summary>
+    public List<Faction> AnsweringFactions { get; set; }
+
+    /// <summary>
+    /// The factions this prompt answers for, always non-empty: <see cref="AnsweringFactions"/> when the
+    /// host merged a group, otherwise just <see cref="TargetFaction"/>. Every reader should use this
+    /// rather than the raw list, so a single-faction prompt needs no special case anywhere.
+    /// </summary>
+    [JsonIgnore]
+    public IReadOnlyList<Faction> Answering =>
+        AnsweringFactions is { Count: > 0 } ? AnsweringFactions : new List<Faction> { TargetFaction };
+
     public List<int> TargetCountryIds { get; set; }
     public List<int> TargetUnitIds { get; set; }
     public List<int> TargetCardIds { get; set; }
@@ -273,6 +302,10 @@ public abstract partial class InputRequest
     /// plain Skip. Rides the same DTO round-trip as <see cref="WasSkipped"/>; the host feeds it to
     /// <see cref="GameFlow.RecordReactionSkip"/> and stops opening the information-hiding reaction
     /// windows for that faction for the scope's duration. NONE for every non-reaction request.
+    ///
+    /// One scope for the whole prompt, which on a merged window means every faction in
+    /// <see cref="Answering"/>: the player made one decision about one prompt, and the per-faction
+    /// control they already have is the toggle in each faction's info row.
     /// </summary>
     public ReactionSkipScope ReactionSkipScope { get; set; } = ReactionSkipScope.NONE;
 
@@ -368,7 +401,10 @@ public abstract partial class InputRequest
         }
         else
         {
-            MarkInputOpen(TargetFaction);
+            // Every faction the prompt answers for, not just its representative: a merged window left
+            // its other factions in the set forever, and MarkInputClosed only hides the countdown once
+            // the set empties.
+            MarkInputOpen(Answering);
 
             // No finally to hide it here: this branch returns immediately rather than awaiting anything,
             // so the countdown is cleared where the waiting text already is — NetworkApi's
@@ -397,16 +433,27 @@ public abstract partial class InputRequest
     /// answered inside their own process. Paired with <see cref="MarkInputClosed"/>, which is
     /// idempotent, so the later AnnounceInputClosed broadcast is harmless.
     /// </summary>
-    public static void MarkInputOpen(Faction faction)
+    public static void MarkInputOpen(Faction faction) => MarkInputOpen(new[] { faction });
+
+    /// <inheritdoc cref="MarkInputOpen(Faction)"/>
+    /// <remarks>One prompt may answer for several factions — see <see cref="AnsweringFactions"/>.</remarks>
+    public static void MarkInputOpen(IReadOnlyList<Faction> factions)
     {
-        if (!AwaitedFactions.Add(faction)) return;
+        bool added = false;
+        foreach (Faction faction in factions) added |= AwaitedFactions.Add(faction);
+        if (!added) return;
         RenderAwaitingText();
     }
 
     /// <summary>One of the prompts this peer was watching has closed — answered, withdrawn or given up on.</summary>
-    public static void MarkInputClosed(Faction faction)
+    public static void MarkInputClosed(Faction faction) => MarkInputClosed(new[] { faction });
+
+    /// <inheritdoc cref="MarkInputClosed(Faction)"/>
+    public static void MarkInputClosed(IReadOnlyList<Faction> factions)
     {
-        if (!AwaitedFactions.Remove(faction)) return;
+        bool removed = false;
+        foreach (Faction faction in factions) removed |= AwaitedFactions.Remove(faction);
+        if (!removed) return;
         RenderAwaitingText();
         // Only once nothing is left, so the first answer of a concurrent team turn does not blank the
         // countdown of the players still deciding.
@@ -557,12 +604,39 @@ public abstract partial class InputRequest
     {
         if (!IsEmptyReactionWindow) return false;
 
-        ReactionSkipScope armed = ReactionSkipPreference.ActiveScope(TargetFaction);
-        if (armed == ReactionSkipScope.NONE) return false;
+        // All or nothing across a merged prompt. One press of a scoped skip button arms every faction
+        // the prompt answers for, but the standing preference is set per faction in the faction info
+        // rows — so a group can hold one armed faction beside one that never asked to be silenced, and
+        // auto-passing there would answer a window on behalf of a player who wanted the click.
+        ReactionSkipScope armed = ReactionSkipScope.NONE;
+        foreach (Faction faction in Answering)
+        {
+            ReactionSkipScope factionScope = ReactionSkipPreference.ActiveScope(faction);
+            if (factionScope == ReactionSkipScope.NONE) return false;
+            armed = Narrower(armed, factionScope);
+        }
 
-        DebugUtilities.PrintPeer($"{TargetFaction} auto-passed an empty reaction window ({armed})");
+        DebugUtilities.PrintPeer($"{string.Join(", ", Answering)} auto-passed an empty reaction window ({armed})");
         ReactionSkipScope = armed;
         return true;
+    }
+
+    /// <summary>
+    /// The less silencing of two armed scopes, for a merged prompt whose factions armed different ones.
+    /// The response carries one scope for the whole group (see <see cref="ReactionSkipScope"/>), so it
+    /// has to be the one that takes the fewest windows away: a faction that asked for TURN_STEP must not
+    /// be handed a teammate's ROUND. UNTIL_ACTIVATABLE is narrowest of all — GameFlow.RecordReactionSkip
+    /// ignores it, so it silences nothing on the host at all.
+    /// </summary>
+    private static ReactionSkipScope Narrower(ReactionSkipScope a, ReactionSkipScope b)
+    {
+        if (a == ReactionSkipScope.NONE) return b;
+        if (b == ReactionSkipScope.NONE) return a;
+        if (a == ReactionSkipScope.UNTIL_ACTIVATABLE || b == ReactionSkipScope.UNTIL_ACTIVATABLE)
+            return ReactionSkipScope.UNTIL_ACTIVATABLE;
+        if (a == ReactionSkipScope.TURN_STEP || b == ReactionSkipScope.TURN_STEP)
+            return ReactionSkipScope.TURN_STEP;
+        return a;
     }
 
     public class SelectCountryRequestHandler : InputRequest
@@ -651,6 +725,14 @@ public abstract partial class InputRequest
         // after-reaction options for a reaction window, and ActivatableCardIds is a wider set.
         public override void PopulateTargets()
         {
+            // A merged reaction window's offer is the UNION of its factions' options and only the host
+            // can build it, so falling back to one faction's activatable cards here would quietly drop
+            // the rest of the group rather than fail. The fallback stays for the single-faction case.
+            if (TargetCardIds == null && Answering.Count > 1)
+                throw new InvalidOperationException(
+                    $"A merged reaction window for {string.Join(", ", Answering)} arrived with no " +
+                    "TargetCardIds — CardPlayRound must stamp the union of the group's offers.");
+
             TargetCardIds ??= DeckState.ForFaction(TargetFaction).ActivatableCardIds;
             PopulateCardTargetPreviews();
         }
@@ -669,7 +751,8 @@ public abstract partial class InputRequest
             // played yet, which is exactly when RequestPlay sends the hand-play request instead.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
-                cardTargetPreviews: CardTargetPreviews, triggerKind: TriggerReactionKind);
+                cardTargetPreviews: CardTargetPreviews, triggerKind: TriggerReactionKind,
+                answeringFactions: Answering);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(
                     TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,
@@ -985,7 +1068,8 @@ public abstract partial class InputRequest
             // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
             PlayerScene.Current.InputManager.SetCardSelectionActive(
                 TargetFaction, TargetCardIds ?? new List<int>(), IsReactionWindow, DisplayCardIds,
-                cardTargetPreviews: CardTargetPreviews, triggerKind: TriggerReactionKind);
+                cardTargetPreviews: CardTargetPreviews, triggerKind: TriggerReactionKind,
+                answeringFactions: Answering);
             if (TriggerCardId > -1)
                 TriggerContextDisplay.Current?.ShowCard(
                     TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,

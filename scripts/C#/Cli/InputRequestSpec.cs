@@ -41,7 +41,18 @@ public enum PassMode { Skip, EmptyResponse, EchoTargets, NotAllowed }
 public sealed class InputRequestSpec
 {
     public string Kind;
+
+    /// <summary>The faction the request is addressed to — its representative, when it asks several.</summary>
     public Faction Faction;
+
+    /// <summary>
+    /// Every faction the prompt answers for. More than one when a reaction window merged one seat's
+    /// share of the reacting team into a single request (<see cref="InputRequest.AnsweringFactions"/>),
+    /// which in a single-seat CLI game is the whole team. Rendered beside <see cref="Faction"/> rather
+    /// than instead of it, so a transcript can still key off one name.
+    /// </summary>
+    public List<Faction> Factions = new();
+
     public string Title;
     public List<CliOption> Options = new();
     public int MinSelections;
@@ -80,6 +91,7 @@ public sealed class InputRequestSpec
         {
             Kind = request.GetType().Name.Replace("RequestHandler", ""),
             Faction = request.TargetFaction,
+            Factions = request.Answering.ToList(),
             OriginCardId = request.OriginCardId,
             OriginPurpose = request.OriginPurpose,
             OriginStepKind = request.OriginStepKind,

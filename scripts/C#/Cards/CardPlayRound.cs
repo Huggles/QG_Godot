@@ -367,8 +367,8 @@ public partial class CardPlayRound : GodotObject
     }
 
     /// <summary>
-    /// Take one team's turn in a reaction window: prompt every candidate faction at the same time and
-    /// return the first card any of them chooses.
+    /// Take one team's turn in a reaction window: prompt everyone controlling a candidate faction at
+    /// the same time and return the first card any of them chooses.
     ///
     /// A team uses only one reaction per turn (reaction-specifics), so the first card chosen ends the
     /// turn and every prompt still open is withdrawn. Which of its reactions a team uses, and in what
@@ -376,21 +376,34 @@ public partial class CardPlayRound : GodotObject
     /// so racing them IS the choice rather than an approximation of one. The flat six-faction
     /// RequestOrder this replaced invented one (UK always before Soviet before US).
     ///
-    /// Grouped by controlling peer, the same shape <see cref="OpeningDiscard"/> uses: groups run
-    /// concurrently, the factions inside a group one after another. A peer is only ever asked one thing
-    /// at a time, so its own factions must not be prompted simultaneously — and a single-process game
-    /// (the CLI, a hotseat) collapses to one group and stays fully sequential.
+    /// Grouped by <see cref="InputServices.PromptGroupKey"/> — the controlling seat by default — and
+    /// each group is asked ONCE, with every reaction all of its factions can make. A player holding
+    /// Germany, Japan and Italy used to answer three prompts in a row for one trigger, two of them
+    /// usually empty always-ask windows; they now answer one. Groups still run concurrently, because
+    /// they are different people.
     /// </summary>
-    /// <param name="ask">Raises one faction's prompt. Given the turn's token so it can be withdrawn.</param>
+    /// <param name="ask">
+    /// Raises one group's prompt and returns the faction and card it chose, or <c>(NONE, -1)</c> for a
+    /// pass. Given the turn's token so the prompt can be withdrawn. The card's faction is resolved by
+    /// the ask itself, from the offers it built the prompt from — never from the answer.
+    /// </param>
     /// <param name="passed">
-    /// Factions that declined are added here. A faction whose prompt was withdrawn, or that was never
-    /// reached because the turn was already decided, is deliberately NOT added: it made no decision,
-    /// and must still be offered when this team's turn comes round again.
+    /// Factions that declined are added here — on a merged prompt, every faction the pass answered for.
+    /// A group whose prompt was withdrawn, or one that chose a card, is deliberately NOT added: the
+    /// factions that did not get to play made no decision, and must still be offered when this team's
+    /// turn comes round again.
+    ///
+    /// That last part is a small, deliberate change in the BLOCK window, which is the one window that
+    /// does not clear this set on a play: a faction that would have been asked first and passed, before
+    /// a teammate on the same seat played, is no longer recorded as having passed. It gets one more
+    /// offer than it did. Harmless and arguably more correct — today's outcome depends only on the
+    /// arbitrary order the seat's factions happened to be asked in, and per reaction-specifics a team
+    /// may use its reactions in whatever order it likes as long as the other side reacts in between.
     /// </param>
     /// <returns>The winning faction and card id, or <c>(Faction.NONE, -1)</c> if the whole team declined.</returns>
     private static async Task<(Faction faction, int cardId)> TakeTeamTurn(
         List<Faction> candidates,
-        Func<Faction, CancellationToken, Task<int>> ask,
+        Func<List<Faction>, CancellationToken, Task<(Faction faction, int cardId)>> ask,
         HashSet<Faction> passed)
     {
         if (candidates.Count == 0) return (Faction.NONE, -1);
@@ -401,18 +414,25 @@ public partial class CardPlayRound : GodotObject
         int winningCardId = -1;
 
         List<Task> groups = candidates
-            .GroupBy(PlayerFactionRegistry.GetPeerIdForFaction)
-            .Select(async peerFactions =>
+            .GroupBy(InputServices.PromptGroupKey)
+            .Select(group => group.ToList())
+            // A group cannot be empty coming out of GroupBy, but an empty one would send a prompt with
+            // TargetFaction NONE — and GetPeerIdForFaction answers that with an error log and the host's
+            // own peer id, so it would be routed at the host rather than refused.
+            .Where(group => group.Count > 0)
+            .Select(async group =>
             {
-                foreach (Faction faction in peerFactions)
+                try
                 {
                     // Checked before the prompt is raised, not only inside the wait: once the turn is
-                    // decided this peer's later factions must not reach the screen at all.
+                    // decided, a group that has not been reached must not reach the screen at all.
                     if (turnDecided.IsCancellationRequested) return;
 
-                    int cardId = await ask(faction, turnDecided.Token);
+                    (Faction faction, int cardId) = await ask(group, turnDecided.Token);
 
-                    // Withdrawn rather than answered — no decision to record either way.
+                    // Withdrawn rather than answered — no decision to record either way. Merged, this
+                    // discards the player's whole team decision and not just one faction's, which is the
+                    // cost of a race two players entered at the same time.
                     if (turnDecided.IsCancellationRequested)
                     {
                         if (cardId != -1)
@@ -424,8 +444,9 @@ public partial class CardPlayRound : GodotObject
 
                     if (cardId == -1)
                     {
-                        lock (winnerLock) passed.Add(faction);
-                        continue;
+                        lock (winnerLock)
+                            foreach (Faction passer in group) passed.Add(passer);
+                        return;
                     }
 
                     lock (winnerLock)
@@ -435,7 +456,14 @@ public partial class CardPlayRound : GodotObject
                         winningCardId = cardId;
                     }
                     turnDecided.Cancel();
-                    return;
+                }
+                catch
+                {
+                    // Withdraw the other groups before unwinding. Task.WhenAll below surfaces the first
+                    // exception and abandons the rest, so without this a prompt raised on another peer
+                    // would sit on NetworkApi's fifteen-minute backstop with nothing left to answer it.
+                    turnDecided.Cancel();
+                    throw;
                 }
             })
             .ToList();
@@ -491,17 +519,41 @@ public partial class CardPlayRound : GodotObject
                 // resolved block card goes on to move arrives as its own ChangeEvent with its own scope.
                 GameStateCalculator.CalculateAll(RecalcScope.Flow);
 
-                List<Faction> candidates = StaticGameData.FactionsForTeam(team)
-                    .Where(f => f != changeEvent.TriggeringFaction)   // nobody blocks their own action
-                    .Where(f => !passed.Contains(f))
-                    .Where(f => ShouldOpenReactionWindow(f, GetBlockReactionOptions(f)))
-                    .ToList();
+                // Options computed once per faction and carried into the prompt, rather than re-derived
+                // inside RequestBlock: a merged prompt's offer is the union over its group, so the
+                // caller has to hold the per-faction sets anyway to know which faction a chosen card
+                // belongs to. The self-block guard lives here too, for the same reason — a faction it
+                // rejects must be absent from the group rather than merged in and then refused.
+                List<Faction> candidates = new();
+                Dictionary<Faction, List<int>> offers = new();
+                foreach (Faction faction in StaticGameData.FactionsForTeam(team))
+                {
+                    if (faction == changeEvent.TriggeringFaction) continue;   // nobody blocks their own action
+                    if (passed.Contains(faction)) continue;
 
-                (Faction faction, int cardId) = await TakeTeamTurn(candidates, RequestBlock, passed);
+                    List<int> options = GetBlockReactionOptions(faction);
+                    if (!ShouldOpenReactionWindow(faction, options))
+                    {
+                        DebugUtilities.PrintPeer(
+                            $"{faction} is not offered a block window (no block reactions, and nothing hidden to cover for)");
+                        // Kept from where this check used to live, inside RequestBlock: a replay that
+                        // fast-forwards through a window nobody is asked about still needs the beat.
+                        await ReplayContext.Pace(10);
+                        continue;
+                    }
+
+                    candidates.Add(faction);
+                    offers[faction] = options;
+                }
+
+                (Faction blocker, int cardId) = await TakeTeamTurn(
+                    candidates,
+                    (group, ct) => RequestBlock(group, offers, ct),
+                    passed);
                 if (cardId == -1)
                     break; // The whole team declined — nothing further will block this event
 
-                DebugUtilities.PrintPeer($"BLOCK REACTION from {FactionState.ForEnum(faction).FactionLabel}");
+                DebugUtilities.PrintPeer($"BLOCK REACTION from {FactionState.ForEnum(blocker).FactionLabel}");
                 await DoCard(cardId, changeEvent);
             }
         }
@@ -564,7 +616,7 @@ public partial class CardPlayRound : GodotObject
 
                 (Faction winner, int cardId) = await TakeTeamTurn(
                     candidates,
-                    (faction, ct) => RequestPlay(faction, offers[faction], ct),
+                    (group, ct) => RequestPlay(group, offers, ct),
                     _afterReactionPassedFactions);
 
                 if (cardId != -1)
@@ -638,24 +690,12 @@ public partial class CardPlayRound : GodotObject
         return -1;
     }
 
-    /// <summary>Ask the faction to choose a card to play/activate (initial play or after reaction).</summary>
-    /// <param name="reactionOptions">
-    /// Non-null when this is an after-reaction window: the exact set of cards on offer, sent to the
-    /// controlling peer as TargetCardIds the same way RequestBlock sends its block options.
-    ///
-    /// Without it the request fell through to HandCardPlayRequestHandler for any faction that had not
-    /// yet played a hand card this turn step — which is every faction reacting on an opponent's turn —
-    /// and that handler deliberately offers the whole hand. The prompt then showed all of the reacting
-    /// faction's hand cards beside the event it was answering. Hand cards are never playable inside a
-    /// reaction window, so the reaction path must never build that request.
-    /// </param>
-    /// <param name="withdrawToken">
-    /// Cancelled by <see cref="TakeTeamTurn"/> when another faction on this team has already used the
-    /// team's one reaction for this turn. The prompt closes and this returns -1, the same as a pass —
-    /// the caller distinguishes the two by the token, not by the return value.
-    /// </param>
-    public async Task<int> RequestPlay(Faction faction, List<int> reactionOptions = null,
-                                       CancellationToken withdrawToken = default)
+    /// <summary>
+    /// Ask the faction to choose a card to play or activate on its own turn — reaction depth 0, its one
+    /// play for the step. The reaction windows go through <see cref="RequestPlay(List{Faction},
+    /// Dictionary{Faction, List{int}}, CancellationToken)"/> instead.
+    /// </summary>
+    public async Task<int> RequestPlay(Faction faction)
     {
         PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
         if (controllingPlayer == null)
@@ -664,144 +704,206 @@ public partial class CardPlayRound : GodotObject
             return -1;
         }
 
-        bool isReaction = reactionOptions != null;
-
-        // Only this faction's own plays consume its hand-card play for the turn step; another faction
-        // playing must not hide this faction's hand cards.
         bool hasSpentPlay =
             GameFlow.Instance.CardsPlayedThisTurnStep.TryGetValue(faction, out int cardsPlayedByFaction)
             && cardsPlayedByFaction > 0;
 
-        // Two of these three cases open a prompt with nothing on offer, deliberately, for different
-        // reasons:
-        //   - In a reaction window the caller has already run ShouldOpenReactionWindow, and an empty
-        //     option list is the whole point of the always-ask rule — an unanswerable prompt is the
-        //     cover that stops the prompt itself from revealing a face-down Response card.
-        //   - The faction's own play prompt, before the play is spent, always opens. A faction must
-        //     always play a card, take an instead-of-play action, or discard, so passing now costs
-        //     something (see ApplyPassedOnPlayPenalty) — the player has to be given the choice and told
-        //     the price. This gate used to exist to avoid an empty prompt; an empty prompt is now the
-        //     point, and it also stops the ABSENCE of the prompt from proving the hand is dead.
-        //   - Once the play is spent, passing is free again, so an empty prompt there is just a click
-        //     with nothing behind it and stays suppressed.
-        bool hasOptions = isReaction
-                       || !hasSpentPlay
-                       || DeckState.ForFaction(faction).ActivatableCardIds.Count > 0;
+        // Before the play is spent this prompt always opens, even with nothing on offer. A faction must
+        // always play a card, take an instead-of-play action, or discard, so passing now costs something
+        // (see ApplyPassedOnPlayPenalty) — the player has to be given the choice and told the price, and
+        // the ABSENCE of the prompt must not prove the hand is dead. Once the play is spent, passing is
+        // free again, so an empty prompt there is just a click with nothing behind it.
+        bool hasOptions = !hasSpentPlay || DeckState.ForFaction(faction).ActivatableCardIds.Count > 0;
+        if (!hasOptions) return -1;
 
-        int selectedId = -1;
-        if(hasOptions)
+        InputRequest request = hasSpentPlay
+            ? new InputRequest.ActivateCardRequestHandler(faction)
+            : new InputRequest.HandCardPlayRequestHandler(faction);
+
+        // What passing this prompt will cost, so the Skip button can say so. Stamped host-side
+        // from the authoritative hand rather than re-derived by the client, so a future modifier
+        // on the cost stays knowable by the only peer that can know it.
+        if (!hasSpentPlay)
         {
-            InputRequest request;
-            if (isReaction)
-            {
-                // Carried explicitly rather than re-derived on the client. The client never runs
-                // GameStateCalculator (tags arrive over the wire) and has no CardPlayRound, so it
-                // cannot reproduce the host's reaction-depth-aware filtering on its own.
-                request = new InputRequest.ActivateCardRequestHandler(faction)
-                {
-                    TargetCardIds = reactionOptions,
-                    DisplayCardIds = ReactionWindowDisplayCardIds(faction, reactionOptions),
-                    IsReactionWindow = true,
-                    // Only on this branch. The else branch below is the faction's own play, which can
-                    // carry a trigger too (the stamp under it is not gated on isReaction) — but it is
-                    // not a reaction window, and labelling it "after reaction" would say it was.
-                    TriggerReactionKind = TriggerKind.AFTER,
-                };
-            }
-            else
-            {
-                request = hasSpentPlay
-                    ? new InputRequest.ActivateCardRequestHandler(faction)
-                    : new InputRequest.HandCardPlayRequestHandler(faction);
-
-                // What passing this prompt will cost, so the Skip button can say so. Stamped host-side
-                // from the authoritative hand rather than re-derived by the client, so a future modifier
-                // on the cost stays knowable by the only peer that can know it.
-                if (!hasSpentPlay)
-                {
-                    request.PassCostText = DeckState.ForFaction(faction).HandCardIds.Count > 0
-                        ? "discard 1 card"
-                        : "lose 1 VP";
-                }
-            }
-
-            if (CurrentReactionTrigger != null)
-            {
-                request.TriggerCardId = GetTriggerCardId(CurrentReactionTrigger);
-                request.TriggerSummaryText = CurrentReactionTrigger.SummaryText();
-                // Not derivable from TriggerCardId above: that falls back to the last card in the pool
-                // when the event has no source card, so it is what to SHOW, not what caused this.
-                request.TriggerCauseText = CurrentReactionTrigger.CauseText();
-                StampTriggerTargets(request, CurrentReactionTrigger);
-            }
-
-            InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request, withdrawToken);
-            // Not for a withdrawn prompt: the player never got to answer it, so there is no skip scope
-            // of theirs to record — reading the untouched default would silence them for the rest of
-            // the turn step on a decision somebody else made.
-            if (isReaction && !withdrawToken.IsCancellationRequested)
-                GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
-            // A pass is only the player's own if they were the one who answered. WasSkipped here means
-            // the HOST released the prompt — see the field's own note.
-            if (!isReaction && !responseDto.WasSkipped)
-                ownPlayPromptAnswered = true;
-            selectedId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
+            request.PassCostText = DeckState.ForFaction(faction).HandCardIds.Count > 0
+                ? "discard 1 card"
+                : "lose 1 VP";
         }
 
+        // An own play can carry a trigger too — it is not a reaction window, which is why it is never
+        // labelled one, but the event that led here is still worth showing.
+        StampTrigger(request, CurrentReactionTrigger);
 
-        return selectedId;
+        InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request);
+        // A pass is only the player's own if they were the one who answered. WasSkipped here means
+        // the HOST released the prompt — see the field's own note.
+        if (!responseDto.WasSkipped)
+            ownPlayPromptAnswered = true;
+        return responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
     }
 
-    /// <summary>Ask the faction to choose a block-reaction step, or pass.</summary>
-    /// <param name="withdrawToken">See <see cref="RequestPlay"/> — the team's turn was decided by one
-    /// of its other factions and this prompt is being taken back off the screen.</param>
-    public async Task<int> RequestBlock(Faction faction, CancellationToken withdrawToken = default)
+    /// <summary>
+    /// Ask one seat for an after-reaction, in a single prompt covering every faction of its that this
+    /// window is offering one to, and return the faction and card it chose.
+    /// </summary>
+    /// <param name="group">
+    /// The factions to ask, in team order — one seat's share of the team taking its turn. The first is
+    /// the request's representative <c>TargetFaction</c>; see <see cref="InputRequest.AnsweringFactions"/>.
+    /// </param>
+    /// <param name="offers">
+    /// Each faction's own reaction options, as the caller computed them. Carried rather than re-derived
+    /// because the prompt offers the union and the answer is a bare card id: this map is what says which
+    /// faction a chosen card belongs to.
+    /// </param>
+    /// <param name="withdrawToken">
+    /// Cancelled by <see cref="TakeTeamTurn"/> when another seat on this team has already used the
+    /// team's one reaction for this turn. The prompt closes and this returns a pass — the caller
+    /// distinguishes the two by the token, not by the return value.
+    /// </param>
+    private async Task<(Faction faction, int cardId)> RequestPlay(
+        List<Faction> group, Dictionary<Faction, List<int>> offers, CancellationToken withdrawToken)
     {
-        PlayerScene controllingPlayer = PlayerFactionRegistry.GetPlayerSceneForFaction(faction);
-        if (controllingPlayer == null)
+        if (!TryResolveSeat(group, "RequestPlay", out Faction representative))
+            return (Faction.NONE, -1);
+
+        // Carried explicitly rather than re-derived on the client. The client never runs
+        // GameStateCalculator (tags arrive over the wire) and has no CardPlayRound, so it
+        // cannot reproduce the host's reaction-depth-aware filtering on its own.
+        InputRequest request = new InputRequest.ActivateCardRequestHandler(representative)
         {
-            DebugUtilities.PrintPeerError($"RequestBlock: No player found controlling {faction}");
-            return -1;
-        }
+            AnsweringFactions = new List<Faction>(group),
+            TargetCardIds = UnionOfOffers(group, offers),
+            DisplayCardIds = MergedDisplayCardIds(group, offers),
+            IsReactionWindow = true,
+            TriggerReactionKind = TriggerKind.AFTER,
+        };
+        StampTrigger(request, CurrentReactionTrigger);
 
-        // Factions cannot block their own events. Read from CurrentBlockTrigger, not LastChangeEvent:
-        // once a nested window has run, LastChangeEvent is no longer this window's event.
-        if (CurrentBlockTrigger?.TriggeringFaction == faction)
-            return -1;
+        return await AwaitReaction(request, group, offers, withdrawToken);
+    }
 
-        List<int> blockOptions = GetBlockReactionOptions(faction);
+    /// <summary>
+    /// Ask one seat for a block reaction, in a single prompt covering every faction of its being
+    /// offered one. The block counterpart of
+    /// <see cref="RequestPlay(List{Faction}, Dictionary{Faction, List{int}}, CancellationToken)"/> —
+    /// see there for the parameters.
+    /// </summary>
+    private async Task<(Faction faction, int cardId)> RequestBlock(
+        List<Faction> group, Dictionary<Faction, List<int>> offers, CancellationToken withdrawToken)
+    {
+        if (!TryResolveSeat(group, "RequestBlock", out Faction representative))
+            return (Faction.NONE, -1);
 
-        if (!ShouldOpenReactionWindow(faction, blockOptions))
-        {
-            DebugUtilities.PrintPeer($"{faction} is not offered a block window (no block reactions, and nothing hidden to cover for)");
-            await ReplayContext.Pace(10);
-            return -1;
-        }
-
-        DebugUtilities.PrintPeer($"{faction} has block reaction options: {string.Join(",", blockOptions)}");
+        DebugUtilities.PrintPeer(
+            $"{string.Join(", ", group)} has block reaction options: {string.Join(",", UnionOfOffers(group, offers))}");
 
         // Route through the network seam (like RequestPlay) so the authoritative host — which may
         // be a faction-less headless server — awaits the controlling peer's response instead of a
         // local UI click. The client's Handle() runs the actual card-selection UI.
-        InputRequest.BlockReactionRequestHandler request = new InputRequest.BlockReactionRequestHandler(faction)
+        InputRequest request = new InputRequest.BlockReactionRequestHandler(representative)
         {
+            AnsweringFactions = new List<Faction>(group),
             // Sent explicitly so the client prompt offers only block-eligible cards rather than
             // everything tagged IsActivatable. Tag.IsBlockReaction itself stays server-internal.
-            TargetCardIds = blockOptions,
-            DisplayCardIds = ReactionWindowDisplayCardIds(faction, blockOptions),
-            TriggerCardId = GetTriggerCardId(CurrentBlockTrigger),
-            TriggerSummaryText = CurrentBlockTrigger?.SummaryText(),
-            // See RequestPlay: the cause is the trigger's own source card, which TriggerCardId only
-            // coincides with when the event has one. The kind is BLOCK from the handler's constructor.
-            TriggerCauseText = CurrentBlockTrigger?.CauseText()
+            TargetCardIds = UnionOfOffers(group, offers),
+            DisplayCardIds = MergedDisplayCardIds(group, offers),
         };
-        StampTriggerTargets(request, CurrentBlockTrigger);
+        StampTrigger(request, CurrentBlockTrigger);
 
+        return await AwaitReaction(request, group, offers, withdrawToken);
+    }
+
+    /// <summary>
+    /// Send a reaction prompt, record what it says about skipping, and resolve the card it came back
+    /// with to the faction that owns it. Shared by the block and after-reaction windows, which differ
+    /// only in the request they build.
+    /// </summary>
+    private static async Task<(Faction faction, int cardId)> AwaitReaction(
+        InputRequest request, List<Faction> group, Dictionary<Faction, List<int>> offers,
+        CancellationToken withdrawToken)
+    {
         InputRequest responseDto = await NetworkApi.Instance.SendInputRequest(request, withdrawToken);
-        // See RequestPlay: a withdrawn prompt carries no decision of this player's to record.
+
+        // Not for a withdrawn prompt: the player never got to answer it, so there is no skip scope
+        // of theirs to record — reading the untouched default would silence them for the rest of
+        // the turn step on a decision somebody else made.
+        //
+        // One scope, recorded for every faction the prompt asked: the player pressed one button about
+        // one prompt. See InputRequest.ReactionSkipScope.
         if (!withdrawToken.IsCancellationRequested)
-            GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
-        return responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
+            foreach (Faction faction in group)
+                GameFlow.Instance.RecordReactionSkip(faction, responseDto.ReactionSkipScope);
+
+        int cardId = responseDto.ResponseCardIds.Count > 0 ? responseDto.ResponseCardIds[0] : -1;
+        if (cardId == -1) return (Faction.NONE, -1);
+
+        // Resolved from what the host offered, never from the card itself. A merged prompt spans several
+        // factions' cards, so an answer that named a card outside the offer would otherwise be played
+        // for whichever faction happens to own it — a stale or malformed response becoming a free
+        // reaction. The offer sets are disjoint by owner (CardState.AllForFaction filters on Faction),
+        // so the first match is the only one.
+        foreach (Faction faction in group)
+        {
+            if (offers.TryGetValue(faction, out List<int> options) && options.Contains(cardId))
+                return (faction, cardId);
+        }
+
+        DebugUtilities.PrintPeerError(
+            $"Reaction prompt for {string.Join(", ", group)} answered with card {cardId}, which none of " +
+            "them was offered — treating it as a pass");
+        return (Faction.NONE, -1);
+    }
+
+    /// <summary>
+    /// The group's representative faction — the one the request routes by — or false when no
+    /// PlayerScene controls it. Every faction in a group shares a seat, so one check covers the group.
+    /// </summary>
+    private static bool TryResolveSeat(List<Faction> group, string caller, out Faction representative)
+    {
+        representative = group.Count > 0 ? group[0] : Faction.NONE;
+        if (representative != Faction.NONE
+            && PlayerFactionRegistry.GetPlayerSceneForFaction(representative) != null)
+            return true;
+
+        DebugUtilities.PrintPeerError($"{caller}: No player found controlling {representative}");
+        return false;
+    }
+
+    /// <summary>Every card the group may choose from, across all of its factions.</summary>
+    private static List<int> UnionOfOffers(List<Faction> group, Dictionary<Faction, List<int>> offers) =>
+        group.SelectMany(faction => offers.TryGetValue(faction, out List<int> options)
+                ? options
+                : Enumerable.Empty<int>())
+            .Distinct()
+            .ToList();
+
+    /// <summary>
+    /// Everything a merged reaction prompt draws: each asked faction's whole event-triggered table, so
+    /// the player can see why nothing of a given country's applies rather than facing a prompt that
+    /// silently omits cards they know they hold. See <see cref="ReactionWindowDisplayCardIds"/>.
+    /// </summary>
+    private static List<int> MergedDisplayCardIds(List<Faction> group, Dictionary<Faction, List<int>> offers) =>
+        group.SelectMany(faction => ReactionWindowDisplayCardIds(
+                faction,
+                offers.TryGetValue(faction, out List<int> options) ? options : null))
+            .Distinct()
+            .ToList();
+
+    /// <summary>
+    /// Put the event being reacted to on the request, so the prompt can say what it is answering and
+    /// show where on the board it landed. A null trigger leaves the request unstamped — RequestBlock's
+    /// CurrentBlockTrigger is nullable, and an own play outside any reaction has nothing to show.
+    /// </summary>
+    private void StampTrigger(InputRequest request, ChangeEvent trigger)
+    {
+        if (trigger == null) return;
+
+        request.TriggerCardId = GetTriggerCardId(trigger);
+        request.TriggerSummaryText = trigger.SummaryText();
+        // Not derivable from TriggerCardId above: that falls back to the last card in the pool
+        // when the event has no source card, so it is what to SHOW, not what caused this.
+        request.TriggerCauseText = trigger.CauseText();
+        StampTriggerTargets(request, trigger);
     }
 
     /// <summary>Card IDs of hand cards the faction can play from hand.</summary>

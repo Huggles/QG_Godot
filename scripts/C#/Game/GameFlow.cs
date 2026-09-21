@@ -697,7 +697,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             DebugUtilities.PrintPeer($"Restore resumed on the saved prompt ({expected}).");
         else
             DebugUtilities.PrintPeerErrorRaw(
-                $"Restore resumed on {PendingPrompt.KindOf(actual)} for {actual.TargetFaction}, " +
+                $"Restore resumed on {PendingPrompt.KindOf(actual)} for {string.Join(", ", actual.Answering)}, " +
                 $"but the save was taken on {expected}. The board is restored; the turn position may not be.");
     }
 

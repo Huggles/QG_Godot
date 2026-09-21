@@ -343,7 +343,8 @@ public partial class NetworkApi : Node
             .Select(pending => new PendingPrompt
             {
                 Kind = PendingPrompt.KindOf(pending.Request),
-                Faction = pending.Request.TargetFaction
+                Faction = pending.Request.TargetFaction,
+                Factions = pending.Request.Answering.ToList()
             })
             .ToList();
 
@@ -476,7 +477,7 @@ public partial class NetworkApi : Node
                 ClearPendingInput(pendingId, pending);
                 if (pending.Peer != 0 || Multiplayer?.MultiplayerPeer == null)
                     AbortRemoteInput(pending.Peer);
-                AnnounceInputClosed(inputRequest.TargetFaction);
+                AnnounceInputClosed(inputRequest);
 
                 inputRequest.WasSkipped = true;
                 return inputRequest;
@@ -498,7 +499,7 @@ public partial class NetworkApi : Node
             // deciding, not just the one that timed out.
             ClearPendingInput(pendingId, pending);
             AbortRemoteInput(pending.Peer);
-            AnnounceInputClosed(inputRequest.TargetFaction);
+            AnnounceInputClosed(inputRequest);
             GameFlow.Instance?.ClearCurrentInputRequest();
 
             if (await ErrorReporter.ReportInputTimeoutAndAwaitDecision(inputRequest, wasForced)) continue;
@@ -569,7 +570,7 @@ public partial class NetworkApi : Node
         {
             skipped.WasSkipped = true;
             tcs.TrySetResult(skipped.ToJson());
-            AnnounceInputClosed(skipped.TargetFaction);
+            AnnounceInputClosed(skipped);
         }
         else
         {
@@ -650,16 +651,27 @@ public partial class NetworkApi : Node
     /// the same condition answered locally.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void InputRequestAnswered(int faction)
+    public void InputRequestAnswered(int[] factions)
     {
-        InputRequest.MarkInputClosed((Faction)faction);
+        InputRequest.MarkInputClosed(factions.Select(faction => (Faction)faction).ToList());
     }
 
-    /// <summary>Host-side helper: tell every peer that this faction's prompt is no longer open.</summary>
-    private void AnnounceInputClosed(Faction faction)
+    /// <summary>
+    /// Host-side helper: tell every peer that this prompt is no longer open.
+    ///
+    /// Every faction the prompt answered for, not just its representative. One prompt can answer for a
+    /// whole seat's share of a reacting team (<see cref="InputRequest.AnsweringFactions"/>), and a
+    /// faction left behind in the watchers' set pins a "Waiting on …" line and a live countdown on
+    /// every other player's screen for the rest of the game — MarkInputClosed only hides the timer once
+    /// the set empties.
+    /// </summary>
+    private void AnnounceInputClosed(InputRequest request)
     {
-        if (Multiplayer?.MultiplayerPeer != null) Rpc(nameof(InputRequestAnswered), (int)faction);
-        else InputRequestAnswered((int)faction);   // single process: no wire, but the label is still ours
+        if (request == null) return;
+        int[] factions = request.Answering.Select(faction => (int)faction).ToArray();
+
+        if (Multiplayer?.MultiplayerPeer != null) Rpc(nameof(InputRequestAnswered), factions);
+        else InputRequestAnswered(factions);   // single process: no wire, but the label is still ours
     }
 
     // ── Error propagation ────────────────────────────────────────────────────
@@ -791,7 +803,7 @@ public partial class NetworkApi : Node
             // purpose: announcing a stale reply would drop a faction whose retry is already in progress.
             // Each peer hides its own countdown once its list empties, so the first player to answer a
             // concurrent team turn still does not blank the countdown of everyone else choosing.
-            AnnounceInputClosed(pending.Request?.TargetFaction ?? response.TargetFaction);
+            AnnounceInputClosed(pending.Request ?? response);
 
             pending.Tcs.TrySetResult(dtoJson);
 
