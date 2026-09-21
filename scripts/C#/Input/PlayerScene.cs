@@ -29,12 +29,14 @@ public partial class PlayerScene : CharacterBody2D
     /// <summary>
     /// Whether this seat is played by a bot rather than by a person on some peer.
     ///
-    /// Derived from the node's own authority, which NetworkApi.LoadPlayers set from the assignment's
-    /// peer id — so it needs no extra field and is identically true on every peer. See
-    /// <see cref="PlayerFactionRegistry.AiSeatIdBase"/> for why that id also keeps this scene from
-    /// ever becoming <see cref="Current"/>.
+    /// Set by NetworkApi.LoadPlayers from the assignment, which every peer deserialises identically, so
+    /// this is the same on all of them. Deliberately NOT derived from the authority id: a real Godot
+    /// client id is drawn at random from the whole positive range, so an id test calls every remote
+    /// human a bot — and then <see cref="InputRequest.TargetPeer"/> sends their prompts to the host.
+    /// The synthetic id from <see cref="PlayerFactionRegistry.AiSeatIdBase"/> still keeps this scene
+    /// from ever becoming <see cref="Current"/>; it just no longer decides what the seat IS.
     /// </summary>
-    public bool IsAiSeat => PlayerFactionRegistry.IsAiSeatId(GetMultiplayerAuthority());
+    public bool IsAiSeat { get; set; }
 
     /// <summary>
     /// The bot answering for this seat, or null for a human seat and on any peer that is not the one

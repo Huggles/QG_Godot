@@ -79,6 +79,8 @@ public partial class NetworkApi : Node
             // instead. Both set before AddChild so they are in place when _Ready runs.
             player.PlayerName  = $"Player_{peerId}";
             player.DisplayName = assignment.DisplayName;
+            // Before AddChild with the rest: the registry reads it the moment the seat is registered.
+            player.IsAiSeat    = assignment.IsAi;
 
             if (Multiplayer.IsServer())
             {
