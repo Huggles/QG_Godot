@@ -25,7 +25,7 @@ public partial class SelectionSkipButton : MenuPanelButton
 
         ButtonText = "Skip";
 
-        if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        if (SessionIdentity.IsLocalAuthority(this))
         {
             Current = this;
         }

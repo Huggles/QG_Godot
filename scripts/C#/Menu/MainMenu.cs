@@ -58,6 +58,9 @@ public partial class MainMenu : Control
 	{
 		PendingLobbyIntent  = LobbyIntent.None;
 		PendingSteamLobbyId = 0;
+		// An invite nobody consumed is stale the moment another lobby flow starts: leaving it set makes
+		// the next visit to the friends screen auto-join a lobby that is probably already gone.
+		PendingInviteLobbyId = 0;
 	}
 
 	/// <summary>
@@ -92,6 +95,10 @@ public partial class MainMenu : Control
 		// destroy the very payload the lobby had just arrived to restore.
 		GameManager.PendingSave = null;
 		GameManager.PendingScenarioJson = null;
+
+		// Same reasoning, and the backstop for any exit that does not run SceneFlow's leaveSession
+		// teardown: standing on the main menu, there is no host to have told us who we are.
+		SessionIdentity.Reset();
 
 		var skirmish         = GetNode<MenuPanelButton>("%SkirmishButton");
 		var loadGame         = GetNode<MenuPanelButton>("%LoadGameButton");

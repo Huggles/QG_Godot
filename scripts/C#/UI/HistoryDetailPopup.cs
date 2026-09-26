@@ -51,7 +51,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
 
     public override void _Ready()
     {
-        if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        if (SessionIdentity.IsLocalAuthority(this))
         {
             Current = this;
             LoadUI();

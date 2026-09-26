@@ -9,6 +9,13 @@ public partial class PlayerScene : CharacterBody2D
 
     public static PlayerScene Current { get; private set; }
 
+    /// <summary>
+    /// Drop the pointer when a session ends. It is a static holding a node from the game scene, so
+    /// without this the menus — and the next game, until its own PlayerScene is ready — hold a freed
+    /// wrapper that throws ObjectDisposedException rather than answering null. See SceneFlow.
+    /// </summary>
+    public static void ClearCurrent() => Current = null;
+
     private Camera2D _camera => GetNode<Camera2D>("%MainGameCamera");
     private Node _rootNode => GetNode(".");
 
@@ -80,7 +87,7 @@ public partial class PlayerScene : CharacterBody2D
 
     public override void _Ready()
     {   
-        if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
+        if(SessionIdentity.IsLocalAuthority(this))
         {
             Current = this;
         }

@@ -73,6 +73,11 @@ public partial class MultiplayerSession : Node
         {
             DebugUtilities.PrintPeerFinest($"LoadGame called with config: {configuration}");
 
+            // A session exists again from here. NetworkApi refuses to open an input request while none
+            // is live, which is what stops an abandoned game's loop issuing fresh prompts into an
+            // autoload that outlives it. Before any state is built, so nothing below can race it.
+            ErrorReporter.BeginSession();
+
             // Seed before any state is built. Here rather than at boot because a second game in the
             // same process must not inherit the first game's stream. An unseeded run still records
             // the seed it picked, so any session can be re-pinned afterwards.
@@ -104,6 +109,12 @@ public partial class MultiplayerSession : Node
             await gameMode.Init();
             DebugUtilities.PrintPeerFinest("Game mode initialization complete, emitting MultiplayerSessionReady");
 
+            // The HUD goes up underneath the loading cover BEFORE any game logic runs, on every peer. A
+            // restore streams its whole event log in a couple of frames, and a fresh game's StartGame
+            // raises the opening discard from inside this call — either way a HUD built afterwards misses
+            // the signals that populate it, and that prompt reaches a null PlayerActionLabel.Instance.
+            // Null on a dedicated/headless server (it controls no faction, so has no local PlayerScene).
+            PlayerScene.Current?.EnsureUiLoaded();
 
             if(Multiplayer.IsServer())
             {
@@ -114,13 +125,6 @@ public partial class MultiplayerSession : Node
 
                 if (restore != null)
                 {
-                    // The HUD goes up BEFORE the replay rather than after it. A restore applies its whole
-                    // event log in a couple of frames, so a HUD built afterwards would miss every signal
-                    // that populates it, and the prompt the resume raises could reach a null
-                    // ModalStack.Current. Building first and letting the events stream into it is exactly
-                    // what every client already does with the setup burst.
-                    PlayerScene.Current?.EnsureUiLoaded();
-
                     ReplayContext.BeginFastForward();
                     Rpc(nameof(BeginFastForward));
                     await RestoreSavedGame(gameMode, restore);
@@ -138,9 +142,6 @@ public partial class MultiplayerSession : Node
             }
 
 
-            // Build the local HUD underneath the loading cover, which is still up.
-            // Null on a dedicated/headless server (it controls no faction, so has no local PlayerScene).
-            PlayerScene.Current?.EnsureUiLoaded();
             EventBus.Emit(EventBus.SignalName.GameSessionStarted);
 
             // In-game music. Here rather than in SceneFlow because the opening track is chosen from

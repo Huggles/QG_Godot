@@ -46,7 +46,7 @@ public partial class InputTimerDisplay : Control, LoadableUI
 	{
 		// Same guard as TriggerContextDisplay: user_interface.tscn is instanced once per player, so only
 		// the locally-controlled copy may claim Current or the timer would render on every player's UI.
-		if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+		if (SessionIdentity.IsLocalAuthority(this))
 		{
 			Current = this;
 

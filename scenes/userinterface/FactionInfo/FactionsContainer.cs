@@ -28,7 +28,7 @@ public partial class FactionsContainer : Control
 
     public override void _Ready()
     {
-        if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        if(SessionIdentity.IsLocalAuthority(this))
         {
             DebugUtilities.PrintPeerFinest($"Setting up FactionsContainer for local player: {GetMultiplayerAuthority()}");
             Current = this;

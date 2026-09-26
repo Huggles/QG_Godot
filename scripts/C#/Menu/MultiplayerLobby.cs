@@ -229,7 +229,7 @@ public partial class MultiplayerLobby : Control
 			_steamLobbyId   = MainMenu.PendingSteamLobbyId;
 			MainMenu.ClearLobbyIntent();
 
-			int me = Multiplayer.GetUniqueId();
+			int me = SessionIdentity.LocalPeerId(this);
 			UpdateStatusLabel("Connected – waiting for lobby data...");
 			AddPlayerRow(me, $"{LocalDisplayName()} (You)", LocalDisplayName());
 			// Deferred so this node has finished entering the tree before the RPC goes out.
@@ -337,6 +337,7 @@ public partial class MultiplayerLobby : Control
 		if (!Multiplayer.IsServer() || _gameStarting) return;
 
 		int sender = Multiplayer.GetRemoteSenderId();
+		EnsureRowForSender(sender);
 		if (!_playerLabels.TryGetValue(sender, out Label label)) return;
 
 		string clean = MakeNameUnique(SanitisePlayerName(displayName, sender), sender);
@@ -348,6 +349,24 @@ public partial class MultiplayerLobby : Control
 		// The load-bearing seating hook: this is the first moment the host knows who a peer actually is,
 		// and therefore the first moment a saved seat can be matched to them by name.
 		ReseatForRestore();
+	}
+
+	/// <summary>
+	/// Host-side: a peer is talking to us, so it is connected, so it gets a row — even if
+	/// <see cref="OnPeerConnected"/> has not run for it yet.
+	///
+	/// Both client→host RPCs used to assume the row already existed. ReportPlayerName returned early
+	/// and never retried, leaving the peer listed as "Player N" forever; RequestLobbyState answered
+	/// with a list that omitted the requester, and the client's SyncPlayerList then wiped its own row
+	/// on the strength of it. Ordering between the transport's peer_connected and the first RPC off
+	/// that same connection is not something this screen should have to rely on.
+	/// </summary>
+	private void EnsureRowForSender(int sender)
+	{
+		if (sender == 0 || _playerLabels.ContainsKey(sender)) return;
+
+		DebugUtilities.PrintPeer($"Peer {sender} reached us before its connection signal; adding its row now");
+		AddPlayerRow(sender, $"Player {_playerLabels.Count + 1}");
 	}
 
 	/// <summary>
@@ -716,7 +735,7 @@ public partial class MultiplayerLobby : Control
 
 	private void OnFactionButtonPressed(int rowPeerId, Faction faction)
 	{
-		int me = Multiplayer.GetUniqueId();
+		int me = SessionIdentity.LocalPeerId(this);
 		// Only the row's owner or the host may interact with a row.
 		if (me != rowPeerId && me != 1) return;
 
@@ -728,7 +747,7 @@ public partial class MultiplayerLobby : Control
 
 	private void OnRandomButtonPressed(int rowPeerId)
 	{
-		int me = Multiplayer.GetUniqueId();
+		int me = SessionIdentity.LocalPeerId(this);
 		// Only the row's owner or the host may interact with a row.
 		if (me != rowPeerId && me != 1) return;
 
@@ -860,7 +879,7 @@ public partial class MultiplayerLobby : Control
 
 	private void RefreshButton(int rowPeerId, Faction faction, TextureButton btn)
 	{
-		int  me      = Multiplayer.GetUniqueId();
+		int  me      = SessionIdentity.LocalPeerId(this);
 		bool isMyRow = rowPeerId == me;
 		bool iAmHost = me == 1;
 
@@ -919,7 +938,7 @@ public partial class MultiplayerLobby : Control
 	/// </summary>
 	private void RefreshRandomButton(int rowPeerId, TextureButton btn)
 	{
-		int  me      = Multiplayer.GetUniqueId();
+		int  me      = SessionIdentity.LocalPeerId(this);
 		bool isMyRow = rowPeerId == me;
 		bool iAmHost = me == 1;
 
@@ -1164,6 +1183,8 @@ public partial class MultiplayerLobby : Control
 
 		if (_isHost)
 		{
+			// First, so the row list that follows can be read against an id both ends agree on.
+			RpcId((int)peerId, nameof(AssignPeerIdentity), (int)peerId);
 			RpcId((int)peerId, nameof(SyncPlayerList),   GetPlayerListData());
 			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
 			// Not while restoring: SyncScenarioSelection sends a PATH that the client looks up in its own
@@ -1281,7 +1302,7 @@ public partial class MultiplayerLobby : Control
 	private void OnConnectedToServer()
 	{
 		DebugUtilities.PrintPeer("Connected to server");
-		int me = Multiplayer.GetUniqueId();
+		int me = SessionIdentity.LocalPeerId(this);
 		UpdateStatusLabel("Connected – waiting for lobby data...");
 		AddPlayerRow(me, $"{LocalDisplayName()} (You)", LocalDisplayName());
 
@@ -1477,6 +1498,10 @@ public partial class MultiplayerLobby : Control
 		if (!Multiplayer.IsServer() || _gameStarting) return;
 
 		int requester = Multiplayer.GetRemoteSenderId();
+		EnsureRowForSender(requester);
+
+		// Ahead of the list, as in OnPeerConnected: the requester reads that list against this id.
+		RpcId(requester, nameof(AssignPeerIdentity), requester);
 		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());
 		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
 		// See OnPeerConnected: a restored game syncs its banner rather than a scenario path.
@@ -1489,14 +1514,43 @@ public partial class MultiplayerLobby : Control
 	}
 
 	/// <summary>
+	/// Host → one client, ahead of every other sync: "this is the peer id I address you by".
+	///
+	/// Sent first because every row decision downstream is "is this row mine", and a client that
+	/// answers that from its own transport id can be wrong — see SessionIdentity. Cheap and idempotent,
+	/// so it rides along with both state pushes rather than getting its own handshake.
+	/// </summary>
+	// Reliable and explicit: this must arrive, and it must arrive BEFORE the SyncPlayerList sent
+	// straight after it — reliable RPCs on one channel are delivered in order, unreliable ones are not.
+	[Rpc(MultiplayerApi.RpcMode.Authority, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void AssignPeerIdentity(int yourPeerId)
+	{
+		SessionIdentity.AdoptHostAssignedId(yourPeerId, Multiplayer.GetUniqueId());
+		RefreshAllButtons();
+	}
+
+	/// <summary>
 	/// Rebuilds the entire player list from host-provided data.
 	/// Called on newly connected clients to synchronise the current lobby state.
 	/// </summary>
-	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
 	private void SyncPlayerList(Godot.Collections.Dictionary<int, string> playerData)
 	{
 		ClearAllRows();
 		foreach (var kv in playerData) AddPlayerRow(kv.Key, kv.Value);
+
+		// ClearAllRows destroyed the row this client built for itself on connect, so a list that does
+		// not name us leaves the lobby with no row we can act on — every flag and the Random button
+		// read as someone else's and grey out, with no way back. Rebuild it rather than sit there
+		// unusable: the host's next broadcast replaces this row with the real one.
+		int me = SessionIdentity.LocalPeerId(this);
+		if (!Multiplayer.IsServer() && !_playerLabels.ContainsKey(me))
+		{
+			DebugUtilities.PrintPeerErrorRaw(
+				$"SyncPlayerList: the host's list has no row for us (peer {me}); re-adding our own.");
+			AddPlayerRow(me, $"{LocalDisplayName()} (You)", LocalDisplayName());
+		}
+
 		RefreshAllButtons();
 	}
 

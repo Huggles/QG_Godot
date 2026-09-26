@@ -329,15 +329,11 @@ public static class PlayerFactionRegistry
         if (IsSinglePlayer)
             return 1;
         
-        // In multiplayer, get from Godot's multiplayer API
-        // Access through Engine rather than SceneTree
-        var mainLoop = Engine.GetMainLoop();
-        if (mainLoop is SceneTree tree)
-        {
-            return tree.GetMultiplayer().GetUniqueId();
-        }
-        
-        return 1; // Default to host if multiplayer not set up
+        // Through SessionIdentity rather than straight off the MultiplayerAPI: the factions this
+        // peer controls are keyed by the ids the HOST dealt out, so asking the transport who we are
+        // is only right while both ends agree. When they do not, this is the seam that keeps the
+        // local player owning their own seats.
+        return SessionIdentity.LocalPeerId();
     }
 
     /// <summary>

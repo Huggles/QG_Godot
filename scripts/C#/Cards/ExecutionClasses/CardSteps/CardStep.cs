@@ -239,8 +239,11 @@ public abstract partial class CardStep : ITaggable
                 DebugUtilities.PrintPeer("Player skipped step");
                 await new ShowActionLabelPresentationEvent(TriggeringFaction, "Skipped: " + ActionGuidance).Apply();
             }
-            catch (Exception e)
+            catch (Exception e) when (!ErrorReporter.IsBenign(e))
             {
+                // An exception filter, so a benign unwind — a stale epoch, an abandoned session — never
+                // runs this body at all and the stack is left undisturbed for whoever does handle it.
+                //
                 // Report here, where the card and step are known, then RETHROW.
                 //
                 // This used to swallow the exception and let DoCard move to the card's next step. That

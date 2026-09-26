@@ -364,6 +364,11 @@ public partial class NetworkApi : Node
     {
         DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");
 
+        // Captured once, up front, and re-checked on every attempt below. This autoload outlives the
+        // game scene, so a request started by a session the player has since left would otherwise park
+        // here on the 15-minute backstop and then fire at whoever happens to be connected NEXT.
+        int sessionGeneration = ErrorReporter.SessionGeneration;
+
         // Stamp the legal move set onto the request before it goes on the wire, so it is
         // self-describing to a scripted/CLI peer. Here rather than in InputRequest.BroadCast because
         // CardPlayRound.RequestPlay and RequestBlock call this method directly, bypassing BroadCast —
@@ -417,6 +422,11 @@ public partial class NetworkApi : Node
         // already removed a unit would remove a second one.
         while (true)
         {
+            // Inside the loop, not above it: the Retry decision at the bottom `continue`s back to here,
+            // so a host that clicked Retry a frame before quitting would otherwise re-register a fresh
+            // pending entry pointed at a peer that no longer exists.
+            ErrorReporter.ThrowIfSessionAbandoned(sessionGeneration);
+
             // A fresh Id per attempt. Aborting the previous attempt makes the client's handler complete
             // as skipped and reply; that reply carries the OLD Id, so ReceiveInputResponse's staleness
             // check drops it instead of instantly resolving the retry we are about to open.

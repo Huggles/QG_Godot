@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 using GDExtension.Wrappers;
 
@@ -59,6 +60,42 @@ public static class SteamPeerFactory
 
 		error = null;
 		return peer;
+	}
+
+	/// <summary>
+	/// Release the Steam networking sessions a peer was holding, before it is closed.
+	///
+	/// <c>MultiplayerPeer.Close()</c> tears down Godot's view of the connections; the Steam session
+	/// underneath each one lives on, and a later session between the same two users inherits its
+	/// state — including the peer identity the previous connection was using. That produced a re-host
+	/// in which the host addressed a client by the old session's id while the client's own peer had
+	/// generated a new one, so nothing in the lobby read as belonging to that client.
+	///
+	/// Call with the peer still open: the id → Steam id lookup is the peer's own map. A no-op for
+	/// anything that is not a Steam peer, which is every ENet session.
+	/// </summary>
+	public static void ReleaseSession(MultiplayerPeer peer, IEnumerable<int> peerIds)
+	{
+		if (peer == null || !IsSupported || SteamworksApi.Instance == null) return;
+
+		// By class rather than by `is`: the wrapper is a script attached to a GDExtension object, and
+		// the instance Godot hands back from MultiplayerPeer is not necessarily the managed wrapper the
+		// factory built. This is the same check Bind performs before it will attach.
+		if (!ClassDB.IsParentClass("SteamMultiplayerPeer", peer.GetClass())) return;
+
+		SteamMultiplayerPeer steamPeer = SteamMultiplayerPeer.Bind(peer);
+		if (steamPeer == null) return;
+
+		foreach (int peerId in peerIds)
+		{
+			// Guarded individually: one peer whose id no longer resolves must not stop the rest being
+			// released, and leaving even one session open reintroduces the bug this exists to prevent.
+			Guard.Try(() =>
+			{
+				long steamId = steamPeer.GetSteamIdForPeerId(peerId);
+				SteamworksApi.Instance.CloseNetworkingSessionWith(steamId);
+			}, $"SteamPeerFactory.ReleaseSession:{peerId}");
+		}
 	}
 
 	/// <summary>

@@ -324,7 +324,7 @@ public partial class InputManager : Node2D
 
 	public override void _Ready()
 	{
-		if(Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
+		if(SessionIdentity.IsLocalAuthority(this))
 		{
 			Current = this;
 			Camera.Enabled = true;
