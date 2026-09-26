@@ -32,17 +32,14 @@ public partial class FactionInfoRow : Control
 	// Store event handlers for cleanup
 
 	public override void _Ready()
-	{   
-		EventBus.Instance.NewTurnStarted += OnNewTurnStarted; // Update modulation at the start of each turn to reflect current faction        
+	{
 		LoadUI();
-
 	}
 	public override void _ExitTree()
 	{
 		// Unsubscribe from events
 		if (EventBus.Instance != null)
 		{
-			EventBus.Instance.NewTurnStarted -= OnNewTurnStarted;
 			EventBus.Instance.FactionScoredPoints -= OnFactionScoredPoints;
 			EventBus.Instance.UnitDeployed -= OnUnitDeployed;
 			EventBus.Instance.UnitRemoved -= OnUnitRemoved;
@@ -52,13 +49,21 @@ public partial class FactionInfoRow : Control
 			EventBus.Instance.CardsDiscarded -= OnCardsChanged;
 			EventBus.Instance.ReactionSkipPreferenceChanged -= OnReactionSkipPreferenceChanged;
 			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
+			EventBus.Instance.GameChangeEventAfter -= OnGameChangeEventAfter;
 			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
 			FactionInfoButton.Pressed -= OnFactionInfoButtonPressed;
 			DiscardDeckButton.Pressed -= OnDiscardDeckButtonPressed;
 		}
 	}
 
-	private void OnNewTurnStarted(int turnNumber)
+	/// <summary>
+	/// The dim state below is derived from GameFlow.CurrentFaction, so it has to repaint wherever the
+	/// turn can move — and NOT on NewTurnStarted, which is where this used to hang: that is emitted
+	/// inside GameFlow.StartNewTurn, which only the host runs, so a joined client sat on the opening
+	/// faction's dimming for the whole game and a save restore never repainted at all. Same pair, and
+	/// same reasoning, as GameRoundLabel and TurnFactionTint.
+	/// </summary>
+	private void OnGameChangeEventAfter(string changeEventName)
 	{
 		SetModulation();
 	}
@@ -120,6 +125,7 @@ public partial class FactionInfoRow : Control
 		// peer, so it is the one turn-boundary signal a client can rely on — and it is exactly when a
 		// TURN_STEP arming expires and the toggle has to fall back to "always ask".
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
+		EventBus.Instance.GameChangeEventAfter += OnGameChangeEventAfter;
 		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		DiscardDeckButton.Pressed += OnDiscardDeckButtonPressed;
@@ -172,12 +178,15 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>
-	/// A TURN_STEP or ROUND arming can expire without anyone touching the toggle, so repaint it at
-	/// every step boundary rather than only when the setting is changed.
+	/// A TURN_STEP or ROUND arming can expire without anyone touching the toggle, so repaint the
+	/// toggle at every step boundary rather than only when the setting is changed. The dimming rides
+	/// along because this is also the one turn-boundary signal that reaches a client after a save
+	/// restore, where the turn has already moved before any new event lands.
 	/// </summary>
 	private void OnNextStepStarted(int turnStep)
 	{
 		ReactionSkipToggleButton.Refresh();
+		SetModulation();
 	}
 
 	private void OnFactionInfoButtonPressed()
@@ -218,7 +227,8 @@ public partial class FactionInfoRow : Control
 		{
 			Modulate = new Color(0.5f, 0.5f, 0.5f, 1f); // Dim the row for factions not controlled by the local player
 		}
-		if (GameFlow.Instance.CurrentFaction != Faction)
+		// Guarded because GameChangeEventAfter can now reach this before GameFlow exists on a peer.
+		if (GameFlow.Instance != null && GameFlow.Instance.CurrentFaction != Faction)
 		{
 			Modulate = new Color(Modulate.R - 0.2f, Modulate.G - 0.2f, Modulate.B - 0.2f,  Modulate.A); // Further dim the row if it's not the current faction's turn
 		}

@@ -358,11 +358,6 @@ public abstract partial class InputRequest
             // AiSeatInputProvider renders "Waiting on <faction> input…" instead, which carries no clock.
             if (asked) InputTimerDisplay.Current?.Start(TimeoutSeconds, "Your input");
 
-            // Here rather than per handler, for the same reason the timer above is: every request
-            // subclass funnels through Execute(), so the faction tint covers card, country, unit and
-            // battle-target prompts as well as reaction windows without a call per Handle().
-            if (asked) FactionFocus.Set(FactionFocusSource.InputRequest, TargetFaction);
-
             try
             {
                 // Through the seam rather than Handle() directly, so a headless/scripted peer can
@@ -377,14 +372,11 @@ public abstract partial class InputRequest
                 // "Blitzkrieg — Germany is deciding" is exactly the narration a watching human wants.
                 if (showedBulletin) TriggerContextDisplay.Current?.Hide();
 
-                // Both gated for correctness, not tidiness. A team reaction window opens prompts for a
-                // whole team at once, so on a host holding one human faction and one bot faction on the
-                // same team these run while the HUMAN's prompt is still open — an ungated Hide() would
-                // clear their live countdown, and an ungated Clear() would drop their focus claim
-                // outright, since FactionFocus keys claims by source and both prompts use
-                // FactionFocusSource.InputRequest.
+                // Gated for correctness, not tidiness. A team reaction window opens prompts for a
+                // whole team at once, so on a host holding one human faction and one bot faction on
+                // the same team this runs while the HUMAN's prompt is still open — an ungated Hide()
+                // would clear their live countdown.
                 if (asked) InputTimerDisplay.Current?.Hide();
-                if (asked) FactionFocus.Clear(FactionFocusSource.InputRequest);
 
                 // The player has answered and the game is moving on, so a turn announcement still
                 // fading out over the middle of the screen is behind the play — drop it rather than
@@ -463,9 +455,6 @@ public abstract partial class InputRequest
     /// <summary>Drop everything, for a session ending with prompts still nominally open.</summary>
     public static void ClearAwaitingInput()
     {
-        // Above the early return: this peer's own prompt puts nothing in AwaitedFactions (that set is
-        // the watcher's), so a client torn down mid-prompt would keep its tint with the game gone.
-        FactionFocus.Reset();
         if (AwaitedFactions.Count == 0) return;
         AwaitedFactions.Clear();
         RenderAwaitingText();

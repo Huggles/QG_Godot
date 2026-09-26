@@ -18,12 +18,12 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	private MenuPanel MenuPanel => GetNode<MenuPanel>("%MenuPanel");
 
 	/// <summary>
-	/// The plate behind the banner text. Tinted with whatever the client is busy with, so the banner
-	/// says whose prompt it is by colour as well as by wording — see <see cref="FactionFocusTint"/>.
+	/// The plate behind the banner text. Tinted with the faction on turn, so the banner
+	/// says who the game is on by colour as well as by wording — see <see cref="TurnFactionTint"/>.
 	/// </summary>
 	private Control BackgroundPanel => GetNode<Control>("%MenuPanel/BackgroundContainer/Panel");
 
-	private FactionFocusTint _focusTint;
+	private TurnFactionTint _turnTint;
 
 	/// <summary>
 	/// The size the banner was authored at, read off the scene before anything overrides it. Every fit
@@ -57,8 +57,8 @@ public partial class PlayerActionLabel : Label, LoadableUI
 		// again on every resize is what makes that case, and a later window resize, come out right.
 		Resized += FitTextToBox;
 
-		_focusTint = new FactionFocusTint(BackgroundPanel);
-		_focusTint.Attach();
+		_turnTint = new TurnFactionTint(BackgroundPanel);
+		_turnTint.Attach();
 
 		// Hide by default until LoadUI is called
 		Visible = false;
@@ -70,8 +70,8 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	/// </summary>
 	public override void _ExitTree()
 	{
-		_focusTint?.Detach();
-		_focusTint = null;
+		_turnTint?.Detach();
+		_turnTint = null;
 
 		// Same release as ModalStack.Current. Without it the static outlives the HUD it points at, and
 		// the null guards on ShowText/HideText would wave a freed node through into ObjectDisposedException.

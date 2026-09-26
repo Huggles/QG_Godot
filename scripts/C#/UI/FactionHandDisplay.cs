@@ -106,7 +106,7 @@ public partial class FactionHandDisplay : Control
 		// A hand pulled up from the bottom-left menu is claimed OVER a live prompt rather than instead
 		// of one, so browsing is checked first and keeps the behaviour it always had: refresh what is
 		// actually on the display.
-		bool browsing = FactionFocus.IsHeldBy(FactionFocusSource.Browsing);
+		bool browsing = HandBrowsing.IsActive;
 
 		if (!browsing && InputManager.CurrentCardPrompt != null)
 		{
@@ -149,10 +149,10 @@ public partial class FactionHandDisplay : Control
 		if (upcoming == Faction.NONE || upcoming == followedFaction) return;
 
 		// An open card prompt owns this display, and so does a hand pulled up from the bottom-left menu
-		// (which is claimed over a live request rather than instead of one, hence IsHeldBy rather than
-		// FactionFocus.Current). Deliberately not recorded as followed when skipped: the next step
-		// retries, so the display catches up as soon as it is free again.
-		if (InputManager.CurrentCardPrompt != null || FactionFocus.IsHeldBy(FactionFocusSource.Browsing))
+		// (claimed over a live request rather than instead of one, so browsing being set says nothing
+		// about whether a prompt is open underneath it). Deliberately not recorded as followed when
+		// skipped: the next step retries, so the display catches up as soon as it is free again.
+		if (InputManager.CurrentCardPrompt != null || HandBrowsing.IsActive)
 		{
 			return;
 		}
