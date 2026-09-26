@@ -33,6 +33,13 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>When true, display-only modals dismiss automatically after a delay instead of requiring the user to click Close.</summary>
     public bool AutoDismissModal { get; private set; } = true;
 
+    /// <summary>
+    /// When true, the hand-play prompt also draws the faction's active table cards — its played
+    /// Status and Response cards — in the side fan, greyed out unless the host offered them.
+    /// Presentation only; the faction row's Active Cards button keeps working either way.
+    /// </summary>
+    public bool ShowActiveCardsInFan { get; private set; } = false;
+
     /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
     public string LastJoinIp { get; private set; } = "127.0.0.1";
 
@@ -71,6 +78,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public static DebugVerbosity Debug => Instance.DebugLevel;
     public static bool IsDebugMultiplayer => Instance.DebugMultiplayer;
     public static bool IsAutoDismissModal => Instance.AutoDismissModal;
+    public static bool IsShowActiveCardsInFan => Instance.ShowActiveCardsInFan;
     public static bool IsDebugTeamsSwapped => OS.GetCmdlineUserArgs().Contains("swapped_teams=true");
 
     /// <summary>
@@ -123,6 +131,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
+    public void SetShowActiveCardsInFan(bool value)    { ShowActiveCardsInFan = value; Save(); }
     public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
 
     /// <summary>
@@ -203,6 +212,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             PresentationSpeed = (GameSpeed)Math.Clamp(saved, 0, 2);
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
             AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
+            ShowActiveCardsInFan = config.GetValue(Section, "show_active_cards_in_fan", false).As<bool>();
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
             LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
 
@@ -266,6 +276,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         // debug_multiplayer is deliberately not persisted — it is a runtime-only, command-line
         // driven flag (see Load). Persisting it would leak F6 auto-start into menu launches.
         config.SetValue(Section, "auto_dismiss_modal",    AutoDismissModal);
+        config.SetValue(Section, "show_active_cards_in_fan", ShowActiveCardsInFan);
         config.SetValue(Section, "last_join_ip",          LastJoinIp);
         config.SetValue(Section, "last_join_port",        LastJoinPort);
         config.SetValue(Section, "show_country_labels",   ShowCountryLabels);

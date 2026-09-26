@@ -18,6 +18,7 @@ public partial class FactionInfoRow : Control
 	private Button DiscardDeckButton => BackgroundPanel.GetNode<Button>("DiscardDeckButton");
 	private Label DeckCardNumber => DiscardDeckButton.GetNode<Label>("DeckCardNumber");
 	private Button PlayedCardsButton => BackgroundPanel.GetNode<Button>("PlayedCardsButton");
+	private Label PlayedCardNumber => PlayedCardsButton.GetNode<Label>("PlayedCardsNumber");
 	private RichTextLabel TurnSummariesRichText => DetailPanel.GetNode<RichTextLabel>("MarginContainer/TurnSummariesRichText");
 	private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
 	private TextureRect ArmyIcon => GetNode<TextureRect>("%ArmyIcon");
@@ -44,7 +45,7 @@ public partial class FactionInfoRow : Control
 			EventBus.Instance.UnitDeployed -= OnUnitDeployed;
 			EventBus.Instance.UnitRemoved -= OnUnitRemoved;
 			EventBus.Instance.GameStateRecalculated -= SetUnitCounts;
-			EventBus.Instance.GameStateRecalculated -= SetDeckCardCount;
+			EventBus.Instance.GameStateRecalculated -= SetCardCounts;
 			EventBus.Instance.CardsDrawn -= OnCardsChanged;
 			EventBus.Instance.CardsDiscarded -= OnCardsChanged;
 			EventBus.Instance.ReactionSkipPreferenceChanged -= OnReactionSkipPreferenceChanged;
@@ -66,6 +67,9 @@ public partial class FactionInfoRow : Control
 	private void OnGameChangeEventAfter(string changeEventName)
 	{
 		SetModulation();
+		// Also the catch-all for the two card counters: a change event that declares RecalcScope.None
+		// never reaches GameStateRecalculated, and two label writes are cheap enough to do unconditionally.
+		SetCardCounts();
 	}
 
 	/**
@@ -110,13 +114,13 @@ public partial class FactionInfoRow : Control
 
 		SetScore(FactionState.Score);
 		SetUnitCounts();
-		SetDeckCardCount();
+		SetCardCounts();
 
 		EventBus.Instance.FactionScoredPoints += OnFactionScoredPoints;
 		EventBus.Instance.UnitDeployed += OnUnitDeployed;
 		EventBus.Instance.UnitRemoved += OnUnitRemoved;
 		EventBus.Instance.GameStateRecalculated += SetUnitCounts;
-		EventBus.Instance.GameStateRecalculated += SetDeckCardCount;
+		EventBus.Instance.GameStateRecalculated += SetCardCounts;
 		EventBus.Instance.CardsDrawn += OnCardsChanged;
 		EventBus.Instance.CardsDiscarded += OnCardsChanged;
 		EventBus.Instance.ReactionSkipPreferenceChanged += OnReactionSkipPreferenceChanged;
@@ -168,7 +172,7 @@ public partial class FactionInfoRow : Control
 	{
 		if ((Faction)faction == Faction)
 		{
-			SetDeckCardCount();
+			SetCardCounts();
 		}
 	}
 
@@ -200,7 +204,7 @@ public partial class FactionInfoRow : Control
 		List<int> playedCardIds = [.. deckState.StatusCardIds, .. deckState.ResponseCardIds];
 		List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(playedCardIds, false);            
 		_ = ModalStack.Current.Show(
-			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Played Cards", presentationItems)
+			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Active Cards", presentationItems)
 				.WithDedupeKey($"played-cards:{Faction}"));
 	}
 	
@@ -253,16 +257,21 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>
-	/// Repaints the draw-deck counter — how many cards the faction has left to draw.
+	/// Repaints the draw-deck counter (cards left to draw) and the active-cards counter (status and
+	/// response cards currently on the table).
 	/// Reads state directly rather than tracking deltas: several paths change DeckCardIds without
 	/// emitting CardsDrawn/CardsDiscarded (DiscardTopCards, PlayCard, ShuffleDeck, RecycleCardChangeEvent,
 	/// and a client applying a snapshot), so the card signals alone would drift out of sync.
 	/// </summary>
-	private void SetDeckCardCount()
+	private void SetCardCounts()
 	{
 		// FactionState.ForEnum returns null before the game state exists — same guard as UnitPool.AvailableUnitCount.
 		DeckState deckState = FactionState?.DeckState;
 		DeckCardNumber.Text = (deckState?.DeckCardIds.Count ?? 0).ToString();
+		// Active cards are the status and response cards still lying on the table — the same two piles
+		// the Active Cards modal lists, so the counter can never disagree with what the button opens.
+		int activeCardCount = (deckState?.StatusCardIds.Count ?? 0) + (deckState?.ResponseCardIds.Count ?? 0);
+		PlayedCardNumber.Text = activeCardCount.ToString();
 	}
 
 	private void SetUnitCount(Label label, int count)

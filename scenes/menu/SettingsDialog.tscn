@@ -218,10 +218,31 @@ theme_override_font_sizes/font_size = 18
 text = "Messages that only report what happened close themselves after a moment instead of waiting for a click."
 autowrap_mode = 3
 
-[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="4" unique_id=1904471010]
+[node name="ActiveCardsRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="4" unique_id=1904471015]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ActiveCardsLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ActiveCardsRow" index="0" unique_id=1904471016]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Show Active Cards"
+
+[node name="ActiveCardsToggle" type="CheckButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ActiveCardsRow" index="1" unique_id=1904471017]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="5" unique_id=1904471011]
+[node name="ActiveCardsHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="5" unique_id=1904471018]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "When choosing a card to play, your Status and Response cards already on the table are drawn beside your hand, next to the cards you can activate instead of playing."
+autowrap_mode = 3
+
+[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471010]
+layout_mode = 2
+
+[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="7" unique_id=1904471011]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -242,7 +263,7 @@ popup/item_0/id = 0
 popup/item_1/text = "Finest"
 popup/item_1/id = 1
 
-[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471014]
+[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="8" unique_id=1904471014]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18

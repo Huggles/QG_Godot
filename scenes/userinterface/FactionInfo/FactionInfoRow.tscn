@@ -190,6 +190,19 @@ icon = ExtResource("4_rhpmq")
 icon_alignment = 1
 expand_icon = true
 
+[node name="PlayedCardsNumber" type="Label" parent="BackgroundPanel/PlayedCardsButton" unique_id=633649374]
+custom_minimum_size = Vector2(50, 25)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_0r4er")
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="DetailPanel" type="Panel" parent="." unique_id=1521963942]
 unique_name_in_owner = true
 visible = false

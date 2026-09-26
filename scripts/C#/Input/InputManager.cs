@@ -140,7 +140,8 @@ public partial class InputManager : Node2D
 			BannerText(triggerKind, cardIds.Count > 0, isHandPlayPrompt, passCostText, answering), faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
 		// and would resolve Faction.NONE for an empty always-ask prompt.
-		FactionHandDisplay.Current.Show(displayCardIds ?? cardIds, faction, cardIds, separateNonHandCards,
+		FactionHandDisplay.Current.Show(
+			DrawnCardIds(CurrentCardPrompt), faction, cardIds, separateNonHandCards,
 			isReactionWindow, answering);
 		FactionHandDisplay.Current.CardSelected += HandleItemSelected;
 		EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
@@ -289,10 +290,40 @@ public partial class InputManager : Node2D
 		}
 
 		FactionHandDisplay.Current.Show(
-			CurrentCardPrompt.DisplayCardIds, CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds,
+			DrawnCardIds(CurrentCardPrompt), CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds,
 			CurrentCardPrompt.SeparateNonHandCards, CurrentCardPrompt.IsReactionWindow,
 			CurrentCardPrompt.Answering);
 		return true;
+	}
+
+	/// <summary>
+	/// What the hand display actually draws for <paramref name="prompt"/>: the host's offer, plus the
+	/// faction's active table cards when the player has asked for those
+	/// (<see cref="GameSettings.ShowActiveCardsInFan"/>) and this is the hand-play prompt — they land
+	/// in the side fan beside the cards that activate instead of a play, greyed out because the host
+	/// never offered them.
+	///
+	/// Resolved here on every draw rather than folded into <see cref="ActiveCardPrompt.DisplayCardIds"/>
+	/// once: the record stays a faithful copy of what the host sent, and toggling the setting mid-prompt
+	/// takes effect on the next draw instead of being frozen at the moment the prompt opened. The extra
+	/// ids are this peer's own faction's piles, already replicated — nothing new goes on the wire, and
+	/// the faction row's Active Cards button is untouched.
+	/// </summary>
+	private static List<int> DrawnCardIds(ActiveCardPrompt prompt)
+	{
+		if (!prompt.IsHandPlay || !GameSettings.IsShowActiveCardsInFan)
+			return prompt.DisplayCardIds;
+
+		// Null before the game state exists, and on a faction with no deck — same guard, and same
+		// fallback, as FactionHandDisplay's own split of the hand from the side fan.
+		DeckState deck = FactionState.ForEnum(prompt.Faction)?.DeckState;
+		if (deck == null) return prompt.DisplayCardIds;
+
+		return prompt.DisplayCardIds
+			.Concat(deck.StatusCardIds)
+			.Concat(deck.ResponseCardIds)
+			.Distinct()
+			.ToList();
 	}
 
 	private void HandleItemSelected(int cardId)
