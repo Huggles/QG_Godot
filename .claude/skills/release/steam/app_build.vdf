@@ -1,0 +1,22 @@
+"AppBuild"
+{
+	"AppID" "5159090"
+	"Desc" "{{DESC}}"
+	"ContentRoot" "{{CONTENT_ROOT}}"
+	"BuildOutput" "{{BUILD_OUTPUT}}"
+	"SetLive" "{{SET_LIVE}}"
+	"Depots"
+	{
+		"5159091"
+		{
+			"FileMapping"
+			{
+				"LocalPath" "*"
+				"DepotPath" "."
+				"recursive" "1"
+			}
+			"FileExclusion" "*.console.exe"
+			"FileExclusion" "*.zip"
+		}
+	}
+}

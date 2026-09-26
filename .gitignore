@@ -8,3 +8,5 @@ Builds/*
 sim/bin/
 sim/obj/
 sim/runs/
+# steamcmd install (binaries + cached Steam login under steamcmd/config)
+steamcmd/
