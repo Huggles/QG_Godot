@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-
 /// <summary>Who is allowed to award an achievement, enforced by <see cref="SteamworksApi.Unlock"/>.</summary>
 public enum AchievementScope
 {
@@ -18,6 +14,13 @@ public enum AchievementScope
 /// <summary>
 /// One achievement as configured in Steamworks. <paramref name="ApiName"/> must match the API Name
 /// column there exactly — Steam answers a wrong name with a bare false that looks like any other refusal.
+///
+/// A progressive achievement names the stat it counts against:
+/// <code>new("ACH_ATTRITION", AchievementScope.Server, ProgressStat: "STAT_UNITS_LOST", ProgressTarget: 100)</code>
+///
+/// Deliberately carries no game concepts: this file and <see cref="SteamworksApi"/> are the reusable
+/// half. What the game's achievements ARE lives in its own catalog — see <c>Achievements</c>, which
+/// registers itself through <see cref="SteamworksApi.Catalog"/>.
 /// </summary>
 public sealed record SteamAchievement(
 	string           ApiName,
@@ -26,31 +29,4 @@ public sealed record SteamAchievement(
 	int              ProgressTarget = 0)
 {
 	public bool IsProgressive => !string.IsNullOrWhiteSpace(ProgressStat) && ProgressTarget > 0;
-}
-
-/// <summary>
-/// Every achievement the game can award. Add a <c>public static readonly SteamAchievement</c> field here
-/// and call <see cref="SteamworksApi.Unlock"/> with it; nothing else needs touching.
-///
-/// <code>
-/// public static readonly SteamAchievement FirstBlood  = new("ACH_FIRST_BLOOD");
-/// public static readonly SteamAchievement WarOfAttrition =
-///     new("ACH_ATTRITION", AchievementScope.Server, ProgressStat: "STAT_UNITS_LOST", ProgressTarget: 100);
-/// </code>
-/// </summary>
-public static class Achievements
-{
-	// ── Add achievements here ────────────────────────────────────────────────
-
-	// ── Keep All last: it reads the fields above, and a static initialiser runs in declaration order.
-	public static IReadOnlyList<SteamAchievement> All { get; } =
-		typeof(Achievements)
-			.GetFields(BindingFlags.Public | BindingFlags.Static)
-			.Where(field => field.FieldType == typeof(SteamAchievement))
-			.Select(field => (SteamAchievement)field.GetValue(null))
-			.Where(achievement => achievement != null)
-			.ToList();
-
-	public static SteamAchievement Find(string apiName)
-		=> All.FirstOrDefault(achievement => achievement.ApiName == apiName);
 }

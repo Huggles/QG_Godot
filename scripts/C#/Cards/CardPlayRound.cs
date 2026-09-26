@@ -103,6 +103,14 @@ public partial class CardPlayRound : GodotObject
         while (true)
         {
             int stepId = await RequestCardPlay(faction);
+
+            // Everything below reads GameFlow.Instance, and the await above is where a quit-to-menu
+            // lands: SceneFlow.ChangeScene calls AbandonSession (which bumps the epoch) and then
+            // CancelPendingAwaiters, so the request resolves into a session whose GameFlow has left
+            // the tree and nulled its Instance. Unwinding here is what stops that surfacing as a
+            // NullReferenceException out of HasPlayedCardThisTurnStep.
+            ThrowIfAborted();
+
             if (stepId == -1)
             {
                 break;

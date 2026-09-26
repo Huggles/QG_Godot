@@ -906,8 +906,15 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		=> _available && achievement?.IsProgressive == true ? (int)_steam.GetStatInt(achievement.ProgressStat) : 0;
 
 	/// <summary>
-	/// Logs every catalog entry Steamworks does not know about. Names are only ever checked at runtime,
-	/// so without this a typo shows up as an achievement that quietly never unlocks.
+	/// The game's achievements, registered at startup. The only thing this class knows about them, and
+	/// only so <see cref="LogUnknownAchievements"/> has something to check — leave it unset and every
+	/// unlock still works.
+	/// </summary>
+	public static IReadOnlyList<SteamAchievement> Catalog { get; set; } = Array.Empty<SteamAchievement>();
+
+	/// <summary>
+	/// Logs every <see cref="Catalog"/> entry Steamworks does not know about. Names are only ever checked
+	/// at runtime, so without this a typo shows up as an achievement that quietly never unlocks.
 	/// </summary>
 	public void LogUnknownAchievements()
 	{
@@ -917,7 +924,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		long count = _steam.GetNumAchievements();
 		for (long i = 0; i < count; i++) configured.Add(_steam.GetAchievementName(i));
 
-		foreach (SteamAchievement achievement in Achievements.All)
+		foreach (SteamAchievement achievement in Catalog)
 			if (!configured.Contains(achievement.ApiName))
 				DebugUtilities.PrintPeerError($"Steam: '{achievement.ApiName}' is not configured in Steamworks");
 	}
