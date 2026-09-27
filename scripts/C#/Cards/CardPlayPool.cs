@@ -63,6 +63,9 @@ public static class CardPlayPool
     /// </summary>
     public static async Task DoChangeEvent(ChangeEvent changeEvent)
     {
+        // Before the block window and the shortfall recall, whose own events would otherwise take lower ids.
+        changeEvent.EnsureId();
+
         if (CardPlayRound.Current != null)
         {
             await CardPlayRound.Current.DoChangeEvent(changeEvent);

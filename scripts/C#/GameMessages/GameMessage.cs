@@ -35,11 +35,16 @@ public abstract partial class GameMessage : GodotObject
     /// One counter across every message kind on purpose: ids must be unique channel-wide, because
     /// GameHistoryList de-duplicates on them and ChangeEvent.ForId resolves reaction sources by them.
     ///
-    /// The counter also advances on a client (every message is constructed there too), so client-local
-    /// values drift ahead of the server's. Harmless, because FromDto overwrites Id from the wire and a
-    /// client never originates a message.
+    /// Assigned on ENTRY to the stream (<see cref="EnsureId"/>), not on construction, so a message built
+    /// only to be inspected — a bot's hypothetical outcome — allocates nothing. -1 until then.
     /// </summary>
     public int Id { get; set; } = -1;
+
+    /// <summary>Take the next stream position, once. A no-op for a message that already has one (e.g. from the wire).</summary>
+    public void EnsureId()
+    {
+        if (Id < 0) Id = ++messageCounter;
+    }
 
     public Faction TriggeringFaction { get; set; }
     public Faction TargetFaction { get; set; }
@@ -58,8 +63,6 @@ public abstract partial class GameMessage : GodotObject
     protected GameMessage(Faction triggeringFaction)
     {
         TriggeringFaction = triggeringFaction;
-        messageCounter += 1;
-        Id = messageCounter;
     }
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
@@ -70,7 +73,11 @@ public abstract partial class GameMessage : GodotObject
     /// captured here and handed down so a branch can bail before touching anything if error recovery
     /// moved the loop on underneath it.
     /// </summary>
-    public Task<bool> Apply() => ApplyInternal(ErrorReporter.GameLoopEpoch);
+    public Task<bool> Apply()
+    {
+        EnsureId();
+        return ApplyInternal(ErrorReporter.GameLoopEpoch);
+    }
 
     protected abstract Task<bool> ApplyInternal(int capturedEpoch);
 
@@ -199,6 +206,7 @@ public abstract partial class GameMessage : GodotObject
     /// <summary>Hand this message to the ordered Rpc. Server-side only; a client never re-broadcasts.</summary>
     public Task BroadCast()
     {
+        EnsureId();
         OnBeforeBroadcast();
         // Serialize against GameMessageDto explicitly rather than relying on generic inference: the
         // [JsonPolymorphic] config lives on that type, and passing it by hand means a covariant
