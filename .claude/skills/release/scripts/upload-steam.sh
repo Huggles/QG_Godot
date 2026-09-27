@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Uploads Builds/windows and Builds/macOS to their depots as one Steam build, with steamcmd
 # ($STEAMCMD, else ~/Steam/steamcmd.sh) and its cached login for $STEAM_BUILD_USER.
-# Usage: upload-steam.sh X.Y.Z [SET_LIVE]   SET_LIVE defaults to 'default'; pass '' to upload without setting live.
+# Usage: upload-steam.sh X.Y.Z [SET_LIVE]   SET_LIVE defaults to '' (upload only). Steam refuses SetLive "default"
+# from a build script for this app (the commit fails), so default goes live by hand in Steamworks.
 set -u
 VERSION="${1:?usage: upload-steam.sh X.Y.Z [SET_LIVE]}"
-SET_LIVE="${2-default}"
+SET_LIVE="${2:-}"
 ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 STEAMCMD="${STEAMCMD:-$HOME/Steam/steamcmd.sh}"
 WORK="$ROOT/Builds/steam"

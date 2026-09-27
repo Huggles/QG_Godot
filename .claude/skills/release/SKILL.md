@@ -1,6 +1,6 @@
 ---
 name: release
-description: Ship a new beta release of Quartermaster General from the MacBook — bump the patch version, release-export the Windows and macOS builds, write player-facing release notes, upload both depots to Steam as one build (live on default) and post the notes to the beta Discord. Run only when the user types /release.
+description: Ship a new beta release of Quartermaster General from the MacBook — bump the patch version, release-export the Windows and macOS builds, write player-facing release notes, upload both depots to Steam as one build and post the notes to the beta Discord. Run only when the user types /release.
 disable-model-invocation: true
 ---
 
@@ -48,16 +48,17 @@ The Windows exe is built without `rcedit`, so it has Godot's default icon and fi
 - Save it to `releases/vX.Y.Z.md`.
 
 ## 5. Confirmation gate — the only stop
-Show the user the version, both export sizes and the full note. Say plainly: **"This uploads the Windows and macOS builds to Steam as one build and sets it live on the default branch, then posts the note to the beta Discord."** Wait for an explicit go-ahead. Apply any edits they ask for to the note file.
+Show the user the version, both export sizes and the full note. Say plainly: **"This uploads the Windows and macOS builds to Steam as one build and posts the note to the beta Discord. You then set the build live on default yourself in Steamworks."** If the user wants to test the build before players hear about it, upload now and hold steps 7–8 until they say it is good. Wait for an explicit go-ahead. Apply any edits they ask for to the note file.
 If they abort: run `git checkout -- export_presets.cfg project.godot` and delete the note file.
 
 ## 6. Upload to Steam
 `.claude/skills/release/scripts/upload-steam.sh X.Y.Z`
 - Exit 1 means the upload failed. Common causes are an expired cached login or a Steam Guard prompt. In that case, tell the user to run `~/Steam/steamcmd.sh +login <user> +quit` in their own terminal, then rerun `/release`. It resumes at the same version.
-- Exit 2 means the build uploaded but Steam refused to set it live on default. Carry on with the release, and pass the user the Steamworks builds link the script prints.
+- The script does not set the build live: Steam rejects `SetLive "default"` from a build script for this app ("Failed to commit build … : Failure"). Give the user the BuildID and https://partner.steamgames.com/apps/builds/5159090 to set it live on default.
 
 ## 7. Post to Discord
 `.claude/skills/release/scripts/post-discord.sh releases/vX.Y.Z.md`
+To attach an image the user gave, copy it to `releases/vX.Y.Z.png` and pass that path as a second argument. Stage it in step 8.
 
 ## 8. Commit and tag
-Stage `export_presets.cfg`, `project.godot` and `releases/vX.Y.Z.md`. Commit as `Release vX.Y.Z`, then `git tag vX.Y.Z`. **Do not push.** Finish with a short summary: the version, the Steam BuildID, whether it went live, and the Discord post. Also tell the user that `git push --follow-tags` is left to do.
+Stage `export_presets.cfg`, `project.godot` and `releases/vX.Y.Z.md`. Commit as `Release vX.Y.Z`, then `git tag vX.Y.Z`. **Do not push.** Finish with a short summary: the version, the Steam BuildID with the Steamworks builds link for setting it live, and the Discord post. Also tell the user that `git push --follow-tags` is left to do.
