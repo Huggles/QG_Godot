@@ -147,6 +147,7 @@ internal sealed class ResultAccumulator
     private readonly Dictionary<string, int> _factions = new();
     private readonly Dictionary<string, RoundSeries> _rounds = new();
     private readonly List<CardStat> _cards = new();
+    private string? _cardStatsJson;
 
     public bool HasResult => _resultJson != null;
 
@@ -201,6 +202,7 @@ internal sealed class ResultAccumulator
                 break;
 
             case "card_stats":
+                _cardStatsJson = trimmed;
                 if (root.TryGetProperty("cards", out JsonElement cards)
                     && cards.ValueKind == JsonValueKind.Array)
                     foreach (JsonElement card in cards.EnumerateArray())
@@ -215,6 +217,7 @@ internal sealed class ResultAccumulator
                             Activated = Int(card, "activated"),
                             PlayedRounds = IntArray(card, "played_rounds"),
                             ActivatedRounds = IntArray(card, "activated_rounds"),
+                            HandRound = card.TryGetProperty("hand_round", out JsonElement hr) && hr.TryGetInt32(out int hri) ? hri : -1,
                         });
                 break;
 
@@ -249,6 +252,7 @@ internal sealed class ResultAccumulator
         WallMs = wallMs,
         LogPath = logPath,
         ResultJson = _resultJson,
+        CardStatsJson = _cardStatsJson,
         Winner = _winner,
         AxisTotal = _axis,
         AlliesTotal = _allies,

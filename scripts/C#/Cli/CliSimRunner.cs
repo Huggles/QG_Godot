@@ -52,6 +52,14 @@ public sealed class CliSimRunner
     private bool _finished;
     private bool _subscribed;
 
+    /// <summary>
+    /// The round each card last entered a hand, observed after every applied event — sim-side only, so it
+    /// touches neither game state nor the hash. Lets card_ranking tell a card that sat in hand unused
+    /// from one drawn in the last turn of a game that then ended.
+    /// </summary>
+    private readonly Dictionary<int, int> _handEntryRound = new();
+    private HashSet<int> _inHand = new();
+
     public CliSimRunner(CliSession session, CliRenderer renderer)
     {
         _session = session;
@@ -148,6 +156,7 @@ public sealed class CliSimRunner
         InputServices.Override(_bot);
 
         EventBus.Instance.GameEnded += OnGameEnded;
+        EventBus.Instance.GameChangeEventAfter += OnChangeEventApplied;
         _subscribed = true;
 
         _renderer.Emit(new CliEvent("sim_started")
@@ -579,6 +588,7 @@ public sealed class CliSimRunner
                 // The round of each play and activation, so a batch can ask WHEN a card pays off.
                 ["played_rounds"] = card.PlayedInTurn.Select(StaticGameData.RoundForTurn).ToList(),
                 ["activated_rounds"] = card.ActivatedInTurns.Select(StaticGameData.RoundForTurn).ToList(),
+                ["hand_round"] = _handEntryRound.TryGetValue(card.Id, out int entered) ? entered : -1,
             });
         }
 
@@ -594,10 +604,24 @@ public sealed class CliSimRunner
     /// handlers through one multicast delegate — so a stale handler that throws aborts the emission
     /// for everyone behind it. Unsubscribing is not optional bookkeeping.
     /// </summary>
+    private void OnChangeEventApplied(string changeEventName)
+    {
+        int round = GameFlow.Instance?.Round ?? 0;
+        HashSet<int> now = new();
+        foreach (FactionState faction in MultiplayerSession.Instance?.GameState?.PlayableFactionStates ?? new List<FactionState>())
+            foreach (int cardId in faction.DeckState.HandCardIds)
+            {
+                now.Add(cardId);
+                if (!_inHand.Contains(cardId)) _handEntryRound[cardId] = round;
+            }
+        _inHand = now;
+    }
+
     public void Dispose()
     {
         if (!_subscribed) return;
         _subscribed = false;
         EventBus.Instance.GameEnded -= OnGameEnded;
+        EventBus.Instance.GameChangeEventAfter -= OnChangeEventApplied;
     }
 }

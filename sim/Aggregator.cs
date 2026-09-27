@@ -31,6 +31,12 @@ public static class Aggregator
             foreach (SimResult r in ordered.Where(r => r.HasResult))
                 w.WriteLine(r.ResultJson);
 
+        // Every game's per-card record, in the same order, so a new card analysis never needs a rerun.
+        string cardsPath = Path.Combine(config.OutputDirectory, "cards.jsonl");
+        using (StreamWriter w = new(cardsPath, append: false))
+            foreach (SimResult r in ordered.Where(r => r.HasResult && r.CardStatsJson != null))
+                w.WriteLine(r.CardStatsJson);
+
         string summary = BuildSummary(config, ordered, elapsed);
         File.WriteAllText(Path.Combine(config.OutputDirectory, "summary.txt"), summary);
         Console.WriteLine();
@@ -61,6 +67,9 @@ public static class Aggregator
     /// <summary>Games needed on BOTH sides of the used/held split before a row is ranked.</summary>
     private const int MinGames = 5;
 
+    /// <summary>Rounds a drawn card must have been in hand, before the game ended, to count as held.</summary>
+    private const int HeldRounds = 2;
+
     /// <summary>
     /// card_ranking.csv / card_ranking.txt — which cards win games, pooled over every seed in the batch.
     ///
@@ -88,6 +97,17 @@ public static class Aggregator
                 List<int> rounds = copies.SelectMany(c => c.PlayedRounds.Concat(c.ActivatedRounds)).ToList();
                 bool used = copies.Any(c => c.Played + c.Activated > 0);
 
+                // "Held" means the owner had the card and chose not to use it: in hand for at least
+                // HeldRounds rounds before the game ended. A card drawn in a game's last round was never
+                // really on offer, and counting it is what made quick wins look like bad cards.
+                if (!used && drawn)
+                {
+                    // Never seen in a hand means it left the deck some other way — the discards economic
+                    // warfare takes off the top — so the owner never had it to hold.
+                    int entered = copies.Where(c => c.HandRound > 0).Select(c => c.HandRound).DefaultIfEmpty(-1).Min();
+                    if (entered <= 0 || result.FinalRound - entered < HeldRounds) continue;
+                }
+
                 if (!byCard.TryGetValue(copies.Key, out RankAccumulator? acc))
                     acc = byCard[copies.Key] = new RankAccumulator { Team = team, Type = first.Type };
                 acc.Games++;
@@ -108,16 +128,23 @@ public static class Aggregator
             }
         }
 
+        // Each card against the other cards of its own team: subtract the team's mean win-rate difference
+        // over its ranked cards. What is left does not depend on how often that team wins or how short its
+        // games run, which otherwise tilts every card of the stronger side the same way.
+        Dictionary<string, double> teamMean = byCard.Values.Where(a => a.Reliable).GroupBy(a => a.Team)
+            .ToDictionary(g => g.Key, g => g.Average(a => a.WinRateDiff!.Value));
+        double? VsTeam(RankAccumulator a) => a.WinRateDiff is double d && teamMean.TryGetValue(a.Team, out double m) ? d - m : null;
+
         string csvPath = Path.Combine(config.OutputDirectory, "card_ranking.csv");
         using (StreamWriter w = new(csvPath, append: false))
         {
-            w.WriteLine("faction,card,type,team,games,drawn,used,held,winrate_used,winrate_held,winrate_diff,"
+            w.WriteLine("faction,card,type,team,games,drawn,used,held,winrate_used,winrate_held,winrate_diff,winrate_diff_vs_team,"
                         + "delta_used,delta_held,delta_diff,uses_per_used_game,avg_first_round,uses_early,uses_mid,uses_late,ranked");
-            foreach ((string key, RankAccumulator acc) in byCard.OrderByDescending(kv => kv.Value.WinRateDiff ?? double.MinValue))
+            foreach ((string key, RankAccumulator acc) in byCard.OrderByDescending(kv => VsTeam(kv.Value) ?? double.MinValue))
             {
                 string[] parts = key.Split('|', 2);
                 w.WriteLine($"{parts[0]},{Escape(parts[1])},{acc.Type},{acc.Team},{acc.Games},{acc.Drawn},{acc.Used},{acc.Held},"
-                            + $"{Pct(acc.WinRateUsed)},{Pct(acc.WinRateHeld)},{Pct(acc.WinRateDiff)},"
+                            + $"{Pct(acc.WinRateUsed)},{Pct(acc.WinRateHeld)},{Pct(acc.WinRateDiff)},{Pct(VsTeam(acc))},"
                             + $"{Num(acc.DeltaUsed)},{Num(acc.DeltaHeld)},{Num(acc.DeltaDiff)},"
                             + $"{(acc.Used > 0 ? ((double)acc.Uses / acc.Used).ToString("F2") : "")},"
                             + $"{(acc.Used > 0 ? ((double)acc.FirstRoundSum / acc.Used).ToString("F1") : "")},"
@@ -126,17 +153,19 @@ public static class Aggregator
         }
 
         List<(string Key, RankAccumulator Acc)> ranked = byCard.Where(kv => kv.Value.Reliable)
-            .Select(kv => (kv.Key, kv.Value)).OrderByDescending(r => r.Value.WinRateDiff).ToList();
+            .Select(kv => (kv.Key, kv.Value)).OrderByDescending(r => VsTeam(r.Value)).ToList();
 
         StringBuilder sb = new();
         sb.AppendLine("=== CARD RANKING ===");
         sb.AppendLine();
         sb.AppendLine($"  {results.Count(r => r.HasResult)} game(s), seeds {Summarise(config.Seeds)}, "
                       + $"bot_rules {(string.IsNullOrWhiteSpace(config.BotRules) ? "(defaults)" : config.BotRules)}");
-        sb.AppendLine($"  Compares games where the card was drawn: used vs held. Ranked only with >= {MinGames} games on each side");
+        sb.AppendLine($"  Compares games where the card was drawn: used vs held (in hand >= {HeldRounds} rounds, never used).");
+        sb.AppendLine($"  Ranked by that win-rate difference minus its team's average (" + string.Join(", ", teamMean.Select(kv => $"{kv.Key} {100 * kv.Value:F1}")) + ").");
+        sb.AppendLine($"  Only cards with >= {MinGames} games on each side are ranked");
         sb.AppendLine($"  ({ranked.Count} of {byCard.Count} cards). Correlation, not cause — read with the game counts.");
         sb.AppendLine();
-        string header = $"    {"faction",-15} {"card",-44} {"used",5} {"held",5} {"win used",9} {"win held",9} {"diff",7} {"gap diff",9} {"1st rnd",7}";
+        string header = $"    {"faction",-15} {"card",-44} {"used",5} {"held",5} {"win used",9} {"win held",9} {"diff",7} {"vs team",8} {"gap diff",9} {"1st rnd",7}";
         void Rows(IEnumerable<(string Key, RankAccumulator Acc)> rows)
         {
             sb.AppendLine(header);
@@ -145,11 +174,11 @@ public static class Aggregator
                 string[] p = key.Split('|', 2);
                 string name = p[1].Length > 44 ? p[1][..43] + "…" : p[1];
                 sb.AppendLine($"    {p[0],-15} {name,-44} {a.Used,5} {a.Held,5} {Pct(a.WinRateUsed),9} {Pct(a.WinRateHeld),9} "
-                              + $"{Pct(a.WinRateDiff),7} {Num(a.DeltaDiff),9} {(double)a.FirstRoundSum / a.Used,7:F1}");
+                              + $"{Pct(a.WinRateDiff),7} {Pct(VsTeam(a)),8} {Num(a.DeltaDiff),9} {(double)a.FirstRoundSum / a.Used,7:F1}");
             }
             sb.AppendLine();
         }
-        sb.AppendLine("--- BEST (win rate when used minus when held) ---");
+        sb.AppendLine("--- BEST (win rate when used minus when held, relative to its team) ---");
         Rows(ranked.Take(15));
         sb.AppendLine("--- WORST ---");
         Rows(Enumerable.Reverse(ranked).Take(15));

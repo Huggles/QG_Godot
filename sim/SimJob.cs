@@ -118,6 +118,9 @@ public sealed class CardStat
     /// <summary>The round of each play / activation. Empty from a game build older than the field.</summary>
     public int[] PlayedRounds { get; init; } = Array.Empty<int>();
     public int[] ActivatedRounds { get; init; } = Array.Empty<int>();
+
+    /// <summary>The round this card last entered a hand; -1 when never seen there (or an older game build).</summary>
+    public int HandRound { get; init; } = -1;
 }
 
 /// <summary>The outcome of one job: the parsed <c>game_result</c> plus how the process itself fared.</summary>
@@ -135,6 +138,9 @@ public sealed class SimResult
 
     /// <summary>The raw <c>game_result</c> JSON line, or null when no result was produced.</summary>
     public string? ResultJson { get; init; }
+
+    /// <summary>The game's card_stats line, verbatim — what cards.jsonl keeps so a card analysis can be redone without a rerun.</summary>
+    public string? CardStatsJson { get; init; }
 
     public string? Winner { get; init; }
     public int AxisTotal { get; init; }
