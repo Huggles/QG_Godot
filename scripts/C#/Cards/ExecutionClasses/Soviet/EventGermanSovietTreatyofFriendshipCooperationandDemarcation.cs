@@ -15,20 +15,14 @@ public partial class EventGermanSovietTreatyofFriendshipCooperationandDemarcatio
     {
         return new List<CardStep> {
             // Recruit an Army in Russia
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => [(int)targetCountries[0]],
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)targetCountries[0]], Faction), this))
             .WithGuidance("Recruit an army in Russia"),
             
             // Recruit an Army in Eastern Europe
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[1]]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => [(int)targetCountries[1]],
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)targetCountries[1]], Faction), this))
             .WithGuidance("Recruit an army in Eastern Europe"),
         }; 

@@ -20,11 +20,11 @@ public partial class EventPlunder_Italy : EventCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this,async() => {
+            new ResultStep(this, Choose.Fixed(() => {
                 FactionState factionState = FactionState.ForEnum(Faction);
                 int score = ScoringUnits.Count;
                 return new ScorePointsChangeEvent(new VPEntry(score, $"{factionState.FactionData.FactionAdjactiveLabel} armies and navies outside Italy"), Faction);
-            })
+            }))
         }; 
     }
 }

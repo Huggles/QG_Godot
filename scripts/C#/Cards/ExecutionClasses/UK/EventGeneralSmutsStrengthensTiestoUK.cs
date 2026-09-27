@@ -22,20 +22,14 @@ public partial class EventGeneralSmutsStrengthensTiestoUK : EventCardLogic
     {
         return new List<CardStep> {
             // Recruit an Army in Africa
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, armyCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => armyCountryIds,
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable(armyCountryIds, Faction), this))
             .WithGuidance("Recruit an army in Africa"),
             
             // Recruit a Navy in Southern Ocean or Bay of Bengal
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, NavyTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => NavyTargets.ToCountryIds(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 return NavyTargets.Count > 0;
             }), this))

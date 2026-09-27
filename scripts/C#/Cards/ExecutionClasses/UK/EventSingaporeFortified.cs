@@ -15,20 +15,14 @@ public partial class EventSingaporeFortified : EventCardLogic
     {
         return new List<CardStep> {
             // Recruit an Army in Southeast Asia
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => [(int)targetCountries[0]],
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)targetCountries[0]], Faction), this))
             .WithGuidance("Recruit an army in Southeast Asia"),
             
             // Recruit a Navy in South China Sea
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[1]]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => [(int)targetCountries[1]],
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)targetCountries[1]], Faction), this))
             .WithGuidance("Recruit a navy in the South China Sea"),
         }; 

@@ -50,19 +50,12 @@ public partial class StatusStavkaFormsArtilleryCorps : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardHandCardsChangeEvent(Faction, Faction, 1)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 1)))
             .WithGuidance("Discard a card from hand to battle the same space")
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(SameSpaceCountryIds, Faction), this)),
 
-            new ResultStep(this, async () => {
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, SameSpaceTargets).BroadCast();
-                BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
-                return battleEvent;
-            })
+            new ResultStep(this, Choose.BattleTargetFrom(() => SameSpaceTargets,
+                target => target.ToAttackChangeEvent(Faction)))
             .RequiringPreviousStep()
         };
     }

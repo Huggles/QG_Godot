@@ -26,22 +26,14 @@ public partial class StatusResistance : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
             .WithGuidance("Discard 2 cards from hand to battle in Western Europe or Italy"),
 
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),
 
-            new ResultStep(this, async () => {
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
-                BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
-                return battleEvent;
-            })
+            new ResultStep(this, Choose.BattleTargetFrom(() => BattleTargets,
+                target => target.ToAttackChangeEvent(Faction)))
             .RequiringPreviousStep()
         };
     }

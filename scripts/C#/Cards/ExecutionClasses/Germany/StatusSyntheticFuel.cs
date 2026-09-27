@@ -39,15 +39,11 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .WithGuidance("Deploy an army adjacent to where you've deployed an army this turn"),
 
-            new ResultStep(this, async () => {
-                int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => DeployTargets.ToCountryIds(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .RequiringPreviousStep()
         };
     }

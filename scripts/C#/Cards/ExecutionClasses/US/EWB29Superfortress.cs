@@ -27,10 +27,7 @@ public partial class EWB29Superfortress : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async() => {
-                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction.GERMANY, 5);
-                return discardEvent;
-            })
+            new ResultStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction.GERMANY, 5)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(QualifyingUnitExists), this))
             .WithGuidance("Germany must discard 5 cards")
         };

@@ -57,19 +57,12 @@ public partial class StatusFrontalAssault : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
             .WithGuidance("Discard 2 cards from hand to battle the same or adjacent land space")
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(SameOrAdjacentCountryIds, Faction), this)),
 
-            new ResultStep(this, async () => {
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, SameOrAdjacentTargets).BroadCast();
-                BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
-                return battleEvent;
-            })
+            new ResultStep(this, Choose.BattleTargetFrom(() => SameOrAdjacentTargets,
+                target => target.ToAttackChangeEvent(Faction)))
             .RequiringPreviousStep()
         };
     }

@@ -24,22 +24,14 @@ public partial class EWSubmarinesPreyonUnprotectedShipping : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async() => {
-                int discardCount = BlockingUnits.Count > 0 ? 2 : 5;
-                
-                // UK discards cards
-                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, discardCount);
-                return discardEvent;
-            }),
+            new ResultStep(this, Choose.Fixed(() =>
+                new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, BlockingUnits.Count > 0 ? 2 : 5))),
             // A ResultStep, so the VP is a trigger like the scoring step of every other two-event
             // Economic Warfare card. It used to carry IsTrigger = false, alone among the ten, which
             // meant no reaction window opened on the points -- the typed steps made the
             // disagreement visible and this is the side it was resolved on.
-            new ResultStep(this, async() => {
-                // Score 1 VP
-                ScorePointsChangeEvent scorePointsEvent = new ScorePointsChangeEvent(new VPEntry(1, "Submarines Prey on Unprotected Shipping"), Faction);
-                return scorePointsEvent;
-            })
+            new ResultStep(this, Choose.Fixed(() =>
+                new ScorePointsChangeEvent(new VPEntry(1, "Submarines Prey on Unprotected Shipping"), Faction)))
             // Gated like every other two-event EW card: without it ContinueWithNextSteps can hoist
             // this VP into the discard step's own after-reaction window.
             .RequiringPreviousStep()

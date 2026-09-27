@@ -34,13 +34,11 @@ public partial class EWDecimaFlottigliaMASFrogmen : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, () => {
-                _totalDiscards = 1 + (BlockingUnits.Count == 0 ? 1 : 0);
-                return Task.FromResult<CardStepResult>(
-                    new ScorePointsChangeEvent(new VPEntry(1, "Decima Flottiglia MAS Frogmen"), Faction));
-            }),
+            new ResultStep(this, Choose.Fixed(() =>
+                new ScorePointsChangeEvent(new VPEntry(1, "Decima Flottiglia MAS Frogmen"), Faction))
+            .OnChosen(_ => _totalDiscards = 1 + (BlockingUnits.Count == 0 ? 1 : 0))),
 
-            new ResultStep(this, () => Task.FromResult<CardStepResult>(
+            new ResultStep(this, Choose.Fixed(() =>
                 new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, _totalDiscards)))
             .RequiringPreviousStep()
         };

@@ -19,11 +19,8 @@ public partial class EventFreeFrenchAllies : EventCardLogic
     {
 
         return new List<CardStep> {
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => RecruitTargets.ToCountryIds(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => {
                 return RecruitTargets.Count > 0;
             }), this))

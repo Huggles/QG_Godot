@@ -51,19 +51,13 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async () => {
-                int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, RecruitableNearMoscowIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => RecruitableNearMoscowIds,
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(MoscowAndAdjacentIds, Faction), this))
             .WithGuidance("Recruit an Army in or adjacent to Moscow"),
 
-            new ResultStep(this, async () => {
-                int unitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesInMoscow).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AxisArmiesInMoscow,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInMoscow.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in Moscow")
         };

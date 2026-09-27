@@ -28,13 +28,11 @@ public partial class ResponseRasputitsa : ResponseCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async () => {
+            new ResultStep(this, Choose.Fixed(() => {
                 var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
                 if (trigger == null) throw new Exception("Reaction trigger is not a DeployUnitChangeEvent");
-                RemoveUnitChangeEvent removeEvent = 
-                    new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+                return new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE);
+            }))
             .WithGuidance("Eliminate the Axis Army just built near Moscow")
         };
     }

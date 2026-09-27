@@ -22,20 +22,14 @@ public partial class StatusFreeFrance : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(buildCountryIds, Faction), this))
             .WithGuidance("Discard top 2 deck cards to build an Army in Western Europe"),
 
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),
 
-            new ResultStep(this, async () => {
-                DeployUnitChangeEvent deployEvent = 
-                    new DeployUnitChangeEvent(Faction, buildCountryIds[0], DeployType.BUILD);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.Fixed(() => new DeployUnitChangeEvent(Faction, buildCountryIds[0], DeployType.BUILD)))
             .RequiringPreviousStep()
         };
     }

@@ -59,16 +59,12 @@ public partial class MutatorSyntheticFuelAnyFaction : ActivatableMutator
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => {
-                DebugUtilities.PrintPeer("MutatorSyntheticFuelAnyFaction react step");
-                return Task.FromResult<CardStepResult>(new ForceDiscardCardsChangeEvent(Faction, Faction, 2));
-            })
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2))
+                .OnChosen(_ => DebugUtilities.PrintPeer("MutatorSyntheticFuelAnyFaction react step")))
             .WithGuidance("Deploy an army adjacent to where you've deployed an army this turn"),
 
-            new ResultStep(this, async() => {
-                int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                return new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
-            })
+            new ResultStep(this, Choose.CountryFrom(() => DeployTargets.ToCountryIds(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .RequiringPreviousStep()
             .WithPurpose(PromptPurpose.DEPLOY_TARGET)
         };

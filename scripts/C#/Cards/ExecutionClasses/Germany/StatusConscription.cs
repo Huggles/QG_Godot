@@ -26,20 +26,15 @@ public partial class StatusConscription : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(BuildableLandCountries(), Faction),this))            
             .WithGuidance("Build an army"),
 
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),
 
-            new ResultStep(this, async () => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildableLandCountries()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => BuildableLandCountries(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .RequiringPreviousStep()
         };
     }

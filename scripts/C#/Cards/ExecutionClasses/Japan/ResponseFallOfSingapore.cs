@@ -22,22 +22,12 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
     {
         return new List<CardStep> {
 
-            new ResultStep(this, async() => {
-                
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, CountryState.ForEnum(Country.SouthChinaSea).BattleTargets(Faction)).BroadCast();
-                BattleTarget target = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleCountryChangeEvent = target.ToAttackChangeEvent(Faction);
-                return battleCountryChangeEvent;
-            })
+            new ResultStep(this, Choose.BattleTargetFrom(() => CountryState.ForEnum(Country.SouthChinaSea).BattleTargets(Faction),
+                target => target.ToAttackChangeEvent(Faction)))
             .WithGuidance("Battle in the South China Sea")
             .WithConditions( () => { return new List<Condition> { new Condition.CountryIsAttackable([CountryState.ForEnum(Country.SouthChinaSea).Id], Faction) }; } ),
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id }).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id },
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsRecruitable([CountryState.ForEnum(Country.SouthEastAsia).Id], Faction)}; } )
             .WithGuidance("Recruit an army in South East Asia")
 

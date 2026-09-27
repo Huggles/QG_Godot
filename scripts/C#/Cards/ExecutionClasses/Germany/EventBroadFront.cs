@@ -109,17 +109,14 @@ public partial class EventBroadFront : EventCardLogic
 
     private CardStep MakeBattleStep()
     {
-        return new ResultStep(this, async () =>
-        {
-            var targets = QualifyingTargets();
-            var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, targets).BroadCast();
-            BattleTarget battleTarget = new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-            battlesCompleted++;
-            if (battlesCompleted < MaxBattles && QualifyingTargets().Count > 0)
-                CardSteps.Add(MakeBattleStep());
-            BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
-            return battleEvent;
-        })
+        return new ResultStep(this, Choose.BattleTargetFrom(() => QualifyingTargets(),
+                target => target.ToAttackChangeEvent(Faction))
+            .OnChosen(_ =>
+            {
+                battlesCompleted++;
+                if (battlesCompleted < MaxBattles && QualifyingTargets().Count > 0)
+                    CardSteps.Add(MakeBattleStep());
+            }))
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
             battlesCompleted < MaxBattles && QualifyingTargets().Count > 0), this))
         .WithGuidance("Battle a Soviet Army adjacent to a German Army");

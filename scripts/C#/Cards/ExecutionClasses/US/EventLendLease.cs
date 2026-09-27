@@ -48,8 +48,7 @@ public partial class EventLendLease : EventCardLogic
             // Gated, and the gate is doing real work rather than tidiness: while the ally's card is
             // resolving, step one's StepSucceeded is still false, so a ContinueWithNextSteps fired
             // from inside THAT card's reaction windows cannot hoist this draw into the middle of it.
-            new ResultStep(this, () => Task.FromResult<CardStepResult>(
-                new DrawCardsChangeEvent(Faction, _selectedFaction, 1, true)))
+            new ResultStep(this, Choose.Fixed(() => new DrawCardsChangeEvent(Faction, _selectedFaction, 1, true)))
             .RequiringPreviousStep()
         };
     }

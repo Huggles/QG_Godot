@@ -29,22 +29,13 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, EligibleAttackedCountries()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => EligibleAttackedCountries(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .WithConditions(()=>{ return EligibleAttackedCountries().Map(countryId => Condition.Build(new Condition.CountryIsEmpty(countryId), this)).ToList<Condition>(); })
             .WithGuidance("Build an army in the country just battled"), 
 
-            new ResultStep(this, async() => {
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
-                BattleTarget target = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleEvent = target.ToAttackChangeEvent(Faction);
-                return battleEvent;
-            })
+            new ResultStep(this, Choose.BattleTargetFrom(() => BattleTargets,
+                target => target.ToAttackChangeEvent(Faction)))
             .WithCondition(
                 ()=>{ return Condition.Build(new Condition.CountryIsAttackable(TargetCountries.ToCountryIds(), Faction), this); }
             ).WithGuidance("Battle in China or an adjacent land space"),

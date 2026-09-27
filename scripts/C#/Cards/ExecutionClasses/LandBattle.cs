@@ -22,16 +22,10 @@ public partial class LandBattle : CardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async() => {
-                List<int> armyUnits = AttackableArmies;
-                List<int> emptyCountries = AttackableCountries;
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, emptyCountries, armyUnits).BroadCast();
-                BattleTarget target = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleCountryChange = target.ToAttackChangeEvent(Faction);
-                return battleCountryChange;
-            })
+            // Countries then units: the list constructor splits by type, so this offers exactly the old two lists.
+            new ResultStep(this, Choose.BattleTargetFrom(() => AttackableCountries.Select(id => new BattleTarget(id, TargetType.COUNTRY))
+                    .Concat(AttackableArmies.Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
+                target => target.ToAttackChangeEvent(Faction)))
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
             .WithGuidance("Select a army or empty land country to attack")
         }; 

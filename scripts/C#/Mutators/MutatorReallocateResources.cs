@@ -102,13 +102,11 @@ public partial class MutatorReallocateResources : ActivatableMutator
             // and a host timeout can end the sequence with no card played at all. The taken card's own
             // PlayCardChangeEvent increments the same counter again, which is harmless —
             // CardsPlayedThisTurnStep is only ever tested > 0 and is cleared each round.
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
             .WithGuidance($"Discard {DiscardCost} cards to take a Build or Battle card from your deck and play it"),
 
             // Raises its own required selection and round-trips the picks to clients.
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost)))
             .RequiringPreviousStep(),
 
             // The full pipeline, deliberately: this play triggers responses like any other.

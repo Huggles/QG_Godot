@@ -22,25 +22,14 @@ public partial class EventTitosPartisans : EventCardLogic
     {
         return new List<CardStep> {
             // Step 1: Eliminate an Axis Army in the Balkans
-            new ResultStep(this, async () => {
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesInBalkans).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = 
-                    new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AxisArmiesInBalkans,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInBalkans.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in the Balkans"),
 
             // Step 2: Recruit a Soviet or United Kingdom Army in the Balkans
-            new ResultStep(this, async () => {
-                var factionResp = await new InputRequest.SelectFactionRequestHandler(
-                    Faction, new List<Faction> { Faction.SOVIET, Faction.UNITED_KINGDOM }).BroadCast();
-                Faction selectedFaction = (Faction)factionResp.ResponseCardIds[0];
-
-                DeployUnitChangeEvent deployEvent = 
-                    new DeployUnitChangeEvent(selectedFaction, (int)Country.Balkans, DeployType.RECRUIT);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.FactionFrom(() => new List<Faction> { Faction.SOVIET, Faction.UNITED_KINGDOM },
+                faction => new DeployUnitChangeEvent(faction, (int)Country.Balkans, DeployType.RECRUIT)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Balkans], Faction.SOVIET), this).MeetCondition() ||
                 Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Balkans], Faction.UNITED_KINGDOM), this).MeetCondition()

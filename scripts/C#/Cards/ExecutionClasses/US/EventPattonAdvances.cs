@@ -19,21 +19,12 @@ public partial class EventPattonAdvances : EventCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => buildCountryIds,
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(buildCountryIds, Faction), this))
             .WithGuidance("Build an Army in Western Europe"),
-            new ResultStep(this, async() => {
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
-                BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleEvent = battleTarget.ToAttackChangeEvent(Faction);
-                return battleEvent;
-            })
+            new ResultStep(this, Choose.BattleTargetFrom(() => BattleTargets,
+                target => target.ToAttackChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(battleCountryIds, Faction), this))
             .WithGuidance("Battle in Germany or Italy"),
         };

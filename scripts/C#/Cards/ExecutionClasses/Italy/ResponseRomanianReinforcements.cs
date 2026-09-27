@@ -23,14 +23,11 @@ public partial class ResponseRomanianReinforcements : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async () => {
-                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent) {
-                    int countryId = removeEvent.CountryId;
-                    DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT);
-                    return deployEvent;
-                }
-                return CardStepResult.Nothing;
-            })
+            new ResultStep(this, Choose.Fixed(() => {
+                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)
+                    return new DeployUnitChangeEvent(Faction, removeEvent.CountryId, DeployType.RECRUIT);
+                return null;
+            }))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)
                     return CountryState.ForId(removeEvent.CountryId).Tags.Has(Tag.Recruitable, Faction);

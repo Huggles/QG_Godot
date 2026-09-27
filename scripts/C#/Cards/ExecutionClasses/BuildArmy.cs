@@ -17,11 +17,8 @@ public partial class BuildArmy : CardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildTargets).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => BuildTargets,
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .WithCondition(()=> Condition.Build(new Condition.HasBuildableLand(Faction), this))
             .WithAdvisoryConditions(()=> new List<Condition> {
                 Condition.Build(new Condition.HasVacantBuildableLand(Faction), this),

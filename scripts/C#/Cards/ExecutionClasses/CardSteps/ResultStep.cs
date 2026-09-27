@@ -14,6 +14,8 @@ public sealed partial class ResultStep : EventCardStep
 {
     public ResultStep(CardLogic cardLogic, Func<Task<CardStepResult>> produce) : base(cardLogic, produce) { }
 
+    public ResultStep(CardLogic cardLogic, StepChoice choice) : base(cardLogic, choice) { }
+
     public override StepKind Kind => StepKind.Result;
 
     protected override bool EventIsTrigger => true;

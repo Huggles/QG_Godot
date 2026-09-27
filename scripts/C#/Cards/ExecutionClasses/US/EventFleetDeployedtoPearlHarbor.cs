@@ -22,18 +22,12 @@ public partial class EventFleetDeployedtoPearlHarbor : EventCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, anchorCountryIds).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => anchorCountryIds,
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(anchorCountryIds, Faction), this))
             .WithGuidance("Recruit an Army in Hawaii"),
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, AdjacentNavyTargets.ToCountryIds()).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => AdjacentNavyTargets.ToCountryIds(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 return AdjacentNavyTargets.Count > 0;
             }), this))

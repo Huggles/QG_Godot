@@ -20,12 +20,8 @@ public partial class EventMaoTsetung : EventCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async () => {
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesInChinaOrSzechuan).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = 
-                    new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AxisArmiesInChinaOrSzechuan,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInChinaOrSzechuan.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in China or Szechuan")
         };

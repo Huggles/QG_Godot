@@ -22,18 +22,12 @@ public partial class EventGermanAidinGreece : EventCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async() => {
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AlliedArmiesInBalkans).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AlliedArmiesInBalkans,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => AlliedArmiesInBalkans.Count > 0),this))
             .WithGuidance($"Eliminate an Allied army in {CountryState.ForEnum(targetCountries[0]).Label}"),
-            new ResultStep(this, async() => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)targetCountries[0]]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployUnitChangeEvent = new DeployUnitChangeEvent(Faction.GERMANY, selectedCountryId, DeployType.RECRUIT);
-                return deployUnitChangeEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => new List<int> { (int)targetCountries[0] },
+                countryId => new DeployUnitChangeEvent(Faction.GERMANY, countryId, DeployType.RECRUIT)))
             .WithCondition(()=> Condition.Build(new Condition.CountryIsRecruitable([(int)targetCountries[0]], Faction.GERMANY),this))
             .WithGuidance($"Recruit a German army in {CountryState.ForEnum(targetCountries[0]).Label}"),
         };

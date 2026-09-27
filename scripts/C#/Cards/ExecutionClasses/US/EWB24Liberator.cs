@@ -27,10 +27,7 @@ public partial class EWB24Liberator : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async() => {
-                ForceDiscardCardsChangeEvent discardEvent = new ForceDiscardCardsChangeEvent(Faction, Faction.ITALY, 4);
-                return discardEvent;
-            })
+            new ResultStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction.ITALY, 4)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(QualifyingUnitExists), this))
             .WithGuidance("Italy must discard 4 cards")
         };

@@ -34,14 +34,11 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, () => {
-                _scoringCount = ScoringUnits.Count;
-                return Task.FromResult<CardStepResult>(
-                    new ScorePointsChangeEvent(new VPEntry(_scoringCount, "German units in or adjacent to Scandinavia"), Faction));
-            }),
+            new ResultStep(this, Choose.Fixed(() =>
+                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits.Count, "German units in or adjacent to Scandinavia"), Faction))
+                .OnChosen(_ => _scoringCount = ScoringUnits.Count)),
 
-            new ResultStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction.SOVIET, _scoringCount * 2)))
+            new ResultStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction.SOVIET, _scoringCount * 2)))
             .RequiringPreviousStep()
         };
     }

@@ -18,6 +18,8 @@ public sealed partial class RequirementStep : EventCardStep
 {
     public RequirementStep(CardLogic cardLogic, Func<Task<CardStepResult>> produce) : base(cardLogic, produce) { }
 
+    public RequirementStep(CardLogic cardLogic, StepChoice choice) : base(cardLogic, choice) { }
+
     public override StepKind Kind => StepKind.Requirement;
 
     protected override bool EventIsTrigger => false;

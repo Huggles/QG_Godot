@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -14,9 +15,19 @@ using System.Threading.Tasks;
 public abstract partial class EventCardStep : CardStep
 {
     private readonly Func<Task<CardStepResult>> _produce;
+    private readonly StepChoice _choice;
 
     protected EventCardStep(CardLogic cardLogic, Func<Task<CardStepResult>> produce) : base(cardLogic)
         => _produce = produce;
+
+    /// <summary>A step declared as options plus an outcome factory, so its outcomes can be listed without running it.</summary>
+    protected EventCardStep(CardLogic cardLogic, StepChoice choice) : base(cardLogic)
+    {
+        _choice = choice;
+        _produce = () => choice.Run(TriggeringFaction);
+    }
+
+    public override IReadOnlyList<StepOption> PossibleOutcomes() => _choice?.Outcomes();
 
     /// <summary>Set on every event this step emits. The type decides; the card may not.</summary>
     protected abstract bool EventIsTrigger { get; }

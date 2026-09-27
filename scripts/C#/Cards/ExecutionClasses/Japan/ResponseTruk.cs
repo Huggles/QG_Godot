@@ -34,16 +34,14 @@ public partial class ResponseTruk : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => {
+            new RequirementStep(this, Choose.Fixed(() => {
                 // Guarded INSIDE the step, not with .WithCondition. A step condition would make this
                 // the card's only executable step when it fails, HasExecutableCardSteps false, and
                 // the card unactivatable -- where before it simply announced itself and granted
                 // nothing. Same trap as the EW cards above.
                 List<int> unitIds = SupplyTargetUnitIds;
-                return unitIds.Count == 0
-                    ? Task.FromResult(CardStepResult.Nothing)
-                    : Task.FromResult<CardStepResult>(new GrantSupplyChangeEvent(Faction, unitIds));
-            })
+                return unitIds.Count == 0 ? null : new GrantSupplyChangeEvent(Faction, unitIds);
+            }))
             .WithGuidance("Grant supply to all Japanese pieces in or adjacent to the Central Pacific"),
 
             // Announcement only — no ChangeEvent, so an EffectStep. Deliberately NOT gated on the

@@ -30,17 +30,14 @@ public partial class EWVWeapons : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, () => {
-                _scoringCount = ScoringUnits.Count;
-                if (_scoringCount == 0) return Task.FromResult(CardStepResult.Nothing);
-                return Task.FromResult<CardStepResult>(
-                    new ScorePointsChangeEvent(new VPEntry(3, "German Army in Western Europe"), Faction));
-            }),
+            new ResultStep(this, Choose.Fixed(() => ScoringUnits.Count == 0
+                    ? null
+                    : new ScorePointsChangeEvent(new VPEntry(3, "German Army in Western Europe"), Faction))
+                .OnChosen(_ => _scoringCount = ScoringUnits.Count)),
 
-            new ResultStep(this, () => _scoringCount == 0
-                ? Task.FromResult(CardStepResult.Nothing)
-                : Task.FromResult<CardStepResult>(
-                    new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, 1)))
+            new ResultStep(this, Choose.Fixed(() => _scoringCount == 0
+                ? null
+                : new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, 1)))
             .RequiringPreviousStep()
         };
     }

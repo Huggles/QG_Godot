@@ -18,22 +18,13 @@ public partial class EventMilitaryDictatorshipsInTheBalkans : EventCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, async () =>
-            {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, new List<int> { (int)Country.Balkans }).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction.ITALY, selectedCountryId, DeployType.RECRUIT);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => new List<int> { (int)Country.Balkans },
+                countryId => new DeployUnitChangeEvent(Faction.ITALY, countryId, DeployType.RECRUIT)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(new List<int> { (int)Country.Balkans }, Faction.ITALY), this))
             .WithGuidance($"Recruit an Italian army in {CountryState.ForEnum(Country.Balkans).Label}"),
 
-            new ResultStep(this, async () =>
-            {
-                List<int> alliedArmies = AlliedArmiesInUkraine();
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, alliedArmies).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AlliedArmiesInUkraine(),
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AlliedArmiesInUkraine().Count > 0), this))
             .WithGuidance($"Eliminate an Allied army in {CountryState.ForEnum(Country.Ukraine).Label}"),
         };

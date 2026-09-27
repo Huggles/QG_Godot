@@ -35,15 +35,14 @@ public partial class EventTheaterShift : EventCardLogic
 
     private CardStep MakeRemovalStep()
     {
-        return new RequirementStep(this, async () =>
-        {
-            int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, EligibleUnitIds).BroadCast()).ResponseUnitIds[0];
-            lastRemovedUnitWasNavy = UnitState.ForId(selectedUnitId).Type == UnitType.NAVY;
-            relocatedIds.Add(selectedUnitId);
-            if (EligibleUnitIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
-            RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-            return removeEvent;
-        })
+        return new RequirementStep(this, Choose.UnitFrom(() => EligibleUnitIds,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE))
+            .OnChosen(chosen =>
+            {
+                lastRemovedUnitWasNavy = UnitState.ForId(chosen.Value.Id).Type == UnitType.NAVY;
+                relocatedIds.Add(chosen.Value.Id);
+                if (EligibleUnitIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
+            }))
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
             EligibleUnitIds.Count > 0
             && (CountryState.BuildableLand(Faction).Count > 0 || CountryState.BuildableSea(Faction).Count > 0)), this))
@@ -52,16 +51,11 @@ public partial class EventTheaterShift : EventCardLogic
 
     private CardStep MakeDeployStep()
     {
-        return new ResultStep(this, async () =>
-        {
-            await ReplayContext.Pace(1000);
-            var buildableIds = lastRemovedUnitWasNavy
-                ? CountryState.BuildableSea(Faction).Select(cs => cs.Id).ToList()
-                : CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
-            int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableIds).BroadCast()).ResponseCountryIds[0];
-            DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
-            return deployEvent;
-        })
+        return new ResultStep(this, Choose.CountryFrom(() => lastRemovedUnitWasNavy
+                    ? CountryState.BuildableSea(Faction).Select(cs => cs.Id).ToList()
+                    : CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD))
+            .BeforePrompt(() => ReplayContext.Pace(1000)))
         // Rebuilding is the other half of the removal, not an effect of its own: a skipped removal
         // finishes the card instead of granting a free piece.
         .RequiringPreviousStep()

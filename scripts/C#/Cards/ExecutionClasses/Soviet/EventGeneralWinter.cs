@@ -26,19 +26,13 @@ public partial class EventGeneralWinter : EventCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async () => {
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesNearMoscow).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AxisArmiesNearMoscow,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesNearMoscow.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in or adjacent to Moscow"),
 
-            new ResultStep(this, async () => {
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesNearMoscow).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AxisArmiesNearMoscow,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesNearMoscow.Count > 0), this))
             .WithGuidance("Eliminate a second Axis Army in or adjacent to Moscow")
         };

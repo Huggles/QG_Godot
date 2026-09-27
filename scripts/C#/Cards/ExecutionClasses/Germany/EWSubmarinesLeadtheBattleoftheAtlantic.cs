@@ -27,14 +27,11 @@ public partial class EWSubmarinesLeadtheBattleoftheAtlantic : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, () => {
-                _scoringCount = ScoringUnits.Count;
-                return Task.FromResult<CardStepResult>(
-                    new ScorePointsChangeEvent(new VPEntry(_scoringCount, "German Navies on the board"), Faction));
-            }),
+            new ResultStep(this, Choose.Fixed(() =>
+                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits.Count, "German Navies on the board"), Faction))
+                .OnChosen(_ => _scoringCount = ScoringUnits.Count)),
 
-            new ResultStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, _scoringCount * 2)))
+            new ResultStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, _scoringCount * 2)))
             .RequiringPreviousStep()
         };
     }

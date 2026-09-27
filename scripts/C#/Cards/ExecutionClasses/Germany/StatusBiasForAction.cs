@@ -81,8 +81,7 @@ public partial class StatusBiasForAction : StatusCardLogic
             // It stays a condition of its OWN, rather than leaning on the card trigger: the trigger
             // gate reads tags while this reads BattleTargets, so the two can disagree at the margin
             // (ImmuneForTurn, supply).
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => BattleTargets.Count > 0), this))
             .WithGuidance("Battle a land space adjacent to the Army just built"),
 

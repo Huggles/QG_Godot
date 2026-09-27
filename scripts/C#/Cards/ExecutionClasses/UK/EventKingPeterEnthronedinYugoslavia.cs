@@ -22,21 +22,13 @@ public partial class EventKingPeterEnthronedinYugoslavia : EventCardLogic
     {
         return new List<CardStep> {
             // Eliminate an Axis Army in the Balkans
-            new ResultStep(this, async () => {
-                int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, AxisArmiesInBalkans).BroadCast()).ResponseUnitIds[0];
-                RemoveUnitChangeEvent removeEvent = 
-                    new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-                return removeEvent;
-            })
+            new ResultStep(this, Choose.UnitFrom(() => AxisArmiesInBalkans,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => AxisArmiesInBalkans.Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in the Balkans"),
 
             // Recruit an Army in the Balkans
-            new ResultStep(this, async () => {
-                DeployUnitChangeEvent deployEvent = 
-                    new DeployUnitChangeEvent(Faction, (int)Country.Balkans, DeployType.RECRUIT);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.Fixed(() => new DeployUnitChangeEvent(Faction, (int)Country.Balkans, DeployType.RECRUIT)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Balkans], Faction), this))
             .WithGuidance("Recruit an Army in the Balkans")
         };

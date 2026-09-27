@@ -39,20 +39,15 @@ public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICou
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Szechuan], Faction), this))
             .WithGuidance("Discard top 2 deck cards to recruit an Army in Szechuan"),
 
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),
 
-            new ResultStep(this, async () => {
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, [(int)Country.Szechuan]).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.RECRUIT);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(() => [(int)Country.Szechuan],
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .RequiringPreviousStep()
         };
     }

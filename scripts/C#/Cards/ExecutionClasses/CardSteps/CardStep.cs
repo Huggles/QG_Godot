@@ -164,6 +164,13 @@ public abstract partial class CardStep : ITaggable
     protected abstract Task<CardStepResult> RunCoreAsync();
 
     /// <summary>
+    /// Every event this step could produce right now, one per legal answer, without prompting or
+    /// applying anything — or null when the step is free-form and cannot say. Does not check the
+    /// step's conditions. The caller owns the events: <see cref="StepChoice.Release"/> them.
+    /// </summary>
+    public virtual IReadOnlyList<StepOption> PossibleOutcomes() => null;
+
+    /// <summary>
     /// Apply the result. One seam per step kind, and the only place a step's effect reaches the game.
     /// </summary>
     protected abstract Task DispatchAsync(CardStepResult result);

@@ -35,17 +35,15 @@ public partial class EWSubmarinesSupportPacificIslands : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, () => {
-                _scoringCount = ScoringUnits.Count;
-                if (_scoringCount == 0) return Task.FromResult(CardStepResult.Nothing);
-                return Task.FromResult<CardStepResult>(
-                    new ScorePointsChangeEvent(new VPEntry(_scoringCount * 2, "Japanese Navies in or adjacent to East Pacific"), Faction));
-            }),
+            new ResultStep(this, Choose.Fixed(() => {
+                int count = ScoringUnits.Count;
+                return count == 0 ? null
+                    : new ScorePointsChangeEvent(new VPEntry(count * 2, "Japanese Navies in or adjacent to East Pacific"), Faction);
+            })
+            .OnChosen(_ => _scoringCount = ScoringUnits.Count)),
 
-            new ResultStep(this, () => _scoringCount == 0
-                ? Task.FromResult(CardStepResult.Nothing)
-                : Task.FromResult<CardStepResult>(
-                    new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_STATES, _scoringCount * 2)))
+            new ResultStep(this, Choose.Fixed(() => _scoringCount == 0 ? null
+                : new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_STATES, _scoringCount * 2)))
             .RequiringPreviousStep()
         };
     }

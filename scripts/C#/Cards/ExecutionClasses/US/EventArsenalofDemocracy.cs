@@ -23,27 +23,18 @@ public partial class EventArsenalofDemocracy : EventCardLogic
         return new List<CardStep>
         {
             // Step 1: show ALL buildable countries (both land and sea); player chooses order.
-            new ResultStep(this, async() => {
-                var buildableLand = CountryState.BuildableLand(targetFaction).ToCountryIds();
-                var buildableSea = CountryState.BuildableSea(targetFaction).ToCountryIds();
-                var all = buildableLand.Concat(buildableSea).ToList();
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(targetFaction, all).BroadCast()).ResponseCountryIds[0];
-                _firstWasArmy = CountryState.ForId(selectedCountryId).Type == CountryType.LAND;
-                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.BUILD);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.CountryFrom(
+                    () => CountryState.BuildableLand(targetFaction).ToCountryIds().Concat(CountryState.BuildableSea(targetFaction).ToCountryIds()).ToList(),
+                    countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD))
+                .OnChosen(chosen => _firstWasArmy = CountryState.ForId(chosen.Value.Id).Type == CountryType.LAND))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 CountryState.BuildableLand(targetFaction).Any() || CountryState.BuildableSea(targetFaction).Any()), this))
             .WithGuidance("United Kingdom builds an Army or a Navy (choose order)"),
             // Step 2: show only the other type to complete the pair.
-            new ResultStep(this, async() => {
-                var buildable = _firstWasArmy
+            new ResultStep(this, Choose.CountryFrom(() => _firstWasArmy
                     ? CountryState.BuildableSea(targetFaction).ToCountryIds()
-                    : CountryState.BuildableLand(targetFaction).ToCountryIds();
-                int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(targetFaction, buildable).BroadCast()).ResponseCountryIds[0];
-                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(targetFaction, selectedCountryId, DeployType.BUILD);
-                return deployEvent;
-            })
+                    : CountryState.BuildableLand(targetFaction).ToCountryIds(),
+                countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 var buildable = _firstWasArmy
                     ? CountryState.BuildableSea(targetFaction)

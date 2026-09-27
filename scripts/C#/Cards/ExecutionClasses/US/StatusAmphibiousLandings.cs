@@ -38,19 +38,14 @@ public partial class StatusAmphibiousLandings : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-                new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
                 var b = LastLandBattle;
                 return b != null && CountryState.ForId(b.CountryId).Tags.Has(Tag.Buildable, Faction) && HasAdjacentSuppliedUSNavy;
             }), this))
             .WithGuidance("Discard top 1 deck card to build an Army in the space just battled"),
 
-            new ResultStep(this, async () => {
-                int countryId = LastLandBattle.CountryId;
-                DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
-                return deployEvent;
-            })
+            new ResultStep(this, Choose.Fixed(() => new DeployUnitChangeEvent(Faction, LastLandBattle.CountryId, DeployType.BUILD)))
             .RequiringPreviousStep()
         };
     }

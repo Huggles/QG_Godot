@@ -47,14 +47,8 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, async() => {
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
-                BattleTarget target = resp.ResponseCountryIds.Count > 0
-                    ? new BattleTarget(resp.ResponseCountryIds[0], TargetType.COUNTRY)
-                    : new BattleTarget(resp.ResponseUnitIds[0], TargetType.UNIT);
-                BattleCountryChangeEvent battleCountryChange = target.ToAttackChangeEvent(Faction);
-                return battleCountryChange;
-            })
+            new ResultStep(this, Choose.BattleTargetFrom(() => BattleTargets,
+                target => target.ToAttackChangeEvent(Faction)))
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
             .WithGuidance("Battle in the same or adjacent land space"),
         }; 

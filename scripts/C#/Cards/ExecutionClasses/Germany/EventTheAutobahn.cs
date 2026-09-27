@@ -32,14 +32,13 @@ public partial class EventTheAutobahn : EventCardLogic
 
     private CardStep MakeRemovalStep()
     {
-        return new RequirementStep(this, async () =>
-        {
-            int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(Faction, EligibleArmyIds).BroadCast()).ResponseUnitIds[0];
-            relocatedIds.Add(selectedUnitId);
-            if (EligibleArmyIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
-            RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
-            return removeEvent;
-        })
+        return new RequirementStep(this, Choose.UnitFrom(() => EligibleArmyIds,
+                unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE))
+            .OnChosen(chosen =>
+            {
+                relocatedIds.Add(chosen.Value.Id);
+                if (EligibleArmyIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
+            }))
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
             EligibleArmyIds.Count > 0 && CountryState.BuildableLand(Faction).Count > 0), this))
         .WithGuidance("Select a German Army to eliminate and rebuild");
@@ -47,14 +46,9 @@ public partial class EventTheAutobahn : EventCardLogic
 
     private CardStep MakeDeployStep()
     {
-        return new ResultStep(this, async () =>
-        {
-            await ReplayContext.Pace(1000);
-            var buildableIds = CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList();
-            int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, buildableIds).BroadCast()).ResponseCountryIds[0];
-            DeployUnitChangeEvent deployEvent = new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
-            return deployEvent;
-        })
+        return new ResultStep(this, Choose.CountryFrom(() => CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList(),
+                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD))
+            .BeforePrompt(() => ReplayContext.Pace(1000)))
         // Rebuilding is the other half of the removal, not an effect of its own: a skipped removal
         // finishes the card instead of granting a free army.
         .RequiringPreviousStep()
