@@ -36,6 +36,7 @@ ChangeEventQueue="*res://scenes/network/ChangeEventQueue.cs"
 AnimationQueue="*res://scripts/C#/Animations/AnimationQueue.cs"
 CliSession="*res://scripts/C#/Cli/CliSession.cs"
 SteamworksApi="*res://scripts/C#/Utils/SteamworksApi.cs"
+AchievementTracker="*res://scripts/C#/Utils/AchievementTracker.cs"
 
 [debug]
 

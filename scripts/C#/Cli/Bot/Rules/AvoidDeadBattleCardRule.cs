@@ -71,8 +71,6 @@ public sealed class AvoidDeadBattleCardRule : IBotRule
 
     public void Apply(BotDecision decision, IBotVerdictSink sink)
     {
-        bool couldFireATrigger = BotBattleFacts.HasTriggerableTableCards(decision.Faction);
-
         for (int i = 0; i < decision.Options.Count; i++)
         {
             CardState card = CardState.ForId(decision.Options[i].Id);
@@ -80,7 +78,13 @@ public sealed class AvoidDeadBattleCardRule : IBotRule
 
             CardType type = card.CardData.CardType;
             if (!BotBattleFacts.IsBattleCard(type)) continue;
-            if (BotBattleFacts.HasRealTarget(type, decision.Faction)) continue;
+            // Judged for the card's OWN faction, not the asked one. A reaction window merges every
+            // faction one seat controls into a single prompt, so these options can span three of them —
+            // and "is there anything to attack" is a question about whoever would be playing the card.
+            // The two facts are per card rather than hoisted for the same reason.
+            if (BotBattleFacts.HasRealTarget(type, card.Faction)) continue;
+
+            bool couldFireATrigger = BotBattleFacts.HasTriggerableTableCards(card.Faction);
 
             if (couldFireATrigger) sink.Score(i, FallbackPenalty);
             else                   sink.Veto(i, "no unit to attack, nothing to trigger");

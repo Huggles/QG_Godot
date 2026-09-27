@@ -38,7 +38,7 @@ public partial class ModalStack : Control, LoadableUI, IRecallablePrompt
 
 	public override void _Ready()
 	{
-		if (Multiplayer.GetUniqueId() == GetMultiplayerAuthority())
+		if (SessionIdentity.IsLocalAuthority(this))
 			Current = this;
 		LoadUI();
 	}

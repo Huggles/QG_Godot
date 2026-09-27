@@ -60,8 +60,12 @@ public static class OpeningDiscard
         {
             if (!picks.TryGetValue(faction, out List<int> cardIds) || cardIds.Count == 0) continue;
 
+            // Silent, unlike every other discard: this fires once per faction back to back before the
+            // first turn, so narrating it to the table would be five modals in a row on the way in.
+            // PlayAnimations rides the DTO, so clients suppress it too.
             ForceDiscardHandCardsChangeEvent discardEvent =
-                new(Faction.NONE, faction, cardIds.Count) { IsTrigger = false };
+                new ForceDiscardHandCardsChangeEvent(Faction.NONE, faction, cardIds.Count) { IsTrigger = false }
+                    .WithoutAnimations();
             // Already chosen above, so ExecuteAsync must not raise a second request for it.
             discardEvent.PreselectDiscards(cardIds);
             await discardEvent.Apply();

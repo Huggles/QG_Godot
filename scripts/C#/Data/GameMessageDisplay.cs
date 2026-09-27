@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Display data for a <see cref="GameMessage"/> that is not the message's own SummaryText() — what
@@ -52,6 +53,56 @@ public static class GameMessageDisplay
 
         _                                     => null,
     };
+
+    /// <summary>
+    /// The cards this message acted ON — what the hover popup draws beside the card that caused it.
+    /// Empty for the great majority of messages, which move no cards at all.
+    ///
+    /// Only events that already KNOW the ids qualify. The by-name events resolve theirs inside
+    /// ExecuteAsync and keep nothing, and DrawCardsChangeEvent never learns which cards came off the
+    /// deck — those stay card-less rather than being given a lookup that could answer differently on
+    /// each peer. Secrecy is not this list's problem: CardFace.ForCard draws anything the local
+    /// player may not see as a card back, so an opponent's discard is safe to name here.
+    ///
+    /// The list is COPIED, not referenced: DiscardedCardIds and ReorderedCardIds are live state a
+    /// later event may rewrite, and a history entry is a snapshot — see <see cref="GameHistoryEntry"/>.
+    ///
+    /// ORDER IS LOAD-BEARING, as in <see cref="HistoryIconPath"/>.
+    /// </summary>
+    public static IReadOnlyList<int> HistoryTargetCardIds(this GameMessage message) => message switch
+    {
+        DiscardHandCardsChangeEvent d      => Snapshot(d.CardIds),
+        ForceDiscardHandCardsChangeEvent d => Snapshot(d.DiscardedCardIds),
+        ForceDiscardCardsChangeEvent d     => Snapshot(d.DiscardedCardIds),
+        RecycleCardChangeEvent r           => Snapshot(new[] { r.CardId }),
+
+        // A full shuffle touches the whole deck and says nothing by listing it; a top-of-deck
+        // rearrangement is exactly the handful of cards worth seeing again afterwards.
+        ReorderDeckChangeEvent r when !r.IsFullShuffle
+                                           => Snapshot(r.ReorderedCardIds?.Take(r.ReorderedFromTop)),
+
+        _                                  => NoCards,
+    };
+
+    /// <summary>
+    /// How many target cards one entry may carry. The popup draws them full size and side by side,
+    /// so this is what stops a five-card discard from growing a popup wider than the screen.
+    /// </summary>
+    private const int MaxTargetCards = 5;
+
+    /// <summary>Shared empty list, so the common "no cards" answer allocates nothing.</summary>
+    private static readonly IReadOnlyList<int> NoCards = new List<int>();
+
+    /// <summary>
+    /// Copy, in the order the event lists them. Ids are not resolved to CardStates here: that is the
+    /// display's job, and this must stay callable on a peer that is mid-mutation.
+    /// </summary>
+    private static IReadOnlyList<int> Snapshot(IEnumerable<int> cardIds)
+    {
+        if (cardIds == null) return NoCards;
+        List<int> copy = cardIds.Where(id => id > -1).Take(MaxTargetCards).ToList();
+        return copy.Count == 0 ? NoCards : copy;
+    }
 
     /// <summary>
     /// A flag texture that replaces the acting faction's on the badge, or null to use the faction's own.

@@ -1,6 +1,7 @@
 {
   "title": "Debug Empty Deck",
   "description": "Italy's draw deck is drained to 2 cards and the US opens with B-24 Liberator (Italy discards 4). Expect 2 cards discarded and -2 VP for Italy.",
+  "debug": true,
   "startingFaction": "UNITED_STATES",
   "startingRound": 1,
   "maxRounds": 20,

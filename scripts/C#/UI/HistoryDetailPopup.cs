@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 /// The hover detail for one game history badge: the card that triggered it, drawn as a real card,
-/// plus the message summary.
+/// the cards it acted on beside it, and the message summary.
 ///
 /// One instance owned by the Interface CanvasLayer rather than one popup per badge. GameHistoryList
 /// sets clip_contents, so anything parented under a badge is clipped by the 48px strip; and a strip
@@ -29,8 +30,16 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     private const float TextWidthAlone = 170f;
 
     private PanelContainer DetailPanel => GetNode<PanelContainer>("%HistoryDetailPanel");
+    private HBoxContainer  CardRow => GetNode<HBoxContainer>("%CardRow");
     private CardScene      CardSceneNode => GetNode<CardScene>("%HistoryCard");
     private RichTextLabel  SummaryLabel => GetNode<RichTextLabel>("%HistorySummary");
+
+    /// <summary>
+    /// The extra card slots for <see cref="GameHistoryEntry.TargetCardIds"/>, drawn to the right of
+    /// the source card. Grown on demand and then hidden rather than freed, so hovering along a strip
+    /// of discard badges does not instantiate and free a CardScene per badge.
+    /// </summary>
+    private readonly List<CardScene> targetCards = new();
 
     /// <summary>
     /// Which badge the popup currently belongs to. The token that makes the hover hand-off between
@@ -42,7 +51,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
 
     public override void _Ready()
     {
-        if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        if (SessionIdentity.IsLocalAuthority(this))
         {
             Current = this;
             LoadUI();
@@ -51,12 +60,18 @@ public partial class HistoryDetailPopup : Control, LoadableUI
 
     public void LoadUI()
     {
-        CardSceneNode.TriggersEmphasis(false);   // a history hover must not drive the hand's card preview
-        CardSceneNode.SetClickable(false);
-        CardSceneNode.SetActivatable(true);      // clears the red "cannot use this" scrim
-        CardSceneNode.SetMousePassthrough(true); // the popup floats over the board; it must not eat clicks
+        AsHistoryCard(CardSceneNode);
         DetailPanel.Visible = false;
         SetProcess(false);
+    }
+
+    /// <summary>How every card in this popup is drawn, source card and target cards alike.</summary>
+    private static void AsHistoryCard(CardScene card)
+    {
+        card.TriggersEmphasis(false);   // a history hover must not drive the hand's card preview
+        card.SetClickable(false);
+        card.SetActivatable(true);      // clears the red "cannot use this" scrim
+        card.SetMousePassthrough(true); // the popup floats over the board; it must not eat clicks
     }
 
     public override void _ExitTree()
@@ -94,10 +109,13 @@ public partial class HistoryDetailPopup : Control, LoadableUI
             CardSceneNode.Visible = false;
         }
 
+        int targetsShown = ShowTargetCards(entry.TargetCardIds);
+
         // Drives both the wrap width and, through it, the whole panel's width — the PanelContainer has
         // no minimum of its own, so a text-only entry collapses to just this column plus the margins.
+        // The card row is wider than this whenever it holds anything, so it wins the width on its own.
         SummaryLabel.CustomMinimumSize = new Vector2(
-            CardSceneNode.Visible ? TextWidthWithCard : TextWidthAlone, 0);
+            CardSceneNode.Visible || targetsShown > 0 ? TextWidthWithCard : TextWidthAlone, 0);
 
         // The sequence number is the same one on the badge, so a player can tie the popup back to the
         // entry they are pointing at. The stream id is debug-only: it is not what the badge shows.
@@ -108,6 +126,43 @@ public partial class HistoryDetailPopup : Control, LoadableUI
         DetailPanel.Visible = true;
         Reposition(badge);
         SetProcess(true);
+    }
+
+    /// <summary>
+    /// Fill the row to the right of the source card with the cards the entry acted on, and return how
+    /// many were drawn. Ids are resolved here rather than at capture time, exactly like the source
+    /// card: a card revealed after the event starts showing its face in the history too.
+    /// </summary>
+    private int ShowTargetCards(IReadOnlyList<int> cardIds)
+    {
+        int shown = 0;
+        for (int i = 0; cardIds != null && i < cardIds.Count; i++)
+        {
+            // Not in game state at all: CardFace.ForCard would NRE on it, so skip rather than draw.
+            if (CardState.ForId(cardIds[i]) == null) continue;
+            TargetCardAt(shown).ShowCard(cardIds[i]);  // ShowCard makes the slot visible again
+            shown++;
+        }
+        for (int i = shown; i < targetCards.Count; i++) targetCards[i].Visible = false;
+        return shown;
+    }
+
+    /// <summary>
+    /// The nth target slot, created on first use. Size is assigned as well as the minimum, because
+    /// CardScene.RecalculateSizes scales its fonts off Size and runs inside ShowCard — a frame before
+    /// the container would otherwise have given a fresh instance any size at all.
+    /// </summary>
+    private CardScene TargetCardAt(int index)
+    {
+        if (index < targetCards.Count) return targetCards[index];
+
+        CardScene card = CardScene.CardScenePackedPath.Instantiate<CardScene>();
+        card.CustomMinimumSize = CardSceneNode.CustomMinimumSize;
+        card.Size = CardSceneNode.CustomMinimumSize;
+        CardRow.AddChild(card);
+        AsHistoryCard(card);
+        targetCards.Add(card);
+        return card;
     }
 
     /// <summary>Release the popup, but only if <paramref name="badge"/> still owns it.</summary>

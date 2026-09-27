@@ -40,3 +40,20 @@ public class AbortedEpochException : Exception
     public AbortedEpochException(int expectedEpoch, int currentEpoch)
         : base($"Aborted: continuation belongs to game-loop epoch {expectedEpoch}, current is {currentEpoch}.") { }
 }
+
+/// <summary>
+/// Thrown by the session guards when a continuation belongs to a game the player has already left.
+///
+/// Deliberately NOT derived from <see cref="StepSkippedException"/>. Every step handler and card step
+/// that catches a skip treats it as "that faction passed, carry on with the next thing" — and
+/// carrying on is exactly what an abandoned session must not do. OpeningDiscard did precisely that
+/// on a quit: it caught the cancelled request as a skip and immediately broadcast the next one, into
+/// an autoload that outlives the session, where it sat until it fired at a peer in the NEXT lobby.
+///
+/// Benign, and never reported — see <c>ErrorReporter.IsBenign</c>.
+/// </summary>
+public class SessionAbandonedException : Exception
+{
+    public SessionAbandonedException(int expectedGeneration, int currentGeneration)
+        : base($"Abandoned: continuation belongs to game session {expectedGeneration}, current is {currentGeneration}.") { }
+}

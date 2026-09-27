@@ -110,7 +110,9 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
         new ShowNotificationLabelAnimation($"{TargetFaction.WithPlayer()} discards {NumberOfCards} hand card(s)", TriggeringFaction),
-        new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards", TargetFaction)
+        // Always the target's own pick: either ExecuteAsync prompted them, or a caller did and handed
+        // the answer to PreselectDiscards.
+        new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards", TargetFaction, true)
     };
 
     public override string SummaryText() => $"{TargetFaction.WithPlayer()} discarded {DiscardedCardIds.Count} hand card(s)";

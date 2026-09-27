@@ -26,6 +26,30 @@ public partial class ErrorReporter : Node
     public static int GameLoopEpoch { get; private set; } = 0;
 
     /// <summary>
+    /// Bumped once per ABANDONED session — the player quit to the menu. Continuations belonging to a
+    /// game nobody is in any more compare against this and unwind via
+    /// <see cref="SessionAbandonedException"/> instead of issuing fresh work into the autoloads that
+    /// outlive the session (NetworkApi above all).
+    ///
+    /// Separate from <see cref="GameLoopEpoch"/> because the two mean different things: an epoch bump
+    /// says "the loop failed and is restarting", this says "there is no loop". Both unwind, but only
+    /// one of them has somewhere to resume to.
+    /// </summary>
+    public static int SessionGeneration { get; private set; } = 0;
+
+    /// <summary>
+    /// Whether a game session is running at all. False before the first game and from the moment one
+    /// is abandoned until the next begins.
+    ///
+    /// Needed alongside <see cref="SessionGeneration"/>, not instead of it: the generation catches a
+    /// continuation that STARTED in the old session, but an abandoned loop can also start brand-new
+    /// work afterwards — OpeningDiscard catching the cancelled request as a skip and broadcasting the
+    /// next faction's is exactly that — and that work would capture the CURRENT generation and sail
+    /// through. This is the check that says "there is no game to ask anyone anything about".
+    /// </summary>
+    public static bool SessionActive { get; private set; } = false;
+
+    /// <summary>
     /// Depth of in-flight <c>ChangeEvent.Apply</c> calls. Non-zero means state may be
     /// half-mutated, which (combined with <see cref="BroadcastSent"/>) decides severity.
     /// </summary>
@@ -485,10 +509,14 @@ public partial class ErrorReporter : Node
             ? ""
             : $" for Bulletin \"{request.TriggerBulletinLabel}\"";
 
+        // Every faction the prompt asked, not just its representative: a reaction window can cover a
+        // whole seat's share of a team, and "Germany did not answer" names a third of the real prompt.
+        string asked = request == null ? "Nobody" : string.Join(", ", request.Answering);
+
         string cause = forced
-            ? $"You timed out {request?.TargetFaction}'s {request?.GetType().Name}{bulletin} " +
+            ? $"You timed out {asked}'s {request?.GetType().Name}{bulletin} " +
               $"early (Id {request?.Id})."
-            : $"{request?.TargetFaction} did not answer {request?.GetType().Name}{bulletin} " +
+            : $"{asked} did not answer {request?.GetType().Name}{bulletin} " +
               $"within {NetworkApi.InputResponseTimeoutMinutes} minutes (Id {request?.Id}).";
 
         return new InputTimeoutException(
@@ -532,6 +560,49 @@ public partial class ErrorReporter : Node
             throw new AbortedEpochException(capturedEpoch, GameLoopEpoch);
     }
 
+    /// <summary>
+    /// The session is over: nothing belonging to it may start anything new.
+    ///
+    /// Bumps the epoch as well, which is most of the value for one line: every existing
+    /// ThrowIfStaleEpoch site — ChangeEvent, PresentationEvent, RecalculateTagsMessage,
+    /// CardPlayRound, StepMutatorRunner, GameFlow.StartNextStep/FinishStep — becomes an abandon
+    /// guard for free, and those are the paths by which an old continuation could otherwise mutate
+    /// the NEXT game's state. GameFlow and MultiplayerGameState hang off an autoload and their
+    /// Instance statics repoint to the new session, so "stale" here does not mean "harmlessly
+    /// disposed" — it means "aimed at the wrong game".
+    ///
+    /// Only ever called when LEAVING a session, never when starting one: the Draw/Discard/Supply
+    /// handlers swallow a skip and then fire their Finished event, and a SessionAbandonedException
+    /// escaping that catch correctly stops the turn loop advancing. Bumping mid-game would hang it.
+    /// </summary>
+    public static void AbandonSession()
+    {
+        SessionActive = false;
+        SessionGeneration++;
+        DebugUtilities.PrintPeer($"ErrorReporter: session abandoned, generation → {SessionGeneration}");
+        BumpEpoch();
+    }
+
+    /// <summary>Marks a session live. Called once per game, as MultiplayerSession.StartSession opens.</summary>
+    public static void BeginSession()
+    {
+        // A flag, NOT a generation bump: bumping mid-game would make every in-flight step unwind and
+        // the turn loop stop advancing. Only leaving a session moves the generation.
+        SessionActive = true;
+        DebugUtilities.PrintPeerFinest($"ErrorReporter: session {SessionGeneration} is live");
+    }
+
+    /// <summary>
+    /// Throws <see cref="SessionAbandonedException"/> when there is no live session, or when
+    /// <paramref name="capturedGeneration"/> belongs to one that has been left. Capture the
+    /// generation once, before the work starts.
+    /// </summary>
+    public static void ThrowIfSessionAbandoned(int capturedGeneration)
+    {
+        if (!SessionActive || capturedGeneration != SessionGeneration)
+            throw new SessionAbandonedException(capturedGeneration, SessionGeneration);
+    }
+
     // ── Filtering ────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -544,6 +615,7 @@ public partial class ErrorReporter : Node
     {
         StepSkippedException => true,
         AbortedEpochException => true,
+        SessionAbandonedException => true,
         OperationCanceledException => true,   // covers TaskCanceledException
         _ => false
     };

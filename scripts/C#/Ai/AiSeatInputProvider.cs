@@ -55,14 +55,14 @@ public sealed class AiSeatInputProvider : IInputProvider
             // own process. Only while actually pausing, or it would flicker on every empty reaction
             // window; MarkInputClosed is idempotent, so the AnnounceInputClosed broadcast that follows
             // is harmless.
-            InputRequest.MarkInputOpen(request.TargetFaction);
+            InputRequest.MarkInputOpen(request.Answering);
             try
             {
                 await Task.Delay(think);
             }
             finally
             {
-                InputRequest.MarkInputClosed(request.TargetFaction);
+                InputRequest.MarkInputClosed(request.Answering);
             }
         }
 

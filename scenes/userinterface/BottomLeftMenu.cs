@@ -22,8 +22,8 @@ public partial class BottomLeftMenu : Control
 	/// The faction whose hand this menu put on the display, or NONE when it did not.
 	///
 	/// A property rather than a field so every one of the four places that ends browsing keeps
-	/// <see cref="FactionFocus"/> in step — browsing is claimed over a live input request rather than
-	/// instead of one, so dropping the claim is what hands the tint back to the prompt underneath.
+	/// <see cref="HandBrowsing"/> in step — browsing is claimed over a live input request rather than
+	/// instead of one, so dropping it is what hands the display back to the prompt underneath.
 	/// </summary>
 	private Faction BrowsingFaction
 	{
@@ -31,7 +31,7 @@ public partial class BottomLeftMenu : Control
 		set
 		{
 			_browsingFaction = value;
-			FactionFocus.Set(FactionFocusSource.Browsing, value);
+			HandBrowsing.Current = value;
 		}
 	}
 	private Faction _browsingFaction = Faction.NONE;
@@ -74,6 +74,10 @@ public partial class BottomLeftMenu : Control
 
 	public override void _ExitTree()
 	{
+		// HandBrowsing is a process-wide static, so a session torn down mid-browse would leave the
+		// next game's FactionHandDisplay refusing to follow the turn.
+		HandBrowsing.Reset();
+
 		if (EventBus.Instance != null)
 		{
 			EventBus.Instance.FactionsAssigned -= AddFactionButtons;

@@ -49,15 +49,31 @@ public static class SceneFlow
 
         if (leaveSession)
         {
+            // FIRST, above every release below, for the reason ErrorReporter.RequestResume documents at its
+            // own bump: anything this teardown releases must unwind as belonging to a dead session
+            // rather than carry on. CancelPendingAwaiters alone is not enough — it cancels the request
+            // in flight, and a loop that catches that as a skip simply issues the next one.
+            ErrorReporter.AbandonSession();
+
             // Close before nulling. ENetMultiplayerPeer is RefCounted, so assigning null only drops the
             // engine's reference and the socket is released whenever the last one happens to go — which
             // leaves port 7777 bound and makes the next CreateServer fail with a bare "Failed to host".
             // Latent on the existing Quit-then-Host path; loading a save makes that round trip routine.
             if (from.Multiplayer?.MultiplayerPeer is { } peer)
             {
+                // Read the peer list BEFORE closing, while the ids still resolve to Steam ids. Closing
+                // the Godot peer does not close the SteamNetworkingMessages session underneath it, and
+                // a surviving session carries the old connection's peer identity into the next one —
+                // which is how a re-host ended up handing a client a peer id its own peer disagreed
+                // with, leaving it unable to click anything in the lobby. No-op for ENet.
+                SteamPeerFactory.ReleaseSession(peer, from.Multiplayer.GetPeers());
+
                 peer.Close();
                 from.Multiplayer.MultiplayerPeer = null;
             }
+
+            // Back to the transport's own answer for "who am I"; the next session's host will say.
+            SessionIdentity.Reset();
 
             // NetworkApi is an autoload, so its pending input requests outlive the game scene. Quitting
             // while a prompt is open otherwise leaves a live awaiter holding a multi-minute backstop
@@ -107,6 +123,19 @@ public static class SceneFlow
             // (the peer refuses to host on a lobby it does not own outright). Harmless no-op when
             // there is no lobby, which is every ENet session.
             SteamworksApi.Instance?.LeaveCurrentLobby();
+
+            // Both are keyed by peer id and hold Godot wrappers from the scene being freed, and both
+            // outlive it: the registry is only ever cleared at the START of the next game
+            // (NetworkApi.LoadPlayers), so between games it answers questions about the last one.
+            PlayerFactionRegistry.Clear();
+            PlayerScene.ClearCurrent();
+
+            // Last, and deferred: NetworkApi parents the session to itself (an autoload), so nothing
+            // ever freed it and each game left a live MultiplayerSession, GameFlow and synchronizer
+            // behind to replicate at the next lobby's peers. After AbandonSession above, so the
+            // subtree is already inert when it goes.
+            if (GodotObject.IsInstanceValid(MultiplayerSession.Instance))
+                MultiplayerSession.Instance.QueueFree();
         }
 
         SceneTree tree = from.GetTree();

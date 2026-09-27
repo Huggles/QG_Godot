@@ -79,6 +79,11 @@ public sealed class CliRenderer
                 ["label"] = o.Label,
             }).ToList());
 
+        // Only when the prompt really asks for several factions, so an ordinary prompt's event is byte
+        // for byte what it always was. See InputRequestSpec.Factions.
+        if (spec.Factions.Count > 1)
+            e.Set("factions", spec.Factions.Select(f => f.ToString()).ToList());
+
         if (request.TriggerCardId > -1)
             e.Set("trigger_card", CardState.ForId(request.TriggerCardId)?.CardName ?? $"#{request.TriggerCardId}");
         if (!string.IsNullOrEmpty(request.TriggerSummaryText))
@@ -93,7 +98,9 @@ public sealed class CliRenderer
             e.Set("bulletin", request.TriggerBulletinLabel);
 
         StringBuilder sb = new();
-        sb.Append($"PROMPT {spec.Kind}  faction={spec.Faction}  {spec.Title}");
+        sb.Append($"PROMPT {spec.Kind}  faction={spec.Faction}"
+                  + (spec.Factions.Count > 1 ? $"  factions={string.Join(",", spec.Factions)}" : "")
+                  + $"  {spec.Title}");
         if (request.TriggerCardId > -1)
             sb.Append($"\n  trigger: {CardState.ForId(request.TriggerCardId)?.CardName}"
                       + (request.TriggerReactionKind != TriggerKind.NONE ? $" ({request.TriggerReactionKind})" : ""));

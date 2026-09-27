@@ -25,25 +25,37 @@ public static class PlayerFactionRegistry
 
     /// <summary>
     /// First id handed to an AI seat. An AI seat is an ordinary <see cref="PlayerScene"/> registered
-    /// under an id in this range, which is what makes it invisible with no special cases:
+    /// under an id from here, which is what makes it invisible with no special cases — WHETHER a seat
+    /// is a bot is the assignment's own flag (<see cref="PlayerFactionAssignment.IsAi"/>), never this
+    /// range, because a real Godot client id is drawn at random from the whole positive range and lands
+    /// in it too:
     ///
     ///  - PlayerScene._Ready only assigns <see cref="PlayerScene.Current"/> when the local peer id
-    ///    equals the node's authority, and no real peer is ever numbered from here — so an AI seat
-    ///    never becomes Current on ANY peer. Everything that renders "my factions" reads Current, so
-    ///    the bot's hand and its face-down Response cards stay off the human's screen for free.
+    ///    equals the node's authority, and bots are only ever seated by SkirmishScreen and
+    ///    CliBootstrap, whose single human sits on peer 1 — so an AI seat never becomes Current.
+    ///    Everything that renders "my factions" reads Current, so the bot's hand and its face-down
+    ///    Response cards stay off the human's screen for free.
     ///  - NetworkApi.LoadPlayers names the node Player_{peerId}, which is the RPC NodePath, so the id
     ///    must be unique and identical on every peer. Every peer deserialises the same assignment
     ///    list, so it is.
     ///  - RegisterPlayer rejects a duplicate id, so an AI seat cannot share one with the host.
     ///
-    /// Godot peer ids are positive and the host is 1, so a high base cannot collide. Deliberately not
-    /// a negative sentinel: -1 already means "no card"/"no unit" in several places, and a negative
-    /// here would read as an error rather than as a seat.
+    /// Deliberately not a negative sentinel: -1 already means "no card"/"no unit" in several places,
+    /// and a negative here would read as an error rather than as a seat.
     /// </summary>
     public const int AiSeatIdBase = 1000;
 
+    /// <summary>
+    /// The seats that registered as bots, by registry id. Filled from the seat's own
+    /// <see cref="PlayerScene.IsAiSeat"/> flag rather than tested against <see cref="AiSeatIdBase"/>:
+    /// Godot draws a client's peer id at random from the whole positive range, so an id test called
+    /// every remote human a bot — labelling them "(AI)" and, worse, routing their prompts to the host
+    /// through <see cref="GetAnsweringPeerForFaction"/>, where nobody could answer them.
+    /// </summary>
+    private static readonly HashSet<int> _aiSeatIds = new HashSet<int>();
+
     /// <summary>Whether this registry id belongs to an AI seat rather than a network peer.</summary>
-    public static bool IsAiSeatId(int peerId) => peerId >= AiSeatIdBase;
+    public static bool IsAiSeatId(int peerId) => _aiSeatIds.Contains(peerId);
 
 
     /// <summary>
@@ -74,8 +86,11 @@ public static class PlayerFactionRegistry
 
         _peerIdToPlayerScene[peerId] = playerScene;
         _peerIdToFactions[peerId] = new List<Faction>();
-        
-        DebugUtilities.PrintPeer($"PlayerFactionRegistry: Registered player '{playerScene.PlayerName}' (Peer {peerId})");
+        // The seat says what it is; see _aiSeatIds for why this is not read off the id.
+        if (playerScene.IsAiSeat) _aiSeatIds.Add(peerId);
+
+        DebugUtilities.PrintPeer($"PlayerFactionRegistry: Registered {(playerScene.IsAiSeat ? "AI seat" : "player")} " +
+                                 $"'{playerScene.PlayerName}' (Peer {peerId})");
     }
 
     /// <summary>
@@ -134,6 +149,7 @@ public static class PlayerFactionRegistry
 
         string playerName = _peerIdToPlayerScene[peerId].PlayerName;
         _peerIdToPlayerScene.Remove(peerId);
+        _aiSeatIds.Remove(peerId);
         
         DebugUtilities.PrintPeer($"PlayerFactionRegistry: Unregistered player '{playerName}' (Peer {peerId})");
     }
@@ -146,6 +162,7 @@ public static class PlayerFactionRegistry
         _factionToPeerId.Clear();
         _peerIdToPlayerScene.Clear();
         _peerIdToFactions.Clear();
+        _aiSeatIds.Clear();
         DebugUtilities.PrintPeer("PlayerFactionRegistry: Cleared all registrations");
     }
 
@@ -312,15 +329,11 @@ public static class PlayerFactionRegistry
         if (IsSinglePlayer)
             return 1;
         
-        // In multiplayer, get from Godot's multiplayer API
-        // Access through Engine rather than SceneTree
-        var mainLoop = Engine.GetMainLoop();
-        if (mainLoop is SceneTree tree)
-        {
-            return tree.GetMultiplayer().GetUniqueId();
-        }
-        
-        return 1; // Default to host if multiplayer not set up
+        // Through SessionIdentity rather than straight off the MultiplayerAPI: the factions this
+        // peer controls are keyed by the ids the HOST dealt out, so asking the transport who we are
+        // is only right while both ends agree. When they do not, this is the seam that keeps the
+        // local player owning their own seats.
+        return SessionIdentity.LocalPeerId();
     }
 
     /// <summary>

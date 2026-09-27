@@ -47,7 +47,7 @@ public partial class GameHistoryList : VBoxContainer
             child.QueueFree();
         }
 
-        isLocalList = Multiplayer.GetUniqueId() == GetMultiplayerAuthority();
+        isLocalList = SessionIdentity.IsLocalAuthority(this);
         if (!isLocalList) return;
 
         AddUnprocessedChangeEvents();

@@ -11,14 +11,14 @@ public partial class FactionsContainer : Control
     /// <summary>
     /// The plate the faction rows sit on. It is a little larger than the rows themselves, so tinting it
     /// reads as a frame around them rather than as a change to any one row — which is what makes it the
-    /// right surface for "the client is busy with this faction".
+    /// right surface for "the game is on this faction".
     /// </summary>
     private PanelContainer BackgroundPanel => GetNode<PanelContainer>("PanelContainer");
 
     public Dictionary<Faction, FactionInfoRow> FactionInfoNodes = new();
 
-    /// <summary>Paints the plate with whatever the client is busy with. See <see cref="FactionFocusTint"/>.</summary>
-    private FactionFocusTint _focusTint;
+    /// <summary>Paints the plate with the colour of the faction on turn. See <see cref="TurnFactionTint"/>.</summary>
+    private TurnFactionTint _turnTint;
 
     /// <summary>
     /// Whether <see cref="_Ready"/> got as far as connecting. Only the authority peer subscribes, so
@@ -28,12 +28,12 @@ public partial class FactionsContainer : Control
 
     public override void _Ready()
     {
-        if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        if(SessionIdentity.IsLocalAuthority(this))
         {
             DebugUtilities.PrintPeerFinest($"Setting up FactionsContainer for local player: {GetMultiplayerAuthority()}");
             Current = this;
-            _focusTint = new FactionFocusTint(BackgroundPanel);
-            _focusTint.Attach();
+            _turnTint = new TurnFactionTint(BackgroundPanel);
+            _turnTint.Attach();
             EventBus.Instance.PlayerJoined += InitChildElements;
             EventBus.Instance.PlayerLeft += InitChildElements;
             EventBus.Instance.FactionsAssigned += InitChildElements;
@@ -53,8 +53,8 @@ public partial class FactionsContainer : Control
         // skipped. That is exactly how quitting and loading a second game left the faction strip empty.
         if (Current == this) Current = null;
 
-        _focusTint?.Detach();
-        _focusTint = null;
+        _turnTint?.Detach();
+        _turnTint = null;
 
         if (!_subscribed || EventBus.Instance == null) return;
         _subscribed = false;

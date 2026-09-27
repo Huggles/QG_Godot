@@ -156,7 +156,22 @@ public class PendingPrompt
     /// <summary>The request class name without its "RequestHandler" suffix, e.g. "HandCardPlay".</summary>
     public string Kind { get; set; }
 
+    /// <summary>The faction the request was addressed to — its representative, when it asked several.</summary>
     public Faction Faction { get; set; }
+
+    /// <summary>
+    /// Every faction the prompt answered for, when it answered for more than one: a reaction window
+    /// merges one seat's share of the reacting team into a single request
+    /// (<see cref="InputRequest.AnsweringFactions"/>). Recorded so a save taken inside such a window
+    /// describes the whole of it, and so the resume check does not report a mismatch merely because the
+    /// group's representative moved — which it can, since the group is rebuilt from live state.
+    ///
+    /// Null in a save written before this existed, which <see cref="All"/> reads as
+    /// <see cref="Faction"/> alone.
+    /// </summary>
+    public List<Faction> Factions { get; set; }
+
+    private List<Faction> All => Factions is { Count: > 0 } ? Factions : new List<Faction> { Faction };
 
     public static string KindOf(InputRequest request)
     {
@@ -165,10 +180,24 @@ public class PendingPrompt
         return name.EndsWith(suffix) ? name.Substring(0, name.Length - suffix.Length) : name;
     }
 
+    /// <summary>
+    /// Same prompt, same factions — as a SET, because the order a group is built in is an artefact of
+    /// the team's faction order and not something the save should insist on.
+    /// </summary>
     public bool Matches(InputRequest request)
-        => Kind == KindOf(request) && Faction == request.TargetFaction;
+    {
+        if (Kind != KindOf(request)) return false;
 
-    public override string ToString() => $"{Kind} for {Faction}";
+        List<Faction> saved = All;
+        IReadOnlyList<Faction> actual = request.Answering;
+        if (saved.Count != actual.Count) return false;
+
+        foreach (Faction faction in actual)
+            if (!saved.Contains(faction)) return false;
+        return true;
+    }
+
+    public override string ToString() => $"{Kind} for {string.Join(", ", All)}";
 }
 
 /// <summary>One player's seat in the saved game, for lobby pre-fill.</summary>

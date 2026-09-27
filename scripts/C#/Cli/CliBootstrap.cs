@@ -68,7 +68,8 @@ public static class CliBootstrap
         {
             assignments.Add(new PlayerFactionAssignment(
                 PlayerFactionRegistry.AiSeatIdBase + i,
-                new List<Faction> { aiFactions[i] }));
+                new List<Faction> { aiFactions[i] },
+                IsAi: true));
         }
 
         return assignments;

@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://bdisclaimerscr1"]
+
+[ext_resource type="Script" uid="uid://cttjjbw44b1h0" path="res://scripts/C#/Menu/DisclaimerScreen.cs" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c7l5nndh4p5c4" path="res://scenes/menu/ParallaxBackdrop.tscn" id="2_bdrop"]
+[ext_resource type="PackedScene" uid="uid://cviw1rdhjifft" path="res://scenes/menu/MenuPanel.tscn" id="3_panel"]
+[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="4_btn"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Backdrop" parent="." instance=ExtResource("2_bdrop")]
+layout_mode = 1
+
+[node name="Centre" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" parent="Centre" instance=ExtResource("3_panel")]
+custom_minimum_size = Vector2(1200, 0)
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="Centre/Panel/ContentContainer" index="0"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Title" type="Label" parent="Centre/Panel/ContentContainer/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Before You Play"
+horizontal_alignment = 1
+
+[node name="BodyLabel" type="RichTextLabel" parent="Centre/Panel/ContentContainer/Box"]
+layout_mode = 2
+theme_override_colors/default_color = Color(0.82, 0.82, 0.82, 1)
+theme_override_constants/line_separation = 4
+theme_override_font_sizes/normal_font_size = 20
+theme_override_font_sizes/bold_font_size = 20
+bbcode_enabled = true
+text = "•  [b]This is a beta version of the game.[/b] It is still under active development: rules, cards, artwork, interface and balance are all being worked on, and anything you see here may change, break or disappear in a later build. Saved games may not survive an update. If something looks wrong, it may well be — please report it rather than assume it was intended.
+
+•  [b]All gameplay and assets are based on the board game designed by Ian Brody.[/b] The rules, the cards, the factions and the design as a whole originate with him, and all intellectual property in them remains his. This digital version is built on that work with his knowledge and claims no ownership over any part of it. It is not a commercial product: it is not sold, carries no purchases or advertising, and is not intended to make a profit for anyone involved in it.
+
+•  [b]This version is not intended for distribution.[/b] It is provided to you personally, for testing. Do not pass the build, its files, or your access to it on to anyone outside the beta program. Doing so may result in removal from the beta program and a lifelong ban from future access.
+
+Choosing Accept confirms you have read and understood the above."
+fit_content = true
+scroll_active = false
+
+[node name="ButtonRow" type="HBoxContainer" parent="Centre/Panel/ContentContainer/Box"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="AcceptButton" parent="Centre/Panel/ContentContainer/Box/ButtonRow" instance=ExtResource("4_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 100)
+layout_mode = 2
+
+[node name="DeclineButton" parent="Centre/Panel/ContentContainer/Box/ButtonRow" instance=ExtResource("4_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 100)
+layout_mode = 2
+
+[editable path="Centre/Panel"]

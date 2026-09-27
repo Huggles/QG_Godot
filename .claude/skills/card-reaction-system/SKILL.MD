@@ -69,11 +69,15 @@ inside one:
 `RequestAfterReactions` implements this with a **turn pointer** — a local, seeded from the event that
 opened the window and flipped after every turn, played or passed. See its section below.
 
-Within a turn, every eligible faction of the team is prompted **at the same time** and the first card
-chosen wins; the rest are withdrawn. That race *is* the team's choice of which reaction to use, since
-the rules give no order to impose. The flat six-faction `RequestOrder` this replaced invented one
-(UK always before Soviet before US) and let a team react twice in a row, because after a play it
-restarted from the top of the same team's slice.
+Within a turn, everyone controlling an eligible faction of the team is prompted **at the same time**
+and the first card chosen wins; the rest are withdrawn. That race *is* the team's choice of which
+reaction to use, since the rules give no order to impose. The flat six-faction `RequestOrder` this
+replaced invented one (UK always before Soviet before US) and let a team react twice in a row, because
+after a play it restarted from the top of the same team's slice.
+
+One prompt per **player**, not per faction: a player holding several of the team's factions is asked
+once, with every reaction all of them can make in a single hand. Playing one of those cards is that
+player's — and so the team's — one reaction for the turn. See `TakeTeamTurn` below.
 
 ## Reaction Chain Flow
 
@@ -180,19 +184,33 @@ The cost of keeping it was real: combined with the always-ask rule, every card p
 **The after-reaction window on an introduction event — the old "activation window" — is gone for the same reason.** It ran on every single card play and every activation, cost two `GameStateCalculator.CalculateAll()` passes (each broadcasting a `RecalculateTagsMessage` to every peer) plus a blocking prompt, and existed to serve two cards. Reacting to a card being played or activated is now expressed through windows the card's own resolution already opens — see **Reacting to a play or an activation** below.
 
 #### `TakeTeamTurn(candidates, ask, passed)` → `(Faction, int cardId)`
-One team's turn, shared by both windows. Prompts every candidate faction at once and returns the
-first card any of them chooses.
+One team's turn, shared by both windows. Prompts everyone controlling a candidate faction at once and
+returns the first card any of them chooses.
 
-- Candidates are grouped by controlling peer (`PlayerFactionRegistry.GetPeerIdForFaction`), the same
-  shape `OpeningDiscard` uses. Groups run concurrently; the factions inside a group run in sequence,
-  because a peer is only ever asked one thing at a time. **A single-process game — the CLI, a hotseat — collapses
-  to one group and stays fully sequential**, which is why `.qgc` scripts still drive one prompt at a time.
+- **One prompt per seat, not per faction.** Candidates are grouped by `InputServices.PromptGroupKey`
+  — `PlayerFactionRegistry.GetPeerIdForFaction` by default — and each group is asked **once**, with the
+  union of everything its factions can react with. A player holding Germany, Japan and Italy answers
+  one prompt for a trigger, not three. Groups run concurrently, because they are different people.
+  **A single-process game — the CLI, a hotseat, a sim — is one group, so a whole team answers once.**
+- Deliberately keyed on the registry id and not `GetAnsweringPeerForFaction`: the latter folds an AI
+  seat onto the host, which would merge a bot's faction into the host player's prompt. AI seats hold
+  one faction each, so an AI group is always size 1.
+- `PromptGroupKey` is a seam because a seat is not always one decision-maker. `TutorialRuntime`
+  overrides it to keep the learner out of the scripted factions' group — `TutorialInputProvider` routes
+  on `TargetFaction`, and a tutorial holds all six factions on peer 1. Returning the faction itself is
+  the kill switch that restores per-faction prompts everywhere.
+- The `ask` delegate takes the group and returns `(faction, cardId)`. The faction is resolved **host-side
+  from the offers map**, never from the answer: a merged prompt spans several factions' cards, and an
+  id outside the offer is logged and treated as a pass rather than played for whoever owns it.
 - The first card chosen cancels the turn's `CancellationTokenSource`. Every still-open prompt is
   withdrawn through `NetworkApi.SendInputRequest`'s `withdrawToken`, which clears the host's awaiter
-  and then `AbortRemoteInput`s that one peer.
-- A faction that **declined** is added to `passed`. A faction that was **withdrawn**, or never reached
-  because the turn was already decided, is not — it made no decision and must be offered again on the
-  team's next turn. A card chosen a hair too late is discarded and logged, for the same reason.
+  and then `AbortRemoteInput`s that one peer. A group that **throws** cancels it too, in a `catch`, so
+  `Task.WhenAll` surfacing the first exception cannot leave another peer's prompt on the 15-minute
+  backstop.
+- A group that **declined** puts *every* faction it asked into `passed`. A group that was **withdrawn**,
+  never reached, or that chose a card adds none — those factions made no decision and must be offered
+  again on the team's next turn. A card chosen a hair too late is discarded and logged, for the same
+  reason.
 - `Task.WhenAll` before returning: the caller must not resolve the winning card while another peer's
   prompt is still live, or `DoCard` mutates state alongside it and the peers' GameMessage ids and
   state hashes stop agreeing.
@@ -204,7 +222,10 @@ or `ForceDiscardCardsChangeEvent`, so a turn for the acting team would be an emp
 case that exists.
 
 - Computes the team itself from `changeEvent.TriggeringFaction` — the caller passes no order
-- Skips the faction that triggered the event
+- Skips the faction that triggered the event. This guard, `passed`, and `ShouldOpenReactionWindow` all
+  run while the candidate list is built, and each surviving faction's `GetBlockReactionOptions` is kept
+  in an `offers` map: a faction any guard rejects must be *absent* from a merged prompt rather than
+  merged in and then refused, and the map is what tells the host which faction a chosen card belongs to
 - `GameStateCalculator.CalculateAll()` once per turn rather than once per faction: a turn raises all
   of its prompts from one tag snapshot, so the old `tagsDirty` bookkeeping is gone and this is
   strictly fewer calls
@@ -234,7 +255,7 @@ Runs the window as alternating team turns. Returns `true` if at least one reacti
   to its own introduction because no introduction opens a window.
 
 #### `ShouldOpenReactionWindow(Faction, List<int> options)` — the always-ask rule
-The single gate deciding whether a faction is prompted at all. Used by **both** `RequestAfterReactions` and `RequestBlock`, so the rule lives in one place.
+The single gate deciding whether a faction is prompted at all. Used by **both** windows while each builds its candidate list, so the rule lives in one place.
 
 ```csharp
 if (GameFlow.Instance.IsSkippingReactions(faction))
@@ -291,13 +312,13 @@ The change event currently being **offered for block**, or null when no block wi
 
 - Set at the start of `RequestBlockReactions`, restored (stack-safe) in the `finally` — a block card resolved inside the window runs its own steps, whose events open nested windows, and the outer window's remaining factions need their trigger identity back
 - `RequestBlockReactions` recalculates tags *inside* its loop, after `CurrentBlockTrigger` is set and again after any block card resolves, so conditions are always evaluated against the open window
-- Also drives the block prompt's trigger label and the "cannot block your own action" guard in `RequestBlock`
+- Also drives the block prompt's trigger label and the "cannot block your own action" guard in `RequestBlockReactions`
 
 **Never match a block trigger against `CardPlayPool.LastNoneNewCardChangeEvent`.** That property deliberately skips `PlayCardChangeEvent` and `ActivateReactionChangeEvent`, so when it is read anywhere near an introduction event it reports the *earlier* event. That is what made every removal-blocker (e.g. UK's Destroyers) offer itself against StatusRadar being activated — a card activation is not a unit removal. Introduction events no longer open a block window at all, which removes that particular trap at the source, but the rule stands for every other window.
 
 So the rule is symmetric: **step logic reads `ActivationTrigger`, block trigger conditions read `CurrentBlockTrigger`** — neither re-reads the live pool.
 
-One consequence to expect: a block card only claims `Tag.IsActivatable` while its block window is open. That is correct — block cards are offered solely through `GetBlockReactionOptions` inside `RequestBlock`.
+One consequence to expect: a block card only claims `Tag.IsActivatable` while its block window is open. That is correct — block cards are offered solely through `GetBlockReactionOptions` inside `RequestBlockReactions`.
 
 #### `ContinueWithNextSteps()`
 Checks all cards in the pool for executable next steps:
@@ -709,7 +730,8 @@ protected override List<Condition> CardTriggers() => new List<Condition> {
 
 A faction must always play a card, take an instead-of-play action, **or discard**. So the faction's own
 play prompt (`HandCardPlayRequestHandler`) opens on every one of its Play steps, even with nothing
-activatable — `RequestPlay`'s gate is `isReaction || !hasSpentPlay || ActivatableCardIds.Count > 0`.
+activatable — `RequestPlay(Faction)`'s gate is `!hasSpentPlay || ActivatableCardIds.Count > 0`. (The reaction windows go
+through its `List<Faction>` overload, which always opens — that is the always-ask rule.)
 This is the second reason a card prompt with nothing on offer is not a bug, alongside the always-ask
 rule: here the empty prompt is how a player with a dead hand is given, and shown, the only choice they
 have. It also means the prompt's *absence* can no longer prove the hand is dead.

@@ -36,6 +36,16 @@ public static class MenuScenarioPicker
 	/// factions from a script and blocks the game on a button only one peer can press, so it is single
 	/// player by construction — TutorialRuntime declines to start one at all when peers are attached.
 	/// Offering it in a lobby only produces a game whose scenario nobody chose to play that way.
+	///
+	/// Debug scenarios are dropped in a release export, both screens alike, and that is not a parameter
+	/// because no caller could sensibly answer it differently: a test fixture is not something a player
+	/// chooses. <see cref="GameContext.IsProductionBuild"/> rather than GameSettings.ShowDebugMenu —
+	/// the export decides this, not a setting a player can flip.
+	///
+	/// THIS IS A VIEW FILTER AND NOTHING MORE. AvailableScenarios still holds every scenario on every
+	/// build, the files all ship (export_filter is all_resources), and MultiplayerLobby.SyncScenarioSelection
+	/// resolves the host's choice against that full list — so a release client joining a host who picked
+	/// a debug scenario still loads and plays it, and only its own picker cannot offer one.
 	/// </summary>
 	public static void Populate(OptionButton picker, List<ScenarioInfo> scenarios, bool includeTutorials)
 	{
@@ -45,6 +55,7 @@ public static class MenuScenarioPicker
 		for (int i = 0; i < scenarios.Count; i++)
 		{
 			if (!includeTutorials && scenarios[i].IsTutorial) continue;
+			if (GameContext.IsProductionBuild && scenarios[i].IsDebug) continue;
 			picker.AddItem(scenarios[i].Title, i);
 		}
 	}

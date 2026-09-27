@@ -121,8 +121,20 @@ public partial class SkirmishScreen : Control
 
 		if (gameManager.SelectedScenario != null)
 		{
-			MenuScenarioPicker.SelectByPath(
+			// A selection this picker cannot show is a real case now that it filters debug scenarios in
+			// a release build: the static can still be pointing at one a client picked up from a debug
+			// host in the lobby. Falling back in the WIDGET alone would leave the two disagreeing and
+			// Start would play the scenario nobody was shown, so the static is moved too — the same
+			// fallback, and for the same reason, as MultiplayerLobby's.
+			bool shown = MenuScenarioPicker.SelectByPath(
 				_scenarioPicker, gameManager.AvailableScenarios, gameManager.SelectedScenario.Path);
+
+			if (!shown && _scenarioPicker.ItemCount > 0)
+			{
+				_scenarioPicker.Selected = 0;
+				gameManager.SetSelectedScenarioByIndex(MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, 0));
+			}
+
 			UpdateDescription(gameManager.SelectedScenario.Description);
 			_scriptedScenario = gameManager.SelectedScenario.IsTutorial;
 			_openingDiscardCheckBox.ButtonPressed = gameManager.SelectedScenario.OpeningDiscard;
@@ -290,9 +302,8 @@ public partial class SkirmishScreen : Control
 	private void OnScenarioSelected(long selectedIndex)
 	{
 		var gameManager = GetNode<GameManager>("/root/GameManager");
-		// The item's id, not its position — see MenuScenarioPicker. This picker happens not to filter,
-		// so the two agree today; asking for the id anyway is what keeps that a fact about the data
-		// rather than a coincidence nobody would notice breaking.
+		// The item's id, not its position — see MenuScenarioPicker. This picker keeps tutorials but
+		// still drops debug scenarios in a release build, so the two genuinely differ there.
 		int index = MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, (int)selectedIndex);
 		if (index < 0 || index >= gameManager.AvailableScenarios.Count)
 			return;
@@ -399,7 +410,8 @@ public partial class SkirmishScreen : Control
 		{
 			assignments.Add(new PlayerFactionAssignment(
 				PlayerFactionRegistry.AiSeatIdBase + i,
-				new List<Faction> { aiFactions[i] }));
+				new List<Faction> { aiFactions[i] },
+				IsAi: true));
 		}
 
 		return assignments;

@@ -94,6 +94,15 @@ public sealed class TutorialRuntime : ITurnProgram
             Current = runtime;
             runtime._displacedProvider = InputServices.Provider;
             InputServices.Override(new TutorialInputProvider(runtime, script));
+            // A reaction window merges the factions of one SEAT into a single prompt, and a tutorial
+            // holds all six on peer 1 — so without this the learner would share a prompt with the
+            // scripted factions on their own team, and TutorialInputProvider routes on TargetFaction:
+            // either the human would answer for the script's factions, or the script would answer the
+            // learner's reaction for them. Keeping the learner in a group of their own restores the
+            // one-prompt-one-decision-maker assumption the whole provider is built on.
+            InputServices.OverridePromptGroupKey(faction => (
+                PlayerFactionRegistry.GetPeerIdForFaction(faction),
+                faction == script.LearnerFaction));
             GameFlow.Instance.InstallProgram(runtime);
 
             DebugUtilities.PrintPeer($"Tutorial '{script.Title}' installed from {path}");
@@ -122,6 +131,7 @@ public sealed class TutorialRuntime : ITurnProgram
         _remaining.Clear();
 
         InputServices.Override(_displacedProvider);   // every seat goes back to whoever had it
+        InputServices.OverridePromptGroupKey(null);   // and reaction prompts back to merging by seat
         if (Current == this) Current = null;
 
         DebugUtilities.PrintPeerErrorRaw($"Tutorial ended: {reason}");
@@ -136,7 +146,11 @@ public sealed class TutorialRuntime : ITurnProgram
     /// </summary>
     public static void Reset()
     {
-        if (Current != null) InputServices.Override(Current._displacedProvider);
+        if (Current != null)
+        {
+            InputServices.Override(Current._displacedProvider);
+            InputServices.OverridePromptGroupKey(null);
+        }
         Current = null;
         PendingScriptPath = null;
     }

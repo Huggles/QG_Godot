@@ -49,7 +49,7 @@ public partial class FactionHandDisplay : Control
 
 	public override void _Ready()
 	{        
-		if(GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+		if(SessionIdentity.IsLocalAuthority(this))
 		{
 			Current = this;
 			LoadUI();          
@@ -89,20 +89,33 @@ public partial class FactionHandDisplay : Control
 		};
 	}
 
-	private void OnCardsDrawn(int faction, int numberOfCards)
-	{
-		if (showingFaction == (Faction)faction)
-		{
-			Show(showingFaction);
-		}
-	}
+	private void OnCardsDrawn(int faction, int numberOfCards) => RefreshFor((Faction)faction);
 
-	private void OnCardsDiscarded(int faction, int numberOfCards)
+	private void OnCardsDiscarded(int faction, int numberOfCards) => RefreshFor((Faction)faction);
+
+	/// <summary>
+	/// Re-draw the hand after cards moved, if this display is the one showing that faction.
+	///
+	/// An open card prompt owns this display, so it is redrawn as the PROMPT rather than as a plain
+	/// hand — Show(Faction) would replace an offer the player is in the middle of answering with an
+	/// unclickable copy of one faction's hand, and the request awaiting CardSelected would never be
+	/// released. The same claim OnTurnStepStarted respects.
+	/// </summary>
+	private void RefreshFor(Faction faction)
 	{
-		if (showingFaction == (Faction)faction)
+		// A hand pulled up from the bottom-left menu is claimed OVER a live prompt rather than instead
+		// of one, so browsing is checked first and keeps the behaviour it always had: refresh what is
+		// actually on the display.
+		bool browsing = HandBrowsing.IsActive;
+
+		if (!browsing && InputManager.CurrentCardPrompt != null)
 		{
-			Show(showingFaction);
+			if (InputManager.CurrentCardPrompt.Answering.Contains(faction))
+				InputManager.ShowCurrentCardPrompt();
+			return;
 		}
+
+		if (showingFaction == faction) Show(showingFaction);
 	}
 
 	private void OnGameSessionStarted()
@@ -136,10 +149,10 @@ public partial class FactionHandDisplay : Control
 		if (upcoming == Faction.NONE || upcoming == followedFaction) return;
 
 		// An open card prompt owns this display, and so does a hand pulled up from the bottom-left menu
-		// (which is claimed over a live request rather than instead of one, hence IsHeldBy rather than
-		// FactionFocus.Current). Deliberately not recorded as followed when skipped: the next step
-		// retries, so the display catches up as soon as it is free again.
-		if (InputManager.CurrentCardPrompt != null || FactionFocus.IsHeldBy(FactionFocusSource.Browsing))
+		// (claimed over a live request rather than instead of one, so browsing being set says nothing
+		// about whether a prompt is open underneath it). Deliberately not recorded as followed when
+		// skipped: the next step retries, so the display catches up as soon as it is free again.
+		if (InputManager.CurrentCardPrompt != null || HandBrowsing.IsActive)
 		{
 			return;
 		}
@@ -252,12 +265,23 @@ public partial class FactionHandDisplay : Control
 	/// A block or after-reaction prompt. Every selectable card in one gets the foil sweep — see
 	/// LayoutFan. Nothing to do with how the fan is laid out; it is purely which cue the prompt earns.
 	/// </param>
+	/// <param name="answeringFactions">
+	/// The factions a merged reaction prompt is asking, in the order they should appear. The fan is
+	/// sorted by owner within this order so each faction's cards sit together instead of interleaving by
+	/// card id — a player holding Germany, Japan and Italy answers all three in one prompt, and ten
+	/// cards shuffled by id is not something anyone can read.
+	///
+	/// Deliberately still ONE fan. LayoutFan positions by index off a single centre, and a fan per
+	/// faction would mean generalising the fan geometry and the right-edge clamp for N fans that would
+	/// overflow the screen anyway. Null (every prompt but a merged window) keeps the plain id sort.
+	/// </param>
 	public void Show(List<int> cardIds, Faction faction, List<int> selectableCardIds = null,
-		bool separateNonHandCards = false, bool isReactionWindow = false)
+		bool separateNonHandCards = false, bool isReactionWindow = false,
+		IReadOnlyList<Faction> answeringFactions = null)
 	{
 		showingFaction = faction;
 		ResetVisibility();
-		InitCards(cardIds, selectableCardIds, separateNonHandCards, isReactionWindow);
+		InitCards(cardIds, selectableCardIds, separateNonHandCards, isReactionWindow, answeringFactions);
 	}
 
 	private void ResetVisibility()
@@ -282,7 +306,8 @@ public partial class FactionHandDisplay : Control
 	}
 
 	private void InitCards(List<int> cardIds, List<int> selectableCardIds = null,
-		bool separateNonHandCards = false, bool isReactionWindow = false)
+		bool separateNonHandCards = false, bool isReactionWindow = false,
+		IReadOnlyList<Faction> answeringFactions = null)
 	{
 		// Only initialize cards if LoadUI has been called
 		DebugUtilities.PrintPeerFinest($"Initializing cards {string.Join(", ", cardIds)}");
@@ -313,8 +338,8 @@ public partial class FactionHandDisplay : Control
 			}
 		}
 
-		handIds.Sort();
-		sideIds.Sort();
+		SortForDisplay(handIds, answeringFactions);
+		SortForDisplay(sideIds, answeringFactions);
 
 		float containerWidth = ContainerWidth();
 		float containerCentreX = containerWidth * 0.5f;
@@ -340,6 +365,36 @@ public partial class FactionHandDisplay : Control
 			isReactionWindow);
 		LayoutFan(sideIds, selectableCardIds, miniCentreX, fanTopY, miniStepSize, MiniCardScale, handIds.Count,
 			isReactionWindow);
+	}
+
+	/// <summary>
+	/// Order a fan in place: by owning faction first when a merged prompt named several, then by card id
+	/// as it has always been. An owner outside <paramref name="answeringFactions"/> sorts last rather
+	/// than throwing — the display set can legitimately include a card the offer did not
+	/// (see CardPlayRound.ReactionWindowDisplayCardIds).
+	/// </summary>
+	private static void SortForDisplay(List<int> cardIds, IReadOnlyList<Faction> answeringFactions)
+	{
+		if (answeringFactions == null || answeringFactions.Count < 2)
+		{
+			cardIds.Sort();
+			return;
+		}
+
+		cardIds.Sort((left, right) =>
+		{
+			int byFaction = OwnerRank(left).CompareTo(OwnerRank(right));
+			return byFaction != 0 ? byFaction : left.CompareTo(right);
+		});
+
+		int OwnerRank(int cardId)
+		{
+			CardState card = CardState.ForId(cardId);
+			if (card == null) return answeringFactions.Count;
+			for (int i = 0; i < answeringFactions.Count; i++)
+				if (answeringFactions[i] == card.Faction) return i;
+			return answeringFactions.Count;
+		}
 	}
 
 	/// <summary>

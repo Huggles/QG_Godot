@@ -34,4 +34,15 @@ public class ScenarioInfo
     /// <summary>A scenario that names a tutorial script is a tutorial: single player only.</summary>
     [JsonIgnore]
     public bool IsTutorial => !string.IsNullOrEmpty(TutorialPath);
+
+    /// <summary>
+    /// A test fixture rather than a scenario anyone would choose to play — the debug and card-test
+    /// setups, and the one-round blitz. Absent means false, so the standard game and the tutorial
+    /// stay ordinary without having to say so.
+    ///
+    /// Carried here beside <see cref="IsTutorial"/> for whoever wants to keep these out of a player's
+    /// way; nothing filters on it yet.
+    /// </summary>
+    [JsonPropertyName("debug")]
+    public bool IsDebug { get; set; }
 }

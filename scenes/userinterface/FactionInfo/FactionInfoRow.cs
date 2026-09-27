@@ -18,6 +18,7 @@ public partial class FactionInfoRow : Control
 	private Button DiscardDeckButton => BackgroundPanel.GetNode<Button>("DiscardDeckButton");
 	private Label DeckCardNumber => DiscardDeckButton.GetNode<Label>("DeckCardNumber");
 	private Button PlayedCardsButton => BackgroundPanel.GetNode<Button>("PlayedCardsButton");
+	private Label PlayedCardNumber => PlayedCardsButton.GetNode<Label>("PlayedCardsNumber");
 	private RichTextLabel TurnSummariesRichText => DetailPanel.GetNode<RichTextLabel>("MarginContainer/TurnSummariesRichText");
 	private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
 	private TextureRect ArmyIcon => GetNode<TextureRect>("%ArmyIcon");
@@ -32,35 +33,43 @@ public partial class FactionInfoRow : Control
 	// Store event handlers for cleanup
 
 	public override void _Ready()
-	{   
-		EventBus.Instance.NewTurnStarted += OnNewTurnStarted; // Update modulation at the start of each turn to reflect current faction        
+	{
 		LoadUI();
-
 	}
 	public override void _ExitTree()
 	{
 		// Unsubscribe from events
 		if (EventBus.Instance != null)
 		{
-			EventBus.Instance.NewTurnStarted -= OnNewTurnStarted;
 			EventBus.Instance.FactionScoredPoints -= OnFactionScoredPoints;
 			EventBus.Instance.UnitDeployed -= OnUnitDeployed;
 			EventBus.Instance.UnitRemoved -= OnUnitRemoved;
 			EventBus.Instance.GameStateRecalculated -= SetUnitCounts;
-			EventBus.Instance.GameStateRecalculated -= SetDeckCardCount;
+			EventBus.Instance.GameStateRecalculated -= SetCardCounts;
 			EventBus.Instance.CardsDrawn -= OnCardsChanged;
 			EventBus.Instance.CardsDiscarded -= OnCardsChanged;
 			EventBus.Instance.ReactionSkipPreferenceChanged -= OnReactionSkipPreferenceChanged;
 			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
+			EventBus.Instance.GameChangeEventAfter -= OnGameChangeEventAfter;
 			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
 			FactionInfoButton.Pressed -= OnFactionInfoButtonPressed;
 			DiscardDeckButton.Pressed -= OnDiscardDeckButtonPressed;
 		}
 	}
 
-	private void OnNewTurnStarted(int turnNumber)
+	/// <summary>
+	/// The dim state below is derived from GameFlow.CurrentFaction, so it has to repaint wherever the
+	/// turn can move — and NOT on NewTurnStarted, which is where this used to hang: that is emitted
+	/// inside GameFlow.StartNewTurn, which only the host runs, so a joined client sat on the opening
+	/// faction's dimming for the whole game and a save restore never repainted at all. Same pair, and
+	/// same reasoning, as GameRoundLabel and TurnFactionTint.
+	/// </summary>
+	private void OnGameChangeEventAfter(string changeEventName)
 	{
 		SetModulation();
+		// Also the catch-all for the two card counters: a change event that declares RecalcScope.None
+		// never reaches GameStateRecalculated, and two label writes are cheap enough to do unconditionally.
+		SetCardCounts();
 	}
 
 	/**
@@ -105,13 +114,13 @@ public partial class FactionInfoRow : Control
 
 		SetScore(FactionState.Score);
 		SetUnitCounts();
-		SetDeckCardCount();
+		SetCardCounts();
 
 		EventBus.Instance.FactionScoredPoints += OnFactionScoredPoints;
 		EventBus.Instance.UnitDeployed += OnUnitDeployed;
 		EventBus.Instance.UnitRemoved += OnUnitRemoved;
 		EventBus.Instance.GameStateRecalculated += SetUnitCounts;
-		EventBus.Instance.GameStateRecalculated += SetDeckCardCount;
+		EventBus.Instance.GameStateRecalculated += SetCardCounts;
 		EventBus.Instance.CardsDrawn += OnCardsChanged;
 		EventBus.Instance.CardsDiscarded += OnCardsChanged;
 		EventBus.Instance.ReactionSkipPreferenceChanged += OnReactionSkipPreferenceChanged;
@@ -120,6 +129,7 @@ public partial class FactionInfoRow : Control
 		// peer, so it is the one turn-boundary signal a client can rely on — and it is exactly when a
 		// TURN_STEP arming expires and the toggle has to fall back to "always ask".
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
+		EventBus.Instance.GameChangeEventAfter += OnGameChangeEventAfter;
 		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		DiscardDeckButton.Pressed += OnDiscardDeckButtonPressed;
@@ -162,7 +172,7 @@ public partial class FactionInfoRow : Control
 	{
 		if ((Faction)faction == Faction)
 		{
-			SetDeckCardCount();
+			SetCardCounts();
 		}
 	}
 
@@ -172,12 +182,15 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>
-	/// A TURN_STEP or ROUND arming can expire without anyone touching the toggle, so repaint it at
-	/// every step boundary rather than only when the setting is changed.
+	/// A TURN_STEP or ROUND arming can expire without anyone touching the toggle, so repaint the
+	/// toggle at every step boundary rather than only when the setting is changed. The dimming rides
+	/// along because this is also the one turn-boundary signal that reaches a client after a save
+	/// restore, where the turn has already moved before any new event lands.
 	/// </summary>
 	private void OnNextStepStarted(int turnStep)
 	{
 		ReactionSkipToggleButton.Refresh();
+		SetModulation();
 	}
 
 	private void OnFactionInfoButtonPressed()
@@ -191,7 +204,7 @@ public partial class FactionInfoRow : Control
 		List<int> playedCardIds = [.. deckState.StatusCardIds, .. deckState.ResponseCardIds];
 		List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(playedCardIds, false);            
 		_ = ModalStack.Current.Show(
-			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Played Cards", presentationItems)
+			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Active Cards", presentationItems)
 				.WithDedupeKey($"played-cards:{Faction}"));
 	}
 	
@@ -218,7 +231,8 @@ public partial class FactionInfoRow : Control
 		{
 			Modulate = new Color(0.5f, 0.5f, 0.5f, 1f); // Dim the row for factions not controlled by the local player
 		}
-		if (GameFlow.Instance.CurrentFaction != Faction)
+		// Guarded because GameChangeEventAfter can now reach this before GameFlow exists on a peer.
+		if (GameFlow.Instance != null && GameFlow.Instance.CurrentFaction != Faction)
 		{
 			Modulate = new Color(Modulate.R - 0.2f, Modulate.G - 0.2f, Modulate.B - 0.2f,  Modulate.A); // Further dim the row if it's not the current faction's turn
 		}
@@ -243,16 +257,21 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>
-	/// Repaints the draw-deck counter — how many cards the faction has left to draw.
+	/// Repaints the draw-deck counter (cards left to draw) and the active-cards counter (status and
+	/// response cards currently on the table).
 	/// Reads state directly rather than tracking deltas: several paths change DeckCardIds without
 	/// emitting CardsDrawn/CardsDiscarded (DiscardTopCards, PlayCard, ShuffleDeck, RecycleCardChangeEvent,
 	/// and a client applying a snapshot), so the card signals alone would drift out of sync.
 	/// </summary>
-	private void SetDeckCardCount()
+	private void SetCardCounts()
 	{
 		// FactionState.ForEnum returns null before the game state exists — same guard as UnitPool.AvailableUnitCount.
 		DeckState deckState = FactionState?.DeckState;
 		DeckCardNumber.Text = (deckState?.DeckCardIds.Count ?? 0).ToString();
+		// Active cards are the status and response cards still lying on the table — the same two piles
+		// the Active Cards modal lists, so the counter can never disagree with what the button opens.
+		int activeCardCount = (deckState?.StatusCardIds.Count ?? 0) + (deckState?.ResponseCardIds.Count ?? 0);
+		PlayedCardNumber.Text = activeCardCount.ToString();
 	}
 
 	private void SetUnitCount(Label label, int count)

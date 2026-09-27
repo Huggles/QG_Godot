@@ -1,8 +1,8 @@
 using Godot;
 
 /// <summary>
-/// The Gameplay tab of <see cref="SettingsDialog"/>: presentation speed, debug verbosity, and
-/// whether display-only modals dismiss themselves.
+/// The Gameplay tab of <see cref="SettingsDialog"/>: presentation speed, debug verbosity, whether
+/// display-only modals dismiss themselves, and whether the hand-play fan shows the active table cards.
 ///
 /// These three used to be loose <c>PanelContainer</c>s pinned to the top-left of
 /// <c>user_interface.tscn</c> — permanent HUD clutter for settings that get changed once and then
@@ -18,6 +18,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
     private OptionButton _speed;
     private OptionButton _debugLevel;
     private CheckButton  _autoDismiss;
+    private CheckButton  _activeCards;
 
     public override void _Ready() => Guard.Try(ReadyInternal, "GameplaySettingsPanel._Ready");
 
@@ -26,6 +27,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _speed       = GetNode<OptionButton>("%SpeedOption");
         _debugLevel  = GetNode<OptionButton>("%DebugLevelOption");
         _autoDismiss = GetNode<CheckButton>("%AutoDismissToggle");
+        _activeCards = GetNode<CheckButton>("%ActiveCardsToggle");
 
         // The picker entries are authored in the scene, and their *ids* — not their row order — are
         // the enum values the handlers below read back. Same guard as VideoSettingsPanel applies to
@@ -38,6 +40,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _speed.Selected            = (int)settings.PresentationSpeed;
         _debugLevel.Selected       = (int)settings.DebugLevel;
         _autoDismiss.ButtonPressed = settings.AutoDismissModal;
+        _activeCards.ButtonPressed = settings.ShowActiveCardsInFan;
 
         // Wired after seeding: assigning Selected/ButtonPressed would otherwise write the value
         // straight back out again on open.
@@ -47,6 +50,14 @@ public partial class GameplaySettingsPanel : VBoxContainer
             GameSettings.Instance.SetDebugLevel((DebugVerbosity)_debugLevel.GetItemId((int)index));
         _autoDismiss.Toggled += value =>
             GameSettings.Instance.SetAutoDismissModal(value);
+        _activeCards.Toggled += value =>
+        {
+            GameSettings.Instance.SetShowActiveCardsInFan(value);
+            // The fan is drawn behind this dialog, so a prompt already open has to be re-drawn or the
+            // toggle looks dead until the next one. Skipped while browsing another faction's hand —
+            // re-drawing there would take the display off the browse without ending it.
+            if (!HandBrowsing.IsActive) InputManager.ShowCurrentCardPrompt();
+        };
     }
 
     private static void AssertIdsMatchOrder(OptionButton option, string optionName)

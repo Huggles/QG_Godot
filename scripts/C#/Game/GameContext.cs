@@ -18,6 +18,7 @@ public static class GameContext
     private static bool? _isHeadless;
     private static bool? _isCli;
     private static bool? _isDedicatedServer;
+    private static bool? _isProductionBuild;
 
     /// <summary>
     /// True when running without a window, rendering, audio, or UI. Detected once (cached) from
@@ -69,6 +70,23 @@ public static class GameContext
                                    && (OS.GetCmdlineUserArgs().Contains("dedicated_server=true")
                                        || DisplayServer.GetName() == "headless");
             return _isDedicatedServer.Value;
+        }
+    }
+
+    /// <summary>
+    /// True only in a release export — the build a tester actually receives. False in the editor and
+    /// in a debug export, so anything aimed at players (the startup disclaimer) can be skipped while
+    /// developing without disappearing from the shipped build.
+    ///
+    /// <c>template_release</c> rather than <c>!OS.IsDebugBuild()</c>, which is also true for the
+    /// release build of the editor this project runs in.
+    /// </summary>
+    public static bool IsProductionBuild
+    {
+        get
+        {
+            _isProductionBuild ??= OS.HasFeature("template_release");
+            return _isProductionBuild.Value;
         }
     }
 

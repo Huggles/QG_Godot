@@ -207,6 +207,12 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_steam.LeaderboardScoreUploadedSignal    += OnLeaderboardScoreUploaded;
 		_steam.PersonaStateChangeSignal          += OnPersonaStateChange;
 
+		// Both stat signals, because GodotSteam auto-init may already have asked for the player's stats
+		// before this class existed — whichever one still arrives marks them loaded.
+		_steam.CurrentStatsReceivedSignal  += OnStatsReceived;
+		_steam.UserStatsReceivedSignal     += OnStatsReceived;
+		_steam.UserAchievementStoredSignal += OnUserAchievementStored;
+
 		// Peer support is logged separately because it fails independently of Steam itself: the plain
 		// GodotSteam build initialises fine but ships no SteamMultiplayerPeer, and an export built
 		// against it would otherwise only reveal that on the first host attempt.
@@ -224,13 +230,20 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	{
 		if (!_available) return;
 		_steam.RunCallbacks();
+
+		// Batched here rather than per unlock: Steam asks that StoreStats not be called per event.
+		if (_storeQueued) FlushStats();
 	}
 
 	public override void _Notification(int what)
 	{
 		// Releasing the lobby on the way out stops a stale entry lingering in friends' lists.
 		if (what == NotificationWMCloseRequest || what == NotificationPredelete)
+		{
+			// An unlock earned on the closing frame would otherwise never reach Steam.
+			if (_available && _storeQueued) Guard.Try(FlushStats, "SteamworksApi.FlushStats");
 			Guard.Try(LeaveCurrentLobby, "SteamworksApi.Shutdown");
+		}
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -320,6 +333,22 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		}
 
 		return (false, DescribeEnterResponse(response));
+	}
+
+	/// <summary>
+	/// Tear down the SteamNetworkingMessages session with one peer.
+	///
+	/// Closing the Godot MultiplayerPeer does NOT do this: the Steam-level session between the two
+	/// users survives, and with it the previous connection's peer identity, which a later session
+	/// between the same two users then inherits. That is how a re-host handed a client a peer id its
+	/// own peer disagreed with. Called from SceneFlow on the way out; see SteamPeerFactory.ReleaseSession.
+	/// </summary>
+	public void CloseNetworkingSessionWith(long remoteSteamId)
+	{
+		if (!_available || remoteSteamId == 0) return;
+
+		DebugUtilities.PrintPeerFinest($"Steam: closing networking session with {remoteSteamId}");
+		_steam.CloseSessionWithUser(remoteSteamId);
 	}
 
 	public void LeaveCurrentLobby()
@@ -817,6 +846,175 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		return rows;
 	}
 
+	// ══════════════════════════════════════════════════════════════════════════
+	// Achievements
+	// ══════════════════════════════════════════════════════════════════════════
+
+	/// <summary>Raised once an unlock has been accepted by Steam, for an in-game toast.</summary>
+	public event Action<SteamAchievement> AchievementUnlocked;
+
+	private readonly HashSet<string>         _unlockedApiNames = new();
+	private readonly List<SteamAchievement>  _deferredUnlocks  = new();
+	private bool _statsReady;
+	private bool _storeQueued;
+
+	/// <summary>
+	/// Whether the player's stats and achievements have arrived. The live probe backs up the signal:
+	/// with GodotSteam's auto-init the request can complete before this class subscribes, and a schema
+	/// only reads back non-empty once the stats are loaded.
+	/// </summary>
+	private bool StatsLoaded => _statsReady || (_available && _steam.GetNumAchievements() > 0);
+
+	/// <summary>
+	/// Award <paramref name="achievement"/> to the local player. Safe to call from anywhere and as often
+	/// as you like — no Steam, wrong peer, or already unlocked all end as a silent no-op.
+	/// </summary>
+	public static void Unlock(SteamAchievement achievement) => Instance?.UnlockInternal(achievement);
+
+	/// <summary>Whether the local player already holds <paramref name="achievement"/>.</summary>
+	public static bool IsUnlocked(SteamAchievement achievement)
+		=> Instance is { _available: true } api
+		   && achievement != null
+		   && (api._unlockedApiNames.Contains(achievement.ApiName) || api.AchievedOnSteam(achievement.ApiName));
+
+	/// <summary>
+	/// Record absolute progress toward a progressive achievement, unlocking it on reaching its target.
+	/// <paramref name="announce"/> pops Steam's "37 / 100" notification, so pass it only at milestones.
+	/// </summary>
+	public static void RecordProgress(SteamAchievement achievement, int current, bool announce = false)
+		=> Instance?.RecordProgressInternal(achievement, current, announce);
+
+	/// <summary>
+	/// Add to a progressive achievement's stat. Refuses while the stats are unread rather than counting
+	/// up from a zero Steam never confirmed, which would silently restart the player's progress.
+	/// </summary>
+	public static void AddProgress(SteamAchievement achievement, int amount = 1, bool announce = false)
+	{
+		if (Instance is not { _available: true } api || achievement?.IsProgressive != true) return;
+
+		if (!api.StatsLoaded)
+		{
+			DebugUtilities.PrintPeerError($"Steam: cannot add to '{achievement.ApiName}' before stats load");
+			return;
+		}
+
+		api.RecordProgressInternal(achievement, api.ProgressOf(achievement) + amount, announce);
+	}
+
+	/// <summary>Progress recorded so far, or 0 when Steam has nothing for this player yet.</summary>
+	public int ProgressOf(SteamAchievement achievement)
+		=> _available && achievement?.IsProgressive == true ? (int)_steam.GetStatInt(achievement.ProgressStat) : 0;
+
+	/// <summary>
+	/// The game's achievements, registered at startup. The only thing this class knows about them, and
+	/// only so <see cref="LogUnknownAchievements"/> has something to check — leave it unset and every
+	/// unlock still works.
+	/// </summary>
+	public static IReadOnlyList<SteamAchievement> Catalog { get; set; } = Array.Empty<SteamAchievement>();
+
+	/// <summary>
+	/// Logs every <see cref="Catalog"/> entry Steamworks does not know about. Names are only ever checked
+	/// at runtime, so without this a typo shows up as an achievement that quietly never unlocks.
+	/// </summary>
+	public void LogUnknownAchievements()
+	{
+		if (!_available || !StatsLoaded) return;
+
+		var configured = new HashSet<string>();
+		long count = _steam.GetNumAchievements();
+		for (long i = 0; i < count; i++) configured.Add(_steam.GetAchievementName(i));
+
+		foreach (SteamAchievement achievement in Catalog)
+			if (!configured.Contains(achievement.ApiName))
+				DebugUtilities.PrintPeerError($"Steam: '{achievement.ApiName}' is not configured in Steamworks");
+	}
+
+	/// <summary>Development only: wipes every achievement and stat the local player has on this app.</summary>
+	public void ResetAllAchievements()
+	{
+		if (!_available || GameContext.IsProductionBuild) return;
+
+		_unlockedApiNames.Clear();
+		_deferredUnlocks.Clear();
+		_steam.ResetAllStats(true);
+		_storeQueued = true;
+		DebugUtilities.PrintPeer("Steam: all achievements and stats reset");
+	}
+
+	private void UnlockInternal(SteamAchievement achievement)
+	{
+		if (achievement == null || !_available || !MayAward(achievement)) return;
+		if (_unlockedApiNames.Contains(achievement.ApiName)) return;
+
+		// Already earned on a previous run: remember it, but do not re-store and re-toast it.
+		if (AchievedOnSteam(achievement.ApiName))
+		{
+			_unlockedApiNames.Add(achievement.ApiName);
+			return;
+		}
+
+		if (!_steam.SetAchievement(achievement.ApiName))
+		{
+			// Almost always "stats not loaded yet"; a name missing from Steamworks fails the same way.
+			if (!_deferredUnlocks.Contains(achievement)) _deferredUnlocks.Add(achievement);
+			DebugUtilities.PrintPeerFinest($"Steam: '{achievement.ApiName}' refused, deferred until stats load");
+			return;
+		}
+
+		_unlockedApiNames.Add(achievement.ApiName);
+		_storeQueued = true;
+		DebugUtilities.PrintPeer($"Steam: unlocked achievement '{achievement.ApiName}'");
+		AchievementUnlocked?.Invoke(achievement);
+	}
+
+	private void RecordProgressInternal(SteamAchievement achievement, int current, bool announce)
+	{
+		if (achievement == null || !_available || !MayAward(achievement)) return;
+		if (_unlockedApiNames.Contains(achievement.ApiName)) return;
+
+		if (!achievement.IsProgressive)
+		{
+			DebugUtilities.PrintPeerError($"Steam: '{achievement.ApiName}' has no progress stat to record against");
+			return;
+		}
+
+		if (_steam.SetStatInt(achievement.ProgressStat, current)) _storeQueued = true;
+
+		if (current >= achievement.ProgressTarget) UnlockInternal(achievement);
+		else if (announce) _steam.IndicateAchievementProgress(achievement.ApiName, current, achievement.ProgressTarget);
+	}
+
+	/// <summary>
+	/// A <see cref="AchievementScope.Server"/> achievement is only ever awarded on the authoritative
+	/// peer, so a client that happens to observe the same state cannot hand it to itself. A null peer
+	/// means menu or solo play, which is authoritative.
+	/// </summary>
+	private static bool MayAward(SteamAchievement achievement)
+	{
+		if (achievement.Scope == AchievementScope.Client) return true;
+
+		MultiplayerApi multiplayer = MultiplayerSession.Instance?.Multiplayer;
+		if (multiplayer?.MultiplayerPeer == null || multiplayer.IsServer()) return true;
+
+		DebugUtilities.PrintPeerFinest($"Steam: '{achievement.ApiName}' is server-scoped; this peer is a client");
+		return false;
+	}
+
+	/// <summary>Reads through to Steam: a false "ret" means the stats are unread, not that it is locked.</summary>
+	private bool AchievedOnSteam(string apiName)
+	{
+		Godot.Collections.Dictionary result = _steam.GetAchievement(apiName);
+		return result != null && result.TryGetValue("achieved", out Variant achieved) && achieved.AsBool();
+	}
+
+	/// <summary>Commits queued unlocks and stat writes in one call.</summary>
+	private void FlushStats()
+	{
+		_storeQueued = false;
+		if (!_steam.StoreStats())
+			DebugUtilities.PrintPeerError("Steam: storeStats failed; unlocks stay local until the next one succeeds");
+	}
+
 	/// <summary>Users already asked about, so a name is only ever requested from Steam once.</summary>
 	private readonly HashSet<ulong> _requestedNames = new();
 
@@ -946,6 +1144,34 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_requestedNames.Remove((ulong)steamId);
 		UserInfoUpdated?.Invoke((ulong)steamId);
 	}
+
+	/// <summary>
+	/// The local player's stats have landed, which is the point every unlock refused so far becomes
+	/// possible. Fires for other users too once <c>RequestUserStats</c> is ever used, hence the id check.
+	/// </summary>
+	private void OnStatsReceived(long gameId, long result, long userId)
+	{
+		if ((ulong)userId != LocalSteamId) return;
+
+		if (result != (long)Steam.Result.Ok)
+		{
+			DebugUtilities.PrintPeerError($"Steam: stats could not be loaded (result {result}); no achievement can unlock");
+			return;
+		}
+
+		_statsReady = true;
+		if (!GameContext.IsProductionBuild) LogUnknownAchievements();
+
+		if (_deferredUnlocks.Count == 0) return;
+
+		// Copied first: UnlockInternal appends back onto the list when Steam refuses again.
+		var retry = new List<SteamAchievement>(_deferredUnlocks);
+		_deferredUnlocks.Clear();
+		foreach (SteamAchievement achievement in retry) UnlockInternal(achievement);
+	}
+
+	private void OnUserAchievementStored(long gameId, bool groupAchieve, string achievementName, long currentProgress, long maxProgress)
+		=> DebugUtilities.PrintPeerFinest($"Steam: '{achievementName}' stored ({currentProgress}/{maxProgress})");
 
 	// ══════════════════════════════════════════════════════════════════════════
 	// Helpers

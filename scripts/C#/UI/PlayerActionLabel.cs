@@ -18,12 +18,12 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	private MenuPanel MenuPanel => GetNode<MenuPanel>("%MenuPanel");
 
 	/// <summary>
-	/// The plate behind the banner text. Tinted with whatever the client is busy with, so the banner
-	/// says whose prompt it is by colour as well as by wording — see <see cref="FactionFocusTint"/>.
+	/// The plate behind the banner text. Tinted with the faction on turn, so the banner
+	/// says who the game is on by colour as well as by wording — see <see cref="TurnFactionTint"/>.
 	/// </summary>
 	private Control BackgroundPanel => GetNode<Control>("%MenuPanel/BackgroundContainer/Panel");
 
-	private FactionFocusTint _focusTint;
+	private TurnFactionTint _turnTint;
 
 	/// <summary>
 	/// The size the banner was authored at, read off the scene before anything overrides it. Every fit
@@ -57,8 +57,8 @@ public partial class PlayerActionLabel : Label, LoadableUI
 		// again on every resize is what makes that case, and a later window resize, come out right.
 		Resized += FitTextToBox;
 
-		_focusTint = new FactionFocusTint(BackgroundPanel);
-		_focusTint.Attach();
+		_turnTint = new TurnFactionTint(BackgroundPanel);
+		_turnTint.Attach();
 
 		// Hide by default until LoadUI is called
 		Visible = false;
@@ -70,8 +70,12 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	/// </summary>
 	public override void _ExitTree()
 	{
-		_focusTint?.Detach();
-		_focusTint = null;
+		_turnTint?.Detach();
+		_turnTint = null;
+
+		// Same release as ModalStack.Current. Without it the static outlives the HUD it points at, and
+		// the null guards on ShowText/HideText would wave a freed node through into ObjectDisposedException.
+		if (Instance == this) Instance = null;
 	}
 
 	public void LoadUI()
@@ -84,8 +88,13 @@ public partial class PlayerActionLabel : Label, LoadableUI
 		ShowText(text, -1, faction);
 
 	}
-	public static void ShowText(string text, int duration, Faction faction = (Faction)(-1)){        
-		Instance.ShowTextForDuration(text, duration, faction);
+	/// <summary>
+	/// Null-conditional like <c>InputTimerDisplay.Current?</c>: the banner is cosmetic, and every caller
+	/// is on the logic path, so a peer whose HUD is not up yet must lose the caption rather than the
+	/// prompt behind it.
+	/// </summary>
+	public static void ShowText(string text, int duration, Faction faction = (Faction)(-1)){
+		Instance?.ShowTextForDuration(text, duration, faction);
 	}
 
 	public void ShowTextForDuration(string text, int duration = -1, Faction faction = (Faction)(-1))
@@ -168,9 +177,11 @@ public partial class PlayerActionLabel : Label, LoadableUI
 		}
 	}
 
+	/// <summary>Guarded like <see cref="ShowText(string, int, Faction)"/> — every client runs this off the
+	/// input-response path, whether or not its HUD is up.</summary>
 	public static void HideText()
 	{
-		Instance.HideNode();
+		Instance?.HideNode();
 	}
 	public void HideNode()
 	{

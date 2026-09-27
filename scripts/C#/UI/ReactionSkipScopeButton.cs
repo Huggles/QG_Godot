@@ -44,7 +44,7 @@ public partial class ReactionSkipScopeButton : MenuPanelButton
             ? "Stop showing me empty reaction windows. You will still be asked the moment any of your cards can actually react."
             : "Stop asking me for reactions. You will still be asked when you have a face-up card that can react.";
 
-        if (GetMultiplayerAuthority() == Multiplayer.GetUniqueId())
+        if (SessionIdentity.IsLocalAuthority(this))
         {
             Local.Add(this);
         }

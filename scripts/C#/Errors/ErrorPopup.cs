@@ -464,17 +464,13 @@ public partial class ErrorPopup : CanvasLayer
     {
         Dismiss();
         ErrorReporter.Instance?.AbandonPendingStall();   // leaving the game; resuming is moot
-        ErrorReporter.IsShuttingDown = true;
 
-        // Leave any multiplayer session cleanly so a fresh game can be hosted/joined — same
-        // teardown as VictoryScreen.OnMainMenuPressed. Deferred because the click arrives during
-        // signal processing.
-        if (Multiplayer.MultiplayerPeer != null)
-            Multiplayer.MultiplayerPeer = null;
-        // This path deliberately bypasses SceneFlow, so the Steam lobby release SceneFlow does for
-        // leaveSession has to be repeated here. No-op unless the session was Steam-hosted.
-        SteamworksApi.Instance?.LeaveCurrentLobby();
-        GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/menu/MainMenu.tscn");
+        // Through SceneFlow, not by hand. This path used to null the peer without closing it (the exact
+        // failure SceneFlow documents: the socket stays bound and the next host attempt fails) and
+        // skipped every other release — the abandon bump, the pending awaiters, the buffered barrier
+        // reports, the tutorial and AI runtimes. Quitting from an error popup is leaving a session like
+        // any other, so it gets the same teardown. IsShuttingDown and the deferral are SceneFlow's too.
+        SceneFlow.ChangeScene(this, "res://scenes/menu/MainMenu.tscn", leaveSession: true);
     }
 
     private void Dismiss()

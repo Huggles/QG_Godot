@@ -5,7 +5,10 @@ using System.Collections.Generic;
 /// received it. Held by <see cref="InputManager.CurrentCardPrompt"/> so the prompt can be re-drawn
 /// after the player has browsed something else on the hand display.
 /// </summary>
-/// <param name="Faction">The faction being asked to choose.</param>
+/// <param name="Faction">
+/// The faction being asked to choose, and on a merged prompt the representative of the group — the one
+/// whose tint and recall the prompt uses. See <paramref name="AnsweringFactions"/>.
+/// </param>
 /// <param name="DisplayCardIds">Everything the prompt draws, including the greyed-out cards.</param>
 /// <param name="SelectableCardIds">
 /// The subset that may actually be clicked. Only the host can compute this — see the remarks on
@@ -49,6 +52,20 @@ using System.Collections.Generic;
 /// third thing for every caller to thread through — the same reasoning that makes
 /// <see cref="TargetSet"/> a list of <see cref="TargetRef"/> instead of a field per kind.
 /// </param>
+/// <param name="AnsweringFactions">
+/// Every faction this prompt answers for — more than one when a player holds several factions of the
+/// reacting team and the host merged their reaction windows (see
+/// <see cref="InputRequest.AnsweringFactions"/>). Never null once the record is built: the constructor
+/// call falls back to <paramref name="Faction"/> alone.
+///
+/// What it is read for: ordering the fan so each owner's cards sit together, naming the factions in
+/// the banner, arming every one of them when a scoped skip is pressed, and letting the bottom-left
+/// menu recognise a click on ANY of their card backs as a recall of this prompt rather than a browse
+/// over the top of it.
+///
+/// Read through <see cref="ActiveCardPrompt.Answering"/>, which falls back to
+/// <paramref name="Faction"/> alone, so no caller has to handle a null or a single-faction prompt.
+/// </param>
 public sealed record ActiveCardPrompt(
     Faction Faction,
     List<int> DisplayCardIds,
@@ -56,4 +73,14 @@ public sealed record ActiveCardPrompt(
     bool SeparateNonHandCards = false,
     bool IsHandPlay = false,
     bool IsReactionWindow = false,
-    Dictionary<int, InputRequest.CardTargetPreview> PreviewsByCardId = null);
+    Dictionary<int, InputRequest.CardTargetPreview> PreviewsByCardId = null,
+    IReadOnlyList<Faction> AnsweringFactions = null)
+{
+    /// <summary>
+    /// The factions this prompt answers for, always non-empty — <see cref="AnsweringFactions"/> when the
+    /// host merged a group, otherwise just <see cref="Faction"/>. The mirror of
+    /// <see cref="InputRequest.Answering"/> on the client side of the wire.
+    /// </summary>
+    public IReadOnlyList<Faction> Answering =>
+        AnsweringFactions is { Count: > 0 } ? AnsweringFactions : new List<Faction> { Faction };
+}

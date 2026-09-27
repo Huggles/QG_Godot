@@ -79,6 +79,8 @@ public partial class NetworkApi : Node
             // instead. Both set before AddChild so they are in place when _Ready runs.
             player.PlayerName  = $"Player_{peerId}";
             player.DisplayName = assignment.DisplayName;
+            // Before AddChild with the rest: the registry reads it the moment the seat is registered.
+            player.IsAiSeat    = assignment.IsAi;
 
             if (Multiplayer.IsServer())
             {
@@ -343,7 +345,8 @@ public partial class NetworkApi : Node
             .Select(pending => new PendingPrompt
             {
                 Kind = PendingPrompt.KindOf(pending.Request),
-                Faction = pending.Request.TargetFaction
+                Faction = pending.Request.TargetFaction,
+                Factions = pending.Request.Answering.ToList()
             })
             .ToList();
 
@@ -360,6 +363,11 @@ public partial class NetworkApi : Node
     public async Task<InputRequest> SendInputRequest(InputRequest inputRequest, CancellationToken withdrawToken = default)
     {
         DebugUtilities.PrintPeer($"[color={"purple"}]SendInputRequest: {inputRequest.GetType().Name}");
+
+        // Captured once, up front, and re-checked on every attempt below. This autoload outlives the
+        // game scene, so a request started by a session the player has since left would otherwise park
+        // here on the 15-minute backstop and then fire at whoever happens to be connected NEXT.
+        int sessionGeneration = ErrorReporter.SessionGeneration;
 
         // Stamp the legal move set onto the request before it goes on the wire, so it is
         // self-describing to a scripted/CLI peer. Here rather than in InputRequest.BroadCast because
@@ -414,6 +422,11 @@ public partial class NetworkApi : Node
         // already removed a unit would remove a second one.
         while (true)
         {
+            // Inside the loop, not above it: the Retry decision at the bottom `continue`s back to here,
+            // so a host that clicked Retry a frame before quitting would otherwise re-register a fresh
+            // pending entry pointed at a peer that no longer exists.
+            ErrorReporter.ThrowIfSessionAbandoned(sessionGeneration);
+
             // A fresh Id per attempt. Aborting the previous attempt makes the client's handler complete
             // as skipped and reply; that reply carries the OLD Id, so ReceiveInputResponse's staleness
             // check drops it instead of instantly resolving the retry we are about to open.
@@ -476,7 +489,7 @@ public partial class NetworkApi : Node
                 ClearPendingInput(pendingId, pending);
                 if (pending.Peer != 0 || Multiplayer?.MultiplayerPeer == null)
                     AbortRemoteInput(pending.Peer);
-                AnnounceInputClosed(inputRequest.TargetFaction);
+                AnnounceInputClosed(inputRequest);
 
                 inputRequest.WasSkipped = true;
                 return inputRequest;
@@ -498,7 +511,7 @@ public partial class NetworkApi : Node
             // deciding, not just the one that timed out.
             ClearPendingInput(pendingId, pending);
             AbortRemoteInput(pending.Peer);
-            AnnounceInputClosed(inputRequest.TargetFaction);
+            AnnounceInputClosed(inputRequest);
             GameFlow.Instance?.ClearCurrentInputRequest();
 
             if (await ErrorReporter.ReportInputTimeoutAndAwaitDecision(inputRequest, wasForced)) continue;
@@ -569,7 +582,7 @@ public partial class NetworkApi : Node
         {
             skipped.WasSkipped = true;
             tcs.TrySetResult(skipped.ToJson());
-            AnnounceInputClosed(skipped.TargetFaction);
+            AnnounceInputClosed(skipped);
         }
         else
         {
@@ -650,16 +663,27 @@ public partial class NetworkApi : Node
     /// the same condition answered locally.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void InputRequestAnswered(int faction)
+    public void InputRequestAnswered(int[] factions)
     {
-        InputRequest.MarkInputClosed((Faction)faction);
+        InputRequest.MarkInputClosed(factions.Select(faction => (Faction)faction).ToList());
     }
 
-    /// <summary>Host-side helper: tell every peer that this faction's prompt is no longer open.</summary>
-    private void AnnounceInputClosed(Faction faction)
+    /// <summary>
+    /// Host-side helper: tell every peer that this prompt is no longer open.
+    ///
+    /// Every faction the prompt answered for, not just its representative. One prompt can answer for a
+    /// whole seat's share of a reacting team (<see cref="InputRequest.AnsweringFactions"/>), and a
+    /// faction left behind in the watchers' set pins a "Waiting on …" line and a live countdown on
+    /// every other player's screen for the rest of the game — MarkInputClosed only hides the timer once
+    /// the set empties.
+    /// </summary>
+    private void AnnounceInputClosed(InputRequest request)
     {
-        if (Multiplayer?.MultiplayerPeer != null) Rpc(nameof(InputRequestAnswered), (int)faction);
-        else InputRequestAnswered((int)faction);   // single process: no wire, but the label is still ours
+        if (request == null) return;
+        int[] factions = request.Answering.Select(faction => (int)faction).ToArray();
+
+        if (Multiplayer?.MultiplayerPeer != null) Rpc(nameof(InputRequestAnswered), factions);
+        else InputRequestAnswered(factions);   // single process: no wire, but the label is still ours
     }
 
     // ── Error propagation ────────────────────────────────────────────────────
@@ -791,7 +815,7 @@ public partial class NetworkApi : Node
             // purpose: announcing a stale reply would drop a faction whose retry is already in progress.
             // Each peer hides its own countdown once its list empties, so the first player to answer a
             // concurrent team turn still does not blank the countdown of everyone else choosing.
-            AnnounceInputClosed(pending.Request?.TargetFaction ?? response.TargetFaction);
+            AnnounceInputClosed(pending.Request ?? response);
 
             pending.Tcs.TrySetResult(dtoJson);
 
