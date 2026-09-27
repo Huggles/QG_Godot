@@ -11,12 +11,23 @@
 		{
 			"FileMapping"
 			{
-				"LocalPath" "*"
+				"LocalPath" "windows/*"
 				"DepotPath" "."
 				"recursive" "1"
 			}
 			"FileExclusion" "*.console.exe"
 			"FileExclusion" "*.zip"
+		}
+		"5159092"
+		{
+			"FileMapping"
+			{
+				"LocalPath" "macOS/*"
+				"DepotPath" "."
+				"recursive" "1"
+			}
+			"FileExclusion" "*.zip"
+			"FileExclusion" ".DS_Store"
 		}
 	}
 }
