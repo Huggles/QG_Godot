@@ -16,7 +16,9 @@ public sealed record SimJob(
     double BotDiscard,
     double BotHollow,
     string BotRules,
-    string BotProfile)
+    string BotProfile,
+    string BotRulesFor = "",
+    string BotRulesOther = "")
 {
     /// <summary>Stable, filesystem-safe identity. Also the sort key that makes a run diffable.</summary>
     public string Id => $"{Scenario}_s{Seed}_d{DecisionSeed}";
@@ -42,6 +44,9 @@ public sealed record SimJob(
         // Conditional, unlike the probabilities: an empty bot_rules= is a value the game would have to
         // interpret, and "absent means the registry defaults" is the cleaner contract.
         if (!string.IsNullOrWhiteSpace(BotRules)) yield return $"bot_rules={BotRules}";
+        // Which factions bot_rules applies to; absent means all of them. The rest play the defaults.
+        if (!string.IsNullOrWhiteSpace(BotRulesFor)) yield return $"bot_rules_for={BotRulesFor}";
+        if (!string.IsNullOrWhiteSpace(BotRulesOther)) yield return $"bot_rules_other={BotRulesOther}";
         // Same contract as bot_rules: absent means the game applies its own default, which for the
         // profile is "no agent at all".
         if (!string.IsNullOrWhiteSpace(BotProfile)) yield return $"bot_profile={BotProfile}";

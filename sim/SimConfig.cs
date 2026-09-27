@@ -36,6 +36,16 @@ public sealed class SimConfig
     public string BotRules { get; private set; } = "";
 
     /// <summary>
+    /// Which factions <see cref="BotRules"/> applies to, passed through to <c>bot_rules_for=</c>: a team
+    /// (AXIS, ALLIES) or a comma list of factions. Empty means all six. The others play the defaults,
+    /// which is how one side is measured against the other.
+    /// </summary>
+    public string BotRulesFor { get; private set; } = "";
+
+    /// <summary>What the factions outside <see cref="BotRulesFor"/> play, passed to <c>bot_rules_other=</c>. Empty means the defaults.</summary>
+    public string BotRulesOther { get; private set; } = "";
+
+    /// <summary>
     /// Which goal profile the bot runs, passed through verbatim to <c>bot_profile=</c>. Empty means the
     /// game default, which is no agent at all.
     /// </summary>
@@ -91,7 +101,7 @@ public sealed class SimConfig
         foreach (string scenario in Scenarios)
             foreach (int seed in Seeds)
                 foreach (int decisionSeed in DecisionSeeds)
-                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules, BotProfile));
+                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules, BotProfile, BotRulesFor, BotRulesOther));
         return jobs;
     }
 
@@ -125,6 +135,8 @@ public sealed class SimConfig
                     case "--bot-discard": c.BotDiscard = ParseProbability(Next(arg), arg); break;
                     case "--bot-hollow": c.BotHollow = ParseProbability(Next(arg), arg); break;
                     case "--bot-rules": c.BotRules = Next(arg); break;
+                    case "--bot-rules-for": c.BotRulesFor = Next(arg); break;
+                    case "--bot-rules-other": c.BotRulesOther = Next(arg); break;
                     case "--bot-profile": c.BotProfile = Next(arg); break;
                     case "--workers" or "-j": workers = int.Parse(Next(arg)); break;
                     case "--timeout": c.JobTimeout = TimeSpan.FromSeconds(double.Parse(Next(arg),
@@ -226,6 +238,8 @@ public sealed class SimConfig
               --bot-discard 0..1       chance to take the optional end-of-turn discard (default 0)
               --bot-hollow 0..1        chance to play a card the board has made pointless (default 0)
               --bot-rules LIST         policy rules: name, name:2.0, name:suppress=0.3, -name, all, none
+              --bot-rules-for WHO      apply --bot-rules only to AXIS, ALLIES or a faction list; the rest use defaults
+              --bot-rules-other LIST   what the factions outside --bot-rules-for play (default: the defaults)
               --bot-profile NAME       goal profile: none, generic, faction  (default none)
                                        (run the game with bot_rules_list=true to see them)
               -j, --workers N          concurrent Godot processes (default cores/2)

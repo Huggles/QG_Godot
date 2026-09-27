@@ -62,6 +62,18 @@ public sealed class RandomInputProvider : IInputProvider
     public BotRuleEngine Engine => _engine;
 
     /// <summary>
+    /// The engine for factions <see cref="_usesRules"/> excludes, running the registry defaults — or null
+    /// when every faction plays <see cref="_engine"/>. Shares the same counted draw stream.
+    /// </summary>
+    private readonly BotRuleEngine _defaultEngine;
+
+    /// <summary>Which factions play the configured rules; null means all of them. See <c>bot_rules_for</c>.</summary>
+    private readonly Func<Faction, bool> _usesRules;
+
+    private BotRuleEngine EngineFor(Faction faction)
+        => _defaultEngine != null && _usesRules != null && !_usesRules(faction) ? _defaultEngine : _engine;
+
+    /// <summary>
     /// Where a per-prompt trace goes under <c>verbose=true</c>, and null otherwise.
     ///
     /// Worth the field: the failure this catches is a bot that looks busy but is quietly passing on
@@ -143,7 +155,9 @@ public sealed class RandomInputProvider : IInputProvider
     public RandomInputProvider(int decisionSeed, double passChance, double discardChance,
                                List<IBotRule> rules, Dictionary<string, BotRuleConfig> ruleConfig,
                                double tierWidth, int yieldEvery, CliRenderer trace,
-                               Func<Faction, BotProfile> profileFor = null)
+                               Func<Faction, BotProfile> profileFor = null,
+                               Dictionary<string, BotRuleConfig> defaultRuleConfig = null,
+                               Func<Faction, bool> usesRules = null)
     {
         _rng = new Random(decisionSeed);
         _passChance = passChance;
@@ -151,6 +165,8 @@ public sealed class RandomInputProvider : IInputProvider
         _yieldEvery = yieldEvery;
         _trace = trace;
         _engine = new BotRuleEngine(rules, ruleConfig, Draw, tierWidth);
+        _usesRules = usesRules;
+        _defaultEngine = usesRules == null || defaultRuleConfig == null ? null : new BotRuleEngine(rules, defaultRuleConfig, Draw, tierWidth);
         _profileFor = profileFor;
         GoalStats = profileFor == null ? null : new BotGoalStats();
     }
@@ -191,14 +207,15 @@ public sealed class RandomInputProvider : IInputProvider
 
         BotAgenda agenda = BuildAgenda(spec.Faction);
         BotDecision decision = BotDecision.Build(spec, request, agenda);
-        BotAdvice advice = _engine.Consult(decision);
+        BotRuleEngine engine = EngineFor(spec.Faction);
+        BotAdvice advice = engine.Consult(decision);
 
         // Narrowing happens BEFORE the pass decision, not after: whether anything worth doing is on
         // offer is an INPUT to that decision. An option set the rules emptied is how "everything I
         // could play here is pointless" reaches ShouldPass as the empty set it already knows to pass
         // on — and the engine has already refused to empty it where that would leave the prompt
         // unanswerable.
-        List<ScoredOption> scored = _engine.Survivors(decision, advice);
+        List<ScoredOption> scored = engine.Survivors(decision, advice);
         if (advice.AnyVetoes)
         {
             spec.Options = new List<CliOption>(scored.Count);
@@ -213,7 +230,7 @@ public sealed class RandomInputProvider : IInputProvider
         }
         else
         {
-            List<CliOption> chosen = Choose(spec, scored, advice);
+            List<CliOption> chosen = Choose(engine, spec, scored, advice);
             spec.Apply(request, chosen);
             Trace(spec, chosen, advice, agenda);
         }
@@ -361,7 +378,7 @@ public sealed class RandomInputProvider : IInputProvider
     /// The unscored path below is then byte-for-byte the original: an early return rather than a
     /// single-tier special case, so the equivalence is visible instead of argued.
     /// </summary>
-    private List<CliOption> Choose(InputRequestSpec spec, List<ScoredOption> scored, BotAdvice advice)
+    private List<CliOption> Choose(BotRuleEngine engine, InputRequestSpec spec, List<ScoredOption> scored, BotAdvice advice)
     {
         int max = Math.Min(spec.MaxSelections, spec.Options.Count);
         int min = Math.Min(Math.Max(spec.MinSelections, 1), max);
@@ -373,7 +390,7 @@ public sealed class RandomInputProvider : IInputProvider
         // into the next one, which is the right reading of a multi-select: take everything you prefer,
         // then make up the number at random from what is left.
         List<CliOption> picked = new(count);
-        foreach (List<CliOption> tier in _engine.Tiers(scored))
+        foreach (List<CliOption> tier in engine.Tiers(scored))
         {
             if (picked.Count >= count) break;
             picked.AddRange(PartialShuffle(tier, Math.Min(count - picked.Count, tier.Count)));

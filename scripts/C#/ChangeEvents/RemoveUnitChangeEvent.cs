@@ -67,6 +67,8 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
             ? new() { new ReturnCameraAnimation() }
             : new();
 
+    public override void Project(BoardProjection projection) => projection.Remove(UnitId);
+
     protected override async Task<bool> ExecuteAsync()
     {
         GameAPI.RemoveUnitFromCountry(UnitId, Reason, TriggeringFaction);

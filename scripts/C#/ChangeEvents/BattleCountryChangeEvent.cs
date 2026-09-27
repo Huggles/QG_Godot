@@ -48,6 +48,9 @@ public partial class BattleCountryChangeEvent : ChangeEvent
         return dto;
     }
 
+    /// <summary>Battling an empty country changes nothing on the board; RemoveUnitChangeEvent overrides this.</summary>
+    public override void Project(BoardProjection projection) { }
+
     protected async override Task<bool> ExecuteAsync()
     {
         await Task.CompletedTask;

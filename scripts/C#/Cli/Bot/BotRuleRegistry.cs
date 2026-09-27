@@ -32,6 +32,8 @@ public static class BotRuleRegistry
         new AvoidDeadBattleCardRule(),
         new PreferVacantDeployRule(),
         new PreferSupplyStarDeployRule(),
+        new PreferValuableCardRule(),
+        new PreferValuableTargetRule(),
     };
 
     /// <summary>

@@ -63,9 +63,11 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         new ReturnCameraAnimation(),
     };
 
+    public override void Project(BoardProjection projection) => projection.Deploy(TriggeringFaction, CountryId, UnitType);
+
     protected override async Task<bool> ExecuteAsync()
     {
-        
+
         UnitId = GameAPI.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType, BlockAnimationQueue);
         await Task.CompletedTask;
         return true;

@@ -77,14 +77,26 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
 
     private void ApplyDiscardModifiers()
     {
+        NumberOfCards = ModifiedCount();
+        ModifiersApplied = true;
+    }
+
+    /// <summary>The count after every IDiscardModifier, without changing this event. No modifier reads NumberOfCards.</summary>
+    private int ModifiedCount()
+    {
+        int count = NumberOfCards;
         foreach (IDiscardModifier modifier in ModifierRegistry.GetAll<IDiscardModifier>())
         {
             int delta = modifier.ModifyDiscard(this);
             if (delta != 0)
-                NumberOfCards = Math.Max(NumberOfCards + delta, 0);
+                count = Math.Max(count + delta, 0);
         }
-        ModifiersApplied = true;
+        return count;
     }
+
+    /// <summary>Mirror of ExecuteAsync: top-of-deck discards, and 1 VP lost for each card the deck cannot pay.</summary>
+    public override void Project(BoardProjection projection)
+        => projection.DiscardFromDeck(TargetFaction, ModifiersApplied ? NumberOfCards : ModifiedCount());
 
     public override string SummaryText() => UndischargedCards > 0
         ? $"{TargetFaction.WithPlayer()} was forced to discard {NumberOfCards} cards by {TriggeringFaction.WithPlayer()}, but only had {DiscardedCardIds.Count} left and lost {UndischargedCards} VP"

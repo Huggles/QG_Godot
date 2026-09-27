@@ -113,10 +113,35 @@ public sealed class CliSimRunner
             profileFor = null;
         }
 
+        // bot_rules_for: bot_rules plays only for these factions, the rest play the registry defaults.
+        // A misspelt name is a config error for the same reason an unknown rule is.
+        Func<Faction, bool> usesRules = ParseRulesFor(CliArgs.Get("bot_rules_for"), out string rulesForError);
+        if (rulesForError != null)
+        {
+            renderer.Emit(new CliEvent("bot_config_error")
+                .Set("error", rulesForError)
+                .Text($"BOT CONFIG ERROR  {rulesForError}"));
+            _session.Quit(2);
+            usesRules = null;
+        }
+        // bot_rules_other: what those other factions play instead of the defaults. Same syntax as bot_rules.
+        string otherError = null;
+        Dictionary<string, BotRuleConfig> defaultConfig = usesRules == null ? null
+            : BotRuleRegistry.Parse(CliArgs.Get("bot_rules_other"), rules, out otherError);
+        if (usesRules != null && defaultConfig == null)
+        {
+            renderer.Emit(new CliEvent("bot_config_error")
+                .Set("error", otherError)
+                .Text($"BOT CONFIG ERROR  bot_rules_other: {otherError}"));
+            _session.Quit(2);
+            defaultConfig = BotRuleRegistry.Parse(null, rules, out _);
+        }
+        if (defaultConfig != null && hollowChance > 0) defaultConfig["no_hollow"].Suppress = hollowChance;
+
         _bot = new RandomInputProvider(_decisionSeed, passChance, discardChance,
             rules, ruleConfig, Probability("bot_rule_temp"),
             CliArgs.GetInt("bot_yield_every", 64), CliArgs.Verbose ? renderer : null,
-            profileFor);
+            profileFor, defaultConfig, usesRules);
 
         // Replaces the CliInputProvider CliSession would otherwise install: nothing is reading stdin
         // for answers, so every prompt has to be resolved by the bot or the run parks forever.
@@ -156,6 +181,31 @@ public sealed class CliSimRunner
     /// result, and worth checking rather than assuming: if the two ever diverge before a profile has
     /// been given weights, something is reading a profile it should not.
     /// </summary>
+    /// <summary>
+    /// <c>bot_rules_for</c>: AXIS, ALLIES, or a comma list of factions. Null (all factions) when absent.
+    /// </summary>
+    private static Func<Faction, bool> ParseRulesFor(string spec, out string error)
+    {
+        error = null;
+        if (string.IsNullOrWhiteSpace(spec)) return null;
+
+        HashSet<Faction> factions = new();
+        foreach (string entry in spec.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (entry.Equals("ALL", StringComparison.OrdinalIgnoreCase)) return null;
+            if (Enum.TryParse(entry, true, out FactionTeam team) && team is FactionTeam.AXIS or FactionTeam.ALLIES)
+                factions.UnionWith(StaticGameData.FactionsForTeam(team));
+            else if (Enum.TryParse(entry, true, out Faction faction) && faction != Faction.NONE)
+                factions.Add(faction);
+            else
+            {
+                error = $"bot_rules_for: \"{entry}\" is not a team (AXIS, ALLIES) or a faction";
+                return null;
+            }
+        }
+        return factions.Contains;
+    }
+
     private static Func<Faction, BotProfile> ParseProfile(string name, out string error)
     {
         error = null;

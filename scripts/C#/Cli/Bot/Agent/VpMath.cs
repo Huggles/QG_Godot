@@ -59,11 +59,13 @@ public static class VpMath
     /// make this wrong.
     /// </summary>
     public static int TeamStarVpAt(CountryState country, FactionTeam team)
-    {
-        if (country == null || !country.IsSupply) return 0;
+        => country == null ? 0 : TeamStarVpAt(country, country.Units, team);
 
-        int payout = PayoutFor(country.Units.Count);
-        return OccupantsOnTeam(country, team) * payout;
+    /// <summary>As above, for a country whose occupants come from somewhere other than the live board (a projection).</summary>
+    public static int TeamStarVpAt(CountryState country, IReadOnlyDictionary<Faction, int> units, FactionTeam team)
+    {
+        if (country == null || !country.IsSupply || units == null) return 0;
+        return OccupantsOnTeam(units, team) * PayoutFor(units.Count);
     }
 
     /// <summary>
@@ -126,15 +128,30 @@ public static class VpMath
     /// Walks countries rather than each faction's OccupiedCountryIds so a shared star is visited once and
     /// its payout is computed once.
     /// </summary>
-    public static int SupplyStarVpRate(FactionTeam team)
+    public static int SupplyStarVpRate(FactionTeam team) => SupplyStarVpRate(team, null);
+
+    /// <summary>The board half of the rate on a projected board; null reads the live board.</summary>
+    public static int SupplyStarVpRate(FactionTeam team, BoardProjection projection)
     {
         List<CountryState> countries = CountryState.AllCountryStates;
         if (countries == null) return 0;
 
         int total = 0;
-        for (int i = 0; i < countries.Count; i++) total += TeamStarVpAt(countries[i], team);
+        for (int i = 0; i < countries.Count; i++)
+        {
+            CountryState country = countries[i];
+            if (country == null) continue;
+            total += TeamStarVpAt(country, projection?.UnitsIn(country.Id) ?? country.Units, team);
+        }
         return total;
     }
+
+    /// <summary>
+    /// Per-turn income on a projected board. Status cards are read live: a projection does not model
+    /// cards entering or leaving the table.
+    /// </summary>
+    public static int TeamVpRate(FactionTeam team, BoardProjection projection)
+        => SupplyStarVpRate(team, projection) + StatusCardVpRate(team);
 
     /// <summary>
     /// The status-card half of <see cref="TeamVpRate"/>.
@@ -171,10 +188,12 @@ public static class VpMath
     private static int PayoutFor(int occupantCount) => Math.Max(3 - occupantCount, 1);
 
     /// <summary>How many of <paramref name="country"/>'s occupying factions belong to <paramref name="team"/>.</summary>
-    private static int OccupantsOnTeam(CountryState country, FactionTeam team)
+    private static int OccupantsOnTeam(CountryState country, FactionTeam team) => OccupantsOnTeam(country.Units, team);
+
+    private static int OccupantsOnTeam(IReadOnlyDictionary<Faction, int> units, FactionTeam team)
     {
         int count = 0;
-        foreach (Faction occupant in country.Units.Keys)
+        foreach (Faction occupant in units.Keys)
             if (StaticGameData.FactionTeamForFaction(occupant) == team) count++;
         return count;
     }

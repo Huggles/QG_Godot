@@ -94,6 +94,13 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
 
     protected abstract Task<bool> ExecuteAsync();
 
+    /// <summary>
+    /// What <see cref="ExecuteAsync"/> would do, written onto a hypothetical board instead of the live
+    /// one. Must stay pure and must mirror ExecuteAsync — override it next to it. The default says
+    /// "cannot model this", which makes the whole projection unknown rather than quietly wrong.
+    /// </summary>
+    public virtual void Project(BoardProjection projection) => projection.MarkUnknown(GetType().Name);
+
     protected virtual List<ChangeEventAnimation> BeforeAnimations { get; } = new();
     protected virtual List<ChangeEventAnimation> AfterAnimations  { get; } = new();
 

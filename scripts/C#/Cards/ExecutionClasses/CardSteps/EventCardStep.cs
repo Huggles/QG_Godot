@@ -32,7 +32,15 @@ public abstract partial class EventCardStep : CardStep
         };
     }
 
-    public override IReadOnlyList<StepOption> PossibleOutcomes(StepOption? previous) => _choice?.Outcomes(previous);
+    /// <summary>Stamped as dispatch would stamp them, so a projection sees the source card a discard modifier reads.</summary>
+    public override IReadOnlyList<StepOption> PossibleOutcomes(StepOption? previous)
+    {
+        IReadOnlyList<StepOption> outcomes = _choice?.Outcomes(previous);
+        if (outcomes != null)
+            foreach (StepOption outcome in outcomes)
+                if (outcome.Event != null) StampProvenance(outcome.Event);
+        return outcomes;
+    }
 
     /// <summary>Set on every event this step emits. The type decides; the card may not.</summary>
     protected abstract bool EventIsTrigger { get; }

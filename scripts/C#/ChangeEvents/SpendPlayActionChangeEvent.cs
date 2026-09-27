@@ -12,6 +12,9 @@ public partial class SpendPlayActionChangeEvent : ChangeEvent
     public override ChangeEventDto ToDto() =>
         ChangeEventDto.Build<SpendPlayActionChangeEventDto>(this, Id);
 
+    /// <summary>Spends the turn's play, which the board does not model.</summary>
+    public override void Project(BoardProjection projection) { }
+
     protected override async Task<bool> ExecuteAsync()
     {
         if (!GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(TriggeringFaction))
