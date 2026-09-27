@@ -10,7 +10,6 @@ public partial class EventTheaterShift : EventCardLogic
             .ToList();
 
     private List<int> relocatedIds = new List<int>();
-    private bool lastRemovedUnitWasNavy = false;
 
     /// <summary>
     /// The pieces still awaiting relocation. Read by the removal step, its condition and
@@ -28,6 +27,10 @@ public partial class EventTheaterShift : EventCardLogic
             .Plus(TargetSet.Countries(CountryState.BuildableLand(Faction)))
             .Plus(TargetSet.Countries(CountryState.BuildableSea(Faction)));
 
+    // The rebuild offers the removed piece's own type. Read off the removal step's outcome, which is
+    // always there on the real path: the rebuild requires the removal to have happened.
+    private static bool RemovedNavy(StepOption removal) => UnitState.ForId(removal.Target.Value.Id).Type == UnitType.NAVY;
+
     public override List<CardStep> OnActivate() => MakeRelocationSteps();
 
     private List<CardStep> MakeRelocationSteps() =>
@@ -39,7 +42,6 @@ public partial class EventTheaterShift : EventCardLogic
                 unitId => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE))
             .OnChosen(chosen =>
             {
-                lastRemovedUnitWasNavy = UnitState.ForId(chosen.Value.Id).Type == UnitType.NAVY;
                 relocatedIds.Add(chosen.Value.Id);
                 if (EligibleUnitIds.Count > 0) CardSteps.AddRange(MakeRelocationSteps());
             }))
@@ -51,10 +53,10 @@ public partial class EventTheaterShift : EventCardLogic
 
     private CardStep MakeDeployStep()
     {
-        return new ResultStep(this, Choose.CountryFrom(() => lastRemovedUnitWasNavy
+        return new ResultStep(this, Choose.CountryFrom(previous => RemovedNavy(previous.Value)
                     ? CountryState.BuildableSea(Faction).Select(cs => cs.Id).ToList()
                     : CountryState.BuildableLand(Faction).Select(cs => cs.Id).ToList(),
-                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD))
+                (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD))
             .BeforePrompt(() => ReplayContext.Pace(1000)))
         // Rebuilding is the other half of the removal, not an effect of its own: a skipped removal
         // finishes the card instead of granting a free piece.

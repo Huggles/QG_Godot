@@ -6,8 +6,12 @@ using Godot;
 public partial class EventArsenalofDemocracy : EventCardLogic
 {
     private static readonly Faction targetFaction = Faction.UNITED_KINGDOM;
-    // Tracks which type was built first so step 2 offers only the other type.
-    private bool _firstWasArmy;
+    // Whether step 1 built an army, read off its outcome so step 2 offers only the other type. False
+    // when step 1 has not run, which is what the field this replaces held before a first play.
+    private static bool BuiltArmy(StepOption? first)
+        => first is { Target: { } built } && CountryState.ForId(built.Id).Type == CountryType.LAND;
+
+    private StepOption? FirstStepOutcome => CardSteps[0] is { StepSucceeded: true } first ? first.LastOutcome : null;
 
     /// <summary>
     /// Everywhere the UK could put either piece. Step 1 offers both types and step 2 offers whichever
@@ -25,18 +29,17 @@ public partial class EventArsenalofDemocracy : EventCardLogic
             // Step 1: show ALL buildable countries (both land and sea); player chooses order.
             new ResultStep(this, Choose.CountryFrom(
                     () => CountryState.BuildableLand(targetFaction).ToCountryIds().Concat(CountryState.BuildableSea(targetFaction).ToCountryIds()).ToList(),
-                    countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD))
-                .OnChosen(chosen => _firstWasArmy = CountryState.ForId(chosen.Value.Id).Type == CountryType.LAND))
+                    countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
                 CountryState.BuildableLand(targetFaction).Any() || CountryState.BuildableSea(targetFaction).Any()), this))
             .WithGuidance("United Kingdom builds an Army or a Navy (choose order)"),
             // Step 2: show only the other type to complete the pair.
-            new ResultStep(this, Choose.CountryFrom(() => _firstWasArmy
+            new ResultStep(this, Choose.CountryFrom(previous => BuiltArmy(previous)
                     ? CountryState.BuildableSea(targetFaction).ToCountryIds()
                     : CountryState.BuildableLand(targetFaction).ToCountryIds(),
-                countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
+                (countryId, _) => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
-                var buildable = _firstWasArmy
+                var buildable = BuiltArmy(FirstStepOutcome)
                     ? CountryState.BuildableSea(targetFaction)
                     : CountryState.BuildableLand(targetFaction);
                 return buildable.Any();

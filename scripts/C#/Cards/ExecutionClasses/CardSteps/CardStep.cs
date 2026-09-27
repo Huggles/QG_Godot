@@ -164,11 +164,25 @@ public abstract partial class CardStep : ITaggable
     protected abstract Task<CardStepResult> RunCoreAsync();
 
     /// <summary>
+    /// What this step actually did the last time it ran as a choice step: the answer and its event.
+    /// Overwritten only by a completed choice, so it keeps the same lifetime as the card fields it
+    /// replaces. Not state — a save is only taken between cards, where no step is waiting on it.
+    /// </summary>
+    [JsonIgnore] public StepOption? LastOutcome { get; internal set; }
+
+    /// <summary>The previous step's real outcome in this activation, or null when it has not run.</summary>
+    [JsonIgnore] public StepOption? PreviousOutcome
+        => PreviousCardStep is { StepSucceeded: true } previous ? previous.LastOutcome : null;
+
+    /// <summary>
     /// Every event this step could produce right now, one per legal answer, without prompting or
-    /// applying anything — or null when the step is free-form and cannot say. Does not check the
+    /// applying anything — or null when the step is free-form or cannot say. Does not check the
     /// step's conditions. The caller owns the events: <see cref="StepChoice.Release"/> them.
     /// </summary>
-    public virtual IReadOnlyList<StepOption> PossibleOutcomes() => null;
+    public IReadOnlyList<StepOption> PossibleOutcomes() => PossibleOutcomes(PreviousOutcome);
+
+    /// <summary>As above, after a hypothetical <paramref name="previous"/> — how a projection chains steps.</summary>
+    public virtual IReadOnlyList<StepOption> PossibleOutcomes(StepOption? previous) => null;
 
     /// <summary>
     /// Apply the result. One seam per step kind, and the only place a step's effect reaches the game.

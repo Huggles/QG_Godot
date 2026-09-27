@@ -24,10 +24,15 @@ public abstract partial class EventCardStep : CardStep
     protected EventCardStep(CardLogic cardLogic, StepChoice choice) : base(cardLogic)
     {
         _choice = choice;
-        _produce = () => choice.Run(TriggeringFaction);
+        _produce = async () =>
+        {
+            StepOption chosen = await choice.Run(TriggeringFaction, PreviousOutcome);
+            LastOutcome = chosen;
+            return chosen.Event;
+        };
     }
 
-    public override IReadOnlyList<StepOption> PossibleOutcomes() => _choice?.Outcomes();
+    public override IReadOnlyList<StepOption> PossibleOutcomes(StepOption? previous) => _choice?.Outcomes(previous);
 
     /// <summary>Set on every event this step emits. The type decides; the card may not.</summary>
     protected abstract bool EventIsTrigger { get; }
