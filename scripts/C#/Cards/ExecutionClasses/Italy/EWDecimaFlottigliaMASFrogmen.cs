@@ -22,24 +22,16 @@ public partial class EWDecimaFlottigliaMASFrogmen : EWCardLogic
         TargetSet.Countries(new List<Country> { Country.MediterraneanSea })
             .Plus(TargetSet.Units(BlockingUnits));
 
-    /// <summary>
-    /// Captured by the scoring step and read by the discard step, rather than recomputed. The two
-    /// are separate steps now, and a reaction played in the scoring step's after-reaction window can
-    /// move the board between them -- recomputing would make the discard disagree with the VP that
-    /// was actually awarded.
-    /// </summary>
-    private int _totalDiscards;
-
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
+            // Discard first: it is the only half that depends on the board, so it reads it when it runs.
             new ResultStep(this, Choose.Fixed(() =>
-                new ScorePointsChangeEvent(new VPEntry(1, "Decima Flottiglia MAS Frogmen"), Faction))
-            .OnChosen(_ => _totalDiscards = 1 + (BlockingUnits.Count == 0 ? 1 : 0))),
+                new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, 1 + (BlockingUnits.Count == 0 ? 1 : 0)))),
 
             new ResultStep(this, Choose.Fixed(() =>
-                new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, _totalDiscards)))
+                new ScorePointsChangeEvent(new VPEntry(1, "Decima Flottiglia MAS Frogmen"), Faction)))
             .RequiringPreviousStep()
         };
     }
