@@ -51,7 +51,7 @@ public sealed class AvoidDeadBattleCardRule : IBotRule
 
     public double DefaultWeight => 1.0;
 
-    public bool EnabledByDefault => false;
+    public bool EnabledByDefault => true;
 
     /// <summary>
     /// The prompts that put a card into play. BlockReaction is excluded: a block is answering someone

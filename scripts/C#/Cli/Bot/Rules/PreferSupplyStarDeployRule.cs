@@ -55,7 +55,7 @@ public sealed class PreferSupplyStarDeployRule : IBotRule
 
     public double DefaultWeight => 1.0;
 
-    public bool EnabledByDefault => false;
+    public bool EnabledByDefault => true;
 
     public IReadOnlySet<string> Kinds { get; } = new HashSet<string> { "SelectCountry" };
 

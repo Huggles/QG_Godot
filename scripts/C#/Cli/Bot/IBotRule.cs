@@ -52,8 +52,8 @@ public interface IBotRule
 
     /// <summary>
     /// Whether the rule is on when <c>bot_rules</c> does not mention it. A rule that changes the bot's
-    /// measured behaviour should default OFF until an A/B says it helps — the exception is
-    /// <see cref="NoHollowRule"/>, which was measured before this engine existed.
+    /// measured behaviour should default OFF until an A/B says it helps. All seven current rules are on:
+    /// on 2026-09-27 the full set beat every subset tried, one-sided, over 200-game batches.
     /// </summary>
     bool EnabledByDefault { get; }
 

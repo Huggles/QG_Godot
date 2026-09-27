@@ -213,6 +213,8 @@ internal sealed class ResultAccumulator
                                     && d.ValueKind == JsonValueKind.True,
                             Played = Int(card, "played"),
                             Activated = Int(card, "activated"),
+                            PlayedRounds = IntArray(card, "played_rounds"),
+                            ActivatedRounds = IntArray(card, "activated_rounds"),
                         });
                 break;
 

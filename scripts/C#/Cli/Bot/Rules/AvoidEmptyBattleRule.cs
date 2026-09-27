@@ -53,7 +53,7 @@ public sealed class AvoidEmptyBattleRule : IBotRule
     /// Off until an A/B says otherwise, unlike no_hollow. It changes what the bot does on a very
     /// common prompt, so it must not become the silent default of a measurement nobody re-ran.
     /// </summary>
-    public bool EnabledByDefault => false;
+    public bool EnabledByDefault => true;
 
     public IReadOnlySet<string> Kinds { get; } = new HashSet<string> { "SelectBattleTarget" };
 

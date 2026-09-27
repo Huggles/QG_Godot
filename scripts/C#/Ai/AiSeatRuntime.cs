@@ -113,7 +113,8 @@ public static class AiSeatRuntime
     /// here. That is the intended direction: measure first, then name it here. See
     /// <see cref="BotRuleRegistry.Parse"/>.
     /// </summary>
-    private const string SeatRules = "no_hollow,prefer_vacant_deploy,prefer_supply_star_deploy";
+    private const string SeatRules = "no_hollow,avoid_empty_battle,avoid_dead_battle_card,prefer_vacant_deploy," +
+                                     "prefer_supply_star_deploy,prefer_valuable_card,prefer_valuable_target";
 
     /// <summary>
     /// The bot for one seat.

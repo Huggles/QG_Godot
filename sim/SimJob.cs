@@ -114,6 +114,10 @@ public sealed class CardStat
     public required bool Drawn { get; init; }
     public required int Played { get; init; }
     public required int Activated { get; init; }
+
+    /// <summary>The round of each play / activation. Empty from a game build older than the field.</summary>
+    public int[] PlayedRounds { get; init; } = Array.Empty<int>();
+    public int[] ActivatedRounds { get; init; } = Array.Empty<int>();
 }
 
 /// <summary>The outcome of one job: the parsed <c>game_result</c> plus how the process itself fared.</summary>

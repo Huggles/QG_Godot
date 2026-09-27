@@ -39,6 +39,127 @@ public static class Aggregator
         WriteFailureIndex(config, ordered);
         WriteRoundScores(config, ordered);
         WriteCardImpact(config, ordered);
+        WriteCardRanking(config, ordered);
+    }
+
+    /// <summary>A card's running figures across every game in the batch, for card_ranking.</summary>
+    private sealed class RankAccumulator
+    {
+        public string Team = "", Type = "";
+        public int Games, Drawn, Used, Held, UsedWins, HeldWins, Uses, Early, Mid, Late, FirstRoundSum;
+        public double UsedDeltaSum, HeldDeltaSum;
+
+        public double? WinRateUsed => Used > 0 ? (double)UsedWins / Used : null;
+        public double? WinRateHeld => Held > 0 ? (double)HeldWins / Held : null;
+        public double? DeltaUsed => Used > 0 ? UsedDeltaSum / Used : null;
+        public double? DeltaHeld => Held > 0 ? HeldDeltaSum / Held : null;
+        public double? WinRateDiff => WinRateUsed is double u && WinRateHeld is double h ? u - h : null;
+        public double? DeltaDiff => DeltaUsed is double u && DeltaHeld is double h ? u - h : null;
+        public bool Reliable => Used >= MinGames && Held >= MinGames;
+    }
+
+    /// <summary>Games needed on BOTH sides of the used/held split before a row is ranked.</summary>
+    private const int MinGames = 5;
+
+    /// <summary>
+    /// card_ranking.csv / card_ranking.txt — which cards win games, pooled over every seed in the batch.
+    ///
+    /// The comparison is between games where the card was DRAWN: used (played or activated at least
+    /// once) against held (drawn, never used). That removes "never drawn" from the baseline, which
+    /// card_impact's played-vs-unplayed split includes. It is still not causal: a bot that is ahead
+    /// takes more turns and uses more cards, and the default bot only uses a card when it values it.
+    /// Rows with fewer than <see cref="MinGames"/> games on either side are written but not ranked.
+    /// </summary>
+    private static void WriteCardRanking(SimConfig config, List<SimResult> results)
+    {
+        Dictionary<string, RankAccumulator> byCard = new();
+
+        foreach (SimResult result in results.Where(r => r.HasResult && r.Cards.Count > 0))
+        {
+            // Copies of one card are interchangeable: drawn if any copy was, used if any copy was.
+            foreach (IGrouping<string, CardStat> copies in result.Cards.GroupBy(c => c.Faction + "|" + c.Name))
+            {
+                CardStat first = copies.First();
+                string team = result.Rounds.TryGetValue(first.Faction, out RoundSeries? series) ? series.Team : "UNKNOWN";
+                double delta = team == "AXIS" ? result.AxisTotal - result.AlliesTotal : result.AlliesTotal - result.AxisTotal;
+                bool won = result.Winner == team;
+
+                bool drawn = copies.Any(c => c.Drawn);
+                List<int> rounds = copies.SelectMany(c => c.PlayedRounds.Concat(c.ActivatedRounds)).ToList();
+                bool used = copies.Any(c => c.Played + c.Activated > 0);
+
+                if (!byCard.TryGetValue(copies.Key, out RankAccumulator? acc))
+                    acc = byCard[copies.Key] = new RankAccumulator { Team = team, Type = first.Type };
+                acc.Games++;
+                if (drawn) acc.Drawn++;
+                if (used)
+                {
+                    acc.Used++; acc.UsedDeltaSum += delta; if (won) acc.UsedWins++;
+                    acc.Uses += copies.Sum(c => c.Played + c.Activated);
+                    if (rounds.Count > 0) acc.FirstRoundSum += rounds.Min();
+                    acc.Early += rounds.Count(r => r <= 7);
+                    acc.Mid += rounds.Count(r => r >= 8 && r <= 14);
+                    acc.Late += rounds.Count(r => r >= 15);
+                }
+                else if (drawn)
+                {
+                    acc.Held++; acc.HeldDeltaSum += delta; if (won) acc.HeldWins++;
+                }
+            }
+        }
+
+        string csvPath = Path.Combine(config.OutputDirectory, "card_ranking.csv");
+        using (StreamWriter w = new(csvPath, append: false))
+        {
+            w.WriteLine("faction,card,type,team,games,drawn,used,held,winrate_used,winrate_held,winrate_diff,"
+                        + "delta_used,delta_held,delta_diff,uses_per_used_game,avg_first_round,uses_early,uses_mid,uses_late,ranked");
+            foreach ((string key, RankAccumulator acc) in byCard.OrderByDescending(kv => kv.Value.WinRateDiff ?? double.MinValue))
+            {
+                string[] parts = key.Split('|', 2);
+                w.WriteLine($"{parts[0]},{Escape(parts[1])},{acc.Type},{acc.Team},{acc.Games},{acc.Drawn},{acc.Used},{acc.Held},"
+                            + $"{Pct(acc.WinRateUsed)},{Pct(acc.WinRateHeld)},{Pct(acc.WinRateDiff)},"
+                            + $"{Num(acc.DeltaUsed)},{Num(acc.DeltaHeld)},{Num(acc.DeltaDiff)},"
+                            + $"{(acc.Used > 0 ? ((double)acc.Uses / acc.Used).ToString("F2") : "")},"
+                            + $"{(acc.Used > 0 ? ((double)acc.FirstRoundSum / acc.Used).ToString("F1") : "")},"
+                            + $"{acc.Early},{acc.Mid},{acc.Late},{(acc.Reliable ? "yes" : "no")}");
+            }
+        }
+
+        List<(string Key, RankAccumulator Acc)> ranked = byCard.Where(kv => kv.Value.Reliable)
+            .Select(kv => (kv.Key, kv.Value)).OrderByDescending(r => r.Value.WinRateDiff).ToList();
+
+        StringBuilder sb = new();
+        sb.AppendLine("=== CARD RANKING ===");
+        sb.AppendLine();
+        sb.AppendLine($"  {results.Count(r => r.HasResult)} game(s), seeds {Summarise(config.Seeds)}, "
+                      + $"bot_rules {(string.IsNullOrWhiteSpace(config.BotRules) ? "(defaults)" : config.BotRules)}");
+        sb.AppendLine($"  Compares games where the card was drawn: used vs held. Ranked only with >= {MinGames} games on each side");
+        sb.AppendLine($"  ({ranked.Count} of {byCard.Count} cards). Correlation, not cause — read with the game counts.");
+        sb.AppendLine();
+        string header = $"    {"faction",-15} {"card",-44} {"used",5} {"held",5} {"win used",9} {"win held",9} {"diff",7} {"gap diff",9} {"1st rnd",7}";
+        void Rows(IEnumerable<(string Key, RankAccumulator Acc)> rows)
+        {
+            sb.AppendLine(header);
+            foreach ((string key, RankAccumulator a) in rows)
+            {
+                string[] p = key.Split('|', 2);
+                string name = p[1].Length > 44 ? p[1][..43] + "…" : p[1];
+                sb.AppendLine($"    {p[0],-15} {name,-44} {a.Used,5} {a.Held,5} {Pct(a.WinRateUsed),9} {Pct(a.WinRateHeld),9} "
+                              + $"{Pct(a.WinRateDiff),7} {Num(a.DeltaDiff),9} {(double)a.FirstRoundSum / a.Used,7:F1}");
+            }
+            sb.AppendLine();
+        }
+        sb.AppendLine("--- BEST (win rate when used minus when held) ---");
+        Rows(ranked.Take(15));
+        sb.AppendLine("--- WORST ---");
+        Rows(Enumerable.Reverse(ranked).Take(15));
+
+        string txtPath = Path.Combine(config.OutputDirectory, "card_ranking.txt");
+        File.WriteAllText(txtPath, sb.ToString());
+        Console.WriteLine($"  ranking  {txtPath}");
+
+        static string Pct(double? v) => v is double d ? (100 * d).ToString("F1") : "";
+        static string Num(double? v) => v is double d ? d.ToString("F2") : "";
     }
 
     /// <summary>

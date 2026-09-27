@@ -576,6 +576,9 @@ public sealed class CliSimRunner
                 ["drawn"] = drawn,
                 ["played"] = played,
                 ["activated"] = activated,
+                // The round of each play and activation, so a batch can ask WHEN a card pays off.
+                ["played_rounds"] = card.PlayedInTurn.Select(StaticGameData.RoundForTurn).ToList(),
+                ["activated_rounds"] = card.ActivatedInTurns.Select(StaticGameData.RoundForTurn).ToList(),
             });
         }
 
