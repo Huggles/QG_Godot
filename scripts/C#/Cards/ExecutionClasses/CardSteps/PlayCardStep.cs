@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -20,6 +21,17 @@ public sealed partial class PlayCardStep : CardStep
 
     public PlayCardStep(CardLogic cardLogic, Func<Task<CardStepResult>> chooseCard) : base(cardLogic)
         => _chooseCard = chooseCard;
+
+    private readonly PlayChoice _choice;
+
+    /// <summary>A play step whose candidates can be listed without running it — see <see cref="PlayChoice"/>.</summary>
+    public PlayCardStep(CardLogic cardLogic, PlayChoice choice) : base(cardLogic)
+    {
+        _choice = choice;
+        _chooseCard = async () => CardStepResult.PlayCard(await choice.Run(TriggeringFaction, PreviousOutcome));
+    }
+
+    public override IReadOnlyList<int> PossiblePlays(StepOption? previous) => _choice?.Candidates(previous);
 
     public override StepKind Kind => StepKind.PlayCard;
 

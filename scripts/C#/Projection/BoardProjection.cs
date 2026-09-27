@@ -23,6 +23,7 @@ public sealed class BoardProjection
     private readonly Dictionary<Faction, int> _hand = new();
     private readonly Dictionary<Faction, int> _deck = new();
     private readonly Dictionary<int, (Faction Faction, UnitType Type)> _projectedUnits = new();
+    private readonly Dictionary<int, CardPile> _cardPile = new();
     private int _nextProjectedUnitId = -2;
 
     /// <summary>True once any projected event could not be modelled; every read is then a guess.</summary>
@@ -47,6 +48,7 @@ public sealed class BoardProjection
         foreach (var kv in _hand) copy._hand[kv.Key] = kv.Value;
         foreach (var kv in _deck) copy._deck[kv.Key] = kv.Value;
         foreach (var kv in _projectedUnits) copy._projectedUnits[kv.Key] = kv.Value;
+        foreach (var kv in _cardPile) copy._cardPile[kv.Key] = kv.Value;
         return copy;
     }
 
@@ -86,6 +88,20 @@ public sealed class BoardProjection
 
     public int DeckCount(Faction faction)
         => _deck.TryGetValue(faction, out int n) ? n : DeckState.ForFaction(faction).DeckCardIds.Count;
+
+    /// <summary>Which pile a card is in. Discards chosen by a player are counted but not tracked per card.</summary>
+    public CardPile PileOf(int cardId)
+    {
+        if (_cardPile.TryGetValue(cardId, out CardPile pile)) return pile;
+        CardState card = CardState.ForId(cardId);
+        DeckState deck = card == null ? null : DeckState.ForFaction(card.Faction);
+        if (deck == null) return CardPile.None;
+        if (deck.HandCardIds.Contains(cardId)) return CardPile.Hand;
+        if (deck.DeckCardIds.Contains(cardId)) return CardPile.Deck;
+        if (deck.DiscardedCardIds.Contains(cardId)) return CardPile.Discard;
+        if (deck.StatusCardIds.Contains(cardId) || deck.ResponseCardIds.Contains(cardId)) return CardPile.Table;
+        return CardPile.None;
+    }
 
     /// <summary>Countries whose occupancy differs from the live board.</summary>
     public IEnumerable<int> ChangedCountryIds => _units.Keys;
@@ -139,6 +155,27 @@ public sealed class BoardProjection
         if (count > paid) AddScore(faction, -(count - paid));
     }
 
+    /// <summary>Move a card between piles, keeping the owner's hand and deck counts in step.</summary>
+    public void MoveCard(int cardId, CardPile to)
+    {
+        Faction owner = CardState.ForId(cardId).Faction;
+        CardPile from = PileOf(cardId);
+        if (from == CardPile.Hand) _hand[owner] = HandCount(owner) - 1;
+        if (from == CardPile.Deck) _deck[owner] = DeckCount(owner) - 1;
+        if (to == CardPile.Hand) _hand[owner] = HandCount(owner) + 1;
+        if (to == CardPile.Deck) _deck[owner] = DeckCount(owner) + 1;
+        _cardPile[cardId] = to;
+    }
+
+    /// <summary>Mirror of DeckState.PlayCard: from hand or deck to the table (Status, Response) or the discard.</summary>
+    public void PlayCard(int cardId)
+    {
+        CardPile from = PileOf(cardId);
+        if (from != CardPile.Hand && from != CardPile.Deck) { MarkUnknown($"play card {cardId}, which is not in hand or deck"); return; }
+        CardType type = CardState.ForId(cardId).CardData.CardType;
+        MoveCard(cardId, type is CardType.STATUS or CardType.RESPONSE ? CardPile.Table : CardPile.Discard);
+    }
+
     /// <summary>Give up on modelling. Only the first reason is kept.</summary>
     public void MarkUnknown(string reason) => UnknownReason ??= reason;
 
@@ -152,3 +189,6 @@ public sealed class BoardProjection
         return units;
     }
 }
+
+/// <summary>The piles a card can be in, as far as a <see cref="BoardProjection"/> tracks them.</summary>
+public enum CardPile { None, Deck, Hand, Discard, Table }

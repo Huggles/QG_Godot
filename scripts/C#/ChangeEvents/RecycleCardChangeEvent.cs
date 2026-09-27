@@ -49,6 +49,13 @@ public partial class RecycleCardChangeEvent : ChangeEvent
         if (dto is RecycleCardChangeEventDto d) ShuffledOrder = d.ShuffledOrder;
     }
 
+    /// <summary>Mirror of ExecuteAsync: the card leaves whatever pile it is in for the hand or the deck.</summary>
+    public override void Project(BoardProjection projection)
+    {
+        if (projection.PileOf(CardId) == CardPile.None) { projection.MarkUnknown($"recycle card {CardId}, which is in no pile"); return; }
+        projection.MoveCard(CardId, Destination == RecycleDestination.Hand ? CardPile.Hand : CardPile.Deck);
+    }
+
     protected override async Task<bool> ExecuteAsync()
     {
         DeckState deckState = DeckState.ForFaction(TargetFaction);

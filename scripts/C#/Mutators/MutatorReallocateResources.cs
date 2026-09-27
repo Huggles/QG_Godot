@@ -60,9 +60,12 @@ public partial class MutatorReallocateResources : ActivatableMutator
     /// choice once, not once per copy. The representative is a real deck card id, so DoCard plays that
     /// exact card and no separate draw is needed.
     /// </summary>
+    // Only cards that could actually do something if played now — a Build Navy with no sea to build in
+    // is not offered, so the four discarded cards can never buy a play that does nothing.
     private List<int> DrawOptions() =>
         DeckState.ForFaction(Faction).DeckCardIds
             .Where(cardId => DrawableTypes.Contains(CardState.ForId(cardId).CardData.CardType))
+            .Where(CanPlayNow)
             .GroupBy(cardId => CardState.ForId(cardId).CardData.UniqueName)
             .Select(sameNamedCards => sameNamedCards.First())
             .ToList();
@@ -72,6 +75,10 @@ public partial class MutatorReallocateResources : ActivatableMutator
     /// Play-step action, not a reaction, and CardLogic.CanBeActivated offering it only at
     /// ReactionDepth 0 is exactly what is wanted.
     /// </summary>
+    /// <summary>Whether the card's first step could run right now: its conditions, e.g. HasBuildableSea for Build Navy.</summary>
+    private static bool CanPlayNow(int cardId)
+        => CardState.ForId(cardId).CardLogic?.CardSteps.FirstOrDefault()?.MeetAllConditions ?? false;
+
     protected override List<Condition> MutatorTriggers()
     {
         return new List<Condition> {
@@ -116,16 +123,7 @@ public partial class MutatorReallocateResources : ActivatableMutator
             // DrawOptions() is read here rather than captured before the discard: the discard only
             // moves hand cards so the answer is the same, but the deck is live state and the read
             // belongs next to its use.
-            new PlayCardStep(this, async () => {
-                InputRequest pick = await new InputRequest.SelectCardRequestHandler(
-                    Faction, DrawOptions(), "Take a card from your draw deck and play it").BroadCast();
-
-                // Only reachable through a host timeout / Skip decision — the modal has no Cancel
-                // while the pick is required, and MutatorTriggers guarantees at least one option.
-                return pick.ResponseCardIds.Count == 0
-                    ? CardStepResult.Nothing
-                    : CardStepResult.PlayCard(pick.ResponseCardIds[0]);
-            })
+            new PlayCardStep(this, PlayChoice.From(_ => DrawOptions(), "Take a card from your draw deck and play it"))
             .RequiringPreviousStep()
         };
     }

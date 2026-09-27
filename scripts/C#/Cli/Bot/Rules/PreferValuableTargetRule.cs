@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// When a card step asks for its target, prefer the option whose outcome is worth the most victory
-/// points. The asking step lists what every option would do (<see cref="CardStep.PossibleOutcomes()"/>),
+/// When a card step asks for its target — a country, unit, faction, or the card a play step takes —
+/// prefer the option whose outcome is worth the most victory points. The asking step lists what every option would do (<see cref="CardStep.PossibleOutcomes()"/>),
 /// so each option is valued by projecting exactly the event it causes.
 ///
 /// Fires only on the step's OWN choice: a prompt raised under the step for something else — the
@@ -22,19 +22,43 @@ public sealed class PreferValuableTargetRule : IBotRule
 
     public IReadOnlySet<string> Kinds { get; } = new HashSet<string>
     {
-        "SelectCountry", "SelectUnit", "SelectBattleTarget", "SelectFaction",
+        "SelectCountry", "SelectUnit", "SelectBattleTarget", "SelectFaction", "SelectCard",
     };
 
     public IReadOnlySet<CliOptionKind> OptionKinds { get; } = new HashSet<CliOptionKind>
     {
-        CliOptionKind.Country, CliOptionKind.Unit, CliOptionKind.Faction,
+        CliOptionKind.Country, CliOptionKind.Unit, CliOptionKind.Faction, CliOptionKind.Card,
     };
 
     public bool AppliesTo(BotDecision decision) => decision.Request.OriginStepId >= 0;
 
+    /// <summary>
+    /// A play step asking which card to take (Reallocate Resources): each candidate is worth what playing
+    /// it would achieve. Only the step's own candidates are scored, so any other card prompt raised under
+    /// it is left alone.
+    /// </summary>
+    private static void ScorePlays(BotDecision decision, CardStep step, IBotVerdictSink sink)
+    {
+        IReadOnlyList<int> candidates;
+        try { candidates = step.PossiblePlays(step.PreviousOutcome); }
+        catch (System.Exception) { return; }
+        if (candidates == null) return;
+
+        for (int i = 0; i < decision.Options.Count; i++)
+        {
+            CliOption option = decision.Options[i];
+            if (option.Kind != CliOptionKind.Card || !candidates.Contains(option.Id)) continue;
+
+            double? value = ProjectionValuer.ValuePlay(option.Id, decision.Faction);
+            if (value is double v && v != 0) sink.Score(i, v);
+        }
+    }
+
     public void Apply(BotDecision decision, IBotVerdictSink sink)
     {
         if (!GameSession.Current.GameState.CardStepsById.TryGetValue(decision.Request.OriginStepId, out CardStep step)) return;
+
+        if (step.Kind == StepKind.PlayCard) { ScorePlays(decision, step, sink); return; }
 
         IReadOnlyList<StepOption> outcomes = step.PossibleOutcomes();
         if (outcomes == null) return;

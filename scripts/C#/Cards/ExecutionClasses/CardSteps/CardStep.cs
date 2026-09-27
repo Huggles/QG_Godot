@@ -184,6 +184,9 @@ public abstract partial class CardStep : ITaggable
     /// <summary>As above, after a hypothetical <paramref name="previous"/> — how a projection chains steps.</summary>
     public virtual IReadOnlyList<StepOption> PossibleOutcomes(StepOption? previous) => null;
 
+    /// <summary>The cards a play step could play after <paramref name="previous"/>, or null when it cannot say. See <see cref="PlayChoice"/>.</summary>
+    public virtual IReadOnlyList<int> PossiblePlays(StepOption? previous) => null;
+
     /// <summary>
     /// Apply the result. One seam per step kind, and the only place a step's effect reaches the game.
     /// </summary>

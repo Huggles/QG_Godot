@@ -27,9 +27,6 @@ public partial class StatusGuards : StatusCardLogic
         };
     }
 
-    /// <summary>The Build Army card recovered from the discard pile, played by the final step.</summary>
-    private int _buildArmyCardId = -1;
-
     /// <summary>The first Build Army card in the discard pile — the one the recycle step recovers.</summary>
     private int DiscardedBuildArmyCardId => DeckState.ForFaction(Faction).DiscardedCardIds
         .First(id => CardState.ForId(id).CardData.CardType == CardType.BUILD_ARMY);
@@ -47,11 +44,11 @@ public partial class StatusGuards : StatusCardLogic
 
             // Recycled to hand first, then PLAYED from there, so the play emits a real
             // PlayCardChangeEvent — which is what lets reaction cards (Women Conscripts) trigger on it.
-            new RequirementStep(this, Choose.Fixed(() => new RecycleCardChangeEvent(Faction, Faction, DiscardedBuildArmyCardId, RecycleDestination.Hand))
-                .OnChosen(_ => _buildArmyCardId = DiscardedBuildArmyCardId))
+            new RequirementStep(this, Choose.Fixed(() => new RecycleCardChangeEvent(Faction, Faction, DiscardedBuildArmyCardId, RecycleDestination.Hand)))
             .RequiringPreviousStep(),
 
-            new PlayCardStep(this, () => Task.FromResult(CardStepResult.PlayCard(_buildArmyCardId)))
+            // Plays exactly the card the recycle step moved to hand, read off that step's outcome.
+            new PlayCardStep(this, PlayChoice.Fixed(previous => ((RecycleCardChangeEvent)previous.Value.Event).CardId))
             .RequiringPreviousStep()
         };
     }

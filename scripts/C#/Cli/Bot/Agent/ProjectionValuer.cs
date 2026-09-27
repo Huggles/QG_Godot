@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Prices a projected board for one faction, in victory points relative to the live board — and
@@ -71,11 +72,12 @@ public static class ProjectionValuer
     /// <summary>
     /// The best a card could do if played now: its unfinished steps projected in order, each step
     /// taking its best option given the one before it. Null when any step cannot say what it does —
-    /// a free-form step, a nested card play, an event the projection does not model.
+    /// a free-form step, an event the projection does not model.
     ///
     /// Steps are treated as all running: conditions are not checked, since a later step's conditions
     /// read a board the earlier steps have not changed yet. A step with no options does nothing and
-    /// hands the next step no previous outcome.
+    /// hands the next step no previous outcome. A step that plays another card (Reallocate Resources,
+    /// Guards) is worth its best candidate, played out on the board as it stands at that step.
     /// </summary>
     public static double? ValueCard(int cardId, Faction faction)
     {
@@ -85,41 +87,116 @@ public static class ProjectionValuer
         List<StepOption> built = new();
         try
         {
-            BoardProjection board = BoardProjection.FromLive();
-            StepOption? previous = null;
-
-            foreach (CardStep step in card.CardSteps)
-            {
-                if (step.StepFinished) continue;
-                // No ChangeEvent to project: a registered modifier, or a block of someone else's event.
-                if (step.Kind == StepKind.Effect || step.Kind == StepKind.Block) { previous = null; continue; }
-
-                IReadOnlyList<StepOption> outcomes = step.PossibleOutcomes(previous);
-                if (outcomes == null) return null;
-                built.AddRange(outcomes);
-                if (outcomes.Count == 0) { previous = null; continue; }
-
-                BoardProjection bestBoard = null;
-                StepOption best = default;
-                double bestValue = double.NegativeInfinity;
-                foreach (StepOption outcome in outcomes)
-                {
-                    BoardProjection tried = board.Fork();
-                    if (!tried.Apply(outcome.Event)) continue;
-                    double value = Value(tried, faction);
-                    if (value > bestValue) { bestValue = value; bestBoard = tried; best = outcome; }
-                }
-
-                if (bestBoard == null) return null;
-                board = bestBoard;
-                previous = best;
-            }
-
-            return Value(board, faction);
+            BoardProjection board = PlaySteps(card.CardSteps.Where(s => !s.StepFinished), BoardProjection.FromLive(), faction, 0, built);
+            return board == null ? null : Value(board, faction);
         }
         finally
         {
             StepChoice.Release(built);
         }
+    }
+
+    /// <summary>
+    /// What a play step would gain by playing <paramref name="cardId"/> now: the card leaves its pile
+    /// and all its steps are projected. For the prompt in which such a step asks which card to take.
+    /// </summary>
+    public static double? ValuePlay(int cardId, Faction faction)
+    {
+        CardLogic card = CardState.ForId(cardId)?.CardLogic;
+        if (card == null) return null;
+
+        List<StepOption> built = new();
+        try
+        {
+            BoardProjection board = BoardProjection.FromLive();
+            board.PlayCard(cardId);
+            if (board.IsUnknown) return null;
+            board = PlaySteps(card.CardSteps, board, faction, 1, built);
+            return board == null ? null : Value(board, faction);
+        }
+        finally
+        {
+            StepChoice.Release(built);
+        }
+    }
+
+    /// <summary>How deep one card playing another may nest before the valuer stops following it.</summary>
+    private const int MaxPlayDepth = 2;
+
+    /// <summary>Project <paramref name="steps"/> onto <paramref name="board"/>, best option each; null when unknown.</summary>
+    private static BoardProjection PlaySteps(IEnumerable<CardStep> steps, BoardProjection board, Faction faction,
+                                             int depth, List<StepOption> built)
+    {
+        StepOption? previous = null;
+        foreach (CardStep step in steps)
+        {
+            // No ChangeEvent to project: a registered modifier, or a block of someone else's event.
+            if (step.Kind == StepKind.Effect || step.Kind == StepKind.Block) { previous = null; continue; }
+
+            if (step.Kind == StepKind.PlayCard)
+            {
+                board = PlayBestCandidate(step, previous, board, faction, depth, built);
+                if (board == null) return null;
+                previous = null;
+                continue;
+            }
+
+            IReadOnlyList<StepOption> outcomes = step.PossibleOutcomes(previous);
+            if (outcomes == null) return null;
+            built.AddRange(outcomes);
+            if (outcomes.Count == 0) { previous = null; continue; }
+
+            BoardProjection bestBoard = null;
+            StepOption best = default;
+            double bestValue = double.NegativeInfinity;
+            foreach (StepOption outcome in outcomes)
+            {
+                BoardProjection tried = board.Fork();
+                if (!tried.Apply(outcome.Event)) continue;
+                double value = Value(tried, faction);
+                if (value > bestValue) { bestValue = value; bestBoard = tried; best = outcome; }
+            }
+
+            if (bestBoard == null) return null;
+            board = bestBoard;
+            previous = best;
+        }
+        return board;
+    }
+
+    /// <summary>
+    /// A play step: each candidate card leaves its pile as DeckState.PlayCard would move it, then its
+    /// own steps are projected — all of them, since a recycled card is re-armed before it is played.
+    /// Candidates that cannot be valued are skipped; null only when none can.
+    /// </summary>
+    private static BoardProjection PlayBestCandidate(CardStep step, StepOption? previous, BoardProjection board,
+                                                     Faction faction, int depth, List<StepOption> built)
+    {
+        if (depth >= MaxPlayDepth) return null;
+
+        IReadOnlyList<int> candidates;
+        try { candidates = step.PossiblePlays(previous); }
+        catch (Exception) { return null; }
+        if (candidates == null) return null;
+        if (candidates.Count == 0) return board;
+
+        BoardProjection bestBoard = null;
+        double bestValue = double.NegativeInfinity;
+        foreach (int candidate in candidates)
+        {
+            CardLogic logic = CardState.ForId(candidate)?.CardLogic;
+            if (logic == null) continue;
+
+            BoardProjection tried = board.Fork();
+            tried.PlayCard(candidate);
+            if (tried.IsUnknown) continue;
+
+            tried = PlaySteps(logic.CardSteps, tried, faction, depth + 1, built);
+            if (tried == null) continue;
+
+            double value = Value(tried, faction);
+            if (value > bestValue) { bestValue = value; bestBoard = tried; }
+        }
+        return bestBoard;
     }
 }

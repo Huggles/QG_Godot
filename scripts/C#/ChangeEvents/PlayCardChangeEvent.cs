@@ -35,6 +35,9 @@ public partial class PlayCardChangeEvent : ChangeEvent
                 : $"{TriggeringFaction.WithPlayer()} plays a Response card")
     };
 
+    /// <summary>Mirror of ExecuteAsync's DeckState.PlayCard; the per-turn play counter is not modelled.</summary>
+    public override void Project(BoardProjection projection) => projection.PlayCard(SourceCardId);
+
     protected override async Task<bool> ExecuteAsync(){
         DeckState.ForFaction(SourceCardState.Faction).PlayCard(SourceCardState.Id);
         
