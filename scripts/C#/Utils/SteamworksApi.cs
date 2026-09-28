@@ -207,9 +207,9 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_steam.LeaderboardScoreUploadedSignal    += OnLeaderboardScoreUploaded;
 		_steam.PersonaStateChangeSignal          += OnPersonaStateChange;
 
-		// Both stat signals, because GodotSteam auto-init may already have asked for the player's stats
-		// before this class existed — whichever one still arrives marks them loaded.
-		_steam.CurrentStatsReceivedSignal  += OnStatsReceived;
+		// Only user_stats_received: GodotSteam 4.21 no longer has current_stats_received, although the C#
+		// bindings still list it. If auto-init's stats answer landed before this class existed,
+		// StatsLoaded falls back to the achievement count.
 		_steam.UserStatsReceivedSignal     += OnStatsReceived;
 		_steam.UserAchievementStoredSignal += OnUserAchievementStored;
 
