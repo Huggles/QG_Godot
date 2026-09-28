@@ -23,10 +23,10 @@ using System.Collections.Generic;
 ///    turns a clear preference into a veto-then-rescue round trip that shows up as `floored` noise
 ///    and tells you nothing.
 ///
-/// Gated on <see cref="PromptPurpose.DEPLOY_TARGET"/>, which the asking STEP declares. Without that
-/// gate this rule is actively harmful rather than merely useless: "prefer a country I do not occupy"
-/// applied to a prompt asking "which of your own units' spaces?" prefers the space with no unit in it.
-/// PromptPurpose.NONE therefore means do nothing.
+/// Gated on the asking step's listed outcomes (<see cref="BotDecision.DeployTargets"/>): it fires only
+/// on options that would deploy. Without that gate this rule is actively harmful rather than merely
+/// useless: "prefer a country I do not occupy" applied to a prompt asking "which of your own units'
+/// spaces?" prefers the space with no unit in it.
 /// </summary>
 public sealed class PreferVacantDeployRule : IBotRule
 {
@@ -53,15 +53,25 @@ public sealed class PreferVacantDeployRule : IBotRule
     /// alone, because this rule's advice is inverted on some of the prompts it would otherwise match.
     /// </summary>
     public bool AppliesTo(BotDecision decision)
-        => decision.Spec.OriginPurpose == PromptPurpose.DEPLOY_TARGET;
+        => decision.DeployTargets().Count > 0;
+
+    /// <summary>
+    /// Who deploys if this option is chosen, read off the step's outcomes — so Arsenal of Democracy
+    /// scores for the UK, which builds. False for an option that does not deploy.
+    /// </summary>
+    internal static bool DeployingFaction(BotDecision decision, int countryId, out Faction deployer)
+    {
+        return decision.DeployTargets().TryGetValue(countryId, out deployer);
+    }
 
     public void Apply(BotDecision decision, IBotVerdictSink sink)
     {
         for (int i = 0; i < decision.Options.Count; i++)
         {
             if (decision.Options[i].Kind != CliOptionKind.Country) continue;
+            if (!DeployingFaction(decision, decision.Options[i].Id, out Faction deployer)) continue;
 
-            Condition occupied = new Condition.CountryHasFactionUnit(decision.Options[i].Id, decision.Faction);
+            Condition occupied = new Condition.CountryHasFactionUnit(decision.Options[i].Id, deployer);
             if (!occupied.MeetCondition()) sink.Score(i, VacantBonus);
         }
     }

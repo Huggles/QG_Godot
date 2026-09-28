@@ -60,7 +60,7 @@ public sealed class InputRequestSpec
     public PassMode Pass;
 
     /// <summary>
-    /// What the prompt is for and which card asked, copied verbatim off the request. PASS-THROUGH
+    /// Which card and step asked, copied verbatim off the request. PASS-THROUGH
     /// ONLY — no field here changes what may be chosen.
     ///
     /// That distinction is the whole reason they are allowed in this file at all: this table is the
@@ -70,9 +70,6 @@ public sealed class InputRequestSpec
     /// reaching into the request behind the table's back.
     /// </summary>
     public int OriginCardId;
-
-    /// <inheritdoc cref="OriginCardId"/>
-    public PromptPurpose OriginPurpose;
 
     /// <summary>
     /// Whether this prompt belongs to a COST step or an effect step — see
@@ -93,7 +90,6 @@ public sealed class InputRequestSpec
             Faction = request.TargetFaction,
             Factions = request.Answering.ToList(),
             OriginCardId = request.OriginCardId,
-            OriginPurpose = request.OriginPurpose,
             OriginStepKind = request.OriginStepKind,
         };
 

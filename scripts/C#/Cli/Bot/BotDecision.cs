@@ -90,6 +90,33 @@ public sealed class BotDecision
         => new(request, spec, agenda);
 
     /// <summary>
+    /// The countries this prompt's options would deploy into, each with the faction that deploys —
+    /// read off the asking step's listed outcomes, so any card that deploys counts. Empty when the
+    /// prompt is not a deploy.
+    /// </summary>
+    public IReadOnlyDictionary<int, Faction> DeployTargets() => Cached("deploy_targets", () =>
+    {
+        Dictionary<int, Faction> targets = new();
+        if (Request.OriginStepId < 0
+            || !GameSession.Current.GameState.CardStepsById.TryGetValue(Request.OriginStepId, out CardStep step))
+            return targets;
+
+        IReadOnlyList<StepOption> outcomes = step.PossibleOutcomes();
+        if (outcomes == null) return targets;
+        try
+        {
+            foreach (StepOption outcome in outcomes)
+                if (outcome.Target is { Kind: TargetKind.Country } target && outcome.Event is DeployUnitChangeEvent deploy)
+                    targets[target.Id] = deploy.TriggeringFaction;
+        }
+        finally
+        {
+            StepChoice.Release(outcomes);
+        }
+        return targets;
+    });
+
+    /// <summary>
     /// Memoise a per-prompt state read. The key is the caller's business; prefix it with the rule name
     /// unless the value is genuinely shared.
     /// </summary>

@@ -1,49 +1,6 @@
 using System;
 
 /// <summary>
-/// What a prompt is FOR, declared by the step that raises it.
-///
-/// Needed because an <see cref="InputRequest.SelectCountryRequestHandler"/> is byte-identical whether
-/// BuildArmy wants a deploy target, StatusConscription wants a recruit space, or a card wants the
-/// country one of your own units is standing in — roughly forty call sites, all constructed the same
-/// way. A bot rule about WHERE TO BUILD cannot work without being told which of those it is looking at.
-///
-/// The two tempting ways to infer it instead are both worse than useless:
-///
-///  - Matching the step's ActionGuidance string. That is player-facing copy, interpolated at runtime:
-///    the real corpus includes "Build an army", "Recruit an Army in the Balkans", "Select where to
-///    rebuild the German Army" and $"Build an army in {country.Label}". No stable token, and
-///    EventGunsandButter raises a build prompt AND a battle prompt from one step under one guidance
-///    string. A copy edit would silently change bot behaviour with no compile error.
-///  - Inferring from the offer set. CountryState.CanRecruit is "empty or occupied by my own team", so
-///    EVERY country holding one of your own units is recruitable by definition. The prompts that ask
-///    "which of your own units' spaces?" therefore pass a "looks like a build" test, and a
-///    prefer-vacant rule would invert on them — preferring to eliminate a unit from an EMPTY space.
-///    An undeclared purpose degrades to today's random behaviour; an inferred one degrades to
-///    confidently wrong.
-/// </summary>
-public enum PromptPurpose
-{
-    /// <summary>
-    /// Undeclared. Every rule that reads a purpose MUST treat this as "do not fire", so a step nobody
-    /// has annotated behaves exactly as it did before this existed.
-    /// </summary>
-    NONE,
-
-    /// <summary>Where to place a unit — a build, a recruit, or a rebuild.</summary>
-    DEPLOY_TARGET,
-
-    /// <summary>What to attack.</summary>
-    BATTLE_TARGET,
-
-    /// <summary>Which unit to remove, whether the player's own or an enemy's.</summary>
-    REMOVE_TARGET,
-
-    /// <summary>Where to move an existing unit to.</summary>
-    RELOCATE_TARGET,
-}
-
-/// <summary>
 /// The card step currently executing, so <see cref="NetworkApi.SendInputRequest"/> can stamp its
 /// identity onto every prompt that step raises.
 ///
@@ -73,16 +30,15 @@ public enum PromptPurpose
 public static class PromptOrigin
 {
     /// <summary>
-    /// Who is asking, and what for. Null outside any card step.
+    /// Who is asking. Null outside any card step. What an option would DO is not stamped: the asking
+    /// step lists it (CardStep.PossibleOutcomes), which is exact where a declared purpose was a label.
     ///
-    /// <c>Kind</c> is the structural half of the answer and <c>Purpose</c> the semantic one: Purpose
-    /// says what is being chosen (a deploy target, a battle target), Kind says why the step is asking
-    /// at all — a <see cref="StepKind.Requirement"/> prompt is a COST the card is charging, a
-    /// <see cref="StepKind.Result"/> prompt is the payoff. A bot needs both to price "discard 2 to
+    /// <c>Kind</c> says why the step is asking at all — a <see cref="StepKind.Requirement"/> prompt is a COST the card is charging, a
+    /// <see cref="StepKind.Result"/> prompt is the payoff. A bot needs it to price "discard 2 to
     /// deploy 1", and before the typed steps there was no way to tell them apart without running the
     /// step. <see cref="StepKind.Result"/> is the neutral default for a synthesised frame.
     /// </summary>
-    public readonly record struct Frame(int CardId, int StepId, PromptPurpose Purpose, StepKind Kind);
+    public readonly record struct Frame(int CardId, int StepId, StepKind Kind);
 
     /// <summary>
     /// The innermost step currently executing. Host-side only and never serialised — the request
@@ -105,26 +61,7 @@ public static class PromptOrigin
         Current = new Frame(
             step?.CardLogic?.CardState?.Id ?? -1,
             step?.Id ?? -1,
-            step?.Purpose ?? PromptPurpose.NONE,
             step?.Kind ?? StepKind.Result);
-        return new Scope(displaced);
-    }
-
-    /// <summary>
-    /// Re-declare the purpose for part of a step, keeping the card and step identity.
-    ///
-    /// For the places where the step is not a fine enough unit — EventGunsandButter's single step
-    /// raises a SelectOption and then EITHER a build target OR a battle target, so no per-step purpose
-    /// can describe both — and for the two prompt raisers that run outside any step at all
-    /// (MutatorRedeployAfterPlayCard, UnitPoolShortfall), where there is no frame to keep and one is
-    /// synthesised.
-    /// </summary>
-    public static Scope Narrow(PromptPurpose purpose)
-    {
-        Frame? displaced = Current;
-        Current = displaced is { } frame
-            ? new Frame(frame.CardId, frame.StepId, purpose, frame.Kind)
-            : new Frame(-1, -1, purpose, StepKind.Result);
         return new Scope(displaced);
     }
 

@@ -68,8 +68,8 @@ public abstract partial class CardStep : ITaggable
 
     // internal, not private: the fluent builders are generic extension methods — see
     // CardStepBuilders for why they cannot be instance methods. One assembly, so internal costs
-    // nothing, and System.Text.Json ignores non-public members, which strengthens the rule on
-    // Purpose below that authored card data must never enter the saved game.
+    // nothing, and System.Text.Json ignores non-public members, which strengthens the rule
+    // that authored card data must never enter the saved game.
     [JsonIgnore] internal Func<List<Condition>> GetConditionsMethod;
     [JsonIgnore] internal Func<List<Condition>> GetAdvisoryConditionsMethod;
     [JsonIgnore] internal bool RequiresPreviousStep;
@@ -118,20 +118,6 @@ public abstract partial class CardStep : ITaggable
             return advisory == null || advisory.All(condition => condition.MeetCondition());
         }
     }
-
-    /// <summary>
-    /// What this step's prompts are FOR, so a bot rule can tell a deploy-target country selection from
-    /// the thirty-odd other reasons a card asks for a country. Declared with
-    /// <see cref="CardStepBuilders.WithPurpose"/>; <see cref="PromptPurpose.NONE"/> until it is.
-    ///
-    /// [JsonIgnore] is mandatory, not tidiness. Steps register themselves into
-    /// GameSession.Current.GameState.CardSteps, and Id / StepFinished / StepSucceeded / ActionGuidance
-    /// are all public and serialised — so a bare public field here would enter the saved game and the
-    /// state hash. This is a property of the AUTHORED CARD, identical on every peer and across every
-    /// save, and it must never be state. The same rule governs <see cref="Kind"/> and
-    /// <see cref="RecalcScope"/> below.
-    /// </summary>
-    [JsonIgnore] public PromptPurpose Purpose = PromptPurpose.NONE;
 
     /// <summary>What kind of step this is, structurally. See <see cref="StepKind"/>.</summary>
     [JsonIgnore] public abstract StepKind Kind { get; }

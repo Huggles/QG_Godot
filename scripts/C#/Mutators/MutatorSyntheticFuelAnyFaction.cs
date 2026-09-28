@@ -66,7 +66,6 @@ public partial class MutatorSyntheticFuelAnyFaction : ActivatableMutator
             new ResultStep(this, Choose.CountryFrom(() => DeployTargets.ToCountryIds(),
                 countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .RequiringPreviousStep()
-            .WithPurpose(PromptPurpose.DEPLOY_TARGET)
         };
     }
 }
