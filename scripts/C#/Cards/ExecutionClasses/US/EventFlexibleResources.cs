@@ -18,15 +18,15 @@ public partial class EventFlexibleResources : EventCardLogic
     /// Used by the step condition as well as the offer, so a pile holding nothing but this card
     /// leaves the step unexecutable rather than raising a prompt with no valid choice.
     /// </summary>
-    private List<int> PlayableDiscardedCardIds =>
-        DeckState.ForFaction(Faction).DiscardedCardIds.Where(id => id != CardState.Id).ToList();
+    private List<int> PlayableDiscardedCardIds(BoardState board) =>
+        board.ForFaction(Faction).Discarded.Where(id => id != CardState.Id).ToList();
 
     /// <summary>
     /// The discard pile this may reach into. Card targets name no board space, so this lights nothing
     /// on the map today — it is declared because the offer is genuinely a target set, and the CLI and
     /// any future card-strip preview read the same field.
     /// </summary>
-    public override TargetSet Targets() => TargetSet.Cards(PlayableDiscardedCardIds);
+    public override TargetSet Targets() => TargetSet.Cards(PlayableDiscardedCardIds(BoardState.Live));
 
     /// <summary>The discard-pile card chosen by the first step, played by the second.</summary>
     private int _selectedCardId = -1;
@@ -36,7 +36,7 @@ public partial class EventFlexibleResources : EventCardLogic
         return new List<CardStep>
         {
             new RequirementStep(this, async () => {
-                var resp = await new InputRequest.CardsRequestHandler(Faction, PlayableDiscardedCardIds).BroadCast();
+                var resp = await new InputRequest.CardsRequestHandler(Faction, PlayableDiscardedCardIds(BoardState.Live)).BroadCast();
 
                 // Declining leaves an EMPTY response rather than setting WasSkipped — that is
                 // CardsRequestHandler's pass idiom (PassMode.EmptyResponse), so BroadCast does not
@@ -47,8 +47,8 @@ public partial class EventFlexibleResources : EventCardLogic
                 _selectedCardId = resp.ResponseCardIds[0];
                 return new RecycleCardChangeEvent(Faction, Faction, _selectedCardId, RecycleDestination.Hand);
             })
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-                PlayableDiscardedCardIds.Count > 0), this))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                PlayableDiscardedCardIds(s.Board).Count > 0), this))
             .WithGuidance("Play a card of your choice from your discard pile"),
 
             new PlayCardStep(this, () => Task.FromResult(CardStepResult.PlayCard(_selectedCardId)))

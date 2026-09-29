@@ -13,8 +13,8 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.CurrentReactionTrigger is not DeployUnitChangeEvent deployEvent) return false;
+            Condition.Build(new Condition.CustomCondition(s => {
+                if (s.ReactionTrigger is not DeployUnitChangeEvent deployEvent) return false;
                 return StaticGameData.FactionTeamForFaction(deployEvent.TriggeringFaction) == FactionTeam.AXIS
                     && deployEvent.UnitType == UnitType.ARMY
                     && TargetCountries.Contains(deployEvent.CountryState.Country);
@@ -25,8 +25,8 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, Choose.Fixed(() => {
-                var deployEvent = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
+            new ResultStep(this, Choose.Fixed(c => {
+                var deployEvent = c.Situation.ReactionTrigger as DeployUnitChangeEvent;
                 if (deployEvent == null) return null;
                 return new RemoveUnitChangeEvent(Faction, deployEvent.UnitId, UnitRemovalReason.ELIMINATE);
             }))

@@ -241,7 +241,8 @@ public sealed partial class BoardState
 
     // ── Cards ───────────────────────────────────────────────────────────────
 
-    public bool IsPlayed(CardState card) => Of(card).Tags.Has(Tag.IsPlayed, card.Faction);
-    public bool IsDiscarded(CardState card) => ForFaction(card.Faction).Discarded.Contains(card.Id);
+    // Through the card: a Bulletin is always played and never discarded, whatever the piles say.
+    public bool IsPlayed(CardState card) => card.IsPlayedOn(this);
+    public bool IsDiscarded(CardState card) => card.IsDiscardedOn(this);
     public int ScoreOf(Faction faction) => ForFaction(faction).Score;
 }

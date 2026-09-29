@@ -29,8 +29,8 @@ public partial class EventDivisionAzul : EventCardLogic
 
                 return discardEvent;
             })
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-                DeckState.ForFaction(Faction.SOVIET).ResponseCardIds.Count > 0), this))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.ForFaction(Faction.SOVIET).Response.Count > 0), this))
             .WithGuidance("Discard a random Soviet Response card from the table")
         };
     }

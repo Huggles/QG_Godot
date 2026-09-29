@@ -6,16 +6,16 @@ using Godot;
 
 public partial class StatusBravado : StatusCardLogic
 {
-    private List<BattleTarget> LandBattleTargets =>
-        CountryState.AttackableLand(Faction)
+    private List<BattleTarget> LandBattleTargets(BoardState board) =>
+        board.AttackableLand(Faction)
             .Select(cs => new BattleTarget(cs.Id, TargetType.COUNTRY))
-            .Concat(UnitState.AttackableArmies(Faction)
+            .Concat(board.AttackableArmies(Faction)
                 .Select(us => new BattleTarget(us.Id, TargetType.UNIT)))
             .Distinct()
             .ToList();
 
     /// <summary>Every land space and enemy army this may attack.</summary>
-    public override TargetSet Targets() => TargetSet.FromBattleTargets(LandBattleTargets);
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(LandBattleTargets(BoardState.Live));
 
     protected override List<Condition> CardTriggers()
     {
@@ -30,14 +30,14 @@ public partial class StatusBravado : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
             .WithGuidance("Discard the top 2 cards of your draw deck to battle a land space"),
 
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),
 
-            new ResultStep(this, Choose.BattleTargetFrom(() => LandBattleTargets,
-                target => target.ToAttackChangeEvent(Faction)))
+            new ResultStep(this, Choose.BattleTargetFrom(c => LandBattleTargets(c.Board),
+                (target, _) => target.ToAttackChangeEvent(Faction)))
             .RequiringPreviousStep()
         };
     }

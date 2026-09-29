@@ -14,8 +14,8 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
-            Condition.Build(new Condition.CustomCondition(()=>{
-                if(CardPlayPool.CurrentBlockTrigger is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
+            Condition.Build(new Condition.CustomCondition(s=>{
+                if(s.BlockTrigger is ForceDiscardCardsChangeEvent ForceDiscardCardsChangeEvent){
                     bool isEW = ForceDiscardCardsChangeEvent.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE;
                     bool targetIsMe = ForceDiscardCardsChangeEvent.TargetFaction == Faction;
                     return isEW && targetIsMe;

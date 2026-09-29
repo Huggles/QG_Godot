@@ -14,27 +14,27 @@ public partial class EWB26Marauder : EWCardLogic
 
     /// <summary>The Axis homes in reach, paired with the US Armies putting them there. One pass,
     /// read by the faction list, the condition and <see cref="Targets"/> alike.</summary>
-    private List<(Country Home, List<UnitState> Armies, Faction AxisFaction)> QualifyingHomes() =>
+    private List<(Country Home, List<UnitState> Armies, Faction AxisFaction)> QualifyingHomes(BoardState board) =>
         AxisHomes
             .Select(pair => (
                 Home: pair.HomeCountry,
-                Armies: FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+                Armies: board.ActiveUnits(Faction)
                     .Where(us => us.Type == UnitType.ARMY)
-                    .Where(us => PathFindingService.IsWithinGeographicDistance(us.CountryId, (int)pair.HomeCountry, 3))
+                    .Where(us => PathFindingService.IsWithinGeographicDistance(board.CountryOf(us), (int)pair.HomeCountry, 3))
                     .ToList(),
                 pair.AxisFaction))
             .Where(entry => entry.Armies.Count > 0)
             .ToList();
 
-    private List<Faction> QualifyingAxisFactions() =>
-        QualifyingHomes().Select(entry => entry.AxisFaction).ToList();
+    private List<Faction> QualifyingAxisFactions(BoardState board) =>
+        QualifyingHomes(board).Select(entry => entry.AxisFaction).ToList();
 
     /// <summary>Every home this card could reach, and the Armies putting them in range — which is
     /// what the card text leaves you to work out for yourself. These are the candidates the
     /// selection modal offers; only the one the player picks is actually hit.</summary>
     public override TargetSet Targets()
     {
-        var qualifying = QualifyingHomes();
+        var qualifying = QualifyingHomes(BoardState.Live);
         return TargetSet.Countries(qualifying.Select(entry => entry.Home).ToList())
             .Plus(TargetSet.Units(qualifying.SelectMany(entry => entry.Armies).ToList()));
     }
@@ -45,9 +45,9 @@ public partial class EWB26Marauder : EWCardLogic
         {
             // One target, not every qualifier: the card text's "that country" is singular, so the
             // player chooses which reachable Axis power takes the hit.
-            new ResultStep(this, Choose.FactionFrom(QualifyingAxisFactions,
-                targetFaction => new ForceDiscardCardsChangeEvent(Faction, targetFaction, 4)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => QualifyingAxisFactions().Count > 0), this))
+            new ResultStep(this, Choose.FactionFrom(c => QualifyingAxisFactions(c.Board),
+                (targetFaction, _) => new ForceDiscardCardsChangeEvent(Faction, targetFaction, 4)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => QualifyingAxisFactions(s.Board).Count > 0), this))
             .WithGuidance("Choose an Axis country with a US Army within 3 spaces of its Home to discard 4 cards")
         };
     }

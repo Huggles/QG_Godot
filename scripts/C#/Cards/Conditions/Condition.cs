@@ -762,10 +762,6 @@ public abstract class Condition
 
         public CustomCondition(Func<GameSituation, bool> condition) => this.Condition = condition;
 
-        /// <summary>A predicate that ignores the situation and reads the live game — wrong on any fork.</summary>
-        [Obsolete("Take the GameSituation: situation => ... and read situation.Board, not the live state.")]
-        public CustomCondition(Func<bool> condition) => this.Condition = _ => condition();
-
         /// <summary>
         /// Marks this predicate as event-scoped: it inspects the situation's reaction trigger
         /// or its event pool, so the card may activate inside a reaction chain.

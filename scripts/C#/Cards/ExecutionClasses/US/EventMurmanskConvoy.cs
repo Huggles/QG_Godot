@@ -18,12 +18,12 @@ public partial class EventMurmanskConvoy : EventCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.CountryFrom(() => recruitCountryIds,
-                countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.RECRUIT)))
+            new ResultStep(this, Choose.CountryFrom(_ => recruitCountryIds,
+                (countryId, _) => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.RECRUIT)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(recruitCountryIds, targetFaction), this))
             .WithGuidance("Recruit a Soviet Army in Russia"),
-            new ResultStep(this, Choose.CountryFrom(() => CountryState.BuildableLand(targetFaction).ToCountryIds(),
-                countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
+            new ResultStep(this, Choose.CountryFrom(c => c.Board.BuildableLand(targetFaction).ToCountryIds(),
+                (countryId, _) => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(targetFaction), this))
             .WithGuidance("Soviet Union may build an Army"),
         };

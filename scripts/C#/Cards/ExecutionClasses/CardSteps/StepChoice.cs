@@ -112,48 +112,25 @@ public abstract class StepChoice
 /// The choice factories a card passes to a <see cref="ResultStep"/> or <see cref="RequirementStep"/>.
 /// Each wraps exactly the InputRequest the free-form bodies used, so a converted step prompts the same.
 ///
-/// The lambdas take a <see cref="StepContext"/> and read the board and trigger through it. The forms
-/// without one read the live game, which is wrong on a forked board, and are kept only until every
-/// card is converted.
+/// The lambdas take a <see cref="StepContext"/> and read the board and trigger through it, never the
+/// live game, so the same step answers for a forked board.
 /// </summary>
 public static class Choose
 {
-    private const string LiveOnly = "Take the StepContext: c => ... and read c.Board / c.Situation, not the live state.";
-
     public static StepChoice CountryFrom(Func<StepContext, List<int>> countryIds, Func<int, StepContext, ChangeEvent> outcome)
         => new CountryChoice(countryIds, outcome);
-
-    [Obsolete(LiveOnly)]
-    public static StepChoice CountryFrom(Func<List<int>> countryIds, Func<int, ChangeEvent> outcome)
-        => new CountryChoice(_ => countryIds(), (id, _) => outcome(id));
 
     public static StepChoice UnitFrom(Func<StepContext, List<int>> unitIds, Func<int, StepContext, ChangeEvent> outcome, bool allowSkip = true)
         => new UnitChoice(unitIds, outcome, allowSkip);
 
-    [Obsolete(LiveOnly)]
-    public static StepChoice UnitFrom(Func<List<int>> unitIds, Func<int, ChangeEvent> outcome, bool allowSkip = true)
-        => new UnitChoice(_ => unitIds(), (id, _) => outcome(id), allowSkip);
-
     public static StepChoice FactionFrom(Func<StepContext, List<Faction>> factions, Func<Faction, StepContext, ChangeEvent> outcome)
         => new FactionChoice(factions, outcome);
-
-    [Obsolete(LiveOnly)]
-    public static StepChoice FactionFrom(Func<List<Faction>> factions, Func<Faction, ChangeEvent> outcome)
-        => new FactionChoice(_ => factions(), (f, _) => outcome(f));
 
     public static StepChoice BattleTargetFrom(Func<StepContext, List<BattleTarget>> targets, Func<BattleTarget, StepContext, ChangeEvent> outcome)
         => new BattleTargetChoice(targets, outcome);
 
-    [Obsolete(LiveOnly)]
-    public static StepChoice BattleTargetFrom(Func<List<BattleTarget>> targets, Func<BattleTarget, ChangeEvent> outcome)
-        => new BattleTargetChoice(_ => targets(), (t, _) => outcome(t));
-
     /// <summary>No prompt: the step has exactly one outcome.</summary>
     public static StepChoice Fixed(Func<StepContext, ChangeEvent> outcome) => new FixedChoice(outcome);
-
-    /// <inheritdoc cref="Fixed(Func{StepContext, ChangeEvent})"/>
-    [Obsolete(LiveOnly)]
-    public static StepChoice Fixed(Func<ChangeEvent> outcome) => new FixedChoice(_ => outcome());
 
     private sealed class CountryChoice(Func<StepContext, List<int>> ids, Func<int, StepContext, ChangeEvent> outcome) : StepChoice
     {

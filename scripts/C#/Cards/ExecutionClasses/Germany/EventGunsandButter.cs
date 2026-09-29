@@ -71,11 +71,11 @@ public partial class EventGunsAndButter : EventCardLogic
 
                 return result;
             })
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-                CountryState.BuildableLand(Faction).Any()
-                || CountryState.BuildableSea(Faction).Any()
-                || UnitState.AttackableArmies(Faction).Any() || CountryState.AttackableLand(Faction).Any()
-                || UnitState.AttackableNavies(Faction).Any() || CountryState.AttackableSea(Faction).Any()
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.BuildableLand(Faction).Any()
+                || s.Board.BuildableSea(Faction).Any()
+                || s.Board.AttackableArmies(Faction).Any() || s.Board.AttackableLand(Faction).Any()
+                || s.Board.AttackableNavies(Faction).Any() || s.Board.AttackableSea(Faction).Any()
             ), this))
             .WithGuidance("Use this card to: build an army, build a navy, land battle, or sea battle")
         };

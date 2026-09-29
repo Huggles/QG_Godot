@@ -24,19 +24,22 @@ public class BattleTarget
     ///
     /// Not the same question as the instance method CountryState.BattleTargets, which additionally
     /// requires an adjacent supplied unit of its own: that answers "can I reach this country?", this
-    /// answers "what is attackable in it?". Both are live.
+    /// answers "what is attackable in it?". The board-less forms ask the live board.
     /// </summary>
-    public static List<BattleTarget> In(IEnumerable<int> countryIds, Faction faction) =>
+    public static List<BattleTarget> In(IEnumerable<int> countryIds, Faction faction) => In(BoardState.Live, countryIds, faction);
+
+    /// <inheritdoc cref="In(IEnumerable{int}, Faction)"/>
+    public static List<BattleTarget> In(BoardState board, IEnumerable<int> countryIds, Faction faction) =>
         (countryIds ?? Enumerable.Empty<int>())
             .Select(CountryState.ForId)
             .Where(countryState => countryState != null)
             .SelectMany(countryState =>
             {
                 List<BattleTarget> targets = new();
-                if (countryState.Tags.Has(Tag.Attackable, faction))
+                if (board.Of(countryState).Tags.Has(Tag.Attackable, faction))
                     targets.Add(new BattleTarget(countryState.Id, TargetType.COUNTRY));
-                targets.AddRange(countryState.Units.Values
-                    .Where(unitId => UnitState.ForId(unitId).Tags.Has(Tag.Attackable, faction))
+                targets.AddRange(board.UnitsIn(countryState).Values
+                    .Where(unitId => board.Of(UnitState.ForId(unitId)).Tags.Has(Tag.Attackable, faction))
                     .Select(unitId => new BattleTarget(unitId, TargetType.UNIT)));
                 return targets;
             })
@@ -45,6 +48,10 @@ public class BattleTarget
     /// <inheritdoc cref="In(IEnumerable{int}, Faction)"/>
     public static List<BattleTarget> In(IEnumerable<Country> countries, Faction faction) =>
         In(countries?.Select(country => (int)country), faction);
+
+    /// <inheritdoc cref="In(IEnumerable{int}, Faction)"/>
+    public static List<BattleTarget> In(BoardState board, IEnumerable<Country> countries, Faction faction) =>
+        In(board, countries?.Select(country => (int)country), faction);
 
     public BattleCountryChangeEvent ToAttackChangeEvent(Faction faction)
     {

@@ -10,40 +10,39 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     {        
         return new List<Condition> {
             Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD), this).Immediately(),
+            // Built per situation: which spaces are adjacent depends on the deploy being reacted to.
             Condition.Build(
-                new Condition.CountryIsBuildable(
-                    DeployTargets.ToCountryIds(),
-                    Faction),
+                new Condition.CustomCondition(s =>
+                    new Condition.CountryIsBuildable(
+                        DeployTargets(s).ToCountryIds(),
+                        Faction).MeetCondition(s)),
                 this
             )
-            
+
         };
     }
-    
-    public List<CountryState> DeployTargets
+
+    public List<CountryState> DeployTargets(GameSituation situation)
     {
-        get 
-        {
-            var trigger = TriggerContextAs<DeployUnitChangeEvent>();
-            if (trigger == null) return new List<CountryState>();
-            return CountryState.ForId(trigger.CountryId).AdjacentCountryStates(Faction)
-                .Where(countryState => countryState.CanBuild(Faction) && countryState.IsLand)
-                .Distinct()
-                .ToList();
-        }
+        var trigger = TriggerContextAs<DeployUnitChangeEvent>(situation);
+        if (trigger == null) return new List<CountryState>();
+        return situation.Board.AdjacentCountryStates(Faction, CountryState.ForId(trigger.CountryId))
+            .Where(countryState => situation.Board.CanBuild(Faction, countryState) && countryState.IsLand)
+            .Distinct()
+            .ToList();
     }
 
     /// <summary>The spaces adjacent to the deploy that can take the second Army.</summary>
-    public override TargetSet Targets() => TargetSet.Countries(DeployTargets);
+    public override TargetSet Targets() => TargetSet.Countries(DeployTargets(GameSituation.Live));
 
-    public override List<CardStep> OnActivate() 
+    public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .WithGuidance("Deploy an army adjacent to where you've deployed an army this turn"),
 
-            new ResultStep(this, Choose.CountryFrom(() => DeployTargets.ToCountryIds(),
-                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
+            new ResultStep(this, Choose.CountryFrom(c => DeployTargets(c.Situation).ToCountryIds(),
+                (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .RequiringPreviousStep()
         };
     }

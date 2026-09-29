@@ -15,8 +15,8 @@ public partial class EWBomberCommand : EWCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.FactionFrom(() => new List<Faction> { Faction.GERMANY, Faction.ITALY },
-                faction => new ForceDiscardCardsChangeEvent(Faction, faction, 4)))
+            new ResultStep(this, Choose.FactionFrom(_ => new List<Faction> { Faction.GERMANY, Faction.ITALY },
+                (faction, _) => new ForceDiscardCardsChangeEvent(Faction, faction, 4)))
         };
     }
 }

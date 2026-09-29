@@ -12,18 +12,15 @@ public partial class ResponseMobileForce : ResponseCardLogic
     /// <summary>The sea spaces the navy may go to: the North Pacific and its neighbours, filtered to
     /// what is actually recruitable. One expression, read by the step, its condition and the preview.
     /// </summary>
-    private List<CountryState> RecruitTargets
+    private List<CountryState> RecruitTargets(BoardState board)
     {
-        get
-        {
-            var northPacific = CountryState.ForEnum(Country.NorthPacific);
-            return CountryState.RecruitableSea(Faction)
-                .Where(cs => cs == northPacific || northPacific.ConnectedCountryStates.Contains(cs))
-                .ToList();
-        }
+        var northPacific = CountryState.ForEnum(Country.NorthPacific);
+        return board.RecruitableSea(Faction)
+            .Where(cs => cs == northPacific || northPacific.ConnectedCountryStates.Contains(cs))
+            .ToList();
     }
 
-    public override TargetSet Targets() => TargetSet.Countries(RecruitTargets);
+    public override TargetSet Targets() => TargetSet.Countries(RecruitTargets(BoardState.Live));
 
     protected override List<Condition> CardTriggers()
     {
@@ -44,9 +41,9 @@ public partial class ResponseMobileForce : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, Choose.CountryFrom(() => RecruitTargets.ToCountryIds(),
-                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
-            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(() => RecruitTargets.Count > 0), this))
+            new ResultStep(this, Choose.CountryFrom(c => RecruitTargets(c.Board).ToCountryIds(),
+                (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
+            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(s => RecruitTargets(s.Board).Count > 0), this))
             .WithGuidance("Recruit a navy in or adjacent to the North Pacific"),
         }; 
     }

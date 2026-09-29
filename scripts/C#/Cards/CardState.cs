@@ -57,14 +57,20 @@ public partial class CardState : StateObject
         
     }
 
-    public virtual bool IsPlayed => BoardState.Live.IsPlayed(this);
+    public bool IsPlayed => IsPlayedOn(BoardState.Live);
+
+    /// <summary>Whether this card is played on <paramref name="board"/>. The override point: see BulletinCardState.</summary>
+    public virtual bool IsPlayedOn(BoardState board) => board.Of(this).Tags.Has(Tag.IsPlayed, Faction);
 
     /// <summary>
     /// In its owner's discard pile. Deliberately not derived from Tag.IsPlayed — discarded cards keep
     /// that tag (see GameStateCalculator.CalculatePlayedCardsForFaction), so "played" and "discarded"
     /// cannot be told apart by tag alone.
     /// </summary>
-    public virtual bool IsDiscarded => BoardState.Live.IsDiscarded(this);
+    public bool IsDiscarded => IsDiscardedOn(BoardState.Live);
+
+    /// <inheritdoc cref="IsDiscarded"/>
+    public virtual bool IsDiscardedOn(BoardState board) => board.ForFaction(Faction).Discarded.Contains(Id);
 
     /// <summary>
     /// The card face CardScene renders. Virtual so a card that is not a faction card — see

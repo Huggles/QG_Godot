@@ -22,8 +22,8 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
             // the play.
             Condition.Build(new Condition.IsPlayCardStep(), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
-            Condition.Build(new Condition.CustomCondition(() =>
-                DeckState.ForFaction(Faction).DeckCardIds.Count > 0), this)
+            Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.ForFaction(Faction).Deck.Count > 0), this)
         };
     }
 

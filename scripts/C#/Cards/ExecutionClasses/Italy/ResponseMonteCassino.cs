@@ -12,8 +12,8 @@ public partial class ResponseMonteCassino : ResponseCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
-            Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.CurrentBlockTrigger is not RemoveUnitChangeEvent removeEvent) return false;
+            Condition.Build(new Condition.CustomCondition(s => {
+                if (s.BlockTrigger is not RemoveUnitChangeEvent removeEvent) return false;
                 return StaticGameData.FactionTeamForFaction(removeEvent.UnitState.Faction) == FactionTeam.AXIS
                     && removeEvent.UnitState.Type == UnitType.ARMY
                     && removeEvent.CountryId == (int)Country.Italy;

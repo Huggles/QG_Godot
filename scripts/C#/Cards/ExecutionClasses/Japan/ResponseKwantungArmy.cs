@@ -20,11 +20,11 @@ public partial class ResponseKwantungArmy : ResponseCardLogic
     {
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
-            Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.CurrentBlockTrigger is not RemoveUnitChangeEvent removeEvent) return false;
+            Condition.Build(new Condition.CustomCondition(s => {
+                if (s.BlockTrigger is not RemoveUnitChangeEvent removeEvent) return false;
                 return removeEvent.UnitState.Faction == Faction
                     && removeEvent.UnitState.Type == UnitType.ARMY
-                    && removeEvent.UnitState.InSupply
+                    && s.Board.InSupply(removeEvent.UnitState)
                     && targetCountryIds.Contains(removeEvent.CountryId);
             }), this)
         };

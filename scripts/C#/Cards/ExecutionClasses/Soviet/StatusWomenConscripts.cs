@@ -41,13 +41,13 @@ public partial class StatusWomenConscripts : StatusCardLogic
     ///
     /// The discard-pile clause excludes a Status/Response table play, as in ResponseRationing.
     /// </summary>
-    private PlayCardChangeEvent BuildArmyCard() =>
-        CardPlayPool.ChangeEventsPool
+    private PlayCardChangeEvent BuildArmyCard(GameSituation situation) =>
+        situation.Pool
             .OfType<PlayCardChangeEvent>()
             .LastOrDefault(playCard =>
                 playCard.TriggeringFaction == Faction
                 && CardState.ForId(playCard.SourceCardId)?.CardData.CardType == CardType.BUILD_ARMY
-                && DeckState.ForFaction(Faction).DiscardedCardIds.Contains(playCard.SourceCardId));
+                && situation.Board.ForFaction(Faction).Discarded.Contains(playCard.SourceCardId));
 
     protected override List<Condition> CardTriggers()
     {
@@ -55,7 +55,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
             Condition.Build(new Condition.FactionPlayedCard(Faction), this),
             Condition.Build(new Condition.IsGameFlowStep(TurnStep.PLAY_CARD), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
-            Condition.Build(new Condition.CustomCondition(() => BuildArmyCard() != null), this)
+            Condition.Build(new Condition.CustomCondition(s => BuildArmyCard(s) != null), this)
         };
     }
 
@@ -63,7 +63,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
     {
         return new List<CardStep> {
             new EffectStep(this, async () => {
-                PlayCardChangeEvent playEvent = BuildArmyCard();
+                PlayCardChangeEvent playEvent = BuildArmyCard(GameSituation.Live);
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Women Conscripts: no Build Army card found to recycle");
