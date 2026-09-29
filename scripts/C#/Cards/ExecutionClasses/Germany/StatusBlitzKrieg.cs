@@ -13,7 +13,9 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionBattled(Faction), this).Immediately(),
+            // Land only, as the card reads: FactionBattled also matched sea battles, where the build
+            // would have placed a Navy.
+            Condition.Build(new Condition.HasBattledOnLand(Faction), this).Immediately(),
             // The space must be one we can actually BUILD in after the battle, which is the question
             // GameAPI.DeployUnitToCountry will ask when the step runs.
             //
