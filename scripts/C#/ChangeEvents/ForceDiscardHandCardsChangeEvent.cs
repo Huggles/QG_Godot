@@ -70,10 +70,6 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
         if (dto is ForceDiscardHandCardsChangeEventDto d) PreselectDiscards(d.DiscardedCardIds);
     }
 
-    /// <summary>The count leaves the target's hand; which cards the player picks is not modelled.</summary>
-    public override void Project(BoardProjection projection)
-        => projection.DiscardFromHand(TargetFaction, SelectionResolved ? DiscardedCardIds.Count : NumberOfCards);
-
     protected override async Task ResolveChoicesAsync()
     {
         if (!SelectionResolved)

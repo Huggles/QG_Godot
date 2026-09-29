@@ -18,7 +18,8 @@ public sealed record SimJob(
     string BotRules,
     string BotProfile,
     string BotRulesFor = "",
-    string BotRulesOther = "")
+    string BotRulesOther = "",
+    string BotForecast = "")
 {
     /// <summary>Stable, filesystem-safe identity. Also the sort key that makes a run diffable.</summary>
     public string Id => $"{Scenario}_s{Seed}_d{DecisionSeed}";
@@ -47,6 +48,8 @@ public sealed record SimJob(
         // Which factions bot_rules applies to; absent means all of them. The rest play the defaults.
         if (!string.IsNullOrWhiteSpace(BotRulesFor)) yield return $"bot_rules_for={BotRulesFor}";
         if (!string.IsNullOrWhiteSpace(BotRulesOther)) yield return $"bot_rules_other={BotRulesOther}";
+        // Who forecasts after-reactions when valuing a move; absent means everyone does.
+        if (!string.IsNullOrWhiteSpace(BotForecast)) yield return $"bot_forecast={BotForecast}";
         // Same contract as bot_rules: absent means the game applies its own default, which for the
         // profile is "no agent at all".
         if (!string.IsNullOrWhiteSpace(BotProfile)) yield return $"bot_profile={BotProfile}";

@@ -69,6 +69,10 @@ public sealed class GameSituation
     public GameSituation ReactingTo(ChangeEvent trigger) =>
         new(Board, trigger, null, Pool.Append(trigger).ToList(), CardPool, System.Math.Max(ReactionDepth, 1));
 
+    /// <summary>The same moment once <paramref name="applied"/> has happened: it joins the pool, the trigger stays.</summary>
+    public GameSituation After(ChangeEvent applied) =>
+        new(Board, ReactionTrigger, BlockTrigger, Pool.Append(applied).ToList(), CardPool, ReactionDepth);
+
     public T TriggerAs<T>() where T : ChangeEvent => ReactionTrigger as T;
 
     public List<T> PoolEvents<T>() where T : ChangeEvent => Pool.OfType<T>().ToList();

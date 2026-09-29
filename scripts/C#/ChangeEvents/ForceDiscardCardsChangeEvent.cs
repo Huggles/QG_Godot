@@ -102,10 +102,6 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         return count;
     }
 
-    /// <summary>Mirror of Mutate: top-of-deck discards, and 1 VP lost for each card the deck cannot pay.</summary>
-    public override void Project(BoardProjection projection)
-        => projection.DiscardFromDeck(TargetFaction, ModifiersApplied ? NumberOfCards : ModifiedCount(BoardState.Live));
-
     public override string SummaryText() => UndischargedCards > 0
         ? $"{TargetFaction.WithPlayer()} was forced to discard {NumberOfCards} cards by {TriggeringFaction.WithPlayer()}, but only had {DiscardedCardIds.Count} left and lost {UndischargedCards} VP"
         : $"{TargetFaction.WithPlayer()} was forced to discard {NumberOfCards} cards by {TriggeringFaction.WithPlayer()}";

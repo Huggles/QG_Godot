@@ -366,14 +366,19 @@ public class GameStateCalculator
     /// As above, with the conditions that feed the card and step tags evaluated in <paramref name="situation"/>
     /// — for a fork that is reacting to a hypothetical event, whose pool and trigger those conditions read.
     /// </summary>
-    public static void CalculateAll(RecalcScope scope, GameSituation situation)
+    /// <remarks>
+    /// <paramref name="cardTags"/> false stops a fork after the board and pile tags: step executability
+    /// and the card tags keep the values the fork was copied with. That is what a bot projection wants —
+    /// the step conditions are the expensive part, and a projection reads the board, not the tags on cards.
+    /// </remarks>
+    public static void CalculateAll(RecalcScope scope, GameSituation situation, bool cardTags = true)
     {
         if (scope == RecalcScope.None) return;
 
         BoardState board = situation.Board;
         if (!board.IsLive)
         {
-            CalculatePhases(scope, situation);
+            CalculatePhases(scope, situation, cardTags);
             return;
         }
 
@@ -453,7 +458,7 @@ public class GameStateCalculator
     /// phases also makes it deterministic: six factions running the whole sequence in parallel let one
     /// faction's step conditions read tags another faction's thread was still writing.
     /// </summary>
-    private static void CalculatePhases(RecalcScope scope, GameSituation situation)
+    private static void CalculatePhases(RecalcScope scope, GameSituation situation, bool cardTags = true)
     {
         BoardState board = situation.Board;
         if (scope.HasFlag(RecalcScope.Board))
@@ -471,7 +476,7 @@ public class GameStateCalculator
                 faction => CalculatePlayedCardsForFaction(situation, faction));
 
         // Downstream of both heads, so it runs whenever anything at all moved.
-        if (scope != RecalcScope.None)
+        if (scope != RecalcScope.None && cardTags)
         {
             // Once for everyone. See EvaluateExecutableSteps for why this is not per faction.
             List<CardStep> steps = CardStep.All;

@@ -63,8 +63,6 @@ public partial class DeployUnitChangeEvent : ChangeEvent
         new ReturnCameraAnimation(),
     };
 
-    public override void Project(BoardProjection projection) => projection.Deploy(TriggeringFaction, CountryId, UnitType);
-
     public override void Mutate(BoardState board) =>
         UnitId = board.DeployUnit(TriggeringFaction, CountryId, UnitType, DeploymentType);
 

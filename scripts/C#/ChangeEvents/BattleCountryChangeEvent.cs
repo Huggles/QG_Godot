@@ -8,7 +8,6 @@ public partial class BattleCountryChangeEvent : ChangeEvent
     public int CountryId { get; private set; }
     public CountryState CountryState => CountryState.ForId(CountryId);
 
-
     public BattleCountryChangeEvent(Faction triggeringFaction, int countryId) : base(triggeringFaction)
     {
         CountryId = countryId;
@@ -47,9 +46,6 @@ public partial class BattleCountryChangeEvent : ChangeEvent
         dto.CountryId = CountryId;
         return dto;
     }
-
-    /// <summary>Battling an empty country changes nothing on the board; RemoveUnitChangeEvent overrides this.</summary>
-    public override void Project(BoardProjection projection) { }
 
     public override void Mutate(BoardState board) { }
 

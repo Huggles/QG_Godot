@@ -69,8 +69,6 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
             ? new() { new ReturnCameraAnimation() }
             : new();
 
-    public override void Project(BoardProjection projection) => projection.Remove(UnitId);
-
     public override void Mutate(BoardState board) => board.RemoveUnit(UnitId, Reason, TriggeringFaction);
 
     protected override Task OnLiveMutatedAsync()

@@ -12,6 +12,21 @@ using System.Linq;
 /// </summary>
 public sealed partial class BoardState
 {
+    /// <summary>
+    /// This fork as the game would be after <paramref name="changeEvent"/>: the event's Mutate, then
+    /// the tags re-derived in <paramref name="situation"/> with the event in its pool. False, and the
+    /// fork left part-way, when the event cannot happen here — a rule refusal, or an event a fork cannot
+    /// model. Never the live board: that changes only through ChangeEvent.Apply().
+    /// </summary>
+    public bool Apply(ChangeEvent changeEvent, GameSituation situation, bool cardTags = true)
+    {
+        if (IsLive) throw new InvalidOperationException("The live board changes only through ChangeEvent.Apply().");
+        try { changeEvent.Mutate(this); }
+        catch (Exception) { return false; }
+        GameStateCalculator.CalculateAll(changeEvent.RecalcScope, situation.WithBoard(this).After(changeEvent), cardTags);
+        return true;
+    }
+
     // ── Units ───────────────────────────────────────────────────────────────
 
     /// <summary>

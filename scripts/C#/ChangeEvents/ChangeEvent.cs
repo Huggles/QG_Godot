@@ -63,7 +63,6 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         set { SourceCardState.IsBlocked = value; }
     }
 
-
     public int SourceCardId { get; set; } = -1;
     public bool HasSourceCard => SourceCardId > -1;
     public CardState SourceCardState => CardState.ForId(SourceCardId);
@@ -112,13 +111,6 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
     /// state a board does not hold (re-armed steps). Runs before the broadcast and the tag pass.
     /// </summary>
     protected virtual Task OnLiveMutatedAsync() => Task.CompletedTask;
-
-    /// <summary>
-    /// What <see cref="Mutate"/> would do, written onto the bot's older partial projection. Being retired
-    /// in favour of a forked BoardState; must mirror Mutate until then. The default says
-    /// "cannot model this", which makes the whole projection unknown rather than quietly wrong.
-    /// </summary>
-    public virtual void Project(BoardProjection projection) => projection.MarkUnknown(GetType().Name);
 
     protected virtual List<ChangeEventAnimation> BeforeAnimations { get; } = new();
     protected virtual List<ChangeEventAnimation> AfterAnimations  { get; } = new();

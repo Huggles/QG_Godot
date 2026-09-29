@@ -492,7 +492,7 @@ public partial class CardPlayRound : GodotObject
     /// reaction-specifics the team of the faction taking its turn goes SECOND there, so the causing
     /// team is read from GameFlow instead of from the event.
     /// </summary>
-    private static FactionTeam FirstTeamToReactTo(ChangeEvent triggerEvent)
+    internal static FactionTeam FirstTeamToReactTo(ChangeEvent triggerEvent)
     {
         FactionTeam causedBy = StaticGameData.FactionTeamForFaction(triggerEvent.TriggeringFaction);
         if (causedBy == FactionTeam.NONE)

@@ -35,9 +35,6 @@ public partial class PlayCardChangeEvent : ChangeEvent
                 : $"{TriggeringFaction.WithPlayer()} plays a Response card")
     };
 
-    /// <summary>Mirror of Mutate's DeckState.PlayCard; the per-turn play counter is not modelled.</summary>
-    public override void Project(BoardProjection projection) => projection.PlayCard(SourceCardId);
-
     public override void Mutate(BoardState board)
     {
         board.PlayCard(SourceCardState.Faction, SourceCardState.Id);

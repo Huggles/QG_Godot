@@ -49,13 +49,6 @@ public partial class RecycleCardChangeEvent : ChangeEvent
         if (dto is RecycleCardChangeEventDto d) ShuffledOrder = d.ShuffledOrder;
     }
 
-    /// <summary>Mirror of Mutate: the card leaves whatever pile it is in for the hand or the deck.</summary>
-    public override void Project(BoardProjection projection)
-    {
-        if (projection.PileOf(CardId) == CardPile.None) { projection.MarkUnknown($"recycle card {CardId}, which is in no pile"); return; }
-        projection.MoveCard(CardId, Destination == RecycleDestination.Hand ? CardPile.Hand : CardPile.Deck);
-    }
-
     /// <summary>
     /// The host decides a shuffle before anything moves: the deck as it will be once the card has
     /// joined it, shuffled with the same draws the in-place shuffle used to make. A client and a replay
