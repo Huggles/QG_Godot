@@ -10,10 +10,10 @@ public partial class StatusLordLinlithgowDeclaresIndiatoBeatWar : StatusCardLogi
     /// re-tags India so any Army you may build may go there instead.</summary>
     public override TargetSet Targets() => TargetSet.Countries(unlockedCountries);
 
-    public void ApplyTagModifiers(Faction faction)
+    public void ApplyTagModifiers(BoardState board, Faction faction)
     {
         CountryState india = CountryState.ForEnum(unlockedCountries[0]);
-        if (india.CanRecruit(faction))
-            india.AddTag(Tag.Buildable, faction);
+        if (board.CanRecruit(faction, india))
+            board.Of(india).Tags.Add(Tag.Buildable, faction);
     }
 }

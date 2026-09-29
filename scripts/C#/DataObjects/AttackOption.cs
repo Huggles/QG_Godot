@@ -14,26 +14,29 @@ public partial class AttackOption : GodotObject
         this.AttackingUnit = attackingUnit;
     }
 
-    public static AttackOption CalculateAttackOptions(int unitId)
+    /// <summary>What the unit could battle from where it stands on <paramref name="board"/>: enemy units not immune, and empty neighbours.</summary>
+    public static AttackOption CalculateAttackOptions(int unitId, BoardState board)
     {
         AttackOption attackOption = new AttackOption(unitId);
         UnitState unitState = UnitState.ForId(unitId);
         attackOption.Faction = unitState.Faction;        
         FactionTeam enemyTeam = StaticGameData.OpponentFactionTeamForFaction(unitState.Faction);
-        foreach (CountryState countryState in unitState.CountryState.AdjacentCountryStates(unitState.Faction))
+        CountryState from = CountryState.ForId(board.CountryOf(unitState));
+        foreach (CountryState countryState in board.AdjacentCountryStates(unitState.Faction, from))
         {
-            if (countryState.OccupyingTeam == enemyTeam)
+            FactionTeam occupying = board.OccupyingTeam(countryState);
+            if (occupying == enemyTeam)
             {
-                foreach (int targetUnitId in countryState.Units.Values)
+                foreach (int targetUnitId in board.UnitsIn(countryState).Values)
                 {
                     UnitState targetUnitState = UnitState.ForId(targetUnitId);
-                    if (targetUnitState.ImmuneForTurn == false)
+                    if (board.ImmuneForTurn(targetUnitState) == false)
                     {
                         attackOption.AttackableUnits.Add(targetUnitId);
                     }
                 }
             }
-            if (countryState.OccupyingTeam == FactionTeam.NONE)
+            if (occupying == FactionTeam.NONE)
             {
                 attackOption.AttackableCountries.Add(countryState.Id);
             }

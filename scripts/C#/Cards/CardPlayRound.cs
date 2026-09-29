@@ -123,7 +123,7 @@ public partial class CardPlayRound : GodotObject
             // Volksturm and the other "at the beginning of your turn" cards are explicitly in ADDITION
             // to it, and ResponseTruk carries no play-step condition at all — before this, activating
             // any of them ended the step with the hand card unplayed.
-            if (Condition.HasPlayedCardThisTurnStep.For(faction))
+            if (Condition.HasPlayedCardThisTurnStep.For(BoardState.Live, faction))
             {
                 break;
             }
@@ -132,7 +132,7 @@ public partial class CardPlayRound : GodotObject
         // The faction reached the end of its play step without spending its play: it passed the prompt
         // outright, or only took activations that are explicitly in ADDITION to the play. Either way the
         // action is still owed, and passing it costs something.
-        if (!Condition.HasPlayedCardThisTurnStep.For(faction))
+        if (!Condition.HasPlayedCardThisTurnStep.For(BoardState.Live, faction))
         {
             await ApplyPassedOnPlayPenalty(faction);
         }

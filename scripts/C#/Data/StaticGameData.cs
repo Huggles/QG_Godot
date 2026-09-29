@@ -30,6 +30,9 @@ public static partial class StaticGameData
     /// The 1-based round a 1-based game turn belongs to — every faction takes one turn per round.
     /// </summary>
     public static int RoundForTurn(int turnNumber) => ((turnNumber - 1) / PlayableFactions.Count) + 1;
+    /// <summary>Whose turn a turn number is. Germany before the first turn.</summary>
+    public static Faction FactionForTurn(int turnNumber) =>
+        turnNumber > 0 ? PlayableFactions[(turnNumber - 1) % PlayableFactions.Count] : Faction.GERMANY;
     public static List<FactionData> FactionDataList { get; set; } = new();
     public static List<CardData> CardDataList { get; set; } = new();
     public static List<DeckData> DeckDataList { get; set; } = new();

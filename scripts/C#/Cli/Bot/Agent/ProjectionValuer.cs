@@ -141,7 +141,7 @@ public static class ProjectionValuer
                 continue;
             }
 
-            IReadOnlyList<StepOption> outcomes = step.PossibleOutcomes(previous);
+            IReadOnlyList<StepOption> outcomes = step.PossibleOutcomes(StepContext.Live(previous));
             if (outcomes == null) return null;
             built.AddRange(outcomes);
             if (outcomes.Count == 0) { previous = null; continue; }
@@ -175,7 +175,7 @@ public static class ProjectionValuer
         if (depth >= MaxPlayDepth) return null;
 
         IReadOnlyList<int> candidates;
-        try { candidates = step.PossiblePlays(previous); }
+        try { candidates = step.PossiblePlays(StepContext.Live(previous)); }
         catch (Exception) { return null; }
         if (candidates == null) return null;
         if (candidates.Count == 0) return board;

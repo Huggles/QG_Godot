@@ -26,16 +26,16 @@ public abstract partial class EventCardStep : CardStep
         _choice = choice;
         _produce = async () =>
         {
-            StepOption chosen = await choice.Run(TriggeringFaction, PreviousOutcome);
+            StepOption chosen = await choice.Run(TriggeringFaction, StepContext.Live(PreviousOutcome));
             LastOutcome = chosen;
             return chosen.Event;
         };
     }
 
     /// <summary>Stamped as dispatch would stamp them, so a projection sees the source card a discard modifier reads.</summary>
-    public override IReadOnlyList<StepOption> PossibleOutcomes(StepOption? previous)
+    public override IReadOnlyList<StepOption> PossibleOutcomes(StepContext context)
     {
-        IReadOnlyList<StepOption> outcomes = _choice?.Outcomes(previous);
+        IReadOnlyList<StepOption> outcomes = _choice?.Outcomes(context);
         if (outcomes != null)
             foreach (StepOption outcome in outcomes)
                 if (outcome.Event != null) StampProvenance(outcome.Event);

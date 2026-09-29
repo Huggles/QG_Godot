@@ -4,6 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 
+/// <summary>
+/// Derives every computed tag of a board from its data: supply, what can be attacked, built and
+/// recruited, straight control, and which cards are played, activatable and executable. Runs against
+/// any <see cref="BoardState"/>; only the live board also replicates the result and announces it.
+/// </summary>
 public class GameStateCalculator
 {
     /// <summary>
@@ -30,64 +35,63 @@ public class GameStateCalculator
 
     public static bool Enabled {
         get { return field; }
-        set { 
+        set {
             field = value;
             if(field) CalculateAll();
         }
     } = true;
-    
 
-    public Faction Faction;
-    
-
-    private static void CalculateAttackableForFaction(Faction faction)
+    private static void CalculateAttackableForFaction(BoardState board, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.Attackable);
-        
-        List<int> suppliedUnitIds = GameAPI.SuppliedUnitsForFaction(faction);
+        ClearTagsForFaction(board, faction, Tag.Attackable);
+
+        List<int> suppliedUnitIds = board.SuppliedUnitIds(faction);
         foreach (int suppliedUnitId in suppliedUnitIds)
         {
-            AttackOption attackOption = AttackOption.CalculateAttackOptions(suppliedUnitId);
-            UnitState.ForIds(attackOption.AttackableUnits).AddTag(Tag.Attackable, faction);
-            CountryState.ForIds(attackOption.AttackableCountries).AddTag(Tag.Attackable, faction);
+            AttackOption attackOption = AttackOption.CalculateAttackOptions(suppliedUnitId, board);
+            foreach (UnitState unit in UnitState.ForIds(attackOption.AttackableUnits))
+                board.Of(unit).Tags.Add(Tag.Attackable, faction);
+            foreach (CountryState country in CountryState.ForIds(attackOption.AttackableCountries))
+                board.Of(country).Tags.Add(Tag.Attackable, faction);
         }
     }
 
-    private static void CalculateBuildableCountriesForFaction(Faction faction)
+    private static void CalculateBuildableCountriesForFaction(BoardState board, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.Buildable);
-        
+        ClearTagsForFaction(board, faction, Tag.Buildable);
+
         foreach (var countryState in CountryState.AllCountryStates)
         {
-            if (countryState.CanBuild(faction))
-                countryState.AddTag(Tag.Buildable, faction);
+            if (board.CanBuild(faction, countryState))
+                board.Of(countryState).Tags.Add(Tag.Buildable, faction);
         }
     }
 
-    private static void CalculateRecruitableCountriesForFaction(Faction faction)
+    private static void CalculateRecruitableCountriesForFaction(BoardState board, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.Recruitable);
-        
+        ClearTagsForFaction(board, faction, Tag.Recruitable);
+
         foreach (var countryState in CountryState.AllCountryStates)
         {
-            if (countryState.CanRecruit(faction))
-                countryState.AddTag(Tag.Recruitable, faction);
+            if (board.CanRecruit(faction, countryState))
+                board.Of(countryState).Tags.Add(Tag.Recruitable, faction);
         }
     }
 
-    private static void CalculateActivatableCardsForFaction(Faction faction)
+    private static void CalculateActivatableCardsForFaction(GameSituation situation, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.IsActivatable);
+        BoardState board = situation.Board;
+        ClearTagsForFaction(board, faction, Tag.IsActivatable);
 
-        DeckState deckState = DeckState.ForFaction(faction);
-        List<CardState> candidates = new();        
-        candidates.AddRange(deckState.HandCardStates);
-        candidates.AddRange(deckState.StatusCardStates);
-        candidates.AddRange(deckState.ResponseCardStates);
+        FactionRecord piles = board.ForFaction(faction);
+        List<CardState> candidates = new();
+        candidates.AddRange(CardState.ForIds(piles.Hand));
+        candidates.AddRange(CardState.ForIds(piles.Status));
+        candidates.AddRange(CardState.ForIds(piles.Response));
 
-        List<CardState> cardPlayedThisTurn = 
+        List<CardState> cardPlayedThisTurn =
             CardState.AllForFaction(faction).Values
-                .Where(cs => cs.PlayedInTurn.Contains(GameFlow.Instance.GameTurn))
+                .Where(cs => board.Of(cs).PlayedInTurn.Contains(board.GameTurn))
                 .ToList();
         candidates.AddRange(cardPlayedThisTurn);
 
@@ -96,62 +100,58 @@ public class GameStateCalculator
         candidates.AddRange(CardState.AllForFaction(faction).Values.Where(cs => cs.CardLogic is ActivatableMutator));
 
         candidates = candidates.Distinct().ToList();
-        
+
 
         foreach (var cardState in candidates)
         {
-            if (cardState.CardLogic == null) { 
-                DebugUtilities.PrintPeer($"[DIAG]   {cardState.CardData?.UniqueName ?? "?"} skipped - CardLogic is null"); 
-                continue; 
+            if (cardState.CardLogic == null) {
+                DebugUtilities.PrintPeer($"[DIAG]   {cardState.CardData?.UniqueName ?? "?"} skipped - CardLogic is null");
+                continue;
             }
 
-            bool canActivate = cardState.CardLogic.CanBeActivated();
+            CardRecord card = board.Of(cardState);
+            bool canActivate = cardState.CardLogic.CanBeActivated(situation);
             if (canActivate)
-            {   
-                cardState.AddTag(Tag.IsActivatable, faction);
+            {
+                card.Tags.Add(Tag.IsActivatable, faction);
             }
 
-            if (cardState.IsBlocked)
-                cardState.AddTag(Tag.IsBlocked, faction);
+            if (card.IsBlocked)
+                card.Tags.Add(Tag.IsBlocked, faction);
             else
-                cardState.Tags.Remove(Tag.IsBlocked, faction);
-        };  
+                card.Tags.Remove(Tag.IsBlocked, faction);
+        };
     }
 
-    private static void CalculatePlayedCardsForFaction(Faction faction)
+    private static void CalculatePlayedCardsForFaction(GameSituation situation, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.IsPlayed);
+        BoardState board = situation.Board;
+        ClearTagsForFaction(board, faction, Tag.IsPlayed);
 
-        DeckState deckState = DeckState.ForFaction(faction);
+        FactionRecord piles = board.ForFaction(faction);
+        void MarkPlayed(IEnumerable<CardState> cards) { foreach (CardState card in cards) board.Of(card).Tags.Add(Tag.IsPlayed, faction); }
 
         // STATUS and RESPONSE cards are played once they are in their permanent piles
-        CardState.ForIds(deckState.StatusCardIds).AddTag(Tag.IsPlayed, faction);
-        CardState.ForIds(deckState.ResponseCardIds).AddTag(Tag.IsPlayed, faction);
+        MarkPlayed(CardState.ForIds(piles.Status));
+        MarkPlayed(CardState.ForIds(piles.Response));
 
         // EVENT cards are played once discarded
-        CardState.ForIds(deckState.DiscardedCardIds).AddTag(Tag.IsPlayed, faction);
+        MarkPlayed(CardState.ForIds(piles.Discarded));
 
         // EVENT cards currently in the active play round pool are also considered played
         // (covers the window between entering the pool and being moved to discard)
-        if (CardPlayRound.Current != null)
-        {
-            foreach (var cardState in CardPlayRound.Current.CardPool)
-            {
-                if (cardState.Faction == faction)
-                    cardState.AddTag(Tag.IsPlayed, faction);
-            }
-        }
+        MarkPlayed(situation.CardPool.Where(cardState => cardState.Faction == faction));
     }
 
-    private static void CalculateAfterReactionCardsForFaction(Faction faction)
+    private static void CalculateAfterReactionCardsForFaction(BoardState board, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.IsAfterReaction);
+        ClearTagsForFaction(board, faction, Tag.IsAfterReaction);
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
             // IsPlayed: a card can only be used as a reaction once it is on the table. A hand card
             // tagged IsActivatable is offering a *play*, not a reaction.
-            if (cardState.IsPlayed && cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
-                cardState.AddTag(Tag.IsAfterReaction, faction);
+            if (board.IsPlayed(cardState) && board.Of(cardState).Tags.Has(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
+                board.Of(cardState).Tags.Add(Tag.IsAfterReaction, faction);
         });
     }
 
@@ -161,23 +161,22 @@ public class GameStateCalculator
     /// CardPlayRound.GetBlockReactionOptions — block cards are excluded from Tag.IsAfterReaction, so
     /// without this tag they have no route to ever be offered.
     /// </summary>
-    private static void CalculateBlockReactionCardsForFaction(Faction faction)
+    private static void CalculateBlockReactionCardsForFaction(BoardState board, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.IsBlockReaction);
+        ClearTagsForFaction(board, faction, Tag.IsBlockReaction);
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
-            if (cardState.IsPlayed && cardState.HasTag(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == true)
-                cardState.AddTag(Tag.IsBlockReaction, faction);
+            if (board.IsPlayed(cardState) && board.Of(cardState).Tags.Has(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == true)
+                board.Of(cardState).Tags.Add(Tag.IsBlockReaction, faction);
         });
     }
 
-    private static void CalculatePlayableCardsForFaction(Faction faction)
+    private static void CalculatePlayableCardsForFaction(BoardState board, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.IsPlayable);        
-        DeckState deckState = DeckState.ForFaction(faction);
-        deckState.HandCardStates
-            .Where(cs => cs.HasTag(Tag.IsActivatable, faction) && !cs.IsPlayed)
-            .AddTag(Tag.IsPlayable, faction);
+        ClearTagsForFaction(board, faction, Tag.IsPlayable);
+        foreach (CardState cardState in CardState.ForIds(board.ForFaction(faction).Hand))
+            if (board.Of(cardState).Tags.Has(Tag.IsActivatable, faction) && !board.IsPlayed(cardState))
+                board.Of(cardState).Tags.Add(Tag.IsPlayable, faction);
     }
 
     /// <summary>
@@ -189,12 +188,13 @@ public class GameStateCalculator
     /// hollow effect beside one real effect is left alone. Runs after
     /// <see cref="CalculateActivatableCardsForFaction"/>, whose tag it reads.
     /// </summary>
-    private static void CalculateAttentionCardsForFaction(Faction faction)
+    private static void CalculateAttentionCardsForFaction(GameSituation situation, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.NeedsAttention);
+        BoardState board = situation.Board;
+        ClearTagsForFaction(board, faction, Tag.NeedsAttention);
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
-            if (!cardState.HasTag(Tag.IsActivatable, faction))
+            if (!board.Of(cardState).Tags.Has(Tag.IsActivatable, faction))
                 return;
             // A Status/Response card in hand is being PLAYED onto the table; its steps are the later
             // activation effect and say nothing about this play. Same reasoning as
@@ -202,48 +202,49 @@ public class GameStateCalculator
             if (cardState.CardLogic?.IsTableCardInHand != false)
                 return;
 
-            List<CardStep> steps = cardState.CardLogic.ExecutableCardSteps;
+            List<CardStep> steps = cardState.CardLogic.CardSteps
+                .Where(step => board.Of(step).Tags.HasForAny(Tag.IsExecutable)).ToList();
             if (steps.Count == 0)
                 return;
-            if (steps.All(step => !step.MeetAllAdvisoryConditions))
-                cardState.AddTag(Tag.NeedsAttention, faction);
+            if (steps.All(step => !step.MeetAllAdvisoryConditions(situation)))
+                board.Of(cardState).Tags.Add(Tag.NeedsAttention, faction);
         });
     }
 
-    private static void CalculateInSupplyForFaction(Faction faction)
+    private static void CalculateInSupplyForFaction(BoardState board, Faction faction)
     {
-        ClearTagsForFaction(faction, Tag.InSupply);
-        ClearTagsForFaction(faction, Tag.OutOfSupply);
-        
-        var factionState = FactionState.ForEnum(faction);
-        var pathFindingService = new PathFindingService(new PathFindingNodeDefault(), faction);
-        List<UnitState> activeUnits = UnitState.ForIds(factionState.ActiveUnitIds);
-        
+        ClearTagsForFaction(board, faction, Tag.InSupply);
+        ClearTagsForFaction(board, faction, Tag.OutOfSupply);
+
+        var pathFindingService = new PathFindingService(new PathFindingNodeDefault(), faction, board);
+        List<UnitState> activeUnits = UnitState.ForIds(board.ActiveUnitIds(faction));
+
         foreach (UnitState unit in activeUnits)
         {
-            bool modifierGrantsSupply = ModifierRegistry.GetAll<IUnitSupplyModifier>()
-                .Any(m => m.GrantsSupply(unit));
+            UnitRecord record = board.Of(unit);
+            bool modifierGrantsSupply = board.Modifiers<IUnitSupplyModifier>()
+                .Any(m => m.GrantsSupply(board, unit));
 
-            if (modifierGrantsSupply || unit.SuppliedForTurn || CalculateSupplyForUnit(pathFindingService, unit.Id, faction))
+            if (modifierGrantsSupply || record.SuppliedForTurn || CalculateSupplyForUnit(board, pathFindingService, unit, faction))
             {
-                unit.AddTag(Tag.InSupply, faction);
-            } 
+                record.Tags.Add(Tag.InSupply, faction);
+            }
             else
             {
-                unit.AddTag(Tag.OutOfSupply, faction);
+                record.Tags.Add(Tag.OutOfSupply, faction);
             }
         }
     }
 
-    private static bool CalculateSupplyForUnit(PathFindingService pathFinding, int unitId, Faction faction)
+    private static bool CalculateSupplyForUnit(BoardState board, PathFindingService pathFinding, UnitState unit, Faction faction)
     {
-        var unit = UnitState.ForId(unitId);
-        foreach (var supplyId in GameAPI.GetSupplyCountryIds(faction))
+        int countryId = board.CountryOf(unit);
+        foreach (var supplyId in board.SupplyCountryIds(faction))
         {
-            if (pathFinding.CalculatePath(unit.CountryId, supplyId) >= 0)
+            if (pathFinding.CalculatePath(countryId, supplyId) >= 0)
             {
                 if (unit.IsNavy)
-                    return unit.CountryState.HasHarbor(faction);
+                    return board.HasHarbor(faction, CountryState.ForId(countryId));
                 return true;
             }
         }
@@ -264,8 +265,9 @@ public class GameStateCalculator
     /// property that rebuilds the whole list from every CardState on every access, and the old code
     /// touched it twice per faction — about 13,000 rebuilds in a full game.
     /// </summary>
-    private static bool[] EvaluateExecutableSteps(List<CardStep> steps)
+    private static bool[] EvaluateExecutableSteps(GameSituation situation, List<CardStep> steps)
     {
+        BoardState board = situation.Board;
         // Cards still face-down in a draw pile are skipped rather than evaluated. Nothing can activate
         // one — CalculateActivatableCardsForFaction only ever considers hand, status, response,
         // played-this-turn and mutator cards, and CardPlayRound only asks about cards in its pool — so
@@ -276,7 +278,7 @@ public class GameStateCalculator
         // shuffled back into the deck cannot carry a stale IsExecutable from when it was last in play.
         HashSet<int> inDrawPile = new();
         foreach (Faction faction in StaticGameData.PlayableFactions)
-            foreach (int cardId in DeckState.ForFaction(faction).DeckCardIds)
+            foreach (int cardId in board.ForFaction(faction).Deck)
                 inDrawPile.Add(cardId);
 
         bool[] executable = new bool[steps.Count];
@@ -285,7 +287,7 @@ public class GameStateCalculator
             CardStep step = steps[i];
             executable[i] = !inDrawPile.Contains(step.CardLogic.CardState.Id)
                             && !step.StepFinished
-                            && step.MeetAllConditions;
+                            && step.MeetAllConditions(situation);
         });
         return executable;
     }
@@ -298,38 +300,39 @@ public class GameStateCalculator
     /// to what the per-faction loop produced. The only reader, <c>CardLogic.ExecutableCardSteps</c>,
     /// asks <c>HasTagForAny</c> and never names a faction.
     /// </summary>
-    private static void ApplyExecutableStepTags(List<CardStep> steps, bool[] executable, Faction faction)
+    private static void ApplyExecutableStepTags(BoardState board, List<CardStep> steps, bool[] executable, Faction faction)
     {
         for (int i = 0; i < steps.Count; i++)
         {
-            if (executable[i]) steps[i].Tags.Add(Tag.IsExecutable, faction);
-            else               steps[i].Tags.Remove(Tag.IsExecutable, faction);
+            TagContainer tags = board.Of(steps[i]).Tags;
+            if (executable[i]) tags.Add(Tag.IsExecutable, faction);
+            else               tags.Remove(Tag.IsExecutable, faction);
         }
     }
 
-    private static void CalculateStraightControlForFaction()
+    private static void CalculateStraightControlForFaction(BoardState board)
     {
         // Clear old straight control tags
         foreach (var straightState in GameSession.Current.GameState.StraightStates)
         {
-            straightState.Tags.RemoveForAll(Tag.AxisControlled);
-            straightState.Tags.RemoveForAll(Tag.AlliesControlled);
+            board.Of(straightState).Tags.RemoveForAll(Tag.AxisControlled);
+            board.Of(straightState).Tags.RemoveForAll(Tag.AlliesControlled);
         }
-        
+
         // Calculate control for each straight based on controlling country's team
         foreach (var straightState in GameSession.Current.GameState.StraightStates)
         {
-            FactionTeam controllingTeam = straightState.ControllingCountryState.OccupyingTeam;
-            
+            FactionTeam controllingTeam = board.OccupyingTeam(straightState.ControllingCountryState);
+
             if (controllingTeam == FactionTeam.AXIS)
-                straightState.Tags.AddForAll(Tag.AxisControlled);
+                board.Of(straightState).Tags.AddForAll(Tag.AxisControlled);
             else if (controllingTeam == FactionTeam.ALLIES)
-                straightState.Tags.AddForAll(Tag.AlliesControlled);
+                board.Of(straightState).Tags.AddForAll(Tag.AlliesControlled);
         }
     }
 
-    
-    
+
+
 
     /// <summary>
     /// Whether any OTHER peer needs to be told about derived state.
@@ -346,12 +349,33 @@ public class GameStateCalculator
            && MultiplayerSession.Instance.Multiplayer.GetPeers().Length > 0;
 
     /// <summary>
-    /// Re-derive the tag state. <paramref name="scope"/> names which sources of truth moved; see
-    /// <see cref="RecalcScope"/> for why the default is everything.
+    /// Re-derive the live board's tag state. <paramref name="scope"/> names which sources of truth
+    /// moved; see <see cref="RecalcScope"/> for why the default is everything.
     /// </summary>
-    public static void CalculateAll(RecalcScope scope = RecalcScope.All)
+    public static void CalculateAll(RecalcScope scope = RecalcScope.All) => CalculateAll(scope, BoardState.Live);
+
+    /// <summary>
+    /// Re-derive <paramref name="board"/>'s tag state. A forked board is computed in full and in
+    /// silence: the Enabled switch, the server-only rule, replication and the recalculated signal are
+    /// all about the live game, and none of them apply to a board nobody else can see.
+    /// </summary>
+    public static void CalculateAll(RecalcScope scope, BoardState board) =>
+        CalculateAll(scope, GameSituation.Live.WithBoard(board));
+
+    /// <summary>
+    /// As above, with the conditions that feed the card and step tags evaluated in <paramref name="situation"/>
+    /// — for a fork that is reacting to a hypothetical event, whose pool and trigger those conditions read.
+    /// </summary>
+    public static void CalculateAll(RecalcScope scope, GameSituation situation)
     {
         if (scope == RecalcScope.None) return;
+
+        BoardState board = situation.Board;
+        if (!board.IsLive)
+        {
+            CalculatePhases(scope, situation);
+            return;
+        }
 
         if (!Enabled)
         {
@@ -371,48 +395,7 @@ public class GameStateCalculator
         try
         {
             DebugUtilities.PrintPeer($"Calculating game state for all factions (scope {scope})");
-            // Phases rather than six independent per-faction passes, because the step evaluation in
-            // the middle is shared. The ordering — board -> played cards -> executable steps -> card
-            // tags — is the order a single faction's pass used, so each phase still sees what it used
-            // to, and it is a real dependency chain, not a convention:
-            //
-            //   board       feeds the step conditions (HasBuildableLand and friends read Tag.Buildable)
-            //   playedCards feeds them too (Condition.CardIsPlayed reads Tag.IsPlayed)
-            //   steps       feed the card tags (CanBeActivated consults HasExecutableCardSteps)
-            //
-            // That chain is why `scope` only says which SOURCE moved: everything downstream of it has
-            // to be redone regardless, so only the two independent heads are actually optional.
-            //
-            // It is also the order the old code only APPEARED to have. Six factions ran the whole
-            // sequence in parallel, so one faction's CardStep conditions could be evaluated while
-            // another faction's thread was still writing the tags they read — the answer depended on
-            // thread scheduling. Splitting the phases makes it deterministic.
-            if (scope.HasFlag(RecalcScope.Board))
-            {
-                System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
-                    CalculateBoardTagsForFaction);
-
-                // Straight control writes global (non-faction-scoped) tags — run once after parallel
-                // work, and before the conditions below, which may read them.
-                CalculateStraightControlForFaction();
-            }
-
-            if (scope.HasFlag(RecalcScope.Decks))
-                System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
-                    CalculatePlayedCardsForFaction);
-
-            // Downstream of both heads, so it runs whenever anything at all moved.
-            if (scope != RecalcScope.None)
-            {
-                // Once for everyone. See EvaluateExecutableSteps for why this is not per faction.
-                List<CardStep> steps = CardStep.All;
-                bool[] executable = EvaluateExecutableSteps(steps);
-                foreach (Faction faction in StaticGameData.PlayableFactions)
-                    ApplyExecutableStepTags(steps, executable, faction);
-
-                System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
-                    CalculateCardTagsForFaction);
-            }
+            CalculatePhases(scope, situation);
 
             // Build the snapshot, apply it locally, and replicate it to clients as an ordered
             // RecalculateTagsMessage. Because ChangeEvent.Apply() broadcasts the change
@@ -438,7 +421,7 @@ public class GameStateCalculator
             {
                 // The two things ApplyComputedTags does that are NOT the round trip, so a peerless
                 // server behaves identically to one with clients.
-                CalculateStraightControlForFaction();
+                CalculateStraightControlForFaction(board);
                 EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
             }
 
@@ -453,7 +436,52 @@ public class GameStateCalculator
             DebugUtilities.PrintPeer($"[ERROR] Exception during game state calculation after {stopwatch.ElapsedMilliseconds}ms: {ex.Message}");
             DebugUtilities.PrintPeer($"[ERROR] Stack Trace: {ex.StackTrace}");
             throw;
-        }        
+        }
+    }
+
+    /// <summary>
+    /// The derivation itself. Phases rather than six independent per-faction passes, because the step
+    /// evaluation in the middle is shared. The ordering — board -> played cards -> executable steps ->
+    /// card tags — is a real dependency chain, not a convention:
+    ///
+    ///   board       feeds the step conditions (HasBuildableLand and friends read Tag.Buildable)
+    ///   playedCards feeds them too (Condition.CardIsPlayed reads Tag.IsPlayed)
+    ///   steps       feed the card tags (CanBeActivated consults HasExecutableCardSteps)
+    ///
+    /// That chain is why `scope` only says which SOURCE moved: everything downstream of it has to be
+    /// redone regardless, so only the two independent heads are actually optional. Splitting the
+    /// phases also makes it deterministic: six factions running the whole sequence in parallel let one
+    /// faction's step conditions read tags another faction's thread was still writing.
+    /// </summary>
+    private static void CalculatePhases(RecalcScope scope, GameSituation situation)
+    {
+        BoardState board = situation.Board;
+        if (scope.HasFlag(RecalcScope.Board))
+        {
+            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                faction => CalculateBoardTagsForFaction(board, faction));
+
+            // Straight control writes global (non-faction-scoped) tags — run once after parallel
+            // work, and before the conditions below, which may read them.
+            CalculateStraightControlForFaction(board);
+        }
+
+        if (scope.HasFlag(RecalcScope.Decks))
+            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                faction => CalculatePlayedCardsForFaction(situation, faction));
+
+        // Downstream of both heads, so it runs whenever anything at all moved.
+        if (scope != RecalcScope.None)
+        {
+            // Once for everyone. See EvaluateExecutableSteps for why this is not per faction.
+            List<CardStep> steps = CardStep.All;
+            bool[] executable = EvaluateExecutableSteps(situation, steps);
+            foreach (Faction faction in StaticGameData.PlayableFactions)
+                ApplyExecutableStepTags(board, steps, executable, faction);
+
+            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+                faction => CalculateCardTagsForFaction(situation, faction));
+        }
     }
 
     /// <summary>
@@ -527,21 +555,9 @@ public class GameStateCalculator
 
         // Straight control is deterministic from ControllingCountryId — recompute locally
         // on every peer rather than including it in the snapshot.
-        CalculateStraightControlForFaction();
+        CalculateStraightControlForFaction(BoardState.Live);
 
         EventBus.Emit(EventBus.SignalName.GameStateRecalculated);
-    }
-    
-    public static GameStateCalculator CalculateAllForFaction(Faction faction)
-    {
-        GameStateCalculator calculator = new GameStateCalculator { Faction = faction };
-        List<CardStep> steps = CardStep.All;
-
-        CalculateBoardTagsForFaction(faction);
-        ApplyExecutableStepTags(steps, EvaluateExecutableSteps(steps), faction);
-        CalculateCardTagsForFaction(faction);
-
-        return calculator;
     }
 
     /// <summary>
@@ -554,14 +570,14 @@ public class GameStateCalculator
     /// every draw, discard and play — about a quarter of all ChangeEvents — to re-derive supply and
     /// buildability for six factions to answer a question about which cards are on the table.
     /// </summary>
-    private static void CalculateBoardTagsForFaction(Faction faction)
+    private static void CalculateBoardTagsForFaction(BoardState board, Faction faction)
     {
         // Supply first — buildable/attackable both consult it.
-        CalculateInSupplyForFaction(faction);
-        CalculateAttackableForFaction(faction);
-        CalculateBuildableCountriesForFaction(faction);
-        CalculateRecruitableCountriesForFaction(faction);
-        ApplyCountryTagModifiersForFaction(faction);
+        CalculateInSupplyForFaction(board, faction);
+        CalculateAttackableForFaction(board, faction);
+        CalculateBuildableCountriesForFaction(board, faction);
+        CalculateRecruitableCountriesForFaction(board, faction);
+        ApplyCountryTagModifiersForFaction(board, faction);
     }
 
     /// <summary>
@@ -569,37 +585,28 @@ public class GameStateCalculator
     /// CalculateActivatableCardsForFaction resolves CardLogic.CanBeActivated, which consults
     /// HasExecutableCardSteps — i.e. the executable tags stamped immediately before it.
     /// </summary>
-    private static void CalculateCardTagsForFaction(Faction faction)
+    private static void CalculateCardTagsForFaction(GameSituation situation, Faction faction)
     {
-        CalculateActivatableCardsForFaction(faction);
-        CalculateAfterReactionCardsForFaction(faction);
-        CalculateBlockReactionCardsForFaction(faction);
-        CalculatePlayableCardsForFaction(faction);
-        CalculateAttentionCardsForFaction(faction);
+        CalculateActivatableCardsForFaction(situation, faction);
+        CalculateAfterReactionCardsForFaction(situation.Board, faction);
+        CalculateBlockReactionCardsForFaction(situation.Board, faction);
+        CalculatePlayableCardsForFaction(situation.Board, faction);
+        CalculateAttentionCardsForFaction(situation, faction);
     }
 
-    private static void ApplyCountryTagModifiersForFaction(Faction faction)
+    private static void ApplyCountryTagModifiersForFaction(BoardState board, Faction faction)
     {
-        foreach (ICountryTagModifier modifier in ModifierRegistry.GetAll<ICountryTagModifier>().Where(m => m.Faction == faction))
-            modifier.ApplyTagModifiers(faction);
+        foreach (ICountryTagModifier modifier in board.Modifiers<ICountryTagModifier>().Where(m => m.Faction == faction))
+            modifier.ApplyTagModifiers(board, faction);
     }
 
-    private static void ClearTagsForFaction(Faction faction, Tag tag)    {
-        foreach (var unitState in GameSession.Current.GameState.UnitStatesById.Values)
-        {
-            unitState.Tags.Remove(tag, faction);
-        }
-        foreach (var countryState in GameSession.Current.GameState.CountryStateById.Values)
-        {
-            countryState.Tags.Remove(tag, faction);
-        }
-        foreach (var cardState in GameSession.Current.GameState.CardStatesById.Values)
-        {
-            cardState.Tags.Remove(tag, faction);
-        }
+    private static void ClearTagsForFaction(BoardState board, Faction faction, Tag tag)
+    {
+        foreach (UnitRecord unit in board.UnitRecords)
+            unit.Tags.Remove(tag, faction);
+        foreach (CountryRecord country in board.CountryRecords)
+            country.Tags.Remove(tag, faction);
+        foreach (CardRecord card in board.CardRecords)
+            card.Tags.Remove(tag, faction);
     }
-    
-
 }
-
-

@@ -9,28 +9,28 @@ using System.Threading.Tasks;
 /// </summary>
 public sealed class PlayChoice
 {
-    private readonly Func<StepOption?, List<int>> _candidates;
+    private readonly Func<StepContext, List<int>> _candidates;
     private readonly string _promptTitle;
 
-    private PlayChoice(Func<StepOption?, List<int>> candidates, string promptTitle)
+    private PlayChoice(Func<StepContext, List<int>> candidates, string promptTitle)
     {
         _candidates = candidates;
         _promptTitle = promptTitle;
     }
 
     /// <summary>The player picks one of these cards, through SelectCardRequestHandler.</summary>
-    public static PlayChoice From(Func<StepOption?, List<int>> cardIds, string promptTitle) => new(cardIds, promptTitle);
+    public static PlayChoice From(Func<StepContext, List<int>> cardIds, string promptTitle) => new(cardIds, promptTitle);
 
     /// <summary>No prompt: the step plays exactly this card.</summary>
-    public static PlayChoice Fixed(Func<StepOption?, int> cardId) => new(previous => new List<int> { cardId(previous) }, null);
+    public static PlayChoice Fixed(Func<StepContext, int> cardId) => new(context => new List<int> { cardId(context) }, null);
 
-    /// <summary>Every card the step could play right now. Pure; may throw when the previous outcome is needed but unknown.</summary>
-    public List<int> Candidates(StepOption? previous) => _candidates(previous);
+    /// <summary>Every card the step could play right now. Pure; may throw when the previous outcome is needed but unknown. Reads the context, never the live game.</summary>
+    public List<int> Candidates(StepContext context) => _candidates(context);
 
     /// <summary>The real path: the card to play, or -1 for none (an empty answer only a host timeout produces).</summary>
-    internal async Task<int> Run(Faction faction, StepOption? previous)
+    internal async Task<int> Run(Faction faction, StepContext context)
     {
-        List<int> candidates = _candidates(previous);
+        List<int> candidates = _candidates(context);
         if (_promptTitle == null) return candidates.Count > 0 ? candidates[0] : -1;
 
         InputRequest pick = await new InputRequest.SelectCardRequestHandler(faction, candidates, _promptTitle).BroadCast();

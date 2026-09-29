@@ -8,21 +8,21 @@ public partial class EWSubmarinesLeadtheBattleoftheAtlantic : EWCardLogic
 {
     /// <summary>Every German Navy on the board: one VP and two UK discards each. Read by both the
     /// step and <see cref="Targets"/>, so hovering shows exactly what this card is worth.</summary>
-    private List<UnitState> ScoringUnits =>
-        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+    private List<UnitState> ScoringUnits(BoardState board) =>
+        board.ActiveUnits(Faction)
             .Where(u => u.Type == UnitType.NAVY)
             .ToList();
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.Fixed(() =>
-                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits.Count, "German Navies on the board"), Faction))),
+            new ResultStep(this, Choose.Fixed(c =>
+                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits(c.Board).Count, "German Navies on the board"), Faction))),
 
-            new ResultStep(this, Choose.Fixed(previous => new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, ScoredBy(previous) * 2)))
+            new ResultStep(this, Choose.Fixed(c => new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, ScoredBy(c.Previous) * 2)))
             .RequiringPreviousStep()
         };
     }

@@ -58,7 +58,9 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
 
     public bool HasEventBasedTrigger => CardTriggers().Any(c => c.RequiresEventContext);
     public bool HasImmediateTrigger => CardTriggers().Any(c => c is Condition.EventCondition ec && ec.IsImmediate);
-    public bool HasExecutableCardSteps => CardSteps.Count == 0 || ExecutableCardSteps.Count > 0;
+    public bool HasExecutableCardSteps => HasExecutableCardStepsOn(BoardState.Live);
+    public bool HasExecutableCardStepsOn(BoardState board) =>
+        CardSteps.Count == 0 || CardSteps.Any(step => board.Of(step).Tags.HasForAny(Tag.IsExecutable));
     public int NextStepId => HasExecutableCardSteps ? ExecutableCardSteps[0].Id : -1;
     [Signal] public delegate void CardFinishedEventHandler();
     
@@ -111,6 +113,15 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     protected T TriggerContextAs<T>() where T : ChangeEvent => TriggerContext as T;
 
     /// <summary>
+    /// The event this card reacts to in <paramref name="situation"/> — what step and trigger logic reads,
+    /// so a forked situation answers with its hypothetical trigger. ActivationTrigger still wins, as above.
+    /// </summary>
+    protected ChangeEvent TriggerContextIn(GameSituation situation) => ActivationTrigger ?? situation.ReactionTrigger;
+
+    /// <inheritdoc cref="TriggerContextIn"/>
+    protected T TriggerContextAs<T>(GameSituation situation) where T : ChangeEvent => TriggerContextIn(situation) as T;
+
+    /// <summary>
     /// What the event being reacted to acts on — the whole answer for a card that chooses nothing
     /// because its trigger has already chosen for it: the "do not remove your X this turn" blocks,
     /// and the responses that hit or replace the very piece the trigger names.
@@ -135,49 +146,55 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// <remarks>The block-window half — see <see cref="BlockContext"/>.</remarks>
     protected TargetSet BlockTargets() => BlockContext.TargetsOrNone();
 
+    /// <summary>The block-window half of <see cref="TriggerContextIn"/>.</summary>
+    protected ChangeEvent BlockContextIn(GameSituation situation) => ActivationTrigger ?? situation.BlockTrigger;
+
     // A Status/Response card still in hand is being PLAYED onto the table, not activated.
     // Its CardSteps are the later activation effect, so their executability must not gate the play.
-    public bool IsTableCardInHand => (IsStatus || IsResponse) && !CardState.IsPlayed;
+    public bool IsTableCardInHand => IsTableCardInHandOn(BoardState.Live);
+    private bool IsTableCardInHandOn(BoardState board) => (IsStatus || IsResponse) && !board.IsPlayed(CardState);
 
-    public bool CanBeActivated()
+    public bool CanBeActivated(GameSituation situation)
     {
+        BoardState board = situation.Board;
+        CardRecord card = board.Of(CardState);
+
         // A card in the discard pile is out of play. This cannot be inferred from Tag.IsPlayed, which
         // stays set once a card is discarded (GameStateCalculator.CalculatePlayedCardsForFaction), so
         // without this check a spent Response card would still be offered as a reaction next turn.
         // CanBeActivated feeds Tag.IsActivatable, so this one gate covers plays, after-reactions and
         // block reactions alike.
-        if (CardState.IsDiscarded)
+        if (board.IsDiscarded(CardState))
             return false;
-        if (IsBlocked)
+        if (card.IsBlocked)
             return false;
 
         // For an unplayed card TriggerConditionsMet resolves to _defaultPlayConditions, which is
         // the correct gate for a play.
-        if (IsActivationFinished || !TriggerConditionsMet)
+        if (IsActivationFinished || !TriggerConditionsMet(situation))
             return false;
 
-        if (IsTableCardInHand)
+        if (IsTableCardInHandOn(board))
         {
             // Playing it onto the table is a Play-step action, never a reaction from hand.
             // HasEventBasedTrigger is deliberately not consulted: it reads CardTriggers(), which
             // describes the later activation and is meaningless while the card is in hand.
-            return (CardPlayRound.Current?.ReactionDepth ?? 0) == 0;
+            return situation.ReactionDepth == 0;
         }
 
-        if (!HasExecutableCardSteps)
+        if (!HasExecutableCardStepsOn(board))
             return false;
 
         // "Once per turn" cards (MultipleActivationsPerTurn = false) may not activate
         // again in the same faction turn.
-        if (!CardData.MultipleActivationsPerTurn && IsActivatedThisTurn)
+        if (!CardData.MultipleActivationsPerTurn && card.ActivatedInTurns.Contains(board.GameTurn))
             return false;
 
         // Cards whose triggers are purely state-based (no event/block conditions) must not
         // appear as options inside a reaction chain — only at reaction depth 0.
         if (!HasEventBasedTrigger)
         {
-            int reactionDepth = CardPlayRound.Current?.ReactionDepth ?? 0;
-            return reactionDepth == 0;
+            return situation.ReactionDepth == 0;
         }
 
         return true;
@@ -188,7 +205,7 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
         set { CardState.IsBlocked = value; }
     }
     
-    public bool TriggerConditionsMet => _conditions.All(condition=>condition.MeetCondition());
+    public bool TriggerConditionsMet(GameSituation situation) => ConditionsOn(situation.Board).All(condition => condition.MeetCondition(situation));
 
 
     protected virtual List<Condition> _defaultPlayConditions => new List<Condition> 
@@ -200,16 +217,17 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     };
     
 
-    public List<Condition> _conditions
+    public List<Condition> _conditions => ConditionsOn(BoardState.Live);
+
+    /// <summary>The play conditions while the card is in hand on <paramref name="board"/>, its triggers once it is on the table.</summary>
+    private List<Condition> ConditionsOn(BoardState board)
     {
-        get {
-            if (!CardState.IsPlayed)
-                return _defaultPlayConditions;
-            if (CardTriggers().Count > 0)
-                return CardTriggers();
-            // Played with no custom triggers = passive modifier, never re-activatable
-            return new List<Condition> { new Condition.Never() };
-        }
+        if (!board.IsPlayed(CardState))
+            return _defaultPlayConditions;
+        if (CardTriggers().Count > 0)
+            return CardTriggers();
+        // Played with no custom triggers = passive modifier, never re-activatable
+        return new List<Condition> { new Condition.Never() };
     }
         
 

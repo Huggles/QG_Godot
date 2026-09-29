@@ -72,7 +72,7 @@ public sealed class PreferVacantDeployRule : IBotRule
             if (!DeployingFaction(decision, decision.Options[i].Id, out Faction deployer)) continue;
 
             Condition occupied = new Condition.CountryHasFactionUnit(decision.Options[i].Id, deployer);
-            if (!occupied.MeetCondition()) sink.Score(i, VacantBonus);
+            if (!occupied.MeetCondition(GameSituation.Live)) sink.Score(i, VacantBonus);
         }
     }
 }

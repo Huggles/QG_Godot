@@ -44,15 +44,7 @@ public partial class GameAPI : Node
 
     public static List<int> GetSupplyCountryIds(Faction faction)
     {
-        var response = new List<int>();
-        foreach (var countryState in GameState.CountryStates)
-        {
-            bool blocked = ModifierRegistry.GetAll<ISupplyBlockModifier>()
-                .Any(m => m.BlocksSupply(countryState.Id, faction));
-            if (!blocked && countryState.IsSupply && countryState.OccupyingFactions.Contains(faction))
-                response.Insert(0, countryState.Id);
-        }
-        return response;
+        return BoardState.Live.SupplyCountryIds(faction);
     }
 
     public static List<int> ActiveUnitIds(Faction faction)

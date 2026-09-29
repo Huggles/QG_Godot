@@ -9,6 +9,10 @@ public partial class StraightState : StateObject
     public int ControlledCountryId1 { get; set; }
     public int ControlledCountryId2 { get; set; }
 
+    /// <summary>This strait's data on the live board: only its control tags.</summary>
+    [JsonIgnore] public StraitRecord Record { get; } = new();
+    [JsonIgnore] public override TagContainer Tags => Record.Tags;
+
     [JsonIgnore] public CountryState ControllingCountryState => CountryState.ForId(ControllingCountryId);
     [JsonIgnore] public CountryState ControlledCountryState1 => CountryState.ForId(ControlledCountryId1);
     [JsonIgnore] public CountryState ControlledCountryState2 => CountryState.ForId(ControlledCountryId2);
@@ -55,8 +59,8 @@ public partial class StraightState : StateObject
             HideStraightSprite();
     }
 
-    public FactionTeam ControlledByFaction => ControllingCountryState.OccupyingTeam == FactionTeam.NONE ? FactionTeam.ALLIES : ControllingCountryState.OccupyingTeam;
-    public bool IsControlledByFaction(Faction faction) => ControlledByFaction == StaticGameData.FactionTeamForFaction(faction);
+    public FactionTeam ControlledByFaction => BoardState.Live.StraitController(this);
+    public bool IsControlledByFaction(Faction faction) => BoardState.Live.IsStraitControlledBy(this, faction);
 
     public void ShowStraightSprite()
     {

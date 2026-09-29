@@ -20,8 +20,9 @@ using System.Threading.Tasks;
 /// </summary>
 public abstract partial class CardStep : ITaggable
 {
-    [JsonIgnore] private readonly TagContainer _tags = new();
-    [JsonIgnore] public TagContainer Tags => _tags;
+    /// <summary>This step's tags on the live board. Its progress (StepFinished, ...) stays on the step.</summary>
+    [JsonIgnore] public StepRecord Record { get; } = new();
+    [JsonIgnore] public TagContainer Tags => Record.Tags;
 
     public bool StepFinished { get; set; } = false;
 
@@ -85,18 +86,15 @@ public abstract partial class CardStep : ITaggable
     /// </summary>
     [JsonIgnore] private bool PreviousStepRequirementMet => !RequiresPreviousStep || (PreviousCardStep?.StepSucceeded ?? false);
 
-    [JsonIgnore] public bool MeetAllConditions
+    public bool MeetAllConditions(GameSituation situation)
     {
-        get
-        {
-            // Resolved ONCE. GetConditionsMethod is a card author's lambda that allocates a fresh
-            // List<Condition> of fresh Condition objects on every call, and the expression this
-            // replaces read the property twice — once for the null test, once for the All() — so
-            // every evaluation built the list twice and threw one copy away.
-            List<Condition> conditions = Conditions;
-            return (conditions == null || conditions.All(condition => condition.MeetCondition()))
-                   && PreviousStepRequirementMet;
-        }
+        // Resolved ONCE. GetConditionsMethod is a card author's lambda that allocates a fresh
+        // List<Condition> of fresh Condition objects on every call, and the expression this
+        // replaces read the property twice — once for the null test, once for the All() — so
+        // every evaluation built the list twice and threw one copy away.
+        List<Condition> conditions = Conditions;
+        return (conditions == null || conditions.All(condition => condition.MeetCondition(situation)))
+               && PreviousStepRequirementMet;
     }
 
     [JsonIgnore] protected List<Condition> AdvisoryConditions => GetAdvisoryConditionsMethod?.Invoke();
@@ -110,13 +108,10 @@ public abstract partial class CardStep : ITaggable
     /// GameStateCalculator.CalculateAttentionCardsForFaction to raise
     /// <see cref="Tag.NeedsAttention"/>, and by nothing in the execution path.
     /// </summary>
-    [JsonIgnore] public bool MeetAllAdvisoryConditions
+    public bool MeetAllAdvisoryConditions(GameSituation situation)
     {
-        get
-        {
-            List<Condition> advisory = AdvisoryConditions;   // once — see MeetAllConditions
-            return advisory == null || advisory.All(condition => condition.MeetCondition());
-        }
+        List<Condition> advisory = AdvisoryConditions;   // once — see MeetAllConditions
+        return advisory == null || advisory.All(condition => condition.MeetCondition(situation));
     }
 
     /// <summary>What kind of step this is, structurally. See <see cref="StepKind"/>.</summary>
@@ -165,13 +160,13 @@ public abstract partial class CardStep : ITaggable
     /// applying anything — or null when the step is free-form or cannot say. Does not check the
     /// step's conditions. The caller owns the events: <see cref="StepChoice.Release"/> them.
     /// </summary>
-    public IReadOnlyList<StepOption> PossibleOutcomes() => PossibleOutcomes(PreviousOutcome);
+    public IReadOnlyList<StepOption> PossibleOutcomes() => PossibleOutcomes(StepContext.Live(PreviousOutcome));
 
-    /// <summary>As above, after a hypothetical <paramref name="previous"/> — how a projection chains steps.</summary>
-    public virtual IReadOnlyList<StepOption> PossibleOutcomes(StepOption? previous) => null;
+    /// <summary>As above, in <paramref name="context"/> — a forked board and a hypothetical previous outcome is how a projection chains steps.</summary>
+    public virtual IReadOnlyList<StepOption> PossibleOutcomes(StepContext context) => null;
 
-    /// <summary>The cards a play step could play after <paramref name="previous"/>, or null when it cannot say. See <see cref="PlayChoice"/>.</summary>
-    public virtual IReadOnlyList<int> PossiblePlays(StepOption? previous) => null;
+    /// <summary>The cards a play step could play in <paramref name="context"/>, or null when it cannot say. See <see cref="PlayChoice"/>.</summary>
+    public virtual IReadOnlyList<int> PossiblePlays(StepContext context) => null;
 
     /// <summary>
     /// Apply the result. One seam per step kind, and the only place a step's effect reaches the game.
@@ -205,7 +200,7 @@ public abstract partial class CardStep : ITaggable
         // A re-run — a Status card's steps are re-armed every turn — must not inherit the last run's result.
         StepSucceeded = false;
 
-        if (!MeetAllConditions)
+        if (!MeetAllConditions(GameSituation.Live))
         {
             //Should skip step
             DebugUtilities.PrintPeer("SKIPPING STEP");

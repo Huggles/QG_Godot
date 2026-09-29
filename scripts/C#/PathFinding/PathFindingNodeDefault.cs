@@ -9,8 +9,8 @@ public partial class PathFindingNodeDefault : IPathFindingNode
         throw new NotImplementedException();
     }
 
-    public bool CountryLinksSupplyForFaction(int countryId, Faction faction)
+    public bool CountryLinksSupplyForFaction(BoardState board, int countryId, Faction faction)
     {
-        return CountryState.ForId(countryId).OccupyingFactions.Contains(faction);
+        return board.UnitsIn(CountryState.ForId(countryId)).ContainsKey(faction);
     }
 }

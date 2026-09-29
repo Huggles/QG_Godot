@@ -78,11 +78,7 @@ public partial class UnitPool : Object
     /// </summary>
     public static int AvailableUnitCount(Faction faction, UnitType unitType)
     {
-        FactionState factionState = FactionState.ForEnum(faction);
-        if (factionState == null) return 0;
-
-        return UnitState.ForIds(factionState.AllUnits)
-            .Count(unit => unit.Type == unitType && !unit.IsDeployedToCountry);
+        return BoardState.Live.AvailableUnitCount(faction, unitType);
     }
 
     /// <summary>

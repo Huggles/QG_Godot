@@ -6,17 +6,17 @@ using Godot;
 
 public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICountryTagModifier, IUnitSupplyModifier
 {
-    public bool GrantsSupply(UnitState unit)
+    public bool GrantsSupply(BoardState board, UnitState unit)
     {
         return StaticGameData.FactionTeamForFaction(unit.Faction) == FactionTeam.ALLIES
             && unit.Type == UnitType.ARMY
-            && unit.CountryState.Country == Country.Szechuan;
+            && board.CountryOf(unit) == (int)Country.Szechuan;
     }
 
-    public void ApplyTagModifiers(Faction faction)
+    public void ApplyTagModifiers(BoardState board, Faction faction)
     {
         if (StaticGameData.FactionTeamForFaction(faction) != FactionTeam.ALLIES) return;
-        CountryState.ForEnum(Country.Szechuan).AddTag(Tag.Recruitable, faction);
+        board.Of(CountryState.ForEnum(Country.Szechuan)).Tags.Add(Tag.Recruitable, faction);
     }
 
     /// <summary>Szechuan — the space this recruits into, and the space whose Allied Armies it keeps
@@ -24,7 +24,7 @@ public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICou
     public override TargetSet Targets() =>
         TargetSet.Countries(new List<Country> { Country.Szechuan })
             .Plus(TargetSet.Units(CountryState.ForEnum(Country.Szechuan).Units.Values
-                .Select(UnitState.ForId).Where(GrantsSupply).ToList()));
+                .Select(UnitState.ForId).Where(unit => GrantsSupply(BoardState.Live, unit)).ToList()));
 
     protected override List<Condition> CardTriggers()
     {

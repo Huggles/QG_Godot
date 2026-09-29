@@ -14,8 +14,12 @@ public partial class CardState : StateObject
 
     [JsonIgnore] public CardLogic CardLogic { get; set; } = null;
 
-    public List<int> PlayedInTurn { get; set; } = new();
-    public List<int> ActivatedInTurns { get; set; } = new();
+    /// <summary>This card's runtime data on the live board.</summary>
+    [JsonIgnore] public CardRecord Record { get; } = new();
+    [JsonIgnore] public override TagContainer Tags => Record.Tags;
+
+    public List<int> PlayedInTurn { get => Record.PlayedInTurn; set => Record.PlayedInTurn = value; }
+    public List<int> ActivatedInTurns { get => Record.ActivatedInTurns; set => Record.ActivatedInTurns = value; }
 
     /// <summary>
     /// True once this card's face has been shown to every player, and false again as soon as it
@@ -29,12 +33,12 @@ public partial class CardState : StateObject
     /// replaying the message stream. Like ActivatedInTurns it is deliberately outside ComputeHash — a
     /// peer cannot get it wrong independently, it can only learn it from the wire.
     /// </summary>
-    public bool IsRevealed { get; set; } = false;
+    public bool IsRevealed { get => Record.IsRevealed; set => Record.IsRevealed = value; }
 
     /// <summary>
     /// Whether the card was blocked by a card reaction. This is set by the card logic that blocks the card, and is used to prevent the card from being activated.
     /// </summary>
-    public bool IsBlocked { get; set; } = false;
+    public bool IsBlocked { get => Record.IsBlocked; set => Record.IsBlocked = value; }
 
     /// <summary>
     /// Whether this peer may see the card's face. A Response card is played face down and stays
@@ -53,14 +57,14 @@ public partial class CardState : StateObject
         
     }
 
-    public virtual bool IsPlayed => this.HasTag(Tag.IsPlayed, Faction);
+    public virtual bool IsPlayed => BoardState.Live.IsPlayed(this);
 
     /// <summary>
     /// In its owner's discard pile. Deliberately not derived from Tag.IsPlayed — discarded cards keep
     /// that tag (see GameStateCalculator.CalculatePlayedCardsForFaction), so "played" and "discarded"
     /// cannot be told apart by tag alone.
     /// </summary>
-    public virtual bool IsDiscarded => DeckState.ForFaction(Faction).DiscardedCardIds.Contains(Id);
+    public virtual bool IsDiscarded => BoardState.Live.IsDiscarded(this);
 
     /// <summary>
     /// The card face CardScene renders. Virtual so a card that is not a faction card — see

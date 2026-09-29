@@ -28,10 +28,10 @@ public sealed partial class PlayCardStep : CardStep
     public PlayCardStep(CardLogic cardLogic, PlayChoice choice) : base(cardLogic)
     {
         _choice = choice;
-        _chooseCard = async () => CardStepResult.PlayCard(await choice.Run(TriggeringFaction, PreviousOutcome));
+        _chooseCard = async () => CardStepResult.PlayCard(await choice.Run(TriggeringFaction, StepContext.Live(PreviousOutcome)));
     }
 
-    public override IReadOnlyList<int> PossiblePlays(StepOption? previous) => _choice?.Candidates(previous);
+    public override IReadOnlyList<int> PossiblePlays(StepContext context) => _choice?.Candidates(context);
 
     public override StepKind Kind => StepKind.PlayCard;
 

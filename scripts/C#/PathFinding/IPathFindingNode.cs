@@ -4,6 +4,6 @@ using System.Collections.Generic;
 
 public interface IPathFindingNode
 {
-    bool CountryLinksSupplyForFaction(int countryId, Faction faction);
+    bool CountryLinksSupplyForFaction(BoardState board, int countryId, Faction faction);
     List<int> ConnectedCountries(Faction faction);
 }

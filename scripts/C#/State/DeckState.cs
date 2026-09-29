@@ -20,11 +20,12 @@ public partial class DeckState : StateObject
                    .Concat(ResponseCardIds)
                    .Concat(StatusCardIds).ToList();
 
-    public List<int> DeckCardIds {get; set;} = new();
-    public List<int> HandCardIds {get; set;} = new();
-    public List<int> DiscardedCardIds {get; set;} = new();
-    public List<int> ResponseCardIds {get; set;} = new();
-    public List<int> StatusCardIds {get; set;} = new();
+    // The piles are the faction's board data; this class is the operations on them.
+    public List<int> DeckCardIds { get => FactionState.Record.Deck; set => FactionState.Record.Deck = value; }
+    public List<int> HandCardIds { get => FactionState.Record.Hand; set => FactionState.Record.Hand = value; }
+    public List<int> DiscardedCardIds { get => FactionState.Record.Discarded; set => FactionState.Record.Discarded = value; }
+    public List<int> ResponseCardIds { get => FactionState.Record.Response; set => FactionState.Record.Response = value; }
+    public List<int> StatusCardIds { get => FactionState.Record.Status; set => FactionState.Record.Status = value; }
 
     [JsonIgnore] public List<CardState> DeckCardStates => CardState.ForIds(DeckCardIds);
     [JsonIgnore] public List<CardState> HandCardStates => CardState.ForIds(HandCardIds);

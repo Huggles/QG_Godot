@@ -10,10 +10,10 @@ public partial class StatusAustraliaFormstheDirectorateofManpower : StatusCardLo
     /// re-tags Australia so any Army you may build may go there instead.</summary>
     public override TargetSet Targets() => TargetSet.Countries(unlockedCountries);
 
-    public void ApplyTagModifiers(Faction faction)
+    public void ApplyTagModifiers(BoardState board, Faction faction)
     {
         CountryState australia = CountryState.ForEnum(unlockedCountries[0]);
-        if (australia.CanRecruit(faction))
-            australia.AddTag(Tag.Buildable, faction);
+        if (board.CanRecruit(faction, australia))
+            board.Of(australia).Tags.Add(Tag.Buildable, faction);
     }
 }

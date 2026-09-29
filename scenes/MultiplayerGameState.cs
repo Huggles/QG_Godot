@@ -26,6 +26,11 @@ public class MultiplayerGameState
 	public List<GameMessage>               GameMessages { get; set; } = new();
 	public List<CardStep>                  CardSteps    { get; set; } = new();
 
+	/// <summary>The live board: the mutable data of the objects above, as conditions and events see it.</summary>
+	[JsonIgnore] public BoardState Board { get; }
+
+	public MultiplayerGameState() => Board = new BoardState(this);
+
 	// -------------------------------------------------------------------------
 	// Lookup caches — lazily populated from the lists above
 	// -------------------------------------------------------------------------
@@ -197,37 +202,7 @@ public class MultiplayerGameState
 			GameStateCalculator.ApplyComputedTags(snapshot.ComputedTags);
 	}
 
-	public string ComputeHash()
-	{
-		var sb = new StringBuilder();
-
-		foreach (var cs in CountryStates.OrderBy(c => c.Id))
-			sb.Append($"C{cs.Id}:{string.Join(",", cs.Units.OrderBy(kv => (int)kv.Key).Select(kv => $"{(int)kv.Key}={kv.Value}"))}|");
-
-		foreach (var us in UnitStates.OrderBy(u => u.Id))
-			sb.Append($"U{us.Id}:{us.CountryId},{us.ImmuneForTurn},{us.SuppliedForTurn}|");
-
-		foreach (var ss in StraightStates.OrderBy(s => s.Id))
-			sb.Append($"S{ss.Id}:{ss.ControllingCountryId}|");
-
-		foreach (var kv in PlayableFactionStatesByFaction.OrderBy(kv => (int)kv.Key))
-		{
-			var deck = kv.Value.DeckState;
-			sb.Append($"F{(int)kv.Key}:{kv.Value.Score}," +
-					  $"d{deck.DeckCardIds.Count}," +
-					  $"h{string.Join("-", deck.HandCardIds.OrderBy(id => id))}," +
-					  $"st{string.Join("-", deck.StatusCardIds.OrderBy(id => id))}," +
-					  $"r{string.Join("-", deck.ResponseCardIds.OrderBy(id => id))}|");
-		}
-		return Fnv1a32(sb.ToString()).ToString("X8");
-	}
-
-	private static uint Fnv1a32(string s)
-	{
-		uint hash = 2166136261u;
-		foreach (char c in s) { hash ^= c; hash *= 16777619u; }
-		return hash;
-	}
+	public string ComputeHash() => Board.Hash();
 }
 
 // =============================================================================

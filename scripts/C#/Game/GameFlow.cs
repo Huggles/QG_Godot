@@ -70,7 +70,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     public bool OpeningDiscardEnabled { get; set; } = true;
 
     public int Round => StaticGameData.RoundForTurn(GameTurn);
-    public Faction CurrentFaction => GameTurn > 0 ? StaticGameData.PlayableFactions[(GameTurn - 1) % StaticGameData.PlayableFactions.Count] : Faction.GERMANY;
+    public Faction CurrentFaction => StaticGameData.FactionForTurn(GameTurn);
     private MultiplayerGameState gameState => GameSession.Current.GameState;
     public FactionState CurrentFactionState => FactionState.ForEnum(CurrentFaction);
     public DeckState CurrentFactionDeckState => DeckState.ForFaction(CurrentFaction);

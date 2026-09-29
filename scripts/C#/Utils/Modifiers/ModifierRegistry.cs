@@ -26,6 +26,9 @@ public static class ModifierRegistry
 
     public static IEnumerable<T> GetAll<T>() where T : IModifier => _modifiers.OfType<T>();
 
+    /// <summary>The live modifiers in registration order, copied for a forked board.</summary>
+    public static List<IModifier> Snapshot() => new(_modifiers);
+
     /// <summary>
     /// Whether any modifier is registered that a save-game replay could not rebuild. See
     /// <see cref="IUnsavedModifier"/> — GameFlow.CanSave refuses to save while one is live.
