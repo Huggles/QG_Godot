@@ -67,7 +67,7 @@ public partial class TurnBadge : Control
 	/// the two race. Nothing in StartGame is guaranteed to yield — the opening draw loop skips its
 	/// await when a scenario pre-dealt full hands, an empty opening discard completes synchronously,
 	/// OnGameStarted is only awaited when a program is installed, and ChangeRoundChangeEvent's own
-	/// ExecuteAsync awaits Task.CompletedTask — so on those configurations the first turn change lands
+	/// Mutate awaits Task.CompletedTask — so on those configurations the first turn change lands
 	/// before this node exists, Announce finds a null Instance, and the opening badge is simply lost.
 	///
 	/// This signal is emitted immediately after the HUD is built, which makes it the first moment the

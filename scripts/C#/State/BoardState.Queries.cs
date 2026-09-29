@@ -17,9 +17,9 @@ public sealed partial class BoardState
 
     public CountryRecord Of(CountryState country) => _source != null ? country.Record : _countries[country.Id];
     public UnitRecord Of(UnitState unit) => _source != null ? unit.Record : _units[unit.Id];
-    public CardRecord Of(CardState card) => _source != null ? card.Record : _cards[card.Id];
-    public StraitRecord Of(StraightState strait) => _source != null ? strait.Record : _straits[strait.Id];
-    public StepRecord Of(CardStep step) => _source != null ? step.Record : _steps[step.Id];
+    public CardRecord Of(CardState card) => _source != null ? card.Record : _cards.GetOrAdd(card.Id, _ => card.Record.Clone());
+    public StraitRecord Of(StraightState strait) => _source != null ? strait.Record : _straits[strait.ControllingCountryId];
+    public StepRecord Of(CardStep step) => _source != null ? step.Record : _steps.GetOrAdd(step.Id, _ => step.Record.Clone());
 
     // ── Occupancy ───────────────────────────────────────────────────────────
 

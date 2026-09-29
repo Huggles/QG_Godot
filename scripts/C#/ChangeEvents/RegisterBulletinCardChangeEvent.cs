@@ -42,7 +42,14 @@ public partial class RegisterBulletinCardChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    /// <summary>A Bulletin is a new card object, which a fork cannot create: projecting one is refused.</summary>
+    public override void Mutate(BoardState board)
+    {
+        if (!board.IsLive)
+            throw new NotSupportedException("A Bulletin registration creates a card and cannot be applied to a fork.");
+    }
+
+    protected override Task OnLiveMutatedAsync()
     {
         Type mutatorType = Type.GetType(MutatorClassName);
         if (mutatorType == null || !typeof(ActivatableMutator).IsAssignableFrom(mutatorType))
@@ -88,9 +95,7 @@ public partial class RegisterBulletinCardChangeEvent : ChangeEvent
 
         GameSession.Current.GameState.CardStates.Add(cardState);
         DebugUtilities.PrintPeer($"Registered Bulletin {MutatorClassName} for {TargetFaction} as card {CardId}");
-
-        await Task.CompletedTask;
-        return true;
+        return Task.CompletedTask;
     }
 
     public override string SummaryText() => $"{TargetFaction.WithPlayer()} gains the {MutatorClassName} Bulletin";

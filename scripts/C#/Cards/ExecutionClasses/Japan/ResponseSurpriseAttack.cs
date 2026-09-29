@@ -26,14 +26,14 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
             // Battle a sea space
             new ResultStep(this, Choose.BattleTargetFrom(c => c.Board.AttackableSeaIds(Faction).Select(id => new BattleTarget(id, TargetType.COUNTRY))
                     .Concat(c.Board.AttackableNavyIds(Faction).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=> Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))
             .WithGuidance("Battle a sea space"),
             
             // Battle a land space
             new ResultStep(this, Choose.BattleTargetFrom(c => c.Board.AttackableLandIds(Faction).Select(id => new BattleTarget(id, TargetType.COUNTRY))
                     .Concat(c.Board.AttackableArmyIds(Faction).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
             .WithGuidance("Battle a land space"),
         }; 

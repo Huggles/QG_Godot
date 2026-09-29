@@ -24,7 +24,7 @@ public partial class EventPattonAdvances : EventCardLogic
             .WithCondition(() => Condition.Build(new Condition.CountryIsBuildable(buildCountryIds, Faction), this))
             .WithGuidance("Build an Army in Western Europe"),
             new ResultStep(this, Choose.BattleTargetFrom(c => BattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(battleCountryIds, Faction), this))
             .WithGuidance("Battle in Germany or Italy"),
         };

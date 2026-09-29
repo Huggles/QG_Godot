@@ -19,7 +19,7 @@ public partial class EventArdennesOffensive : EventCardLogic
         return new List<CardStep>
         {
             new ResultStep(this, Choose.BattleTargetFrom(c => BattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(targetCountryIds, Faction), this))
             .WithGuidance("Battle in Western Europe"),
             new ResultStep(this, Choose.CountryFrom(_ => targetCountryIds,

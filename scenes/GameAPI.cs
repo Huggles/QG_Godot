@@ -105,102 +105,27 @@ public partial class GameAPI : Node
     }    
 
     /**
-    * Board Management API
+    * Presentation of board changes. The changes themselves are BoardState operations, made by each
+    * ChangeEvent's Mutate; these are the live-only halves that follow them: signals, animations and
+    * notifications. Called with nothing awaited in between, so observers see the same order as before.
     */
-    public static int DeployUnitToCountry(int countryId, Faction faction, UnitType unitType, DeployType deployType, bool awaitAnimation = true)
-    {   
-        DebugUtilities.PrintPeer($"Deploying unit of type {unitType} for faction {faction} to country {countryId} with deploy type {deployType}");
-        CountryState countryState = GameState.CountryStateById[countryId];
-
-        // "Build that army again": a deploy may target a country the faction already occupies. See
-        // CountryState.CanBuild. Notionally the piece standing there returns to the pool and is
-        // deployed again; in practice the SAME piece is redeployed, which is what makes the removal
-        // half a non-event — no ChangeEvent, no UnitRemoved signal, no removal animation, and no
-        // sprite to hide and re-show. It also means no pool piece is consumed and no pool scan runs,
-        // so the peers cannot disagree about which piece was used.
-        bool rebuildInPlace = countryState.Units.ContainsKey(faction);
-
-        bool deployable = deployType == DeployType.BUILD ? countryState.Tags.Has(Tag.Buildable, faction) : countryState.Tags.Has(Tag.Recruitable, faction);
-
-        // Fullness cannot block a rebuild in place: the slot being filled is the faction's own, and it
-        // is the one being vacated. Checked before anything mutates, so a refused deploy leaves the
-        // board untouched.
-        // Reported as two distinct reasons rather than one "full or not deployable" string. They have
-        // completely different causes — a full country is a board that filled up, an undeployable one
-        // is usually a target that was legal when it was offered and stopped being legal before the
-        // deploy landed (a unit recalled to fund this very build can break the supply chain reaching
-        // it; see UnitPool.RecallCandidates). Conflating them sends anyone reading the log after the
-        // fact looking at occupancy for a problem that was never about occupancy.
-        if ((countryState.IsCountryFull && !rebuildInPlace) || !deployable)
-        {
-            string reason = !deployable
-                ? $"Country is not {(deployType == DeployType.BUILD ? "buildable" : "recruitable")} for {faction}"
-                : $"Country is full ({countryState.Units.Count}/3 factions: {string.Join(", ", countryState.OccupyingFactions)})";
-            string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. {reason}.";
-            DebugUtilities.PrintPeer(exceptionMessage);
-            throw new GameAPIException(exceptionMessage);
-        }
-
-        // Throws GameRuleException when the pool is empty — same category as GameAPIException above, a
-        // rules mismatch thrown before any mutation. It never returns -1, so there is nothing to test
-        // for here. An interactive deploy is expected to have freed a piece first; see
-        // UnitPoolShortfall.ResolveBeforeDeploy, which skips a rebuild in place for the reason above.
-        int unitId = rebuildInPlace
-            ? countryState.Units[faction]
-            : UnitPool.GetAvailableUnitForFaction(faction, unitType);
-        UnitState unitState = UnitState.ForId(unitId);
-
-        countryState.Units[faction] = unitState.Id;
-        unitState.CountryId = countryState.Id;
-        EventBus.Emit(EventBus.SignalName.UnitDeployed, unitState.Id, countryState.Id);
-        _ = PresentationServices.Animation.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
-
-        return unitId;
-    }
-    /// <summary>
-    /// The block window runs before Apply(), so the board can move between offer and removal. Throw
-    /// GameAPIException above the mutation line only — an NRE here is graded Unrecoverable.
-    /// </summary>
-    public static void RemoveUnitFromCountry(int unitId, UnitRemovalReason reason, Faction removingFaction, bool awaitAnimation = true)
+    public static void PresentDeploy(int unitId, int countryId, bool awaitAnimation = true)
     {
-        UnitState unitState = UnitState.ForId(unitId);
+        EventBus.Emit(EventBus.SignalName.UnitDeployed, unitId, countryId);
+        _ = PresentationServices.Animation.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+    }
 
-        if (!unitState.IsDeployedToCountry)
-            throw new GameAPIException(
-                $"Cannot remove {unitState.Faction} {unitState.Type} (unit {unitId}) for {reason}: it is not on the board.");
-
-        CountryState countryState = CountryState.ForId(unitState.CountryId);
-
-        switch (reason)
-        {
-            case UnitRemovalReason.SUPPLY when unitState.InSupply:
-                throw new GameAPIException(
-                    $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for SUPPLY: the unit is in supply.");
-
-            // Not ELIMINATE: whether immunity stops an elimination is an open rules question.
-            case UnitRemovalReason.BATTLE when unitState.ImmuneForTurn:
-                throw new GameAPIException(
-                    $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for BATTLE: the unit is immune this turn.");
-
-            // Tag.Attackable means removingFaction has a supplied unit that can reach this target.
-            case UnitRemovalReason.BATTLE when !unitState.Tags.Has(Tag.Attackable, removingFaction):
-                throw new GameAPIException(
-                    $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for BATTLE: {removingFaction} has no supplied unit able to attack it.");
-        }
-
-        _ = PresentationServices.Animation.Enqueue(new RemoveUnitAnimation(unitId, countryState.Id){ BlockQueue = awaitAnimation });
-
-        unitState.CountryId = -1;
-        countryState.Units.Remove(unitState.Faction);
-        EventBus.Emit(EventBus.SignalName.UnitRemoved, unitId, countryState.Id);
+    public static void PresentRemove(int unitId, int countryId, bool awaitAnimation = true)
+    {
+        _ = PresentationServices.Animation.Enqueue(new RemoveUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+        EventBus.Emit(EventBus.SignalName.UnitRemoved, unitId, countryId);
     }
 
     /**
     * Faction/ Deck API
     */
-    public static async Task DrawCards(Faction faction, int numberOfCards, bool showDrawnCards = true)
+    public static async Task PresentDraw(Faction faction, int numberOfCards, List<int> drawnCardIds, bool showDrawnCards = true)
     {
-        List<int> drawnCardIds = DeckState.ForFaction(faction).DrawCards(numberOfCards);
         if(showDrawnCards)
         {
             if(PresentationServices.Notification.LocalPlayerControls(faction))
@@ -221,9 +146,8 @@ public partial class GameAPI : Node
         EventBus.Emit(EventBus.SignalName.CardsDrawn, (int)faction, numberOfCards);
     }
 
-    public static async Task DiscardHandCards(Faction faction, List<int> cardIds)
+    public static void PresentDiscardHand(Faction faction, List<int> cardIds)
     {
-        DeckState.ForFaction(faction).DiscardHandCards(cardIds);
         if(!PresentationServices.Notification.LocalPlayerControls(faction))
         {
             string message = $"{faction.WithPlayer()} discarded {cardIds.Count} card(s)...";
@@ -233,10 +157,13 @@ public partial class GameAPI : Node
         EventBus.Emit(EventBus.SignalName.CardsDiscarded, (int)faction, cardIds.Count);
     }
 
-    public static void ScorePoints(VPTurnSummary vpTurnSummary)
+    /// <summary>
+    /// After the score moved on the board: the per-turn VP breakdown the scoreboard shows, and the
+    /// signal. The breakdown is history for display, not board data, so it stays on GameFlow.
+    /// </summary>
+    public static void PresentScore(VPTurnSummary vpTurnSummary)
     {
         FactionState factionState = FactionState.ForEnum(vpTurnSummary.Faction);
-        factionState.Score += vpTurnSummary.TotalScore;
         if(!GameFlow.Instance.VictoryPointSummaries.ContainsKey(vpTurnSummary.Faction))
         {
             GameFlow.Instance.VictoryPointSummaries.Add(vpTurnSummary.Faction, new List<VPTurnSummary>());
@@ -245,6 +172,7 @@ public partial class GameAPI : Node
         DebugUtilities.PrintPeer($"Faction {vpTurnSummary.Faction} scored {vpTurnSummary.TotalScore} points (Total Score: {factionState.Score})");      
         EventBus.Emit(EventBus.SignalName.FactionScoredPoints, (int)vpTurnSummary.Faction, factionState.Score);
     }
+
 
     /// <summary>
     /// A card step asked for something the rules do not allow. Derives from

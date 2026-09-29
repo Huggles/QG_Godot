@@ -70,7 +70,7 @@ public partial class StatusDiveBombers : StatusCardLogic
                     new Condition.CountryIsAttackable(battleTargetCountryIds(s), Faction).MeetCondition(s)), this); }),
 
             new ResultStep(this, Choose.BattleTargetFrom(c => battleTargets(c.Situation),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

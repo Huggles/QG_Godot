@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 public partial class ReorderDeckChangeEvent : ChangeEvent
 {
     /// <summary>
-    /// The deck's complete new order. ExecuteAsync replaces DeckCardIds outright, so a caller that
+    /// The deck's complete new order. Mutate replaces DeckCardIds outright, so a caller that
     /// only rearranged the top few cards still has to pass the untouched remainder after them — see
     /// StatusSuperiorPlanning. That is why the count here says nothing about how much actually moved,
     /// and why <see cref="ReorderedFromTop"/> exists.
@@ -37,13 +37,11 @@ public partial class ReorderDeckChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board)
     {
-        DeckState deck = DeckState.ForFaction(TargetFaction);
-        deck.DeckCardIds.Clear();
-        deck.DeckCardIds.AddRange(ReorderedCardIds);
-        await Task.CompletedTask;
-        return true;
+        List<int> deck = board.ForFaction(TargetFaction).Deck;
+        deck.Clear();
+        deck.AddRange(ReorderedCardIds);
     }
 
     /// <summary>

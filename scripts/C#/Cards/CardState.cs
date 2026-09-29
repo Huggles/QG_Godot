@@ -29,7 +29,7 @@ public partial class CardState : StateObject
     /// (CardData.MultipleActivationsPerTurn, Condition.CardHasNotBeenActivatedThisTurn), so clearing
     /// it to re-hide a recycled card would also let the card be activated again in the same turn.
     ///
-    /// Written only from ChangeEvent.ExecuteAsync bodies, so every peer derives the same value by
+    /// Written only from ChangeEvent.Mutate bodies, so every peer derives the same value by
     /// replaying the message stream. Like ActivatedInTurns it is deliberately outside ComputeHash — a
     /// peer cannot get it wrong independently, it can only learn it from the wire.
     /// </summary>

@@ -39,7 +39,7 @@ public partial class EventTheaterShift : EventCardLogic
     private CardStep MakeRemovalStep()
     {
         return new RequirementStep(this, Choose.UnitFrom(c => EligibleUnitIds(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board))
             .OnChosen(chosen =>
             {
                 relocatedIds.Add(chosen.Value.Id);

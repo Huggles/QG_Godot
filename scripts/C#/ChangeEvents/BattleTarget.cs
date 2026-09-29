@@ -53,11 +53,12 @@ public class BattleTarget
     public static List<BattleTarget> In(BoardState board, IEnumerable<Country> countries, Faction faction) =>
         In(board, countries?.Select(country => (int)country), faction);
 
-    public BattleCountryChangeEvent ToAttackChangeEvent(Faction faction)
+    /// <summary>The battle against this target, with the defending unit read off <paramref name="board"/> (live by default).</summary>
+    public BattleCountryChangeEvent ToAttackChangeEvent(Faction faction, BoardState board = null)
     {
         if (Type == TargetType.UNIT)
         {
-            return new BattleUnitChangeEvent(faction, Id);
+            return new BattleUnitChangeEvent(faction, Id, board);
         }
         else
         {

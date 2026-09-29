@@ -57,7 +57,7 @@ public partial class ResponseDefenseoftheMotherland : ResponseCardLogic
             .WithGuidance("Recruit an Army in or adjacent to Moscow"),
 
             new ResultStep(this, Choose.UnitFrom(c => AxisArmiesInMoscow(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AxisArmiesInMoscow(s.Board).Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in Moscow")
         };

@@ -28,7 +28,7 @@ public partial class EventVasilevskyTakesCommandInTheFarEast : EventCardLogic
 
             // Step 2: Battle in China
             new ResultStep(this, Choose.BattleTargetFrom(c => ChinaBattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(battleCountryIds, Faction), this))
             .WithGuidance("Battle in China")
         };

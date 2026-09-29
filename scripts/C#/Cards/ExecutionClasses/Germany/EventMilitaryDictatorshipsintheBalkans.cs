@@ -24,7 +24,7 @@ public partial class EventMilitaryDictatorshipsInTheBalkans : EventCardLogic
             .WithGuidance($"Recruit an Italian army in {CountryState.ForEnum(Country.Balkans).Label}"),
 
             new ResultStep(this, Choose.UnitFrom(c => AlliedArmiesInUkraine(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AlliedArmiesInUkraine(s.Board).Count > 0), this))
             .WithGuidance($"Eliminate an Allied army in {CountryState.ForEnum(Country.Ukraine).Label}"),
         };

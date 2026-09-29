@@ -66,7 +66,7 @@ public static class OpeningDiscard
             ForceDiscardHandCardsChangeEvent discardEvent =
                 new ForceDiscardHandCardsChangeEvent(Faction.NONE, faction, cardIds.Count) { IsTrigger = false }
                     .WithoutAnimations();
-            // Already chosen above, so ExecuteAsync must not raise a second request for it.
+            // Already chosen above, so Mutate must not raise a second request for it.
             discardEvent.PreselectDiscards(cardIds);
             await discardEvent.Apply();
         }

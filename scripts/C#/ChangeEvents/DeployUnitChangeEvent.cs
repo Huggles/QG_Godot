@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 public partial class DeployUnitChangeEvent : ChangeEvent
 {
     /// <summary>
-    /// The deployed unit, or -1 until <see cref="ExecuteAsync"/> has created it — a block window runs
+    /// The deployed unit, or -1 until <see cref="Mutate"/> has placed it — a block window runs
     /// before that and has no unit to name yet.
     ///
     /// -1 rather than the default 0: unit ids start at 0 (<c>UnitPool.GetUniqueUnitId</c>
@@ -45,7 +45,7 @@ public partial class DeployUnitChangeEvent : ChangeEvent
 
     /// <summary>
     /// The country, plus the deployed unit once there is one. A BLOCK window runs before
-    /// <see cref="ExecuteAsync"/>, so it gets the country alone; an AFTER-REACTION window runs after
+    /// <see cref="Mutate"/>, so it gets the country alone; an AFTER-REACTION window runs after
     /// it and can point straight at the new unit.
     /// </summary>
     public override TargetSet Targets() =>
@@ -65,12 +65,13 @@ public partial class DeployUnitChangeEvent : ChangeEvent
 
     public override void Project(BoardProjection projection) => projection.Deploy(TriggeringFaction, CountryId, UnitType);
 
-    protected override async Task<bool> ExecuteAsync()
-    {
+    public override void Mutate(BoardState board) =>
+        UnitId = board.DeployUnit(TriggeringFaction, CountryId, UnitType, DeploymentType);
 
-        UnitId = GameAPI.DeployUnitToCountry(CountryId, TriggeringFaction, UnitType, DeploymentType, BlockAnimationQueue);
-        await Task.CompletedTask;
-        return true;
+    protected override Task OnLiveMutatedAsync()
+    {
+        GameAPI.PresentDeploy(UnitId, CountryId, BlockAnimationQueue);
+        return Task.CompletedTask;
     }
 
     public override string TraceText()

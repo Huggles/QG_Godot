@@ -11,13 +11,13 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
 
     /// <summary>
     /// Cards the target was required to discard but could not, because its draw deck ran out.
-    /// Each one costs the target 1 VP — see <see cref="ExecuteAsync"/>.
+    /// Each one costs the target 1 VP — see <see cref="Mutate"/>.
     /// </summary>
     public int UndischargedCards { get; private set; } = 0;
 
     /// <summary>
     /// True when NumberOfCards is already the final, post-modifier count — set by ChangeEvent.FromDto,
-    /// because ToDto() runs after ExecuteAsync() and therefore ships the modified number. Without this
+    /// because ToDto() runs after Mutate() and therefore ships the modified number. Without this
     /// the client re-ran ApplyDiscardModifiers() on top of the server's result and applied every delta
     /// twice: a guaranteed desync, and with a negative modifier (e.g. Jet Fighters, -3) the count
     /// clamped to 0, so the client discarded nothing and ShowDiscardModalAnimation got an empty list.
@@ -38,26 +38,34 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    // The penalty the last mutation charged, for the scoreboard entry that follows it on the live board.
+    private VPTurnSummary _penalty;
+
+    public override void Mutate(BoardState board)
     {
         if (!ModifiersApplied)
-            ApplyDiscardModifiers();
-        DeckState deckState = DeckState.ForFaction(TargetFaction);
-        DiscardedCardIds = deckState.DiscardTopCards(NumberOfCards);
+            ApplyDiscardModifiers(board);
+        DiscardedCardIds = board.DiscardTopCards(TargetFaction, NumberOfCards);
 
         // A card that cannot be discarded because the deck ran out costs the target 1 VP instead.
         // Applied here rather than as a nested ScorePointsChangeEvent: clients replay this
-        // ExecuteAsync from the DTO, so a nested Apply would be both broadcast and replayed,
+        // Mutate from the DTO, so a nested Apply would be both broadcast and replayed,
         // deducting twice. Recomputing the shortfall locally keeps the deduction inside the same
-        // hashed mutation, exactly like ForceDiscardHandCardsChangeEvent calling GameAPI directly.
+        // hashed mutation.
         UndischargedCards = NumberOfCards - DiscardedCardIds.Count;
+        _penalty = null;
         if (UndischargedCards > 0)
         {
-            VPTurnSummary penalty = new VPTurnSummary(GameFlow.Instance.GameTurn, TargetFaction);
-            penalty.AddScore(new VPEntry(-UndischargedCards, $"{UndischargedCards} card(s) that could not be discarded from an empty deck"));
-            GameAPI.ScorePoints(penalty);
+            _penalty = new VPTurnSummary(board.GameTurn, TargetFaction);
+            _penalty.AddScore(new VPEntry(-UndischargedCards, $"{UndischargedCards} card(s) that could not be discarded from an empty deck"));
+            board.AddScore(TargetFaction, _penalty.TotalScore);
         }
-        return true;
+    }
+
+    protected override Task OnLiveMutatedAsync()
+    {
+        if (_penalty != null) GameAPI.PresentScore(_penalty);
+        return Task.CompletedTask;
     }
 
     protected override List<ChangeEventAnimation> AfterAnimations
@@ -75,17 +83,17 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         }
     }
 
-    private void ApplyDiscardModifiers()
+    private void ApplyDiscardModifiers(BoardState board)
     {
-        NumberOfCards = ModifiedCount();
+        NumberOfCards = ModifiedCount(board);
         ModifiersApplied = true;
     }
 
     /// <summary>The count after every IDiscardModifier, without changing this event. No modifier reads NumberOfCards.</summary>
-    private int ModifiedCount()
+    private int ModifiedCount(BoardState board)
     {
         int count = NumberOfCards;
-        foreach (IDiscardModifier modifier in ModifierRegistry.GetAll<IDiscardModifier>())
+        foreach (IDiscardModifier modifier in board.Modifiers<IDiscardModifier>())
         {
             int delta = modifier.ModifyDiscard(this);
             if (delta != 0)
@@ -94,9 +102,9 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         return count;
     }
 
-    /// <summary>Mirror of ExecuteAsync: top-of-deck discards, and 1 VP lost for each card the deck cannot pay.</summary>
+    /// <summary>Mirror of Mutate: top-of-deck discards, and 1 VP lost for each card the deck cannot pay.</summary>
     public override void Project(BoardProjection projection)
-        => projection.DiscardFromDeck(TargetFaction, ModifiersApplied ? NumberOfCards : ModifiedCount());
+        => projection.DiscardFromDeck(TargetFaction, ModifiersApplied ? NumberOfCards : ModifiedCount(BoardState.Live));
 
     public override string SummaryText() => UndischargedCards > 0
         ? $"{TargetFaction.WithPlayer()} was forced to discard {NumberOfCards} cards by {TriggeringFaction.WithPlayer()}, but only had {DiscardedCardIds.Count} left and lost {UndischargedCards} VP"

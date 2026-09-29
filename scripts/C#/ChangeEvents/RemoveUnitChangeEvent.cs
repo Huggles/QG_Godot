@@ -9,24 +9,26 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
     public UnitRemovalReason Reason { get; private set; }
 
     /// <summary>
-    /// Whether the unit was in supply at the moment the event was created (before ExecuteAsync removes it).
+    /// Whether the unit was in supply at the moment the event was created (before Mutate removes it).
     /// Use this in after-reaction conditions instead of UnitState.InSupply, which is cleared by
     /// CalculateAll before reactions are checked.
     /// </summary>
     public bool WasInSupply { get; private set; }
 
     /// <summary>
-    /// WARNING: UnitState.CountryId is set to -1 after ExecuteAsync runs (unit removed from country).
+    /// WARNING: UnitState.CountryId is set to -1 after Mutate runs (unit removed from country).
     /// Always use this event's inherited <see cref="BattleCountryChangeEvent.CountryId"/> to get the
     /// country — it is captured at construction time and remains valid after execution.
     /// </summary>
     public UnitState UnitState => UnitState.ForId(UnitId);
 
-    public RemoveUnitChangeEvent(Faction triggeringFaction, int unitId, UnitRemovalReason removalReason) : base(triggeringFaction, UnitState.ForId(unitId).CountryId)
+    /// <summary>The unit's country and supply are read off <paramref name="board"/>: the live one unless an outcome is built for a fork.</summary>
+    public RemoveUnitChangeEvent(Faction triggeringFaction, int unitId, UnitRemovalReason removalReason, BoardState board = null)
+        : base(triggeringFaction, (board ?? BoardState.Live).CountryOf(UnitState.ForId(unitId)))
     {
         UnitId = unitId;        
         Reason = removalReason;
-        WasInSupply = UnitState.ForId(unitId).InSupply;
+        WasInSupply = (board ?? BoardState.Live).InSupply(UnitState.ForId(unitId));
     }
 
     public override ChangeEventDto ToDto()
@@ -69,10 +71,12 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
 
     public override void Project(BoardProjection projection) => projection.Remove(UnitId);
 
-    protected override async Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board) => board.RemoveUnit(UnitId, Reason, TriggeringFaction);
+
+    protected override Task OnLiveMutatedAsync()
     {
-        GameAPI.RemoveUnitFromCountry(UnitId, Reason, TriggeringFaction);
-        return true;
+        GameAPI.PresentRemove(UnitId, CountryId);
+        return Task.CompletedTask;
     }
 
     public override string SummaryText()

@@ -51,7 +51,7 @@ public partial class StatusStavkaFormsArtilleryCorps : StatusCardLogic
                 new Condition.CountryIsAttackable(SameSpaceCountryIds(s), Faction).MeetCondition(s)), this)),
 
             new ResultStep(this, Choose.BattleTargetFrom(c => SameSpaceTargets(c.Situation),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

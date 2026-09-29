@@ -15,15 +15,7 @@ public partial class SpendPlayActionChangeEvent : ChangeEvent
     /// <summary>Spends the turn's play, which the board does not model.</summary>
     public override void Project(BoardProjection projection) { }
 
-    protected override async Task<bool> ExecuteAsync()
-    {
-        if (!GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(TriggeringFaction))
-            GameFlow.Instance.CardsPlayedThisTurnStep[TriggeringFaction] = 1;
-        else
-            GameFlow.Instance.CardsPlayedThisTurnStep[TriggeringFaction] += 1;
-        await Task.CompletedTask;
-        return true;
-    }
+    public override void Mutate(BoardState board) => board.CountPlay(TriggeringFaction);
 
     /// <summary>
     /// Increments the per-step play counter and nothing else. Card conditions read that counter, so

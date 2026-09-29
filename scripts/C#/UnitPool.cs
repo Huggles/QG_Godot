@@ -20,16 +20,15 @@ public partial class UnitPool : Object
     /// a piece must go through <see cref="UnitPoolShortfall.ResolveBeforeDeploy"/> first — reaching
     /// this throw means nobody could be asked (scenario setup) or a caller skipped that guard.
     /// </summary>
-    public static int GetAvailableUnitForFaction(Faction faction, UnitType unitType)
+    public static int GetAvailableUnitForFaction(Faction faction, UnitType unitType) =>
+        GetAvailableUnitForFaction(faction, unitType, BoardState.Live);
+
+    /// <inheritdoc cref="GetAvailableUnitForFaction(Faction, UnitType)"/>
+    public static int GetAvailableUnitForFaction(Faction faction, UnitType unitType, BoardState board)
     {
         List<UnitState> unitStates = UnitState.ForIds(FactionState.ForEnum(faction).AllUnits);
-        foreach (var unitState in unitStates)
-        {
-            if (!unitState.IsDeployedToCountry && unitState.Type == unitType)
-            {
-                return unitState.Id;
-            }
-        }
+        int unitId = board.NextAvailableUnit(faction, unitType);
+        if (unitId >= 0) return unitId;
 
         int cap = unitStates.Count(unit => unit.Type == unitType);
         throw new GameRuleException(

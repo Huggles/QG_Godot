@@ -31,7 +31,7 @@ public partial class StatusTheRoyalNavy : StatusCardLogic
             .WithGuidance("Discard 2 cards from hand to battle a sea space"),
 
             new ResultStep(this, Choose.BattleTargetFrom(c => SeaBattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

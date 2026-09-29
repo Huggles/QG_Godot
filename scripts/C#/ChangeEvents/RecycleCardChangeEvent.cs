@@ -18,7 +18,7 @@ public partial class RecycleCardChangeEvent : ChangeEvent
     /// The deck order the host produced for a <see cref="RecycleDestination.ShuffleIntoDeck"/>, and
     /// the client's instruction to match it. Null for every other destination.
     ///
-    /// Needed because ExecuteAsync runs on both peers and the state hash covers deck *counts* but not
+    /// Needed because Mutate runs on both peers and the state hash covers deck *counts* but not
     /// order, so two independent shuffles would diverge undetected. It is not a constructor parameter,
     /// so it round-trips via ToDto/ApplyDtoFields — the same shape as
     /// ForceDiscardCardsChangeEvent.ModifiersApplied, and for the same reason: a field the client must
@@ -38,7 +38,7 @@ public partial class RecycleCardChangeEvent : ChangeEvent
         RecycleCardChangeEventDto dto = ChangeEventDto.Build<RecycleCardChangeEventDto>(this, Id);
         dto.CardId = CardId;
         dto.Destination = Destination;
-        // Safe to read here: BroadCast (and so ToDto) runs after ExecuteAsync has set it.
+        // Safe to read here: BroadCast (and so ToDto) runs after Mutate has set it.
         dto.ShuffledOrder = ShuffledOrder;
         return dto;
     }
@@ -49,68 +49,90 @@ public partial class RecycleCardChangeEvent : ChangeEvent
         if (dto is RecycleCardChangeEventDto d) ShuffledOrder = d.ShuffledOrder;
     }
 
-    /// <summary>Mirror of ExecuteAsync: the card leaves whatever pile it is in for the hand or the deck.</summary>
+    /// <summary>Mirror of Mutate: the card leaves whatever pile it is in for the hand or the deck.</summary>
     public override void Project(BoardProjection projection)
     {
         if (projection.PileOf(CardId) == CardPile.None) { projection.MarkUnknown($"recycle card {CardId}, which is in no pile"); return; }
         projection.MoveCard(CardId, Destination == RecycleDestination.Hand ? CardPile.Hand : CardPile.Deck);
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    /// <summary>
+    /// The host decides a shuffle before anything moves: the deck as it will be once the card has
+    /// joined it, shuffled with the same draws the in-place shuffle used to make. A client and a replay
+    /// take the recorded order instead, and so does every board this event mutates.
+    /// </summary>
+    protected override Task ResolveChoicesAsync()
     {
-        DeckState deckState = DeckState.ForFaction(TargetFaction);
+        if (Destination != RecycleDestination.ShuffleIntoDeck || !IsServer || ReplayContext.IsReplaying)
+            return Task.CompletedTask;
 
-        // Recycling MOVES the card, so it has to leave wherever it currently is. This used to be
-        // `DiscardedCardIds.Remove(CardId)` — right for every in-game caller, all of which recycle out
-        // of the discard pile, but a silent duplication for any other source: the card was added to the
-        // destination while the original copy stayed put, and it then existed in two piles at once
-        // (hand *and* draw deck, say). See DeckState.RemoveCardFromAnyPile for why that reads as two
-        // separate cards to the rest of the game.
-        if (!deckState.RemoveCardFromAnyPile(CardId))
+        FactionRecord piles = BoardState.Live.ForFaction(TargetFaction);
+        bool inAnyPile = piles.Hand.Contains(CardId) || piles.Deck.Contains(CardId) || piles.Discarded.Contains(CardId)
+                      || piles.Response.Contains(CardId) || piles.Status.Contains(CardId);
+        if (!inAnyPile) return Task.CompletedTask;
+
+        List<int> order = new(piles.Deck);
+        order.Remove(CardId);
+        order.Add(CardId);
+        GameRandom.Shuffle(order);
+        ShuffledOrder = order;
+        return Task.CompletedTask;
+    }
+
+    // Whether the last mutation found the card to move; a card in no pile changes nothing at all.
+    private bool _moved;
+
+    public override void Mutate(BoardState board)
+    {
+        FactionRecord piles = board.ForFaction(TargetFaction);
+
+        // Recycling MOVES the card, so it has to leave wherever it currently is — adding it to the
+        // destination while the original stayed put would make it two cards. See
+        // BoardState.RemoveCardFromAnyPile.
+        _moved = board.RemoveCardFromAnyPile(TargetFaction, CardId);
+        if (!_moved)
         {
             // Not in any of this faction's piles: adding it to the destination would conjure a card
             // that was never theirs. Both peers see the same state here, so both skip identically.
-            DebugUtilities.PrintPeerError($"Cannot recycle card {CardId}: not in any pile of {TargetFaction}");
-            return false;
+            if (board.IsLive) DebugUtilities.PrintPeerError($"Cannot recycle card {CardId}: not in any pile of {TargetFaction}");
+            return;
         }
 
         switch (Destination)
         {
             case RecycleDestination.TopOfDeck:
-                deckState.DeckCardIds.Insert(0, CardId);
+                piles.Deck.Insert(0, CardId);
                 break;
             case RecycleDestination.ShuffleIntoDeck:
-                deckState.DeckCardIds.Add(CardId);
-                // Host shuffles and records the order; the client replays that exact order rather
-                // than shuffling for itself. See DeckState.ShuffleDeck.
-                //
-                // ...and so does the host while restoring a save. Replay re-applies recorded outcomes; it does
-                // not re-decide them. Shuffling afresh here would silently give the restored game a different
-                // deck order from the saved one, and MultiplayerGameState.ComputeHash covers deck COUNTS, not
-                // order, so nothing downstream would catch it.
-                ShuffledOrder = deckState.ShuffleDeck(IsServer && !ReplayContext.IsReplaying ? null : ShuffledOrder);
+                piles.Deck.Add(CardId);
+                // The order was decided in ResolveChoicesAsync, or arrived with the event. Replay
+                // re-applies recorded outcomes rather than re-deciding them, and ComputeHash covers deck
+                // counts, not order, so a fresh shuffle would diverge silently. A projection that was
+                // never resolved keeps the deck unshuffled: a fork does not draw.
+                if (ShuffledOrder != null) board.ShuffleDeck(TargetFaction, ShuffledOrder);
                 break;
             case RecycleDestination.Hand:
-                deckState.HandCardIds.Add(CardId);
+                piles.Hand.Add(CardId);
                 break;
             case RecycleDestination.BottomOfDeck:
-                deckState.DeckCardIds.Add(CardId);
+                piles.Deck.Add(CardId);
                 break;
         }
 
         // Back in play means face down again: a Response card revealed by an earlier activation must
-        // not stay revealed once it returns to a deck or a hand. Placed after the RemoveCardFromAnyPile
-        // guard above, so a recycle that found nothing to move changes nothing here either.
-        CardState cardState = CardState.ForId(CardId);
-        cardState.IsRevealed = false;
+        // not stay revealed once it returns to a deck or a hand.
+        board.ForCard(CardId).IsRevealed = false;
+    }
 
-        // ...and unused again. A card whose steps are still marked finished is drawn as a dead card:
-        // no executable steps, so CanBeActivated is false and it is never playable or activatable
-        // again. See CardLogic.OnReturnedToPlay. Runs on both peers, like everything else in here.
-        cardState.CardLogic?.OnReturnedToPlay();
-
-        await Task.CompletedTask;
-        return true;
+    /// <summary>
+    /// ...and unused again. A card whose steps are still marked finished is drawn as a dead card: no
+    /// executable steps, so it is never playable again. See CardLogic.OnReturnedToPlay. Step progress
+    /// lives on the card, not the board, so this is the live half. Runs on both peers.
+    /// </summary>
+    protected override Task OnLiveMutatedAsync()
+    {
+        if (_moved) CardState.ForId(CardId).CardLogic?.OnReturnedToPlay();
+        return Task.CompletedTask;
     }
 
     protected override List<ChangeEventAnimation> AfterAnimations => new()

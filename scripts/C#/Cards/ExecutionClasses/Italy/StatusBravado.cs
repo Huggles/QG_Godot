@@ -37,7 +37,7 @@ public partial class StatusBravado : StatusCardLogic
             .RequiringPreviousStep(),
 
             new ResultStep(this, Choose.BattleTargetFrom(c => LandBattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

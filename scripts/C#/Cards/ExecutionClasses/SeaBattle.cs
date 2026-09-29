@@ -25,7 +25,7 @@ public partial class SeaBattle : CardLogic
             // Countries then units: the list constructor splits by type, so this offers exactly the old two lists.
             new ResultStep(this, Choose.BattleTargetFrom(c => AttackableCountries(c.Board).Select(id => new BattleTarget(id, TargetType.COUNTRY))
                     .Concat(AttackableNavies(c.Board).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=>Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))
             .WithGuidance("Select a navy or empty sea country to attack")
         }; 

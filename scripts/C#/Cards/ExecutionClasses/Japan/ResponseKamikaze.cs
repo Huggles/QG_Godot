@@ -28,7 +28,7 @@ public partial class ResponseKamikaze : ResponseCardLogic
             new ResultStep(this, Choose.Fixed(c => {
                 var trigger = c.Situation.ReactionTrigger as DeployUnitChangeEvent;
                 if (trigger == null) return null;
-                return new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE);
+                return new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE, c.Board);
             }))
             .WithGuidance("Eliminate the Allied Navy just built"),
         };

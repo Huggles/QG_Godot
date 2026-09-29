@@ -51,11 +51,7 @@ public partial class BattleCountryChangeEvent : ChangeEvent
     /// <summary>Battling an empty country changes nothing on the board; RemoveUnitChangeEvent overrides this.</summary>
     public override void Project(BoardProjection projection) { }
 
-    protected async override Task<bool> ExecuteAsync()
-    {
-        await Task.CompletedTask;
-        return true;
-    }
+    public override void Mutate(BoardState board) { }
 
     /// <summary>
     /// Must never throw: CardPlayRound puts SummaryText() on the wire as

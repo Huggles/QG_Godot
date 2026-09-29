@@ -19,13 +19,11 @@ public partial class DrawCardByNameChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board)
     {
-        int cardId = DeckState.ForFaction(TargetFaction).DrawCardByName(CardName);
-        if (cardId == -1)
+        int cardId = board.DrawCardByName(TargetFaction, CardName);
+        if (cardId == -1 && board.IsLive)
             DebugUtilities.PrintPeerError($"DrawCardByNameChangeEvent: card '{CardName}' not found in {TargetFaction} deck");
-        await Task.CompletedTask;
-        return true;
     }
 
     /// <summary>

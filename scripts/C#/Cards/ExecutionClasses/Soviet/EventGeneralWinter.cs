@@ -24,12 +24,12 @@ public partial class EventGeneralWinter : EventCardLogic
     {
         return new List<CardStep> {
             new ResultStep(this, Choose.UnitFrom(c => AxisArmiesNearMoscow(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AxisArmiesNearMoscow(s.Board).Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in or adjacent to Moscow"),
 
             new ResultStep(this, Choose.UnitFrom(c => AxisArmiesNearMoscow(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AxisArmiesNearMoscow(s.Board).Count > 0), this))
             .WithGuidance("Eliminate a second Axis Army in or adjacent to Moscow")
         };

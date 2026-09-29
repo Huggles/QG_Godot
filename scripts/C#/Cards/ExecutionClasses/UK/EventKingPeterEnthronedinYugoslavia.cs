@@ -23,7 +23,7 @@ public partial class EventKingPeterEnthronedinYugoslavia : EventCardLogic
         return new List<CardStep> {
             // Eliminate an Axis Army in the Balkans
             new ResultStep(this, Choose.UnitFrom(c => AxisArmiesInBalkans(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AxisArmiesInBalkans(s.Board).Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in the Balkans"),
 

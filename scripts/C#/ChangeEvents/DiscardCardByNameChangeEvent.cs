@@ -30,23 +30,19 @@ public partial class DiscardCardByNameChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board)
     {
-        int cardId = DeckState.ForFaction(TargetFaction).DiscardCardByName(CardName);
+        int cardId = board.DiscardCardByName(TargetFaction, CardName);
         if (cardId == -1)
         {
-            DebugUtilities.PrintPeerError($"DiscardCardByNameChangeEvent: card '{CardName}' not found in {TargetFaction} deck");
-            await Task.CompletedTask;
-            return false;
+            if (board.IsLive) DebugUtilities.PrintPeerError($"DiscardCardByNameChangeEvent: card '{CardName}' not found in {TargetFaction} deck");
+            return;
         }
 
         // The discard pile is public, so a card that lands there is face up — otherwise a Response
         // card put in the pile by a scenario would render face down to everyone but its owner. Set
-        // inside ExecuteAsync so both peers derive it from the same replayed message.
-        CardState.ForId(cardId).IsRevealed = true;
-
-        await Task.CompletedTask;
-        return true;
+        // inside Mutate so both peers derive it from the same replayed message.
+        board.ForCard(cardId).IsRevealed = true;
     }
 
     /// <summary>

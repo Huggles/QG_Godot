@@ -46,7 +46,7 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
     {
         return new List<CardStep> {
             new ResultStep(this, Choose.BattleTargetFrom(c => BattleTargets(c.Situation),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
             .WithGuidance("Battle in the same or adjacent land space"),
         }; 

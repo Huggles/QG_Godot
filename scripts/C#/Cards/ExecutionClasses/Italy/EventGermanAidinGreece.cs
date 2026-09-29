@@ -23,7 +23,7 @@ public partial class EventGermanAidinGreece : EventCardLogic
         return new List<CardStep>
         {
             new ResultStep(this, Choose.UnitFrom(c => AlliedArmiesInBalkans(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
             .WithCondition(()=> Condition.Build(new Condition.CustomCondition(s => AlliedArmiesInBalkans(s.Board).Count > 0),this))
             .WithGuidance($"Eliminate an Allied army in {CountryState.ForEnum(targetCountries[0]).Label}"),
             new ResultStep(this, Choose.CountryFrom(_ => new List<int> { (int)targetCountries[0] },

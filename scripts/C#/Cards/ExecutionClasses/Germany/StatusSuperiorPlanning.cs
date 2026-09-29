@@ -41,7 +41,7 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
                 List<int> fullDeck = new List<int>(reorderedIds);
                 fullDeck.AddRange(deck.DeckCardIds.Skip(peekCount));
 
-                // fullDeck is the whole deck because ExecuteAsync replaces DeckCardIds outright, so the
+                // fullDeck is the whole deck because Mutate replaces DeckCardIds outright, so the
                 // event has to be told how much of it the player actually rearranged — otherwise the
                 // history reports a four-card peek as a reorder of every card in the deck.
                 ReorderDeckChangeEvent reorderEvent = 

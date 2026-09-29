@@ -21,7 +21,7 @@ public partial class EventMaoTsetung : EventCardLogic
     {
         return new List<CardStep> {
             new ResultStep(this, Choose.UnitFrom(c => AxisArmiesInChinaOrSzechuan(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE)))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AxisArmiesInChinaOrSzechuan(s.Board).Count > 0), this))
             .WithGuidance("Eliminate an Axis Army in China or Szechuan")
         };

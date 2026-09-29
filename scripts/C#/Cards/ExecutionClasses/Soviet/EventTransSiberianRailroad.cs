@@ -38,7 +38,7 @@ public partial class EventTransSiberianRailroad : EventCardLogic
     private CardStep MakeRemovalStep()
     {
         return new RequirementStep(this, Choose.UnitFrom(c => EligibleArmyIds(c.Board),
-                (unitId, _) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE))
+                (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board))
             .OnChosen(chosen =>
             {
                 relocatedIds.Add(chosen.Value.Id);

@@ -17,21 +17,30 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board)
     {
-        GameFlow.Instance.GameTurn = NewTurn;
-        GameFlow.Instance.CardsPlayedThisTurnStep.Clear();
+        board.GameTurn = NewTurn;
+        board.CardsPlayedThisTurnStep.Clear();
+
+        foreach (UnitRecord unit in board.UnitRecords)
+        {
+            unit.ImmuneForTurn   = false;
+            unit.SuppliedForTurn = false;
+        }
+    }
+
+    protected override Task OnLiveMutatedAsync()
+    {
         // After GameTurn moved, so CurrentFaction is the faction whose turn is starting.
         GameFlow.Instance.DropOwnTurnReactionSkip();
 
         ResetPerTurnState();
-
-        await Task.CompletedTask;
-        return true;
+        return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Clear the state that only lasts a turn.
+    /// Clear the turn-scoped state a board does not hold: each card's step progress. The units'
+    /// ImmuneForTurn and SuppliedForTurn are board data, cleared in <see cref="Mutate"/>.
     ///
     /// This lives in the event rather than on the EventBus NewTurnStarted signal, which is where it used
     /// to be, for two reasons. That signal is emitted from GameFlow.StartNewTurn, which is host-only, so
@@ -49,12 +58,6 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
         MultiplayerGameState gameState = MultiplayerSession.Instance?.GameState;
         if (gameState == null) return;
 
-        foreach (UnitState unitState in gameState.UnitStates)
-        {
-            unitState.ImmuneForTurn   = false;
-            unitState.SuppliedForTurn = false;
-        }
-
         // Re-arms a status card.s steps for the new turn, and drops any activation binding an aborted
         // play left behind. See CardLogic.OnNewTurnStarted.
         foreach (CardState cardState in gameState.CardStates)
@@ -69,7 +72,7 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
     /// dropped ChangeEvent is caught by the state hash, a dropped PresentationEvent by nothing.
     ///
     /// Read off GameFlow rather than recomputed from NewTurn so the faction is derived in exactly one
-    /// place. Safe here: AfterAnimations is built lazily, after ExecuteAsync has moved GameTurn.
+    /// place. Safe here: AfterAnimations is built lazily, after Mutate has moved GameTurn.
     /// </summary>
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {

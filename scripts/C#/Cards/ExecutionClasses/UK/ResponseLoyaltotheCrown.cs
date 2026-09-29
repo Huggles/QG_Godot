@@ -28,7 +28,7 @@ public partial class ResponseLoyaltotheCrown : ResponseCardLogic
             new ResultStep(this, Choose.Fixed(c => {
                 var deployEvent = c.Situation.ReactionTrigger as DeployUnitChangeEvent;
                 if (deployEvent == null) return null;
-                return new RemoveUnitChangeEvent(Faction, deployEvent.UnitId, UnitRemovalReason.ELIMINATE);
+                return new RemoveUnitChangeEvent(Faction, deployEvent.UnitId, UnitRemovalReason.ELIMINATE, c.Board);
             }))
             .WithGuidance("Eliminate the Axis Army just built")
         };

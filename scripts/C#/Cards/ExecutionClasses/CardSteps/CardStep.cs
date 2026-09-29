@@ -192,7 +192,7 @@ public abstract partial class CardStep : ITaggable
         // why restoring the displaced frame — rather than clearing — is the load-bearing part.
         //
         // Dispatch happens INSIDE this scope, deliberately: a cost event raises its own prompt from
-        // inside ExecuteAsync (ForceDiscardHandCardsChangeEvent does), and that prompt has to carry
+        // inside Mutate (ForceDiscardHandCardsChangeEvent does), and that prompt has to carry
         // this step's card id, step id and purpose.
         using PromptOrigin.Scope origin = PromptOrigin.Enter(this);
 

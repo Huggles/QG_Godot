@@ -5,7 +5,7 @@ using System.Collections.Generic;
 ///
 /// The board no-op is exact, not a judgement call. AttackOption.CalculateAttackOptions adds a COUNTRY
 /// to a battle prompt's options only when its OccupyingTeam is NONE, so a country option always means
-/// an empty space; BattleTarget then builds a plain BattleCountryChangeEvent, whose ExecuteAsync is
+/// an empty space; BattleTarget then builds a plain BattleCountryChangeEvent, whose Mutate is
 /// <c>await Task.CompletedTask; return true;</c> — no unit removed, no occupation, no score. Meanwhile
 /// every empty space adjacent to every supplied unit is offered, so these are usually the MAJORITY of
 /// a Land Battle prompt's options: uniform random was spending a large share of the game's battle

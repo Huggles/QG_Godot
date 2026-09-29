@@ -33,7 +33,7 @@ public partial class StatusResistance : StatusCardLogic
             .RequiringPreviousStep(),
 
             new ResultStep(this, Choose.BattleTargetFrom(c => BattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

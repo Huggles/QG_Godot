@@ -58,7 +58,7 @@ public partial class StatusFrontalAssault : StatusCardLogic
                 new Condition.CountryIsAttackable(SameOrAdjacentCountryIds(s), Faction).MeetCondition(s)), this)),
 
             new ResultStep(this, Choose.BattleTargetFrom(c => SameOrAdjacentTargets(c.Situation),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

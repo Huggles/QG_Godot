@@ -37,7 +37,7 @@ public partial class ResponseChinaOffensive : ResponseCardLogic
             .WithGuidance("Build an army in the country just battled"), 
 
             new ResultStep(this, Choose.BattleTargetFrom(c => BattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(
                 ()=>{ return Condition.Build(new Condition.CountryIsAttackable(TargetCountries.ToCountryIds(), Faction), this); }
             ).WithGuidance("Battle in China or an adjacent land space"),

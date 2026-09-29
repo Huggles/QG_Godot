@@ -35,33 +35,17 @@ public partial class PlayCardChangeEvent : ChangeEvent
                 : $"{TriggeringFaction.WithPlayer()} plays a Response card")
     };
 
-    /// <summary>Mirror of ExecuteAsync's DeckState.PlayCard; the per-turn play counter is not modelled.</summary>
+    /// <summary>Mirror of Mutate's DeckState.PlayCard; the per-turn play counter is not modelled.</summary>
     public override void Project(BoardProjection projection) => projection.PlayCard(SourceCardId);
 
-    protected override async Task<bool> ExecuteAsync(){
-        DeckState.ForFaction(SourceCardState.Faction).PlayCard(SourceCardState.Id);
-        
-        if (!GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(SourceCardState.Faction))
-        {
-            GameFlow.Instance.CardsPlayedThisTurnStep.Add(SourceCardState.Faction, 1);
-        } 
-        else
-        {
-            GameFlow.Instance.CardsPlayedThisTurnStep[SourceCardState.Faction] += 1;
-        }
+    public override void Mutate(BoardState board)
+    {
+        board.PlayCard(SourceCardState.Faction, SourceCardState.Id);
+        board.CountPlay(SourceCardState.Faction);
 
-        SourceCardState.PlayedInTurn.Add(GameFlow.Instance.GameTurn);
-        if(SourceCardState.CardData.CardType == CardType.RESPONSE)
-        {
-            SourceCardState.IsRevealed = false;
-        }
-        else
-        {
-            SourceCardState.IsRevealed = true;
-        }
-        
-        await Task.CompletedTask;
-        return true;
+        CardRecord card = board.Of(SourceCardState);
+        card.PlayedInTurn.Add(board.GameTurn);
+        card.IsRevealed = SourceCardState.CardData.CardType != CardType.RESPONSE;
     }
 
     /// <summary>

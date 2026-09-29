@@ -31,7 +31,7 @@ public partial class ResponseRasputitsa : ResponseCardLogic
             new ResultStep(this, Choose.Fixed(c => {
                 var trigger = c.Situation.ReactionTrigger as DeployUnitChangeEvent;
                 if (trigger == null) throw new Exception("Reaction trigger is not a DeployUnitChangeEvent");
-                return new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE);
+                return new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE, c.Board);
             }))
             .WithGuidance("Eliminate the Axis Army just built near Moscow")
         };

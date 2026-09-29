@@ -26,7 +26,7 @@ public partial class EventLedoAndBurmaRoads : EventCardLogic
 
             // Battle in China or Szechuan
             new ResultStep(this, Choose.BattleTargetFrom(c => BattleTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(BattleCountryIds, Faction), this))
             .WithGuidance("Battle in China or Szechuan")
         };

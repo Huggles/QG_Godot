@@ -23,7 +23,7 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
         return new List<CardStep> {
 
             new ResultStep(this, Choose.BattleTargetFrom(c => c.Board.BattleTargets(Faction, CountryState.ForEnum(Country.SouthChinaSea)),
-                (target, _) => target.ToAttackChangeEvent(Faction)))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithGuidance("Battle in the South China Sea")
             .WithConditions( () => { return new List<Condition> { new Condition.CountryIsAttackable([CountryState.ForEnum(Country.SouthChinaSea).Id], Faction) }; } ),
             new ResultStep(this, Choose.CountryFrom(_ => new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id },

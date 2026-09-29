@@ -38,6 +38,15 @@ public class TagContainer
     public event Action<Tag, Faction> TagAdded;
     public event Action<Tag, Faction> TagRemoved;
 
+    /// <summary>Every set (tag, faction) bit the filter admits, for comparing two boards.</summary>
+    public string Digest(Func<Tag, bool> include)
+    {
+        List<string> set = new();
+        for (int tag = 0; tag < TagCount; tag++)
+            if (_bits[tag] != 0 && include((Tag)tag)) set.Add($"{(Tag)tag}:{_bits[tag]:X}");
+        return string.Join(",", set);
+    }
+
     /// <summary>A copy of the bits with no subscribers: a forked board's tags must never drive visuals.</summary>
     public TagContainer CloneBits()
     {

@@ -110,7 +110,7 @@ public partial class EventBroadFront : EventCardLogic
     private CardStep MakeBattleStep()
     {
         return new ResultStep(this, Choose.BattleTargetFrom(c => QualifyingTargets(c.Board),
-                (target, _) => target.ToAttackChangeEvent(Faction))
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board))
             .OnChosen(_ =>
             {
                 battlesCompleted++;
