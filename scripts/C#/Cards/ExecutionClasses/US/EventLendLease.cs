@@ -40,15 +40,15 @@ public partial class EventLendLease : EventCardLogic
                     ? CardStepResult.PlayCard(cardResp.ResponseCardIds[0])
                     : CardStepResult.Nothing;
             })
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-                DeckState.ForFaction(Faction.UNITED_KINGDOM).HandCardIds.Count > 0 ||
-                DeckState.ForFaction(Faction.SOVIET).HandCardIds.Count > 0), this))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.ForFaction(Faction.UNITED_KINGDOM).Hand.Count > 0 ||
+                s.Board.ForFaction(Faction.SOVIET).Hand.Count > 0), this))
             .WithGuidance("Select an Allied faction to play a card and draw a card"),
 
             // Gated, and the gate is doing real work rather than tidiness: while the ally's card is
             // resolving, step one's StepSucceeded is still false, so a ContinueWithNextSteps fired
             // from inside THAT card's reaction windows cannot hoist this draw into the middle of it.
-            new ResultStep(this, Choose.Fixed(() => new DrawCardsChangeEvent(Faction, _selectedFaction, 1, true)))
+            new ResultStep(this, Choose.Fixed(_ => new DrawCardsChangeEvent(Faction, _selectedFaction, 1, true)))
             .RequiringPreviousStep()
         };
     }

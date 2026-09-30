@@ -5,14 +5,15 @@ public partial class PathFindingService
 {
     private AStar2D _aStar;
 
-    public PathFindingService(IPathFindingNode nodeImplementation, Faction faction)
+    /// <summary>The supply graph of <paramref name="faction"/> on <paramref name="board"/>: the countries it links, joined where it can cross.</summary>
+    public PathFindingService(IPathFindingNode nodeImplementation, Faction faction, BoardState board)
     {
         _aStar = new AStar2D();
 
         // Add eligible countries as A* nodes
         foreach (CountryState countryState in GameSession.Current.GameState.CountryStates)
         {
-            if (nodeImplementation.CountryLinksSupplyForFaction(countryState.Id, faction))
+            if (nodeImplementation.CountryLinksSupplyForFaction(board, countryState.Id, faction))
             {
                 _aStar.AddPoint(countryState.Id, Vector2.One, 1);
             }
@@ -23,7 +24,7 @@ public partial class PathFindingService
         {
             CountryState countryState = CountryState.ForId(countryId);
 
-            foreach (CountryState connectedState in countryState.AdjacentCountryStates(faction))
+            foreach (CountryState connectedState in board.AdjacentCountryStates(faction, countryState))
             {
                 if (_aStar.HasPoint(connectedState.Id))
                 {

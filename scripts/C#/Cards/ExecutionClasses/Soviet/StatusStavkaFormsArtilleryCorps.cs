@@ -5,57 +5,53 @@ using Godot;
 
 public partial class StatusStavkaFormsArtilleryCorps : StatusCardLogic
 {
-    private BattleCountryChangeEvent LastLandBattle =>
-        CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>()
+    private BattleCountryChangeEvent LastLandBattle(GameSituation situation) =>
+        situation.PoolEvents<BattleCountryChangeEvent>()
             .LastOrDefault(ce => ce.IsBattle && ce.TriggeringFaction == Faction && ce.CountryState.Type == CountryType.LAND);
 
-    private List<BattleTarget> SameSpaceTargets
+    private List<BattleTarget> SameSpaceTargets(GameSituation situation)
     {
-        get
-        {
-            var battle = LastLandBattle;
-            if (battle == null) return new List<BattleTarget>();
-            var cs = battle.CountryState;
-            var targets = new List<BattleTarget>();
-            if (cs.Tags.Has(Tag.Attackable, Faction))
-                targets.Add(new BattleTarget(cs.Id, TargetType.COUNTRY));
-            targets.AddRange(cs.Units.Values
-                .Where(uId => UnitState.ForId(uId).Tags.Has(Tag.Attackable, Faction))
-                .Select(uId => new BattleTarget(uId, TargetType.UNIT)));
-            return targets;
-        }
+        var battle = LastLandBattle(situation);
+        if (battle == null) return new List<BattleTarget>();
+        var board = situation.Board;
+        var cs = battle.CountryState;
+        var targets = new List<BattleTarget>();
+        if (board.Of(cs).Tags.Has(Tag.Attackable, Faction))
+            targets.Add(new BattleTarget(cs.Id, TargetType.COUNTRY));
+        targets.AddRange(board.UnitsIn(cs).Values
+            .Where(uId => board.Of(UnitState.ForId(uId)).Tags.Has(Tag.Attackable, Faction))
+            .Select(uId => new BattleTarget(uId, TargetType.UNIT)));
+        return targets;
     }
 
-    private List<int> SameSpaceCountryIds
+    private List<int> SameSpaceCountryIds(GameSituation situation)
     {
-        get
-        {
-            var battle = LastLandBattle;
-            return battle != null ? new List<int> { battle.CountryId } : new List<int>();
-        }
+        var battle = LastLandBattle(situation);
+        return battle != null ? new List<int> { battle.CountryId } : new List<int>();
     }
 
     /// <summary>The space just battled — the only place this may strike again.</summary>
-    public override TargetSet Targets() => TargetSet.FromBattleTargets(SameSpaceTargets);
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(SameSpaceTargets(GameSituation.Live));
 
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
             Condition.Build(new Condition.HasBattledOnLand(Faction), this).Immediately(),
-            Condition.Build(new Condition.CustomCondition(() =>
-                DeckState.ForFaction(Faction).HandCardIds.Count >= 1), this)
+            Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.ForFaction(Faction).Hand.Count >= 1), this)
         };
     }
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 1)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 1)))
             .WithGuidance("Discard a card from hand to battle the same space")
-            .WithCondition(() => Condition.Build(new Condition.CountryIsAttackable(SameSpaceCountryIds, Faction), this)),
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                new Condition.CountryIsAttackable(SameSpaceCountryIds(s), Faction).MeetCondition(s)), this)),
 
-            new ResultStep(this, Choose.BattleTargetFrom(() => SameSpaceTargets,
-                target => target.ToAttackChangeEvent(Faction)))
+            new ResultStep(this, Choose.BattleTargetFrom(c => SameSpaceTargets(c.Situation),
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

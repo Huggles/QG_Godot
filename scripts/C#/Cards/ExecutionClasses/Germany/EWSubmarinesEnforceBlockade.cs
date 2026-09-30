@@ -8,27 +8,24 @@ public partial class EWSubmarinesEnforceBlockade : EWCardLogic
 {
     /// <summary>The German Armies beside the North Sea: one VP and two UK discards each. Read by
     /// both the step and <see cref="Targets"/>.</summary>
-    private List<UnitState> ScoringUnits
+    private List<UnitState> ScoringUnits(BoardState board)
     {
-        get
-        {
-            CountryState northSea = CountryState.ForEnum(Country.NorthSea);
-            return FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-                .Where(u => u.Type == UnitType.ARMY && northSea.ConnectedCountryStates.Contains(u.CountryState))
-                .ToList();
-        }
+        CountryState northSea = CountryState.ForEnum(Country.NorthSea);
+        return board.ActiveUnits(Faction)
+            .Where(u => u.Type == UnitType.ARMY && northSea.ConnectedCountryIds.Contains(board.CountryOf(u)))
+            .ToList();
     }
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.Fixed(() =>
-                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits.Count, "German Armies adjacent to North Sea"), Faction))),
+            new ResultStep(this, Choose.Fixed(c =>
+                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits(c.Board).Count, "German Armies adjacent to North Sea"), Faction))),
 
-            new ResultStep(this, Choose.Fixed(previous => new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, ScoredBy(previous) * 2)))
+            new ResultStep(this, Choose.Fixed(c => new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, ScoredBy(c.Previous) * 2)))
             .RequiringPreviousStep()
         };
     }

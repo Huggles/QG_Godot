@@ -57,10 +57,6 @@ public partial class EWMaltaSubmarines : EWCardLogic
 
             if (choice == CHOICE_ELIMINATE && navies.Count > 0)
             {
-                // Narrowed rather than declared with .WithPurpose: this step raises a SelectOption
-                // and then, on one branch only, a unit selection. PromptOrigin.Narrow puts the
-                // declaration where the truth is.
-                using PromptOrigin.Scope purpose = PromptOrigin.Narrow(PromptPurpose.REMOVE_TARGET);
                 int selectedUnitId = (await new InputRequest.SelectUnitRequestHandler(targetFaction, navies).BroadCast()).ResponseUnitIds[0];
                 return new RemoveUnitChangeEvent(Faction, selectedUnitId, UnitRemovalReason.ELIMINATE);
             }

@@ -8,28 +8,25 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
 {
     /// <summary>The German pieces in or beside Scandinavia: one VP and two Soviet discards each.
     /// Read by both the step and <see cref="Targets"/>.</summary>
-    private List<UnitState> ScoringUnits
+    private List<UnitState> ScoringUnits(BoardState board)
     {
-        get
-        {
-            CountryState scandinavia = CountryState.ForEnum(Country.Scandinavia);
-            return FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-                .Where(u => u.CountryState.Country == Country.Scandinavia
-                         || scandinavia.ConnectedCountryStates.Contains(u.CountryState))
-                .ToList();
-        }
+        CountryState scandinavia = CountryState.ForEnum(Country.Scandinavia);
+        return board.ActiveUnits(Faction)
+            .Where(u => board.CountryOf(u) == (int)Country.Scandinavia
+                     || scandinavia.ConnectedCountryIds.Contains(board.CountryOf(u)))
+            .ToList();
     }
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.Fixed(() =>
-                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits.Count, "German units in or adjacent to Scandinavia"), Faction))),
+            new ResultStep(this, Choose.Fixed(c =>
+                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits(c.Board).Count, "German units in or adjacent to Scandinavia"), Faction))),
 
-            new ResultStep(this, Choose.Fixed(previous => new ForceDiscardCardsChangeEvent(Faction, Faction.SOVIET, ScoredBy(previous) * 2)))
+            new ResultStep(this, Choose.Fixed(c => new ForceDiscardCardsChangeEvent(Faction, Faction.SOVIET, ScoredBy(c.Previous) * 2)))
             .RequiringPreviousStep()
         };
     }

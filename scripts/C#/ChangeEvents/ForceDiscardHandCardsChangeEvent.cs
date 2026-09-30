@@ -14,7 +14,7 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
     /// <summary>
     /// True once the selection is known, and the guard on raising the input request.
     ///
-    /// ExecuteAsync runs on every peer, but only the host may raise an input request — so a replaying
+    /// Mutate runs on every peer, but only the host may raise an input request — so a replaying
     /// client must be *told* what was picked rather than ask again. The ids round-trip via
     /// ToDto/ApplyDtoFields, the same shape as RecycleCardChangeEvent.ShuffledOrder and
     /// ForceDiscardCardsChangeEvent.ModifiersApplied. A separate flag rather than
@@ -46,7 +46,7 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
     /// <summary>
     /// Supply the selection up front, for a caller that has already asked the player. The opening
     /// discard asks every player at the same time and then applies the events one by one, so its
-    /// requests cannot live inside ExecuteAsync — concurrent Apply() calls would interleave their
+    /// requests cannot live inside Mutate — concurrent Apply() calls would interleave their
     /// broadcasts and state hashes.
     /// </summary>
     public void PreselectDiscards(List<int> cardIds)
@@ -59,7 +59,7 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
     {
         ForceDiscardHandCardsChangeEventDto dto = ChangeEventDto.Build<ForceDiscardHandCardsChangeEventDto>(this, Id);
         dto.NumberOfCards = NumberOfCards;
-        // Safe to read here: BroadCast (and so ToDto) runs after ExecuteAsync has resolved it.
+        // Safe to read here: BroadCast (and so ToDto) runs after Mutate has resolved it.
         dto.DiscardedCardIds = DiscardedCardIds;
         return dto;
     }
@@ -70,11 +70,7 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
         if (dto is ForceDiscardHandCardsChangeEventDto d) PreselectDiscards(d.DiscardedCardIds);
     }
 
-    /// <summary>The count leaves the target's hand; which cards the player picks is not modelled.</summary>
-    public override void Project(BoardProjection projection)
-        => projection.DiscardFromHand(TargetFaction, SelectionResolved ? DiscardedCardIds.Count : NumberOfCards);
-
-    protected override async Task<bool> ExecuteAsync()
+    protected override async Task ResolveChoicesAsync()
     {
         if (!SelectionResolved)
         {
@@ -107,14 +103,29 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
 
             PreselectDiscards(selection);
         }
-        await GameAPI.DiscardHandCards(TargetFaction, DiscardedCardIds);
-        return true;
+    }
+
+    /// <summary>
+    /// The chosen cards leave the hand. A fork asked before anyone chose — a projection — takes them
+    /// off the front of the hand, the same fallback AutoDiscardOnAbort pays a released prompt with.
+    /// </summary>
+    public override void Mutate(BoardState board)
+    {
+        if (!SelectionResolved)
+            PreselectDiscards(board.ForFaction(TargetFaction).Hand.Take(NumberOfCards).ToList());
+        board.DiscardHandCards(TargetFaction, DiscardedCardIds);
+    }
+
+    protected override Task OnLiveMutatedAsync()
+    {
+        GameAPI.PresentDiscardHand(TargetFaction, DiscardedCardIds);
+        return Task.CompletedTask;
     }
 
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
         new ShowNotificationLabelAnimation($"{TargetFaction.WithPlayer()} discards {NumberOfCards} hand card(s)", TriggeringFaction),
-        // Always the target's own pick: either ExecuteAsync prompted them, or a caller did and handed
+        // Always the target's own pick: either Mutate prompted them, or a caller did and handed
         // the answer to PreselectDiscards.
         new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards", TargetFaction, true)
     };

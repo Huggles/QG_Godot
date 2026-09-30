@@ -452,6 +452,8 @@ public static class Aggregator
         sb.AppendLine($"  bot_rules      {(string.IsNullOrWhiteSpace(config.BotRules) ? "(defaults)" : config.BotRules)}");
         if (!string.IsNullOrWhiteSpace(config.BotRulesFor))
             sb.AppendLine($"  bot_rules_for  {config.BotRulesFor} (others: {(string.IsNullOrWhiteSpace(config.BotRulesOther) ? "defaults" : config.BotRulesOther)})");
+        if (!string.IsNullOrWhiteSpace(config.BotForecast))
+            sb.AppendLine($"  bot_forecast   {config.BotForecast}");
         sb.AppendLine($"  bot_profile    {(string.IsNullOrWhiteSpace(config.BotProfile) ? "(none)" : config.BotProfile)}");
         sb.AppendLine($"  workers        {config.Workers}");
         sb.AppendLine();

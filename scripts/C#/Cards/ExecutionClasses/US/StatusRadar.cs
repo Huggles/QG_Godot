@@ -36,7 +36,7 @@ public partial class StatusRadar : StatusCardLogic
             // (or TriggerContext), which fall back to the live window. Here none is needed at all:
             // Condition.UnitAboutToBeRemoved in CardTriggers already guarantees the event type, and
             // the BlockStep below re-checks it anyway.
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
                 .WithGuidance("Discard top 2 deck cards"),
 
             // The block. RequiringPreviousStep is what keeps the Navy from being saved for free when

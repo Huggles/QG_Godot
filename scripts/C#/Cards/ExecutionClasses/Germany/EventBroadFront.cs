@@ -38,7 +38,7 @@ public partial class EventBroadFront : EventCardLogic
         base.OnNewTurnStarted(turnNumber);
 
         snapshotTurn = turnNumber;
-        snapshotSovietArmyIds = SovietArmiesAdjacentToGermanArmy();
+        snapshotSovietArmyIds = SovietArmiesAdjacentToGermanArmy(BoardState.Live);
         battlesCompleted = 0;
     }
 
@@ -46,16 +46,16 @@ public partial class EventBroadFront : EventCardLogic
     /// Soviet Armies standing next to a German Army. The card's own clause, and nothing else — no
     /// supply term, because the text does not put one here and supply is enforced live below.
     /// </summary>
-    private List<int> SovietArmiesAdjacentToGermanArmy()
+    private List<int> SovietArmiesAdjacentToGermanArmy(BoardState board)
     {
-        HashSet<int> germanArmyCountryIds = FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+        HashSet<int> germanArmyCountryIds = board.ActiveUnits(Faction)
             .Where(us => us.Type == UnitType.ARMY)
-            .Select(us => us.CountryId)
+            .Select(us => board.CountryOf(us))
             .ToHashSet();
 
-        return FactionState.ForEnum(Faction.SOVIET).ActiveUnitIds.ToUnitStates()
+        return board.ActiveUnits(Faction.SOVIET)
             .Where(us => us.Type == UnitType.ARMY
-                      && CountryState.ForId(us.CountryId).ConnectedCountryStates
+                      && CountryState.ForId(board.CountryOf(us)).ConnectedCountryStates
                              .Any(adj => germanArmyCountryIds.Contains(adj.Id)))
             .Select(us => us.Id)
             .ToList();
@@ -67,8 +67,8 @@ public partial class EventBroadFront : EventCardLogic
     /// wrong in the same small way it always was; offering nothing would make the card unplayable,
     /// which is worse, and the next turn corrects it.
     /// </summary>
-    private List<int> EligibleSovietArmyIds =>
-        snapshotTurn >= 0 ? snapshotSovietArmyIds : SovietArmiesAdjacentToGermanArmy();
+    private List<int> EligibleSovietArmyIds(BoardState board) =>
+        snapshotTurn >= 0 ? snapshotSovietArmyIds : SovietArmiesAdjacentToGermanArmy(board);
 
     /// <summary>
     /// What can actually be battled right now: the turn-start set, intersected with the units this
@@ -85,11 +85,11 @@ public partial class EventBroadFront : EventCardLogic
     /// It also drops units that have already died — including to this card's own earlier battles — so
     /// the "up to 3" allowance cannot be spent twice on the same Army.
     /// </summary>
-    private List<BattleTarget> QualifyingTargets()
+    private List<BattleTarget> QualifyingTargets(BoardState board)
     {
-        HashSet<int> attackableNow = UnitState.AttackableArmyIds(Faction).ToHashSet();
+        HashSet<int> attackableNow = board.AttackableArmyIds(Faction).ToHashSet();
 
-        return EligibleSovietArmyIds
+        return EligibleSovietArmyIds(board)
             .Where(id => attackableNow.Contains(id))
             .Select(id => new BattleTarget(id, TargetType.UNIT))
             .ToList();
@@ -100,7 +100,7 @@ public partial class EventBroadFront : EventCardLogic
     /// changed, and the steps for them do not exist yet at hover time — so this reports the first
     /// battle's offer, which is the only one that is knowable.
     /// </summary>
-    public override TargetSet Targets() => TargetSet.FromBattleTargets(QualifyingTargets());
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(QualifyingTargets(BoardState.Live));
 
     public override List<CardStep> OnActivate()
     {
@@ -109,16 +109,16 @@ public partial class EventBroadFront : EventCardLogic
 
     private CardStep MakeBattleStep()
     {
-        return new ResultStep(this, Choose.BattleTargetFrom(() => QualifyingTargets(),
-                target => target.ToAttackChangeEvent(Faction))
+        return new ResultStep(this, Choose.BattleTargetFrom(c => QualifyingTargets(c.Board),
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board))
             .OnChosen(_ =>
             {
                 battlesCompleted++;
-                if (battlesCompleted < MaxBattles && QualifyingTargets().Count > 0)
+                if (battlesCompleted < MaxBattles && QualifyingTargets(BoardState.Live).Count > 0)
                     CardSteps.Add(MakeBattleStep());
             }))
-        .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-            battlesCompleted < MaxBattles && QualifyingTargets().Count > 0), this))
+        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+            battlesCompleted < MaxBattles && QualifyingTargets(s.Board).Count > 0), this))
         .WithGuidance("Battle a Soviet Army adjacent to a German Army");
     }
 }

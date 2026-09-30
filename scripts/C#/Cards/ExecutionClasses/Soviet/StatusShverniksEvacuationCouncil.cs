@@ -5,7 +5,7 @@ using Godot;
 
 public partial class StatusShverniksEvacuationCouncil : StatusCardLogic, IUnitSupplyModifier
 {
-    public bool GrantsSupply(UnitState unit)
+    public bool GrantsSupply(BoardState board, UnitState unit)
     {
         return unit.Faction == Faction.SOVIET && unit.Type == UnitType.ARMY;
     }
@@ -15,7 +15,7 @@ public partial class StatusShverniksEvacuationCouncil : StatusCardLogic, IUnitSu
     /// principle; lighting all of them would say nothing.</summary>
     public override TargetSet Targets() =>
         TargetSet.Units(FactionState.ForEnum(Faction).UnsuppliedUnitIds.ToUnitStates()
-            .Where(GrantsSupply).ToList());
+            .Where(unit => GrantsSupply(BoardState.Live, unit)).ToList());
 
     protected override List<Condition> CardTriggers()
     {

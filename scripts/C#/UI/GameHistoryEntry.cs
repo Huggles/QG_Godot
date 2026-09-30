@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// A snapshot rather than a live <see cref="GameMessage"/> reference (or an id re-resolved on hover)
 /// on purpose: SummaryText() reads current state, and some messages' text moves underneath them —
 /// ForceDiscardCardsChangeEvent.UndischargedCards is mutable, and RemoveUnitChangeEvent's own
-/// summary depends on a UnitState.CountryId that ExecuteAsync clears. History must say what
+/// summary depends on a UnitState.CountryId that Mutate clears. History must say what
 /// happened, not what is true now. It also keeps the stream scan off the hover path:
 /// GameState.GameMessages runs to thousands of entries and ChangeEvent.ForId walks all of them.
 ///

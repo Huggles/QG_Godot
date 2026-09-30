@@ -27,13 +27,13 @@ public partial class BulletinCardState : CardState
     /// "played" is what makes CardLogic._conditions use CardTriggers() instead of _defaultPlayConditions,
     /// and what CalculateAfterReactionCardsForFaction requires before offering a reaction.
     /// </summary>
-    public override bool IsPlayed => true;
+    public override bool IsPlayedOn(BoardState board) => true;
 
     /// <summary>
     /// Never in a discard pile. The base implementation would ask DeckState for a pile that never
     /// contains this id; overriding states the intent rather than relying on that.
     /// </summary>
-    public override bool IsDiscarded => false;
+    public override bool IsDiscardedOn(BoardState board) => false;
 
     /// <summary>
     /// The mutator's text as it reads right now, not the copy RegisterBulletinCardChangeEvent baked

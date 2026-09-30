@@ -13,7 +13,9 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.FactionBattled(Faction), this).Immediately(),
+            // Land only, as the card reads: FactionBattled also matched sea battles, where the build
+            // would have placed a Navy.
+            Condition.Build(new Condition.HasBattledOnLand(Faction), this).Immediately(),
             // The space must be one we can actually BUILD in after the battle, which is the question
             // GameAPI.DeployUnitToCountry will ask when the step runs.
             //
@@ -22,9 +24,9 @@ public partial class StatusBlitzkrieg : StatusCardLogic
             // therefore come up empty, fire Blitzkrieg, and then refuse the build for want of supply:
             // the faction paid the discard (a VP, on an empty deck) and the once-per-turn activation
             // and got no Army. Asking CanBuild means the card simply does not offer itself instead.
-            Condition.Build(new Condition.CustomCondition(() => {
-                var trigger = TriggerContextAs<BattleCountryChangeEvent>();
-                return trigger != null && trigger.CountryState.CanBuild(Faction);
+            Condition.Build(new Condition.CustomCondition(s => {
+                var trigger = TriggerContextAs<BattleCountryChangeEvent>(s);
+                return trigger != null && s.Board.CanBuild(Faction, trigger.CountryState);
             }), this)
         };
     }
@@ -32,11 +34,11 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
             .WithGuidance("Deploy an army in the country where you just battled"),
 
-            new ResultStep(this, Choose.Fixed(() => {
-                var trigger = TriggerContextAs<BattleCountryChangeEvent>();
+            new ResultStep(this, Choose.Fixed(c => {
+                var trigger = TriggerContextAs<BattleCountryChangeEvent>(c.Situation);
                 if (trigger == null) return null;
                 return new DeployUnitChangeEvent(Faction, trigger.CountryId, DeployType.BUILD);
             }))

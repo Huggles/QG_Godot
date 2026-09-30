@@ -14,10 +14,10 @@ public partial class EWSubmarinesoftheMonsoonGroup : EWCardLogic
         {
             // Discard first, score second — this card is the one in the group whose two events run
             // in that order, and the order is preserved rather than normalised.
-            new ResultStep(this, Choose.FactionFrom(() => new List<Faction> { Faction.UNITED_KINGDOM, Faction.UNITED_STATES, Faction.SOVIET },
-                    faction => new ForceDiscardCardsChangeEvent(Faction, faction, 2))),
+            new ResultStep(this, Choose.FactionFrom(_ => new List<Faction> { Faction.UNITED_KINGDOM, Faction.UNITED_STATES, Faction.SOVIET },
+                    (faction, _) => new ForceDiscardCardsChangeEvent(Faction, faction, 2))),
 
-            new ResultStep(this, Choose.Fixed(() => new ScorePointsChangeEvent(new VPEntry(2, "Submarines of the Monsoon Group"), Faction)))
+            new ResultStep(this, Choose.Fixed(_ => new ScorePointsChangeEvent(new VPEntry(2, "Submarines of the Monsoon Group"), Faction)))
             .RequiringPreviousStep()
         };
     }

@@ -9,5 +9,5 @@ public interface IUnitSupplyModifier : IModifier
     /// Returns true if this modifier grants supply to the given unit, bypassing normal
     /// pathfinding. Return false to express no opinion.
     /// </summary>
-    bool GrantsSupply(UnitState unit);
+    bool GrantsSupply(BoardState board, UnitState unit);
 }

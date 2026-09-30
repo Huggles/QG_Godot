@@ -23,12 +23,12 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
     public bool IsTrigger { get; set; } = true;
 
     /// <summary>
-    /// Which sources of derived state this event's <c>ExecuteAsync</c> disturbs, and so how much of
+    /// Which sources of derived state this event's <c>Mutate</c> disturbs, and so how much of
     /// the tag recalculation that follows it actually has to run.
     ///
     /// Defaults to <see cref="RecalcScope.All"/> — the behaviour every event had before this existed.
     /// Override it only where you can say precisely what the event touches, and describe only what
-    /// THIS event's own ExecuteAsync does: effects a card goes on to cause arrive as their own nested
+    /// THIS event's own Mutate does: effects a card goes on to cause arrive as their own nested
     /// ChangeEvents, each carrying its own scope, so the scopes compose without anyone having to
     /// reason about the whole chain.
     ///
@@ -63,7 +63,6 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         set { SourceCardState.IsBlocked = value; }
     }
 
-
     public int SourceCardId { get; set; } = -1;
     public bool HasSourceCard => SourceCardId > -1;
     public CardState SourceCardState => CardState.ForId(SourceCardId);
@@ -92,14 +91,26 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
     // Constructor
     public ChangeEvent(Faction triggeringFaction) : base(triggeringFaction) { }
 
-    protected abstract Task<bool> ExecuteAsync();
+    /// <summary>
+    /// Live only, before the change: what has to be decided first and put on this event — a player's
+    /// pick, the host's shuffle. After it the event is fully determined, which is what lets
+    /// <see cref="Mutate"/> run the same way on a fork.
+    /// </summary>
+    protected virtual Task ResolveChoicesAsync() => Task.CompletedTask;
 
     /// <summary>
-    /// What <see cref="ExecuteAsync"/> would do, written onto a hypothetical board instead of the live
-    /// one. Must stay pure and must mirror ExecuteAsync — override it next to it. The default says
-    /// "cannot model this", which makes the whole projection unknown rather than quietly wrong.
+    /// The change itself, written onto <paramref name="board"/>: the live board, or a fork. Reads and
+    /// writes only that board and this event's own fields, never the live state and never presentation.
+    /// An event is mutated at most once — its result fields (a deployed unit's id, the discarded cards)
+    /// belong to that one application.
     /// </summary>
-    public virtual void Project(BoardProjection projection) => projection.MarkUnknown(GetType().Name);
+    public abstract void Mutate(BoardState board);
+
+    /// <summary>
+    /// Live only, after the change: signals, animations and notifications, and the card execution
+    /// state a board does not hold (re-armed steps). Runs before the broadcast and the tag pass.
+    /// </summary>
+    protected virtual Task OnLiveMutatedAsync() => Task.CompletedTask;
 
     protected virtual List<ChangeEventAnimation> BeforeAnimations { get; } = new();
     protected virtual List<ChangeEventAnimation> AfterAnimations  { get; } = new();
@@ -131,7 +142,7 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
 
     protected override async Task<bool> ApplyInternal(int capturedEpoch)
     {
-        // Mutation tracking for error classification. A throw between ExecuteAsync() (which mutates
+        // Mutation tracking for error classification. A throw between Mutate() (which mutates
         // server state) and BroadCast() (which tells the clients) leaves the peers already divergent,
         // and the resync repair in NetworkApi.RequestResync is commented out — so recovery cannot be
         // offered for that window. MutationDepth/BroadcastSent is how ErrorReporter detects it.
@@ -193,7 +204,10 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         DebugUtilities.PrintPeer($"PlayAnimations: {PlayAnimations}, BlockAnimationQueue: {BlockAnimationQueue}");
         EnqueueAnimations(() => BeforeAnimations);
         DebugUtilities.PrintPeer($"Execute Async");
-        await ExecuteAsync();
+        await ResolveChoicesAsync();
+        ShadowFork.Pending shadow = ShadowFork.Take(this);
+        Mutate(BoardState.Live);
+        await OnLiveMutatedAsync();
         // Armed after the mutation but before BroadCast() — the tier 3 divergence window.
         ErrorInjection.MaybeThrow(ErrorInjection.Site.MidMutation, ScriptName);
         // Broadcast this change event to clients BEFORE recalculating tags, so the tags snapshot
@@ -209,6 +223,7 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         // sent — so the divergence window does not apply and this is set unconditionally.
         ErrorReporter.BroadcastSent = true;
         GameStateCalculator.CalculateAll(RecalcScope);
+        ShadowFork.Compare(this, shadow);
         EmitSignal(SignalName.ChangeEventApplied, Id);
         EnqueueAnimations(() => AfterAnimations);
         DebugUtilities.PrintPeer($"Awaiting)");

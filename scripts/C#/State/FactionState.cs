@@ -7,7 +7,11 @@ using System.Text.Json.Serialization;
 public partial class FactionState : StateObject
 {
 	[JsonIgnore] public FactionData FactionData { get; private set; }
-	private int _score { get; set; }
+
+	/// <summary>This faction's score and card piles on the live board.</summary>
+	[JsonIgnore] public FactionRecord Record { get; } = new();
+	[JsonIgnore] public override TagContainer Tags => Record.Tags;
+	private int _score { get => Record.Score; set => Record.Score = value; }
 
 	public Faction Faction => FactionData.Faction;
 	/// <summary>Debug-log only (never on the wire — FactionStateDto does not carry it).</summary>
@@ -67,19 +71,10 @@ public partial class FactionState : StateObject
 	/// removed — but built in one pass over the cached ownership list instead of the three
 	/// intermediate lists the LINQ chain used to allocate.
 	/// </summary>
-	public List<int> ActiveUnitIds
-	{
-		get
-		{
-			List<int> active = new();
-			foreach (int unitId in AllUnits)
-				if (UnitState.ForId(unitId) is { CountryId: >= 0 }) active.Add(unitId);
-			return active;
-		}
-	}
+	public List<int> ActiveUnitIds => BoardState.Live.ActiveUnitIds(Faction);
 	public List<int> OccupiedCountryIds => ActiveUnitIds.Select(id => GameState.UnitStatesById[id].CountryId).ToList();
-	public List<int> SuppliedUnitIds => ActiveUnitIds.Where(id => GameState.UnitStatesById[id].InSupply).ToList();
-	public List<int> UnsuppliedUnitIds => ActiveUnitIds.Where(id => !GameState.UnitStatesById[id].InSupply).ToList();
+	public List<int> SuppliedUnitIds => BoardState.Live.SuppliedUnitIds(Faction);
+	public List<int> UnsuppliedUnitIds => BoardState.Live.UnsuppliedUnitIds(Faction);
 
 	public static FactionState ForEnum(Faction factionEnum)
 		=> MultiplayerSession.Instance.GameState.FactionStatesByFaction

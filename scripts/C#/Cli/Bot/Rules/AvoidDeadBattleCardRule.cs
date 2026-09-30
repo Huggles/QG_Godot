@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// <see cref="AvoidEmptyBattleRule"/> can only choose the least-bad target once the play is already
 /// spent; this declines the play while it is still worth something. A Land Battle with no attackable
 /// enemy army can do exactly one thing — battle an empty space, which
-/// BattleCountryChangeEvent.ExecuteAsync resolves as <c>await Task.CompletedTask; return true;</c> —
+/// BattleCountryChangeEvent.Mutate resolves as <c>await Task.CompletedTask; return true;</c> —
 /// so playing it converts a card into nothing.
 ///
 /// Same two cases as its sibling, from the same predicate, so the two rules cannot disagree about the

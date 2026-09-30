@@ -16,12 +16,13 @@ public partial class ChangeStepChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board) => board.TurnStep = NewStep;
+
+    /// <summary>The new step's card round is live machinery: the reaction windows run on it.</summary>
+    protected override Task OnLiveMutatedAsync()
     {
-        var flow = GameFlow.Instance;
-        flow.TurnStep = NewStep;
-        flow.CardPlayRounds.Add(CardPlayRound.StartNew());
-        return Task.FromResult(true);
+        GameFlow.Instance.CardPlayRounds.Add(CardPlayRound.StartNew());
+        return Task.CompletedTask;
     }
 
     /// <summary>

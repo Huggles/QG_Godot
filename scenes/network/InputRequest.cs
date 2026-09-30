@@ -212,29 +212,13 @@ public abstract partial class InputRequest
     public int OriginCardId { get; set; } = -1;
 
     /// <summary>
-    /// Which of the origin card's steps is asking. For telemetry and per-card special cases; the
-    /// purpose below is what policy should key off, because a step INDEX means nothing to a reader.
+    /// Which of the origin card's steps is asking. A bot reads that step's PossibleOutcomes to know
+    /// what each option would do.
     /// </summary>
     public int OriginStepId { get; set; } = -1;
 
     /// <summary>
-    /// What this prompt is for — the one field a bot rule or a UI hint should branch on. See
-    /// <see cref="PromptPurpose"/> for why it must be declared rather than inferred, and why
-    /// <see cref="PromptPurpose.NONE"/> has to mean "do not act".
-    ///
-    /// Carried on the request rather than read from the ambient static by the consumer, for a reason
-    /// that is not obvious: <see cref="NetworkApi.ReceiveInputRequest"/> deserialises a FRESH COPY of
-    /// the request before resolving it, so a consumer reading PromptOrigin.Current would be reasoning
-    /// about a different object graph than the one it is answering — and on any peer that is not the
-    /// host there is no CardPlayRound at all, so the static would be empty. Stamping also means the GUI
-    /// could one day scrim already-occupied build targets from the same signal the bot uses.
-    /// </summary>
-    public PromptPurpose OriginPurpose { get; set; } = PromptPurpose.NONE;
-
-    /// <summary>
-    /// What KIND of step raised this prompt — the structural companion to
-    /// <see cref="OriginPurpose"/>. Purpose says what is being chosen; this says why the card is
-    /// asking: a <see cref="StepKind.Requirement"/> prompt is a cost the card is charging, a
+    /// What KIND of step raised this prompt, i.e. why the card is asking: a <see cref="StepKind.Requirement"/> prompt is a cost the card is charging, a
     /// <see cref="StepKind.Result"/> prompt is the payoff it charges for.
     ///
     /// Before card steps were typed there was no way to tell the two apart without running the step

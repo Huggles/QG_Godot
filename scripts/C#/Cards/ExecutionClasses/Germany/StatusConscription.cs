@@ -6,13 +6,13 @@ using System.Linq;
 
 public partial class StatusConscription : StatusCardLogic
 {
-    public List<int> BuildableLandCountries()
+    public List<int> BuildableLandCountries(BoardState board)
     {
-        return CountryState.BuildableLand(Faction).ToCountryIds();
+        return board.BuildableLand(Faction).ToCountryIds();
     }
 
     /// <summary>Where the army may be built — the same list the step offers.</summary>
-    public override TargetSet Targets() => TargetSet.Countries(BuildableLandCountries());
+    public override TargetSet Targets() => TargetSet.Countries(BuildableLandCountries(BoardState.Live));
 
     protected override List<Condition> CardTriggers()
     {
@@ -26,15 +26,16 @@ public partial class StatusConscription : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
-            .WithCondition(()=> Condition.Build(new Condition.CountryIsBuildable(BuildableLandCountries(), Faction),this))            
+            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
+            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(s =>
+                new Condition.CountryIsBuildable(BuildableLandCountries(s.Board), Faction).MeetCondition(s)),this))
             .WithGuidance("Build an army"),
 
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),
 
-            new ResultStep(this, Choose.CountryFrom(() => BuildableLandCountries(),
-                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
+            new ResultStep(this, Choose.CountryFrom(c => BuildableLandCountries(c.Board),
+                (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
             .RequiringPreviousStep()
         };
     }

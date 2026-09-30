@@ -6,8 +6,8 @@ using System.Linq;
 
 public partial class StatusDiveBombers : StatusCardLogic
 {   
-    private CountryState BattledCountryState =>
-        TriggerContextAs<BattleCountryChangeEvent>()?.CountryState;
+    private CountryState BattledCountryState(GameSituation situation) =>
+        TriggerContextAs<BattleCountryChangeEvent>(situation)?.CountryState;
 
     protected override List<Condition> CardTriggers()
     {
@@ -22,24 +22,22 @@ public partial class StatusDiveBombers : StatusCardLogic
     /// "the same or adjacent land space to the one battled" — mirrors <see cref="StatusFrontalAssault"/>,
     /// which implements the identical card text.
     /// </summary>
-    public List<BattleTarget> battleTargets
+    public List<BattleTarget> battleTargets(GameSituation situation)
     {
-        get
-        {
-            CountryState cs = BattledCountryState;
-            if (cs == null) return new List<BattleTarget>();
+        CountryState cs = BattledCountryState(situation);
+        if (cs == null) return new List<BattleTarget>();
 
-            var targets = new List<BattleTarget>();
-            // The battled space itself: empty spaces are a COUNTRY target, occupied ones a UNIT target.
-            if (cs.Tags.Has(Tag.Attackable, Faction))
-                targets.Add(new BattleTarget(cs.Id, TargetType.COUNTRY));
-            targets.AddRange(cs.Units.Values
-                .Where(unitId => UnitState.ForId(unitId).Tags.Has(Tag.Attackable, Faction))
-                .Select(unitId => new BattleTarget(unitId, TargetType.UNIT)));
+        BoardState board = situation.Board;
+        var targets = new List<BattleTarget>();
+        // The battled space itself: empty spaces are a COUNTRY target, occupied ones a UNIT target.
+        if (board.Of(cs).Tags.Has(Tag.Attackable, Faction))
+            targets.Add(new BattleTarget(cs.Id, TargetType.COUNTRY));
+        targets.AddRange(board.UnitsIn(cs).Values
+            .Where(unitId => board.Of(UnitState.ForId(unitId)).Tags.Has(Tag.Attackable, Faction))
+            .Select(unitId => new BattleTarget(unitId, TargetType.UNIT)));
 
-            targets.AddRange(cs.AdjacentBattleTargets(Faction, CountryType.LAND));
-            return targets.Distinct().ToList();
-        }
+        targets.AddRange(board.AdjacentBattleTargets(Faction, CountryType.LAND, cs));
+        return targets.Distinct().ToList();
     }
 
     /// <summary>
@@ -49,33 +47,30 @@ public partial class StatusDiveBombers : StatusCardLogic
     /// every occupied space — AdjacentBattleTargets only emits COUNTRY targets for *empty* spaces —
     /// so an adjacent enemy Army yielded an empty list and the card could never become activatable.
     /// </summary>
-    public List<int> battleTargetCountryIds
+    public List<int> battleTargetCountryIds(GameSituation situation)
     {
-        get
-        {
-            CountryState cs = BattledCountryState;
-            if (cs == null) return new List<int>();
+        CountryState cs = BattledCountryState(situation);
+        if (cs == null) return new List<int>();
 
-            var ids = new List<int> { cs.Id };
-            ids.AddRange(cs.ConnectedCountryStates.Where(adj => adj.Type == CountryType.LAND).Select(adj => adj.Id));
-            return ids;
-        }
+        var ids = new List<int> { cs.Id };
+        ids.AddRange(cs.ConnectedCountryStates.Where(adj => adj.Type == CountryType.LAND).Select(adj => adj.Id));
+        return ids;
     }
 
     /// <summary>The space just battled and its land neighbours — what this may hit again.</summary>
-    public override TargetSet Targets() => TargetSet.FromBattleTargets(battleTargets);
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(battleTargets(GameSituation.Live));
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
             .WithGuidance("Battle the same or an adjacent country where you've battle this turn")
             .WithCondition(()=>{
-                return Condition.Build(
-                    new Condition.CountryIsAttackable(battleTargetCountryIds, Faction), this); }),
+                return Condition.Build(new Condition.CustomCondition(s =>
+                    new Condition.CountryIsAttackable(battleTargetCountryIds(s), Faction).MeetCondition(s)), this); }),
 
-            new ResultStep(this, Choose.BattleTargetFrom(() => battleTargets,
-                target => target.ToAttackChangeEvent(Faction)))
+            new ResultStep(this, Choose.BattleTargetFrom(c => battleTargets(c.Situation),
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .RequiringPreviousStep()
         };
     }

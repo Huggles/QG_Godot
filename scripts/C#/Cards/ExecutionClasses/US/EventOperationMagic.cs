@@ -27,8 +27,8 @@ public partial class EventOperationMagic : EventCardLogic
 
                 return discardEvent;
             })
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-                DeckState.ForFaction(Faction.JAPAN).ResponseCardIds.Count > 0), this))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.ForFaction(Faction.JAPAN).Response.Count > 0), this))
             .WithGuidance("Discard a random Japanese Response card from the table")
         };
     }

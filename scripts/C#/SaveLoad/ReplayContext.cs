@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 /// different peers:
 ///
 ///   <see cref="IsReplaying"/>      — "are these events being RE-applied from a save?" Host-only.
-///                                    Read by the handful of ExecuteAsync branches that normally let
+///                                    Read by the handful of Mutate branches that normally let
 ///                                    the host decide an outcome the client is merely told (see
 ///                                    RecycleCardChangeEvent): during a replay the host must behave
 ///                                    like a client and use the recorded outcome instead.

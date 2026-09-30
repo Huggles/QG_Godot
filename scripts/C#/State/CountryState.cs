@@ -33,7 +33,11 @@ public partial class CountryState : StateObject
     [JsonIgnore] public List<CountryState> ConnectedCountryStates
         => _connectedCountryStates ??= CountryState.ForIds(ConnectedCountryIds);
 
-    public Dictionary<Faction, int> Units { get; set; } = new Dictionary<Faction, int>();
+    /// <summary>This country's data on the live board.</summary>
+    [JsonIgnore] public CountryRecord Record { get; } = new();
+    [JsonIgnore] public override TagContainer Tags => Record.Tags;
+
+    public Dictionary<Faction, int> Units { get => Record.Units; set => Record.Units = value; }
 
     public bool IsLand => Type == CountryType.LAND;
     public bool IsSea => Type == CountryType.SEA;
@@ -43,21 +47,7 @@ public partial class CountryState : StateObject
 
     public List<Faction> OccupyingFactions => Units.Keys.ToList();
 
-    /// <summary>
-    /// The team holding this country, without materialising <see cref="OccupyingFactions"/>.
-    ///
-    /// A country locks to the first occupier's team, so any occupant answers it. Worth avoiding the
-    /// list: OccupyingTeam is read from CanRecruit and HasHarbor, which GameStateCalculator runs for
-    /// every country of every faction after every ChangeEvent.
-    /// </summary>
-    private FactionTeam OccupyingTeamFast()
-    {
-        foreach (Faction occupant in Units.Keys)
-            return StaticGameData.FactionTeamForFaction(occupant);
-        return FactionTeam.NONE;
-    }
-
-    public FactionTeam OccupyingTeam => OccupyingTeamFast();
+    public FactionTeam OccupyingTeam => BoardState.Live.OccupyingTeam(this);
 
     [JsonIgnore] public CountryScene CountryScene => NodeUtilities.Instance.CountriesNode.GetChildren().ToList().Find(c => c.Name == Name) as CountryScene ?? throw new Exception($"Couldn't find CountryScene for country: {Name}");
 
@@ -120,7 +110,7 @@ public partial class CountryState : StateObject
     /// this ran hundreds of thousands of times a game.
     /// </summary>
     [JsonIgnore] private List<StraightState> _controlledByStraightStates;
-    private List<StraightState> ControlledByStraightStates => _controlledByStraightStates ??=
+    public List<StraightState> ControlledByStraightStates => _controlledByStraightStates ??=
         IsLand ? new List<StraightState>()
                : ConnectedCountryStates
                    .Where(ccs => ccs.IsSea)
@@ -131,99 +121,31 @@ public partial class CountryState : StateObject
     public List<StraightState> UncontrolledStraightStatesForFaction(Faction faction) => ControlledByStraightStates.Where(ss => !ss.IsControlledByFaction(faction)).ToList();
     public bool IsControlledByStraightState => ControlledByStraightStates.Count > 0;
 
-    public List<int> AdjacentCountryIds(Faction faction) {
-        // ControlledByStraightStates is now cached, so asking it directly costs nothing — the old code
-        // computed it twice per call (once via IsControlledByStraightState, once via
-        // UncontrolledStraightStatesForFaction) when it was still rebuilt from scratch each time.
-        List<StraightState> straits = ControlledByStraightStates;
-        if (straits.Count == 0) return new List<int>(ConnectedCountryIds);
+    // The rules below live on BoardState so a forked board answers them too; these ask the live one.
+    public List<int> AdjacentCountryIds(Faction faction) => BoardState.Live.AdjacentCountryIds(faction, this);
+    public List<CountryState> AdjacentCountryStates(Faction faction) => BoardState.Live.AdjacentCountryStates(faction, this);
+    public bool HasHarbor(Faction faction) => BoardState.Live.HasHarbor(faction, this);
 
-        return ConnectedCountryStates
-            .Where(ccs => !straits.Any(ss => !ss.IsControlledByFaction(faction) && ss.IsForIds(this.Id, ccs.Id)))
-            .Select(ccs => ccs.Id).ToList();
-    }
-    
-
-    public List<CountryState> AdjacentCountryStates(Faction faction) => CountryState.ForIds(AdjacentCountryIds(faction));
-
-    public bool HasHarbor(Faction faction)
-    {
-        FactionTeam team = StaticGameData.FactionTeamForFaction(faction);
-        return ConnectedCountryStates.Any(connected => connected.IsLand && connected.OccupyingTeamFast() == team);
-    }    
     /// <summary>
     /// A faction may deploy onto a country it ALREADY occupies — "build that army again". The piece
     /// standing there is notionally returned to the pool and deployed again, so the board does not
     /// change but the deploy is a real, reactable DeployUnitChangeEvent (GameAPI.DeployUnitToCountry
-    /// handles the mechanics). That is why neither of these tests <c>!HasUnit(faction)</c> any more.
-    ///
-    /// Everything else is unchanged: a non-home-space BUILD still needs an adjacent supplied unit, and
-    /// a sea space still needs a harbour. Rebuilding in place is a target that becomes legal, not a way
-    /// around the placement rules — a faction's own unit is not adjacent to itself, so an isolated unit
-    /// outside its home space still cannot rebuild where it stands.
+    /// handles the mechanics). That is why neither this nor CanRecruit tests <c>!HasUnit(faction)</c>.
+    /// A non-home-space BUILD still needs an adjacent supplied unit, and a sea space a harbour.
     /// </summary>
-    public bool CanBuild(Faction faction) =>
-            CanRecruit(faction) && //Can faction recruit here (i.e., it's empty or occupied by their own team) AND
-            (!IsHomeSpace(faction) ? HasAdjacentSuppliedUnit(faction) : true) && //If it's not their home space, they must have an adjacent supplied unit AND
-            (this.IsSea ? HasHarbor(faction) : true); //If it's a sea country, they must have a harbor (i.e., an adjacent land country occupied by their team)
-
-    public bool CanRecruit(Faction faction)
-    {
-        // One read, not two: OccupyingTeam is not free, and this is on the CanBuild hot path.
-        FactionTeam occupying = OccupyingTeamFast();
-        return occupying == FactionTeam.NONE || occupying == StaticGameData.FactionTeamForFaction(faction);
-    }
+    public bool CanBuild(Faction faction) => BoardState.Live.CanBuild(faction, this);
+    public bool CanRecruit(Faction faction) => BoardState.Live.CanRecruit(faction, this);
     public bool HasUnit(Faction faction) => Units.ContainsKey(faction);
     public bool IsHomeSpace(Faction faction) => FactionState.ForEnum(faction).FactionData.HomeSpaceCountryState.Id == this.Id;
-    public List<int> AdjacentUnits(Faction faction) => AdjacentCountryStates(faction).Where(ccs => ccs.Units.ContainsKey(faction)).Select(ccs => ccs.Units[faction]).ToList();
-    public List<int> AdjacentSuppliedUnits(Faction faction) => UnitState.ForIds(AdjacentUnits(faction)).Where(unit => unit.InSupply).Select(unit => unit.Id).ToList();
-
-    /// <summary>
-    /// Whether ANY adjacent unit of this faction is in supply — the question CanBuild actually asks.
-    ///
-    /// Short-circuits instead of going through <see cref="AdjacentSuppliedUnits"/>, which materialises
-    /// three intermediate lists to answer a yes/no that usually resolves on the first neighbour. Same
-    /// adjacency rules, same answer.
-    /// </summary>
-    public bool HasAdjacentSuppliedUnit(Faction faction) => AdjacentCountryIds(faction)
-        .Any(id => ForId(id) is { } neighbour
-                   && neighbour.Units.TryGetValue(faction, out int unitId)
-                   && (UnitState.ForId(unitId)?.InSupply ?? false));
-    public bool CanAttack(Faction faction) => HasAdjacentSuppliedUnit(faction) && HasAttackableUnit(faction);
-
-    
-    public List<BattleTarget> AdjacentBattleTargets(Faction attackingFaction, CountryType countryType)
-    {
-        List<BattleTarget> targets = new List<BattleTarget>();
-        List<BattleTarget> targetableUnitIds = AdjacentCountryStates(attackingFaction)
-            .Where(connectedCountryState => connectedCountryState.Type == countryType && connectedCountryState.CanAttack(attackingFaction)).ToList()
-            .SelectMany(countryWithUnits => countryWithUnits.Units.Values.Where(unitId=>!UnitState.ForId(unitId).ImmuneForTurn)).Distinct().ToList()
-            .Map(unitId => new BattleTarget(unitId, TargetType.UNIT));
-        List<BattleTarget> targetableEmptyCountriesIds = AdjacentCountryStates(attackingFaction)
-        .Where(connectedCountryState => connectedCountryState.Type == countryType && connectedCountryState.CanAttackWhenEmpty(attackingFaction)).ToList().ToCountryIds()
-        .Map(countryId => new BattleTarget(countryId, TargetType.COUNTRY));
-        targets.AddRange(targetableUnitIds);
-        targets.AddRange(targetableEmptyCountriesIds);
-        return targets;
-    }
-    public List<BattleTarget> BattleTargets(Faction attackingFaction)
-    {
-        if (!HasAdjacentSuppliedUnit(attackingFaction) || OccupyingTeam == StaticGameData.FactionTeamForFaction(attackingFaction))
-        {
-            return [];
-        }
-        else if (IsCountryEmpty)
-        {
-            return [new BattleTarget(Id, TargetType.COUNTRY)];
-        }
-        else
-        {
-            return Units.Values.ToList().Map(unitId => new BattleTarget(unitId, TargetType.UNIT));
-        }
-    }
-
-    public bool HasAttackableUnit(Faction faction) => OccupyingTeam == StaticGameData.OpponentFactionTeamForFaction(faction);
-    public bool CanAttackWhenEmpty(Faction faction) => HasAdjacentSuppliedUnit(faction) && IsCountryEmpty;
+    public List<int> AdjacentUnits(Faction faction) => BoardState.Live.AdjacentUnits(faction, this);
+    public List<int> AdjacentSuppliedUnits(Faction faction) => BoardState.Live.AdjacentSuppliedUnits(faction, this);
+    public bool HasAdjacentSuppliedUnit(Faction faction) => BoardState.Live.HasAdjacentSuppliedUnit(faction, this);
+    public bool CanAttack(Faction faction) => BoardState.Live.CanAttack(faction, this);
+    public List<BattleTarget> AdjacentBattleTargets(Faction attackingFaction, CountryType countryType) =>
+        BoardState.Live.AdjacentBattleTargets(attackingFaction, countryType, this);
+    public List<BattleTarget> BattleTargets(Faction attackingFaction) => BoardState.Live.BattleTargets(attackingFaction, this);
+    public bool HasAttackableUnit(Faction faction) => BoardState.Live.HasAttackableUnit(faction, this);
+    public bool CanAttackWhenEmpty(Faction faction) => BoardState.Live.CanAttackWhenEmpty(faction, this);
 
     /**
     * Static helpers
@@ -249,8 +171,8 @@ public partial class CountryState : StateObject
     /**
     * Tag helpers
     */
-    public static List<CountryState> WithTag(Tag tag, Faction faction) => AllCountryStates.Where(cs => cs.Tags.Has(tag, faction)).ToList();
-    public static List<CountryState> WithTags(Tag[] tags, Faction faction) => AllCountryStates.Where(cs => tags.All(tag => cs.Tags.Has(tag, faction))).ToList();    
+    public static List<CountryState> WithTag(Tag tag, Faction faction) => BoardState.Live.CountriesWithTag(tag, faction);
+    public static List<CountryState> WithTags(Tag[] tags, Faction faction) => BoardState.Live.CountriesWithTags(tags, faction);
     
     public static List<CountryState> BuildableLand(Faction faction) => 
         WithTags(new[] { Tag.Buildable, Tag.LandCountry }, faction);

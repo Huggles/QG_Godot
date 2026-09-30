@@ -18,19 +18,15 @@ public partial class UnitState : StateObject
     
     [JsonIgnore] public CountryState CountryState => CountryId >= 0 ? CountryState.ForId(CountryId) : null;
     // InSupply is computed from tags - tag is the source of truth
-    public bool InSupply => Tags.Has(Tag.InSupply, Faction) || SuppliedForTurn;
-    public bool ImmuneForTurn
-    {
-        get => Tags.Has(Tag.Immune, Faction.ALL);
-        set { if (value) Tags.Add(Tag.Immune, Faction.ALL); else Tags.Remove(Tag.Immune, Faction.ALL); }
-    }
-    public bool SuppliedForTurn
-    {
-        get => Tags.Has(Tag.SuppliedForTurn, Faction.ALL);
-        set { if (value) Tags.Add(Tag.SuppliedForTurn, Faction.ALL); else Tags.Remove(Tag.SuppliedForTurn, Faction.ALL); }
-    }
+    public bool InSupply => BoardState.Live.InSupply(this);
+    public bool ImmuneForTurn { get => Record.ImmuneForTurn; set => Record.ImmuneForTurn = value; }
+    public bool SuppliedForTurn { get => Record.SuppliedForTurn; set => Record.SuppliedForTurn = value; }
 
-    public int CountryId = -1;
+    /// <summary>This unit's data on the live board.</summary>
+    [JsonIgnore] public UnitRecord Record { get; } = new();
+    [JsonIgnore] public override TagContainer Tags => Record.Tags;
+
+    [JsonIgnore] public int CountryId { get => Record.CountryId; set => Record.CountryId = value; }
     public bool IsDeployedToCountry => CountryId >= 0;
 
     public bool IsArmy => Type == UnitType.ARMY;
@@ -71,14 +67,11 @@ public partial class UnitState : StateObject
     [JsonIgnore] public static List<UnitState> AllUnitStates => 
         GameSession.Current.GameState.UnitStatesById.Values.ToList();
     
-    public static List<UnitState> WithTag(Tag tag, Faction faction) =>
-        AllUnitStates.Where(us => us.Tags.Has(tag, faction)).ToList();
+    public static List<UnitState> WithTag(Tag tag, Faction faction) => BoardState.Live.UnitsWithTag(tag, faction);
     
-    public static List<UnitState> AttackableArmies(Faction faction) =>
-        AllUnitStates.Where(us => us.Tags.Has(Tag.Attackable, faction) && us.Type == UnitType.ARMY).ToList();
+    public static List<UnitState> AttackableArmies(Faction faction) => BoardState.Live.AttackableArmies(faction);
     
-    public static List<UnitState> AttackableNavies(Faction faction) =>
-        AllUnitStates.Where(us => us.Tags.Has(Tag.Attackable, faction) && us.Type == UnitType.NAVY).ToList();
+    public static List<UnitState> AttackableNavies(Faction faction) => BoardState.Live.AttackableNavies(faction);
 
     // ID helpers
     public static List<int> AttackableArmyIds(Faction faction) =>

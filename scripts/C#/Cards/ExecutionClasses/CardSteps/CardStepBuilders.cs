@@ -53,22 +53,6 @@ public static class CardStepBuilders
         return step;
     }
 
-    /// <summary>
-    /// Declare what this step's prompts are for. Sibling of <see cref="WithGuidance"/>, and the
-    /// sturdy counterpart to it: guidance is prose for the player and changes with a copy edit, this
-    /// is an enum the compiler checks.
-    ///
-    /// One purpose per step. Where a single step raises prompts of two different kinds — see
-    /// EventGunsandButter, and EWMaltaSubmarines' discard-or-eliminate branch — leave this unset and
-    /// wrap each branch in <see cref="PromptOrigin.Narrow"/> instead, so the declaration sits where
-    /// the truth is.
-    /// </summary>
-    public static T WithPurpose<T>(this T step, PromptPurpose purpose) where T : CardStep
-    {
-        step.Purpose = purpose;
-        return step;
-    }
-
     public static T WithGuidance<T>(this T step, string actionGuidance) where T : CardStep
     {
         step.ActionGuidance = actionGuidance;

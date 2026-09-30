@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 /// <summary>
 /// Plays the shrink tween on a unit being removed, then calls CountryScene.RemoveUnit.
-/// countryId must be captured before ExecuteAsync runs (UnitState.CountryId is -1 afterwards).
+/// countryId must be captured before Mutate runs (UnitState.CountryId is -1 afterwards).
 /// The signal handler OnUnitRemovedFromCountry is a no-op so this animation owns scene cleanup.
 /// </summary>
 public class RemoveUnitAnimation : ChangeEventAnimation

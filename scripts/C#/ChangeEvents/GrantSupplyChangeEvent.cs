@@ -21,12 +21,10 @@ public partial class GrantSupplyChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board)
     {
         foreach (int unitId in UnitIds)
-            UnitState.ForId(unitId).SuppliedForTurn = true;
-        await Task.CompletedTask;
-        return true;
+            board.ForUnit(unitId).SuppliedForTurn = true;
     }
 
     public override string SummaryText() =>

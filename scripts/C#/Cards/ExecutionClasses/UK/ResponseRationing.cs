@@ -39,12 +39,12 @@ public partial class ResponseRationing : ResponseCardLogic
     /// DeckState.PlayCard files those into StatusCardIds/ResponseCardIds and only falls through to
     /// DiscardCard for other types. Without it, pool scope would match a table play too.
     /// </summary>
-    private PlayCardChangeEvent PlayedCard() =>
-        CardPlayPool.ChangeEventsPool
+    private PlayCardChangeEvent PlayedCard(GameSituation situation) =>
+        situation.Pool
             .OfType<PlayCardChangeEvent>()
             .LastOrDefault(playCard =>
                 playCard.TriggeringFaction == Faction
-                && DeckState.ForFaction(Faction).DiscardedCardIds.Contains(playCard.SourceCardId));
+                && situation.Board.ForFaction(Faction).Discarded.Contains(playCard.SourceCardId));
 
     protected override List<Condition> CardTriggers()
     {
@@ -52,7 +52,7 @@ public partial class ResponseRationing : ResponseCardLogic
             Condition.Build(new Condition.FactionPlayedCard(Faction), this),
             Condition.Build(new Condition.IsGameFlowStep(TurnStep.PLAY_CARD), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
-            Condition.Build(new Condition.CustomCondition(() => PlayedCard() != null), this)
+            Condition.Build(new Condition.CustomCondition(s => PlayedCard(s) != null), this)
         };
     }
 
@@ -60,7 +60,7 @@ public partial class ResponseRationing : ResponseCardLogic
     {
         return new List<CardStep> {
             new EffectStep(this, async () => {
-                PlayCardChangeEvent playEvent = PlayedCard();
+                PlayCardChangeEvent playEvent = PlayedCard(GameSituation.Live);
                 if (playEvent == null)
                 {
                     DebugUtilities.PrintPeerError("Rationing: no played card found to recycle");

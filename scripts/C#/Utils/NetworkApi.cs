@@ -383,11 +383,10 @@ public partial class NetworkApi : Node
         //
         // Guarded on the default so an explicit stamp at a call site wins over the ambient one —
         // mirroring how BroadCast only fills the Bulletin fields when TriggerCardId is still -1.
-        if (inputRequest.OriginPurpose == PromptPurpose.NONE && PromptOrigin.Current is { } origin)
+        if (inputRequest.OriginStepId < 0 && PromptOrigin.Current is { } origin)
         {
             inputRequest.OriginCardId = origin.CardId;
             inputRequest.OriginStepId = origin.StepId;
-            inputRequest.OriginPurpose = origin.Purpose;
             inputRequest.OriginStepKind = origin.Kind;
         }
 

@@ -40,7 +40,7 @@ public partial class MutatorReallocateResources : ActivatableMutator
     {
         get
         {
-            List<string> available = DrawOptions()
+            List<string> available = DrawOptions(GameSituation.Live)
                 .Select(cardId => CardState.ForId(cardId).CardData.Label)
                 .Distinct()
                 .ToList();
@@ -62,10 +62,10 @@ public partial class MutatorReallocateResources : ActivatableMutator
     /// </summary>
     // Only cards that could actually do something if played now — a Build Navy with no sea to build in
     // is not offered, so the four discarded cards can never buy a play that does nothing.
-    private List<int> DrawOptions() =>
-        DeckState.ForFaction(Faction).DeckCardIds
+    private List<int> DrawOptions(GameSituation situation) =>
+        situation.Board.ForFaction(Faction).Deck
             .Where(cardId => DrawableTypes.Contains(CardState.ForId(cardId).CardData.CardType))
-            .Where(CanPlayNow)
+            .Where(cardId => CanPlayNow(cardId, situation))
             .GroupBy(cardId => CardState.ForId(cardId).CardData.UniqueName)
             .Select(sameNamedCards => sameNamedCards.First())
             .ToList();
@@ -76,8 +76,8 @@ public partial class MutatorReallocateResources : ActivatableMutator
     /// ReactionDepth 0 is exactly what is wanted.
     /// </summary>
     /// <summary>Whether the card's first step could run right now: its conditions, e.g. HasBuildableSea for Build Navy.</summary>
-    private static bool CanPlayNow(int cardId)
-        => CardState.ForId(cardId).CardLogic?.CardSteps.FirstOrDefault()?.MeetAllConditions ?? false;
+    private static bool CanPlayNow(int cardId, GameSituation situation)
+        => CardState.ForId(cardId).CardLogic?.CardSteps.FirstOrDefault()?.MeetAllConditions(situation) ?? false;
 
     protected override List<Condition> MutatorTriggers()
     {
@@ -86,11 +86,11 @@ public partial class MutatorReallocateResources : ActivatableMutator
             // and the marker CardLogic.IsPlayStepActivation reads to place this beside the hand.
             Condition.Build(new Condition.IsPlayCardStep(), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
-            Condition.Build(new Condition.CustomCondition(() =>
-                DeckState.ForFaction(Faction).HandCardIds.Count >= DiscardCost), this),
+            Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.ForFaction(Faction).Hand.Count >= DiscardCost), this),
             // Nothing left to take would make the discard a pure loss, so the action is unavailable
             // (drawn greyed out) rather than a trap.
-            Condition.Build(new Condition.CustomCondition(() => DrawOptions().Count > 0), this)
+            Condition.Build(new Condition.CustomCondition(s => DrawOptions(s).Count > 0), this)
         };
     }
 
@@ -100,7 +100,7 @@ public partial class MutatorReallocateResources : ActivatableMutator
     /// rather than left as None: it is the truthful answer, and a future presentation that highlights
     /// deck cards gets it for free.
     /// </summary>
-    public override TargetSet Targets() => TargetSet.Cards(DrawOptions());
+    public override TargetSet Targets() => TargetSet.Cards(DrawOptions(GameSituation.Live));
 
     public override List<CardStep> OnActivate()
     {
@@ -109,21 +109,21 @@ public partial class MutatorReallocateResources : ActivatableMutator
             // and a host timeout can end the sequence with no card played at all. The taken card's own
             // PlayCardChangeEvent increments the same counter again, which is harmless —
             // CardsPlayedThisTurnStep is only ever tested > 0 and is cleared each round.
-            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
             .WithGuidance($"Discard {DiscardCost} cards to take a Build or Battle card from your deck and play it"),
 
             // Raises its own required selection and round-trips the picks to clients.
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost)))
             .RequiringPreviousStep(),
 
             // The full pipeline, deliberately: this play triggers responses like any other.
             // DeckState.PlayCard takes the card out of DeckCardIds, so the card goes from deck to
             // table without ever passing through hand.
             //
-            // DrawOptions() is read here rather than captured before the discard: the discard only
+            // DrawOptions is read here rather than captured before the discard: the discard only
             // moves hand cards so the answer is the same, but the deck is live state and the read
             // belongs next to its use.
-            new PlayCardStep(this, PlayChoice.From(_ => DrawOptions(), "Take a card from your draw deck and play it"))
+            new PlayCardStep(this, PlayChoice.From(c => DrawOptions(c.Situation), "Take a card from your draw deck and play it"))
             .RequiringPreviousStep()
         };
     }

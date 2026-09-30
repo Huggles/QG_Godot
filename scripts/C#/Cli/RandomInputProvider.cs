@@ -277,7 +277,7 @@ public sealed class RandomInputProvider : IInputProvider
         if (spec.OriginCardId >= 0)
         {
             e.Set("origin_card", CardState.ForId(spec.OriginCardId)?.CardName ?? $"card#{spec.OriginCardId}");
-            e.Set("purpose", spec.OriginPurpose.ToString());
+            e.Set("step_kind", spec.OriginStepKind.ToString());
         }
 
         // The agenda is the whole output of the agent layer right now — nothing acts on it — so the
@@ -299,7 +299,7 @@ public sealed class RandomInputProvider : IInputProvider
                      + (advice.PassBy != null ? $" pass_by={advice.PassBy}" : "");
 
         string origin = spec.OriginCardId >= 0
-            ? $" [{CardState.ForId(spec.OriginCardId)?.CardName ?? "?"}/{spec.OriginPurpose}]"
+            ? $" [{CardState.ForId(spec.OriginCardId)?.CardName ?? "?"}/{spec.OriginStepKind}]"
             : "";
 
         _trace.Emit(e.Text($"BOT {spec.Kind,-26} {spec.Faction,-15} " +

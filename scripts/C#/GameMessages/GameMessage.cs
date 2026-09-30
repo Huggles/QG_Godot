@@ -220,7 +220,7 @@ public abstract partial class GameMessage : GodotObject
 
     /// <summary>
     /// Last chance to stamp wire-only fields. ChangeEvent computes its post-mutation state hash here,
-    /// which is why BroadCast has to run after ExecuteAsync rather than before.
+    /// which is why BroadCast has to run after Mutate rather than before.
     /// </summary>
     protected virtual void OnBeforeBroadcast() { }
 

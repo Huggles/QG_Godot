@@ -391,16 +391,20 @@ Tracks which factions have explicitly passed in the current reaction chain:
 public override List<CardStep> OnActivate()
 {
     return new List<CardStep> {
-        new ResultStep(this, async() => {
-            int selectedCountryId = (await new InputRequest.SelectCountryRequestHandler(Faction, BuildTargets).BroadCast()).ResponseCountryIds[0];
-            return new DeployUnitChangeEvent(Faction, selectedCountryId, DeployType.BUILD);
-        })
+        new ResultStep(this, Choose.CountryFrom(() => BuildTargets,
+            countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
         .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
-        .WithPurpose(PromptPurpose.DEPLOY_TARGET)
         .WithGuidance("Build an army")
     };
 }
 ```
+
+`Choose.CountryFrom` splits the step into its options and a pure factory from one option to its
+event; the step does the prompt in between, and `CardStep.PossibleOutcomes()` lists every option's
+event without prompting — which is how the bot sees what a card would do. Use `.OnChosen(...)` for
+card state a choice changes, and keep the factory free of side effects. The other forms are
+`UnitFrom`, `FactionFrom`, `BattleTargetFrom`, `Fixed` (no prompt), and `PlayChoice` for a
+`PlayCardStep`; each has an overload whose lambdas also take the previous step's outcome.
 
 No `IsTrigger =` line and no `BuildChangeEvent(...)` wrapper: `ResultStep` sets the flag, and
 `SourceCardId` / `TriggeringFaction` are stamped centrally for every event a step returns. That

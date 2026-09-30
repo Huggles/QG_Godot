@@ -62,8 +62,8 @@ public abstract partial class ActivatableMutator : CardLogic
     {
         List<Condition> conditions = new List<Condition>
         {
-            Condition.Build(new Condition.CustomCondition(() =>
-                GameFlow.Instance.Round >= FromRound && GameFlow.Instance.Round <= ToRound), this)
+            Condition.Build(new Condition.CustomCondition(s =>
+                StaticGameData.RoundForTurn(s.Board.GameTurn) >= FromRound && StaticGameData.RoundForTurn(s.Board.GameTurn) <= ToRound), this)
         };
         conditions.AddRange(MutatorTriggers());
         return conditions;

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 public partial class BattleUnitChangeEvent : RemoveUnitChangeEvent
 {
-    public BattleUnitChangeEvent(Faction triggeringFaction, int unitId) : base(triggeringFaction, unitId, UnitRemovalReason.BATTLE)
+    public BattleUnitChangeEvent(Faction triggeringFaction, int unitId, BoardState board = null) : base(triggeringFaction, unitId, UnitRemovalReason.BATTLE, board)
     {
     }
 

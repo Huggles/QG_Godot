@@ -24,16 +24,16 @@ public partial class ResponseSurpriseAttack : ResponseCardLogic
     {
         return new List<CardStep> {
             // Battle a sea space
-            new ResultStep(this, Choose.BattleTargetFrom(() => CountryState.AttackableSeaIds(Faction).Select(id => new BattleTarget(id, TargetType.COUNTRY))
-                    .Concat(UnitState.AttackableNavyIds(Faction).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
-                target => target.ToAttackChangeEvent(Faction)))
+            new ResultStep(this, Choose.BattleTargetFrom(c => c.Board.AttackableSeaIds(Faction).Select(id => new BattleTarget(id, TargetType.COUNTRY))
+                    .Concat(c.Board.AttackableNavyIds(Faction).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=> Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))
             .WithGuidance("Battle a sea space"),
             
             // Battle a land space
-            new ResultStep(this, Choose.BattleTargetFrom(() => CountryState.AttackableLandIds(Faction).Select(id => new BattleTarget(id, TargetType.COUNTRY))
-                    .Concat(UnitState.AttackableArmyIds(Faction).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
-                target => target.ToAttackChangeEvent(Faction)))
+            new ResultStep(this, Choose.BattleTargetFrom(c => c.Board.AttackableLandIds(Faction).Select(id => new BattleTarget(id, TargetType.COUNTRY))
+                    .Concat(c.Board.AttackableArmyIds(Faction).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
             .WithGuidance("Battle a land space"),
         }; 

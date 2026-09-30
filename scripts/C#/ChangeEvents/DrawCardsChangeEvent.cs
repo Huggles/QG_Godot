@@ -22,11 +22,11 @@ public partial class DrawCardsChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
-    {
-        await GameAPI.DrawCards(TargetFaction, NumberOfCards, ShowDrawnCards);                
-        return true;
-    }
+    private List<int> _drawnCardIds = new();
+
+    public override void Mutate(BoardState board) => _drawnCardIds = board.DrawCards(TargetFaction, NumberOfCards);
+
+    protected override Task OnLiveMutatedAsync() => GameAPI.PresentDraw(TargetFaction, NumberOfCards, _drawnCardIds, ShowDrawnCards);
 
     /// <summary>
     /// Cards move from the draw pile to the hand (and, on a reshuffle, from the discard back to the

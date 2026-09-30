@@ -12,14 +12,16 @@ public partial class StatusBiasForAction : StatusCardLogic
     /// navy builds made earlier in the same round, widening the target list well past the card text.
     /// Mirrors <see cref="MutatorSyntheticFuelAnyFaction"/>, which implements near-identical text.
     /// </summary>
-    private CountryState BuiltCountryState =>
-        TriggerContextAs<DeployUnitChangeEvent>()?.CountryState;
+    private CountryState BuiltCountryState(GameSituation situation) =>
+        TriggerContextAs<DeployUnitChangeEvent>(situation)?.CountryState;
 
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
             Condition.Build(new Condition.FactionDeployed(Faction, DeployType.BUILD), this).Immediately(),
-            Condition.Build(new Condition.CountryIsAttackable(AdjacentLandCountryIds, Faction), this)
+            // Built per situation: which spaces are adjacent depends on the deploy being reacted to.
+            Condition.Build(new Condition.CustomCondition(s =>
+                new Condition.CountryIsAttackable(AdjacentLandCountryIds(s), Faction).MeetCondition(s)), this)
         };
     }
 
@@ -35,18 +37,15 @@ public partial class StatusBiasForAction : StatusCardLogic
     /// a rebuild-in-place always lands in. CountryIsAttackable inspects each country's units itself.
     /// StatusDiveBombers documents the same pitfall.
     /// </summary>
-    private List<int> AdjacentLandCountryIds
+    private List<int> AdjacentLandCountryIds(GameSituation situation)
     {
-        get
-        {
-            CountryState builtIn = BuiltCountryState;
-            if (builtIn == null) return new List<int>();
+        CountryState builtIn = BuiltCountryState(situation);
+        if (builtIn == null) return new List<int>();
 
-            return builtIn.AdjacentCountryStates(Faction)
-                .Where(adj => adj.Type == CountryType.LAND)
-                .Select(adj => adj.Id)
-                .ToList();
-        }
+        return situation.Board.AdjacentCountryStates(Faction, builtIn)
+            .Where(adj => adj.Type == CountryType.LAND)
+            .Select(adj => adj.Id)
+            .ToList();
     }
 
     /// <summary>
@@ -56,19 +55,16 @@ public partial class StatusBiasForAction : StatusCardLogic
     /// neighbour scan missed. Its CountryType.LAND filter is what keeps an attackable Navy in an
     /// adjacent sea space out of a list the card text limits to land.
     /// </summary>
-    public List<BattleTarget> BattleTargets
+    public List<BattleTarget> BattleTargets(GameSituation situation)
     {
-        get
-        {
-            CountryState builtIn = BuiltCountryState;
-            if (builtIn == null) return new List<BattleTarget>();
+        CountryState builtIn = BuiltCountryState(situation);
+        if (builtIn == null) return new List<BattleTarget>();
 
-            return builtIn.AdjacentBattleTargets(Faction, CountryType.LAND);
-        }
+        return situation.Board.AdjacentBattleTargets(Faction, CountryType.LAND, builtIn);
     }
 
     /// <summary>The land spaces adjacent to the Army just built that this may attack.</summary>
-    public override TargetSet Targets() => TargetSet.FromBattleTargets(BattleTargets);
+    public override TargetSet Targets() => TargetSet.FromBattleTargets(BattleTargets(GameSituation.Live));
 
     public override List<CardStep> OnActivate()
     {
@@ -81,12 +77,12 @@ public partial class StatusBiasForAction : StatusCardLogic
             // It stays a condition of its OWN, rather than leaning on the card trigger: the trigger
             // gate reads tags while this reads BattleTargets, so the two can disagree at the margin
             // (ImmuneForTurn, supply).
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => BattleTargets.Count > 0), this))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BattleTargets(s).Count > 0), this))
             .WithGuidance("Battle a land space adjacent to the Army just built"),
 
             new ResultStep(this, async () => {
-                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets).BroadCast();
+                var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets(GameSituation.Live)).BroadCast();
                 if (resp.ResponseCountryIds.Count == 0 && resp.ResponseUnitIds.Count == 0) return CardStepResult.Nothing;
 
                 BattleTarget battleTarget = resp.ResponseCountryIds.Count > 0

@@ -23,12 +23,7 @@ public partial class SetStartingScoreChangeEvent : ChangeEvent
         return dto;
     }
 
-    protected override async Task<bool> ExecuteAsync()
-    {
-        FactionState.ForEnum(TriggeringFaction).Score = Score;
-        await Task.CompletedTask;
-        return true;
-    }
+    public override void Mutate(BoardState board) => board.ForFaction(TriggeringFaction).Score = Score;
 
     public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} starts with {Score} VP";
 }

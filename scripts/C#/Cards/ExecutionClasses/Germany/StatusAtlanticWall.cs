@@ -29,8 +29,8 @@ public partial class StatusAtlanticWall : StatusCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.Fixed(() =>
-                new ForceDiscardCardsChangeEvent(Faction, TriggerContextAs<BattleCountryChangeEvent>().TriggeringFaction, 3)))
+            new ResultStep(this, Choose.Fixed(c =>
+                new ForceDiscardCardsChangeEvent(Faction, TriggerContextAs<BattleCountryChangeEvent>(c.Situation).TriggeringFaction, 3)))
             .WithGuidance("The attacker discards 3 cards")
         };
     }

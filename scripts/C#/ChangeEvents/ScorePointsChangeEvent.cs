@@ -25,14 +25,12 @@ public partial class ScorePointsChangeEvent : ChangeEvent
         return dto;
     }
 
-    public override void Project(BoardProjection projection)
-        => projection.AddScore(VPTurnSummary.Faction, VPTurnSummary.TotalScore);
+    public override void Mutate(BoardState board) => board.AddScore(VPTurnSummary.Faction, VPTurnSummary.TotalScore);
 
-    protected override async Task<bool> ExecuteAsync()
+    protected override async Task OnLiveMutatedAsync()
     {
-        GameAPI.ScorePoints(VPTurnSummary);
+        GameAPI.PresentScore(VPTurnSummary);
         await Task.Delay(GameSettings.DurationLong);
-        return true;
     }
 
     /// <summary>

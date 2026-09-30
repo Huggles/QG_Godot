@@ -59,7 +59,7 @@ public static class GameMessageDisplay
     /// Empty for the great majority of messages, which move no cards at all.
     ///
     /// Only events that already KNOW the ids qualify. The by-name events resolve theirs inside
-    /// ExecuteAsync and keep nothing, and DrawCardsChangeEvent never learns which cards came off the
+    /// Mutate and keep nothing, and DrawCardsChangeEvent never learns which cards came off the
     /// deck — those stay card-less rather than being given a lookup that could answer differently on
     /// each peer. Secrecy is not this list's problem: CardFace.ForCard draws anything the local
     /// player may not see as a card back, so an opponent's discard is safe to name here.

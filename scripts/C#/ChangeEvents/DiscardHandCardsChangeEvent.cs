@@ -30,11 +30,12 @@ public partial class DiscardHandCardsChangeEvent : ChangeEvent
         new ShowDiscardModalAnimation(CardIds, "Discarded cards", TargetFaction, TriggeringFaction == TargetFaction)
     };
 
-    protected override async Task<bool> ExecuteAsync()
+    public override void Mutate(BoardState board) => board.DiscardHandCards(TargetFaction, CardIds);
+
+    protected override async Task OnLiveMutatedAsync()
     {
-        await GameAPI.DiscardHandCards(TargetFaction, CardIds);
+        GameAPI.PresentDiscardHand(TargetFaction, CardIds);
         await Task.Delay(GameSettings.DurationShort);
-        return true;
     }
 
     /// <summary>

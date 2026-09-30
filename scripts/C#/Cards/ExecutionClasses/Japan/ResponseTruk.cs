@@ -10,19 +10,16 @@ public partial class ResponseTruk : ResponseCardLogic
     /// The pieces this puts back in supply: every Japanese unit in or beside the Central Pacific.
     /// Read by the step and by <see cref="Targets"/>, so the preview lights exactly who benefits.
     /// </summary>
-    private List<int> SupplyTargetUnitIds
+    private List<int> SupplyTargetUnitIds(BoardState board)
     {
-        get
-        {
-            var centralPacific = CountryState.ForEnum(Country.CentralPacific);
-            var targetCountries = centralPacific.ConnectedCountryStates.Append(centralPacific).Distinct().ToList();
-            return FactionState.ForEnum(Faction).ActiveUnitIds
-                .Where(uid => targetCountries.Contains(UnitState.ForId(uid).CountryState))
-                .ToList();
-        }
+        var centralPacific = CountryState.ForEnum(Country.CentralPacific);
+        var targetCountries = centralPacific.ConnectedCountryStates.Append(centralPacific).Distinct().ToList();
+        return board.ActiveUnitIds(Faction)
+            .Where(uid => targetCountries.Contains(board.CountryStateOf(UnitState.ForId(uid))))
+            .ToList();
     }
 
-    public override TargetSet Targets() => TargetSet.Units(SupplyTargetUnitIds);
+    public override TargetSet Targets() => TargetSet.Units(SupplyTargetUnitIds(BoardState.Live));
 
     protected override List<Condition> CardTriggers()
     {
@@ -34,12 +31,12 @@ public partial class ResponseTruk : ResponseCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => {
+            new RequirementStep(this, Choose.Fixed(c => {
                 // Guarded INSIDE the step, not with .WithCondition. A step condition would make this
                 // the card's only executable step when it fails, HasExecutableCardSteps false, and
                 // the card unactivatable -- where before it simply announced itself and granted
                 // nothing. Same trap as the EW cards above.
-                List<int> unitIds = SupplyTargetUnitIds;
+                List<int> unitIds = SupplyTargetUnitIds(c.Board);
                 return unitIds.Count == 0 ? null : new GrantSupplyChangeEvent(Faction, unitIds);
             }))
             .WithGuidance("Grant supply to all Japanese pieces in or adjacent to the Central Pacific"),

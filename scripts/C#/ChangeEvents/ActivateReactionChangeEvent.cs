@@ -54,16 +54,19 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         }
         : new();
 
-    protected override async Task<bool> ExecuteAsync(){
-        DebugUtilities.PrintPeer($"Activating reaction card {SourceCardState.CardName} for faction {TriggeringFaction}");
-        SourceCardState.ActivatedInTurns.Add(GameFlow.Instance.GameTurn);
+    public override void Mutate(BoardState board)
+    {
+        if (board.IsLive)
+            DebugUtilities.PrintPeer($"Activating reaction card {SourceCardState.CardName} for faction {TriggeringFaction}");
+        CardRecord card = board.Of(SourceCardState);
+        card.ActivatedInTurns.Add(board.GameTurn);
 
         // Flip the card face up for every peer. Set here rather than in AfterAnimations so it is
         // already true when the "X activates Y" modal builds its CardScene: ChangeEvent.ApplyMutation
-        // awaits ExecuteAsync before it enqueues AfterAnimations, on the server and on each client
+        // runs Mutate before it enqueues AfterAnimations, on the server and on each client
         // replaying the event off ChangeEventQueue alike. Idempotent — a multi-step Response card
         // emits a second ActivateReactionChangeEvent via CardPlayRound.ContinueWithNextSteps.
-        SourceCardState.IsRevealed = true;
+        card.IsRevealed = true;
 
         // A Response card is spent once activated and moves to the discard pile. Status cards stay on
         // the table (and stay registered as modifiers), so they are deliberately excluded.
@@ -72,10 +75,8 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         // CardPlayRound.ContinueWithNextSteps -> DoCard, which emits a SECOND ActivateReactionChangeEvent
         // for the same card. DeckState.DiscardCard falls through all its branches for an id already in
         // DiscardedCardIds and appends a duplicate, which would corrupt the pile and ComputeHash.
-        if (SourceCardState.CardData.CardType == CardType.RESPONSE && !SourceCardState.IsDiscarded)
-            DeckState.ForFaction(TriggeringFaction).DiscardCard(SourceCardId);
-
-        return true;
+        if (SourceCardState.CardData.CardType == CardType.RESPONSE && !board.IsDiscarded(SourceCardState))
+            board.DiscardCard(TriggeringFaction, SourceCardId);
     }
 
     public override string SummaryText() => $"{TriggeringFaction.WithPlayer()} activated card {SourceCardState.CardName}";

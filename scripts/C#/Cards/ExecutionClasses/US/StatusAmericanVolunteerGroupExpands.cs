@@ -6,17 +6,17 @@ using Godot;
 
 public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICountryTagModifier, IUnitSupplyModifier
 {
-    public bool GrantsSupply(UnitState unit)
+    public bool GrantsSupply(BoardState board, UnitState unit)
     {
         return StaticGameData.FactionTeamForFaction(unit.Faction) == FactionTeam.ALLIES
             && unit.Type == UnitType.ARMY
-            && unit.CountryState.Country == Country.Szechuan;
+            && board.CountryOf(unit) == (int)Country.Szechuan;
     }
 
-    public void ApplyTagModifiers(Faction faction)
+    public void ApplyTagModifiers(BoardState board, Faction faction)
     {
         if (StaticGameData.FactionTeamForFaction(faction) != FactionTeam.ALLIES) return;
-        CountryState.ForEnum(Country.Szechuan).AddTag(Tag.Recruitable, faction);
+        board.Of(CountryState.ForEnum(Country.Szechuan)).Tags.Add(Tag.Recruitable, faction);
     }
 
     /// <summary>Szechuan — the space this recruits into, and the space whose Allied Armies it keeps
@@ -24,7 +24,7 @@ public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICou
     public override TargetSet Targets() =>
         TargetSet.Countries(new List<Country> { Country.Szechuan })
             .Plus(TargetSet.Units(CountryState.ForEnum(Country.Szechuan).Units.Values
-                .Select(UnitState.ForId).Where(GrantsSupply).ToList()));
+                .Select(UnitState.ForId).Where(unit => GrantsSupply(BoardState.Live, unit)).ToList()));
 
     protected override List<Condition> CardTriggers()
     {
@@ -39,15 +39,15 @@ public partial class StatusAmericanVolunteerGroupExpands : StatusCardLogic, ICou
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(() => new SpendPlayActionChangeEvent(Faction)))
+            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable([(int)Country.Szechuan], Faction), this))
             .WithGuidance("Discard top 2 deck cards to recruit an Army in Szechuan"),
 
-            new RequirementStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
+            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),
 
-            new ResultStep(this, Choose.CountryFrom(() => [(int)Country.Szechuan],
-                countryId => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
+            new ResultStep(this, Choose.CountryFrom(_ => [(int)Country.Szechuan],
+                (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .RequiringPreviousStep()
         };
     }

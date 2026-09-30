@@ -251,7 +251,7 @@ public partial class GameStateDetailPanel : PanelContainer
         foreach (var condition in conditions)
         {
             bool met;
-            try { met = condition.MeetCondition(); }
+            try { met = condition.MeetCondition(GameSituation.Live); }
             catch { met = false; }
 
             string symbol = met ? "✓" : "✗";

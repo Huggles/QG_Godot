@@ -10,8 +10,10 @@ public enum ConditionScope { Pool, Immediate }
 [DebuggerDisplay("Condition: {GetType().Name}: {_meetsCondition}")]
 public abstract class Condition
 {
-    private bool _meetsCondition => MeetCondition();
-    public abstract bool MeetCondition();
+    private bool _meetsCondition => MeetCondition(GameSituation.Live);
+
+    /// <summary>Whether this holds in <paramref name="situation"/>: its board, and the round in progress on it.</summary>
+    public abstract bool MeetCondition(GameSituation situation);
     public CardLogic CardLogic;
 
     /// <summary>
@@ -60,23 +62,23 @@ public abstract class Condition
 
     public class Always : Condition
     {
-        public override bool MeetCondition() { return true; }
+        public override bool MeetCondition(GameSituation situation) { return true; }
     }
     public class Never : Condition
     {
-        public override bool MeetCondition() { return false; }
+        public override bool MeetCondition(GameSituation situation) { return false; }
     }
     public class Not : CustomCondition
     {
         public Condition Inner { get; }
-        public Not(Condition condition) : base(() => !condition.MeetCondition()) { Inner = condition; }
+        public Not(Condition condition) : base(situation => !condition.MeetCondition(situation)) { Inner = condition; }
     }
 
     public class CardIsPlayed : Condition
     {
         private readonly CardState _cardState;
         public CardIsPlayed(CardState cardState) { _cardState = cardState; }
-        public override bool MeetCondition() => _cardState.IsPlayed;
+        public override bool MeetCondition(GameSituation situation) => situation.Board.IsPlayed(_cardState);
     }
 
     public class CardHasBeenPlayedInTurn : Condition
@@ -84,14 +86,14 @@ public abstract class Condition
         private readonly CardState _cardState;
         private readonly int _turn;
         public CardHasBeenPlayedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
-        public override bool MeetCondition() => _cardState.PlayedInTurn.Contains(_turn);
+        public override bool MeetCondition(GameSituation situation) => situation.Board.Of(_cardState).PlayedInTurn.Contains(_turn);
     }
 
     public class CardHasBeenPlayedThisTurn : Condition
     {
         private readonly CardState _cardState;
         public CardHasBeenPlayedThisTurn(CardState cardState) { _cardState = cardState; }
-        public override bool MeetCondition() => _cardState.PlayedInTurn.Contains(GameFlow.Instance.GameTurn);
+        public override bool MeetCondition(GameSituation situation) => situation.Board.Of(_cardState).PlayedInTurn.Contains(situation.Board.GameTurn);
     }
 
     public class CardHasNotBeenPlayedInTurn : Condition
@@ -99,15 +101,15 @@ public abstract class Condition
         private readonly CardState _cardState;
         private readonly int _turn;
         public CardHasNotBeenPlayedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
-        public override bool MeetCondition() => !_cardState.PlayedInTurn.Contains(_turn);
+        public override bool MeetCondition(GameSituation situation) => !situation.Board.Of(_cardState).PlayedInTurn.Contains(_turn);
     }
 
     public class CardHasNotBeenPlayedThisTurn : Condition
     {
         private readonly CardState _cardState;
         public CardHasNotBeenPlayedThisTurn(CardState cardState) { _cardState = cardState; }
-        public override bool MeetCondition() =>
-            !_cardState.PlayedInTurn.Contains(GameFlow.Instance.GameTurn);
+        public override bool MeetCondition(GameSituation situation) =>
+            !situation.Board.Of(_cardState).PlayedInTurn.Contains(situation.Board.GameTurn);
     }
 
     public class CardHasBeenActivatedInTurn : Condition
@@ -115,14 +117,14 @@ public abstract class Condition
         private readonly CardState _cardState;
         private readonly int _turn;
         public CardHasBeenActivatedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
-        public override bool MeetCondition() => _cardState.ActivatedInTurns.Contains(_turn);
+        public override bool MeetCondition(GameSituation situation) => situation.Board.Of(_cardState).ActivatedInTurns.Contains(_turn);
     }
 
     public class CardHasBeenActivatedThisTurn : Condition
     {
         private readonly CardState _cardState;
         public CardHasBeenActivatedThisTurn(CardState cardState) { _cardState = cardState; }
-        public override bool MeetCondition() => _cardState.ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
+        public override bool MeetCondition(GameSituation situation) => situation.Board.Of(_cardState).ActivatedInTurns.Contains(situation.Board.GameTurn);
     }
 
     public class CardHasNotBeenActivatedInTurn : Condition
@@ -130,14 +132,14 @@ public abstract class Condition
         private readonly CardState _cardState;
         private readonly int _turn;
         public CardHasNotBeenActivatedInTurn(CardState cardState, int turn) { _cardState = cardState; _turn = turn; }
-        public override bool MeetCondition() => !_cardState.ActivatedInTurns.Contains(_turn);
+        public override bool MeetCondition(GameSituation situation) => !situation.Board.Of(_cardState).ActivatedInTurns.Contains(_turn);
     }
 
     public class CardHasNotBeenActivatedThisTurn : Condition
     {
         private readonly CardState _cardState;
         public CardHasNotBeenActivatedThisTurn(CardState cardState) { _cardState = cardState; }
-        public override bool MeetCondition() => !_cardState.ActivatedInTurns.Contains(GameFlow.Instance.GameTurn);
+        public override bool MeetCondition(GameSituation situation) => !situation.Board.Of(_cardState).ActivatedInTurns.Contains(situation.Board.GameTurn);
     }
 
     public class CountryIsBuildable : Condition
@@ -148,8 +150,8 @@ public abstract class Condition
             this.Faction = faction;
         }
 
-        public override bool MeetCondition() => 
-            CountryStates.Any(cs => cs.Tags.Has(Tag.Buildable, Faction));
+        public override bool MeetCondition(GameSituation situation) => 
+            CountryStates.Any(cs => situation.Board.Of(cs).Tags.Has(Tag.Buildable, Faction));
     }
 
     public class CountryIsRecruitable : Condition
@@ -160,8 +162,8 @@ public abstract class Condition
             this.Faction = faction;
         }
 
-        public override bool MeetCondition() => 
-            CountryStates.Any(cs => cs.Tags.Has(Tag.Recruitable, Faction));
+        public override bool MeetCondition(GameSituation situation) => 
+            CountryStates.Any(cs => situation.Board.Of(cs).Tags.Has(Tag.Recruitable, Faction));
     }
 
 
@@ -173,10 +175,10 @@ public abstract class Condition
             this.Faction = faction;
         }
 
-        public override bool MeetCondition() => 
+        public override bool MeetCondition(GameSituation situation) => 
             CountryStates.Any(cs =>
-                cs.Tags.Has(Tag.Attackable, Faction) ||
-                cs.Units.Values.Any(unitId => UnitState.ForId(unitId).Tags.Has(Tag.Attackable, Faction)));
+                situation.Board.Of(cs).Tags.Has(Tag.Attackable, Faction) ||
+                situation.Board.UnitsIn(cs).Values.Any(unitId => situation.Board.Of(UnitState.ForId(unitId)).Tags.Has(Tag.Attackable, Faction)));
     }
     public class CountryIsEmpty : Condition
     {
@@ -190,10 +192,10 @@ public abstract class Condition
             this.CountryIds = countryIds;
         }
 
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
             // Check if any of the specified countries are empty (no units)
-            return CountryStates.Any(countryState => countryState.IsCountryEmpty);
+            return CountryStates.Any(countryState => situation.Board.IsEmpty(countryState));
         }
     }
 
@@ -205,9 +207,9 @@ public abstract class Condition
             this.Faction = faction;
         }
 
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
-            return CountryStates.Any(countryState => countryState.HasUnit(Faction));
+            return CountryStates.Any(countryState => situation.Board.HasUnit(Faction, countryState));
         }
     }
 
@@ -223,10 +225,10 @@ public abstract class Condition
             this.CountryIds = countryIds;
         }
 
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
             return CountryStates.Any(countryState => 
-                countryState.ConnectedCountryStates.Any(neighbor => neighbor.Tags.HasForAny(Tag.Attackable)));
+                countryState.ConnectedCountryStates.Any(neighbor => situation.Board.Of(neighbor).Tags.HasForAny(Tag.Attackable)));
         }
     }
 
@@ -288,11 +290,11 @@ public abstract class Condition
             this.Faction = faction;
             this.CountryIds = countryIds;
         }
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
             if (CountryIds != null && CountryIds.Count > 0)
             {
-                return CountryStates.Any(countryState => countryState.Tags.Has(Tag.Attackable, Faction));
+                return CountryStates.Any(countryState => situation.Board.Of(countryState).Tags.Has(Tag.Attackable, Faction));
             } 
             else if (CountryIds == null || CountryIds.Count == 0)
             {
@@ -301,10 +303,10 @@ public abstract class Condition
             else
             {
                 // Check if any units have attackable tag for this faction
-                var allUnits = GameSession.Current.GameState.UnitStatesById.Values;
-                bool hasAttackableUnits = allUnits.Any(us => us.Tags.Has(Tag.Attackable, Faction) && us.Type.Matches(unitType));
+                var allUnits = UnitState.AllUnitStates;
+                bool hasAttackableUnits = allUnits.Any(us => situation.Board.Of(us).Tags.Has(Tag.Attackable, Faction) && us.Type.Matches(unitType));
                 // Check if any countries have attackable tag for this faction
-                bool hasAttackableCountries = CountryState.AllCountryStates.Any(cs => cs.Tags.Has(Tag.Attackable, Faction) && 
+                bool hasAttackableCountries = CountryState.AllCountryStates.Any(cs => situation.Board.Of(cs).Tags.Has(Tag.Attackable, Faction) && 
                     ((unitType.Matches(UnitType.ARMY) && cs.Type == CountryType.LAND) || (unitType.Matches(UnitType.NAVY) && cs.Type == CountryType.SEA)));
                 return hasAttackableUnits || hasAttackableCountries;
             }
@@ -382,10 +384,10 @@ public abstract class Condition
             this.TargetCardType = cardType;
         }
         
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
             return this.TargetCardType != null
-                ? CardPlayPool.CurrentBlockTrigger?.SourceCardState?.CardData?.CardType == this.TargetCardType
+                ? situation.BlockTrigger?.SourceCardState?.CardData?.CardType == this.TargetCardType
                 : true;
         }
     }
@@ -412,8 +414,8 @@ public abstract class Condition
 
         public IsBlockRequestFromCard(Faction faction, CardType cardType) : base(cardType) { _faction = faction; }
 
-        public override bool MeetCondition()
-            => base.MeetCondition() && CardPlayPool.CurrentBlockTrigger?.TriggeringFaction == _faction;
+        public override bool MeetCondition(GameSituation situation)
+            => base.MeetCondition(situation) && situation.BlockTrigger?.TriggeringFaction == _faction;
     }
 
     /// <summary>
@@ -452,9 +454,9 @@ public abstract class Condition
             _requireInSupply = requireInSupply;
         }
 
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
-            if (CardPlayPool.CurrentBlockTrigger is not RemoveUnitChangeEvent removeEvent)
+            if (situation.BlockTrigger is not RemoveUnitChangeEvent removeEvent)
                 return false;
             if (TargetFactions?.Count > 0 && !TargetFactions.Contains(removeEvent.UnitState.Faction))
                 return false;
@@ -466,7 +468,7 @@ public abstract class Condition
                 return false;
             if (!UnitType.Matches(removeEvent.UnitState.Type))
                 return false;
-            if (_requireInSupply && !removeEvent.UnitState.InSupply)
+            if (_requireInSupply && !situation.Board.InSupply(removeEvent.UnitState))
                 return false;
             if (CountryIds?.Count > 0 && !CountryIds.Contains(removeEvent.CountryId))
                 return false;
@@ -505,9 +507,9 @@ public abstract class Condition
             this.UnitType = unitType;
         }
 
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
-            return CardPlayPool.GetChangeEvents<DeployUnitChangeEvent>().Any(ce =>
+            return situation.PoolEvents<DeployUnitChangeEvent>().Any(ce =>
             {
                 if (TargetFactions?.Count > 0 && !TargetFactions.Contains(ce.TriggeringFaction))
                     return false;
@@ -531,13 +533,13 @@ public abstract class Condition
         public CardInPlay(int cardId) { this.CardIds = [cardId]; }
         public CardInPlay(CardState cardState) { this.CardIds = [cardState.Id]; }
 
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
             if (CardState.CardData.CardType != CardType.STATUS && CardState.CardData.CardType != CardType.RESPONSE)
             {
                 throw new Exception("Card is not status or response");
             }
-            return CardState.IsPlayed;
+            return situation.Board.IsPlayed(CardState);
         }
     }
 
@@ -548,9 +550,9 @@ public abstract class Condition
             this.TurnStep = turnStep;
         }
 
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
-            return GameFlow.Instance.TurnStep == this.TurnStep;
+            return situation.Board.TurnStep == this.TurnStep;
         }
     }
 
@@ -558,13 +560,13 @@ public abstract class Condition
     public class HasBuildableLand : Condition
     {
         public HasBuildableLand(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.BuildableLand(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => situation.Board.BuildableLand(Faction).Any();
     }
 
     public class HasBuildableSea : Condition
     {
         public HasBuildableSea(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.BuildableSea(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => situation.Board.BuildableSea(Faction).Any();
     }
 
     /// <summary>
@@ -576,14 +578,14 @@ public abstract class Condition
     public class HasVacantBuildableLand : Condition
     {
         public HasVacantBuildableLand(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.BuildableLand(Faction).Any(cs => !cs.HasUnit(Faction));
+        public override bool MeetCondition(GameSituation situation) => situation.Board.BuildableLand(Faction).Any(cs => !situation.Board.HasUnit(Faction, cs));
     }
 
     /// <inheritdoc cref="HasVacantBuildableLand"/>
     public class HasVacantBuildableSea : Condition
     {
         public HasVacantBuildableSea(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.BuildableSea(Faction).Any(cs => !cs.HasUnit(Faction));
+        public override bool MeetCondition(GameSituation situation) => situation.Board.BuildableSea(Faction).Any(cs => !situation.Board.HasUnit(Faction, cs));
     }
 
     /// <summary>
@@ -604,45 +606,45 @@ public abstract class Condition
             this.Faction = faction;
             this.UnitType = unitType;
         }
-        public override bool MeetCondition() => UnitPool.FactionHasAvailableUnits(Faction, UnitType);
+        public override bool MeetCondition(GameSituation situation) => situation.Board.AvailableUnitCount(Faction, UnitType) > 0;
     }
 
     public class HasRecruitableLand : Condition
     {
         public HasRecruitableLand(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.RecruitableLand(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => situation.Board.RecruitableLand(Faction).Any();
     }
 
     public class HasRecruitableSea : Condition
     {
         public HasRecruitableSea(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.RecruitableSea(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => situation.Board.RecruitableSea(Faction).Any();
     }
 
     public class HasAttackableLand : Condition
     {
         public HasAttackableLand(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.AttackableLand(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => situation.Board.AttackableLand(Faction).Any();
     }
 
     public class HasAttackableSea : Condition
     {
         public HasAttackableSea(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => CountryState.AttackableSea(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => situation.Board.AttackableSea(Faction).Any();
     }
 
     public class HasLandBattleTarget : Condition
     {
         public HasLandBattleTarget(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => 
-            UnitState.AttackableArmies(Faction).Any() || CountryState.AttackableLand(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => 
+            situation.Board.AttackableArmies(Faction).Any() || situation.Board.AttackableLand(Faction).Any();
     }
 
     public class HasSeaBattleTarget : Condition
     {
         public HasSeaBattleTarget(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => 
-            UnitState.AttackableNavies(Faction).Any() || CountryState.AttackableSea(Faction).Any();
+        public override bool MeetCondition(GameSituation situation) => 
+            situation.Board.AttackableNavies(Faction).Any() || situation.Board.AttackableSea(Faction).Any();
     }
 
     public class HasDeployedArmy : EventCondition
@@ -683,7 +685,7 @@ public abstract class Condition
     public class HasPlayedCardThisTurnStep : Condition
     {
         public HasPlayedCardThisTurnStep(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => For(Faction);
+        public override bool MeetCondition(GameSituation situation) => For(situation.Board, Faction);
 
         /// <summary>
         /// Whether the faction has already spent its play this turn step. Both a hand play
@@ -691,20 +693,20 @@ public abstract class Condition
         /// counter, so this is the single "the play is gone" test. Static so
         /// <see cref="IsPlayCardStep"/> can fold it in without allocating a condition per check.
         /// </summary>
-        public static bool For(Faction faction)
-            => GameFlow.Instance.CardsPlayedThisTurnStep.ContainsKey(faction)
-               && GameFlow.Instance.CardsPlayedThisTurnStep[faction] > 0;
+        public static bool For(BoardState board, Faction faction)
+            => board.CardsPlayedThisTurnStep.ContainsKey(faction)
+               && board.CardsPlayedThisTurnStep[faction] > 0;
     }
 
     public class IsFactionTurn : Condition
     {
         public IsFactionTurn(Faction faction) { this.Faction = faction; }
-        public override bool MeetCondition() => GameFlow.Instance.CurrentFaction == Faction;
+        public override bool MeetCondition(GameSituation situation) => situation.Board.CurrentFaction == Faction;
     }
 
     public class IsVictoryPointStep : Condition
     {
-        public override bool MeetCondition() => GameFlow.Instance.TurnStep == TurnStep.VICTORY_POINT;
+        public override bool MeetCondition(GameSituation situation) => situation.Board.TurnStep == TurnStep.VICTORY_POINT;
     }
 
     /// <summary>
@@ -732,9 +734,9 @@ public abstract class Condition
     /// </summary>
     public class IsPlayCardStep : Condition
     {
-        public override bool MeetCondition()
+        public override bool MeetCondition(GameSituation situation)
         {
-            if (GameFlow.Instance.TurnStep != TurnStep.PLAY_CARD)
+            if (situation.Board.TurnStep != TurnStep.PLAY_CARD)
                 return false;
 
             // CardLogic is set by Condition.Build, which every card trigger goes through. A bare
@@ -743,7 +745,7 @@ public abstract class Condition
             if (faction == Faction.NONE)
                 return true;
 
-            return !HasPlayedCardThisTurnStep.For(faction);
+            return !HasPlayedCardThisTurnStep.For(situation.Board, faction);
         }
     }
 
@@ -755,20 +757,20 @@ public abstract class Condition
 
     public class CustomCondition : Condition
     {
-        Func<bool> Condition;
+        Func<GameSituation, bool> Condition;
         private bool _requiresEventContext;
 
-        public CustomCondition(Func<bool> condition) => this.Condition = condition;
+        public CustomCondition(Func<GameSituation, bool> condition) => this.Condition = condition;
 
         /// <summary>
-        /// Marks this predicate as event-scoped: it inspects <c>CardPlayPool.CurrentReactionTrigger</c>
-        /// or the change-event pool, so the card may activate inside a reaction chain.
+        /// Marks this predicate as event-scoped: it inspects the situation's reaction trigger
+        /// or its event pool, so the card may activate inside a reaction chain.
         /// Without it, <see cref="CardLogic.CanBeActivated"/> rejects the card whenever ReactionDepth &gt; 0.
         /// </summary>
         public CustomCondition InReactionWindow() { _requiresEventContext = true; return this; }
 
         public override bool RequiresEventContext => _requiresEventContext;
-        public override bool MeetCondition() => Condition.Invoke();
+        public override bool MeetCondition(GameSituation situation) => Condition.Invoke(situation);
     }
 
     /// <summary>
@@ -776,7 +778,7 @@ public abstract class Condition
     /// <para>
     /// <b>Pool</b> (default): scans the full event pool — "did this happen this round?"<br/>
     /// Use for status card scoring and step conditions.<br/><br/>
-    /// <b>Immediate</b> (via <see cref="Immediately"/>): checks only <c>CardPlayPool.CurrentReactionTrigger</c> — "is the current reaction window triggered by this event?"<br/>
+    /// <b>Immediate</b> (via <see cref="Immediately"/>): checks only the situation's <c>ReactionTrigger</c> — "is the current reaction window triggered by this event?"<br/>
     /// Use in response card <c>CardTriggers()</c> for "immediately after X" reactions.
     /// </para>
     /// </summary>
@@ -793,10 +795,10 @@ public abstract class Condition
 
         public virtual bool IsMatch(ChangeEvent ce) => false;
 
-        public override bool MeetCondition() =>
+        public override bool MeetCondition(GameSituation situation) =>
             _scope == ConditionScope.Immediate
-                ? IsMatch(CardPlayPool.CurrentReactionTrigger)
-                : CardPlayPool.ChangeEventsPool.Any(IsMatch);
+                ? IsMatch(situation.ReactionTrigger)
+                : situation.Pool.Any(IsMatch);
     }
 
     public Condition WithCountries(List<int> countryIds)

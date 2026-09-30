@@ -12,8 +12,8 @@ public partial class ResponseRasputitsa : ResponseCardLogic
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.CustomCondition(()=>{
-                var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
+            Condition.Build(new Condition.CustomCondition(s => {
+                var trigger = s.ReactionTrigger as DeployUnitChangeEvent;
                 if (trigger == null) return false;
                 if (StaticGameData.FactionTeamForFaction(trigger.TriggeringFaction) != FactionTeam.AXIS) return false;
                 if (trigger.UnitType != UnitType.ARMY) return false;
@@ -28,10 +28,10 @@ public partial class ResponseRasputitsa : ResponseCardLogic
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.Fixed(() => {
-                var trigger = CardPlayPool.CurrentReactionTrigger as DeployUnitChangeEvent;
+            new ResultStep(this, Choose.Fixed(c => {
+                var trigger = c.Situation.ReactionTrigger as DeployUnitChangeEvent;
                 if (trigger == null) throw new Exception("Reaction trigger is not a DeployUnitChangeEvent");
-                return new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE);
+                return new RemoveUnitChangeEvent(Faction, trigger.UnitId, UnitRemovalReason.ELIMINATE, c.Board);
             }))
             .WithGuidance("Eliminate the Axis Army just built near Moscow")
         };

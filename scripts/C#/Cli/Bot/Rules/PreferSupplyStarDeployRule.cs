@@ -66,18 +66,18 @@ public sealed class PreferSupplyStarDeployRule : IBotRule
 
     /// <inheritdoc cref="PreferVacantDeployRule.AppliesTo"/>
     public bool AppliesTo(BotDecision decision)
-        => decision.Spec.OriginPurpose == PromptPurpose.DEPLOY_TARGET;
+        => decision.DeployTargets().Count > 0;
 
     public void Apply(BotDecision decision, IBotVerdictSink sink)
     {
-        FactionTeam enemyTeam = StaticGameData.OpponentFactionTeamForFaction(decision.Faction);
-
         for (int i = 0; i < decision.Options.Count; i++)
         {
             if (decision.Options[i].Kind != CliOptionKind.Country) continue;
+            if (!PreferVacantDeployRule.DeployingFaction(decision, decision.Options[i].Id, out Faction deployer)) continue;
 
             CountryState country = CountryState.ForId(decision.Options[i].Id);
             if (country == null) continue;
+            FactionTeam enemyTeam = StaticGameData.OpponentFactionTeamForFaction(deployer);
 
             // Enemy-held countries are not deploy targets under CountryState.CanRecruit, so this should
             // never fire. It is here because VpDeltaOfDeploy answers the hypothetical it is asked without
@@ -86,7 +86,7 @@ public sealed class PreferSupplyStarDeployRule : IBotRule
             // every future prompt to have filtered for us.
             if (country.OccupyingTeam == enemyTeam) continue;
 
-            int vpPerTurn = VpMath.VpDeltaOfDeploy(country, decision.Faction);
+            int vpPerTurn = VpMath.VpDeltaOfDeploy(country, deployer);
 
             // Skipping zero rather than scoring it: a zero score changes no ranking but does count as a
             // firing in this rule's stats, and "scored 400 times, none of them meaningfully" is exactly

@@ -10,25 +10,25 @@ public partial class EWB29Superfortress : EWCardLogic
     /// PathFindingService range test the condition always did — extracted so <see cref="Targets"/>
     /// can show WHICH piece is arming it, which is the one thing the card text does not tell you.
     /// </summary>
-    private List<UnitState> QualifyingUnits() =>
-        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+    private List<UnitState> QualifyingUnits(BoardState board) =>
+        board.ActiveUnits(Faction)
             .Where(us => us.Type == UnitType.ARMY)
-            .Where(us => PathFindingService.IsWithinGeographicDistance(us.CountryId, (int)Country.Germany, 3))
+            .Where(us => PathFindingService.IsWithinGeographicDistance(board.CountryOf(us), (int)Country.Germany, 3))
             .ToList();
 
-    private bool QualifyingUnitExists() => QualifyingUnits().Count > 0;
+    private bool QualifyingUnitExists(BoardState board) => QualifyingUnits(board).Count > 0;
 
     /// <summary>The pieces arming this card, and the home space they are bombing.</summary>
     public override TargetSet Targets() =>
-        TargetSet.Units(QualifyingUnits())
+        TargetSet.Units(QualifyingUnits(BoardState.Live))
             .Plus(TargetSet.Countries(new List<Country> { Country.Germany }));
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.Fixed(() => new ForceDiscardCardsChangeEvent(Faction, Faction.GERMANY, 5)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(QualifyingUnitExists), this))
+            new ResultStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction.GERMANY, 5)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => QualifyingUnitExists(s.Board)), this))
             .WithGuidance("Germany must discard 5 cards")
         };
     }

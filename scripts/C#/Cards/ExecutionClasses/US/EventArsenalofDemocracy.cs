@@ -19,8 +19,8 @@ public partial class EventArsenalofDemocracy : EventCardLogic
     /// US, which is why the preview lights UK build spaces.
     /// </summary>
     public override TargetSet Targets() =>
-        TargetSet.Countries(CountryState.BuildableLand(targetFaction))
-            .Plus(TargetSet.Countries(CountryState.BuildableSea(targetFaction)));
+        TargetSet.Countries(BoardState.Live.BuildableLand(targetFaction))
+            .Plus(TargetSet.Countries(BoardState.Live.BuildableSea(targetFaction)));
 
     public override List<CardStep> OnActivate()
     {
@@ -28,20 +28,20 @@ public partial class EventArsenalofDemocracy : EventCardLogic
         {
             // Step 1: show ALL buildable countries (both land and sea); player chooses order.
             new ResultStep(this, Choose.CountryFrom(
-                    () => CountryState.BuildableLand(targetFaction).ToCountryIds().Concat(CountryState.BuildableSea(targetFaction).ToCountryIds()).ToList(),
-                    countryId => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() =>
-                CountryState.BuildableLand(targetFaction).Any() || CountryState.BuildableSea(targetFaction).Any()), this))
+                    c => c.Board.BuildableLand(targetFaction).ToCountryIds().Concat(c.Board.BuildableSea(targetFaction).ToCountryIds()).ToList(),
+                    (countryId, _) => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                s.Board.BuildableLand(targetFaction).Any() || s.Board.BuildableSea(targetFaction).Any()), this))
             .WithGuidance("United Kingdom builds an Army or a Navy (choose order)"),
             // Step 2: show only the other type to complete the pair.
-            new ResultStep(this, Choose.CountryFrom(previous => BuiltArmy(previous)
-                    ? CountryState.BuildableSea(targetFaction).ToCountryIds()
-                    : CountryState.BuildableLand(targetFaction).ToCountryIds(),
+            new ResultStep(this, Choose.CountryFrom(c => BuiltArmy(c.Previous)
+                    ? c.Board.BuildableSea(targetFaction).ToCountryIds()
+                    : c.Board.BuildableLand(targetFaction).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => {
                 var buildable = BuiltArmy(FirstStepOutcome)
-                    ? CountryState.BuildableSea(targetFaction)
-                    : CountryState.BuildableLand(targetFaction);
+                    ? s.Board.BuildableSea(targetFaction)
+                    : s.Board.BuildableLand(targetFaction);
                 return buildable.Any();
             }), this))
             .WithGuidance("United Kingdom builds the other unit type"),

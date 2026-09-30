@@ -9,20 +9,20 @@ public partial class EventPlunder_Italy : EventCardLogic
     /// The pieces that score. Read by both the step and <see cref="Targets"/>, so hovering the card
     /// lights exactly the units it is about to count.
     /// </summary>
-    private List<UnitState> ScoringUnits =>
-        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-            .Where(unitState => unitState.CountryState.Country != Country.Italy)
+    private List<UnitState> ScoringUnits(BoardState board) =>
+        board.ActiveUnits(Faction)
+            .Where(unitState => board.CountryStateOf(unitState).Country != Country.Italy)
             .ToList();
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep>
         {
-            new ResultStep(this, Choose.Fixed(() => {
+            new ResultStep(this, Choose.Fixed(c => {
                 FactionState factionState = FactionState.ForEnum(Faction);
-                int score = ScoringUnits.Count;
+                int score = ScoringUnits(c.Board).Count;
                 return new ScorePointsChangeEvent(new VPEntry(score, $"{factionState.FactionData.FactionAdjactiveLabel} armies and navies outside Italy"), Faction);
             }))
         }; 

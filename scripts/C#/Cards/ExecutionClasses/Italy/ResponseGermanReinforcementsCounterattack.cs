@@ -10,8 +10,8 @@ public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLog
     protected override List<Condition> CardTriggers()
     {
         return new List<Condition> {
-            Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)
+            Condition.Build(new Condition.CustomCondition(s => {
+                if (s.ReactionTrigger is RemoveUnitChangeEvent removeEvent)
                     return removeEvent.UnitState.Faction == Faction.ITALY
                         && removeEvent.UnitState.Type == UnitType.ARMY
                         && removeEvent.WasInSupply;
@@ -23,14 +23,14 @@ public partial class ResponseGermanReinforcementsCounterattack : ResponseCardLog
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new ResultStep(this, Choose.Fixed(() => {
-                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)
+            new ResultStep(this, Choose.Fixed(c => {
+                if (c.Situation.ReactionTrigger is RemoveUnitChangeEvent removeEvent)
                     return new DeployUnitChangeEvent(Faction.GERMANY, removeEvent.CountryId, DeployType.RECRUIT);
                 return null;
             }))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(() => {
-                if (CardPlayPool.CurrentReactionTrigger is RemoveUnitChangeEvent removeEvent)
-                    return CountryState.ForId(removeEvent.CountryId).Tags.Has(Tag.Recruitable, Faction.GERMANY);
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => {
+                if (s.ReactionTrigger is RemoveUnitChangeEvent removeEvent)
+                    return s.Board.Of(CountryState.ForId(removeEvent.CountryId)).Tags.Has(Tag.Recruitable, Faction.GERMANY);
                 return false;
             }), this))
             .WithGuidance("Recruit a German Army in the space where the Italian Army was removed")

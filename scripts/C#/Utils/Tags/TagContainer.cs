@@ -21,8 +21,10 @@ using System.Threading;
 /// reader sees a value from before or after a concurrent write, never a torn one.
 ///
 /// Events fire OUTSIDE the atomic update and only on a real transition, matching the old behaviour.
+///
+/// Plain data, not a Node: it lives in a <see cref="BoardRecord"/>, and a forked board copies it.
 /// </summary>
-public partial class TagContainer : Node
+public class TagContainer
 {
     private static readonly int TagCount = Enum.GetValues<Tag>().Length;
 
@@ -35,6 +37,23 @@ public partial class TagContainer : Node
 
     public event Action<Tag, Faction> TagAdded;
     public event Action<Tag, Faction> TagRemoved;
+
+    /// <summary>Every set (tag, faction) bit the filter admits, for comparing two boards.</summary>
+    public string Digest(Func<Tag, bool> include)
+    {
+        List<string> set = new();
+        for (int tag = 0; tag < TagCount; tag++)
+            if (_bits[tag] != 0 && include((Tag)tag)) set.Add($"{(Tag)tag}:{_bits[tag]:X}");
+        return string.Join(",", set);
+    }
+
+    /// <summary>A copy of the bits with no subscribers: a forked board's tags must never drive visuals.</summary>
+    public TagContainer CloneBits()
+    {
+        TagContainer copy = new();
+        Array.Copy(_bits, copy._bits, TagCount);
+        return copy;
+    }
 
     /// <summary>
     /// Adds a tag for a specific faction.

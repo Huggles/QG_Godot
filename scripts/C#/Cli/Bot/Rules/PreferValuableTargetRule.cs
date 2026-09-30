@@ -40,7 +40,7 @@ public sealed class PreferValuableTargetRule : IBotRule
     private static void ScorePlays(BotDecision decision, CardStep step, IBotVerdictSink sink)
     {
         IReadOnlyList<int> candidates;
-        try { candidates = step.PossiblePlays(step.PreviousOutcome); }
+        try { candidates = step.PossiblePlays(StepContext.Live(step.PreviousOutcome)); }
         catch (System.Exception) { return; }
         if (candidates == null) return;
 
