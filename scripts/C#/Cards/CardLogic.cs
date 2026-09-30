@@ -283,7 +283,6 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
         // Safety net: DoCard releases the binding when the card's steps finish, but an activation
         // abandoned mid-way (exception, aborted epoch) would otherwise leave it dangling.
         ActivationTrigger = null;
-        IsBlocked = false;
     }
 
     /// <summary>
@@ -304,7 +303,7 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// recycled mid-turn be used a second time in the same turn. See the note on CardState.IsRevealed,
     /// which is re-hidden for exactly the same reason this re-arms, and by the same event.
     ///
-    /// IsBlocked is likewise left alone — OnNewTurnStarted clears it, and lifting a block the moment a
+    /// IsBlocked is likewise left alone — ChangeRoundChangeEvent clears it, and lifting a block the moment a
     /// card moves piles would let a blocked card's remaining steps run in DoCard's loop.
     ///
     /// Ordering an in-round caller must respect: a card re-armed while it is still in the live

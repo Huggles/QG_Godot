@@ -50,8 +50,11 @@ public partial class PlayCardChangeEvent : ChangeEvent
     /// because it bumps CardsPlayedThisTurnStep and stamps PlayedInTurn, both of which card conditions
     /// read. Whatever the card then DOES arrives as its own nested ChangeEvents, each carrying its own
     /// scope — a card that deploys a unit raises a DeployUnitChangeEvent, and that one is Board.
+    /// A Status card also registers its modifier, which can change supply itself (Scorched Earth).
     /// </summary>
-    public override RecalcScope RecalcScope => RecalcScope.Decks | RecalcScope.Flow;
+    public override RecalcScope RecalcScope => SourceCardState.CardData.CardType == CardType.STATUS
+        ? RecalcScope.All
+        : RecalcScope.Decks | RecalcScope.Flow;
 
     public override string SummaryText() =>
         SourceCardState.CardData.CardType == CardType.RESPONSE ? 

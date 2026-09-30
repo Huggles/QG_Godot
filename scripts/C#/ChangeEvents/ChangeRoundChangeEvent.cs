@@ -27,6 +27,9 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
             unit.ImmuneForTurn   = false;
             unit.SuppliedForTurn = false;
         }
+
+        foreach (CardRecord card in board.CardRecords)
+            card.IsBlocked = false;
     }
 
     protected override Task OnLiveMutatedAsync()

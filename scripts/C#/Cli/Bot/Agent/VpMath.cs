@@ -130,18 +130,28 @@ public static class VpMath
     /// </summary>
     public static int SupplyStarVpRate(FactionTeam team) => SupplyStarVpRate(team, BoardState.Live);
 
-    /// <summary>The board half of the rate on <paramref name="board"/>.</summary>
+    /// <summary>
+    /// The board half of the rate on <paramref name="board"/>. Only units in supply count: every
+    /// faction's supply step removes the rest before its victory step scores, so a unit standing on a
+    /// star it cannot hold (Ukraine under Scorched Earth) earns nothing and does not dilute the payout.
+    /// </summary>
     public static int SupplyStarVpRate(FactionTeam team, BoardState board)
     {
         List<CountryState> countries = CountryState.AllCountryStates;
         if (countries == null) return 0;
 
         int total = 0;
+        Dictionary<Faction, int> supplied = new();
         for (int i = 0; i < countries.Count; i++)
         {
             CountryState country = countries[i];
-            if (country == null) continue;
-            total += TeamStarVpAt(country, board.UnitsIn(country), team);
+            if (country == null || !country.IsSupply) continue;
+
+            supplied.Clear();
+            foreach (KeyValuePair<Faction, int> occupant in board.UnitsIn(country))
+                if (UnitState.ForId(occupant.Value) is { } unit && board.InSupply(unit))
+                    supplied[occupant.Key] = occupant.Value;
+            total += TeamStarVpAt(country, supplied, team);
         }
         return total;
     }

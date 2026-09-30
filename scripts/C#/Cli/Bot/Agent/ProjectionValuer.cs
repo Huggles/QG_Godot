@@ -87,12 +87,21 @@ public static class ProjectionValuer
     /// </summary>
     public static double? ValueCard(int cardId, Faction faction)
     {
-        CardLogic card = CardState.ForId(cardId)?.CardLogic;
+        CardState state = CardState.ForId(cardId);
+        CardLogic card = state?.CardLogic;
         if (card == null) return null;
 
         List<StepOption> built = new();
         try
         {
+            // A Status card from hand is played onto the fork first: its modifier is its standing effect
+            // (Scorched Earth cuts supply). The card it spends is added back, as every play spends one.
+            if (card.IsStatus && BoardState.Live.ForFaction(state.Faction).Hand.Contains(cardId))
+            {
+                GameSituation played = PlayCard(cardId, Start(), faction, 0, built);
+                return played == null ? null : Value(played.Board, faction) + CardValue;
+            }
+
             GameSituation board = PlaySteps(card.CardSteps.Where(s => !s.StepFinished), Start(), faction, 0, built);
             return board == null ? null : Value(board.Board, faction);
         }
