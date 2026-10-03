@@ -118,6 +118,11 @@ public static class SceneFlow
             // announce their closure, and a stale name would carry into the next game's label.
             InputRequest.ClearAwaitingInput();
 
+            // Quitting mid play step leaves the round as CardPlayRound.Current. The next game's
+            // StartGame then routes its draws into it, its stale epoch throws AbortedEpochException
+            // (benign, so unlogged), and the new game stalls before the opening deal.
+            CardPlayPool.ClearPool();
+
             // A Steam-hosted session rides on a Steam lobby, so dropping the peer without releasing
             // the lobby would leave a stale entry in friends' lists and block the next host attempt
             // (the peer refuses to host on a lobby it does not own outright). Harmless no-op when
