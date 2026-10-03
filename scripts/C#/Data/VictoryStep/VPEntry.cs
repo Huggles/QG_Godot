@@ -29,28 +29,30 @@ public partial class VPEntry
     /// </summary>
     public Dictionary<int, int> SourceCountryVPs { get; set; }
 
+    /// <summary>The units that earned these points, as unit id to the VP floated over that unit. Null when no unit scored.</summary>
+    public Dictionary<int, int> SourceUnitVPs { get; set; }
+
     /// <remarks>
     /// Keep this the only constructor: System.Text.Json binds these parameters by name to round-trip
     /// through ScorePointsChangeEventDto, so each must keep its property's name and type.
     /// </remarks>
-    public VPEntry(int victoryPoints, string reason, Dictionary<int, int> sourceCountryVPs = null)
+    public VPEntry(int victoryPoints, string reason, Dictionary<int, int> sourceCountryVPs = null, Dictionary<int, int> sourceUnitVPs = null)
     {
         this.VictoryPoints = victoryPoints;
         this.Reason = reason;
         this.SourceCountryVPs = sourceCountryVPs;
+        this.SourceUnitVPs = sourceUnitVPs;
     }
 
     /// <summary>All the points shown on one country.</summary>
     public static VPEntry ForCountry(int victoryPoints, string reason, int countryId)
         => new VPEntry(victoryPoints, reason, new Dictionary<int, int> { [countryId] = victoryPoints });
 
-    /// <summary><paramref name="vpEach"/> per unit, each shown on the country it stands in.</summary>
-    public static VPEntry ForUnits(IEnumerable<UnitState> units, BoardState board, int vpEach, string reason)
+    /// <summary><paramref name="vpEach"/> per unit, each shown on the unit itself.</summary>
+    public static VPEntry ForUnits(IEnumerable<UnitState> units, int vpEach, string reason)
     {
-        Dictionary<int, int> byCountry = units
-            .GroupBy(board.CountryOf)
-            .ToDictionary(g => g.Key, g => g.Count() * vpEach);
-        return new VPEntry(byCountry.Values.Sum(), reason, byCountry);
+        Dictionary<int, int> byUnit = units.Distinct().ToDictionary(u => u.Id, _ => vpEach);
+        return new VPEntry(byUnit.Values.Sum(), reason, sourceUnitVPs: byUnit);
     }
 
     /// <summary><paramref name="vpEach"/> per distinct country, for cards that pay per occupied space rather than per unit.</summary>

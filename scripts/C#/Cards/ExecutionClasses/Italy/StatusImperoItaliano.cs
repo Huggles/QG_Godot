@@ -21,7 +21,7 @@ public partial class StatusImperoItaliano : StatusCardLogic, IVPModifier
 
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return VPEntry.ForUnits(ScoringUnits(board), board, 1, $"axis armies in {CountryState.ForEnum(scoringCountries[0]).Label}, {CountryState.ForEnum(scoringCountries[1]).Label} and {CountryState.ForEnum(scoringCountries[2]).Label}");
+        return VPEntry.ForUnits(ScoringUnits(board), 1, $"axis armies in {CountryState.ForEnum(scoringCountries[0]).Label}, {CountryState.ForEnum(scoringCountries[1]).Label} and {CountryState.ForEnum(scoringCountries[2]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

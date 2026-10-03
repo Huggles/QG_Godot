@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public partial class UnitScene : Node2D
 {   
@@ -191,6 +192,9 @@ public partial class UnitScene : Node2D
 
 	public void ShowOutOfSupply() => OutOfSupplyNode.Show();
 	public void HideOutOfSupply() => OutOfSupplyNode.Hide();
+
+	/// <summary>Floats the VP this unit just earned over it.</summary>
+	public Task ShowVpScore(int vp) => GetNode<VpScoreLabel>("%VpScoreLabel").Play(vp);
 
 	/// <summary>
 	/// The look of a unit sitting in the pool. CountryScene.RemoveUnit parks a removed unit at a fixed

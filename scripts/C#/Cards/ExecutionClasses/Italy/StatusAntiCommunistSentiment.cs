@@ -17,7 +17,7 @@ public partial class StatusAntiCommunistSentiment : StatusCardLogic, IVPModifier
 
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return VPEntry.ForUnits(ScoringUnits(board), board, 1, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} armies in {CountryState.ForEnum(scoringCountries[0]).Label} and {CountryState.ForEnum(scoringCountries[1]).Label}");
+        return VPEntry.ForUnits(ScoringUnits(board), 1, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} armies in {CountryState.ForEnum(scoringCountries[0]).Label} and {CountryState.ForEnum(scoringCountries[1]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

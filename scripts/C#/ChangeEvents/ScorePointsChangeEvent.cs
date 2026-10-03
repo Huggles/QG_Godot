@@ -28,31 +28,39 @@ public partial class ScorePointsChangeEvent : ChangeEvent
     }
 
     /// <summary>Points per source country, summed so two entries from one country show one number.</summary>
-    public Dictionary<int, int> VpBySourceCountryId => VPTurnSummary.victoryPointEntries
-        .Where(e => e.SourceCountryVPs != null)
-        .SelectMany(e => e.SourceCountryVPs)
+    public Dictionary<int, int> VpBySourceCountryId => SumBySource(e => e.SourceCountryVPs);
+
+    /// <summary>Points per scoring unit, summed the same way.</summary>
+    public Dictionary<int, int> VpBySourceUnitId => SumBySource(e => e.SourceUnitVPs);
+
+    private Dictionary<int, int> SumBySource(Func<VPEntry, Dictionary<int, int>> sources) => VPTurnSummary.victoryPointEntries
+        .Where(e => sources(e) != null)
+        .SelectMany(sources)
         .GroupBy(kv => kv.Key)
         .ToDictionary(g => g.Key, g => g.Sum(kv => kv.Value));
 
     public override void Mutate(BoardState board) => board.AddScore(VPTurnSummary.Faction, VPTurnSummary.TotalScore);
 
-    /// <summary>The score pause and the country labels run side by side; the event moves on once both are done.</summary>
+    /// <summary>The score pause and the VP labels run side by side; the event moves on once both are done.</summary>
     protected override async Task OnLiveMutatedAsync()
     {
         GameAPI.PresentScore(VPTurnSummary);
-        await Task.WhenAll(Task.Delay(GameSettings.DurationLong), ShowSourceCountryScores());
+        await Task.WhenAll(Task.Delay(GameSettings.DurationLong), ShowSourceScores());
     }
 
     /// <summary>
     /// Started here rather than queued as an AfterAnimation, which would only begin after the pause above.
     /// Same skip as EnqueueAnimations: OnLiveMutatedAsync also runs on a save replay and on a headless server.
     /// </summary>
-    private Task ShowSourceCountryScores()
+    private Task ShowSourceScores()
     {
         if (!PlayAnimations || GameContext.IsHeadless || ReplayContext.IsFastForwarding) return Task.CompletedTask;
 
-        return Task.WhenAll(VpBySourceCountryId
-            .Select(kv => CountryState.ForId(kv.Key).CountryScene?.ShowVpScore(kv.Value) ?? Task.CompletedTask));
+        IEnumerable<Task> countries = VpBySourceCountryId
+            .Select(kv => CountryState.ForId(kv.Key).CountryScene?.ShowVpScore(kv.Value) ?? Task.CompletedTask);
+        IEnumerable<Task> units = VpBySourceUnitId
+            .Select(kv => UnitState.ForId(kv.Key).UnitScene?.ShowVpScore(kv.Value) ?? Task.CompletedTask);
+        return Task.WhenAll(countries.Concat(units));
     }
 
     /// <summary>

@@ -22,7 +22,7 @@ public partial class EventPlunder_Italy : EventCardLogic
         {
             new ResultStep(this, Choose.Fixed(c => {
                 FactionState factionState = FactionState.ForEnum(Faction);
-                return new ScorePointsChangeEvent(VPEntry.ForUnits(ScoringUnits(c.Board), c.Board, 1, $"{factionState.FactionData.FactionAdjactiveLabel} armies and navies outside Italy"), Faction);
+                return new ScorePointsChangeEvent(VPEntry.ForUnits(ScoringUnits(c.Board), 1, $"{factionState.FactionData.FactionAdjactiveLabel} armies and navies outside Italy"), Faction);
             }))
         }; 
     }

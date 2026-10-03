@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://dexhj3ccx1bay" path="res://scripts/C#/Input/ClickableTextureRect.cs" id="4_uddu0"]
 [ext_resource type="Material" uid="uid://kvokyv2saed0" path="res://BlinkingMaterial.tres" id="5_3bedt"]
 [ext_resource type="Texture2D" uid="uid://cgx3wjhrptpt5" path="res://assets/textures/Other/Target_Unit.png" id="6_3bedt"]
+[ext_resource type="PackedScene" path="res://scenes/World/VpScoreLabel.tscn" id="7_vpscr"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n4c3c"]
 content_margin_left = 0.0
@@ -86,3 +87,6 @@ mouse_filter = 2
 texture = ExtResource("3_ided0")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="VpScoreLabel" parent="." unique_id=1739204119 instance=ExtResource("7_vpscr")]
+unique_name_in_owner = true

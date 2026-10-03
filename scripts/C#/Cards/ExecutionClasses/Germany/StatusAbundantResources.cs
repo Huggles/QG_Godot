@@ -18,7 +18,7 @@ public partial class StatusAbundantResources : StatusCardLogic, IVPModifier
 
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return VPEntry.ForUnits(ScoringUnits(board), board, 1, "armies on Ukraine, Kazakhstan and/or Russia");
+        return VPEntry.ForUnits(ScoringUnits(board), 1, "armies on Ukraine, Kazakhstan and/or Russia");
     }
 
     protected override List<Condition> CardTriggers()

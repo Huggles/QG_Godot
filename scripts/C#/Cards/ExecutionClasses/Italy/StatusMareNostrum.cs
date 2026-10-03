@@ -15,7 +15,7 @@ public partial class StatusMareNostrum : StatusCardLogic, IVPModifier
 
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return VPEntry.ForUnits(ScoringUnits(board), board, 1, $"all {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} navies on the board");
+        return VPEntry.ForUnits(ScoringUnits(board), 1, $"all {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} navies on the board");
     }
 
     protected override List<Condition> CardTriggers()

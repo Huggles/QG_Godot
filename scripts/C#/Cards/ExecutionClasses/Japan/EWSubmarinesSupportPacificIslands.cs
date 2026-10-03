@@ -27,7 +27,7 @@ public partial class EWSubmarinesSupportPacificIslands : EWCardLogic
             new ResultStep(this, Choose.Fixed(c => {
                 int count = ScoringUnits(c.Board).Count;
                 return count == 0 ? null
-                    : new ScorePointsChangeEvent(VPEntry.ForUnits(ScoringUnits(c.Board), c.Board, 2, "Japanese Navies in or adjacent to East Pacific"), Faction);
+                    : new ScorePointsChangeEvent(VPEntry.ForUnits(ScoringUnits(c.Board), 2, "Japanese Navies in or adjacent to East Pacific"), Faction);
             })),
 
             new ResultStep(this, Choose.Fixed(c => ScoredBy(c.Previous) == 0 ? null
