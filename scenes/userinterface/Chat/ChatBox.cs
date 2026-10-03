@@ -9,7 +9,7 @@ public partial class ChatBox : PanelContainer
 {
     private const double ShowSeconds = 5.0;
     private const double FadeSeconds = 0.25;
-    private const int MaxLines = 200;
+    private const int MaxLines = 100;
 
     private static readonly Color TeamColor = new("#7fd67f");
     private static readonly Color OwnNameColor = new("#ffd27f");
