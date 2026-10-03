@@ -40,22 +40,8 @@ public partial class UnitScene : Node2D
 		return unitSceneInstance;
 	}
 
-	/// <summary>
-	/// TargetSprite's authored scale, captured before anything shrinks it, so the subdued mode is
-	/// defined relative to whatever Unit.tscn says rather than to a duplicated constant.
-	/// </summary>
-	private Vector2 defaultTargetScale;
-
-	/// <summary>
-	/// How much smaller a rebuild-in-place target is drawn than an ordinary one. Well under half: the
-	/// country's own full-size marker is still on screen beside it, and at 0.6 the two read as the same
-	/// kind of target.
-	/// </summary>
-	private const float SubduedTargetScaleFactor = 0.45f;
-
 	public override void _Ready()
 	{
-		defaultTargetScale = TargetSprite.Scale;
 		SetSprite();
 		SetUnclickable();
 		if (UnitState.CountryId >= 0 && !UnitState.InSupply)
@@ -74,27 +60,13 @@ public partial class UnitScene : Node2D
 		if (!UnitState.IsDeployedToCountry) ResetToPoolState();
 	}
 	/// <summary>
-	/// One sprite, two answers. Ordinarily the target on a unit means "pick this unit". When it is the
-	/// rebuild-in-place marker instead, the thing being chosen is the COUNTRY the unit stands on — the
-	/// deploy targets a space, and the unit is only how that space is pointed at while occupied.
-	///
-	/// Read off the tags at click time rather than cached in a field: both tags are raised and cleared
-	/// by the selection handlers, and a cached flag is one more thing that can be left stale by a
-	/// handler that unwinds. Tag.Clickable wins if somehow both are set — being asked for a unit is the
-	/// more specific request.
+	/// Read off the tag at click time rather than cached: the same marker is drawn for previews and
+	/// the focus view, which must not answer a unit selection.
 	/// </summary>
 	private void OnMouseLeftClickOpaque()
 	{
 		if (UnitState.Tags.Has(Tag.Clickable, Faction.ALL))
-		{
 			EventBus.Emit(EventBus.SignalName.UnitClicked, this.UnitState.Id);
-			return;
-		}
-
-		if (UnitState.Tags.Has(Tag.RebuildTarget, Faction.ALL))
-		{
-			EventBus.Emit(EventBus.SignalName.CountryClicked, this.UnitState.CountryId);
-		}
 	}
 
 	private void SetSprite()
@@ -106,27 +78,12 @@ public partial class UnitScene : Node2D
 	public void SetClickable()
 	{
 		UpdateMarkerVisibilityLayer();
-		TargetSprite.Scale = defaultTargetScale;
 		TargetSprite.ShowSprite();
 		TargetSprite.SetClickable();
 	}
 
-	/// <summary>
-	/// Mark this unit as the rebuild-in-place deploy target for the country it stands on: smaller and
-	/// fainter than an ordinary target, because being able to build onto a space you already hold is
-	/// the rare option and must not read as loudly as the ordinary ones beside it.
-	/// </summary>
-	public void SetRebuildTarget()
-	{
-		UpdateMarkerVisibilityLayer();
-		TargetSprite.Scale = defaultTargetScale * SubduedTargetScaleFactor;
-		TargetSprite.ShowSprite();
-		TargetSprite.SetClickableSubdued();
-	}
-
 	/// <summary>True while this unit is an actually-offered selection target.</summary>
-	private bool IsOfferedTarget =>
-		UnitState.Tags.Has(Tag.Clickable, Faction.ALL) || UnitState.Tags.Has(Tag.RebuildTarget, Faction.ALL);
+	private bool IsOfferedTarget => UnitState.Tags.Has(Tag.Clickable, Faction.ALL);
 
 	/// <summary>True while the player is hovering a card that could affect this unit.</summary>
 	private bool IsPreviewTarget => UnitState.Tags.Has(Tag.PreviewTarget, Faction.ALL);
@@ -162,11 +119,8 @@ public partial class UnitScene : Node2D
 	{
 		UpdateMarkerVisibilityLayer();
 
-		// An offered target owns its own styling — SetClickable and SetRebuildTarget draw the ordinary
-		// and the subdued variant, and a preview restyle would flatten the difference.
+		// An offered target owns its own styling (SetClickable); a preview restyle would flatten it.
 		if (IsOfferedTarget) return;
-
-		TargetSprite.Scale = defaultTargetScale;
 
 		// A unit off the board shows nothing whatever tags are still on it. A focus mark raised in a
 		// block window outlives the removal that window was about, and ResetToPoolState comes through
@@ -220,10 +174,6 @@ public partial class UnitScene : Node2D
 		{
 			Callable.From(SetClickable).CallDeferred();
 		}
-		else if (tag == Tag.RebuildTarget)
-		{
-			Callable.From(SetRebuildTarget).CallDeferred();
-		}
 		else if (tag == Tag.PreviewTarget)
 		{
 			Callable.From(SetPreviewTarget).CallDeferred();
@@ -244,7 +194,7 @@ public partial class UnitScene : Node2D
 
 	private void OnTagRemoved(Tag tag, Faction faction)
 	{
-		if (tag == Tag.Clickable || tag == Tag.RebuildTarget)
+		if (tag == Tag.Clickable)
 		{
 			Callable.From(SetUnclickable).CallDeferred();
 		}

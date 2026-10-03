@@ -9,9 +9,8 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
     List<int> countryIds;
 
     /// <summary>
-    /// The faction being asked. Only used to find its own units standing on the offered countries — a
-    /// country it already occupies is a legal deploy target ("build that army again"), and the marker
-    /// for that goes on the unit rather than only on the empty country slot. Faction.NONE skips it.
+    /// The faction being asked. Only used to find offered countries it already occupies — a legal
+    /// deploy target ("build that army again") that the country draws subdued. Faction.NONE skips it.
     /// </summary>
     Faction selectingFaction;
 
@@ -46,15 +45,13 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
         void onSkip() { tcs.TrySetResult(-1); }
 
         // Captured up front: the deploy that follows can move units, and the finally below has to clear
-        // the tags off exactly the countries and units they were raised on.
+        // the tag off exactly the countries it was raised on.
         List<CountryState> rebuildCountries = RebuildTargetCountries();
-        List<int> rebuildUnitIds = rebuildCountries.Select(country => country.Units[selectingFaction]).ToList();
 
         // RebuildTarget BEFORE Clickable: adding Clickable is what makes CountryScene draw the marker,
         // and it reads this tag to decide whether to draw the ordinary or the subdued one.
         rebuildCountries.AddTag(Tag.RebuildTarget, Faction.ALL);
         CountryState.ForIds(countryIds).AddTag(Tag.Clickable, Faction.ALL);
-        UnitState.ForIds(rebuildUnitIds).AddTag(Tag.RebuildTarget, Faction.ALL);
 
         if (rebuildCountries.Count > 0)
         {
@@ -90,7 +87,6 @@ public partial class SelectCountryHandler : IGameEventHandler<int>
                 // rebuild target as an ordinary one on the way out.
                 CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
                 rebuildCountries.RemoveTag(Tag.RebuildTarget, Faction.ALL);
-                UnitState.ForIds(rebuildUnitIds).RemoveTag(Tag.RebuildTarget, Faction.ALL);
                 InputManager.Current.DisableRayTraceCasting();
             }
         }
