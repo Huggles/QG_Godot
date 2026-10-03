@@ -601,13 +601,10 @@ public partial class GameFlow : SingletonNode<GameFlow>
     private static bool HasPendingInput => NetworkApi.Instance?.HasPendingInput == true;
 
     /// <summary>
-    /// The counter to persist, so that a single resume mechanism — advance one step — lands correctly
-    /// for both checkpoints.
-    ///
-    /// At a quiescent boundary the recorded step has completed, so the resume runs the NEXT one. At an
-    /// initial-decision checkpoint the current step has not really started, so the previous counter is
-    /// stored and the resume re-runs THIS step, re-issuing its prompt. This one line is the whole
-    /// reason two resume modes do not need two mechanisms.
+    /// The counter to persist. At a quiescent boundary the recorded step has completed, so the resume
+    /// advances to the NEXT one. At an initial-decision checkpoint the previous counter is stored —
+    /// the format every existing save already has — and ApplyFlowSnapshot adds the one back, because
+    /// that resume re-runs the step in place (RestartStepBody) instead of advancing into it.
     /// </summary>
     private int SaveStepCounter => IsAtStepStart ? TurnStepCounter - 1 : TurnStepCounter;
 
@@ -645,8 +642,12 @@ public partial class GameFlow : SingletonNode<GameFlow>
         TurnStep    = snapshot.TurnStep;
         MaxRound    = snapshot.MaxRound;
 
+        // A ReRunCurrentStep save stores the counter one lower (SaveStepCounter), but RestartStepBody
+        // re-runs the step in place rather than advancing into it. Restoring the stored value made the
+        // next advance land on the same step again, so the resumed step ran twice.
+        int counter = resume == ResumeMode.ReRunCurrentStep ? snapshot.TurnStepCounter + 1 : snapshot.TurnStepCounter;
         _suppressStepHandler = true;
-        try { TurnStepCounter = snapshot.TurnStepCounter; }
+        try { TurnStepCounter = counter; }
         finally { _suppressStepHandler = false; }
 
         CardsPlayedThisTurnStep = new Dictionary<Faction, int>(snapshot.CardsPlayedThisTurnStep);

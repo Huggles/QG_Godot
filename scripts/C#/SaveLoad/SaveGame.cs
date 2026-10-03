@@ -110,8 +110,8 @@ public class GameFlowSnapshot
 
     /// <summary>
     /// The step counter to restore. NOT simply the live value: it is stored one lower for
-    /// <see cref="ResumeMode.ReRunCurrentStep"/> so that a single resume mechanism — advance one step —
-    /// lands correctly for both resume modes. See GameFlow.SaveStepCounter.
+    /// <see cref="ResumeMode.ReRunCurrentStep"/>, and GameFlow.ApplyFlowSnapshot adds the one back
+    /// before re-running that step in place. See GameFlow.SaveStepCounter.
     /// </summary>
     public int TurnStepCounter { get; set; }
 
