@@ -61,13 +61,6 @@ public static class SceneFlow
             // Latent on the existing Quit-then-Host path; loading a save makes that round trip routine.
             if (from.Multiplayer?.MultiplayerPeer is { } peer)
             {
-                // Read the peer list BEFORE closing, while the ids still resolve to Steam ids. Closing
-                // the Godot peer does not close the SteamNetworkingMessages session underneath it, and
-                // a surviving session carries the old connection's peer identity into the next one —
-                // which is how a re-host ended up handing a client a peer id its own peer disagreed
-                // with, leaving it unable to click anything in the lobby. No-op for ENet.
-                SteamPeerFactory.ReleaseSession(peer, from.Multiplayer.GetPeers());
-
                 peer.Close();
                 from.Multiplayer.MultiplayerPeer = null;
             }

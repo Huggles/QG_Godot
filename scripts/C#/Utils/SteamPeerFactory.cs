@@ -1,5 +1,4 @@
 using Godot;
-using System.Collections.Generic;
 
 using GDExtension.Wrappers;
 
@@ -22,6 +21,25 @@ public static class SteamPeerFactory
 	public static bool IsSupported => ClassDB.ClassExists("SteamMultiplayerPeer");
 
 	/// <summary>
+	/// The one native peer this process ever creates; every session reuses it.
+	///
+	/// The GodotSteam peer subscribes to Steam's connection-status callbacks, and those are process
+	/// wide: every live peer object sees every connection, not just its own. A peer from a finished
+	/// session is not destroyed when it is closed and unassigned — a C# wrapper still references it
+	/// until the GC gets round to it — so it keeps reacting. On a rejoin it adopted the new connection
+	/// to the host and, once that connected, sent its own stale peer id down it. The host takes the
+	/// first id it hears, so it addressed the client by the previous session's id while the client's
+	/// live peer had generated a new one (see SessionIdentity). Closing alone cannot fix that, since the
+	/// callbacks only unregister when the native object is destroyed; reusing the instance means there
+	/// is never a second one to answer.
+	///
+	/// Reuse is supported by the peer itself: Close() returns it to CONNECTION_DISCONNECTED and the
+	/// next HostWithLobby / ConnectToLobby sets every field a session depends on, including a freshly
+	/// generated unique id for a client.
+	/// </summary>
+	private static SteamMultiplayerPeer _peer;
+
+	/// <summary>
 	/// Hosts on an existing Steam lobby. The lobby must already be created and owned by this client
 	/// — the peer asserts ownership internally — so <see cref="SteamworksApi.CreateLobbyAsync"/> has
 	/// to have completed first.
@@ -33,7 +51,7 @@ public static class SteamPeerFactory
 		Error result = peer.HostWithLobby(lobbyId);
 		if (result != Error.Ok)
 		{
-			peer.Free();
+			peer.Close();
 			error = $"Steam refused to host the lobby ({result}).";
 			return null;
 		}
@@ -53,49 +71,13 @@ public static class SteamPeerFactory
 		Error result = peer.ConnectToLobby(lobbyId);
 		if (result != Error.Ok)
 		{
-			peer.Free();
+			peer.Close();
 			error = $"Steam refused the connection ({result}).";
 			return null;
 		}
 
 		error = null;
 		return peer;
-	}
-
-	/// <summary>
-	/// Release the Steam networking sessions a peer was holding, before it is closed.
-	///
-	/// <c>MultiplayerPeer.Close()</c> tears down Godot's view of the connections; the Steam session
-	/// underneath each one lives on, and a later session between the same two users inherits its
-	/// state — including the peer identity the previous connection was using. That produced a re-host
-	/// in which the host addressed a client by the old session's id while the client's own peer had
-	/// generated a new one, so nothing in the lobby read as belonging to that client.
-	///
-	/// Call with the peer still open: the id → Steam id lookup is the peer's own map. A no-op for
-	/// anything that is not a Steam peer, which is every ENet session.
-	/// </summary>
-	public static void ReleaseSession(MultiplayerPeer peer, IEnumerable<int> peerIds)
-	{
-		if (peer == null || !IsSupported || SteamworksApi.Instance == null) return;
-
-		// By class rather than by `is`: the wrapper is a script attached to a GDExtension object, and
-		// the instance Godot hands back from MultiplayerPeer is not necessarily the managed wrapper the
-		// factory built. This is the same check Bind performs before it will attach.
-		if (!ClassDB.IsParentClass("SteamMultiplayerPeer", peer.GetClass())) return;
-
-		SteamMultiplayerPeer steamPeer = SteamMultiplayerPeer.Bind(peer);
-		if (steamPeer == null) return;
-
-		foreach (int peerId in peerIds)
-		{
-			// Guarded individually: one peer whose id no longer resolves must not stop the rest being
-			// released, and leaving even one session open reintroduces the bug this exists to prevent.
-			Guard.Try(() =>
-			{
-				long steamId = steamPeer.GetSteamIdForPeerId(peerId);
-				SteamworksApi.Instance.CloseNetworkingSessionWith(steamId);
-			}, $"SteamPeerFactory.ReleaseSession:{peerId}");
-		}
 	}
 
 	/// <summary>
@@ -122,12 +104,18 @@ public static class SteamPeerFactory
 			return false;
 		}
 
-		peer = SteamMultiplayerPeer.Instantiate();
-		if (peer == null)
+		if (_peer == null || !GodotObject.IsInstanceValid(_peer))
+			_peer = SteamMultiplayerPeer.Instantiate();
+		if (_peer == null)
 		{
 			error = "could not create the Steam peer.";
 			return false;
 		}
+
+		// Not every exit path closes it — the connect timeout on the friends screen only unassigns it —
+		// and the peer refuses to start a session while it still thinks it is in one. Idempotent.
+		_peer.Close();
+		peer = _peer;
 
 		if (GameSettings.IsDebugMultiplayer)
 			peer.DebugLevel = SteamMultiplayerPeer.DebugLevelEnum.Peer;

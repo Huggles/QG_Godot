@@ -335,22 +335,6 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		return (false, DescribeEnterResponse(response));
 	}
 
-	/// <summary>
-	/// Tear down the SteamNetworkingMessages session with one peer.
-	///
-	/// Closing the Godot MultiplayerPeer does NOT do this: the Steam-level session between the two
-	/// users survives, and with it the previous connection's peer identity, which a later session
-	/// between the same two users then inherits. That is how a re-host handed a client a peer id its
-	/// own peer disagreed with. Called from SceneFlow on the way out; see SteamPeerFactory.ReleaseSession.
-	/// </summary>
-	public void CloseNetworkingSessionWith(long remoteSteamId)
-	{
-		if (!_available || remoteSteamId == 0) return;
-
-		DebugUtilities.PrintPeerFinest($"Steam: closing networking session with {remoteSteamId}");
-		_steam.CloseSessionWithUser(remoteSteamId);
-	}
-
 	public void LeaveCurrentLobby()
 	{
 		if (!_available || CurrentLobbyId == 0) return;
