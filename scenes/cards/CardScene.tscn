@@ -34,7 +34,6 @@ size_flags_vertical = 4
 script = ExtResource("1_cjw5f")
 
 [node name="AspectRatioContainer" type="AspectRatioContainer" parent="." unique_id=966316439]
-custom_minimum_size = Vector2(250, 350)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,7 +45,6 @@ stretch_mode = 1
 
 [node name="Panel" type="Panel" parent="AspectRatioContainer" unique_id=1526256952]
 clip_children = 2
-custom_minimum_size = Vector2(250, 350)
 clip_contents = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pe5wv")
@@ -83,7 +81,6 @@ expand_mode = 5
 
 [node name="TextContainer" type="VBoxContainer" parent="AspectRatioContainer/Panel" unique_id=953166368]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 150)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -99,7 +96,6 @@ layout_mode = 2
 
 [node name="Title" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/TextInnerContainer" unique_id=483734299]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 30
@@ -112,7 +108,6 @@ autowrap_mode = 2
 
 [node name="Text" type="RichTextLabel" parent="AspectRatioContainer/Panel/TextContainer/TextInnerContainer" unique_id=1792087069]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme_override_colors/default_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/normal_font_size = 20

@@ -20,12 +20,8 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     private const float ScreenMargin = 10f;
 
     /// <summary>
-    /// Text column width when a card is shown — matched to the card so the two edges line up.
-    /// </summary>
-    private const float TextWidthWithCard = 250f;
-    /// <summary>
-    /// Text column width for a text-only entry. The whole popup is nothing but this line, so it wraps
-    /// narrower and the panel shrinks to fit rather than leaving a card's worth of empty space.
+    /// Narrowest the text column gets. With cards shown it widens to the card grid so the two edges
+    /// line up; a text-only entry wraps at this width and the panel shrinks to fit.
     /// </summary>
     private const float TextWidthAlone = 170f;
 
@@ -131,9 +127,10 @@ public partial class HistoryDetailPopup : Control, LoadableUI
 
         // Drives both the wrap width and, through it, the whole panel's width — the PanelContainer has
         // no minimum of its own, so a text-only entry collapses to just this column plus the margins.
-        // The card row is wider than this whenever it holds anything, so it wins the width on its own.
+        int cardsShown = (CardSceneNode.Visible ? 1 : 0) + targetsShown;
+        float gridWidth = CardRow.Columns * cardSize.X + CardGap * (CardRow.Columns - 1);
         SummaryLabel.CustomMinimumSize = new Vector2(
-            CardSceneNode.Visible || targetsShown > 0 ? TextWidthWithCard : TextWidthAlone, 0);
+            cardsShown > 0 ? Mathf.Max(TextWidthAlone, gridWidth) : TextWidthAlone, 0);
 
         // The sequence number is the same one on the badge, so a player can tie the popup back to the
         // entry they are pointing at. The stream id is debug-only: it is not what the badge shows.
@@ -175,7 +172,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     /// <summary>
     /// Pick CardRow's column count and the card size for <paramref name="count"/> cards so the grid
     /// fits between the screen edge and the badge. Tries every column count and keeps the one with
-    /// the largest cards; a single full-size row wins whenever it fits, as it always did.
+    /// the largest cards; a single full-size row wins whenever it fits.
     /// </summary>
     private Vector2 LayoutGrid(int count, Control badge)
     {
@@ -204,8 +201,8 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     }
 
     /// <summary>
-    /// Size is assigned as well as the minimum, because CardScene.RecalculateSizes scales its fonts
-    /// off Size and runs inside ShowCard — before the container lays the card out at the new size.
+    /// Size is assigned as well as the minimum so the card's first render is already at the right
+    /// scale; CardScene rescales itself on every later resize.
     /// </summary>
     private static void SetCardSize(CardScene card, Vector2 size)
     {

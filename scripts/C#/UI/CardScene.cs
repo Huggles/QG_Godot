@@ -135,6 +135,15 @@ public partial class CardScene : Control
 		RecalculateSizes();
 	}
 
+	/// <summary>
+	/// Rescale with every resize, so a card is drawn right at whatever size its container gives it —
+	/// ShowCard often runs before layout, while Size is still the scene's default 500x700.
+	/// </summary>
+	public override void _Notification(int what)
+	{
+		if (what == NotificationResized && IsNodeReady()) RecalculateSizes();
+	}
+
 	public void RecalculateSizes()
 	{
 		textInnerContainerNode.CustomMinimumSize = new Vector2(Size.X, DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale);
