@@ -227,6 +227,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
         try
         {
             DebugUtilities.PrintPeer("GameFlow: Starting game");
+            // Adopt the current epoch as the resume paths do: quitting an earlier game bumped it, and
+            // a fresh GameFlow's 0 would make StartNextStep drop every advance as stale.
+            stepEpoch = ErrorReporter.GameLoopEpoch;
             GameStateCalculator.Enabled = false;
             // Draw *to* the opening hand size, not a flat deal. A scenario's initialHandCards are
             // already in hand by now (SetupInitialGameState is awaited before StartGame in
