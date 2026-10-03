@@ -22,7 +22,7 @@ using Godot;
 [GlobalClass]
 public partial class BurnEffect : Node
 {
-	private static readonly Shader BurnShader = GD.Load<Shader>("res://assets/materials/shaders/Burn.gdshader");
+	public static readonly Shader BurnShader = GD.Load<Shader>("res://assets/materials/shaders/Burn.gdshader");
 
 	/// <summary>
 	/// What each node had on it before, so <see cref="Clear"/> can put it back. A card that is being
