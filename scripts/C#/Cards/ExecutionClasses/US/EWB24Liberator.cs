@@ -29,7 +29,7 @@ public partial class EWB24Liberator : EWCardLogic
         {
             new ResultStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction.ITALY, 4)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => QualifyingUnitExists(s.Board)), this))
-            .WithGuidance("Italy must discard 4 cards")
+            .WithGuidance("Make Italy discard 4 cards")
         };
     }
 }

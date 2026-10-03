@@ -26,11 +26,11 @@ public partial class ResponseRAF : ResponseCardLogic
         return new List<CardStep> {
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 removeEvent.UnitState.ImmuneForTurn = true;
-                PresentationServices.Notification.ShowActionText("RAF: UK piece will not be removed this turn", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays RAF: the UK piece will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
-            .WithGuidance("Do not remove your piece in or adjacent to the United Kingdom this turn")
+            .WithGuidance("Protect its piece in or adjacent to the United Kingdom from removal this turn")
         };
     }
 }

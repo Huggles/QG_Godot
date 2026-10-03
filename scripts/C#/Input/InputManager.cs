@@ -184,10 +184,8 @@ public partial class InputManager : Node2D
 	/// <paramref name="passCostText"/> — the same one the Skip button carries.
 	/// </param>
 	/// <param name="answering">
-	/// The factions the prompt answers for. Named in the banner when there is more than one, because a
-	/// merged window puts several factions' cards in one fan and "Choose an after reaction" alone does
-	/// not say whose chance this is — the player has to know which of their countries are being asked
-	/// before they read the cards.
+	/// The factions the prompt answers for, always named: a merged window puts several factions' cards in
+	/// one fan, and every banner line also lands in chat, where an unnamed prompt says nothing.
 	/// </param>
 	private static string BannerText(TriggerKind kind, bool hasOptions, bool isHandPlay = false,
 		string passCostText = null, List<Faction> answering = null)
@@ -206,7 +204,7 @@ public partial class InputManager : Node2D
 			_                 => hasOptions ? "Choose a card" : "No reaction available",
 		};
 
-		if (answering == null || answering.Count < 2) return text;
+		if (answering is not { Count: > 0 }) return text;
 		return $"{text} — {string.Join(", ", answering.Select(FactionLabel))}";
 	}
 

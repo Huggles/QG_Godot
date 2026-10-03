@@ -20,7 +20,7 @@ public partial class InputHandlerDiscardHand : Node
 
         string title = "Select card(s) to discard (or skip)";
 
-        PlayerActionLabel.ShowText(title, faction);
+        PlayerActionLabel.ShowText($"{title} — {faction.Label()}", faction);
         
         // Create presentation items for each card in hand
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(handCardIds, true);

@@ -110,7 +110,7 @@ public partial class MutatorReallocateResources : ActivatableMutator
             // PlayCardChangeEvent increments the same counter again, which is harmless —
             // CardsPlayedThisTurnStep is only ever tested > 0 and is cleared each round.
             new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithGuidance($"Discard {DiscardCost} cards to take a Build or Battle card from your deck and play it"),
+            .WithGuidance($"Discard {DiscardCost} cards to take a Build or Battle card from its deck and play it"),
 
             // Raises its own required selection and round-trips the picks to clients.
             new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost)))

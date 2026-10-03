@@ -128,6 +128,9 @@ public partial class GameAPI : Node
     {
         if(showDrawnCards)
         {
+            // On every peer, owner included: named, so it reads right whoever is looking.
+            PresentationServices.Notification.ShowActionText($"{faction.WithPlayer()} draws {numberOfCards} card(s)", faction);
+
             if(PresentationServices.Notification.LocalPlayerControls(faction))
             {
                 // Optionally show the cards that were drawn
@@ -136,23 +139,13 @@ public partial class GameAPI : Node
                 // only ever shown to the faction's own controller — naming them back at themselves is noise.
                 await PresentationServices.Notification.ShowModal(presentationItems, $"{faction.Label()} drew cards");
             }
-            else
-            {
-                string message = $"Drawing {numberOfCards} card(s)...";
-                PresentationServices.Notification.ShowActionText(message, faction);
-            }
-
         }
         EventBus.Emit(EventBus.SignalName.CardsDrawn, (int)faction, numberOfCards);
     }
 
     public static void PresentDiscardHand(Faction faction, List<int> cardIds)
     {
-        if(!PresentationServices.Notification.LocalPlayerControls(faction))
-        {
-            string message = $"{faction.WithPlayer()} discarded {cardIds.Count} card(s)...";
-            PresentationServices.Notification.ShowActionText(message, faction);
-        }
+        // No banner here: the discard events' own labels say it, and saying it twice doubled it in chat.
         DebugUtilities.PrintPeer($"Faction {faction} discards {cardIds.Count} card(s) from hand");
         EventBus.Emit(EventBus.SignalName.CardsDiscarded, (int)faction, cardIds.Count);
     }

@@ -36,7 +36,7 @@ public partial class StatusVolksturm : StatusCardLogic
                 // ShowDiscardModalAnimation for the same cards, and Apply awaits the animation
                 // queue — so showing it again here displayed the discard modal twice.
                 new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithGuidance("Recruit an army in Germany (in addition to your playstep)")
+            .WithGuidance("Recruit an army in Germany (in addition to its play step)")
             // Hollow when Germany already holds a German unit: the recruit redeploys the piece
             // standing there and the board is unchanged (see CountryState.CanBuild).
             .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit(recruitCountryIds[0], Faction)), this)),

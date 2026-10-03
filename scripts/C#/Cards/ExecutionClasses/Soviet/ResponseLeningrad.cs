@@ -24,11 +24,11 @@ public partial class ResponseLeningrad : ResponseCardLogic
         {
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 removeEvent.UnitState.ImmuneForTurn = true;
-                PresentationServices.Notification.ShowActionText($"{Faction.WithPlayer()} prevented the removal of his army in {CountryState.ForId(targetCountries[0])}", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Leningrad: its army in {CountryState.ForId(targetCountries[0]).Label} will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
-            .WithGuidance("Do not remove your Army in Russia this turn")
+            .WithGuidance("Protect its Army in Russia from removal this turn")
         };
     }
 }

@@ -35,7 +35,7 @@ public partial class ResponseSkilledPilots : ResponseCardLogic
             new BlockStep<ForceDiscardCardsChangeEvent>(this, async discardEvent => {
                 int newNumberOfCards = Math.Max(discardEvent.NumberOfCards - NumberOfCardsReduction, 0);
                 discardEvent.NumberOfCards = newNumberOfCards;
-                PresentationServices.Notification.ShowActionText($"Reduced the number of cards to discard by {NumberOfCardsReduction} to a total of {newNumberOfCards}", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Skilled Pilots: the discard is reduced by {NumberOfCardsReduction} to {newNumberOfCards} card(s)").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Nothing;
             })

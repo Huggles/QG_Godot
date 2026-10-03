@@ -83,7 +83,7 @@ public partial class StatusWomenConscripts : StatusCardLogic
                 // the mutator does the work once the step ends
                 return CardStepResult.Nothing;
             })
-            .WithGuidance("Place Build Army card on top of your draw deck at the end of this step")
+            .WithGuidance("Place the Build Army card on top of its draw deck at the end of this step")
         };
     }
 }

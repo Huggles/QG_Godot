@@ -21,11 +21,11 @@ public partial class ResponseBattleshipRepair : ResponseCardLogic
         return new List<CardStep> {
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 removeEvent.UnitState.ImmuneForTurn = true;
-                PresentationServices.Notification.ShowActionText("Battleship Repair: Japanese Navy will not be removed this turn", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Battleship Repair: the Japanese Navy will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
-            .WithGuidance("Do not remove your supplied Navy this turn")
+            .WithGuidance("Protect its supplied Navy from removal this turn")
         };
     }
 }

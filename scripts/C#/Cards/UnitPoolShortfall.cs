@@ -55,7 +55,7 @@ public static class UnitPoolShortfall
         // Explains the prompt that is about to appear. A PresentationEvent, so every peer sees why the
         // deploying faction is being asked something extra.
         await new ShowActionLabelPresentationEvent(
-            faction, $"No {unitType} left in the pool — remove one of your {unitType} units first").Apply();
+            faction, $"{faction.WithPlayer()} has no {unitType} left in the pool and must first remove one of its {unitType} units").Apply();
 
         // allowSkip: false — the removal is mandatory, so the prompt shows no Skip button. BroadCast can
         // still throw StepSkippedException (input timeout resolved as Skip, or error recovery releasing
@@ -125,7 +125,7 @@ public static class UnitPoolShortfall
 
         await new ShowActionLabelPresentationEvent(faction,
             $"{destination.Label} is no longer {(deployType == DeployType.BUILD ? "buildable" : "recruitable")} " +
-            "after the recall — choose another space").Apply();
+            $"after the recall, so {faction.WithPlayer()} must choose another space").Apply();
 
         // BroadCast throws StepSkippedException if the player skips, which abandons the deploy exactly
         // as a skipped recall already does. That leaves the recalled unit off the board — the same

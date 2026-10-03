@@ -45,9 +45,8 @@ public partial class ResponseTruk : ResponseCardLogic
             // step above: the card tells the table what it did whether or not anything needed the
             // supply, exactly as before.
             new EffectStep(this, async () => {
-                PresentationServices.Notification.ShowActionText("Truk: Japanese pieces in or adjacent to the Central Pacific are in supply this turn.", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Truk: Japanese pieces in or adjacent to the Central Pacific are in supply this turn").Apply();
                 await Task.Delay(GameSettings.DurationLong);
-                PresentationServices.Notification.HideActionText();
                 return CardStepResult.Nothing;
             })
         };

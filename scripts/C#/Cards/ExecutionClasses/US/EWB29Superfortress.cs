@@ -29,7 +29,7 @@ public partial class EWB29Superfortress : EWCardLogic
         {
             new ResultStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction.GERMANY, 5)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => QualifyingUnitExists(s.Board)), this))
-            .WithGuidance("Germany must discard 5 cards")
+            .WithGuidance("Make Germany discard 5 cards")
         };
     }
 }

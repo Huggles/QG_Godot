@@ -80,7 +80,7 @@ public partial class ResponseRationing : ResponseCardLogic
                 // the mutator does the work once the step ends
                 return CardStepResult.Nothing;
             })
-            .WithGuidance("Shuffle last played card into your draw deck at the end of this step")
+            .WithGuidance("Shuffle the last played card into its draw deck at the end of this step")
         };
     }
 }

@@ -64,7 +64,7 @@ public partial class StatusDiveBombers : StatusCardLogic
     {
         return new List<CardStep> {
             new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithGuidance("Battle the same or an adjacent country where you've battle this turn")
+            .WithGuidance("Battle the same or an adjacent country where it battled this turn")
             .WithCondition(()=>{
                 return Condition.Build(new Condition.CustomCondition(s =>
                     new Condition.CountryIsAttackable(battleTargetCountryIds(s), Faction).MeetCondition(s)), this); }),

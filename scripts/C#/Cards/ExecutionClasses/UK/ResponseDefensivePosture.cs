@@ -21,11 +21,11 @@ public partial class ResponseDefensivePosture : ResponseCardLogic
         return new List<CardStep> {
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 removeEvent.UnitState.ImmuneForTurn = true;
-                PresentationServices.Notification.ShowActionText("Defensive Posture: UK Army will not be removed this turn", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Defensive Posture: the UK Army will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
-            .WithGuidance("Do not remove your supplied Army this turn")
+            .WithGuidance("Protect its supplied Army from removal this turn")
         };
     }
 }

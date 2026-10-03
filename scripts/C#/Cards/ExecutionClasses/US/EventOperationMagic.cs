@@ -22,7 +22,7 @@ public partial class EventOperationMagic : EventCardLogic
                     new DiscardHandCardsChangeEvent(Faction, Faction.JAPAN, new List<int> { randomCardId })
                     .WithoutAnimations();
 
-                PresentationServices.Notification.ShowActionText("Operation Magic: A random Japanese Response card has been discarded.", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Operation Magic: a random Japanese Response card is discarded").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
 
                 return discardEvent;

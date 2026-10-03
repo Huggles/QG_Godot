@@ -25,7 +25,7 @@ public partial class EventMurmanskConvoy : EventCardLogic
             new ResultStep(this, Choose.CountryFrom(c => c.Board.BuildableLand(targetFaction).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(targetFaction), this))
-            .WithGuidance("Soviet Union may build an Army"),
+            .WithGuidance("Let the Soviet Union build an Army"),
         };
     }
 }

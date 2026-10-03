@@ -49,7 +49,7 @@ public partial class EventFlexibleResources : EventCardLogic
             })
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
                 PlayableDiscardedCardIds(s.Board).Count > 0), this))
-            .WithGuidance("Play a card of your choice from your discard pile"),
+            .WithGuidance("Play a card of its choice from its discard pile"),
 
             new PlayCardStep(this, () => Task.FromResult(CardStepResult.PlayCard(_selectedCardId)))
             .RequiringPreviousStep()

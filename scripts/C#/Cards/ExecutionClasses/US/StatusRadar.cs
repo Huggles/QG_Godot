@@ -47,12 +47,12 @@ public partial class StatusRadar : StatusCardLogic
             // off the removal this card exists to block.
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 removeEvent.UnitState.ImmuneForTurn = true;
-                PresentationServices.Notification.ShowActionText("Radar: US Navy will not be removed this turn", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Radar: the US Navy will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
             .RequiringPreviousStep()
-            .WithGuidance("Prevent your Navy from being removed")
+            .WithGuidance("Protect its Navy from removal")
         };
     }
 }

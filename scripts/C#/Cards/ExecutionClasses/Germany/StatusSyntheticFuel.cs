@@ -39,7 +39,7 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     {
         return new List<CardStep> {
             new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
-            .WithGuidance("Deploy an army adjacent to where you've deployed an army this turn"),
+            .WithGuidance("Deploy an army adjacent to where it deployed an army this turn"),
 
             new ResultStep(this, Choose.CountryFrom(c => DeployTargets(c.Situation).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))

@@ -35,7 +35,7 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     {
         return new List<CardStep> {
             new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithGuidance("Deploy an army in the country where you just battled"),
+            .WithGuidance("Deploy an army in the country where it just battled"),
 
             new ResultStep(this, Choose.Fixed(c => {
                 var trigger = TriggerContextAs<BattleCountryChangeEvent>(c.Situation);

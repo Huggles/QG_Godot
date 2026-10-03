@@ -21,11 +21,11 @@ public partial class ResponseDestroyers : ResponseCardLogic
         return new List<CardStep> {
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 removeEvent.UnitState.ImmuneForTurn = true;
-                PresentationServices.Notification.ShowActionText("Destroyers: Navy will not be removed this turn", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Destroyers: the Navy will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
-            .WithGuidance("Do not remove the supplied Navy this turn")
+            .WithGuidance("Protect the supplied Navy from removal this turn")
         };
     }
 }

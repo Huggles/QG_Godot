@@ -37,7 +37,7 @@ public partial class StatusGuards : StatusCardLogic
             // The card's gate lives on the FIRST step, which is also the one that spends the play.
             new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
             .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
-            .WithGuidance("Discard 2 cards from hand to play a Build Army card from your discard pile"),
+            .WithGuidance("Discard 2 cards from hand to play a Build Army card from its discard pile"),
 
             new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),

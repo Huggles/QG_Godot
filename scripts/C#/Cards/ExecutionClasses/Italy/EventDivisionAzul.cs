@@ -24,7 +24,7 @@ public partial class EventDivisionAzul : EventCardLogic
                     new DiscardHandCardsChangeEvent(Faction, Faction.SOVIET, new List<int> { randomCardId })
                     .WithoutAnimations();
 
-                PresentationServices.Notification.ShowActionText("Division Azul: A random Soviet Response card has been discarded.", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Division Azul: a random Soviet Response card is discarded").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
 
                 return discardEvent;

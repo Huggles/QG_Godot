@@ -48,7 +48,7 @@ public partial class StatusSuperiorPlanning : StatusCardLogic
                     new ReorderDeckChangeEvent(Faction, fullDeck) { ReorderedFromTop = peekCount };
                 return reorderEvent;
             })
-            .WithGuidance("Examine and reorder the top 4 cards of your draw deck")
+            .WithGuidance("Examine and reorder the top 4 cards of its draw deck")
         };
     }
 }

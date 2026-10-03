@@ -29,7 +29,7 @@ public partial class EWSBDDauntless : EWCardLogic
         {
             new ResultStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction.JAPAN, 4)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => QualifyingUnitExists(s.Board)), this))
-            .WithGuidance("Japan must discard 4 cards")
+            .WithGuidance("Make Japan discard 4 cards")
         };
     }
 }

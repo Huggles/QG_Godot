@@ -74,7 +74,9 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
         {
             List<ChangeEventAnimation> animations = new()
             {
-                new ShowNotificationLabelAnimation($"{TriggeringFaction.WithPlayer()} makes {TargetFaction.WithPlayer()} discard {NumberOfCards} cards", TriggeringFaction),
+                new ShowNotificationLabelAnimation(TriggeringFaction == TargetFaction
+                    ? $"{TargetFaction.WithPlayer()} discards {NumberOfCards} card(s)"
+                    : $"{TriggeringFaction.WithPlayer()} makes {TargetFaction.WithPlayer()} discard {NumberOfCards} card(s)", TriggeringFaction),
                 new ShowDiscardModalAnimation(DiscardedCardIds, "Discarded cards", TargetFaction)
             };
             if (UndischargedCards > 0)

@@ -37,9 +37,9 @@ public partial class ResponseASWTactics : ResponseCardLogic
             //
             // The old body dereferenced ActivationTrigger bare; BlockStep now does the cast, so a
             // mismatch is a logged no-op rather than a NullReferenceException that halts the turn.
-            new BlockStep<ChangeEvent>(this, blockedEvent => {
-                PresentationServices.Notification.ShowActionText("Axis EW card effect ignored", Faction);
-                return Task.FromResult(CardStepResult.BlockCard());
+            new BlockStep<ChangeEvent>(this, async blockedEvent => {
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays ASW Tactics: the Axis Economic Warfare card has no effect").Apply();
+                return CardStepResult.BlockCard();
             })
         };
     }

@@ -55,7 +55,7 @@ public partial class MutatorSyntheticFuelAnyFaction : ActivatableMutator
         return new List<CardStep> {
             new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2))
                 .OnChosen(_ => DebugUtilities.PrintPeer("MutatorSyntheticFuelAnyFaction react step")))
-            .WithGuidance("Deploy an army adjacent to where you've deployed an army this turn"),
+            .WithGuidance("Deploy an army adjacent to where it deployed an army this turn"),
 
             new ResultStep(this, Choose.CountryFrom(c => DeployTargets(c.Situation).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))

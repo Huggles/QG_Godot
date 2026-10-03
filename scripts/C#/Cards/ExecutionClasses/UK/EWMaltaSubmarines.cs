@@ -63,6 +63,6 @@ public partial class EWMaltaSubmarines : EWCardLogic
 
             return new ForceDiscardCardsChangeEvent(Faction, targetFaction, 2);
         })
-        .WithGuidance($"{targetFaction}: discard 2 cards or eliminate a Mediterranean Navy");
+        .WithGuidance($"Make {targetFaction.Label()} discard 2 cards or eliminate a Mediterranean Navy");
     }
 }

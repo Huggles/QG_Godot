@@ -31,7 +31,7 @@ public partial class StatusBravado : StatusCardLogic
     {
         return new List<CardStep> {
             new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithGuidance("Discard the top 2 cards of your draw deck to battle a land space"),
+            .WithGuidance("Discard the top 2 cards of its draw deck to battle a land space"),
 
             new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
             .RequiringPreviousStep(),

@@ -35,11 +35,11 @@ public partial class ResponseKwantungArmy : ResponseCardLogic
         return new List<CardStep> {
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 removeEvent.UnitState.ImmuneForTurn = true;
-                PresentationServices.Notification.ShowActionText("Kwantung Army: Japanese Army will not be removed this turn", Faction);
+                await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Kwantung Army: the Japanese Army will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
-            .WithGuidance("Do not remove your supplied Army in China, Szechuan, Mongolia, or Vladivostok")
+            .WithGuidance("Protect its supplied Army in China, Szechuan, Mongolia, or Vladivostok from removal")
         };
     }
 }

@@ -32,7 +32,7 @@ public partial class EventArsenalofDemocracy : EventCardLogic
                     (countryId, _) => new DeployUnitChangeEvent(targetFaction, countryId, DeployType.BUILD)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
                 s.Board.BuildableLand(targetFaction).Any() || s.Board.BuildableSea(targetFaction).Any()), this))
-            .WithGuidance("United Kingdom builds an Army or a Navy (choose order)"),
+            .WithGuidance("Let the United Kingdom build an Army or a Navy (choose order)"),
             // Step 2: show only the other type to complete the pair.
             new ResultStep(this, Choose.CountryFrom(c => BuiltArmy(c.Previous)
                     ? c.Board.BuildableSea(targetFaction).ToCountryIds()
@@ -44,7 +44,7 @@ public partial class EventArsenalofDemocracy : EventCardLogic
                     : s.Board.BuildableLand(targetFaction);
                 return buildable.Any();
             }), this))
-            .WithGuidance("United Kingdom builds the other unit type"),
+            .WithGuidance("Let the United Kingdom build the other unit type"),
         };
     }
 }

@@ -27,7 +27,7 @@ public partial class LandBattle : CardLogic
                     .Concat(AttackableArmies(c.Board).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
                 (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=> Condition.Build(new Condition.HasLandBattleTarget(Faction), this))
-            .WithGuidance("Select a army or empty land country to attack")
+            .WithGuidance("Select an army or empty land country to attack")
         }; 
     }
 }

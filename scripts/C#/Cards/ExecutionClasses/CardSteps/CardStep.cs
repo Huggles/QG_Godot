@@ -76,6 +76,20 @@ public abstract partial class CardStep : ITaggable
     [JsonIgnore] internal bool RequiresPreviousStep;
 
     [JsonIgnore] protected Faction TriggeringFaction => CardLogic.Faction;
+
+    /// <summary>
+    /// The guidance as a sentence about the card's faction, the same on every peer:
+    /// "Germany (Bob) may build an army in Ukraine". Guidance is therefore written as a base-form verb
+    /// phrase about that faction ("Build an army in …", "Protect its Navy …"), never as "you".
+    /// </summary>
+    private string GuidanceSentence(string verb)
+    {
+        if (string.IsNullOrEmpty(ActionGuidance)) return $"{TriggeringFaction.WithPlayer()} {verb} act";
+        string phrase = ActionGuidance.Length > 1 && char.IsLower(ActionGuidance[1])
+            ? char.ToLowerInvariant(ActionGuidance[0]) + ActionGuidance[1..]
+            : ActionGuidance;
+        return $"{TriggeringFaction.WithPlayer()} {verb} {phrase}";
+    }
     [JsonIgnore] protected List<Condition> Conditions => GetConditionsMethod?.Invoke();
 
     /// <summary>
@@ -209,7 +223,7 @@ public abstract partial class CardStep : ITaggable
             // a second, separate failure.
             if (PreviousStepRequirementMet && !string.IsNullOrEmpty(ActionGuidance))
             {
-                await new ShowActionLabelPresentationEvent(TriggeringFaction, "Unable to: " + ActionGuidance).Apply();
+                await new ShowActionLabelPresentationEvent(TriggeringFaction, GuidanceSentence("is unable to")).Apply();
                 await Task.Delay(GameSettings.DurationLong);
             }
             // No cascade to NextCardStep.Execute(). CardPlayRound.DoCard's while loop owns
@@ -231,7 +245,7 @@ public abstract partial class CardStep : ITaggable
                 // the handful of steps that never had a .WithGuidance at all from announcing
                 // themselves with an empty label.
                 if (!string.IsNullOrEmpty(ActionGuidance))
-                    await new ShowActionLabelPresentationEvent(TriggeringFaction, ActionGuidance).Apply();
+                    await new ShowActionLabelPresentationEvent(TriggeringFaction, GuidanceSentence("may")).Apply();
                 ErrorInjection.MaybeThrow(ErrorInjection.Site.CardStep, CardLogic?.CardState?.CardName);
                 await DispatchAsync(await RunCoreAsync());
                 StepSucceeded = true;
@@ -242,7 +256,7 @@ public abstract partial class CardStep : ITaggable
                 // abandoned (nothing is dispatched, so no change event fires); StepFinished is
                 // already true, so DoCard advances to the card's next step (if any).
                 DebugUtilities.PrintPeer("Player skipped step");
-                await new ShowActionLabelPresentationEvent(TriggeringFaction, "Skipped: " + ActionGuidance).Apply();
+                await new ShowActionLabelPresentationEvent(TriggeringFaction, GuidanceSentence("chose not to")).Apply();
             }
             catch (Exception e) when (!ErrorReporter.IsBenign(e))
             {
