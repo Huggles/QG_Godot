@@ -59,7 +59,7 @@ public partial class ChatService : Node
     /// A local-only line from the game itself; never networked, since every peer posts its own.
     /// Safe off the main thread, and a repeat of the line just before it is dropped.
     /// </summary>
-    public void PostGameMessage(string text)
+    public void PostGameMessage(string text, Color? color = null)
     {
         text = Sanitize(text, int.MaxValue);
         if (text.Length == 0) return;
@@ -67,7 +67,7 @@ public partial class ChatService : Node
         Callable.From(() =>
         {
             if (_history.Count > 0 && _history[^1] is { Kind: ChatMessageKind.Game } last && last.Text == text) return;
-            Deliver(new ChatMessage(0, null, ChatChannel.Global, text, false, ChatMessageKind.Game));
+            Deliver(new ChatMessage(0, null, ChatChannel.Global, text, false, ChatMessageKind.Game) { Color = color });
         }).CallDeferred();
     }
 

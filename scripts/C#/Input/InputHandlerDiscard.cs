@@ -26,7 +26,7 @@ public partial class InputHandlerDiscard
             ? $"Select {minimumDiscards} card(s) to discard"
             : "Select card(s) to discard (or skip)";
 
-        PlayerActionLabel.ShowText($"{title} — {faction.Label()}", faction);
+        PlayerActionLabel.ShowText($"{faction.Label()}: {title}", faction);
 
         // Create presentation items for each card in hand
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(cardIds, true);

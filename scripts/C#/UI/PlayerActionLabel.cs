@@ -96,9 +96,18 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	public static void ShowText(string text, int duration, Faction faction = (Faction)(-1)){
 		// A restore replays the whole game; only the prompt it resumes on, shown after, belongs in chat.
 		if (!ReplayContext.IsFastForwarding)
-			ChatService.Instance?.PostGameMessage(text);
+			ChatService.Instance?.PostGameMessage(text, ChatColorFor(faction));
 		Instance?.ShowTextForDuration(text, duration, faction);
 	}
+
+	/// <summary>
+	/// The faction's colour, lightened: several are too dark to read on the chat panel. Null for no
+	/// faction (e.g. "Waiting on …"), which leaves the chat's own grey.
+	/// </summary>
+	private static Color? ChatColorFor(Faction faction) =>
+		StaticGameData.FactionDataMap.TryGetValue(faction, out FactionData data)
+			? data.FactionColor.Lightened(0.35f)
+			: null;
 
 	public void ShowTextForDuration(string text, int duration = -1, Faction faction = (Faction)(-1))
 	{

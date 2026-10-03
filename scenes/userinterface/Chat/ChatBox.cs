@@ -2,12 +2,12 @@ using Godot;
 
 /// <summary>
 /// The in-game chat panel. Stays out of the way: it shows while hovered or typed in, and for
-/// <see cref="ShowSeconds"/> after a message arrives or the mouse leaves, then fades out. Once faded
-/// it is hidden outright, so it never swallows clicks meant for the board underneath.
+/// <see cref="GameSettings.ChatHideSeconds"/> after a player message arrives or the mouse leaves, then
+/// fades out; a setting of 0 keeps it up for good. Once faded it is hidden outright, so it never
+/// swallows clicks meant for the board underneath.
 /// </summary>
 public partial class ChatBox : PanelContainer
 {
-    private const double ShowSeconds = 5.0;
     private const double FadeSeconds = 0.25;
     private const int MaxLines = 100;
 
@@ -22,9 +22,6 @@ public partial class ChatBox : PanelContainer
     private Button ChannelButton => GetNode<Button>("%ChannelButton");
     private Button PlayerFilterButton => GetNode<Button>("%PlayerFilterButton");
     private Button GameFilterButton => GetNode<Button>("%GameFilterButton");
-
-    /// <summary>Skips the hover/fade behaviour and keeps the panel on screen.</summary>
-    [Export] public bool AlwaysVisible { get; set; } = true;
 
     private ChatChannel _channel = ChatChannel.Global;
     private bool _shown;
@@ -41,9 +38,9 @@ public partial class ChatBox : PanelContainer
             return;
         }
 
-        _shown = AlwaysVisible;
-        Visible = AlwaysVisible;
-        Modulate = AlwaysVisible ? Colors.White : Colors.Transparent;
+        _shown = NeverHides;
+        Visible = NeverHides;
+        Modulate = NeverHides ? Colors.White : Colors.Transparent;
 
         MessageInput.MaxLength = ChatService.MaxMessageLength;
         MessageInput.KeepEditingOnTextSubmit = true;
@@ -64,11 +61,12 @@ public partial class ChatBox : PanelContainer
             ChatService.Instance.MessageReceived -= OnMessageReceived;
     }
 
+    /// <summary>Read live, so changing the setting mid-game applies at once.</summary>
+    private static bool NeverHides => GameSettings.Instance?.ChatHideSeconds is null or 0;
+
     public override void _Process(double delta)
     {
-        if (AlwaysVisible) return;
-
-        bool engaged = MessageInput.HasFocus() || GetGlobalRect().HasPoint(GetGlobalMousePosition());
+        bool engaged = NeverHides || MessageInput.HasFocus() || GetGlobalRect().HasPoint(GetGlobalMousePosition());
         if (engaged) Reveal();
         else if (_shown && (_hideIn -= delta) <= 0) FadeOut();
     }
@@ -129,7 +127,8 @@ public partial class ChatBox : PanelContainer
     {
         if (!IsShown(message)) return;
         Append(message);
-        Reveal();
+        // Game lines stream in all turn; only someone talking is worth popping the chat open for.
+        if (message.Kind == ChatMessageKind.Player) Reveal();
     }
 
     private bool IsShown(ChatMessage message) => message.Kind == ChatMessageKind.Game
@@ -170,7 +169,7 @@ public partial class ChatBox : PanelContainer
 
         if (message.Kind == ChatMessageKind.Game)
         {
-            Messages.PushColor(GameColor);
+            Messages.PushColor(message.Color ?? GameColor);
             Messages.AddText(message.Text);
             Messages.Pop();
             return;
@@ -190,7 +189,7 @@ public partial class ChatBox : PanelContainer
 
     private void Reveal()
     {
-        _hideIn = ShowSeconds;
+        _hideIn = GameSettings.Instance?.ChatHideSeconds ?? 0;
         if (_shown) return;
 
         _shown = true;

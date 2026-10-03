@@ -29,6 +29,9 @@
 [ext_resource type="PackedScene" uid="uid://cb05yfgtalgy8" path="res://scenes/userinterface/PlayerAction/TurnBadge.tscn" id="31_turnbadge"]
 [ext_resource type="PackedScene" uid="uid://bchatbox0qg01" path="res://scenes/userinterface/Chat/ChatBox.tscn" id="32_chatbox"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_skipbtn"]
+font_size = 13
+
 [sub_resource type="LabelSettings" id="LabelSettings_round"]
 font_size = 34
 outline_size = 5
@@ -104,10 +107,10 @@ layout_mode = 3
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 150.0
-offset_top = -230.0
-offset_right = 441.0
-offset_bottom = -60.0
+offset_left = 521.0
+offset_top = -258.0
+offset_right = 701.0
+offset_bottom = -8.0
 grow_vertical = 0
 mouse_filter = 2
 
@@ -116,42 +119,106 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -15.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme_override_constants/separation = 4
 alignment = 2
 
 [node name="SelectionSkipButton" parent="Control/VBoxContainer" unique_id=1187079456 instance=ExtResource("14_skipscene")]
 unique_name_in_owner = true
 z_index = 50
-custom_minimum_size = Vector2(160, 50)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 script = ExtResource("15_skip")
+HeldContentOffset = 2
+
+[node name="NinePatchRect" parent="Control/VBoxContainer/SelectionSkipButton" index="1" unique_id=171759037]
+offset_right = 3600.0
+offset_bottom = 600.0
+scale = Vector2(0.05, 0.05)
+TileScale = 0.05
+
+[node name="ContentContainer" parent="Control/VBoxContainer/SelectionSkipButton" index="2" unique_id=1659046377]
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" parent="Control/VBoxContainer/SelectionSkipButton/ContentContainer" index="0" unique_id=1066952590]
+label_settings = SubResource("LabelSettings_skipbtn")
 
 [node name="SkipTurnStepButton" parent="Control/VBoxContainer" unique_id=1187079457 instance=ExtResource("14_skipscene")]
 unique_name_in_owner = true
 z_index = 50
-custom_minimum_size = Vector2(160, 50)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 1
+HeldContentOffset = 2
+
+[node name="NinePatchRect" parent="Control/VBoxContainer/SkipTurnStepButton" index="1" unique_id=171759037]
+offset_right = 3600.0
+offset_bottom = 600.0
+scale = Vector2(0.05, 0.05)
+TileScale = 0.05
+
+[node name="ContentContainer" parent="Control/VBoxContainer/SkipTurnStepButton" index="2" unique_id=1659046377]
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" parent="Control/VBoxContainer/SkipTurnStepButton/ContentContainer" index="0" unique_id=1066952590]
+label_settings = SubResource("LabelSettings_skipbtn")
 
 [node name="SkipRoundButton" parent="Control/VBoxContainer" unique_id=1187079458 instance=ExtResource("14_skipscene")]
 unique_name_in_owner = true
 z_index = 50
-custom_minimum_size = Vector2(250, 50)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 2
+HeldContentOffset = 2
+
+[node name="NinePatchRect" parent="Control/VBoxContainer/SkipRoundButton" index="1" unique_id=171759037]
+offset_right = 3600.0
+offset_bottom = 600.0
+scale = Vector2(0.05, 0.05)
+TileScale = 0.05
+
+[node name="ContentContainer" parent="Control/VBoxContainer/SkipRoundButton" index="2" unique_id=1659046377]
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" parent="Control/VBoxContainer/SkipRoundButton/ContentContainer" index="0" unique_id=1066952590]
+label_settings = SubResource("LabelSettings_skipbtn")
 
 [node name="SkipUntilActivatableButton" parent="Control/VBoxContainer" unique_id=1187079459 instance=ExtResource("14_skipscene")]
 unique_name_in_owner = true
 z_index = 50
-custom_minimum_size = Vector2(280, 50)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 3
+HeldContentOffset = 2
+
+[node name="NinePatchRect" parent="Control/VBoxContainer/SkipUntilActivatableButton" index="1" unique_id=171759037]
+offset_right = 3600.0
+offset_bottom = 600.0
+scale = Vector2(0.05, 0.05)
+TileScale = 0.05
+
+[node name="ContentContainer" parent="Control/VBoxContainer/SkipUntilActivatableButton" index="2" unique_id=1659046377]
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" parent="Control/VBoxContainer/SkipUntilActivatableButton/ContentContainer" index="0" unique_id=1066952590]
+label_settings = SubResource("LabelSettings_skipbtn")
 
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
 offset_bottom = -1005.0
@@ -233,10 +300,6 @@ script = ExtResource("12_gamestatedetail")
 z_index = 99
 
 [node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
-
-[node name="ChatBox" parent="." unique_id=1730245519 instance=ExtResource("32_chatbox")]
-offset_right = 513.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_fpk7i")
 
 [node name="MiniMenu" type="Control" parent="." unique_id=1063376234]
 z_index = 150
@@ -340,3 +403,12 @@ script = ExtResource("28_tutarrow")
 offset_top = -740.0
 offset_bottom = 321.0
 scale = Vector2(0.4, 0.4)
+
+[node name="ChatBox" parent="." unique_id=1730245519 instance=ExtResource("32_chatbox")]
+offset_right = 513.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_fpk7i")
+
+[editable path="Control/VBoxContainer/SelectionSkipButton"]
+[editable path="Control/VBoxContainer/SkipTurnStepButton"]
+[editable path="Control/VBoxContainer/SkipRoundButton"]
+[editable path="Control/VBoxContainer/SkipUntilActivatableButton"]

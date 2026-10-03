@@ -239,10 +239,40 @@ theme_override_font_sizes/font_size = 18
 text = "When choosing a card to play, your Status and Response cards already on the table are drawn beside your hand, next to the cards you can activate instead of playing."
 autowrap_mode = 3
 
-[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471010]
+[node name="ChatHideRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471019]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ChatHideLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ChatHideRow" index="0" unique_id=1904471020]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Hide Chat After"
+
+[node name="ChatHideOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ChatHideRow" index="1" unique_id=1904471021]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+selected = 1
+item_count = 3
+popup/item_0/text = "Never"
+popup/item_0/id = 0
+popup/item_1/text = "5 seconds"
+popup/item_1/id = 5
+popup/item_2/text = "10 seconds"
+popup/item_2/id = 10
+
+[node name="ChatHideHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="7" unique_id=1904471022]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "How long the chat stays on screen after a player message or once the mouse leaves it."
+autowrap_mode = 3
+
+[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="8" unique_id=1904471010]
 layout_mode = 2
 
-[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="7" unique_id=1904471011]
+[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="9" unique_id=1904471011]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -263,7 +293,7 @@ popup/item_0/id = 0
 popup/item_1/text = "Finest"
 popup/item_1/id = 1
 
-[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="8" unique_id=1904471014]
+[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="10" unique_id=1904471014]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18

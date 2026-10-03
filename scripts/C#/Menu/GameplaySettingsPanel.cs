@@ -19,6 +19,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
     private OptionButton _debugLevel;
     private CheckButton  _autoDismiss;
     private CheckButton  _activeCards;
+    private OptionButton _chatHide;
 
     public override void _Ready() => Guard.Try(ReadyInternal, "GameplaySettingsPanel._Ready");
 
@@ -28,6 +29,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _debugLevel  = GetNode<OptionButton>("%DebugLevelOption");
         _autoDismiss = GetNode<CheckButton>("%AutoDismissToggle");
         _activeCards = GetNode<CheckButton>("%ActiveCardsToggle");
+        _chatHide    = GetNode<OptionButton>("%ChatHideOption");
 
         // The picker entries are authored in the scene, and their *ids* — not their row order — are
         // the enum values the handlers below read back. Same guard as VideoSettingsPanel applies to
@@ -41,6 +43,8 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _debugLevel.Selected       = (int)settings.DebugLevel;
         _autoDismiss.ButtonPressed = settings.AutoDismissModal;
         _activeCards.ButtonPressed = settings.ShowActiveCardsInFan;
+        // Ids are the seconds themselves (0, 5, 10), so this one is looked up by id, not by row.
+        _chatHide.Selected         = _chatHide.GetItemIndex(settings.ChatHideSeconds);
 
         // Wired after seeding: assigning Selected/ButtonPressed would otherwise write the value
         // straight back out again on open.
@@ -48,6 +52,8 @@ public partial class GameplaySettingsPanel : VBoxContainer
             GameSettings.Instance.SetPresentationSpeed((GameSpeed)_speed.GetItemId((int)index));
         _debugLevel.ItemSelected += index =>
             GameSettings.Instance.SetDebugLevel((DebugVerbosity)_debugLevel.GetItemId((int)index));
+        _chatHide.ItemSelected += index =>
+            GameSettings.Instance.SetChatHideSeconds(_chatHide.GetItemId((int)index));
         _autoDismiss.Toggled += value =>
             GameSettings.Instance.SetAutoDismissModal(value);
         _activeCards.Toggled += value =>

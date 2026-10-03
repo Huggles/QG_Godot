@@ -205,7 +205,7 @@ public partial class InputManager : Node2D
 		};
 
 		if (answering is not { Count: > 0 }) return text;
-		return $"{text} — {string.Join(", ", answering.Select(FactionLabel))}";
+		return $"{string.Join(", ", answering.Select(FactionLabel))}: {text}";
 	}
 
 	private static string FactionLabel(Faction faction) =>

@@ -40,6 +40,11 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// </summary>
     public bool ShowActiveCardsInFan { get; private set; } = true;
 
+    /// <summary>Seconds the chat stays up after a player message or the mouse leaving; 0 never hides it.</summary>
+    public int ChatHideSeconds { get; private set; } = 5;
+
+    private static readonly int[] ChatHideChoices = { 0, 5, 10 };
+
     /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
     public string LastJoinIp { get; private set; } = "127.0.0.1";
 
@@ -140,6 +145,10 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
     public void SetShowActiveCardsInFan(bool value)    { ShowActiveCardsInFan = value; Save(); }
+    public void SetChatHideSeconds(int seconds)        { ChatHideSeconds = ValidChatHide(seconds); Save(); }
+
+    /// <summary>A hand-edited settings.cfg must not leave the chat with a timer the picker cannot show.</summary>
+    private static int ValidChatHide(int seconds) => System.Array.IndexOf(ChatHideChoices, seconds) >= 0 ? seconds : 5;
     public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
 
     /// <summary>
@@ -218,6 +227,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
             AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
             ShowActiveCardsInFan = config.GetValue(Section, "show_active_cards_in_fan", true).As<bool>();
+            ChatHideSeconds   = ValidChatHide(config.GetValue(Section, "chat_hide_seconds", 5).As<int>());
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
             LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
 
@@ -283,6 +293,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         // driven flag (see Load). Persisting it would leak F6 auto-start into menu launches.
         config.SetValue(Section, "auto_dismiss_modal",    AutoDismissModal);
         config.SetValue(Section, "show_active_cards_in_fan", ShowActiveCardsInFan);
+        config.SetValue(Section, "chat_hide_seconds",     ChatHideSeconds);
         config.SetValue(Section, "last_join_ip",          LastJoinIp);
         config.SetValue(Section, "last_join_port",        LastJoinPort);
         config.SetValue(Section, "show_country_labels",   ShowCountryLabels);

@@ -23,4 +23,7 @@ public record ChatMessage(int SenderPeerId, string SenderName, ChatChannel Chann
 {
     /// <summary>Local clock at arrival, not the sender's: peers' clocks and time zones differ.</summary>
     public System.DateTime Time { get; init; } = System.DateTime.Now;
+
+    /// <summary>Optional colour for the line's text; null leaves it to the chat's default.</summary>
+    public Godot.Color? Color { get; init; }
 }

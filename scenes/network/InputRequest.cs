@@ -796,7 +796,7 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            PlayerActionLabel.ShowText($"{Title} — {TargetFaction.Label()}", TargetFaction);
+            PlayerActionLabel.ShowText($"{TargetFaction.Label()}: {Title}", TargetFaction);
             ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectOne(
                 Title, PresentationItemCard.FromCardIds(TargetCardIds, true), Required));
 
@@ -835,7 +835,7 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            PlayerActionLabel.ShowText($"{Title} — {TargetFaction.Label()}", TargetFaction);
+            PlayerActionLabel.ShowText($"{TargetFaction.Label()}: {Title}", TargetFaction);
             ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectMany(
                 Title, PresentationItemCard.FromCardIds(TargetCardIds, true), MinSelections, MaxSelections));
 
