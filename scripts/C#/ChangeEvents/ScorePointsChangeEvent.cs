@@ -27,8 +27,18 @@ public partial class ScorePointsChangeEvent : ChangeEvent
         return dto;
     }
 
-    /// <summary>Points per source country, summed so two entries from one country show one number.</summary>
-    public Dictionary<int, int> VpBySourceCountryId => SumBySource(e => e.SourceCountryVPs);
+    /// <summary>
+    /// Points per source country, summed so two entries from one country show one number. An entry that
+    /// names neither a country nor a unit lands on the scoring faction's home space; a zero one shows nothing.
+    /// </summary>
+    public Dictionary<int, int> VpBySourceCountryId => SumBySource(e => e.SourceCountryVPs ?? HomeSpaceFallback(e));
+
+    private Dictionary<int, int> HomeSpaceFallback(VPEntry entry)
+    {
+        if (entry.SourceUnitVPs != null || entry.VictoryPoints == 0) return null;
+        CountryState home = StaticGameData.FactionDataMap[VPTurnSummary.Faction].HomeSpaceCountryState;
+        return home == null ? null : new Dictionary<int, int> { [home.Id] = entry.VictoryPoints };
+    }
 
     /// <summary>Points per scoring unit, summed the same way.</summary>
     public Dictionary<int, int> VpBySourceUnitId => SumBySource(e => e.SourceUnitVPs);
