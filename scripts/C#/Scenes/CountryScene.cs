@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public partial class CountryScene : Control
 {
@@ -157,6 +158,8 @@ public partial class CountryScene : Control
 		CountryState.Tags.TagRemoved -= OnTagRemoved;
 		EventBus.Instance.WorldPresentationViewChanged -= OnWorldPresentationViewChanged;
 		EventBus.Instance.CountryNamesToggled -= OnCountryNameToggled;
+		// Leaving the tree kills the label's tween, so its callback would never release the awaiting event.
+		vpScoreDone?.TrySetResult();
 	}
 
 	private void OnCountryNameToggled(bool show)
@@ -665,20 +668,28 @@ public partial class CountryScene : Control
 	private const float VpScoreHoldSeconds = 1f;
 	private const float VpScoreFadeSeconds = 1f;
 	private const float VpScoreRiseDistance = 150f;
+	private static readonly Color VpGainColor = new Color(0.35f, 1f, 0.35f);
+	private static readonly Color VpLossColor = new Color(1f, 0.3f, 0.3f);
 
 	private Tween vpScoreTween;
+	private TaskCompletionSource vpScoreDone;
 
 	/// <summary>
 	/// Pops the VP a country just scored over its middle: holds, then drifts up while fading out.
-	/// Calling again mid-animation kills the old tween and restarts from the rest position.
+	/// Calling again mid-animation restarts it; the returned task completes when the label is gone or superseded.
 	/// </summary>
-	public void ShowVpScore(int vp)
+	public Task ShowVpScore(int vp)
 	{
 		vpScoreTween?.Kill();
+		// A killed tween never reaches its callback, so release whoever awaited the old run here.
+		vpScoreDone?.TrySetResult();
+		TaskCompletionSource done = vpScoreDone = new TaskCompletionSource();
 
-		VpScoreLabel.Text = vp.ToString();
+		// A negative number already carries its own '-'.
+		VpScoreLabel.Text = vp > 0 ? $"+{vp}" : vp.ToString();
 		VpScoreLabel.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-		VpScoreLabel.Modulate = Colors.White;
+		// Tinted through Modulate: the text is white so it takes the colour, the black outline stays black.
+		VpScoreLabel.Modulate = vp > 0 ? VpGainColor : vp < 0 ? VpLossColor : Colors.White;
 		VpScoreLabel.Visible = true;
 
 		float restY = VpScoreLabel.Position.Y;
@@ -686,7 +697,12 @@ public partial class CountryScene : Control
 		vpScoreTween.TweenInterval(VpScoreHoldSeconds);
 		vpScoreTween.TweenProperty(VpScoreLabel, "position:y", restY - VpScoreRiseDistance, VpScoreFadeSeconds);
 		vpScoreTween.Parallel().TweenProperty(VpScoreLabel, "modulate:a", 0f, VpScoreFadeSeconds);
-		vpScoreTween.TweenCallback(Callable.From(() => VpScoreLabel.Visible = false));
+		vpScoreTween.TweenCallback(Callable.From(() =>
+		{
+			VpScoreLabel.Visible = false;
+			done.TrySetResult();
+		}));
+		return done.Task;
 	}
 
 	private void ShowSupplyStar()

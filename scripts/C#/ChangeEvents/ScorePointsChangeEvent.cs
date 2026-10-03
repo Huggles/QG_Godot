@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public partial class ScorePointsChangeEvent : ChangeEvent
@@ -25,12 +27,31 @@ public partial class ScorePointsChangeEvent : ChangeEvent
         return dto;
     }
 
+    /// <summary>Points per source country, summed so two entries from one country show one number.</summary>
+    public Dictionary<int, int> VpBySourceCountryId => VPTurnSummary.victoryPointEntries
+        .Where(e => e.SourceCountryId.HasValue)
+        .GroupBy(e => e.SourceCountryId.Value)
+        .ToDictionary(g => g.Key, g => g.Sum(e => e.VictoryPoints));
+
     public override void Mutate(BoardState board) => board.AddScore(VPTurnSummary.Faction, VPTurnSummary.TotalScore);
 
+    /// <summary>The score pause and the country labels run side by side; the event moves on once both are done.</summary>
     protected override async Task OnLiveMutatedAsync()
     {
         GameAPI.PresentScore(VPTurnSummary);
-        await Task.Delay(GameSettings.DurationLong);
+        await Task.WhenAll(Task.Delay(GameSettings.DurationLong), ShowSourceCountryScores());
+    }
+
+    /// <summary>
+    /// Started here rather than queued as an AfterAnimation, which would only begin after the pause above.
+    /// Same skip as EnqueueAnimations: OnLiveMutatedAsync also runs on a save replay and on a headless server.
+    /// </summary>
+    private Task ShowSourceCountryScores()
+    {
+        if (!PlayAnimations || GameContext.IsHeadless || ReplayContext.IsFastForwarding) return Task.CompletedTask;
+
+        return Task.WhenAll(VpBySourceCountryId
+            .Select(kv => CountryState.ForId(kv.Key).CountryScene?.ShowVpScore(kv.Value) ?? Task.CompletedTask));
     }
 
     /// <summary>
