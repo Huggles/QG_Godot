@@ -26,8 +26,8 @@ public class RemoveUnitAnimation : ChangeEventAnimation
         if (unitScene == null) return;
 
         Tween tween = unitScene.CreateTween();
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), GameSettings.DurationShortSeconds);
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(0f, 0f), GameSettings.DurationShortSeconds);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(1.2f, 1.2f), GameSettings.DurationVeryShortSeconds);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(0f, 0f), GameSettings.DurationVeryShortSeconds);
         await unitScene.ToSignal(tween, Tween.SignalName.Finished);
         tween.Dispose();
 

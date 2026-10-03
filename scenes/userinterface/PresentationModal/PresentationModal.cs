@@ -101,11 +101,14 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		}
 	}
 
+	/// <summary>Show and hide speed, kept off the presentation-speed setting.</summary>
+	private const int FadeMilliseconds = 250;
+
 	private void FadeIn(Action onComplete = null)
 	{
 		_activeTween?.Kill();
 		_activeTween = GetTree().CreateTween();
-		_activeTween.TweenProperty(this, "modulate:a", 1, GameSettings.DurationShortSeconds)
+		_activeTween.TweenProperty(this, "modulate:a", 1, GameSettings.GetFixedDurationSeconds(FadeMilliseconds))
 			.Finished += () => onComplete?.Invoke();
 	}
 
@@ -113,7 +116,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 	{
 		_activeTween?.Kill();
 		_activeTween = GetTree().CreateTween();
-		_activeTween.TweenProperty(this, "modulate:a", 0, GameSettings.DurationShortSeconds)
+		_activeTween.TweenProperty(this, "modulate:a", 0, GameSettings.GetFixedDurationSeconds(FadeMilliseconds))
 			.Finished += () => onComplete?.Invoke();
 	}
 

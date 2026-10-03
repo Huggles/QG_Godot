@@ -106,9 +106,13 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// every client draining its broadcast burst.
     /// </summary>
     public static int GetDuration(DurationScale scale = DurationScale.Medium)
-        => GameContext.IsHeadless || ReplayContext.IsFastForwarding
-            ? 0
-            : DurationTable[(int)Instance.PresentationSpeed, (int)scale];
+        => SkipPacing ? 0 : DurationTable[(int)Instance.PresentationSpeed, (int)scale];
+
+    /// <summary>A fixed duration, in seconds, that ignores the speed setting but still skips with it.</summary>
+    public static double GetFixedDurationSeconds(int milliseconds)
+        => SkipPacing ? 0 : milliseconds / 1000.0;
+
+    private static bool SkipPacing => GameContext.IsHeadless || ReplayContext.IsFastForwarding;
 
     /// <summary>Returns the duration in seconds for the current speed and the given scale.</summary>
     public static double GetDurationSeconds(DurationScale scale = DurationScale.Medium)

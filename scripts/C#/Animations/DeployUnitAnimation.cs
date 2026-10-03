@@ -23,8 +23,8 @@ public class DeployUnitAnimation : ChangeEventAnimation
         UnitScene unitScene = countryScene.AddUnit(_unitId);
         
         Tween tween = unitScene.CreateTween();
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale*1.5f, UnitScene.DefaultSpriteScale*1.5f), GameSettings.DurationShortSeconds);
-        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale, UnitScene.DefaultSpriteScale), GameSettings.DurationShortSeconds);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale*1.5f, UnitScene.DefaultSpriteScale*1.5f), GameSettings.DurationVeryShortSeconds);
+        tween.TweenProperty(unitScene.UnitSpriteNode, "scale", new Vector2(UnitScene.DefaultSpriteScale, UnitScene.DefaultSpriteScale), GameSettings.DurationVeryShortSeconds);
         await unitScene.ToSignal(tween, Tween.SignalName.Finished);
         tween.Dispose();
     }
