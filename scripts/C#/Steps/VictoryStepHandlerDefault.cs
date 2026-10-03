@@ -58,7 +58,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     {
         foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>().Where(m => m.Faction == Faction))
         {
-            vpTurnSummary.AddScore(modifier.AddVictoryPoints());
+            vpTurnSummary.AddScore(modifier.AddVictoryPoints(BoardState.Live));
         }
     }
 

@@ -10,18 +10,18 @@ public partial class StatusImperoItaliano : StatusCardLogic, IVPModifier
 
     /// <summary>Every Axis Army in the three spaces — the whole team's, not just Italy's, which is
     /// what makes this card worth previewing before you commit to it.</summary>
-    private List<UnitState> ScoringUnits =>
+    private List<UnitState> ScoringUnits(BoardState board) =>
         scoringFactions
-            .SelectMany(faction => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates())
-            .Where(unitState => scoringCountries.Contains(unitState.CountryState.Country)
+            .SelectMany(board.ActiveUnits)
+            .Where(unitState => scoringCountries.Contains(board.CountryStateOf(unitState).Country)
                              && unitState.Type == UnitType.ARMY)
             .ToList();
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
-    public virtual VPEntry AddVictoryPoints()
+    public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return new VPEntry(ScoringUnits.Count, $"axis armies in {CountryState.ForEnum(scoringCountries[0]).Label}, {CountryState.ForEnum(scoringCountries[1]).Label} and {CountryState.ForEnum(scoringCountries[2]).Label}");
+        return VPEntry.ForUnits(ScoringUnits(board), board, 1, $"axis armies in {CountryState.ForEnum(scoringCountries[0]).Label}, {CountryState.ForEnum(scoringCountries[1]).Label} and {CountryState.ForEnum(scoringCountries[2]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

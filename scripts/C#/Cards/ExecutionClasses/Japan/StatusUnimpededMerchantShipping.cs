@@ -14,19 +14,21 @@ public partial class StatusUnimpededMerchantShipping : StatusCardLogic, IVPModif
     /// what is worth showing is whatever is currently spoiling it; the space itself is reported too,
     /// so an empty Hawaii still lights up and reads as "this is earning".
     /// </summary>
-    private List<UnitState> BlockingUnits =>
+    private List<UnitState> BlockingUnits(BoardState board) =>
         alliedFactions
-            .SelectMany(faction => FactionState.ForEnum(faction).ActiveUnitIds.ToUnitStates())
-            .Where(u => watchedCountries.Contains(u.CountryState.Country))
+            .SelectMany(board.ActiveUnits)
+            .Where(u => watchedCountries.Contains(board.CountryStateOf(u).Country))
             .ToList();
 
     public override TargetSet Targets() =>
-        TargetSet.Countries(watchedCountries).Plus(TargetSet.Units(BlockingUnits));
+        TargetSet.Countries(watchedCountries).Plus(TargetSet.Units(BlockingUnits(BoardState.Live)));
 
-    public virtual VPEntry AddVictoryPoints()
+    public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        int score = BlockingUnits.Count > 0 ? 0 : 1;
-        return new VPEntry(score, $"no Allied army in {CountryState.ForEnum(watchedCountries[0]).Label}");
+        string reason = $"no Allied army in {CountryState.ForEnum(watchedCountries[0]).Label}";
+        return BlockingUnits(board).Count > 0
+            ? new VPEntry(0, reason)
+            : VPEntry.ForCountry(1, reason, (int)watchedCountries[0]);
     }
 
     protected override List<Condition> CardTriggers()

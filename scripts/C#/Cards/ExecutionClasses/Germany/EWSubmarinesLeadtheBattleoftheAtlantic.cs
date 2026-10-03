@@ -20,7 +20,7 @@ public partial class EWSubmarinesLeadtheBattleoftheAtlantic : EWCardLogic
         return new List<CardStep>
         {
             new ResultStep(this, Choose.Fixed(c =>
-                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits(c.Board).Count, "German Navies on the board"), Faction))),
+                    new ScorePointsChangeEvent(VPEntry.ForUnits(ScoringUnits(c.Board), c.Board, 1, "German Navies on the board"), Faction))),
 
             new ResultStep(this, Choose.Fixed(c => new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, ScoredBy(c.Previous) * 2)))
             .RequiringPreviousStep()

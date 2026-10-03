@@ -8,7 +8,8 @@ public partial class StatusOccupationOfCzechoslovakia : StatusCardLogic, IVPModi
     // No Targets() override: the point is earned by what you did NOT do this turn (no land battle,
     // no unit eliminated). A condition on turn history names no country and no unit.
 
-    public virtual VPEntry AddVictoryPoints()
+    /// <summary>Reads the turn's history, not <paramref name="board"/>, so it has no country to show.</summary>
+    public virtual VPEntry AddVictoryPoints(BoardState board)
     {
         bool factionAttacked = CardPlayPool.GetChangeEvents<BattleCountryChangeEvent>().Any(ce => ce.IsBattle && ce.TriggeringFaction == Faction);
         bool factionEliminated = CardPlayPool.GetChangeEvents<RemoveUnitChangeEvent>().Any(ce => ce.TriggeringFaction == Faction);

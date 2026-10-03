@@ -24,7 +24,7 @@ public partial class EWSubmarinesRaidMurmanskConvoy : EWCardLogic
         return new List<CardStep>
         {
             new ResultStep(this, Choose.Fixed(c =>
-                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits(c.Board).Count, "German units in or adjacent to Scandinavia"), Faction))),
+                    new ScorePointsChangeEvent(VPEntry.ForUnits(ScoringUnits(c.Board), c.Board, 1, "German units in or adjacent to Scandinavia"), Faction))),
 
             new ResultStep(this, Choose.Fixed(c => new ForceDiscardCardsChangeEvent(Faction, Faction.SOVIET, ScoredBy(c.Previous) * 2)))
             .RequiringPreviousStep()

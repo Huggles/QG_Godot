@@ -52,4 +52,11 @@ public partial class VPEntry
             .ToDictionary(g => g.Key, g => g.Count() * vpEach);
         return new VPEntry(byCountry.Values.Sum(), reason, byCountry);
     }
+
+    /// <summary><paramref name="vpEach"/> per distinct country, for cards that pay per occupied space rather than per unit.</summary>
+    public static VPEntry ForCountries(IEnumerable<int> countryIds, int vpEach, string reason)
+    {
+        Dictionary<int, int> byCountry = countryIds.Distinct().ToDictionary(id => id, _ => vpEach);
+        return new VPEntry(byCountry.Values.Sum(), reason, byCountry);
+    }
 }

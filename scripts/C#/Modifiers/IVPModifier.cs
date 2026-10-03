@@ -6,5 +6,6 @@
 public interface IVPModifier : IModifier
 {
     Faction Faction { get; }
-    VPEntry AddVictoryPoints();
+    /// <summary>The points this card scores on <paramref name="board"/>: the live board at the VP step, a fork for the bot.</summary>
+    VPEntry AddVictoryPoints(BoardState board);
 }

@@ -8,17 +8,17 @@ public partial class StatusAbundantResources : StatusCardLogic, IVPModifier
     private static readonly List<Country> scoringCountries = [Country.Ukraine, Country.Kazakhstan, Country.Russia];
 
     /// <summary>The pieces that score. Read by both the VP count and <see cref="Targets"/>.</summary>
-    private List<UnitState> ScoringUnits =>
-        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-            .Where(unitState => scoringCountries.Contains(unitState.CountryState.Country))
+    private List<UnitState> ScoringUnits(BoardState board) =>
+        board.ActiveUnits(Faction)
+            .Where(unitState => scoringCountries.Contains(board.CountryStateOf(unitState).Country))
             .ToList();
 
     /// <summary>Hovering shows which pieces are currently earning this card its points.</summary>
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
-    public virtual VPEntry AddVictoryPoints()
+    public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return new VPEntry(ScoringUnits.Count, "armies on Ukraine, Kazakhstan and/or Russia");
+        return VPEntry.ForUnits(ScoringUnits(board), board, 1, "armies on Ukraine, Kazakhstan and/or Russia");
     }
 
     protected override List<Condition> CardTriggers()

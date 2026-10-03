@@ -7,19 +7,18 @@ public partial class StatusSwedishIronOre : StatusCardLogic, IVPModifier
 {
     /// <summary>The two pieces that score, either of which may be absent. Read by both the VP count
     /// and <see cref="Targets"/>, so the preview shows exactly what is earning the points.</summary>
-    private List<UnitState> ScoringUnits =>
-        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-            .Where(u => (u.CountryState.Country == Country.BalticSea && u.Type == UnitType.NAVY)
-                     || (u.CountryState.Country == Country.Scandinavia && u.Type == UnitType.ARMY))
+    private List<UnitState> ScoringUnits(BoardState board) =>
+        board.ActiveUnits(Faction)
+            .Where(u => (board.CountryStateOf(u).Country == Country.BalticSea && u.Type == UnitType.NAVY)
+                     || (board.CountryStateOf(u).Country == Country.Scandinavia && u.Type == UnitType.ARMY))
             .ToList();
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
-    public virtual VPEntry AddVictoryPoints()
+    public virtual VPEntry AddVictoryPoints(BoardState board)
     {
         // One point per QUALIFYING SPACE, not per piece: two navies in the Baltic still score one.
-        int score = ScoringUnits.Select(u => u.CountryState.Country).Distinct().Count();
-        return new VPEntry(score, "a navy in the Baltic Sea and army in Scandinavia");
+        return VPEntry.ForCountries(ScoringUnits(board).Select(board.CountryOf), 1, "a navy in the Baltic Sea and army in Scandinavia");
     }
 
     protected override List<Condition> CardTriggers()

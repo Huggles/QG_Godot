@@ -9,16 +9,16 @@ public partial class StatusGreaterEastAsiaCoProsperitySphere : StatusCardLogic, 
 
     /// <summary>The pieces that score. Read by both the VP count and <see cref="Targets"/>, so
     /// hovering shows exactly what is earning this card its points.</summary>
-    private List<UnitState> ScoringUnits =>
-        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
-            .Where(unitState => scoringCountries.Contains(unitState.CountryState.Country))
+    private List<UnitState> ScoringUnits(BoardState board) =>
+        board.ActiveUnits(Faction)
+            .Where(unitState => scoringCountries.Contains(board.CountryStateOf(unitState).Country))
             .ToList();
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
-    public virtual VPEntry AddVictoryPoints()
+    public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return new VPEntry(ScoringUnits.Count, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} armies in {CountryState.ForEnum(scoringCountries[0]).Label}, {CountryState.ForEnum(scoringCountries[1]).Label} and {CountryState.ForEnum(scoringCountries[2]).Label}");
+        return VPEntry.ForUnits(ScoringUnits(board), board, 1, $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} armies in {CountryState.ForEnum(scoringCountries[0]).Label}, {CountryState.ForEnum(scoringCountries[1]).Label} and {CountryState.ForEnum(scoringCountries[2]).Label}");
     }
 
     protected override List<Condition> CardTriggers()

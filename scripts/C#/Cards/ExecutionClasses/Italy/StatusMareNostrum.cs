@@ -6,16 +6,16 @@ using Godot;
 public partial class StatusMareNostrum : StatusCardLogic, IVPModifier
 {
     /// <summary>Every Italian navy on the board — one point each.</summary>
-    private List<UnitState> ScoringUnits =>
-        FactionState.ForEnum(Faction).ActiveUnitIds.ToUnitStates()
+    private List<UnitState> ScoringUnits(BoardState board) =>
+        board.ActiveUnits(Faction)
             .Where(unitState => unitState.Type == UnitType.NAVY)
             .ToList();
 
-    public override TargetSet Targets() => TargetSet.Units(ScoringUnits);
+    public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
-    public virtual VPEntry AddVictoryPoints()
+    public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        return new VPEntry(ScoringUnits.Count, $"all {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} navies on the board");
+        return VPEntry.ForUnits(ScoringUnits(board), board, 1, $"all {FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} navies on the board");
     }
 
     protected override List<Condition> CardTriggers()

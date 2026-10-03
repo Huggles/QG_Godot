@@ -171,14 +171,17 @@ public static class VpMath
     /// contribution and nothing else. Silently returning a slightly low rate is a bad answer; aborting
     /// the prompt over a display-detail exception is a worse one.
     /// </summary>
-    public static int StatusCardVpRate(FactionTeam team)
+    public static int StatusCardVpRate(FactionTeam team) => StatusCardVpRate(team, BoardState.Live);
+
+    /// <summary>The status-card half of the rate on <paramref name="board"/>.</summary>
+    public static int StatusCardVpRate(FactionTeam team, BoardState board)
     {
         int total = 0;
         foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>())
         {
             if (StaticGameData.FactionTeamForFaction(modifier.Faction) != team) continue;
 
-            try { total += modifier.AddVictoryPoints()?.VictoryPoints ?? 0; }
+            try { total += modifier.AddVictoryPoints(board)?.VictoryPoints ?? 0; }
             catch { /* see summary: one card's failure costs one card's points */ }
         }
         return total;
