@@ -23,7 +23,7 @@ public partial class EWSubmarinesEnforceBlockade : EWCardLogic
         return new List<CardStep>
         {
             new ResultStep(this, Choose.Fixed(c =>
-                    new ScorePointsChangeEvent(new VPEntry(ScoringUnits(c.Board).Count, "German Armies adjacent to North Sea"), Faction))),
+                    new ScorePointsChangeEvent(VPEntry.ForUnits(ScoringUnits(c.Board), c.Board, 1, "German Armies adjacent to North Sea"), Faction))),
 
             new ResultStep(this, Choose.Fixed(c => new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, ScoredBy(c.Previous) * 2)))
             .RequiringPreviousStep()

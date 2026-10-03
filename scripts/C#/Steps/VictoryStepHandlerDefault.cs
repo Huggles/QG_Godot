@@ -49,7 +49,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
             if (cs.IsSupply)
             {
                 int score = Math.Max(3 - cs.Units.Keys.Count, 1);
-                VPEntry vPEntry = new VPEntry(score, $"supply star on {cs.StaticCountryData.Label}", cs.Id);
+                VPEntry vPEntry = VPEntry.ForCountry(score, $"supply star on {cs.StaticCountryData.Label}", cs.Id);
                 vpTurnSummary.AddScore(vPEntry);                
             }
         }

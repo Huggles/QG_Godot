@@ -29,9 +29,10 @@ public partial class ScorePointsChangeEvent : ChangeEvent
 
     /// <summary>Points per source country, summed so two entries from one country show one number.</summary>
     public Dictionary<int, int> VpBySourceCountryId => VPTurnSummary.victoryPointEntries
-        .Where(e => e.SourceCountryId.HasValue)
-        .GroupBy(e => e.SourceCountryId.Value)
-        .ToDictionary(g => g.Key, g => g.Sum(e => e.VictoryPoints));
+        .Where(e => e.SourceCountryVPs != null)
+        .SelectMany(e => e.SourceCountryVPs)
+        .GroupBy(kv => kv.Key)
+        .ToDictionary(g => g.Key, g => g.Sum(kv => kv.Value));
 
     public override void Mutate(BoardState board) => board.AddScore(VPTurnSummary.Faction, VPTurnSummary.TotalScore);
 
