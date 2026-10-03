@@ -29,13 +29,23 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     /// </summary>
     private const float TextWidthAlone = 170f;
 
+    /// <summary>Must match CardRow's h_separation/v_separation in the scene.</summary>
+    private const float CardGap = 6f;
+    /// <summary>Height kept free under the card grid for the summary text.</summary>
+    private const float SummaryReserve = 120f;
+    /// <summary>Panel margins around the grid, on top of the stylebox's own; see the Margin node.</summary>
+    private const float MarginChrome = 16f;
+
+    /// <summary>The card size the scene was designed at; a big entry shrinks below it, never above.</summary>
+    private Vector2 fullCardSize;
+
     private PanelContainer DetailPanel => GetNode<PanelContainer>("%HistoryDetailPanel");
-    private HBoxContainer  CardRow => GetNode<HBoxContainer>("%CardRow");
+    private GridContainer  CardRow => GetNode<GridContainer>("%CardRow");
     private CardScene      CardSceneNode => GetNode<CardScene>("%HistoryCard");
     private RichTextLabel  SummaryLabel => GetNode<RichTextLabel>("%HistorySummary");
 
     /// <summary>
-    /// The extra card slots for <see cref="GameHistoryEntry.TargetCardIds"/>, drawn to the right of
+    /// The extra card slots for <see cref="GameHistoryEntry.TargetCardIds"/>, drawn in the grid after
     /// the source card. Grown on demand and then hidden rather than freed, so hovering along a strip
     /// of discard badges does not instantiate and free a CardScene per badge.
     /// </summary>
@@ -60,6 +70,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
 
     public void LoadUI()
     {
+        fullCardSize = CardSceneNode.CustomMinimumSize;
         AsHistoryCard(CardSceneNode);
         DetailPanel.Visible = false;
         SetProcess(false);
@@ -93,6 +104,13 @@ public partial class HistoryDetailPopup : Control, LoadableUI
         // free, and because that is evaluated per hover, a card revealed later starts showing its
         // face in the history too.
         CardState card = entry.SourceCardId > -1 ? CardState.ForId(entry.SourceCardId) : null;
+        bool hasSource = card != null || entry.BulletinLabel != null;
+        List<int> targetIds = ResolvableCards(entry.TargetCardIds);
+
+        // Sized before anything is shown: ShowCard scales the card's fonts off its current Size.
+        Vector2 cardSize = LayoutGrid((hasSource ? 1 : 0) + targetIds.Count, badge);
+        SetCardSize(CardSceneNode, cardSize);
+
         if (card != null)
         {
             CardSceneNode.Visible = true;
@@ -109,7 +127,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
             CardSceneNode.Visible = false;
         }
 
-        int targetsShown = ShowTargetCards(entry.TargetCardIds);
+        int targetsShown = ShowTargetCards(targetIds, cardSize);
 
         // Drives both the wrap width and, through it, the whole panel's width — the PanelContainer has
         // no minimum of its own, so a text-only entry collapses to just this column plus the margins.
@@ -129,36 +147,78 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     }
 
     /// <summary>
-    /// Fill the row to the right of the source card with the cards the entry acted on, and return how
-    /// many were drawn. Ids are resolved here rather than at capture time, exactly like the source
-    /// card: a card revealed after the event starts showing its face in the history too.
+    /// The ids that are in game state; CardFace.ForCard would NRE on any other. Resolved per hover
+    /// rather than at capture time, like the source card, so a card revealed later shows its face.
     /// </summary>
-    private int ShowTargetCards(IReadOnlyList<int> cardIds)
+    private static List<int> ResolvableCards(IReadOnlyList<int> cardIds)
     {
-        int shown = 0;
-        for (int i = 0; cardIds != null && i < cardIds.Count; i++)
+        List<int> resolvable = new();
+        if (cardIds == null) return resolvable;
+        foreach (int id in cardIds)
+            if (CardState.ForId(id) != null) resolvable.Add(id);
+        return resolvable;
+    }
+
+    /// <summary>Fill the slots after the source card with the cards the entry acted on.</summary>
+    private int ShowTargetCards(List<int> cardIds, Vector2 cardSize)
+    {
+        for (int i = 0; i < cardIds.Count; i++)
         {
-            // Not in game state at all: CardFace.ForCard would NRE on it, so skip rather than draw.
-            if (CardState.ForId(cardIds[i]) == null) continue;
-            TargetCardAt(shown).ShowCard(cardIds[i]);  // ShowCard makes the slot visible again
-            shown++;
+            CardScene slot = TargetCardAt(i);
+            SetCardSize(slot, cardSize);
+            slot.ShowCard(cardIds[i]);  // ShowCard makes the slot visible again
         }
-        for (int i = shown; i < targetCards.Count; i++) targetCards[i].Visible = false;
-        return shown;
+        for (int i = cardIds.Count; i < targetCards.Count; i++) targetCards[i].Visible = false;
+        return cardIds.Count;
     }
 
     /// <summary>
-    /// The nth target slot, created on first use. Size is assigned as well as the minimum, because
-    /// CardScene.RecalculateSizes scales its fonts off Size and runs inside ShowCard — a frame before
-    /// the container would otherwise have given a fresh instance any size at all.
+    /// Pick CardRow's column count and the card size for <paramref name="count"/> cards so the grid
+    /// fits between the screen edge and the badge. Tries every column count and keeps the one with
+    /// the largest cards; a single full-size row wins whenever it fits, as it always did.
     /// </summary>
+    private Vector2 LayoutGrid(int count, Control badge)
+    {
+        CardRow.Columns = Mathf.Max(count, 1);
+        if (count <= 1) return fullCardSize;
+
+        float chrome = MarginChrome + (DetailPanel.GetThemeStylebox("panel")?.GetMinimumSize().X ?? 0f);
+        Rect2 bounds = GetGlobalRect();
+        float width  = badge.GetGlobalRect().Position.X - GapFromBadge - bounds.Position.X - ScreenMargin - chrome;
+        float height = bounds.Size.Y - 2 * ScreenMargin - chrome - SummaryReserve;
+
+        float bestScale = 0f;
+        for (int cols = count; cols >= 1; cols--)
+        {
+            int rows = Mathf.CeilToInt(count / (float)cols);
+            float scale = Mathf.Min(1f, Mathf.Min(
+                (width  - CardGap * (cols - 1)) / (cols * fullCardSize.X),
+                (height - CardGap * (rows - 1)) / (rows * fullCardSize.Y)));
+            if (scale > bestScale)
+            {
+                bestScale = scale;
+                CardRow.Columns = cols;
+            }
+        }
+        return (fullCardSize * Mathf.Max(bestScale, 0.1f)).Floor();
+    }
+
+    /// <summary>
+    /// Size is assigned as well as the minimum, because CardScene.RecalculateSizes scales its fonts
+    /// off Size and runs inside ShowCard — before the container lays the card out at the new size.
+    /// </summary>
+    private static void SetCardSize(CardScene card, Vector2 size)
+    {
+        card.CustomMinimumSize = size;
+        card.Size = size;
+    }
+
+    /// <summary>The nth target slot, created on first use.</summary>
     private CardScene TargetCardAt(int index)
     {
         if (index < targetCards.Count) return targetCards[index];
 
         CardScene card = CardScene.CardScenePackedPath.Instantiate<CardScene>();
-        card.CustomMinimumSize = CardSceneNode.CustomMinimumSize;
-        card.Size = CardSceneNode.CustomMinimumSize;
         CardRow.AddChild(card);
         AsHistoryCard(card);
         targetCards.Add(card);

@@ -19,9 +19,12 @@ public partial class DrawCardByNameChangeEvent : ChangeEvent
         return dto;
     }
 
+    /// <summary>Filled by Mutate for the history popup; -1 until then, or if the card was not found.</summary>
+    public int DrawnCardId { get; private set; } = -1;
+
     public override void Mutate(BoardState board)
     {
-        int cardId = board.DrawCardByName(TargetFaction, CardName);
+        int cardId = DrawnCardId = board.DrawCardByName(TargetFaction, CardName);
         if (cardId == -1 && board.IsLive)
             DebugUtilities.PrintPeerError($"DrawCardByNameChangeEvent: card '{CardName}' not found in {TargetFaction} deck");
     }

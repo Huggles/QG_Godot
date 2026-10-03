@@ -58,10 +58,8 @@ public static class GameMessageDisplay
     /// The cards this message acted ON — what the hover popup draws beside the card that caused it.
     /// Empty for the great majority of messages, which move no cards at all.
     ///
-    /// Only events that already KNOW the ids qualify. The by-name events resolve theirs inside
-    /// Mutate and keep nothing, and DrawCardsChangeEvent never learns which cards came off the
-    /// deck — those stay card-less rather than being given a lookup that could answer differently on
-    /// each peer. Secrecy is not this list's problem: CardFace.ForCard draws anything the local
+    /// Only events that already KNOW the ids qualify — the draw events keep what their Mutate drew,
+    /// which is filled before the history entry is taken. Secrecy is not this list's problem: CardFace.ForCard draws anything the local
     /// player may not see as a card back, so an opponent's discard is safe to name here.
     ///
     /// The list is COPIED, not referenced: DiscardedCardIds and ReorderedCardIds are live state a
@@ -75,6 +73,8 @@ public static class GameMessageDisplay
         ForceDiscardHandCardsChangeEvent d => Snapshot(d.DiscardedCardIds),
         ForceDiscardCardsChangeEvent d     => Snapshot(d.DiscardedCardIds),
         RecycleCardChangeEvent r           => Snapshot(new[] { r.CardId }),
+        DrawCardsChangeEvent d             => Snapshot(d.DrawnCardIds),
+        DrawCardByNameChangeEvent d        => Snapshot(new[] { d.DrawnCardId }),
 
         // A full shuffle touches the whole deck and says nothing by listing it; a top-of-deck
         // rearrangement is exactly the handful of cards worth seeing again afterwards.
@@ -83,12 +83,6 @@ public static class GameMessageDisplay
 
         _                                  => NoCards,
     };
-
-    /// <summary>
-    /// How many target cards one entry may carry. The popup draws them full size and side by side,
-    /// so this is what stops a five-card discard from growing a popup wider than the screen.
-    /// </summary>
-    private const int MaxTargetCards = 5;
 
     /// <summary>Shared empty list, so the common "no cards" answer allocates nothing.</summary>
     private static readonly IReadOnlyList<int> NoCards = new List<int>();
@@ -100,7 +94,7 @@ public static class GameMessageDisplay
     private static IReadOnlyList<int> Snapshot(IEnumerable<int> cardIds)
     {
         if (cardIds == null) return NoCards;
-        List<int> copy = cardIds.Where(id => id > -1).Take(MaxTargetCards).ToList();
+        List<int> copy = cardIds.Where(id => id > -1).ToList();
         return copy.Count == 0 ? NoCards : copy;
     }
 

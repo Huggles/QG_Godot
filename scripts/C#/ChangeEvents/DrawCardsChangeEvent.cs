@@ -22,6 +22,8 @@ public partial class DrawCardsChangeEvent : ChangeEvent
         return dto;
     }
 
+    /// <summary>Filled by Mutate; read by the draw presentation and the history popup.</summary>
+    public IReadOnlyList<int> DrawnCardIds => _drawnCardIds;
     private List<int> _drawnCardIds = new();
 
     public override void Mutate(BoardState board) => _drawnCardIds = board.DrawCards(TargetFaction, NumberOfCards);
