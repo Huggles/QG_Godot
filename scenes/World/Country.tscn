@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://b4npdllfftdpp" path="res://assets/textures/Countries/Africa.png" id="8_usdfb"]
 [ext_resource type="Script" uid="uid://cylhgacdhvovm" path="res://scripts/C#/Input/OpaqueTextureRect.cs" id="9_optr"]
 [ext_resource type="Material" uid="uid://ba0cxvw7vb63r" path="res://assets/materials/StripesMaterial.tres" id="10_5csi4"]
+[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="11_vpscr"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5csi4"]
 shader = ExtResource("7_1qt7s")
@@ -97,6 +98,22 @@ label_settings = ExtResource("6_1hw3w")
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+
+[node name="VpScoreLabel" type="Label" parent="." unique_id=1739204118]
+unique_name_in_owner = true
+visible = false
+z_index = 31
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+text = "0"
+label_settings = ExtResource("11_vpscr")
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="TVTextureRectContainer" type="MarginContainer" parent="." unique_id=1398882110]
 unique_name_in_owner = true

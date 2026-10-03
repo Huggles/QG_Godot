@@ -26,6 +26,7 @@ public partial class CountryScene : Control
 
 
 	public Label CountryLabel => GetNode<Label>("CountryLabel");
+	public Label VpScoreLabel => GetNode<Label>("%VpScoreLabel");
 	public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
 
 	public Vector2 TextureSize => new Vector2(this.CountryState.StaticCountryData.Texture.GetWidth(), this.CountryState.StaticCountryData.Texture.GetHeight());
@@ -659,6 +660,33 @@ public partial class CountryScene : Control
 
 		CountryLabel.PivotOffset = CountryLabel.Size / 2f;
 		CountryLabel.Scale = new Vector2(scale, scale);
+	}
+
+	private const float VpScoreHoldSeconds = 1f;
+	private const float VpScoreFadeSeconds = 1f;
+	private const float VpScoreRiseDistance = 150f;
+
+	private Tween vpScoreTween;
+
+	/// <summary>
+	/// Pops the VP a country just scored over its middle: holds, then drifts up while fading out.
+	/// Calling again mid-animation kills the old tween and restarts from the rest position.
+	/// </summary>
+	public void ShowVpScore(int vp)
+	{
+		vpScoreTween?.Kill();
+
+		VpScoreLabel.Text = vp.ToString();
+		VpScoreLabel.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+		VpScoreLabel.Modulate = Colors.White;
+		VpScoreLabel.Visible = true;
+
+		float restY = VpScoreLabel.Position.Y;
+		vpScoreTween = VpScoreLabel.CreateTween();
+		vpScoreTween.TweenInterval(VpScoreHoldSeconds);
+		vpScoreTween.TweenProperty(VpScoreLabel, "position:y", restY - VpScoreRiseDistance, VpScoreFadeSeconds);
+		vpScoreTween.Parallel().TweenProperty(VpScoreLabel, "modulate:a", 0f, VpScoreFadeSeconds);
+		vpScoreTween.TweenCallback(Callable.From(() => VpScoreLabel.Visible = false));
 	}
 
 	private void ShowSupplyStar()
