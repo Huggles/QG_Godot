@@ -15,9 +15,11 @@ public partial class FactionHandDisplay : Control
 
 	// The side fan: the same fan, scaled down, for the cards a prompt offers that are not in hand.
 	// The step scales with the cards so the overlap looks the same at both sizes.
-	private const float MiniCardScale = 0.3f;
+	private const float MiniCardScale = 0.2f;
 	private const float FanGap = 60f;
 	private const float FanEdgeMargin = 20f;
+	// How far below the hand's centre line the side fan sits.
+	private const float MiniFanDropY = 40f;
 
 	private Control CardsContainer => GetNode<Panel>("%CardsContainerPanel");
 	private Panel CardPreviewContainer => GetNode<Panel>("%CardPreviewContainer");
@@ -355,15 +357,13 @@ public partial class FactionHandDisplay : Control
 		// A hand wide enough to push the side fan off screen is worth an overlap, not a fan nobody can see.
 		miniCentreX = Mathf.Min(miniCentreX, containerWidth - miniHalfWidth - FanEdgeMargin);
 
-		// Both fans hang from one top edge. The hand's own bottom is deliberately clipped by the screen
-		// edge, so bottom-aligning the smaller fan instead would cut nearly half of it away.
-		// -Size.Y/3 + halfHeight * (1 - HandCardScale) is literally the hand's top edge today.
-		float fanTopY = -CardScene.DEFAULT_SIZE.Y / 3f
-			+ CardScene.DEFAULT_SIZE.Y * 0.5f * (1f - HandCardScale);
+		// The side fan hangs from the hand's vertical centre (plus MiniFanDropY), not its top edge.
+		// -Size.Y/3 + halfHeight is literally the hand's centre today.
+		float fanCentreY = -CardScene.DEFAULT_SIZE.Y / 3f + CardScene.DEFAULT_SIZE.Y * 0.5f;
 
-		LayoutFan(handIds, selectableCardIds, containerCentreX, fanTopY, HandCardStepSize, HandCardScale, 0,
+		LayoutFan(handIds, selectableCardIds, containerCentreX, fanCentreY, HandCardStepSize, HandCardScale, 0,
 			isReactionWindow);
-		LayoutFan(sideIds, selectableCardIds, miniCentreX, fanTopY, miniStepSize, MiniCardScale, handIds.Count,
+		LayoutFan(sideIds, selectableCardIds, miniCentreX, fanCentreY + MiniFanDropY, miniStepSize, MiniCardScale, handIds.Count,
 			isReactionWindow);
 	}
 
@@ -437,15 +437,15 @@ public partial class FactionHandDisplay : Control
 	}
 
 	/// <summary>
-	/// Fan <paramref name="cardIds"/> out around <paramref name="centreX"/>, hanging from
-	/// <paramref name="topY"/> — both in CardsContainer space. Cards are always instantiated at
+	/// Fan <paramref name="cardIds"/> out around <paramref name="centreX"/>, centred on
+	/// <paramref name="centreY"/> — both in CardsContainer space. Cards are always instantiated at
 	/// CardScene.DEFAULT_SIZE and shrunk with Scale, because CardScene.RecalculateSizes derives its
 	/// font sizes from Size.Y and the .tscn is authored against the default.
 	/// </summary>
 	/// <param name="zIndexOffset">
 	/// Keeps the side fan above the hand wherever the clamp has had to overlap the two.
 	/// </param>
-	private void LayoutFan(List<int> cardIds, List<int> selectableCardIds, float centreX, float topY,
+	private void LayoutFan(List<int> cardIds, List<int> selectableCardIds, float centreX, float centreY,
 		float stepSize, float scale, int zIndexOffset, bool isReactionWindow = false)
 	{
 		float totalRotationSize = (cardIds.Count - 1) * RotationStepSize;
@@ -462,7 +462,7 @@ public partial class FactionHandDisplay : Control
 			Vector2 basePosition = new Vector2(centreX, 0);
 			basePosition.X += stepSize * index;
 			basePosition.X -= (totalSizeX / 2) + cardSceneInstance.PivotOffset.X;
-			basePosition.Y = topY - cardSceneInstance.PivotOffset.Y * (1f - scale);
+			basePosition.Y = centreY - cardSceneInstance.PivotOffset.Y;
 
 
 			cardSceneInstance.Position = basePosition;
