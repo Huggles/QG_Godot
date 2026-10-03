@@ -51,15 +51,23 @@ public partial class ScorePointsChangeEvent : ChangeEvent
 
     public override void Mutate(BoardState board) => board.AddScore(VPTurnSummary.Faction, VPTurnSummary.TotalScore);
 
-    /// <summary>The score pause and the VP labels run side by side; the event moves on once both are done.</summary>
-    protected override async Task OnLiveMutatedAsync()
-    {
-        GameAPI.PresentScore(VPTurnSummary);
-        await Task.WhenAll(Task.Delay(GameSettings.DurationLong), ShowSourceScores());
-    }
+    private Task _presentation = Task.CompletedTask;
 
     /// <summary>
-    /// Started here rather than queued as an AfterAnimation, which would only begin after the pause above.
+    /// Starts the score pause and the VP labels side by side but does not await them: this runs before
+    /// the broadcast, so awaiting here held the clients back until the host had finished.
+    /// </summary>
+    protected override Task OnLiveMutatedAsync()
+    {
+        GameAPI.PresentScore(VPTurnSummary);
+        _presentation = Task.WhenAll(Task.Delay(GameSettings.DurationLong), ShowSourceScores());
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The wait for the presentation started above, now after the broadcast.</summary>
+    protected override List<ChangeEventAnimation> AfterAnimations => new() { new AwaitTaskAnimation(_presentation) };
+
+    /// <summary>
     /// Same skip as EnqueueAnimations: OnLiveMutatedAsync also runs on a save replay and on a headless server.
     /// </summary>
     private Task ShowSourceScores()
