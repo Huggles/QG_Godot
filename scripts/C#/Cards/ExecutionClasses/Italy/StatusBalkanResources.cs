@@ -18,9 +18,8 @@ public partial class StatusBalkanResources : StatusCardLogic, IVPModifier
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
         const string reason = "an Italian Army in the Balkans";
-        return ScoringUnits(board).Count > 0
-            ? VPEntry.ForCountry(1, reason, (int)Country.Balkans)
-            : new VPEntry(0, reason);
+        UnitState army = ScoringUnits(board).FirstOrDefault();
+        return army != null ? VPEntry.ForUnit(1, reason, army) : new VPEntry(0, reason);
     }
 
     protected override List<Condition> CardTriggers()

@@ -17,8 +17,8 @@ public partial class StatusMackenzieKingDraftstheNationalResourcesMobilizationAc
 
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        // One point per QUALIFYING SPACE, not per piece: two navies in the North Atlantic score one.
-        return VPEntry.ForCountries(ScoringUnits(board).Select(board.CountryOf), 1, $"a navy in {CountryState.ForEnum(Country.NorthAtlantic).Label} and army in {CountryState.ForEnum(Country.Canada).Label}");
+        // One point per piece is one per space: a faction never has two units in one space.
+        return VPEntry.ForUnits(ScoringUnits(board), 1, $"a navy in {CountryState.ForEnum(Country.NorthAtlantic).Label} and army in {CountryState.ForEnum(Country.Canada).Label}");
     }
 
     protected override List<Condition> CardTriggers()

@@ -16,13 +16,13 @@ public partial class StatusImperialDesigns : StatusCardLogic, IVPModifier
 
     public override TargetSet Targets() => TargetSet.Units(ScoringUnits(BoardState.Live));
 
-    /// <summary>A flat 1 however many spaces are held, shown on the first held one in list order.</summary>
+    /// <summary>A flat 1 however many spaces are held, shown on the unit in the first held one in list order.</summary>
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
         string reason = $"{FactionState.ForEnum(Faction).FactionData.FactionAdjactiveLabel} army in {CountryState.ForEnum(scoringCountries[0]).Label} or {CountryState.ForEnum(scoringCountries[1]).Label}";
         List<UnitState> units = ScoringUnits(board);
-        Country? first = scoringCountries.Cast<Country?>().FirstOrDefault(c => units.Any(u => board.CountryStateOf(u).Country == c));
-        return first == null ? new VPEntry(0, reason) : VPEntry.ForCountry(1, reason, (int)first);
+        UnitState first = units.OrderBy(u => scoringCountries.IndexOf(board.CountryStateOf(u).Country)).FirstOrDefault();
+        return first == null ? new VPEntry(0, reason) : VPEntry.ForUnit(1, reason, first);
     }
 
     protected override List<Condition> CardTriggers()

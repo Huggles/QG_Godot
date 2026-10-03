@@ -17,8 +17,8 @@ public partial class StatusSwedishIronOre : StatusCardLogic, IVPModifier
 
     public virtual VPEntry AddVictoryPoints(BoardState board)
     {
-        // One point per QUALIFYING SPACE, not per piece: two navies in the Baltic still score one.
-        return VPEntry.ForCountries(ScoringUnits(board).Select(board.CountryOf), 1, "a navy in the Baltic Sea and army in Scandinavia");
+        // One point per piece is one per space: a faction never has two units in one space.
+        return VPEntry.ForUnits(ScoringUnits(board), 1, "a navy in the Baltic Sea and army in Scandinavia");
     }
 
     protected override List<Condition> CardTriggers()

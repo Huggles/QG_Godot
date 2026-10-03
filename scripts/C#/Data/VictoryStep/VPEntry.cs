@@ -55,10 +55,7 @@ public partial class VPEntry
         return new VPEntry(byUnit.Values.Sum(), reason, sourceUnitVPs: byUnit);
     }
 
-    /// <summary><paramref name="vpEach"/> per distinct country, for cards that pay per occupied space rather than per unit.</summary>
-    public static VPEntry ForCountries(IEnumerable<int> countryIds, int vpEach, string reason)
-    {
-        Dictionary<int, int> byCountry = countryIds.Distinct().ToDictionary(id => id, _ => vpEach);
-        return new VPEntry(byCountry.Values.Sum(), reason, byCountry);
-    }
+    /// <summary>All the points shown on one unit, for a flat score that unit unlocked.</summary>
+    public static VPEntry ForUnit(int victoryPoints, string reason, UnitState unit)
+        => new VPEntry(victoryPoints, reason, sourceUnitVPs: new Dictionary<int, int> { [unit.Id] = victoryPoints });
 }

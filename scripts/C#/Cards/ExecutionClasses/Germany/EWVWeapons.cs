@@ -24,7 +24,7 @@ public partial class EWVWeapons : EWCardLogic
         {
             new ResultStep(this, Choose.Fixed(c => ScoringUnits(c.Board).Count == 0
                     ? null
-                    : new ScorePointsChangeEvent(VPEntry.ForCountry(3, "German Army in Western Europe", (int)Country.WesternEurope), Faction))),
+                    : new ScorePointsChangeEvent(VPEntry.ForUnit(3, "German Army in Western Europe", ScoringUnits(c.Board)[0]), Faction))),
 
             new ResultStep(this, Choose.Fixed(c => ScoredBy(c.Previous) == 0 ? null
                 : new ForceDiscardCardsChangeEvent(Faction, Faction.UNITED_KINGDOM, 1)))
