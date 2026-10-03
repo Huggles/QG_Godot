@@ -38,7 +38,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// Status and Response cards — in the side fan, greyed out unless the host offered them.
     /// Presentation only; the faction row's Active Cards button keeps working either way.
     /// </summary>
-    public bool ShowActiveCardsInFan { get; private set; } = false;
+    public bool ShowActiveCardsInFan { get; private set; } = true;
 
     /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
     public string LastJoinIp { get; private set; } = "127.0.0.1";
@@ -56,15 +56,19 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public float SfxVolume { get; private set; } = 0.8f;
 
     /// <summary>How the window presents itself. Applied by <see cref="DisplaySettings"/>.</summary>
-    public WindowDisplayMode DisplayMode { get; private set; } = WindowDisplayMode.Windowed;
+    public WindowDisplayMode DisplayMode { get; private set; } = DefaultDisplayMode;
+
+    /// <summary>Fullscreen for players in a release export; windowed while developing.</summary>
+    private static WindowDisplayMode DefaultDisplayMode => GameContext.IsProductionBuild
+        ? WindowDisplayMode.BorderlessFullscreen
+        : WindowDisplayMode.Windowed;
 
     /// <summary>
     /// Window size for <see cref="WindowDisplayMode.Windowed"/>. Both fullscreen modes run at the
     /// desktop resolution, so this is remembered rather than overwritten while one of those is active.
     ///
-    /// Defaulted from the actual window in <see cref="Load"/> rather than to a literal 1920x1080:
-    /// Godot shrinks the boot window to fit a smaller monitor, and applying a hard-coded 1080p on
-    /// startup would push most of it off screen on exactly the machines that can least afford it.
+    /// Defaulted in <see cref="Load"/> from the screen (release) or the boot window (dev), rather
+    /// than to a literal 1920x1080 that would push most of the window off a smaller monitor.
     /// </summary>
     public Vector2I WindowResolution { get; private set; } = new Vector2I(1920, 1080);
 
@@ -180,11 +184,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetShowCountryLabels(bool value) { ShowCountryLabels = value; Save(); }
     public void SetShowDebugMenu(bool value) { ShowDebugMenu = value; Save(); }
 
-    /// <summary>
-    /// False until a display choice has actually been saved. Guards the startup apply: on a first
-    /// launch there is nothing to restore, and resizing the window to a value we only just read off
-    /// that same window would be a no-op at best and a fight with Godot's boot-time fit at worst.
-    /// </summary>
+    /// <summary>False until a display choice has been saved, so a first launch picks its own size.</summary>
     private bool _hasSavedDisplay;
 
     public override void _Ready()
@@ -194,8 +194,9 @@ public partial class GameSettings : SingletonNode<GameSettings>
         Load();
 
         // Same shape as AudioManager._Ready pushing the saved levels onto the buses: the values are
-        // loaded here, so this is where they first reach the thing they describe.
-        if (_hasSavedDisplay)
+        // loaded here, so this is where they first reach the thing they describe. A dev build's
+        // first launch skips it: its size was read off the window, so there is nothing to apply.
+        if (_hasSavedDisplay || GameContext.IsProductionBuild)
         {
             DisplaySettings.Apply(DisplayMode, WindowResolution);
         }
@@ -212,7 +213,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             PresentationSpeed = (GameSpeed)Math.Clamp(saved, 0, 2);
             DebugLevel        = (DebugVerbosity)config.GetValue(Section, "debug_level", (int)DebugVerbosity.INFO).As<int>();
             AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
-            ShowActiveCardsInFan = config.GetValue(Section, "show_active_cards_in_fan", false).As<bool>();
+            ShowActiveCardsInFan = config.GetValue(Section, "show_active_cards_in_fan", true).As<bool>();
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
             LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
 
@@ -225,7 +226,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             SfxVolume    = Mathf.Clamp(config.GetValue(Section, "sfx_volume",    0.8f).As<float>(), 0f, 1f);
 
             DisplayMode = (WindowDisplayMode)Math.Clamp(
-                config.GetValue(Section, "display_mode", (int)WindowDisplayMode.Windowed).As<int>(),
+                config.GetValue(Section, "display_mode", (int)DefaultDisplayMode).As<int>(),
                 0, (int)WindowDisplayMode.ExclusiveFullscreen);
 
             // Keyed off the width because that is what tells a saved choice apart from a first launch.
@@ -251,12 +252,13 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
         }
 
-        // First launch, or a config file predating display settings: adopt whatever size Godot
-        // actually opened at. That is already fitted to the monitor, so it is the only safe default —
-        // and it means the picker opens showing the player's real size rather than a guess.
+        // First launch, or a config file predating display settings: a release build picks from the
+        // screen; while developing, adopt whatever size Godot opened at, already fitted to the monitor.
         if (!_hasSavedDisplay && !GameContext.IsHeadless)
         {
-            WindowResolution = DisplayServer.WindowGetSize();
+            WindowResolution = GameContext.IsProductionBuild
+                ? DisplaySettings.DefaultResolution()
+                : DisplayServer.WindowGetSize();
         }
 
         // DebugMultiplayer is a runtime-only flag, driven solely by the command-line arg used

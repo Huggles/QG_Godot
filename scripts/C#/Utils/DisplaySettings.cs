@@ -59,6 +59,17 @@ public static class DisplaySettings
     }
 
     /// <summary>
+    /// The largest <see cref="Ladder"/> entry that fits the usable area of the current screen, so
+    /// the window and its title bar clear the taskbar. Falls back to the boot window's size.
+    /// </summary>
+    public static Vector2I DefaultResolution()
+    {
+        Vector2I usable = DisplayServer.ScreenGetUsableRect(DisplayServer.WindowGetCurrentScreen()).Size;
+        Vector2I[] fitting = Ladder.Where(size => size.X <= usable.X && size.Y <= usable.Y).ToArray();
+        return fitting.Length > 0 ? fitting[^1] : DisplayServer.WindowGetSize();
+    }
+
+    /// <summary>
     /// Applies <paramref name="mode"/>, and <paramref name="resolution"/> when the mode is one that
     /// has a resolution of its own.
     /// </summary>
