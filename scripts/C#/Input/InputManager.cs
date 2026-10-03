@@ -95,7 +95,7 @@ public partial class InputManager : Node2D
 	/// <param name="isHandPlayPrompt">
 	/// True only for <see cref="InputRequest.HandCardPlayRequestHandler"/>'s prompt — the faction's own
 	/// play at reaction depth 0. Recorded on <see cref="ActiveCardPrompt.IsHandPlay"/>, where
-	/// <c>BottomLeftMenu</c> reads it; kept separate from <paramref name="separateNonHandCards"/>, which
+	/// <c>MiniMenu</c> reads it; kept separate from <paramref name="separateNonHandCards"/>, which
 	/// happens to be true for the same one prompt today but is a statement about how the fan is drawn.
 	/// </param>
 	/// <param name="passCostText">
@@ -495,6 +495,9 @@ public partial class InputManager : Node2D
 	private void KeyboardMovement()
 	{
 		if (Camera == null) return;
+
+		// Polled, so a focused text field (chat) does not swallow it: typing WASD would pan the board.
+		if (GetViewport().GuiGetFocusOwner() is LineEdit or TextEdit) return;
 
 		int inputUp = Input.IsActionPressed("ui_up") ? 1 : 0;
 		int inputDown = Input.IsActionPressed("ui_down") ? 1 : 0;

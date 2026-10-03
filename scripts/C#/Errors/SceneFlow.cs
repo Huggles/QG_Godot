@@ -68,6 +68,9 @@ public static class SceneFlow
             // Back to the transport's own answer for "who am I"; the next session's host will say.
             SessionIdentity.Reset();
 
+            // ChatService is an autoload, so without this one game's conversation opens the next.
+            ChatService.Instance?.Clear();
+
             // NetworkApi is an autoload, so its pending input requests outlive the game scene. Quitting
             // while a prompt is open otherwise leaves a live awaiter holding a multi-minute backstop
             // timer, which later resolves a TaskCompletionSource belonging to a dead loop and tries to

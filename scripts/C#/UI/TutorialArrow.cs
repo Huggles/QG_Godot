@@ -5,7 +5,7 @@ using Godot;
 /// <see cref="TutorialArrowData"/> — a viewport-relative point and a heading, not a node reference.
 ///
 /// Lives as the LAST child of the Interface CanvasLayer, with z_index 160: one step above the highest
-/// HUD element in that layer (the bottom-left menu, at 150), because an arrow that draws underneath
+/// HUD element in that layer (the mini menu, at 150), because an arrow that draws underneath
 /// the thing it points at is worse than no arrow. Tree order alone cannot do it — z_index beats tree
 /// order, and half this layer sets one.
 ///

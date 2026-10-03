@@ -672,7 +672,7 @@ public abstract partial class InputRequest
             // separateNonHandCards: this is the one prompt whose offer spans two zones, so the table
             // cards that activate instead of a hand play get their own smaller fan beside the hand
             // rather than being interleaved into it by card id.
-            // isHandPlayPrompt: tells the bottom-left card back that this prompt IS this faction's hand,
+            // isHandPlayPrompt: tells the mini menu card back that this prompt IS this faction's hand,
             // so pressing it brings the prompt back instead of browsing an unclickable copy over it.
             // passCostText: this is the one prompt where passing costs something, and the Skip button
             // has to say so before it is pressed.

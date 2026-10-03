@@ -94,6 +94,9 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	/// prompt behind it.
 	/// </summary>
 	public static void ShowText(string text, int duration, Faction faction = (Faction)(-1)){
+		// A restore replays the whole game; only the prompt it resumes on, shown after, belongs in chat.
+		if (!ReplayContext.IsFastForwarding)
+			ChatService.Instance?.PostGameMessage(text);
 		Instance?.ShowTextForDuration(text, duration, faction);
 	}
 

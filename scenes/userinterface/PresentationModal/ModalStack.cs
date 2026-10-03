@@ -202,7 +202,7 @@ public partial class ModalStack : Control, LoadableUI, IRecallablePrompt
 	}
 
 	/// <summary>
-	/// Put the on-screen input prompt aside. Used by <c>BottomLeftMenu</c> before it draws a hand onto
+	/// Put the on-screen input prompt aside. Used by <c>MiniMenu</c> before it draws a hand onto
 	/// <c>FactionHandDisplay</c>, which sits below the modal band and would otherwise be hidden behind it.
 	/// </summary>
 	public bool ParkTopRequest()

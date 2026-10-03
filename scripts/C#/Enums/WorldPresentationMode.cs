@@ -4,7 +4,7 @@
 /// faction, TacticalTeam by side. Both are the same overlay with a different palette, so a country held
 /// by Germany and Italy shows two stripes in Tactical and one in TacticalTeam.
 ///
-/// Declaration order is the order the view button cycles through, since BottomLeftMenu walks
+/// Declaration order is the order the view button cycles through, since MiniMenu walks
 /// Enum.GetValues rather than naming the modes.
 ///
 /// Top level rather than nested in CountryScene because EventBus.WorldPresentationViewChanged carries it:

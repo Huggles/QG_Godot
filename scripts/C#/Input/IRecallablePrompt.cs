@@ -1,8 +1,8 @@
 /// <summary>
-/// Something this peer was asked and can put away without answering, that the bottom-left recall
+/// Something this peer was asked and can put away without answering, that the mini menu recall
 /// button brings back.
 ///
-/// Registered with <see cref="RecallablePrompts"/> so <c>BottomLeftMenu</c> reads one thing instead of
+/// Registered with <see cref="RecallablePrompts"/> so <c>MiniMenu</c> reads one thing instead of
 /// growing a branch per prompt kind — board country/unit selection is the next one coming.
 /// </summary>
 public interface IRecallablePrompt

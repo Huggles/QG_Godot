@@ -145,7 +145,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>
     /// Persists all three audio levels in one write and pushes them onto the audio buses.
     /// Deliberately a single setter: <see cref="Save"/> rewrites the whole config file, so a
-    /// slider must not call this per tick — see the sound panel in <c>BottomLeftMenu</c>, which
+    /// slider must not call this per tick — see the sound panel in <c>MiniMenu</c>, which
     /// applies changes live through <see cref="AudioManager.SetBusVolume"/> and only lands here
     /// when the drag ends or the panel closes.
     /// </summary>

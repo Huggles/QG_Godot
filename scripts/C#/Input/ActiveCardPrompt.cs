@@ -26,7 +26,7 @@ using System.Collections.Generic;
 ///
 /// Carried rather than recognised from the drawn set: that set is deliberately wider than the hand,
 /// so comparing it against <see cref="DeckState.HandCardIds"/> cannot tell this prompt from one that
-/// merely happens to include a hand card. <c>BottomLeftMenu</c> reads it to know that a click on this
+/// merely happens to include a hand card. <c>MiniMenu</c> reads it to know that a click on this
 /// faction's card back should hand the prompt back rather than browse a dead copy of the same hand
 /// over the top of it.
 /// </param>
@@ -59,7 +59,7 @@ using System.Collections.Generic;
 /// call falls back to <paramref name="Faction"/> alone.
 ///
 /// What it is read for: ordering the fan so each owner's cards sit together, naming the factions in
-/// the banner, arming every one of them when a scoped skip is pressed, and letting the bottom-left
+/// the banner, arming every one of them when a scoped skip is pressed, and letting the mini
 /// menu recognise a click on ANY of their card backs as a recall of this prompt rather than a browse
 /// over the top of it.
 ///

@@ -59,7 +59,7 @@ public partial class FactionHandDisplay : Control
 
 	public override void _ExitTree()
 	{
-		// Callers guard on `Current == null` (InputManager.RefreshCardPrompt, BottomLeftMenu) — a
+		// Callers guard on `Current == null` (InputManager.RefreshCardPrompt, MiniMenu) — a
 		// pointer left on a freed node from the previous game passes that guard and then throws.
 		if (Current == this) Current = null;
 
@@ -103,7 +103,7 @@ public partial class FactionHandDisplay : Control
 	/// </summary>
 	private void RefreshFor(Faction faction)
 	{
-		// A hand pulled up from the bottom-left menu is claimed OVER a live prompt rather than instead
+		// A hand pulled up from the mini menu is claimed OVER a live prompt rather than instead
 		// of one, so browsing is checked first and keeps the behaviour it always had: refresh what is
 		// actually on the display.
 		bool browsing = HandBrowsing.IsActive;
@@ -148,7 +148,7 @@ public partial class FactionHandDisplay : Control
 		Faction upcoming = UpcomingLocalFaction();
 		if (upcoming == Faction.NONE || upcoming == followedFaction) return;
 
-		// An open card prompt owns this display, and so does a hand pulled up from the bottom-left menu
+		// An open card prompt owns this display, and so does a hand pulled up from the mini menu
 		// (claimed over a live request rather than instead of one, so browsing being set says nothing
 		// about whether a prompt is open underneath it). Deliberately not recorded as followed when
 		// skipped: the next step retries, so the display catches up as soon as it is free again.

@@ -97,7 +97,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 			ParkButton.Pressed += OnParkButtonPressed;
 			ParkButton.Visible = false;
 			// Names the action, because the button itself is now just a glyph in the title bar.
-			ParkButton.TooltipText = "Hide — put this aside without answering it, and bring it back from the bottom-left menu.";
+			ParkButton.TooltipText = "Hide — put this aside without answering it, and bring it back from the mini menu.";
 		}
 	}
 

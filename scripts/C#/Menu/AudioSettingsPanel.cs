@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// The Audio tab of <see cref="SettingsDialog"/>: the three bus levels and one picker per
 /// configurable sound cue.
 ///
-/// This used to be the sound panel in the game's bottom-left menu, which meant audio was only
+/// This used to be the sound panel in the game's mini menu, which meant audio was only
 /// reachable once a game had loaded. It lives here now so the main menu reaches the same controls,
 /// and so there is exactly one place these values are edited.
 ///

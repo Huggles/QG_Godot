@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://poytc7oh3ay1" path="res://scenes/userinterface/History/GameHistoryList.cs" id="9_oxwje"]
 [ext_resource type="PackedScene" uid="uid://bhqnymug3arir" path="res://scenes/userinterface/History/game_history_item.tscn" id="10_dvfjj"]
 [ext_resource type="Script" uid="uid://bqnash47ag2v1" path="res://scripts/C#/UI/DebugOverlay.cs" id="11_debugoverlay"]
-[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="11_fw0ih"]
 [ext_resource type="Script" uid="uid://cnu2sfmowg40f" path="res://scripts/C#/UI/GameStateDetailPanel.cs" id="12_gamestatedetail"]
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="14_skipscene"]
 [ext_resource type="Script" uid="uid://du4glf4b1bhy2" path="res://scripts/C#/UI/SelectionSkipButton.cs" id="15_skip"]
@@ -16,7 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
 [ext_resource type="Script" uid="uid://by4r72f7bleb0" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
 [ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="19_nfi4l"]
-[ext_resource type="Script" uid="uid://5xe5ni5ixdvo" path="res://scenes/userinterface/BottomLeftMenu.cs" id="19_x2nnb"]
+[ext_resource type="Script" uid="uid://5xe5ni5ixdvo" path="res://scenes/userinterface/MiniMenu.cs" id="19_x2nnb"]
 [ext_resource type="PackedScene" uid="uid://b2aymnt6sg5po" path="res://scenes/userinterface/MarginTextureButton.tscn" id="22_x2nnb"]
 [ext_resource type="Texture2D" uid="uid://b5evjrup5daot" path="res://assets/textures/Other/eye_icon.png" id="23_eyeicon"]
 [ext_resource type="PackedScene" uid="uid://bqcmndrmsg001" path="res://scenes/userinterface/CommanderMessage/CommanderMessage.tscn" id="24_cmdrmsg"]
@@ -28,11 +27,31 @@
 [ext_resource type="Texture2D" uid="uid://s1w8qwl20na2" path="res://assets/textures/Other/Icons/Arrow.png" id="29_tutarrowtex"]
 [ext_resource type="Script" uid="uid://bqgrndlbl0001" path="res://scripts/C#/UI/GameRoundLabel.cs" id="30_roundlbl"]
 [ext_resource type="PackedScene" uid="uid://cb05yfgtalgy8" path="res://scenes/userinterface/PlayerAction/TurnBadge.tscn" id="31_turnbadge"]
+[ext_resource type="PackedScene" uid="uid://bchatbox0qg01" path="res://scenes/userinterface/Chat/ChatBox.tscn" id="32_chatbox"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_round"]
 font_size = 34
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fpk7i"]
+resource_local_to_scene = true
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.13333334, 0.13333334, 0.13333334, 0.7294118)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.5, 0.5, 0.8)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0, 0, 0, 0.14509805)
+shadow_size = 10
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -215,38 +234,39 @@ z_index = 99
 
 [node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
 
-[node name="BottomLeftMenu" type="Control" parent="." unique_id=1063376234]
+[node name="ChatBox" parent="." unique_id=1730245519 instance=ExtResource("32_chatbox")]
+offset_right = 513.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_fpk7i")
+
+[node name="MiniMenu" type="Control" parent="." unique_id=1063376234]
 z_index = 150
 layout_mode = 3
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -40.0
+anchors_preset = 0
 offset_right = 40.0
-grow_vertical = 0
+offset_bottom = 40.0
 script = ExtResource("19_x2nnb")
 
-[node name="BottomLeftMenuModal" type="PanelContainer" parent="BottomLeftMenu" unique_id=54608066]
+[node name="MiniMenuModal" type="PanelContainer" parent="MiniMenu" unique_id=54608066]
 unique_name_in_owner = true
 z_index = 150
 layout_mode = 0
 offset_left = 13.0
-offset_top = -210.0
+offset_top = 50.0
 offset_right = 113.0
-offset_bottom = -10.0
+offset_bottom = 250.0
 theme_override_styles/panel = ExtResource("19_nfi4l")
 
-[node name="MarginContainer" type="MarginContainer" parent="BottomLeftMenu/BottomLeftMenuModal" unique_id=160946699]
+[node name="MarginContainer" type="MarginContainer" parent="MiniMenu/MiniMenuModal" unique_id=160946699]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="BottomLeftMenu/BottomLeftMenuModal/MarginContainer" unique_id=2016041426]
+[node name="VBoxContainer" type="VBoxContainer" parent="MiniMenu/MiniMenuModal/MarginContainer" unique_id=2016041426]
 layout_mode = 2
 
-[node name="CountryLabelsButton" type="Button" parent="BottomLeftMenu/BottomLeftMenuModal/MarginContainer/VBoxContainer" unique_id=254644009]
+[node name="CountryLabelsButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=254644009]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
@@ -254,7 +274,7 @@ theme_override_font_sizes/font_size = 8
 toggle_mode = true
 text = "Country Labels"
 
-[node name="DebugMenuButton" type="Button" parent="BottomLeftMenu/BottomLeftMenuModal/MarginContainer/VBoxContainer" unique_id=1615541710]
+[node name="DebugMenuButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541710]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
@@ -263,14 +283,14 @@ toggle_mode = true
 text = "Debug Menu
 "
 
-[node name="WorldPresentationButton" type="Button" parent="BottomLeftMenu/BottomLeftMenuModal/MarginContainer/VBoxContainer" unique_id=1615541711]
+[node name="WorldPresentationButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541711]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 theme_override_font_sizes/font_size = 8
 text = "View: Normal"
 
-[node name="BottomLeftMenuContainer" type="PanelContainer" parent="BottomLeftMenu" unique_id=1591248873]
+[node name="MiniMenuContainer" type="PanelContainer" parent="MiniMenu" unique_id=1591248873]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 propagate_maximum_size = false
@@ -285,20 +305,20 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = ExtResource("19_nfi4l")
 
-[node name="BottomLeftMenuHBox" type="HBoxContainer" parent="BottomLeftMenu/BottomLeftMenuContainer" unique_id=342587826]
+[node name="MiniMenuHBox" type="HBoxContainer" parent="MiniMenu/MiniMenuContainer" unique_id=342587826]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 propagate_maximum_size = false
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="VisibilityButton" parent="BottomLeftMenu/BottomLeftMenuContainer/BottomLeftMenuHBox" unique_id=628711102 instance=ExtResource("22_x2nnb")]
+[node name="VisibilityButton" parent="MiniMenu/MiniMenuContainer/MiniMenuHBox" unique_id=628711102 instance=ExtResource("22_x2nnb")]
 unique_name_in_owner = true
 layout_mode = 2
 TextureNormal = ExtResource("23_eyeicon")
 TexturePressed = ExtResource("24_eyeiconp")
 
-[node name="ActiveInputRequestButton" parent="BottomLeftMenu/BottomLeftMenuContainer/BottomLeftMenuHBox" unique_id=628711103 instance=ExtResource("22_x2nnb")]
+[node name="ActiveInputRequestButton" parent="MiniMenu/MiniMenuContainer/MiniMenuHBox" unique_id=628711103 instance=ExtResource("22_x2nnb")]
 unique_name_in_owner = true
 layout_mode = 2
 TextureNormal = ExtResource("25_playedcards")

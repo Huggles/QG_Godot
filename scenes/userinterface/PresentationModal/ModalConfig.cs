@@ -47,7 +47,7 @@ public class ModalConfig
 
     /// <summary>
     /// Whether this modal offers the "Hide" button, which puts the prompt aside without answering it so
-    /// the player can look at the board and bring it back from the bottom-left menu.
+    /// the player can look at the board and bring it back from the mini menu.
     ///
     /// A selection prompt is exactly what needs it: no prompt carries a Cancel button, so this is the only
     /// way to get one off the screen without answering it. An info modal has nothing to come back to, and

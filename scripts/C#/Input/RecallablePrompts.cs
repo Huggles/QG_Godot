@@ -1,5 +1,5 @@
 /// <summary>
-/// The single thing the bottom-left recall button can bring back on this peer, or null.
+/// The single thing the mini menu recall button can bring back on this peer, or null.
 ///
 /// Single-slot on purpose: a peer is only ever asked one thing at a time (see
 /// <c>OpeningDiscard.Run</c>, which groups its requests by controlling peer for exactly that reason),

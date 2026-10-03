@@ -1,7 +1,7 @@
 /// <summary>
-/// The hand the player pulled up from the bottom-left menu to look at, or NONE when they have not.
+/// The hand the player pulled up from the mini menu to look at, or NONE when they have not.
 ///
-/// A static rather than a property on <c>BottomLeftMenu</c> because the parts that must not draw over
+/// A static rather than a property on <c>MiniMenu</c> because the parts that must not draw over
 /// a browsed hand are elsewhere in the tree: <see cref="FactionHandDisplay"/> checks it before letting
 /// a prompt or the turn follower take the display back, and there is no accessor from there to the
 /// menu node. The menu owns the value; everyone else only asks.

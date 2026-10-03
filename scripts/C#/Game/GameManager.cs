@@ -142,6 +142,9 @@ public partial class GameManager : Node
         DebugUtilities.PrintPeerFinest("GameManager Ready");
         LoadAvailableScenarios();
 
+        // Chat is game-agnostic; this is where it learns our names and teams.
+        ChatService.Roster = new PlayerRegistryChatRoster();
+
         // Listen for scene changes
         GetTree().NodeAdded += OnNodeAdded;
     }

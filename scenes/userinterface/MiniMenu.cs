@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class BottomLeftMenu : Control
+public partial class MiniMenu : Control
 {
 
 
-	public Control BottomLeftMenuContainer => GetNode<Control>("%BottomLeftMenuHBox");
+	public Control MiniMenuContainer => GetNode<Control>("%MiniMenuHBox");
 	public MarginTextureButton VisibilityButton => GetNode<MarginTextureButton>("%VisibilityButton");
 	public MarginTextureButton ActiveInputRequestButton => GetNode<MarginTextureButton>("%ActiveInputRequestButton");
-	public PanelContainer BottomLeftMenuModal => GetNode<PanelContainer>("%BottomLeftMenuModal");
+	public PanelContainer MiniMenuModal => GetNode<PanelContainer>("%MiniMenuModal");
 
 	public Button ToggleCountryLabelsButton => GetNode<Button>("%CountryLabelsButton");
 	public Button ToggleDebugMenuButton => GetNode<Button>("%DebugMenuButton");
@@ -39,7 +39,7 @@ public partial class BottomLeftMenu : Control
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		BottomLeftMenuModal.Visible = false;
+		MiniMenuModal.Visible = false;
 		VisibilityButton.TextureButton.Pressed += OnVisibilityButtonPressed;
 		ActiveInputRequestButton.TextureButton.Pressed += OnActiveInputRequestButtonPressed;
 
@@ -109,7 +109,7 @@ public partial class BottomLeftMenu : Control
 
 		foreach (MarginTextureButton factionButton in _factionButtons.Values)
 		{
-			BottomLeftMenuContainer.RemoveChild(factionButton);
+			MiniMenuContainer.RemoveChild(factionButton);
 			factionButton.QueueFree();
 		}
 		_factionButtons.Clear();
@@ -125,7 +125,7 @@ public partial class BottomLeftMenu : Control
 			marginTextureButton.TexturePressed = cardTexture;
 			marginTextureButton.TooltipText = $"Show the {faction} hand";
 
-			BottomLeftMenuContainer.AddChild(marginTextureButton);
+			MiniMenuContainer.AddChild(marginTextureButton);
 			// Captured rather than read back off the sender: the button carries no faction of its own.
 			marginTextureButton.TextureButton.Pressed += () => OnFactionButtonPressed(faction);
 			_factionButtons[faction] = marginTextureButton;
@@ -261,7 +261,7 @@ public partial class BottomLeftMenu : Control
 	public void OnVisibilityButtonPressed()
 	{
 		VisibilityModalOpen = !VisibilityModalOpen;
-		BottomLeftMenuModal.Visible = VisibilityModalOpen;
+		MiniMenuModal.Visible = VisibilityModalOpen;
 	}
 
 	/// <summary>
