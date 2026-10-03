@@ -466,6 +466,10 @@ public partial class NetworkApi : Node
                 tcs.Task, forceTimeout.Task, withdrawn.Task, Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
             timeoutCts.Cancel();
 
+            // Quitting resolves this as skipped so nothing dangles, but the caller belongs to a freed game:
+            // unwind it here (benign) rather than let it resume against a null GameFlow.Instance.
+            ErrorReporter.ThrowIfSessionAbandoned(sessionGeneration);
+
             if (completed == tcs.Task)
             {
                 ClearPendingInput(pendingId, pending);
