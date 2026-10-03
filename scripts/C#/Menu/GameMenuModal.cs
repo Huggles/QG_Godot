@@ -111,7 +111,7 @@ public partial class GameMenuModal : MenuModal
         // moments a player reaches for this menu, take the request now and honour it at the next step
         // boundary. That is usually seconds away.
         bool immediate = GameFlow.Instance.CanSave;
-        string path = immediate ? MultiplayerSession.Instance.CaptureSave(displayName) : null;
+        string path = immediate ? SaveCapture.Capture(displayName) : null;
 
         if (!immediate)
             GameFlow.Instance.RequestDeferredSave(displayName);

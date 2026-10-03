@@ -12,16 +12,17 @@ using System.Threading.Tasks;
 ///                                    RecycleCardChangeEvent): during a replay the host must behave
 ///                                    like a client and use the recorded outcome instead.
 ///   <see cref="IsFastForwarding"/> — "should presentation and pacing be skipped?" Host AND client.
-///                                    A client never replays anything; it just drains the host's
-///                                    broadcast burst, and it must do so without animating.
+///                                    A client applies the log the host sends it, and must do so
+///                                    without animating.
+///   <see cref="IsApplyingRestoreLog"/> — Client-only: the queue is applying that log.
 ///
-/// IsFastForwarding is a superset: a host replaying is always also fast-forwarding.
+/// IsFastForwarding is a superset of both: a peer restoring is always also fast-forwarding.
 /// </summary>
 public static class ReplayContext
 {
     /// <summary>
     /// Host only: ChangeEvents are being re-applied from a save rather than produced by play.
-    /// Set for the duration of <c>MultiplayerSession.RestoreSavedGame</c>'s replay loop.
+    /// Set for the duration of <c>SessionRestore.RestoreAsync</c>'s replay loop.
     /// </summary>
     public static bool IsReplaying { get; set; }
 
@@ -31,6 +32,13 @@ public static class ReplayContext
     /// again once the loading cover lifts.
     /// </summary>
     public static bool IsFastForwarding { get; private set; }
+
+    /// <summary>
+    /// Client only: the restore log the host sent is being applied. The client gets no tag snapshots
+    /// during it, so BoardState skips its tag-derived legality checks — the host validated these events
+    /// already, and the per-event hash still catches a divergence.
+    /// </summary>
+    public static bool IsApplyingRestoreLog { get; set; }
 
     public static void BeginFastForward() => IsFastForwarding = true;
 
@@ -45,6 +53,7 @@ public static class ReplayContext
     {
         IsReplaying = false;
         IsFastForwarding = false;
+        IsApplyingRestoreLog = false;
     }
 
     /// <summary>

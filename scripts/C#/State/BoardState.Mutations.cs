@@ -30,6 +30,12 @@ public sealed partial class BoardState
     // ── Units ───────────────────────────────────────────────────────────────
 
     /// <summary>
+    /// A client applying the host's restore log has no tag snapshots, so the checks that read derived
+    /// tags (buildable, recruitable, in supply, attackable) would refuse legal moves. See ReplayContext.
+    /// </summary>
+    private bool TrustsRecordedOutcome => IsLive && ReplayContext.IsApplyingRestoreLog;
+
+    /// <summary>
     /// Put a unit of <paramref name="unitType"/> into a country and return its id. "Build that army
     /// again": a faction already there redeploys the SAME piece, so no pool piece is consumed and the
     /// board does not change. Otherwise the first undeployed piece in creation order is used, which is
@@ -44,7 +50,8 @@ public sealed partial class BoardState
 
         bool rebuildInPlace = units.ContainsKey(faction);
         TagContainer tags = Of(countryState).Tags;
-        bool deployable = deployType == DeployType.BUILD ? tags.Has(Tag.Buildable, faction) : tags.Has(Tag.Recruitable, faction);
+        bool deployable = TrustsRecordedOutcome
+                          || (deployType == DeployType.BUILD ? tags.Has(Tag.Buildable, faction) : tags.Has(Tag.Recruitable, faction));
 
         // Fullness cannot block a rebuild in place: the slot being filled is the faction's own. The two
         // reasons stay distinct — a full country and a target that stopped being legal have different
@@ -82,7 +89,7 @@ public sealed partial class BoardState
 
         switch (reason)
         {
-            case UnitRemovalReason.SUPPLY when InSupply(unitState):
+            case UnitRemovalReason.SUPPLY when !TrustsRecordedOutcome && InSupply(unitState):
                 throw new GameAPI.GameAPIException(
                     $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for SUPPLY: the unit is in supply.");
 
@@ -92,7 +99,7 @@ public sealed partial class BoardState
                     $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for BATTLE: the unit is immune this turn.");
 
             // Tag.Attackable means removingFaction has a supplied unit that can reach this target.
-            case UnitRemovalReason.BATTLE when !Of(unitState).Tags.Has(Tag.Attackable, removingFaction):
+            case UnitRemovalReason.BATTLE when !TrustsRecordedOutcome && !Of(unitState).Tags.Has(Tag.Attackable, removingFaction):
                 throw new GameAPI.GameAPIException(
                     $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for BATTLE: {removingFaction} has no supplied unit able to attack it.");
         }

@@ -183,9 +183,18 @@ public partial class NetworkApi : Node
     private void ReceiveGameMessageInternal(string dtoJson)
     {
         GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(dtoJson);
-        GameMessage    msg = GameMessage.FromDto(dto);
-        DebugUtilities.PrintPeer($"[color={"blue"}]ReceiveGameMessage ({msg.Id}): {dto.GetType().Name}");
         DebugUtilities.PrintPeerFinest($"{dtoJson}");
+        EnqueueReplicated(dto, "ReceiveGameMessage");
+    }
+
+    /// <summary>
+    /// Queue a host-sent message for in-order application, with its state hash checked once applied.
+    /// Shared by the live stream and the restore log, so both take exactly the same path.
+    /// </summary>
+    internal GameMessage EnqueueReplicated(GameMessageDto dto, string source)
+    {
+        GameMessage msg = GameMessage.FromDto(dto);
+        DebugUtilities.PrintPeer($"[color={"blue"}]{source} ({msg.Id}): {dto.GetType().Name}");
 
         // Only a state mutation has a hash worth comparing. Gating on the type rather than on
         // "HashAfterApplication != null" is deliberate: a PresentationEvent has no such field at all,
@@ -195,6 +204,7 @@ public partial class NetworkApi : Node
             ev.ChangeEventApplied += (id) => VerifyReplicatedHash(ev, dto);
 
         ChangeEventQueue.Instance.Enqueue(msg);
+        return msg;
     }
 
     private void VerifyReplicatedHash(ChangeEvent ev, GameMessageDto dto)
@@ -207,7 +217,8 @@ public partial class NetworkApi : Node
             DebugUtilities.PrintPeerError($"Hash mismatch after {dto.GetType().Name}: expected {ev.HashAfterApplication}, got {actualHash}. Requesting resync.");
             DebugUtilities.PrintPeerError($"EventId: {ev.Id}, LatestAppliedId: {ChangeEvent.LatestAppliedId}");
             DebugUtilities.PrintPeerError($"///////////////////////////////////////////////////////////////////////////");
-            DebugUtilities.PrintPeerError($"{JsonSerializer.Serialize(MultiplayerSession.Instance.GameState)}");
+            // No state dump here: serializing GameState throws (it holds Godot objects), and that throw
+            // used to stop the resync request below from ever being sent.
             RpcId(1, nameof(RequestResync));
             return;
         }
@@ -321,7 +332,7 @@ public partial class NetworkApi : Node
     public bool HasPendingInput => !_pendingInputs.IsEmpty;
 
     /// <summary>
-    /// The prompt a restored game is expected to reopen, armed by RestoreSavedGame and consumed by the
+    /// The prompt a restored game is expected to reopen, armed by SessionRestore.RestoreAsync and consumed by the
     /// first request raised afterwards. Null the rest of the time.
     /// </summary>
     private PendingPrompt _expectedResumedPrompt;

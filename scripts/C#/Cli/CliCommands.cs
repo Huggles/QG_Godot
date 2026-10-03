@@ -105,7 +105,7 @@ public sealed class CliCommands
 		}
 
 		string name = args.Count > 0 ? string.Join(" ", args) : "cli";
-		string path = MultiplayerSession.Instance.CaptureSave(name);
+		string path = SaveCapture.Capture(name);
 
 		if (path == null) _out.Error("save: failed, see the log");
 		else              _out.Ok($"saved to {path}");

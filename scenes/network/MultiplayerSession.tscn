@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://c8dsbqnhs3504"]
+[gd_scene load_steps=6 format=3 uid="uid://c8dsbqnhs3504"]
 
 [ext_resource type="Script" uid="uid://r2f4hye3fhes" path="res://scenes/network/MultiplayerSession.cs" id="1_fxsb3"]
 [ext_resource type="Script" uid="uid://cde0nvl8mrot5" path="res://scenes/network/PeerReadinessComponent.cs" id="2_2awua"]
 [ext_resource type="Script" uid="uid://byj4cenhv0p52" path="res://scripts/C#/Game/GameFlow.cs" id="3_jir0j"]
+[ext_resource type="Script" path="res://scenes/network/SessionRestore.cs" id="4_srest"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_jir0j"]
 properties/0/path = NodePath("GameFlow:GameStarted")
@@ -25,6 +26,12 @@ script = ExtResource("1_fxsb3")
 script = ExtResource("2_2awua")
 
 [node name="EndGameReadinessComponent" type="Node" parent="."]
+script = ExtResource("2_2awua")
+
+[node name="SessionRestore" type="Node" parent="."]
+script = ExtResource("4_srest")
+
+[node name="RestoreReadinessComponent" type="Node" parent="SessionRestore"]
 script = ExtResource("2_2awua")
 
 [node name="GameFlow" type="Node" parent="."]

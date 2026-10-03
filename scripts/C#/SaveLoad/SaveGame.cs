@@ -4,9 +4,9 @@ using System.Collections.Generic;
 /// A game in progress on disk: the base scenario, plus every <see cref="ChangeEvent"/> that has been
 /// applied, in order.
 ///
-/// Loading replays that log through the normal Apply() pipeline — broadcast on, animations off — so the
-/// board, decks, victory points, card history, the history panel and every client's state all
-/// reconstruct through the live code rather than through a parallel deserializer. Each event's DTO
+/// Loading replays that log through the normal Apply() pipeline with animations off, on the host and then
+/// on every client (the host sends them the log), so the board, decks, victory points, card history and
+/// the history panel all reconstruct through the live code rather than through a parallel deserializer. Each event's DTO
 /// carries its own outcome (the shuffled order, the cards discarded, the modifiers applied), so replay
 /// is re-APPLYING decisions rather than re-MAKING them: it does not depend on the game being
 /// deterministic, and a save survives most changes to card logic.

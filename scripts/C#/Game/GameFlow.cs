@@ -735,7 +735,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
         string displayName = deferredSaveName;
         deferredSaveName = null;
-        MultiplayerSession.Instance?.CaptureSave(displayName, deferred: true);
+        SaveCapture.Capture(displayName, deferred: true);
     }
 
     // ── Turn steps ──────────────────────────────────────────────────────────────

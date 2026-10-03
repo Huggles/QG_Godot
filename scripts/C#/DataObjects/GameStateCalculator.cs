@@ -416,7 +416,8 @@ public class GameStateCalculator
             // as real for a solo GUI game, and the condition is the honest statement of why it is
             // safe. Nothing else consumes the snapshot — RecalculateTagsMessage is not recorded in
             // GameMessages, not counted in LatestAppliedId, not hashed, and not written to saves.
-            if (HasRemotePeers)
+            // Not during a restore either: clients get one snapshot after the replay, not one per event.
+            if (HasRemotePeers && !ReplayContext.IsReplaying)
             {
                 var snapshot = BuildTagsSnapshot();
                 ApplyComputedTags(snapshot);

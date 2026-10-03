@@ -213,7 +213,9 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         // Broadcast this change event to clients BEFORE recalculating tags, so the tags snapshot
         // that CalculateAll() broadcasts (as a RecalculateTagsMessage) is enqueued on clients
         // right behind this event and always applies to post-change state — never before it.
-        if (IsServer)
+        // Not during a restore: the host sends clients the whole log in chunks afterwards instead,
+        // because a broadcast per replayed event overflowed the Steam send buffer and was dropped.
+        if (IsServer && !ReplayContext.IsReplaying)
         {
             await BroadCast();
         }
