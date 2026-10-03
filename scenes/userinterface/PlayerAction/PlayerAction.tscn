@@ -55,7 +55,7 @@ text = "ABC"
 label_settings = ExtResource("2_pjedk")
 horizontal_alignment = 1
 vertical_alignment = 1
-autowrap_mode = 2
+text_overrun_behavior = 3
 script = ExtResource("1_gvner")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="MenuPanel" unique_id=779728291]

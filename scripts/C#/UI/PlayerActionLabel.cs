@@ -9,7 +9,8 @@ using System.Collections.Generic;
 /// The panel it sits in is fixed: it is a HUD frame anchored to the bottom edge, and growing it would
 /// push it off screen rather than reveal more of it. So the TEXT gives way instead — see
 /// <see cref="FitTextToBox"/>. The label itself is sized by <see cref="MenuPanel"/> to the panel's
-/// rect and reports no minimum of its own, which is what keeps it from spilling out sideways.
+/// rect; text that still does not fit at the minimum size is cut with an ellipsis rather than
+/// widening it.
 /// </summary>
 public partial class PlayerActionLabel : Label, LoadableUI
 {    
@@ -32,26 +33,17 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	private int _baseFontSize;
 
 	/// <summary>
-	/// How small the text may get before it stops being worth reading. At the authored panel size this
-	/// is around four lines of text, well past anything the game says here.
+	/// How small the text may get. Low on purpose: the panel never grows, so fitting the line matters
+	/// more than its size, and the longest guidance lines need it.
 	/// </summary>
-	private const int MinimumFontSize = 11;
-
-	/// <summary>
-	/// The theme sizes a fit has to move together: measuring is done with the normal font, so a bold or
-	/// italic run left at its own size could still overflow the box the measurement cleared.
-	/// </summary>
-	private static readonly string[] FontSizeItems =
-	{
-		"normal_font_size", "bold_font_size", "italics_font_size", "bold_italics_font_size",
-		"mono_font_size",
-	};
+	private const int MinimumFontSize = 8;
 
 	public override void _Ready()
-	{        
+	{
 		Instance = this;
 
-		_baseFontSize = GetThemeFontSize("normal_font_size");
+		// LabelSettings, when set, overrides the theme: its size is the one that actually draws.
+		_baseFontSize = LabelSettings?.FontSize ?? GetThemeFontSize("font_size");
 		// The panel lays this label out in its own sort pass, which can land after the text arrives —
 		// and does on the first banner of a game, when the label is still (0,0) at that moment. Fitting
 		// again on every resize is what makes that case, and a later window resize, come out right.
@@ -113,7 +105,8 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	{
 		MenuPanel.MouseFilter = MouseFilterEnum.Stop;
 		this.MouseFilter = MouseFilterEnum.Stop;
-		Text = text;
+		// One line, always: a line break would still split it even with wrapping off.
+		Text = text.Replace("\r", "").Replace("\n", " ");
 		FitTextToBox();
 		Visible = true;
 		if (MenuPanel != null)
@@ -132,7 +125,7 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	}
 
 	/// <summary>
-	/// Shrink the font until the wrapped text fits the box the panel gives this label, so a long
+	/// Shrink the font until the text fits the box on ONE line (the label never wraps), so a long
 	/// notification is never clipped, scrolled out of sight, or drawn over the panel's edge.
 	///
 	/// Measured off the font rather than <c>GetContentHeight</c>: the label only shapes its lines when
@@ -141,24 +134,22 @@ public partial class PlayerActionLabel : Label, LoadableUI
 	/// </summary>
 	private void FitTextToBox()
 	{
-		Font font = GetThemeFont("normal_font");
+		// A Label's theme names are font/font_size/line_spacing, and LabelSettings overrides all three.
+		Font font = LabelSettings?.Font ?? GetThemeFont("font");
 		if (font == null) return;
 
-		// Whatever the label's own background reserves is not text space; zero as the scene stands, but
-		// padding added there later has to come off the box rather than out of the fit.
-		Vector2 padding = GetThemeStylebox("normal")?.GetMinimumSize() ?? Vector2.Zero;
+		// The outline draws outside the glyphs on every side, so it comes off the box too.
+		float outline = LabelSettings?.OutlineSize ?? GetThemeConstant("outline_size");
+		Vector2 padding = (GetThemeStylebox("normal")?.GetMinimumSize() ?? Vector2.Zero) + new Vector2(outline, outline);
 		float width = Size.X - padding.X;
 		float height = Size.Y - padding.Y;
 		// Before the panel's first sort pass there is no box to measure against. The Resized hook above
 		// redoes the fit as soon as there is one.
 		if (width < 1f || height < 1f) return;
 
-		// Tags do not print, so what has to fit is the plain text the label parsed out of the BBCode.
-		int lineSeparation = GetThemeConstant("line_separation");
-
 		for (int fontSize = _baseFontSize; fontSize > MinimumFontSize; fontSize--)
 		{
-			if (TextHeight(font, Text, fontSize, width, lineSeparation) <= height)
+			if (Fits(font, Text, fontSize, width, height))
 			{
 				ApplyFontSize(fontSize);
 				return;
@@ -168,25 +159,18 @@ public partial class PlayerActionLabel : Label, LoadableUI
 		ApplyFontSize(MinimumFontSize);
 	}
 
-	/// <summary>How tall the text draws once wrapped to <paramref name="width"/>.</summary>
-	private static float TextHeight(Font font, string text, int fontSize, float width, int lineSeparation)
+	/// <summary>Whether the text fits the box on one line: the banner never wraps, it shrinks.</summary>
+	private static bool Fits(Font font, string text, int fontSize, float width, float height)
 	{
-		Vector2 textSize = font.GetMultilineStringSize(text, HorizontalAlignment.Center, width, fontSize);
-		if (lineSeparation == 0) return textSize.Y;
-
-		// The measurement stacks its lines flush; the label draws them a line_separation apart, so that
-		// gap has to be added back once per break.
-		float lineHeight = font.GetHeight(fontSize);
-		int lines = lineHeight > 0f ? Mathf.Max(1, Mathf.RoundToInt(textSize.Y / lineHeight)) : 1;
-		return textSize.Y + lineSeparation * (lines - 1);
+		Vector2 textSize = font.GetStringSize(text, HorizontalAlignment.Center, -1, fontSize);
+		return textSize.X <= width && textSize.Y <= height;
 	}
 
+	/// <summary>Into LabelSettings when there is one (local to the scene, so this banner's own copy).</summary>
 	private void ApplyFontSize(int fontSize)
 	{
-		foreach (string item in FontSizeItems)
-		{
-			AddThemeFontSizeOverride(item, fontSize);
-		}
+		if (LabelSettings != null) LabelSettings.FontSize = fontSize;
+		else AddThemeFontSizeOverride("font_size", fontSize);
 	}
 
 	/// <summary>Guarded like <see cref="ShowText(string, int, Faction)"/> — every client runs this off the
