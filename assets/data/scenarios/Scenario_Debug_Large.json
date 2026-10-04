@@ -86,7 +86,8 @@
         { "countryName": "SOUTH_EAST_ASIA" }
       ],
       "initialCards": [
-        { "name": "ResponseLeningrad" }
+        { "name": "ResponseLeningrad" },
+        { "name": "StatusScorchedEarth" }
       ],
       "initialHandCards": [
         { "name": "EventTransSiberianRailroad" }
