@@ -462,6 +462,7 @@ public sealed class CliSimRunner
 
         EmitRoundScores(result);
         EmitCardStats();
+        EmitEconomyStats();
         EmitBotRuleStats();
         EmitBotGoalStats();
 
@@ -565,6 +566,42 @@ public sealed class CliSimRunner
     /// bot_yield_every prompts before the frame loop regains control, by which point several turns of
     /// draws and discards have already churned the hand.
     /// </summary>
+    /// <summary>
+    /// Per faction: Reallocate Resources uses, deck cards lost to effects, VP lost to an empty deck, and
+    /// the cards left. Reallocate is a Bulletin, not a card, so card_stats cannot see it.
+    /// </summary>
+    private void EmitEconomyStats()
+    {
+        List<GameMessage> messages = MultiplayerSession.Instance?.GameState?.GameMessages ?? new();
+        HashSet<int> reallocateIds = messages.OfType<RegisterBulletinCardChangeEvent>()
+            .Where(e => e.MutatorClassName == nameof(MutatorReallocateResources))
+            .Select(e => e.CardId).ToHashSet();
+
+        Dictionary<string, object> factions = new();
+        foreach (Faction faction in StaticGameData.FactionsForTeam(FactionTeam.AXIS).Concat(StaticGameData.FactionsForTeam(FactionTeam.ALLIES)))
+        {
+            if (FactionState.ForEnum(faction) == null) continue;
+            List<ForceDiscardCardsChangeEvent> discards = messages.OfType<ForceDiscardCardsChangeEvent>()
+                .Where(e => e.TargetFaction == faction).ToList();
+            DeckState deck = DeckState.ForFaction(faction);
+            factions[faction.ToString()] = new Dictionary<string, object>
+            {
+                ["reallocate_uses"] = messages.OfType<ActivateReactionChangeEvent>()
+                    .Count(e => e.TriggeringFaction == faction && reallocateIds.Contains(e.SourceCardId)),
+                ["deck_cards_lost"] = discards.Sum(e => e.DiscardedCardIds.Count),
+                ["vp_lost_empty_deck"] = discards.Sum(e => e.UndischargedCards),
+                ["deck_left"] = deck.DeckCardIds.Count,
+                ["hand_left"] = deck.HandCardIds.Count,
+            };
+        }
+
+        _renderer.Emit(new CliEvent("economy_stats")
+            .Set("seed", GameRandom.Seed)
+            .Set("decision_seed", _decisionSeed)
+            .Set("factions", factions)
+            .Text($"ECONOMY  {factions.Count} faction(s)"));
+    }
+
     private void EmitCardStats()
     {
         List<object> cards = new();

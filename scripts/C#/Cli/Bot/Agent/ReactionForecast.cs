@@ -25,14 +25,7 @@ public static class ReactionForecast
     /// Who forecasts: <c>bot_forecast=all|none|AXIS|ALLIES</c> on the command line, all by default. One
     /// side on and the other off is how the forecast is measured against its absence.
     /// </summary>
-    private static readonly string Who = CliArgs.Get("bot_forecast", "all").ToUpperInvariant();
-
-    private static bool Forecasts(Faction valuer) => Who switch
-    {
-        "ALL" => true,
-        "NONE" => false,
-        _ => StaticGameData.FactionTeamForFaction(valuer).ToString() == Who,
-    };
+    private static bool Forecasts(Faction valuer) => BotSides.Includes("bot_forecast", "all", valuer);
 
     /// <summary>
     /// Apply <paramref name="changeEvent"/> to <paramref name="situation"/>'s board, a fork, and play out

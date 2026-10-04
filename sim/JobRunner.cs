@@ -148,6 +148,7 @@ internal sealed class ResultAccumulator
     private readonly Dictionary<string, RoundSeries> _rounds = new();
     private readonly List<CardStat> _cards = new();
     private string? _cardStatsJson;
+    private readonly Dictionary<string, EconomyStat> _economy = new();
 
     public bool HasResult => _resultJson != null;
 
@@ -221,6 +222,20 @@ internal sealed class ResultAccumulator
                         });
                 break;
 
+            case "economy_stats":
+                if (root.TryGetProperty("factions", out JsonElement economy)
+                    && economy.ValueKind == JsonValueKind.Object)
+                    foreach (JsonProperty faction in economy.EnumerateObject())
+                        _economy[faction.Name] = new EconomyStat
+                        {
+                            ReallocateUses = Int(faction.Value, "reallocate_uses"),
+                            DeckCardsLost = Int(faction.Value, "deck_cards_lost"),
+                            VpLostEmptyDeck = Int(faction.Value, "vp_lost_empty_deck"),
+                            DeckLeft = Int(faction.Value, "deck_left"),
+                            HandLeft = Int(faction.Value, "hand_left"),
+                        };
+                break;
+
             case "game_error":
                 _firstError ??= Str(root, "message");
                 break;
@@ -266,5 +281,6 @@ internal sealed class ResultAccumulator
         FirstError = _firstError,
         Rounds = _rounds,
         Cards = _cards,
+        Economy = _economy,
     };
 }

@@ -48,6 +48,10 @@ public sealed class SimConfig
     /// <summary>Who forecasts after-reactions (all, none, AXIS, ALLIES), passed to <c>bot_forecast=</c>. Empty means all.</summary>
     public string BotForecast { get; private set; } = "";
 
+    /// <summary>Who counts Status-card VP income when valuing (all, none, AXIS, ALLIES), passed to <c>bot_value_status=</c>. Empty means all.</summary>
+    public string BotValueStatus { get; private set; } = "";
+
+
     /// <summary>
     /// Which goal profile the bot runs, passed through verbatim to <c>bot_profile=</c>. Empty means the
     /// game default, which is no agent at all.
@@ -104,7 +108,7 @@ public sealed class SimConfig
         foreach (string scenario in Scenarios)
             foreach (int seed in Seeds)
                 foreach (int decisionSeed in DecisionSeeds)
-                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules, BotProfile, BotRulesFor, BotRulesOther, BotForecast));
+                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules, BotProfile, BotRulesFor, BotRulesOther, BotForecast, BotValueStatus));
         return jobs;
     }
 
@@ -141,6 +145,7 @@ public sealed class SimConfig
                     case "--bot-rules-for": c.BotRulesFor = Next(arg); break;
                     case "--bot-rules-other": c.BotRulesOther = Next(arg); break;
                     case "--bot-forecast": c.BotForecast = Next(arg); break;
+                    case "--bot-value-status": c.BotValueStatus = Next(arg); break;
                     case "--bot-profile": c.BotProfile = Next(arg); break;
                     case "--workers" or "-j": workers = int.Parse(Next(arg)); break;
                     case "--timeout": c.JobTimeout = TimeSpan.FromSeconds(double.Parse(Next(arg),
@@ -245,6 +250,7 @@ public sealed class SimConfig
               --bot-rules-for WHO      apply --bot-rules only to AXIS, ALLIES or a faction list; the rest use defaults
               --bot-rules-other LIST   what the factions outside --bot-rules-for play (default: the defaults)
               --bot-forecast WHO       who forecasts after-reactions: all, none, AXIS, ALLIES (default all)
+              --bot-value-status WHO   who counts Status-card VP income when valuing (default all)
               --bot-profile NAME       goal profile: none, generic, faction  (default none)
                                        (run the game with bot_rules_list=true to see them)
               -j, --workers N          concurrent Godot processes (default cores/2)

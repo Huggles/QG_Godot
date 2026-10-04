@@ -19,7 +19,8 @@ public sealed record SimJob(
     string BotProfile,
     string BotRulesFor = "",
     string BotRulesOther = "",
-    string BotForecast = "")
+    string BotForecast = "",
+    string BotValueStatus = "")
 {
     /// <summary>Stable, filesystem-safe identity. Also the sort key that makes a run diffable.</summary>
     public string Id => $"{Scenario}_s{Seed}_d{DecisionSeed}";
@@ -50,6 +51,8 @@ public sealed record SimJob(
         if (!string.IsNullOrWhiteSpace(BotRulesOther)) yield return $"bot_rules_other={BotRulesOther}";
         // Who forecasts after-reactions when valuing a move; absent means everyone does.
         if (!string.IsNullOrWhiteSpace(BotForecast)) yield return $"bot_forecast={BotForecast}";
+        // Who counts Status-card income when valuing; absent means everyone (the game's default).
+        if (!string.IsNullOrWhiteSpace(BotValueStatus)) yield return $"bot_value_status={BotValueStatus}";
         // Same contract as bot_rules: absent means the game applies its own default, which for the
         // profile is "no agent at all".
         if (!string.IsNullOrWhiteSpace(BotProfile)) yield return $"bot_profile={BotProfile}";
@@ -109,6 +112,16 @@ public sealed class RoundSeries
 }
 
 /// <summary>What one card did in one game, from the run's <c>card_stats</c> event.</summary>
+/// <summary>One faction's card economy in one game: Reallocate Resources uses, deck cards lost to effects, and what was left.</summary>
+public sealed class EconomyStat
+{
+    public int ReallocateUses { get; init; }
+    public int DeckCardsLost { get; init; }
+    public int VpLostEmptyDeck { get; init; }
+    public int DeckLeft { get; init; }
+    public int HandLeft { get; init; }
+}
+
 public sealed class CardStat
 {
     public required string Name { get; init; }
@@ -171,6 +184,9 @@ public sealed class SimResult
 
     /// <summary>Per-card outcome for this game. Only cards that were drawn or played are listed.</summary>
     public List<CardStat> Cards { get; init; } = new();
+
+    /// <summary>Per-faction card economy from <c>economy_stats</c>, keyed by faction name. Empty on an older game build.</summary>
+    public Dictionary<string, EconomyStat> Economy { get; init; } = new();
 
     public bool HasResult => ResultJson != null;
 }

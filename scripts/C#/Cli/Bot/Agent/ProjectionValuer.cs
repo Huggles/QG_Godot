@@ -7,9 +7,11 @@ using System.Linq;
 /// that, a single step outcome or a whole card, including the after-reactions each event would open
 /// (see <see cref="ReactionForecast"/>).
 ///
-/// The value is the change in the team's lead: score gained now, plus per-turn supply income gained times
-/// the rounds left (<see cref="Horizon"/>), minus the same for the enemy team, plus <see cref="CardValue"/>
-/// for every card the enemy loses and minus it for every card this team loses. Events are applied to the
+/// The value is the change in the team's lead: score gained now, plus per-turn income gained times the
+/// rounds left (<see cref="Horizon"/>), minus the same for the enemy team, plus <see cref="CardValue"/>
+/// for every card the enemy loses and minus it for every card this team loses. Income is supply stars
+/// plus Status-card VP; <c>bot_value_status=none|AXIS|ALLIES</c> drops the Status half for an A/B
+/// (it measured +17pp Axis / +6pp Allies on 2026-10-04). Events are applied to the
 /// fork by their own Mutate and the board's tags — supply included — are re-derived after each one.
 ///
 /// Pure with respect to the game: it only reads live state and forks, frees every outcome it builds, and
@@ -40,10 +42,11 @@ public static class ProjectionValuer
         FactionTeam team = StaticGameData.FactionTeamForFaction(faction);
         FactionTeam enemy = StaticGameData.OpponentFactionTeamForFaction(faction);
         int horizon = Horizon;
-        return TeamDelta(board, team, horizon) - TeamDelta(board, enemy, horizon);
+        bool status = BotSides.Includes("bot_value_status", "all", faction);
+        return TeamDelta(board, team, horizon, status) - TeamDelta(board, enemy, horizon, status);
     }
 
-    private static double TeamDelta(BoardState board, FactionTeam team, int horizon)
+    private static double TeamDelta(BoardState board, FactionTeam team, int horizon, bool status)
     {
         BoardState live = BoardState.Live;
         double score = 0, cards = 0;
@@ -56,6 +59,7 @@ public static class ProjectionValuer
         }
 
         int rate = VpMath.SupplyStarVpRate(team, board) - VpMath.SupplyStarVpRate(team, live);
+        if (status) rate += VpMath.StatusCardVpRateOn(team, board) - VpMath.StatusCardVpRateOn(team, live);
         return score + rate * horizon + cards * CardValue;
     }
 

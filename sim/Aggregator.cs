@@ -435,6 +435,41 @@ public static class Aggregator
     private static List<int> Counts(Dictionary<string, List<int>> map, string key)
         => map.TryGetValue(key, out List<int>? list) ? list : map[key] = new List<int>();
 
+    /// <summary>
+    /// Card economy per faction, then each faction's team outcome split by how often it used Reallocate
+    /// Resources. Like card_ranking it is correlation, not cause: a losing bot may reach for it more.
+    /// </summary>
+    private static void AppendEconomy(StringBuilder sb, List<SimResult> scored)
+    {
+        List<SimResult> withEconomy = scored.Where(r => r.Economy.Count > 0).ToList();
+        if (withEconomy.Count == 0) return;
+
+        sb.AppendLine("--- CARD ECONOMY (avg per game) ---");
+        sb.AppendLine();
+        sb.AppendLine("    faction                realloc  deck_lost  vp_lost_empty  deck_left  hand_left");
+        foreach (string faction in withEconomy.SelectMany(r => r.Economy.Keys).Distinct())
+        {
+            List<EconomyStat> stats = withEconomy.Where(r => r.Economy.ContainsKey(faction)).Select(r => r.Economy[faction]).ToList();
+            sb.AppendLine($"    {faction,-22} {stats.Average(s => s.ReallocateUses),7:F2}  {stats.Average(s => s.DeckCardsLost),9:F2}"
+                          + $"  {stats.Average(s => s.VpLostEmptyDeck),13:F2}  {stats.Average(s => s.DeckLeft),9:F2}  {stats.Average(s => s.HandLeft),9:F2}");
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("    by Reallocate uses     uses   games  team_win  avg_team_lead");
+        foreach (string faction in withEconomy.SelectMany(r => r.Economy.Keys).Distinct())
+            foreach (IGrouping<string, SimResult> g in withEconomy
+                         .Where(r => r.Economy.ContainsKey(faction) && r.Rounds.ContainsKey(faction))
+                         .GroupBy(r => r.Economy[faction].ReallocateUses switch { 0 => "0", 1 => "1", _ => "2+" })
+                         .OrderBy(g => g.Key))
+            {
+                string team = g.First().Rounds[faction].Team;
+                int wins = g.Count(r => r.Winner == team);
+                double lead = g.Average(r => team == "AXIS" ? r.AxisTotal - r.AlliesTotal : r.AlliesTotal - r.AxisTotal);
+                sb.AppendLine($"    {faction,-22} {g.Key,4}   {g.Count(),5}   {Percent(wins, g.Count()),7}  {lead,13:F1}");
+            }
+        sb.AppendLine();
+    }
+
     private static string BuildSummary(SimConfig config, List<SimResult> results, TimeSpan elapsed)
     {
         StringBuilder sb = new();
@@ -454,6 +489,8 @@ public static class Aggregator
             sb.AppendLine($"  bot_rules_for  {config.BotRulesFor} (others: {(string.IsNullOrWhiteSpace(config.BotRulesOther) ? "defaults" : config.BotRulesOther)})");
         if (!string.IsNullOrWhiteSpace(config.BotForecast))
             sb.AppendLine($"  bot_forecast   {config.BotForecast}");
+        if (!string.IsNullOrWhiteSpace(config.BotValueStatus))
+            sb.AppendLine($"  bot_value_status   {config.BotValueStatus}");
         sb.AppendLine($"  bot_profile    {(string.IsNullOrWhiteSpace(config.BotProfile) ? "(none)" : config.BotProfile)}");
         sb.AppendLine($"  workers        {config.Workers}");
         sb.AppendLine();
@@ -506,6 +543,8 @@ public static class Aggregator
         foreach ((string faction, List<int> scores) in byFaction.OrderByDescending(kv => kv.Value.Average()))
             sb.AppendLine($"    {faction,-22} {scores.Average(),6:F1}   (n={scores.Count})");
         sb.AppendLine();
+
+        AppendEconomy(sb, scored);
 
         sb.AppendLine("--- END REASON ---");
         sb.AppendLine();
