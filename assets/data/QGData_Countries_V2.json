@@ -615,7 +615,7 @@
         "SupplyStarTransformData": {
             "Scale": 1,
             "XPosition": 0,
-            "YPosition": 0,
+            "YPosition": 50,
             "ZPosition": 0
         },
         "LabelTransformData": {
@@ -1212,13 +1212,13 @@
             "Position1": {
                 "Scale": 1,
                 "XPosition": -50,
-                "YPosition": -50,
+                "YPosition": -70,
                 "ZPosition": 0
             },
             "Position2": {
                 "Scale": 1,
                 "XPosition": 0,
-                "YPosition": -50,
+                "YPosition": -60,
                 "ZPosition": 0
             },
             "Position3": {
@@ -1790,13 +1790,13 @@
         "SupplyStarTransformData": {
             "Scale": 1,
             "XPosition": 0,
-            "YPosition": 0,
+            "YPosition": 25,
             "ZPosition": 0
         },
         "LabelTransformData": {
             "Scale": 1,
             "XPosition": 0,
-            "YPosition": 0,
+            "YPosition": -25,
             "ZPosition": 0
         },
         "UnitTransformData": {
@@ -3111,7 +3111,7 @@
         "LabelTransformData": {
             "Scale": 1,
             "XPosition": 0,
-            "YPosition": 0,
+            "YPosition": -50,
             "ZPosition": 0
         },
         "UnitTransformData": {

@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/materials/shaders/OutOfSupply.gdshader" id="1_outofsupply"]
+
+[resource]
+shader = ExtResource("1_outofsupply")
+shader_parameter/cycle_seconds = 6.0
+shader_parameter/dark_fraction = 0.35
+shader_parameter/fade_fraction = 0.15
+shader_parameter/darkness = 0.45

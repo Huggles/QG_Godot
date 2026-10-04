@@ -46,14 +46,15 @@
         { "countryName": "BALKANS" },
         { "countryName": "SZECHUAN" },
         { "countryName": "KAZAKHSTAN" },
-        { "countryName": "SOUTH_EAST_ASIA" }
+        { "countryName": "UKRAINE" }
       ],
       "initialCards": [
         { "name": "StatusStavkaFormsArtilleryCorps" },
         { "name": "StatusFrontalAssault" }
       ],
       "initialHandCards": [
-        { "name": "EventTransSiberianRailroad" }
+        { "name": "EventTransSiberianRailroad" },
+        { "name": "StatusScorchedEarth" }
       ],
       "startingVP": 0
     },
