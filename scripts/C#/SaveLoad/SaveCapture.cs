@@ -59,6 +59,34 @@ public static class SaveCapture
         return path;
     }
 
+    /// <summary>
+    /// Write the finished game as a <see cref="SaveGame.Completed"/> record. Skips the CanSave gate,
+    /// since nothing will resume it, and the toast, since the victory screen is already the news.
+    /// </summary>
+    public static string CaptureCompleted(GameResult result)
+    {
+        MultiplayerSession session = MultiplayerSession.Instance;
+        if (session == null || !session.Multiplayer.IsServer()) return null;
+
+        string scenario = GameManager.ActiveScenarioTitle ?? "Game";
+        bool axisWon = result.WinningTeam == FactionTeam.AXIS;
+        string displayName = $"{scenario} — Completed, {result.WinningTeam.ToString().Capitalize()} win " +
+                             $"{(axisWon ? result.AxisTotal : result.AlliesTotal)}-{(axisWon ? result.AlliesTotal : result.AxisTotal)} " +
+                             $"(Round {result.FinalRound})";
+        try
+        {
+            SaveGame save = Build(session.GameState, displayName);
+            save.Completed = true;
+            return SaveGameService.Save(save);
+        }
+        catch (Exception e)
+        {
+            // Never fatal: the game is over either way, and the victory screen must still come up.
+            DebugUtilities.PrintPeerErrorRaw($"CaptureSave: failed to write the completed game: {e}");
+            return null;
+        }
+    }
+
     /// <summary>The synchronous half of <see cref="Capture"/>. See its remarks on why.</summary>
     private static SaveGame Build(MultiplayerGameState gameState, string displayName)
     {

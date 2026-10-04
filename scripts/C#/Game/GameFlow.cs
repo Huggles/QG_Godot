@@ -316,6 +316,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
             {
                 GameResult result = BuildGameResult(axis, allies, pointLead ? "30-point lead" : $"Round {MaxRound} reached");
                 DebugUtilities.PrintPeer($"Game over ({result.EndReason}) — Axis {axis} / Allies {allies}, winner {result.WinningTeam}");
+                // Before BeginEndGame: a headless run quits on GameEnded. Opt-in under CLI so sim batches don't flood the saves folder.
+                if (!GameContext.IsCli || CliArgs.GetBool("save_completed"))
+                    SaveCapture.CaptureCompleted(result);
                 MultiplayerSession.Instance.Rpc(nameof(MultiplayerSession.BeginEndGame), JsonSerializer.Serialize(result));
                 return; // stop the loop: do NOT start a new turn / round
             }

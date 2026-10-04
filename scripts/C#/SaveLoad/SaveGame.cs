@@ -32,6 +32,12 @@ public class SaveGame
     /// <summary>Shown in the load list, e.g. "Standard Game — Round 4, Japan".</summary>
     public string DisplayName { get; set; }
 
+    /// <summary>
+    /// A record of a finished game, written automatically at game end. There is nothing left to resume,
+    /// so the load list hides it; the file stays readable as a full event log of the game.
+    /// </summary>
+    public bool Completed { get; set; }
+
     // ── Setup: self-contained ───────────────────────────────────────────────
 
     /// <summary>
@@ -218,4 +224,5 @@ public class SaveGameMeta
     public string ScenarioTitle { get; set; }
     public int Version { get; set; }
     public int EventCount { get; set; }
+    public bool Completed { get; set; }
 }
