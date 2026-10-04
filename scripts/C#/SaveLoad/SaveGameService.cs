@@ -52,8 +52,11 @@ public static class SaveGameService
         }
     }
 
-    /// <summary>Save headers, newest first. An unreadable file is skipped and logged, never fatal.</summary>
-    public static List<SaveGameMeta> ListSaves()
+    /// <summary>
+    /// Save headers, newest first. An unreadable file is skipped and logged, never fatal. Completed games
+    /// are left out unless asked for: they cannot be resumed.
+    /// </summary>
+    public static List<SaveGameMeta> ListSaves(bool includeCompleted = false)
     {
         List<SaveGameMeta> result = new();
         if (!EnsureDir()) return result;
@@ -72,6 +75,7 @@ public static class SaveGameService
             string path = SaveDir + fileName;
             SaveGame save = Load(path, quiet: true);
             if (save == null) continue;
+            if (save.Completed && !includeCompleted) continue;
 
             result.Add(new SaveGameMeta
             {
@@ -80,7 +84,8 @@ public static class SaveGameService
                 SavedAtIso    = save.SavedAtIso,
                 ScenarioTitle = save.ScenarioTitle,
                 Version       = save.Version,
-                EventCount    = save.Events.Count
+                EventCount    = save.Events.Count,
+                Completed     = save.Completed
             });
         }
 
