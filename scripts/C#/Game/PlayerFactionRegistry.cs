@@ -198,6 +198,39 @@ public static class PlayerFactionRegistry
         return string.IsNullOrWhiteSpace(playerScene.DisplayName) ? null : playerScene.DisplayName;
     }
 
+    /// <summary>The display name of the player in this seat, or "Player {id}" when they have none.</summary>
+    public static string GetDisplayNameForPeer(int peerId)
+    {
+        if (_peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene)
+            && GodotObject.IsInstanceValid(playerScene)
+            && !string.IsNullOrWhiteSpace(playerScene.DisplayName))
+            return playerScene.DisplayName;
+        return $"Player {peerId}";
+    }
+
+    /// <summary>The PlayerScene registered under this seat id, or null.</summary>
+    public static PlayerScene GetPlayerSceneForSeat(int peerId)
+        => _peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene) && GodotObject.IsInstanceValid(playerScene)
+            ? playerScene
+            : null;
+
+    /// <summary>The registered seats played by people (registry ids), host included.</summary>
+    public static List<int> GetHumanSeatIds()
+        => _peerIdToPlayerScene.Keys.Where(id => !_aiSeatIds.Contains(id)).ToList();
+
+    /// <summary>
+    /// Hand a person's seat to a bot, or back. The seat keeps its id, so its PlayerScene, node path and
+    /// prompt grouping stay put; only <see cref="GetAnsweringPeerForFaction"/> changes its answer.
+    /// Must run on every peer so labels ("(AI)") and the waiting text agree.
+    /// </summary>
+    public static void MarkSeatAi(int peerId, bool isAi)
+    {
+        if (!_peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene)) return;
+        if (GodotObject.IsInstanceValid(playerScene)) playerScene.IsAiSeat = isAi;
+        if (isAi) _aiSeatIds.Add(peerId);
+        else _aiSeatIds.Remove(peerId);
+    }
+
     /// <summary>
     /// Get the PlayerScene that controls a specific faction
     /// </summary>

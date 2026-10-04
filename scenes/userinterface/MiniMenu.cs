@@ -15,6 +15,7 @@ public partial class MiniMenu : Control
 	public Button ToggleCountryLabelsButton => GetNode<Button>("%CountryLabelsButton");
 	public Button ToggleDebugMenuButton => GetNode<Button>("%DebugMenuButton");
 	public Button WorldPresentationButton => GetNode<Button>("%WorldPresentationButton");
+	public Button PlayersButton => GetNode<Button>("%PlayersButton");
 
 	public bool VisibilityModalOpen = false;
 
@@ -53,6 +54,12 @@ public partial class MiniMenu : Control
 		ToggleDebugMenuButton.Pressed += () => {
 			EventBus.Instance.EmitSignal(EventBus.SignalName.DebugMenuToggled, ToggleDebugMenuButton.ButtonPressed);
 			GameSettings.Instance.SetShowDebugMenu(ToggleDebugMenuButton.ButtonPressed);
+		};
+
+		PlayersButton.ButtonPressed = GameSettings.ShowPlayersPanel;
+		PlayersButton.Pressed += () => {
+			GameSettings.Instance.SetShowPlayersPanel(PlayersButton.ButtonPressed);
+			PlayersPanel.Current?.Refresh();
 		};
 
 		WorldPresentationButton.Pressed += CycleWorldPresentationMode;

@@ -41,6 +41,8 @@ public abstract partial class PresentationEvent : GameMessage
         // present something the resumed loop is no longer doing.
         ErrorReporter.ThrowIfStaleEpoch(capturedEpoch);
 
+        if (IsServer) await GamePause.Gate(capturedEpoch);
+
         DebugUtilities.PrintPeer($"Presenting {ScriptName} (Id: {Id}) for {TriggeringFaction}");
 
         // Broadcast before presenting — the same relative order ChangeEvent uses, and for a stronger

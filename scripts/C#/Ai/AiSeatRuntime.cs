@@ -97,6 +97,34 @@ public static class AiSeatRuntime
     }
 
     /// <summary>
+    /// Host-only, mid-game: a bot takes over a person's seat (they lost their connection). Installs the
+    /// provider on the spot when this session started with no bots at all. The registry flag is the
+    /// caller's job, since it has to change on every peer.
+    /// </summary>
+    public static void TakeOverSeat(PlayerScene seat)
+    {
+        if (seat == null) return;
+        if (Current == null)
+        {
+            Current = new AiSeatInstallation { DisplacedProvider = InputServices.Provider };
+            InputServices.Override(new AiSeatInputProvider());
+        }
+
+        seat.Bot ??= BuildBot(seat);
+        if (!Current.Seats.Contains(seat)) Current.Seats.Add(seat);
+        DebugUtilities.PrintPeer($"AI seat took over {seat.PlayerName}");
+    }
+
+    /// <summary>The reverse of <see cref="TakeOverSeat"/>: the player is back. Stands the provider down with the last bot.</summary>
+    public static void ReleaseSeat(PlayerScene seat)
+    {
+        if (seat == null || Current == null) return;
+        seat.Bot = null;
+        Current.Seats.Remove(seat);
+        if (Current.Seats.Count == 0) Reset();
+    }
+
+    /// <summary>
     /// The rules an AI seat plays with, in <c>bot_rules</c> syntax.
     ///
     /// Spelled out here rather than left to <see cref="IBotRule.EnabledByDefault"/>, because the

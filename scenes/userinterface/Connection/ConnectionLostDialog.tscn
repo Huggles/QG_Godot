@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://bconnlostdlg1"]
+
+[ext_resource type="PackedScene" uid="uid://bqmodalshelf" path="res://scenes/menu/MenuModalShell.tscn" id="1_shell"]
+[ext_resource type="Script" path="res://scripts/C#/Connection/ConnectionLostDialog.cs" id="2_script"]
+
+[node name="ConnectionLostDialog" instance=ExtResource("1_shell")]
+script = ExtResource("2_script")
+
+[node name="Panel" parent="Root/Centre" index="0"]
+custom_minimum_size = Vector2(680, 0)
+
+[node name="MessageLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="WaitButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="0"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Wait"
+
+[node name="SaveQuitButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Save & Quit"
+
+[node name="BotButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Bot takes over"
+
+[node name="QuitButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="3"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(190, 44)
+layout_mode = 2
+text = "Quit"
+
+[editable path="Root/Centre/Panel"]

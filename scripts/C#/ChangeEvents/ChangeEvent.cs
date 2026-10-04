@@ -194,6 +194,9 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         // alongside the resumed loop.
         ErrorReporter.ThrowIfStaleEpoch(capturedEpoch);
 
+        // A player cannot be reached: hold the game here, between events, until they are back.
+        if (IsServer) await GamePause.Gate(capturedEpoch);
+
         EventBus.Emit(EventBus.SignalName.GameChangeEventBefore);
         DebugUtilities.PrintPeer($"Doing change event {ScriptName} (Id: {Id}) with source card {SourceCardId} and triggering faction {TriggeringFaction}");
         if(RegisterInPool && CardPlayRound.Current != null)

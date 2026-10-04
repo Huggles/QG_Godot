@@ -71,6 +71,9 @@ public static class SceneFlow
             // ChatService is an autoload, so without this one game's conversation opens the next.
             ChatService.Instance?.Clear();
 
+            // Also an autoload: stop watching connections, and release anything parked on the pause.
+            ConnectionMonitor.Instance?.Reset();
+
             // NetworkApi is an autoload, so its pending input requests outlive the game scene. Quitting
             // while a prompt is open otherwise leaves a live awaiter holding a multi-minute backstop
             // timer, which later resolves a TaskCompletionSource belonging to a dead loop and tries to

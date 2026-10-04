@@ -203,6 +203,9 @@ public partial class MultiplayerSession : Node
                 PresentationServices.World.PlaceDeployedUnits();
 
             GameManager.Instance?.HideLoadingScreen();
+
+            // From here on the game is live, so from here on a lost player pauses it.
+            ConnectionMonitor.Instance?.Arm();
         }
     }
 
@@ -218,6 +221,9 @@ public partial class MultiplayerSession : Node
         try
         {
             DebugUtilities.PrintPeer("BeginEndGame received — draining local queues before victory screen");
+
+            // The game is decided: a player leaving the victory screen is not a lost connection.
+            ConnectionMonitor.Instance?.Reset();
             VictoryScreen.PendingResult = JsonSerializer.Deserialize<GameResult>(resultJson);
 
             // Before the drain, not after: a headless run has no victory screen to reach, and this

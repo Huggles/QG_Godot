@@ -192,6 +192,10 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		AppId            = _steam.GetAppId();
 		SetProcess(true);
 
+		// Steam would drop a silent connection after about 10 s; ConnectionMonitor wants 30 s of its own
+		// grace first, so a short outage pauses the game and then heals instead of ending the session.
+		_steam.SetGlobalConfigValueInt32((long)Steam.NetworkingConfigValue.TimeoutConnected, ConnectionMonitor.SteamTimeoutMs);
+
 		// Note the parameter order: lobby_created is (result, lobby_id), NOT (lobby_id, result).
 		_steam.LobbyCreatedSignal    += OnLobbyCreated;
 		_steam.LobbyJoinedSignal     += OnLobbyJoined;

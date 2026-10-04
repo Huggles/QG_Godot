@@ -276,6 +276,12 @@ public partial class NetworkApi : Node
         /// </summary>
         public TaskCompletionSource<bool> ForceTimeout;
 
+        /// <summary>
+        /// Completing this re-sends the same request to whoever answers for its faction NOW — a bot that
+        /// just took over the seat, or the player's new connection after a rejoin.
+        /// </summary>
+        public TaskCompletionSource<bool> Rerun;
+
         /// <summary>The peer expected to answer, so a disconnect can release only its own waits.</summary>
         public int Peer;
 
@@ -437,6 +443,10 @@ public partial class NetworkApi : Node
             // pending entry pointed at a peer that no longer exists.
             ErrorReporter.ThrowIfSessionAbandoned(sessionGeneration);
 
+            // A player cannot be reached: ask nobody anything until they are back or replaced. After the
+            // gate, so the target below is resolved against whoever answers for the seat by then.
+            await GamePause.Gate();
+
             // A fresh Id per attempt. Aborting the previous attempt makes the client's handler complete
             // as skipped and reply; that reply carries the OLD Id, so ReceiveInputResponse's staleness
             // check drops it instead of instantly resolving the retry we are about to open.
@@ -452,6 +462,7 @@ public partial class NetworkApi : Node
             {
                 Tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously),
                 ForceTimeout = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously),
+                Rerun = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously),
                 Peer = SafeTargetPeer(inputRequest),
                 Request = inputRequest,
             };
@@ -474,7 +485,8 @@ public partial class NetworkApi : Node
                 withdrawToken.Register(() => withdrawn.TrySetResult(true));
 
             Task completed = await Task.WhenAny(
-                tcs.Task, forceTimeout.Task, withdrawn.Task, Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
+                tcs.Task, forceTimeout.Task, withdrawn.Task, pending.Rerun.Task,
+                Task.Delay(InputResponseTimeoutMs, timeoutCts.Token));
             timeoutCts.Cancel();
 
             // Quitting resolves this as skipped so nothing dangles, but the caller belongs to a freed game:
@@ -485,6 +497,16 @@ public partial class NetworkApi : Node
             {
                 ClearPendingInput(pendingId, pending);
                 return InputRequest.FromJson(await tcs.Task);
+            }
+
+            if (completed == pending.Rerun.Task)
+            {
+                // Same request, new answerer: nothing unwinds, so no step work is repeated. The old
+                // connection is gone, so there is no prompt of its to tear down.
+                DebugUtilities.PrintPeer($"Re-sending {inputRequest.GetType().Name} — its seat changed hands");
+                ClearPendingInput(pendingId, pending);
+                AnnounceInputClosed(inputRequest);
+                continue;
             }
 
             if (completed == withdrawn.Task)
@@ -510,6 +532,15 @@ public partial class NetworkApi : Node
             }
 
             bool wasForced = completed == forceTimeout.Task;
+
+            // The backstop is for a player who is connected but not answering. One the ConnectionMonitor
+            // already knows is gone is the host's Wait / Save / Bot decision, not a Retry / Skip one.
+            if (!wasForced && ConnectionMonitor.Instance?.IsSeatAbsent(pending.Peer) == true)
+            {
+                ClearPendingInput(pendingId, pending);
+                continue;
+            }
+
             DebugUtilities.PrintPeerErrorRaw(wasForced
                 ? $"Host timed out {inputRequest.GetType().Name} (Id {inputRequest.Id}) by hand — " +
                   "holding the turn loop for a Retry / Skip decision."
@@ -545,9 +576,9 @@ public partial class NetworkApi : Node
     }
 
     /// <summary>
-    /// If the peer we are waiting on for input drops, complete the wait as skipped straight away.
-    /// Otherwise a mid-turn disconnect left the host parked on the request until the backstop
-    /// timeout — indistinguishable from a freeze.
+    /// A peer dropped. Its open prompts are deliberately LEFT pending: skipping them used to pass the
+    /// player's turn behind their back. The ConnectionMonitor pauses the game instead, and the prompt is
+    /// re-sent (<see cref="RerunInputsForPeer"/>) once a bot takes the seat or the player is back.
     /// </summary>
     private void OnPeerDisconnectedDuringInput(long peerId)
     {
@@ -559,16 +590,19 @@ public partial class NetworkApi : Node
         foreach (HashSet<int> parked in _bufferedBarrierReports.Values)
             parked.Remove((int)peerId);
 
-        // Only this peer's own waits: another player may still be answering a concurrent request, and
-        // releasing theirs too would throw away an answer they are about to give.
+        // A wait with no known answerer (Peer 0) has nobody to come back for it, so it is still released.
         foreach (KeyValuePair<string, PendingInput> entry in _pendingInputs)
         {
-            if (entry.Value.Peer != 0 && entry.Value.Peer != (int)peerId) continue;
-
-            DebugUtilities.PrintPeerErrorRaw(
-                $"Peer {peerId} disconnected while we were waiting on its input — treating as skipped.");
+            if (entry.Value.Peer != 0) continue;
             CancelPendingInput(entry.Key, entry.Value);
         }
+    }
+
+    /// <summary>Re-send every prompt waiting on <paramref name="peer"/> to whoever answers for it now.</summary>
+    public void RerunInputsForPeer(int peer)
+    {
+        foreach (PendingInput pending in _pendingInputs.Values)
+            if (pending.Peer == peer) pending.Rerun?.TrySetResult(true);
     }
 
     /// <summary>
