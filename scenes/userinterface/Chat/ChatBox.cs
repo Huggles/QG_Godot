@@ -28,6 +28,8 @@ public partial class ChatBox : PanelContainer
     private double _hideIn;
     private Tween _fade;
     private bool _swallowEscapeRelease;
+    private int _topZIndex;
+    private bool _underModals;
 
     public override void _Ready()
     {
@@ -38,6 +40,7 @@ public partial class ChatBox : PanelContainer
             return;
         }
 
+        _topZIndex = ZIndex;
         _shown = NeverHides;
         Visible = NeverHides;
         Modulate = NeverHides ? Colors.White : Colors.Transparent;
@@ -69,6 +72,22 @@ public partial class ChatBox : PanelContainer
         bool engaged = NeverHides || MessageInput.HasFocus() || GetGlobalRect().HasPoint(GetGlobalMousePosition());
         if (engaged) Reveal();
         else if (_shown && (_hideIn -= delta) <= 0) FadeOut();
+        KeepBelowModals();
+    }
+
+    /// <summary>
+    /// A tall modal (the opening discard) reaches into the chat's corner, and the modal must win there.
+    /// Clicks follow tree order rather than z_index, so the chat moves in the tree as well as in z.
+    /// </summary>
+    private void KeepBelowModals()
+    {
+        ModalStack stack = ModalStack.Current;
+        bool under = IsInstanceValid(stack) && stack.Visible && stack.GetParent() == GetParent();
+        if (under == _underModals) return;
+
+        _underModals = under;
+        ZIndex = under ? stack.ZIndex - 1 : _topZIndex;
+        GetParent().MoveChild(this, under ? stack.GetIndex() : -1);
     }
 
     public override void _Input(InputEvent @event)
