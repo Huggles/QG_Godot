@@ -122,6 +122,15 @@ public partial class ConnectionMonitor : Node
         TableChanged?.Invoke();
     }
 
+    /// <summary>
+    /// Whether the game is held for a lost connection, as this peer sees it: the host by its own gate, a
+    /// client by the host's table or by the host having gone quiet. Drives the HUD's click blocker.
+    /// </summary>
+    public bool IsGamePaused =>
+        _armed && (IsHost
+            ? GamePause.IsPaused
+            : _hostLost || Now - _lastHeardHost > UnreachableAfter || _rows.Any(r => r.State == SeatState.Absent));
+
     /// <summary>Whether the host is holding the game for this seat.</summary>
     public bool IsSeatAbsent(int seatId) => _seats.TryGetValue(seatId, out Seat seat) && seat.State == SeatState.Absent;
 
@@ -319,12 +328,10 @@ public partial class ConnectionMonitor : Node
 
         string names = string.Join(", ", absent.Select(r => r.Name));
         int left = absent.Max(r => r.SecondsLeft);
-        string text = left > 0
-            ? $"Waiting for {names} to reconnect… {left}s"
-            : $"Waiting for {names} to reconnect…";
+        string detail = left > 0 ? $"Reconnecting… {left}s" : "The game is paused";
 
         bool offerOptions = IsHost && _dialog == null && left == 0;
-        EnsureBanner().Show(text, offerOptions);
+        EnsureBanner().Show($"Waiting for {names} to reconnect", detail, offerOptions);
     }
 
     // ── Client ───────────────────────────────────────────────────────────────
@@ -341,7 +348,8 @@ public partial class ConnectionMonitor : Node
         }
 
         if (silence > UnreachableAfter)
-            EnsureBanner().Show($"Connection to the host lost… {(int)Math.Ceiling(DisconnectAfter - silence)}s", false);
+            EnsureBanner().Show("Connection to the host lost",
+                $"Reconnecting… {(int)Math.Ceiling(DisconnectAfter - silence)}s", false);
         else if (!_rows.Any(r => r.State == SeatState.Absent))
             Banner?.Hide();
     }

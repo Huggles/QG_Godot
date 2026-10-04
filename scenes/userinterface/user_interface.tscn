@@ -29,6 +29,7 @@
 [ext_resource type="PackedScene" uid="uid://cb05yfgtalgy8" path="res://scenes/userinterface/PlayerAction/TurnBadge.tscn" id="31_turnbadge"]
 [ext_resource type="PackedScene" uid="uid://bchatbox0qg01" path="res://scenes/userinterface/Chat/ChatBox.tscn" id="32_chatbox"]
 [ext_resource type="PackedScene" uid="uid://bplayerspanel1" path="res://scenes/userinterface/Connection/PlayersPanel.tscn" id="33_players"]
+[ext_resource type="Script" path="res://scenes/userinterface/Connection/PauseInputBlocker.cs" id="34_blocker"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_skipbtn"]
 font_size = 13
@@ -301,6 +302,16 @@ script = ExtResource("12_gamestatedetail")
 z_index = 99
 
 [node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
+
+[node name="PauseInputBlocker" type="ColorRect" parent="." unique_id=1730245521]
+z_index = 140
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("34_blocker")
 
 [node name="PlayersPanel" parent="." unique_id=1730245520 instance=ExtResource("33_players")]
 

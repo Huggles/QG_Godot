@@ -4,6 +4,7 @@
 [ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="2_style"]
 
 [node name="PlayersPanel" type="PanelContainer"]
+z_index = 150
 custom_minimum_size = Vector2(200, 0)
 offset_left = 8.0
 offset_top = 48.0

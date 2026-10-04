@@ -2,58 +2,73 @@ using Godot;
 using System;
 
 /// <summary>
-/// The strip at the top of the screen while a connection is lost: "Waiting for Bob to reconnect… 25s",
-/// with an Options button for the host once the 30 s are up. Built in code and parented to
-/// <see cref="ConnectionMonitor"/>, so it survives the HUD being rebuilt.
+/// The notice in the middle of the screen while a connection is lost: a large title ("Waiting for Bob
+/// to reconnect"), a line of detail under it (the countdown), and an Options button for the host once
+/// the 30 s are up. Built in code and parented to <see cref="ConnectionMonitor"/>, so it survives the
+/// HUD being rebuilt.
 /// </summary>
 public partial class ConnectionBanner : CanvasLayer
 {
-    /// <summary>Above the HUD, below MenuModal (100), so the host's dialog still draws over it.</summary>
+    /// <summary>Above the HUD and its grey-out, below MenuModal (100), so the host's dialog still draws over it.</summary>
     private const int BannerLayer = 90;
 
     public event Action OptionsPressed;
 
-    private Label _label;
+    private Label _title;
+    private Label _detail;
     private Button _options;
 
     public override void _Ready()
     {
         Layer = BannerLayer;
 
-        Control root = new() { MouseFilter = Control.MouseFilterEnum.Ignore };
-        root.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        AddChild(root);
+        CenterContainer centre = new() { MouseFilter = Control.MouseFilterEnum.Ignore };
+        centre.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        AddChild(centre);
 
-        PanelContainer panel = new()
-        {
-            AnchorLeft = 0.5f, AnchorRight = 0.5f,
-            OffsetTop = 60,
-            GrowHorizontal = Control.GrowDirection.Both,
-        };
+        PanelContainer panel = new() { CustomMinimumSize = new Vector2(520, 0) };
         panel.AddThemeStyleboxOverride("panel", GD.Load<StyleBox>("res://SimpleModalStyle.tres"));
-        root.AddChild(panel);
+        centre.AddChild(panel);
 
         MarginContainer margin = new();
-        foreach (string side in new[] { "left", "right" }) margin.AddThemeConstantOverride($"margin_{side}", 14);
-        foreach (string side in new[] { "top", "bottom" }) margin.AddThemeConstantOverride($"margin_{side}", 8);
+        foreach (string side in new[] { "left", "right" }) margin.AddThemeConstantOverride($"margin_{side}", 32);
+        foreach (string side in new[] { "top", "bottom" }) margin.AddThemeConstantOverride($"margin_{side}", 20);
         panel.AddChild(margin);
 
-        HBoxContainer row = new();
-        row.AddThemeConstantOverride("separation", 12);
-        margin.AddChild(row);
+        VBoxContainer column = new() { Alignment = BoxContainer.AlignmentMode.Center };
+        column.AddThemeConstantOverride("separation", 10);
+        margin.AddChild(column);
 
-        _label = new Label { VerticalAlignment = VerticalAlignment.Center };
-        _label.AddThemeFontSizeOverride("font_size", 18);
-        row.AddChild(_label);
+        _title = NewLabel(32);
+        _detail = NewLabel(20);
+        _detail.AddThemeColorOverride("font_color", new Color(0.8f, 0.8f, 0.8f));
+        column.AddChild(_title);
+        column.AddChild(_detail);
 
-        _options = new Button { Text = "Options", Visible = false, FocusMode = Control.FocusModeEnum.None };
+        _options = new Button
+        {
+            Text = "Options",
+            Visible = false,
+            FocusMode = Control.FocusModeEnum.None,
+            CustomMinimumSize = new Vector2(160, 40),
+            SizeFlagsHorizontal = Control.SizeFlags.ShrinkCenter,
+        };
         _options.Pressed += () => OptionsPressed?.Invoke();
-        row.AddChild(_options);
+        column.AddChild(_options);
     }
 
-    public void Show(string text, bool offerOptions)
+    private static Label NewLabel(int fontSize)
     {
-        _label.Text = text;
+        Label label = new() { HorizontalAlignment = HorizontalAlignment.Center };
+        label.AddThemeFontSizeOverride("font_size", fontSize);
+        return label;
+    }
+
+    public void Show(string title, string detail, bool offerOptions)
+    {
+        _title.Text = title;
+        _detail.Text = detail;
+        _detail.Visible = !string.IsNullOrEmpty(detail);
         _options.Visible = offerOptions;
         Visible = true;
     }
