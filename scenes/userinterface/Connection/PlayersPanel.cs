@@ -73,6 +73,7 @@ public partial class PlayersPanel : PanelContainer
         return row.State switch
         {
             SeatState.Bot => ("bot", QuietColor),
+            SeatState.Rejoining => ("rejoining…", FairColor),
             SeatState.Absent => (row.SecondsLeft > 0 ? $"reconnecting… {row.SecondsLeft}s" : "disconnected", BadColor),
             SeatState.Unstable => ("unstable", FairColor),
             _ => ($"{row.PingMs} ms", row.PingMs < 80 ? GoodColor : row.PingMs < 200 ? FairColor : BadColor),

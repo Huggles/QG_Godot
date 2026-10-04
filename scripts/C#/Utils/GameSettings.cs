@@ -49,6 +49,26 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
     public string LastJoinIp { get; private set; } = "127.0.0.1";
 
+    /// <summary>
+    /// This install's stable identity, so a host can recognise a player who reconnects with a new peer
+    /// id. Made once and kept in settings.cfg. A multi-instance dev launch (instance=N) gets one per
+    /// instance, or every local window would claim the same seat.
+    /// </summary>
+    public string PlayerToken
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_playerToken))
+            {
+                _playerToken = Guid.NewGuid().ToString("N");
+                Save();
+            }
+            string instance = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("instance="));
+            return instance == null ? _playerToken : $"{_playerToken}-{instance}";
+        }
+    }
+    private string _playerToken;
+
     /// <summary>Last server port entered on the join screen, restored on the next launch.</summary>
     public int LastJoinPort { get; private set; } = MultiplayerLobby.DEFAULT_PORT;
 
@@ -241,6 +261,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             ShowActiveCardsInFan = config.GetValue(Section, "show_active_cards_in_fan", true).As<bool>();
             ChatHideSeconds   = ValidChatHide(config.GetValue(Section, "chat_hide_seconds", 5).As<int>());
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
+            _playerToken      = config.GetValue(Section, "player_token", "").AsString();
             LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
 
 
@@ -308,6 +329,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "show_active_cards_in_fan", ShowActiveCardsInFan);
         config.SetValue(Section, "chat_hide_seconds",     ChatHideSeconds);
         config.SetValue(Section, "last_join_ip",          LastJoinIp);
+        config.SetValue(Section, "player_token",          _playerToken ?? "");
         config.SetValue(Section, "last_join_port",        LastJoinPort);
         config.SetValue(Section, "show_country_labels",   ShowCountryLabels);
         config.SetValue(Section, "show_players_panel",    ShowPlayersPanel);

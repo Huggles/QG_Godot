@@ -45,6 +45,12 @@ public static class SessionIdentity
     /// papered over — it means the transport handed the two ends different ids, which is a bug below
     /// this layer, and without this line it only ever surfaced as a lobby full of greyed-out buttons.
     /// </summary>
+    /// <summary>
+    /// Client, rejoining a running game: take back the seat we had. Unlike <see cref="AdoptHostAssignedId"/>
+    /// a differing transport id is expected here — a reconnect always gets a fresh one.
+    /// </summary>
+    public static void AdoptSeatId(int seatId) => _hostAssigned = seatId;
+
     public static void AdoptHostAssignedId(int hostAssigned, int transportId)
     {
         if (hostAssigned == 0) return;

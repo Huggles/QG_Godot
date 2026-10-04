@@ -182,6 +182,11 @@ public partial class NetworkApi : Node
 
     private void ReceiveGameMessageInternal(string dtoJson)
     {
+        // A rejoining player holds live messages until its catch-up log is in; a peer not in a game at
+        // all (still at a join screen) has nothing to apply them to.
+        if (RejoinService.Instance?.BufferIfCatchingUp(dtoJson) == true) return;
+        if (MultiplayerSession.Instance == null) return;
+
         GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(dtoJson);
         DebugUtilities.PrintPeerFinest($"{dtoJson}");
         EnqueueReplicated(dto, "ReceiveGameMessage");
@@ -678,8 +683,16 @@ public partial class NetworkApi : Node
         }
         // RpcId does not call locally even for the host's own id, so the host releases its own prompt
         // by hand — the same asymmetry CallLocal covers on the broadcast path.
-        if (targetPeer == Multiplayer.GetUniqueId()) AbortInputRequest();
-        else RpcId(targetPeer, nameof(AbortInputRequest));
+        if (targetPeer == Multiplayer.GetUniqueId())
+        {
+            AbortInputRequest();
+            return;
+        }
+
+        // targetPeer is a seat; a player who rejoined is reached on a new connection. A seat whose
+        // player is gone has no prompt left to release.
+        int transport = RejoinService.ToTransport(targetPeer);
+        if (Multiplayer.GetPeers().Contains(transport)) RpcId(transport, nameof(AbortInputRequest));
     }
 
     /// <summary>Server → all peers: cancel any local board selection currently awaiting a click.</summary>
@@ -762,6 +775,7 @@ public partial class NetworkApi : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void BroadcastError(string errorJson)
     {
+        if (MultiplayerSession.Instance == null) return;
         try
         {
             ErrorReporter.ReportFromRemote(GameError.FromJson(errorJson));
@@ -779,6 +793,10 @@ public partial class NetworkApi : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public async void ReceiveInputRequest(string dtoJson)
     {
+        // Not in a game yet, or still catching up after a rejoin: the host re-sends this seat's prompt
+        // once the catch-up is complete, and nobody else's prompt is ours to show.
+        if (MultiplayerSession.Instance == null || RejoinService.Instance?.IsCatchingUp == true) return;
+
         InputRequest dto = null;
         try
         {

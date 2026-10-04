@@ -230,10 +230,35 @@ public partial class SteamFriendLobbiesScreen : Control
 
 	private void OnConnectedToServer()
 	{
-		DebugUtilities.PrintPeer("SteamFriendLobbiesScreen: connected, entering lobby");
+		DebugUtilities.PrintPeer("SteamFriendLobbiesScreen: connected, asking the host where to go");
 		_handedOff = true;
-		SetStatus("Connected — entering lobby...", ColorInfo);
-		SceneFlow.ChangeScene(this, LobbyScenePath);
+		_attempt++; // connected: the connect timeout no longer applies, the hello has its own
+		SetStatus("Connected — joining...", ColorInfo);
+		Guard.FireAndForget(EnterAfterHelloAsync, "SteamFriendLobbiesScreen.Hello");
+	}
+
+	/// <summary>The host decides: its lobby, back into the game we dropped out of, or nowhere.</summary>
+	private async Task EnterAfterHelloAsync()
+	{
+		(RejoinService.HelloResult result, string message) = await RejoinService.Instance.HelloAsync();
+		if (!IsInstanceValid(this)) return;
+
+		switch (result)
+		{
+			case RejoinService.HelloResult.Lobby:
+				SceneFlow.ChangeScene(this, LobbyScenePath);
+				break;
+			case RejoinService.HelloResult.Rejoin:
+				SetStatus("Rejoining the game...", ColorInfo);
+				break;
+			default:
+				_handedOff = false;
+				Multiplayer.MultiplayerPeer?.Close();
+				Multiplayer.MultiplayerPeer = null;
+				SteamworksApi.Instance?.LeaveCurrentLobby();
+				AbortAttempt(message);
+				break;
+		}
 	}
 
 	private void OnConnectionFailed()

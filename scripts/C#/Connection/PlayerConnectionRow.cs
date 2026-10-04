@@ -7,7 +7,9 @@ public enum SeatState
     /// <summary>Unreachable: the game is paused for them.</summary>
     Absent,
     /// <summary>A bot is playing their factions.</summary>
-    Bot
+    Bot,
+    /// <summary>Back and being caught up; the game stays paused until they are.</summary>
+    Rejoining
 }
 
 /// <summary>One line of the host's player table, as every peer receives it.</summary>

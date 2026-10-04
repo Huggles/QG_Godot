@@ -98,6 +98,7 @@ public partial class ChatService : Node
         foreach (int peer in Multiplayer.GetPeers().Append(host))
         {
             bool isOwn = peer == senderId;
+            if (!isOwn && peer != host && !Roster.CanHear(peer)) continue;
             if (channel == ChatChannel.Team && !isOwn && !Roster.AreTeammates(senderId, peer)) continue;
 
             if (peer == host) Deliver(new ChatMessage(senderId, senderName, channel, text, isOwn));

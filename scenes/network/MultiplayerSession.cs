@@ -15,6 +15,7 @@ public partial class MultiplayerSession : Node
     private PeerReadinessComponent _peerReadinessComponent => GetNode<PeerReadinessComponent>("PeerReadinessComponent");
     private PeerReadinessComponent _endGameReadiness => GetNode<PeerReadinessComponent>("EndGameReadinessComponent");
     private SessionRestore _restore => GetNode<SessionRestore>("SessionRestore");
+    public SessionRestore Restore => _restore;
 
     public MultiplayerGameState GameState { get; private set; } = new();
 

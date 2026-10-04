@@ -115,7 +115,11 @@ public abstract partial class GameMessage : GodotObject
     /// a session, so this is not a correctness fix — it is what makes two runs of the same seed produce
     /// comparable logs, and what keeps SyncCounterToLatest easy to reason about after a save restore.
     /// </summary>
-    public static void ResetStream() => messageCounter = 0;
+    public static void ResetStream()
+    {
+        messageCounter = 0;
+        BroadcastJournal.Clear();
+    }
 
     /// <summary>
     /// Advance the counter past the highest id already in the journal.
@@ -211,11 +215,22 @@ public abstract partial class GameMessage : GodotObject
         // Serialize against GameMessageDto explicitly rather than relying on generic inference: the
         // [JsonPolymorphic] config lives on that type, and passing it by hand means a covariant
         // ToDto() override can never cost us the "$type" discriminator.
-        string dtoJson = JsonSerializer.Serialize(ToDto(), typeof(GameMessageDto));
+        GameMessageDto dto = ToDto();
+        if (this is ChangeEvent) BroadcastJournal.Record(dto);
+        string dtoJson = JsonSerializer.Serialize(dto, typeof(GameMessageDto));
         DebugUtilities.PrintPeer($"[color={"blue"}]Emitting {ScriptName} to clients (Id: {Id}{BroadcastLogDetail})");
         DebugUtilities.PrintPeerFinest($"{dtoJson}");
         NetworkApi.Instance.Rpc(nameof(NetworkApi.ReceiveGameMessage), dtoJson);
         return Task.CompletedTask;
+    }
+
+    /// <summary>Host: send this message to one peer only — a player who has just rejoined. Never journalled.</summary>
+    public void SendTo(int peer)
+    {
+        EnsureId();
+        OnBeforeBroadcast();
+        string dtoJson = JsonSerializer.Serialize(ToDto(), typeof(GameMessageDto));
+        NetworkApi.Instance.RpcId(peer, nameof(NetworkApi.ReceiveGameMessage), dtoJson);
     }
 
     /// <summary>

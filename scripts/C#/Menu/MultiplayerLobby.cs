@@ -315,6 +315,8 @@ public partial class MultiplayerLobby : Control
 	{
 		RpcId(1, nameof(ReportPlayerName), LocalDisplayName());
 		RpcId(1, nameof(RequestLobbyState));
+		// Also covers the debug auto-join path, which never passes through a join screen's hello.
+		RejoinService.Instance?.AnnounceToken();
 	}
 
 	/// <summary>
@@ -1134,11 +1136,13 @@ public partial class MultiplayerLobby : Control
 	/// The peer is dropped wholesale when the session ends (SceneFlow.ChangeScene with leaveSession, or
 	/// a load auto-hosting afresh), so nothing has to undo this.
 	/// </summary>
+	/// <remarks>
+	/// The transport is left open: a player who drops out mid-game reconnects through it. Anyone else is
+	/// turned away by RejoinService's hello, which only lets a returning player back in.
+	/// </remarks>
 	private void CloseLobbyToNewPeers()
 	{
 		_gameStarting = true;
-		if (Multiplayer.IsServer() && Multiplayer.MultiplayerPeer != null)
-			Multiplayer.MultiplayerPeer.RefuseNewConnections = true;
 	}
 
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
@@ -1162,6 +1166,7 @@ public partial class MultiplayerLobby : Control
 			.ToList();
 
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(playerFactionAssignments);
+		if (Multiplayer.IsServer()) RejoinService.Instance?.RecordSeatTokens(byPeer.Keys);
 		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
 	}
 

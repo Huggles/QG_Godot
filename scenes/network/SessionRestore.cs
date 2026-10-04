@@ -105,6 +105,8 @@ public partial class SessionRestore : Node
 
         // Before the CalculateAll below: its tag snapshot is the first broadcast since the replay began,
         // and it must reach clients after the events it describes, not before them.
+        // The replay broadcast nothing, so the journal a rejoining player is caught up from starts here.
+        BroadcastJournal.Seed(save.Events);
         await SendRestoreLog(save.Events, GameState.ComputeHash());
 
         // Replayed messages keep their original ids, which ChangeEvent.ForId depends on. Push the
@@ -158,9 +160,12 @@ public partial class SessionRestore : Node
     /// Host-only: send clients the save's event log in paced chunks, with the hash the host's own replay
     /// reached. Each event still carries its recorded hash, so a client verifies every one of them.
     /// </summary>
-    private async Task SendRestoreLog(List<GameMessageDto> events, string finalHash)
+    /// <param name="targetPeer">One peer to send to (a player rejoining), or 0 for every client.</param>
+    public async Task SendRestoreLog(List<GameMessageDto> events, string finalHash, int targetPeer = 0)
     {
         if (Multiplayer.GetPeers().Length == 0) return;
+
+        if (targetPeer != 0) RpcId(targetPeer, nameof(BeginFastForward));
 
         List<string> chunks = ChunkEvents(events);
         DebugUtilities.PrintPeer($"SendRestoreLog: {events.Count} event(s) in {chunks.Count} chunk(s), final hash {finalHash}");
@@ -168,7 +173,10 @@ public partial class SessionRestore : Node
         {
             if (i > 0)
                 await ToSignal(GetTree().CreateTimer(RestoreChunkSpacingSeconds), SceneTreeTimer.SignalName.Timeout);
-            Rpc(nameof(ReceiveRestoreLog), i, chunks.Count, events.Count, chunks[i], finalHash);
+            if (targetPeer != 0)
+                RpcId(targetPeer, nameof(ReceiveRestoreLog), i, chunks.Count, events.Count, chunks[i], finalHash);
+            else
+                Rpc(nameof(ReceiveRestoreLog), i, chunks.Count, events.Count, chunks[i], finalHash);
         }
     }
 
@@ -225,6 +233,7 @@ public partial class SessionRestore : Node
             DebugUtilities.PrintPeer($"ReceiveRestoreLog: chunk {chunkIndex + 1}/{chunkCount}, {dtos.Count} event(s)");
             foreach (GameMessageDto dto in dtos)
             {
+                RejoinService.Instance?.NoteLogged(dto.Id);
                 GameMessage msg = NetworkApi.Instance.EnqueueReplicated(dto, "RestoreLog");
                 if (msg is ChangeEvent ev && ++_restoreEventsQueued % ReplayYieldInterval == 0)
                 {
@@ -255,7 +264,10 @@ public partial class SessionRestore : Node
 
         _expectedRestoreHash = null;
         _restoreEventsQueued = 0;
-        _restoreReadiness.RegisterReady();
+
+        // A rejoin is caught up on its own, not by the start-of-game barrier everyone else passed.
+        if (RejoinService.Instance?.IsCatchingUp == true) RejoinService.Instance.OnCaughtUp();
+        else _restoreReadiness.RegisterReady();
     }
 
     /// <summary>Line under the loading cover. Local only: each peer reports its own replay's progress.</summary>

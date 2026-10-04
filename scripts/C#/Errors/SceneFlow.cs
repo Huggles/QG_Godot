@@ -73,6 +73,7 @@ public static class SceneFlow
 
             // Also an autoload: stop watching connections, and release anything parked on the pause.
             ConnectionMonitor.Instance?.Reset();
+            RejoinService.Instance?.Reset();
 
             // NetworkApi is an autoload, so its pending input requests outlive the game scene. Quitting
             // while a prompt is open otherwise leaves a live awaiter holding a multi-minute backstop

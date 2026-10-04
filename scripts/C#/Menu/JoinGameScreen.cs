@@ -1,4 +1,5 @@
 using Godot;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Join-by-IP screen, reached from the main menu's "Join Game" button.
@@ -146,12 +147,32 @@ public partial class JoinGameScreen : Control
 
 	private void OnConnectedToServer()
 	{
-		DebugUtilities.PrintPeer("JoinGameScreen: connected, entering lobby");
-		SetStatus("Connected — entering lobby...", ColorInfo);
+		DebugUtilities.PrintPeer("JoinGameScreen: connected, asking the host where to go");
+		_attempt++; // connected: the connect timeout no longer applies, the hello has its own
+		SetStatus("Connected — joining...", ColorInfo);
+		Guard.FireAndForget(EnterAfterHelloAsync, "JoinGameScreen.Hello");
+	}
 
-		// Deferred: we are inside the multiplayer poll callback, so the scene swap has to wait
-		// until the end of the frame (same reason as MainScene and MultiplayerSession).
-		SceneFlow.ChangeScene(this, LobbyScenePath);
+	/// <summary>The host decides: its lobby, back into the game we dropped out of, or nowhere.</summary>
+	private async Task EnterAfterHelloAsync()
+	{
+		(RejoinService.HelloResult result, string message) = await RejoinService.Instance.HelloAsync();
+		if (!IsInstanceValid(this)) return;
+
+		switch (result)
+		{
+			case RejoinService.HelloResult.Lobby:
+				SceneFlow.ChangeScene(this, LobbyScenePath);
+				break;
+			case RejoinService.HelloResult.Rejoin:
+				SetStatus("Rejoining the game...", ColorInfo);
+				break;
+			default:
+				Multiplayer.MultiplayerPeer?.Close();
+				Multiplayer.MultiplayerPeer = null;
+				AbortAttempt(message);
+				break;
+		}
 	}
 
 	private void OnConnectionFailed()

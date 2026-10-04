@@ -51,10 +51,55 @@ public partial class ConnectionMonitor : Node
         public SeatState State = SeatState.Connected;
         /// <summary>The host chose to wait for this absence; do not ask again until it ends.</summary>
         public bool Decided;
+        /// <summary>A bot held the seat when its player came back, so the bot is stood down on completion.</summary>
+        public bool WasBot;
     }
 
     private readonly Dictionary<int, Seat> _seats = new();
     private bool _armed;
+
+    public bool IsArmed => _armed;
+
+    /// <summary>Host: whether a returning player may take this seat back — it is lost or bot-held.</summary>
+    public bool CanRejoin(int seatId)
+        => _seats.TryGetValue(seatId, out Seat seat) && seat.State is SeatState.Absent or SeatState.Bot or SeatState.Unstable;
+
+    /// <summary>Host: the seat's player is back and being caught up. Paused until they are.</summary>
+    public void BeginRejoin(int seatId)
+    {
+        if (!_seats.TryGetValue(seatId, out Seat seat)) return;
+        seat.WasBot = seat.State == SeatState.Bot;
+        seat.State = SeatState.Rejoining;
+        seat.Gone = false;
+        HostTick();
+    }
+
+    /// <summary>Host: caught up. A bot that held the seat is stood down on every peer.</summary>
+    public void CompleteRejoin(int seatId)
+    {
+        if (!_seats.TryGetValue(seatId, out Seat seat)) return;
+        if (seat.WasBot)
+        {
+            Rpc(MethodName.SetSeatAi, seatId, false);
+            AiSeatRuntime.ReleaseSeat(PlayerFactionRegistry.GetPlayerSceneForSeat(seatId));
+        }
+        seat.WasBot = false;
+        seat.Gone = false;
+        seat.Decided = false;
+        seat.LastHeard = Now;
+        seat.RttMs = 0;
+        seat.State = SeatState.Connected;
+        HostTick();
+    }
+
+    /// <summary>Host: the returning connection dropped before it was caught up. Back to where the seat was.</summary>
+    public void AbortRejoin(int seatId)
+    {
+        if (!_seats.TryGetValue(seatId, out Seat seat)) return;
+        seat.State = seat.WasBot ? SeatState.Bot : SeatState.Absent;
+        seat.Gone = true;
+        HostTick();
+    }
     private double _tickTimer;
     private double _tableTimer;
     private double _lastHeardHost;
@@ -129,10 +174,13 @@ public partial class ConnectionMonitor : Node
     public bool IsGamePaused =>
         _armed && (IsHost
             ? GamePause.IsPaused
-            : _hostLost || Now - _lastHeardHost > UnreachableAfter || _rows.Any(r => r.State == SeatState.Absent));
+            : _hostLost || Now - _lastHeardHost > UnreachableAfter || _rows.Any(r => Holds(r.State)));
 
     /// <summary>Whether the host is holding the game for this seat.</summary>
-    public bool IsSeatAbsent(int seatId) => _seats.TryGetValue(seatId, out Seat seat) && seat.State == SeatState.Absent;
+    public bool IsSeatAbsent(int seatId) => _seats.TryGetValue(seatId, out Seat seat) && Holds(seat.State);
+
+    /// <summary>The states the game waits for: a player who is gone, or one being caught up.</summary>
+    private static bool Holds(SeatState state) => state is SeatState.Absent or SeatState.Rejoining;
 
     public override void _Process(double delta)
     {
@@ -160,7 +208,8 @@ public partial class ConnectionMonitor : Node
         TransferMode = MultiplayerPeer.TransferModeEnum.Unreliable, TransferChannel = PingChannel)]
     public void Pong(long sentAtMs)
     {
-        if (!IsHost || !_seats.TryGetValue(Multiplayer.GetRemoteSenderId(), out Seat seat) || seat.Gone) return;
+        int seatId = RejoinService.ToSeat(Multiplayer.GetRemoteSenderId());
+        if (!IsHost || !_seats.TryGetValue(seatId, out Seat seat) || seat.Gone) return;
 
         seat.LastHeard = Now;
         double rtt = Math.Max(0, (long)Time.GetTicksMsec() - sentAtMs);
@@ -174,13 +223,16 @@ public partial class ConnectionMonitor : Node
         int[] connected = Multiplayer.GetPeers();
         long nowMs = (long)Time.GetTicksMsec();
         foreach (Seat seat in _seats.Values)
-            if (seat.State != SeatState.Bot && !seat.Gone && connected.Contains(seat.Id))
-                RpcId(seat.Id, MethodName.Ping, nowMs);
+        {
+            if (seat.State is SeatState.Bot or SeatState.Rejoining || seat.Gone) continue;
+            int transport = RejoinService.ToTransport(seat.Id);
+            if (connected.Contains(transport)) RpcId(transport, MethodName.Ping, nowMs);
+        }
 
         bool changed = UpdateSeatStates();
 
         _tableTimer += PingInterval;
-        bool anyAbsent = _seats.Values.Any(s => s.State == SeatState.Absent);
+        bool anyAbsent = _seats.Values.Any(s => Holds(s.State));
         if (changed || anyAbsent || _tableTimer >= TableInterval)
         {
             _tableTimer = 0;
@@ -200,7 +252,7 @@ public partial class ConnectionMonitor : Node
         double now = Now;
         foreach (Seat seat in _seats.Values)
         {
-            if (seat.State == SeatState.Bot) continue;
+            if (seat.State is SeatState.Bot or SeatState.Rejoining) continue;
 
             double silence = now - seat.LastHeard;
             SeatState state = seat.Gone || silence > UnreachableAfter ? SeatState.Absent
@@ -319,10 +371,18 @@ public partial class ConnectionMonitor : Node
 
     private void RefreshBanner()
     {
+        List<PlayerConnectionRow> rejoining = _rows.Where(r => r.State == SeatState.Rejoining).ToList();
         List<PlayerConnectionRow> absent = _rows.Where(r => r.State == SeatState.Absent).ToList();
-        if (absent.Count == 0)
+        if (absent.Count == 0 && rejoining.Count == 0)
         {
             Banner?.Hide();
+            return;
+        }
+
+        if (absent.Count == 0)
+        {
+            string returning = string.Join(", ", rejoining.Select(r => r.Name));
+            EnsureBanner().Show($"{returning} is rejoining", "Catching up on the game…", false);
             return;
         }
 
@@ -350,7 +410,7 @@ public partial class ConnectionMonitor : Node
         if (silence > UnreachableAfter)
             EnsureBanner().Show("Connection to the host lost",
                 $"Reconnecting… {(int)Math.Ceiling(DisconnectAfter - silence)}s", false);
-        else if (!_rows.Any(r => r.State == SeatState.Absent))
+        else if (!_rows.Any(r => Holds(r.State)))
             Banner?.Hide();
     }
 
@@ -384,7 +444,9 @@ public partial class ConnectionMonitor : Node
 
     private void OnPeerDisconnected(long id)
     {
-        if (!_armed || !IsHost || !_seats.TryGetValue((int)id, out Seat seat)) return;
+        // Through the seat map: a seat's OLD connection closing after its player rejoined maps to no seat.
+        if (!_armed || !IsHost || !_seats.TryGetValue(RejoinService.ToSeat((int)id), out Seat seat)) return;
+        if (seat.State == SeatState.Rejoining) return;   // RejoinService handles that one
         seat.Gone = true;
         HostTick();
     }

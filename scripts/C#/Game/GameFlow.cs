@@ -56,6 +56,21 @@ public partial class GameFlow : SingletonNode<GameFlow>
         EventBus.Emit(EventBus.SignalName.NextStepStarted, (int)gameTurnStep.TurnStep);
     }
     [Export] public TurnStep TurnStep { get; set; } = 0;
+
+    public bool IsStarted => GameStarted;
+
+    /// <summary>
+    /// Client, rejoining: the values GameFlowMultiplayerSynchronizer replicates, which it only sends on
+    /// change — a peer that arrives mid-turn would otherwise sit on the defaults until the next step.
+    /// Setting the counter on a client only drives the HUD (DispatchTurnStep is host-gated).
+    /// </summary>
+    public void ApplyReplicatedFlow(bool started, int turn, int counter, TurnStep step)
+    {
+        GameStarted = started;
+        GameTurn = turn;
+        TurnStep = step;
+        TurnStepCounter = counter;
+    }
     [Export] public int MaxRound { get; set; } = 20;
 
     /// <summary>
