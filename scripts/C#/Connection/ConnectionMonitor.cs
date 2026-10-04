@@ -195,9 +195,13 @@ public partial class ConnectionMonitor : Node
 
     // ── Ping ─────────────────────────────────────────────────────────────────
 
-    /// <summary>Unreliable and on its own channel, so it never waits behind game traffic.</summary>
+    /// <summary>
+    /// Reliable, on its own channel. Not unreliable: ENet throttles unreliable packets on a busy link, and
+    /// the player being sent the most game traffic (whoever is being prompted) lost pings for seconds at a
+    /// time and was taken for disconnected. Its own channel keeps it from queueing behind game traffic.
+    /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false,
-        TransferMode = MultiplayerPeer.TransferModeEnum.Unreliable, TransferChannel = PingChannel)]
+        TransferMode = MultiplayerPeer.TransferModeEnum.Reliable, TransferChannel = PingChannel)]
     public void Ping(long sentAtMs)
     {
         _lastHeardHost = Now;
@@ -205,7 +209,7 @@ public partial class ConnectionMonitor : Node
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false,
-        TransferMode = MultiplayerPeer.TransferModeEnum.Unreliable, TransferChannel = PingChannel)]
+        TransferMode = MultiplayerPeer.TransferModeEnum.Reliable, TransferChannel = PingChannel)]
     public void Pong(long sentAtMs)
     {
         int seatId = RejoinService.ToSeat(Multiplayer.GetRemoteSenderId());
