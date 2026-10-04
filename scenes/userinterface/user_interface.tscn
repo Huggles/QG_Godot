@@ -67,41 +67,6 @@ shadow_size = 10
 [node name="InputTimerDisplay" parent="." unique_id=2116314957 instance=ExtResource("17_inptmr")]
 z_index = 4096
 
-[node name="ModalStack" type="Control" parent="." unique_id=78458452]
-z_index = 100
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("3_oxwje")
-
-[node name="ModalGutter" type="MarginContainer" parent="ModalStack" unique_id=78458453]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-theme_override_constants/margin_left = 200
-theme_override_constants/margin_top = 200
-theme_override_constants/margin_right = 200
-theme_override_constants/margin_bottom = 200
-
-[node name="ModalCenter" type="CenterContainer" parent="ModalStack/ModalGutter" unique_id=78458454]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="ModalRow" type="HBoxContainer" parent="ModalStack/ModalGutter/ModalCenter" unique_id=78458455]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/separation = 40
-
-[node name="PlayerAction" parent="." unique_id=836962227 instance=ExtResource("4_dvfjj")]
-
 [node name="CommanderMessage" parent="." unique_id=1932160187 instance=ExtResource("24_cmdrmsg")]
 
 [node name="Control" type="Control" parent="." unique_id=235064403]
@@ -302,6 +267,41 @@ script = ExtResource("12_gamestatedetail")
 z_index = 99
 
 [node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
+
+[node name="ModalStack" type="Control" parent="." unique_id=78458452]
+z_index = 100
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_oxwje")
+
+[node name="ModalGutter" type="MarginContainer" parent="ModalStack" unique_id=78458453]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_top = 200
+theme_override_constants/margin_right = 200
+theme_override_constants/margin_bottom = 200
+
+[node name="ModalCenter" type="CenterContainer" parent="ModalStack/ModalGutter" unique_id=78458454]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ModalRow" type="HBoxContainer" parent="ModalStack/ModalGutter/ModalCenter" unique_id=78458455]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="PlayerAction" parent="." unique_id=836962227 instance=ExtResource("4_dvfjj")]
 
 [node name="PauseInputBlocker" type="ColorRect" parent="." unique_id=1730245521]
 z_index = 140
