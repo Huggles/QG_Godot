@@ -144,8 +144,20 @@ public partial class UnitScene : Node2D
 
 	public void SetUnclickable() => RefreshTargetMarker();
 
-	public void ShowOutOfSupply() => OutOfSupplyNode.Show();
-	public void HideOutOfSupply() => OutOfSupplyNode.Hide();
+	/// <summary>Flickers the unit's faction color to black. Shared by every unit, so they flicker in step.</summary>
+	private static readonly Material OutOfSupplyMaterial = GD.Load<Material>("res://assets/materials/OutOfSupplyMaterial.tres");
+
+	public void ShowOutOfSupply()
+	{
+		OutOfSupplyNode.Show();
+		UnitSpriteNode.Material = OutOfSupplyMaterial;
+	}
+
+	public void HideOutOfSupply()
+	{
+		OutOfSupplyNode.Hide();
+		UnitSpriteNode.Material = null;
+	}
 
 	/// <summary>Floats the VP this unit just earned over it.</summary>
 	public Task ShowVpScore(int vp) => GetNode<VpScoreLabel>("%VpScoreLabel").Play(vp);
