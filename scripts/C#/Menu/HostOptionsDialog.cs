@@ -2,8 +2,8 @@ using Godot;
 using System.Threading.Tasks;
 
 /// <summary>
-/// "Host Game" step one: host over Steam (the default) or over plain Godot networking (ENet),
-/// and for Steam collect the lobby size and visibility.
+/// "Host Game" step one: collect the Steam lobby size and visibility, or host over plain Godot
+/// networking (ENet) instead through the small button at the bottom.
 ///
 /// Layout lives in <c>res://scenes/menu/HostOptionsDialog.tscn</c>, an inherited scene of
 /// <see cref="MenuModal"/>'s shell — see that class for how the pair fit together.
@@ -54,9 +54,8 @@ public partial class HostOptionsDialog : MenuModal
 		_privacy       = GetNode<OptionButton>("%Privacy");
 		_confirmButton = GetNode<Button>("%ConfirmButton");
 
-		GetNode<MenuPanelButton>("%GodotButton").Pressed += OnGodotPressed;
-		MenuPanelButton steamButton = GetNode<MenuPanelButton>("%SteamButton");
-		steamButton.Pressed += OnSteamPressed;
+		Button ipButton = GetNode<Button>("%IpButton");
+		ipButton.Pressed += OnGodotPressed;
 
 		GetNode<Button>("%CancelButton").Pressed += Cancel;
 		_confirmButton.Pressed += OnConfirmSteam;
@@ -74,14 +73,19 @@ public partial class HostOptionsDialog : MenuModal
 		string unavailable = SteamUnavailableReason();
 		if (unavailable == null)
 		{
-			// Steam is the default: open with its options showing, so Enter creates the lobby.
-			OnSteamPressed();
+			// Steam is the default, so Enter creates the lobby.
 			_confirmButton.CallDeferred(Control.MethodName.GrabFocus);
 			return;
 		}
 
-		steamButton.Disabled = true;
-		steamButton.Modulate = new Color(1, 1, 1, 0.4f);
+		// IP is the only way left, so it stops being the understated "instead" option.
+		_steamOptions.Visible  = false;
+		_confirmButton.Visible = false;
+		GetNode<Label>("%Hint").Visible = false;
+		ipButton.Text = "Host over IP";
+		ipButton.Flat = false;
+		ipButton.CustomMinimumSize = _confirmButton.CustomMinimumSize;
+		ipButton.CallDeferred(Control.MethodName.GrabFocus);
 
 		Label warning = GetNode<Label>("%WarningLabel");
 		warning.Text    = unavailable;
@@ -103,16 +107,9 @@ public partial class HostOptionsDialog : MenuModal
 	/// <summary>Resolves straight away: the Godot path must stay exactly as many clicks as before.</summary>
 	private void OnGodotPressed() => Resolve(new Result(HostMode.Godot, 0, SteamLobbyPrivacy.FriendsOnly));
 
-	private void OnSteamPressed()
-	{
-		if (Resolved || SteamUnavailableReason() != null) return;
-		_steamOptions.Visible  = true;
-		_confirmButton.Visible = true;
-	}
-
 	private void OnConfirmSteam()
 	{
-		if (Resolved) return;
+		if (Resolved || SteamUnavailableReason() != null) return;
 		Resolve(new Result(
 			HostMode.Steam,
 			(int)_maxPlayers.Value,
