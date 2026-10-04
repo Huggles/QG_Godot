@@ -22,9 +22,13 @@ public sealed record FriendLobby(
 	string ScenarioTitle,
 	int    Members,
 	int    MaxMembers,
-	string DiscoveredVia)
+	string DiscoveredVia,
+	string GameVersion)
 {
 	public bool IsFull => MaxMembers > 0 && Members >= MaxMembers;
+
+	/// <summary>False for a host on a build too old to publish its version, as well as for a real mismatch.</summary>
+	public bool SameVersionAsLocal => GameVersion == BuildInfo.Version;
 }
 
 /// <summary>Friend presence, exposed so no menu code has to reference <see cref="Steam.PersonaState"/>.</summary>
@@ -83,6 +87,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		public const string HostSteamId = "host_steam_id";
 		public const string Scenario    = "scenario";
 		public const string MaxPlayers  = "max_players";
+		public const string GameVersion = "game_version";
 	}
 
 	/// <summary>
@@ -312,6 +317,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.HostSteamId, LocalSteamId.ToString());
 		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.Scenario,    scenarioTitle ?? string.Empty);
 		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.MaxPlayers,  maxPlayers.ToString());
+		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.GameVersion, BuildInfo.Version);
 	}
 
 	/// <summary>
@@ -433,7 +439,8 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 				ScenarioTitle: _steam.GetLobbyData(lobbyId, LobbyKeys.Scenario),
 				Members:       (int)_steam.GetNumLobbyMembers(lobbyId),
 				MaxMembers:    (int)_steam.GetLobbyMemberLimit(lobbyId),
-				DiscoveredVia: via));
+				DiscoveredVia: via,
+				GameVersion:   _steam.GetLobbyData(lobbyId, LobbyKeys.GameVersion)));
 		}
 
 		return result;

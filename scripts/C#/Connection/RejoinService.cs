@@ -115,7 +115,7 @@ public partial class RejoinService : Node
     public async Task<(HelloResult Result, string Message)> HelloAsync()
     {
         _hello = new TaskCompletionSource<(HelloResult, string)>(TaskCreationOptions.RunContinuationsAsynchronously);
-        RpcId(1, MethodName.Hello, GameSettings.Instance.PlayerToken);
+        RpcId(1, MethodName.Hello, GameSettings.Instance.PlayerToken, BuildInfo.Version);
 
         Task timeout = Task.Delay(HelloTimeoutMs);
         if (await Task.WhenAny(_hello.Task, timeout) == timeout)
@@ -124,13 +124,23 @@ public partial class RejoinService : Node
     }
 
     /// <summary>Client, from the lobby: make sure the host has our token, for a rejoin later on.</summary>
-    public void AnnounceToken() => RpcId(1, MethodName.Hello, GameSettings.Instance.PlayerToken);
+    public void AnnounceToken() => RpcId(1, MethodName.Hello, GameSettings.Instance.PlayerToken, BuildInfo.Version);
 
+    /// <summary>
+    /// Host: route a joining peer. The version check comes first and covers every way in — the friends
+    /// list, an accepted Steam invite and a direct IP join all say Hello.
+    /// </summary>
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void Hello(string token)
+    public void Hello(string token, string version)
     {
         if (!IsHost) return;
         int sender = Multiplayer.GetRemoteSenderId();
+
+        if (version != BuildInfo.Version)
+        {
+            Refuse(sender, $"Version mismatch: the host is on v{BuildInfo.Version}, you are on v{version}.");
+            return;
+        }
 
         if (MultiplayerSession.Instance == null)
         {

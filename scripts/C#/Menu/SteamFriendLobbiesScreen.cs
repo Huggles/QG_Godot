@@ -161,20 +161,36 @@ public partial class SteamFriendLobbiesScreen : Control
 		scenarioLabel.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
 		row.AddChild(scenarioLabel);
 
+		row.AddChild(BuildVersionLabel(lobby));
 		row.AddChild(MakeLabel($"{lobby.Members}/{lobby.MaxMembers}", 20, new Vector2(90, 0)));
 
 		// A plain Button, not MenuPanelButton: Disabled has to genuinely block the click for a full
 		// lobby, and MenuPanelButton's own Pressed signal ignores Disabled.
+		// The host refuses a mismatched build anyway (RejoinService.Hello); this just says so up front.
 		var join = new Button
 		{
-			Text = lobby.IsFull ? "Full" : "Join",
-			Disabled = lobby.IsFull,
+			Text = !lobby.SameVersionAsLocal ? "Wrong version" : lobby.IsFull ? "Full" : "Join",
+			Disabled = lobby.IsFull || !lobby.SameVersionAsLocal,
 			CustomMinimumSize = new Vector2(120, 44),
 		};
 		join.Pressed += () => OnJoinPressed(lobby);
 		row.AddChild(join);
 
 		return panel;
+	}
+
+	/// <summary>The host's build, in amber when it differs from ours.</summary>
+	private static Label BuildVersionLabel(FriendLobby lobby)
+	{
+		string text = string.IsNullOrWhiteSpace(lobby.GameVersion) ? "v?" : $"v{lobby.GameVersion}";
+		Label label = MakeLabel(text, 18, new Vector2(110, 0));
+		label.AddThemeColorOverride("font_color",
+			lobby.SameVersionAsLocal ? new Color(0.7f, 0.7f, 0.7f) : new Color(1f, 0.75f, 0.3f));
+		label.TooltipText = lobby.SameVersionAsLocal
+			? "Host is on the same version as you."
+			: $"Host is on {(string.IsNullOrWhiteSpace(lobby.GameVersion) ? "an unknown version" : "v" + lobby.GameVersion)}; you are on v{BuildInfo.Version}. Both need the same version to play together.";
+		label.MouseFilter = MouseFilterEnum.Stop; // a Label ignores the mouse by default, which hides its tooltip
+		return label;
 	}
 
 	private static Label MakeLabel(string text, int fontSize, Vector2 minSize)
