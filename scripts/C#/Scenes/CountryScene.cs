@@ -29,6 +29,8 @@ public partial class CountryScene : Control
 	public Label CountryLabel => GetNode<Label>("CountryLabel");
 	public VpScoreLabel VpScoreLabel => GetNode<VpScoreLabel>("%VpScoreLabel");
 	public static readonly PackedScene CountryScenePacked = GD.Load<PackedScene>("res://scenes/World/Country.tscn");
+	private static readonly Texture2D SupplyStarTexture = GD.Load<Texture2D>("res://assets/textures/Other/SupplyStar.png");
+	private static readonly Texture2D SupplyStarLostTexture = GD.Load<Texture2D>("res://assets/textures/Other/SupplyStarLost.png");
 
 	public Vector2 TextureSize => new Vector2(this.CountryState.StaticCountryData.Texture.GetWidth(), this.CountryState.StaticCountryData.Texture.GetHeight());
 	/// <summary>The country's rect in the Countries node's space. Everything it owns sits inside this.</summary>
@@ -147,6 +149,8 @@ public partial class CountryScene : Control
 
 		EventBus.Instance.WorldPresentationViewChanged += OnWorldPresentationViewChanged;
 		EventBus.Instance.CountryNamesToggled += OnCountryNameToggled;
+		EventBus.Instance.GameStateRecalculated += OnGameStateRecalculated;
+		OnGameStateRecalculated();
 
 		CountrySpriteTextureRect.MouseEntered += OnMouseEnteredOpaque;
 		CountrySpriteTextureRect.MouseExited += OnMouseExitedOpaque;
@@ -158,6 +162,7 @@ public partial class CountryScene : Control
 		CountryState.Tags.TagRemoved -= OnTagRemoved;
 		EventBus.Instance.WorldPresentationViewChanged -= OnWorldPresentationViewChanged;
 		EventBus.Instance.CountryNamesToggled -= OnCountryNameToggled;
+		EventBus.Instance.GameStateRecalculated -= OnGameStateRecalculated;
 	}
 
 	private void OnCountryNameToggled(bool show)
@@ -677,5 +682,15 @@ public partial class CountryScene : Control
 	private void HideSupplyStar()
 	{
 		SupplyStarSprite.Visible = false;
+	}
+
+	/// <summary>Swaps in the crossed-out star while a status card (e.g. Scorched Earth) denies this
+	/// space as a supply source to anyone, and back once the card leaves play.</summary>
+	private void OnGameStateRecalculated()
+	{
+		if (!CountryState.IsSupply) return;
+		bool blocked = BoardState.Live.Modifiers<ISupplyBlockModifier>().Any(m =>
+			Enum.GetValues<Faction>().Any(f => f != Faction.NONE && f != Faction.ALL && m.BlocksSupply(CountryId, f)));
+		SupplyStarSprite.Texture = blocked ? SupplyStarLostTexture : SupplyStarTexture;
 	}
 }
