@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://djinib8j6dupy"]
 
 [ext_resource type="Script" uid="uid://c5fpt5gbmo0lv" path="res://scripts/C#/Menu/MultiplayerLobby.cs" id="1_lobby"]
+[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_description"]
@@ -164,15 +165,20 @@ theme_override_constants/separation = 5
 [node name="HSeparator3" type="HSeparator" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=574421845]
 layout_mode = 2
 
-[node name="InviteButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=209349752]
+[node name="ActionRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1742093318]
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="InviteButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ActionRow" unique_id=209349752 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 visible = false
+custom_minimum_size = Vector2(330, 90)
 layout_mode = 2
-size_flags_horizontal = 4
-text = "Invite Friends"
+ButtonText = "Invite Friends"
 
-[node name="StartGameButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=313149031]
+[node name="StartGameButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ActionRow" unique_id=313149031 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 90)
 layout_mode = 2
-size_flags_horizontal = 4
-text = "Start Game"
+ButtonText = "Start Game"
