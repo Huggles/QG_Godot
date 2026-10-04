@@ -170,6 +170,12 @@ layout_mode = 2
 theme_override_constants/separation = 30
 alignment = 1
 
+[node name="LeaveButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ActionRow" unique_id=1093857721 instance=ExtResource("2_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 90)
+layout_mode = 2
+ButtonText = "Leave"
+
 [node name="InviteButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ActionRow" unique_id=209349752 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 visible = false

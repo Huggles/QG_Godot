@@ -16,6 +16,7 @@ public partial class MultiplayerLobby : Control
 	/// <summary>Shared so JoinGameScreen and GameSettings use one source of truth for the port.</summary>
 	public const int DEFAULT_PORT = 7777;
 	private const string DEFAULT_SERVER_IP = "127.0.0.1";
+	private const string MenuScenePath = "res://scenes/menu/Menu.tscn";
 
 	// ── Scene node references ─────────────────────────────────────────────────
 	private VBoxContainer _playerListContainer;
@@ -133,6 +134,7 @@ public partial class MultiplayerLobby : Control
 
 		_startGameButton.Pressed += OnStartGameButtonPressed;
 		_inviteButton.Pressed    += OnInviteFriendsPressed;
+		GetNode<Button>("%LeaveButton").Pressed += OnLeavePressed;
 
 		Multiplayer.PeerConnected      += OnPeerConnected;
 		Multiplayer.PeerDisconnected   += OnPeerDisconnected;
@@ -661,6 +663,17 @@ public partial class MultiplayerLobby : Control
 		BroadcastFactionState();
 	}
 	private void OnInviteFriendsPressed() => InviteFriendsDialog.Show(this);
+
+	/// <summary>
+	/// Back to the main menu. leaveSession closes the peer and releases the Steam lobby, so a leaving
+	/// host takes the clients down with it (they see ServerDisconnected) and can host again straight away.
+	/// </summary>
+	private void OnLeavePressed()
+	{
+		if (_gameStarting) return; // the scene change into the game is already queued
+		DebugUtilities.PrintPeer("MultiplayerLobby: leaving");
+		SceneFlow.ChangeScene(this, MenuScenePath, leaveSession: true);
+	}
 
 	private void JoinAt(string ip)
 	{
