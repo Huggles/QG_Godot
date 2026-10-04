@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
 /// <summary>
@@ -211,11 +212,20 @@ public partial class GameSettings : SingletonNode<GameSettings>
         // Same shape as AudioManager._Ready pushing the saved levels onto the buses: the values are
         // loaded here, so this is where they first reach the thing they describe. A dev build's
         // first launch skips it: its size was read off the window, so there is nothing to apply.
-        if (_hasSavedDisplay || GameContext.IsProductionBuild)
+        // So does a window placed from the command line, e.g. the tiled multi-instance launch scripts.
+        if ((_hasSavedDisplay || GameContext.IsProductionBuild) && !HasCmdlineWindowGeometry())
         {
             DisplaySettings.Apply(DisplayMode, WindowResolution);
         }
     }
+
+    /// <summary>
+    /// True for a multi-instance dev launch (<c>instance=N</c>), whose scripts size and place each
+    /// window themselves, or any launch with an explicit window size or position.
+    /// </summary>
+    private static bool HasCmdlineWindowGeometry()
+        => OS.GetCmdlineUserArgs().Any(arg => arg.StartsWith("instance="))
+        || OS.GetCmdlineArgs().Any(arg => arg is "--resolution" or "--position");
 
     /// <summary>Loads settings from <c>user://settings.cfg</c>. Call once on startup.</summary>
     public void Load()
