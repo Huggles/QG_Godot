@@ -15,23 +15,23 @@ layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="GodotButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="0" instance=ExtResource("3_btn")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(330, 130)
-layout_mode = 2
-ButtonText = "Host via Godot"
-
-[node name="SteamButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" instance=ExtResource("3_btn")]
+[node name="SteamButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="0" instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(330, 130)
 layout_mode = 2
 ButtonText = "Host via Steam"
 
+[node name="GodotButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" instance=ExtResource("3_btn")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(330, 130)
+layout_mode = 2
+ButtonText = "Host via Godot"
+
 [node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "Godot hosting uses a direct connection over IP. Steam hosting connects through Steam, so no port forwarding is needed."
+text = "Steam hosting connects through Steam, so no port forwarding is needed. Godot hosting uses a direct connection over IP."
 autowrap_mode = 3
 
 [node name="WarningLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="3"]

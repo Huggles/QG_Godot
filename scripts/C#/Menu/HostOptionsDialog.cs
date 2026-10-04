@@ -2,7 +2,7 @@ using Godot;
 using System.Threading.Tasks;
 
 /// <summary>
-/// "Host Game" step one: host over plain Godot networking (ENet, exactly as before) or over Steam,
+/// "Host Game" step one: host over Steam (the default) or over plain Godot networking (ENet),
 /// and for Steam collect the lobby size and visibility.
 ///
 /// Layout lives in <c>res://scenes/menu/HostOptionsDialog.tscn</c>, an inherited scene of
@@ -72,7 +72,13 @@ public partial class HostOptionsDialog : MenuModal
 		// Steam can be perfectly available while the peer class is missing (that happens with the
 		// plain GodotSteam build), so both conditions are reported separately.
 		string unavailable = SteamUnavailableReason();
-		if (unavailable == null) return;
+		if (unavailable == null)
+		{
+			// Steam is the default: open with its options showing, so Enter creates the lobby.
+			OnSteamPressed();
+			_confirmButton.CallDeferred(Control.MethodName.GrabFocus);
+			return;
+		}
 
 		steamButton.Disabled = true;
 		steamButton.Modulate = new Color(1, 1, 1, 0.4f);
