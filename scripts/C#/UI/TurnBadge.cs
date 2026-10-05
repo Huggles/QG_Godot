@@ -145,13 +145,17 @@ public partial class TurnBadge : Control
 		Modulate = new Color(Modulate, 0f);
 		Show();
 
-		// The slowest scale the project has, on all three phases. The badge blocks nothing and is
-		// read rather than watched, so it is the one thing in the turn that can afford to take its
-		// time — and it still collapses to nothing under a fast-forwarded restore, because every
-		// Duration* property returns 0 there.
-		double fadeIn  = GameSettings.DurationLongSeconds;
-		double hold    = GameSettings.DurationLongSeconds;
-		double fadeOut = GameSettings.DurationLongSeconds;
+		// Its own totals (3s/2s/1s) rather than the duration table, whose steps don't land on them.
+		// GetFixedDurationSeconds still collapses to 0 under a fast-forwarded restore.
+		int totalMs = GameSettings.Instance?.PresentationSpeed switch
+		{
+			GameSpeed.Slow => 3000,
+			GameSpeed.Fast => 1000,
+			_ => 2000,
+		};
+		double fadeIn  = GameSettings.GetFixedDurationSeconds(totalMs / 4);
+		double hold    = GameSettings.GetFixedDurationSeconds(totalMs / 2);
+		double fadeOut = GameSettings.GetFixedDurationSeconds(totalMs / 4);
 
 		Tween fade = CreateTween();
 		fade.TweenProperty(this, "modulate:a", 1f, fadeIn)

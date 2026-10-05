@@ -1114,6 +1114,15 @@
         "Label":  "Ardennes Offensive",
         "Text":  "Battle in Western Europe. Then build an army in Western Europe.",
         "MultipleActivationsPerTurn":  false
+    },
+    {
+        "UniqueName":  "EventDutchEastIndies",
+        "Number":  "146",
+        "Type":  "EVENT",
+        "ExecutionClass":  "EventDutchEastIndies",
+        "Label":  "Dutch East Indies",
+        "Text":  "Recruit an Army in Indonesia and an Army in New Guinea, and then a Navy in the South China Sea.",
+        "MultipleActivationsPerTurn":  false
     }
 
 ]

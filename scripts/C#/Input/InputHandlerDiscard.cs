@@ -15,7 +15,8 @@ public partial class InputHandlerDiscard
     public InputHandlerDiscard(Faction faction, List<int> cardIds, int minimumDiscards = 1, bool required = false)
     {
         this.faction = faction;
-        this.cardIds = cardIds;
+        // A sorted copy, matching the hand fan's card-id order; the caller may pass the live hand list.
+        this.cardIds = cardIds.OrderBy(id => id).ToList();
         this.minimumDiscards = minimumDiscards;
         this.required = required;
     }

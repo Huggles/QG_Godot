@@ -188,6 +188,26 @@ public static class VpMath
     }
 
     /// <summary>
+    /// The status-card rate from <paramref name="board"/>'s own Status piles rather than the live
+    /// registry, so a Status card the valuer played onto a fork counts. Guarded per card like the above.
+    /// </summary>
+    public static int StatusCardVpRateOn(FactionTeam team, BoardState board)
+    {
+        int total = 0;
+        foreach (Faction member in StaticGameData.FactionsForTeam(team))
+        {
+            if (FactionState.ForEnum(member) == null) continue;
+            foreach (int cardId in board.ForFaction(member).Status)
+            {
+                if (CardState.ForId(cardId)?.CardLogic is not IVPModifier modifier) continue;
+                try { total += modifier.AddVictoryPoints(board)?.VictoryPoints ?? 0; }
+                catch { /* one card's failure costs one card's points */ }
+            }
+        }
+        return total;
+    }
+
+    /// <summary>
     /// The payout formula itself, for a country held by <paramref name="occupantCount"/> distinct
     /// factions. Kept in one place so every helper above shares it verbatim.
     /// </summary>
