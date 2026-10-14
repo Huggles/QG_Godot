@@ -2,6 +2,12 @@
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quartermaster General", "Quartermaster General.csproj", "{D3C3CDF3-6E96-4711-AAB0-56C37B9824A6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "expansions", "expansions", "{97EBD33C-580B-78D7-52A6-2F3F95EC4893}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "total_war", "total_war", "{FDF89E54-1A87-FFFC-D93C-DFAFE97473D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TotalWar", "expansions\total_war\TotalWar.csproj", "{A9EC0DEB-BDBC-417B-A2E6-9D0D3FC27B18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 	Debug|Any CPU = Debug|Any CPU
@@ -15,5 +21,12 @@ Global
 		{D3C3CDF3-6E96-4711-AAB0-56C37B9824A6}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{D3C3CDF3-6E96-4711-AAB0-56C37B9824A6}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{D3C3CDF3-6E96-4711-AAB0-56C37B9824A6}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{A9EC0DEB-BDBC-417B-A2E6-9D0D3FC27B18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9EC0DEB-BDBC-417B-A2E6-9D0D3FC27B18}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{A9EC0DEB-BDBC-417B-A2E6-9D0D3FC27B18}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FDF89E54-1A87-FFFC-D93C-DFAFE97473D0} = {97EBD33C-580B-78D7-52A6-2F3F95EC4893}
+		{A9EC0DEB-BDBC-417B-A2E6-9D0D3FC27B18} = {FDF89E54-1A87-FFFC-D93C-DFAFE97473D0}
 	EndGlobalSection
 EndGlobal
