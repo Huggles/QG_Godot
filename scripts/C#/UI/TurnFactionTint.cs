@@ -13,8 +13,8 @@ using Godot;
 /// A shared helper rather than the same code on each surface, because the fiddly parts are the same
 /// wherever the turn is shown: the stylebox has to be taken private before it is touched, the first
 /// paint has to happen at attach time rather than waiting for a change, and two changes in quick
-/// succession have to cancel each other's tween. <see cref="FactionsContainer"/> tints the plate the
-/// faction rows sit on; <see cref="PlayerActionLabel"/> tints the banner at the bottom of the screen.
+/// succession have to cancel each other's tween. <see cref="PlayerActionLabel"/> tints the banner at the
+/// bottom of the screen.
 /// </summary>
 public class TurnFactionTint
 {
