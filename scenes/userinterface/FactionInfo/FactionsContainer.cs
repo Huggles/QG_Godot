@@ -76,6 +76,9 @@ public partial class FactionsContainer : Control
     }
 
 
+    /// <summary>The faction strip's minimum size as the scene sets it, before any minor-faction tabs.</summary>
+    private Vector2? _sceneMinimumSize;
+
     private void InitChildElements()
     {
         DebugUtilities.PrintPeerFinest("FactionsContainer initializing child elements");
@@ -108,11 +111,13 @@ public partial class FactionsContainer : Control
             FactionInfoNodes[faction] = rowInstance;
         }
 
-        // Make room for the tallest stack of minor-faction tabs, so they sit inside the panel. The base
-        // game has no minor factions and keeps the strip's height from the scene.
+        // Make room for the tallest stack of minor-faction tabs, so they sit inside the panel. Set from
+        // the scene's own size rather than added to the current one: this runs again on every
+        // join, assignment and session start, and adding would grow the strip each time. The base
+        // game has no minor factions and keeps the scene's height.
+        _sceneMinimumSize ??= HorizontalContainer.CustomMinimumSize;
         int tabs = playerFactions.Max(faction => StaticGameData.MinorsOf(faction).Count);
-        if (tabs > 0)
-            HorizontalContainer.CustomMinimumSize += new Vector2(0, tabs * FactionInfoRow.MinorTabHeight);
+        HorizontalContainer.CustomMinimumSize = _sceneMinimumSize.Value + new Vector2(0, tabs * FactionInfoRow.MinorTabHeight);
     }
 
     public FactionInfoRow GetFactionInfoNodeForFaction(Faction faction)
