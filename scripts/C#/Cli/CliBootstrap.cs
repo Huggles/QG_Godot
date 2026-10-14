@@ -30,6 +30,8 @@ public static class CliBootstrap
         if (!ResolveSave())
             ResolveScenario(from);
 
+        CheckExpansionsArg();
+
         // See the class comment. Must precede the scene change: GameManager watches for the Game node
         // and starts the readiness barrier as soon as it appears.
         from.Multiplayer.MultiplayerPeer = new OfflineMultiplayerPeer();
@@ -119,10 +121,32 @@ public static class CliBootstrap
         if (save.Version != SaveGame.CurrentVersion)
             throw new Exception($"CLI: save at '{path}' is version {save.Version}, expected {SaveGame.CurrentVersion}.");
 
+        List<string> missing = ExpansionRegistry.Unavailable(save.Expansions);
+        if (missing.Count > 0)
+            throw new Exception($"CLI: save at '{path}' needs {ExpansionIds.Describe(save.Expansions)}: {string.Join("; ", missing)}.");
+
         GameManager.ArmRestore(save);
 
         DebugUtilities.PrintPeer($"CLI: restoring '{save.DisplayName}' ({save.Events.Count} event(s)) from {path}");
         return true;
+    }
+
+    /// <summary>
+    /// Refuse an <c>expansions=</c> argument this install cannot play at bootstrap, the way an unknown
+    /// <c>scenario=</c> is refused: the error then names the argument and lists what is available, where
+    /// GameOptions.SetForSession would only refuse it once the session had started.
+    /// </summary>
+    private static void CheckExpansionsArg()
+    {
+        if (!CliArgs.Has("expansions")) return;
+
+        List<string> requested = ExpansionIds.FromCliArg(CliArgs.Get("expansions"));
+        List<string> missing = ExpansionRegistry.Unavailable(requested);
+        if (missing.Count > 0)
+        {
+            string known = string.Join(", ", ExpansionRegistry.AvailableIds());
+            throw new Exception($"CLI: cannot play expansions={CliArgs.Get("expansions")}: {string.Join("; ", missing)}. Available: {(known.Length > 0 ? known : "none")}");
+        }
     }
 
     /// <summary>

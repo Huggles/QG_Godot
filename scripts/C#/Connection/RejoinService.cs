@@ -192,7 +192,8 @@ public partial class RejoinService : Node
             Multiplayer.MultiplayerPeer.DisconnectPeer(old);
 
         ConnectionMonitor.Instance.BeginRejoin(seat);
-        RpcId(transport, MethodName.BeginRejoin, seat, JsonSerializer.Serialize(CurrentAssignments()), GameRandom.Seed);
+        RpcId(transport, MethodName.BeginRejoin, seat, JsonSerializer.Serialize(CurrentAssignments()), GameRandom.Seed,
+              ExpansionIds.ToWire(GameOptions.EnabledExpansions));
     }
 
     /// <summary>The seating as it is now, bots included, in the shape LoadPlayers reads.</summary>
@@ -267,14 +268,14 @@ public partial class RejoinService : Node
     // ── Client: rejoin ───────────────────────────────────────────────────────
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void BeginRejoin(int seatId, string configuration, int seed)
+    public void BeginRejoin(int seatId, string configuration, int seed, string expansions)
     {
         _hello?.TrySetResult((HelloResult.Rejoin, ""));
-        Guard.FireAndForget(() => RejoinAsync(seatId, configuration, seed), "RejoinService.Rejoin");
+        Guard.FireAndForget(() => RejoinAsync(seatId, configuration, seed, expansions), "RejoinService.Rejoin");
     }
 
     /// <summary>The client half of game start, run locally: scene, session, players, blank board, HUD.</summary>
-    private async Task RejoinAsync(int seatId, string configuration, int seed)
+    private async Task RejoinAsync(int seatId, string configuration, int seed, string expansions)
     {
         SessionIdentity.AdoptSeatId(seatId);
         IsCatchingUp = true;
@@ -290,7 +291,7 @@ public partial class RejoinService : Node
         NetworkApi.Instance.LoadPlayers(configuration);
 
         SignalAwaiter started = ToSignal(EventBus.Instance, EventBus.SignalName.GameSessionStarted);
-        MultiplayerSession.Instance.StartSession(configuration, seed);
+        MultiplayerSession.Instance.StartSession(configuration, seed, expansions);
         await started;
 
         RpcId(1, MethodName.RejoinReady);

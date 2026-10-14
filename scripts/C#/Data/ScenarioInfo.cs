@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 public class ScenarioInfo
@@ -21,6 +22,13 @@ public class ScenarioInfo
     /// </summary>
     [JsonPropertyName("openingDiscard")]
     public bool OpeningDiscard { get; set; } = true;
+
+    /// <summary>
+    /// The expansions this scenario is meant to be played with (its optional "expansions" array), which
+    /// the menus tick by default when it is picked. Empty for the base game.
+    /// </summary>
+    [JsonPropertyName("expansions")]
+    public List<string> Expansions { get; set; } = new();
 
     /// <summary>
     /// Tutorial script this scenario runs, or null for an ordinary game. Mirrored here for the same

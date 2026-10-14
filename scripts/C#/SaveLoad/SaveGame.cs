@@ -56,6 +56,13 @@ public class SaveGame
     /// <summary>The RESOLVED value in force, after any lobby override — not the scenario's own.</summary>
     public bool OpeningDiscard { get; set; }
 
+    /// <summary>
+    /// The expansions the game was played with. A restore pins them: the log only replays onto the
+    /// units, decks and step table they produce. Saves from before expansions existed read as empty,
+    /// which is exactly the game they recorded.
+    /// </summary>
+    public List<string> Expansions { get; set; } = new();
+
     public int Seed { get; set; }
 
     /// <summary>

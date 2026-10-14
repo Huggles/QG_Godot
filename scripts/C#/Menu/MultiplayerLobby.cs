@@ -93,6 +93,16 @@ public partial class MultiplayerLobby : Control
 	private readonly Dictionary<int, int> _seatOwners = new();
 
 	private Label _restoreLabel;
+
+	/// <summary>The expansion checkboxes, built beside the opening-discard box; host-editable like it.</summary>
+	private ExpansionToggles _expansionToggles;
+
+	/// <summary>
+	/// Host-side: peerId → the expansions that peer's install can play, as it reported them. Every peer
+	/// builds the game itself, so an expansion can only be enabled when every connected peer has it.
+	/// </summary>
+	private readonly Dictionary<int, List<string>> _peerExpansions = new();
+
 	/// <summary>
 	/// Authoritative set of peers that picked "Random" rather than naming factions. Turned into real
 	/// entries in <see cref="_assignments"/> by <see cref="DealRandomClaims"/> when the host starts the
@@ -215,6 +225,12 @@ public partial class MultiplayerLobby : Control
 		_openingDiscardCheckBox.Disabled = true;
 		_openingDiscardCheckBox.Toggled += OnOpeningDiscardToggled;
 
+		// The same again for expansions: a restore plays with the save's, otherwise the scenario suggests.
+		_expansionToggles = new ExpansionToggles(_openingDiscardCheckBox);
+		_expansionToggles.Set(_restoreSave?.Expansions ?? gameManager.SelectedScenario?.Expansions);
+		_expansionToggles.SetEditable(false);
+		_expansionToggles.Changed += OnExpansionsToggled;
+
 		// Arrived from JoinGameScreen, which already established the client connection.
 		// Adopt it rather than creating a second peer.
 		// This branch is transport-agnostic: a connected SteamMultiplayerPeer satisfies it exactly as
@@ -316,6 +332,7 @@ public partial class MultiplayerLobby : Control
 	private void RequestLobbyStateFromHost()
 	{
 		RpcId(1, nameof(ReportPlayerName), LocalDisplayName());
+		RpcId(1, nameof(ReportAvailableExpansions), ExpansionIds.ToWire(ExpansionRegistry.AvailableIds()));
 		RpcId(1, nameof(RequestLobbyState));
 		// Also covers the debug auto-join path, which never passes through a join screen's hello.
 		RejoinService.Instance?.AnnounceToken();
@@ -530,6 +547,7 @@ public partial class MultiplayerLobby : Control
 		_scenarioPicker.Disabled  = restoring;
 		SetSeedFieldEnabled(!restoring);
 		_openingDiscardCheckBox.Disabled = restoring;
+		_expansionToggles.SetEditable(!restoring);
 
 		if (!restoring) return;
 
@@ -700,7 +718,7 @@ public partial class MultiplayerLobby : Control
 			DebugUtilities.PrintPeerError("Only the host can start the game");
 			return;
 		}
-		if (!CanCoverAllFactions(out string problem))
+		if (!CanCoverAllFactions(out string problem) || !EveryoneHasExpansions(out problem))
 		{
 			DebugUtilities.PrintPeerError($"Cannot start: {problem}");
 			return;
@@ -724,6 +742,7 @@ public partial class MultiplayerLobby : Control
 			GameManager.PendingSave           = _restoreSave;
 			GameManager.PendingSeed           = _restoreSave.Seed;
 			GameManager.PendingOpeningDiscard = _restoreSave.OpeningDiscard;
+			GameManager.PendingExpansions     = _restoreSave.Expansions;
 		}
 		else
 		{
@@ -731,6 +750,7 @@ public partial class MultiplayerLobby : Control
 			// so a client's own box never affects its game.
 			MenuSeedField.Commit(_seedInput);
 			CommitOpeningDiscard();
+			GameManager.PendingExpansions = _expansionToggles.Checked;
 		}
 
 		Rpc(nameof(StartGame));
@@ -1007,7 +1027,7 @@ public partial class MultiplayerLobby : Control
 	private void UpdateStartGameButton()
 	{
 		if (!_isHost) return;
-		bool canStart = CanCoverAllFactions(out string problem);
+		bool canStart = CanCoverAllFactions(out string problem) && EveryoneHasExpansions(out problem);
 		_startGameButton.Disabled    = !canStart;
 		_startGameButton.TooltipText = canStart
 			? "All factions accounted for – ready to start!"
@@ -1215,6 +1235,7 @@ public partial class MultiplayerLobby : Control
 				RpcId((int)peerId, nameof(SyncRestoreBanner), RestoreBannerText());
 
 			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
+			RpcId((int)peerId, nameof(SyncExpansions), ExpansionIds.ToWire(SelectedExpansions));
 
 			// Cannot match by name yet — the peer has not reported one, so _playerNames holds nothing for
 			// it and only the "Player N" placeholder is on the label. Worth doing anyway: passes B and C
@@ -1482,6 +1503,7 @@ public partial class MultiplayerLobby : Control
 		}
 		_playerLabels.Remove(peerId);
 		_playerNames.Remove(peerId);
+		_peerExpansions.Remove(peerId);
 		_factionButtons.Remove(peerId);
 		_randomButtons.Remove(peerId);
 		DebugUtilities.PrintPeer($"Removed player row: Peer {peerId}");
@@ -1493,6 +1515,7 @@ public partial class MultiplayerLobby : Control
 		_playerRowPanels.Clear();
 		_playerLabels.Clear();
 		_playerNames.Clear();
+		_peerExpansions.Clear();
 		_factionButtons.Clear();
 		_randomButtons.Clear();
 	}
@@ -1529,6 +1552,7 @@ public partial class MultiplayerLobby : Control
 			RpcId(requester, nameof(SyncRestoreBanner), RestoreBannerText());
 
 		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
+		RpcId(requester, nameof(SyncExpansions), ExpansionIds.ToWire(SelectedExpansions));
 	}
 
 	/// <summary>
@@ -1589,6 +1613,9 @@ public partial class MultiplayerLobby : Control
 		// has just dropped the override that went with the previous one.
 		SetOpeningDiscard(gameManager.AvailableScenarios[index].OpeningDiscard);
 		Rpc(nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
+
+		_expansionToggles.Set(gameManager.AvailableScenarios[index].Expansions);
+		OnExpansionsToggled();
 	}
 
 	/// <summary>
@@ -1612,6 +1639,89 @@ public partial class MultiplayerLobby : Control
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
 	private void SyncOpeningDiscard(bool enabled) => SetOpeningDiscard(enabled);
+
+	// ══════════════════════════════════════════════════════════════════════════
+	// Expansions
+	// ══════════════════════════════════════════════════════════════════════════
+
+	/// <summary>
+	/// What the game will be played with: a restore's own expansions, otherwise the host's ticks. Read
+	/// rather than the boxes alone because a box only exists for an expansion this install has found.
+	/// </summary>
+	private List<string> SelectedExpansions
+		=> _restoreSave != null ? ExpansionIds.Normalize(_restoreSave.Expansions) : _expansionToggles.Checked;
+
+	/// <summary>Host ticked or unticked an expansion, or picked a scenario that suggests others.</summary>
+	private void OnExpansionsToggled()
+	{
+		if (!_isHost) return;
+		Rpc(nameof(SyncExpansions), ExpansionIds.ToWire(SelectedExpansions));
+		UpdateStartGameButton();
+	}
+
+	/// <summary>
+	/// Host → clients: the expansions the game will use, so everyone sees the rules they are about to play
+	/// under. Display only: the host sends the real list on StartSession. A client that cannot play one of
+	/// them is told why its host cannot start.
+	/// </summary>
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
+	private void SyncExpansions(string wire)
+	{
+		List<string> enabled = ExpansionIds.FromWire(wire);
+		_expansionToggles.Set(enabled);
+
+		List<string> missing = ExpansionRegistry.Unavailable(enabled);
+		if (missing.Count > 0)
+			UpdateStatusLabel($"The host chose {ExpansionIds.Describe(enabled)}, which cannot be played here: {string.Join("; ", missing)}");
+	}
+
+	/// <summary>Client → host, alongside ReportPlayerName: the expansions this peer's install can play.</summary>
+	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
+	private void ReportAvailableExpansions(string wire)
+	{
+		if (!Multiplayer.IsServer() || _gameStarting) return;
+
+		_peerExpansions[Multiplayer.GetRemoteSenderId()] = ExpansionIds.FromWire(wire);
+		UpdateStartGameButton();
+	}
+
+	/// <summary>
+	/// Host-side start gate: every connected peer, the host included, can play every chosen expansion.
+	/// The base game needs no report, which keeps the dedicated-server and debug auto-starts (which fire
+	/// the moment a peer connects, before it could report) working as before.
+	/// </summary>
+	private bool EveryoneHasExpansions(out string problem)
+	{
+		problem = null;
+		List<string> enabled = SelectedExpansions;
+		if (enabled.Count == 0) return true;
+
+		List<string> missingHere = ExpansionRegistry.Unavailable(enabled);
+		if (missingHere.Count > 0)
+		{
+			problem = string.Join("; ", missingHere);
+			return false;
+		}
+
+		int self = Multiplayer.GetUniqueId();
+		foreach (int peer in _playerLabels.Keys.Where(peer => peer != self))
+		{
+			string name = _playerNames.GetValueOrDefault(peer) ?? _playerLabels[peer].Text;
+			if (!_peerExpansions.TryGetValue(peer, out List<string> available))
+			{
+				problem = $"Waiting for {name} to report their expansions";
+				return false;
+			}
+
+			List<string> missing = enabled.Except(available).ToList();
+			if (missing.Count > 0)
+			{
+				problem = $"{name} does not have {ExpansionIds.Describe(missing)}";
+				return false;
+			}
+		}
+		return true;
+	}
 
 	/// <summary>Seed entry follows the scenario picker: host-editable, read-only for everyone else.</summary>
 	private void SetSeedFieldEnabled(bool enabled)

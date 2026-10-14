@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 /// <summary>
@@ -25,6 +26,23 @@ public static class ExpansionRegistry
     public static IReadOnlyList<LoadedExpansion> All => _expansions;
 
     public static LoadedExpansion Find(string id) => _expansions.Find(e => e.Manifest.Id == id);
+
+    /// <summary>The ids of every expansion that could be enabled for a game on this install.</summary>
+    public static List<string> AvailableIds() => _expansions.Where(e => e.IsAvailable).Select(e => e.Manifest.Id).ToList();
+
+    /// <summary>A player-facing name for <paramref name="id"/>, even for an expansion this install lacks.</summary>
+    public static string DisplayName(string id) => Find(id)?.Manifest.DisplayName ?? id;
+
+    /// <summary>
+    /// Of <paramref name="ids"/>, the ones this install cannot play, each with the reason — empty when
+    /// all of them can be. What a session start, a save load and the lobby all check before going on.
+    /// </summary>
+    public static List<string> Unavailable(IEnumerable<string> ids) => ids
+        .Select(id => Find(id) is { } expansion
+            ? expansion.UnavailableReason
+            : $"{id} is not installed")
+        .Where(reason => reason != null)
+        .ToList();
 
     private static bool _discovered;
 
@@ -71,11 +89,28 @@ public sealed class LoadedExpansion
 
     public List<IExpansionRules> Rules { get; } = new();
 
-    /// <summary>Why this expansion cannot be played on this install, or null if it can.</summary>
+    /// <summary>Why this expansion failed to load, or null if it loaded (or had no code to load).</summary>
     public string Error { get; internal set; }
 
     /// <summary>Its content is here and its code, if it has any, loaded cleanly.</summary>
-    public bool IsAvailable => Error == null && (!Manifest.HasAssembly || Assembly != null);
+    public bool IsLoaded => Error == null && (!Manifest.HasAssembly || Assembly != null);
+
+    /// <summary>
+    /// The player owns it. Only Steam can say otherwise: with no DLC app id yet, or no Steam to ask (the
+    /// editor, the CLI, the sim, a headless server), having the files is enough. Asked each time rather
+    /// than cached because Steam initialises after the expansions load (SteamworksApi is a later
+    /// autoload), and a purchase can land while the game is running.
+    /// </summary>
+    public bool IsOwned => Manifest.SteamDlcAppId == 0 || !SteamworksApi.IsAvailable || SteamworksApi.OwnsDlc(Manifest.SteamDlcAppId);
+
+    /// <summary>Can be enabled for a game on this install.</summary>
+    public bool IsAvailable => IsLoaded && IsOwned;
+
+    /// <summary>Why it cannot be enabled, in words for a player; null when it can.</summary>
+    public string UnavailableReason =>
+        !IsLoaded ? $"{Manifest.DisplayName} could not be loaded ({Error ?? "no code"})"
+        : !IsOwned ? $"{Manifest.DisplayName} is not owned on this Steam account"
+        : null;
 
     public LoadedExpansion(ExpansionManifest manifest, string resFolder)
     {

@@ -8,8 +8,6 @@ public sealed class TotalWarRules : IExpansionRules
 
     public void Register(ExpansionRegistrar registrar)
     {
-        // M0a spike: one message of the expansion's own, proving its types can ride the wire and the save.
-        registrar.AddMessage<SpikePingPresentationEventDto>("TW.SpikePing",
-            dto => new SpikePingPresentationEvent(dto.TriggeringFaction, dto.Text));
+        // Nothing to contribute yet: the engine hooks Total War switches on arrive with M1 onwards.
     }
 }

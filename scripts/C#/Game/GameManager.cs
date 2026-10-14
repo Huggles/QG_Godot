@@ -56,6 +56,14 @@ public partial class GameManager : Node
     public static bool? PendingOpeningDiscard { get; set; } = null;
 
     /// <summary>
+    /// The expansions the menus chose for the next game, or null to use whatever the scenario asks for
+    /// (<see cref="ScenarioExpansions"/>). Read by the host only (MultiplayerSession.StartNew), which sends
+    /// the resolved list to every peer. Cleared with PendingOpeningDiscard when the scenario changes, for
+    /// the same reason.
+    /// </summary>
+    public static List<string> PendingExpansions { get; set; } = null;
+
+    /// <summary>
     /// How well the next session's AI seats play; see <see cref="AiSeatRuntime"/>. Hard unless the
     /// skirmish screen says otherwise — a seat a bot takes over mid-game, or a restored save, gets it
     /// too. A player's preference rather than a scenario's, so picking a scenario leaves it alone.
@@ -115,7 +123,27 @@ public partial class GameManager : Node
         PendingSave           = save;
         PendingSeed           = save.Seed;
         PendingOpeningDiscard = save.OpeningDiscard;
+        PendingExpansions     = save.Expansions;
         PendingScenarioJson   = Encoding.UTF8.GetString(Convert.FromBase64String(save.ScenarioJsonBase64));
+    }
+
+    /// <summary>
+    /// The expansions the next session's scenario asks for (its optional "expansions" array): the default
+    /// when neither a save, the CLI nor the menus say otherwise. Empty when it names none or cannot be
+    /// read; a scenario that cannot be read fails loudly a moment later, when the game mode parses it.
+    /// </summary>
+    public static List<string> ScenarioExpansions()
+    {
+        try
+        {
+            string text = PendingScenarioJson ?? FileAccess.GetFileAsString(PendingScenarioPath);
+            using JsonDocument document = JsonDocument.Parse(text);
+            return ExpansionIds.FromScenario(document.RootElement);
+        }
+        catch (Exception)
+        {
+            return new List<string>();
+        }
     }
 
     /// <summary>Record the scenario text this session was built from, and pull its title out of it.</summary>
@@ -214,6 +242,10 @@ public partial class GameManager : Node
 
                 // Absent means true — the same default InitialGameStateData carries, so a scenario
                 // file that predates the setting keeps the opening discard.
+                // The expansions this scenario is meant for: what the menus tick by default when it is
+                // picked. Absent means none.
+                info.Expansions = ExpansionIds.FromScenario(root);
+
                 if (root.TryGetProperty("openingDiscard", out JsonElement openingDiscardElement)
                     && (openingDiscardElement.ValueKind == JsonValueKind.True || openingDiscardElement.ValueKind == JsonValueKind.False))
                     info.OpeningDiscard = openingDiscardElement.GetBoolean();
@@ -267,6 +299,7 @@ public partial class GameManager : Node
         // A new scenario brings its own opening-discard answer; drop any override held for the
         // previous one. The lobby re-commits the checkbox when the host starts the game.
         PendingOpeningDiscard = null;
+        PendingExpansions = null;
         // Picking a scenario explicitly means the picked one, not a scenario left embedded by a save the
         // player looked at and backed out of.
         PendingScenarioJson = null;

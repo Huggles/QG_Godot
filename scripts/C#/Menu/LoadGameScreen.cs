@@ -167,8 +167,15 @@ public partial class LoadGameScreen : Control
                 return;
             }
 
-            // Nothing else to validate. The scenario travels inside the save, so the whole class of
-            // "the scenario this save needs is missing" failure does not exist.
+            // The scenario travels inside the save, so the whole class of "the scenario this save
+            // needs is missing" failure does not exist. Its expansions do not: they are code and content
+            // this install has or lacks, and the replay only works with exactly the ones it was played with.
+            List<string> missing = ExpansionRegistry.Unavailable(save.Expansions);
+            if (missing.Count > 0)
+            {
+                SetStatus($"That save was played with {ExpansionIds.Describe(save.Expansions)}, which cannot be played here: {string.Join("; ", missing)}.", ColorError);
+                return;
+            }
 
             HostOptionsDialog.Result choice = await HostOptionsDialog.PromptAsync(this);
             if (!IsInstanceValid(this)) return;

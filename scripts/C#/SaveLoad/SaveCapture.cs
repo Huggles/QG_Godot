@@ -105,6 +105,7 @@ public static class SaveCapture
             ScenarioTitle  = GameManager.ActiveScenarioTitle,
             ScenarioPath   = GameManager.PendingScenarioPath,
             OpeningDiscard = GameFlow.Instance.OpeningDiscardEnabled,
+            Expansions     = GameOptions.EnabledExpansions.ToList(),
             Seed           = GameRandom.Seed,
             RngDraws       = GameRandom.DrawCount,
 

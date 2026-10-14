@@ -108,6 +108,9 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	public static bool   IsAvailable       => Instance is { _available: true };
 	public static string UnavailableReason => Instance?._reason ?? "Steam integration not loaded";
 
+	/// <summary>The signed-in user owns and has installed DLC <paramref name="dlcAppId"/>. False without Steam.</summary>
+	public static bool OwnsDlc(long dlcAppId) => IsAvailable && Instance._steam.IsDlcInstalled(dlcAppId);
+
 	public ulong  LocalSteamId     { get; private set; }
 	public string LocalPersonaName { get; private set; } = "Player";
 	public long   AppId            { get; private set; }

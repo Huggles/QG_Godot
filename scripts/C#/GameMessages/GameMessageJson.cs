@@ -36,6 +36,10 @@ public static class GameMessageJson
     /// </summary>
     public static JsonSerializerOptions IndentedOptions => _indentedOptions ??= Build(writeIndented: true);
 
+    /// <summary>The DTO types and discriminators <paramref name="expansionId"/> registered.</summary>
+    public static List<(Type DtoType, string Discriminator)> RegisteredMessages(string expansionId)
+        => _expansionMessages.Where(m => m.ExpansionId == expansionId).Select(m => (m.DtoType, m.Discriminator)).ToList();
+
     /// <summary>The message <paramref name="dto"/> encodes, if an expansion registered its DTO type.</summary>
     public static bool TryCreateExpansionMessage(GameMessageDto dto, out GameMessage message)
     {

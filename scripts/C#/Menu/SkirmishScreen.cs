@@ -40,6 +40,7 @@ public partial class SkirmishScreen : Control
 	private GridContainer _seatGrid;
 	private Label _seatsLabel;
 	private CheckBox _openingDiscardCheckBox;
+	private ExpansionToggles _expansionToggles;
 	private OptionButton _aiDifficultyPicker;
 
 	/// <summary>
@@ -106,6 +107,7 @@ public partial class SkirmishScreen : Control
 		_seatGrid         = GetNode<GridContainer>("ButtonContainer/SeatGrid");
 		_seatsLabel       = GetNode<Label>("ButtonContainer/SeatsLabel");
 		_openingDiscardCheckBox = GetNode<CheckBox>("ButtonContainer/OpeningDiscardCheckBox");
+		_expansionToggles = new ExpansionToggles(_openingDiscardCheckBox);
 
 		// Item ids are the enum values, so the pick reads straight back as an AiDifficulty.
 		_aiDifficultyPicker = GetNode<OptionButton>("ButtonContainer/AiDifficultyOptionButton");
@@ -145,6 +147,7 @@ public partial class SkirmishScreen : Control
 			UpdateDescription(gameManager.SelectedScenario.Description);
 			_scriptedScenario = gameManager.SelectedScenario.IsTutorial;
 			_openingDiscardCheckBox.ButtonPressed = gameManager.SelectedScenario.OpeningDiscard;
+			_expansionToggles.Set(gameManager.SelectedScenario.Expansions);
 		}
 		else
 		{
@@ -323,6 +326,7 @@ public partial class SkirmishScreen : Control
 		// seeding it must not read as a host toggling it. Nothing is subscribed here — no clients, no
 		// RPC — so there is nothing to suppress.
 		_openingDiscardCheckBox.ButtonPressed = gameManager.AvailableScenarios[index].OpeningDiscard;
+		_expansionToggles.Set(gameManager.AvailableScenarios[index].Expansions);
 
 		_scriptedScenario = gameManager.AvailableScenarios[index].IsTutorial;
 		RenderAllSeats();
@@ -364,6 +368,8 @@ public partial class SkirmishScreen : Control
 		// box's value unconditionally is also what stops an override left over from a lobby session
 		// earlier in the same process from leaking into this game.
 		GameManager.PendingOpeningDiscard = _openingDiscardCheckBox.ButtonPressed;
+		// A definite list for the same reason: never let a lobby's choice leak into a skirmish.
+		GameManager.PendingExpansions = _expansionToggles.Checked;
 		GameManager.PendingAiDifficulty = (AiDifficulty)_aiDifficultyPicker.GetSelectedId();
 
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(BuildAssignments());

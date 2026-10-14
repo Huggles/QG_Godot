@@ -10,13 +10,14 @@ using System.Runtime.Loader;
 /// Loads each discovered expansion's code assembly, so an expansion can ship its rules and card classes
 /// in its own DLL — in the DLC depot, next to its .pck — rather than inside the base game.
 ///
-/// Three steps per assembly:
+/// Four steps per assembly:
 ///   1. load it into the same AssemblyLoadContext as the game assembly, so its references to the game
 ///      (CardLogic, GameMessage, …) bind to the very types the game already loaded;
-///   2. hand it to Godot (<see cref="Godot.Bridge.ScriptManagerBridge.LookupScriptsInAssembly"/>), which
+///   2. check it was built for this game version (the stamp expansions/Directory.Build.props adds);
+///   3. hand it to Godot (<see cref="Godot.Bridge.ScriptManagerBridge.LookupScriptsInAssembly"/>), which
 ///      registers its GodotObject subclasses as scripts — the same call Godot makes for the game's own
 ///      assembly at startup;
-///   3. create its <see cref="IExpansionRules"/> and let them register their types.
+///   4. create its <see cref="IExpansionRules"/> and let them register their types.
 ///
 /// Where the DLL is looked for: in an exported build, <c>&lt;install&gt;/dlc/</c>, which is where the DLC
 /// depot puts it; anywhere else (editor, CLI, sim), next to the game assembly, where the main project's
@@ -44,6 +45,13 @@ public static class ExpansionLoader
 
         foreach (LoadedExpansion expansion in ExpansionRegistry.All)
         {
+            if (!IsAtLeast(BuildInfo.Version, expansion.Manifest.MinGameVersion))
+            {
+                expansion.Error = $"needs game version {expansion.Manifest.MinGameVersion} or later (this is {BuildInfo.Version})";
+                DebugUtilities.PrintPeerError($"Expansions: '{expansion.Manifest.Id}' {expansion.Error}");
+                continue;
+            }
+
             if (!expansion.Manifest.HasAssembly) continue;
 
             try
@@ -118,9 +126,17 @@ public static class ExpansionLoader
         }
 
         Assembly assembly = context.LoadFromAssemblyPath(path);
-        expansion.Assembly = assembly;
         expansion.AssemblyPath = path;
-        DebugUtilities.PrintPeer($"Expansions: '{id}' loaded {assembly.GetName().Name} {assembly.GetName().Version} from {path}");
+        DebugUtilities.PrintPeer($"Expansions: '{id}' loading {assembly.GetName().Name} from {path}");
+
+        // Before anything touches its types: a DLL built against another game version binds to members
+        // that may have moved, and would otherwise fail at some arbitrary later call instead of here.
+        string builtFor = assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(attribute => attribute.Key == GameVersionMetadataKey)?.Value;
+        if (builtFor != BuildInfo.Version)
+            throw new InvalidOperationException(builtFor == null
+                ? $"{assembly.GetName().Name} carries no game version stamp"
+                : $"{assembly.GetName().Name} was built for game version {builtFor}, this is {BuildInfo.Version}");
 
         Type[] types = ExportedTypes(assembly);
         CheckNoCoreNameIsShadowed(id, types);
@@ -141,6 +157,26 @@ public static class ExpansionLoader
 
         if (expansion.Rules.Count == 0)
             throw new InvalidOperationException($"{assembly.GetName().Name} has no {nameof(IExpansionRules)} implementation");
+
+        // Last, so a half-registered assembly never counts as loaded.
+        expansion.Assembly = assembly;
+        DebugUtilities.PrintPeer($"Expansions: '{id}' loaded, built for game version {builtFor}");
+    }
+
+    /// <summary>
+    /// The <c>[assembly: AssemblyMetadata]</c> key expansions/Directory.Build.props stamps every expansion
+    /// assembly with: the game version it was compiled against.
+    /// </summary>
+    public const string GameVersionMetadataKey = "GameVersion";
+
+    /// <summary>
+    /// <paramref name="version"/> is at least <paramref name="minimum"/>, compared as dotted numbers.
+    /// No minimum, or one that does not parse, means no requirement.
+    /// </summary>
+    private static bool IsAtLeast(string version, string minimum)
+    {
+        if (string.IsNullOrEmpty(minimum) || !Version.TryParse(minimum, out Version required)) return true;
+        return Version.TryParse(version, out Version actual) && actual >= required;
     }
 
     /// <summary>

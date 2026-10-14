@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -59,11 +60,20 @@ public partial class MultiplayerSession : Node
         int seed = GameManager.PendingSave?.Seed
                    ?? CliArgs.GetInt("seed", GameManager.PendingSeed ?? System.Environment.TickCount);
 
-        Rpc(nameof(StartSession), configuration, seed);
+        // Which expansions the game is played with, resolved here for the same reason as the seed: every
+        // peer builds its own units, decks and step table from it, so they must all be handed one answer.
+        // Precedence follows the seed's. A save pins its own (its log was recorded with exactly those),
+        // then a CLI `expansions=` argument, then the menus' choice, then what the scenario asks for.
+        List<string> expansions = GameManager.PendingSave?.Expansions
+            ?? (CliArgs.Has("expansions") ? ExpansionIds.FromCliArg(CliArgs.Get("expansions")) : null)
+            ?? GameManager.PendingExpansions
+            ?? GameManager.ScenarioExpansions();
+
+        Rpc(nameof(StartSession), configuration, seed, ExpansionIds.ToWire(expansions));
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void StartSession(string configuration, int seed)
+    public async void StartSession(string configuration, int seed, string expansions)
     {
         // async void: an uncaught throw here goes to the synchronization context and kills the
         // process. A failure during session init is not recoverable (the readiness barrier will
@@ -76,6 +86,10 @@ public partial class MultiplayerSession : Node
             // is live, which is what stops an abandoned game's loop issuing fresh prompts into an
             // autoload that outlives it. Before any state is built, so nothing below can race it.
             ErrorReporter.BeginSession();
+
+            // Before any state is built: expansions change what the game mode builds on every peer.
+            // Throws, and so stops this peer's session, if this install cannot play one of them.
+            GameOptions.SetForSession(ExpansionIds.FromWire(expansions));
 
             // Seed before any state is built. Here rather than at boot because a second game in the
             // same process must not inherit the first game's stream. An unseeded run still records

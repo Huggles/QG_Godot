@@ -1,0 +1,19 @@
+<Project>
+  <!--
+    Imported by every expansion project under expansions/ (MSBuild finds the nearest Directory.Build.props
+    walking up from the project), and never by the game's own csproj, which sits above this folder.
+
+    Stamps the game version this expansion assembly was built against, read from project.godot, as
+    [assembly: AssemblyMetadata("GameVersion", ...)]. An expansion assembly is compiled against one exact
+    game assembly, so ExpansionLoader refuses one whose stamp differs from the running game's version
+    rather than letting a stale DLL fail later on a missing member.
+  -->
+  <PropertyGroup>
+    <_ProjectGodotText>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../project.godot'))</_ProjectGodotText>
+    <ExpansionGameVersion>$([System.Text.RegularExpressions.Regex]::Match($(_ProjectGodotText), 'config/version="([^"]*)"').Groups[1].Value)</ExpansionGameVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="GameVersion" Value="$(ExpansionGameVersion)" />
+  </ItemGroup>
+</Project>

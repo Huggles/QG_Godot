@@ -1,25 +1,21 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Loader;
 using System.Text.Json;
 
 /// <summary>
-/// <c>-- expansion_selftest=true</c>: proves an expansion's code assembly works in this build, then quits
-/// with exit code 0 (all checks passed) or 1. Exists for the Total War spike (can a separate DLL ship in
-/// the DLC depot?), and stays useful afterwards for checking an exported build with its DLC in place.
+/// <c>-- expansion_selftest=true</c>: checks every expansion this build found can actually run here, then
+/// quits with exit code 0 (all checks passed) or 1. For an exported build with its DLC in place, and after
+/// a Godot upgrade (ExpansionLoader leans on an undocumented Godot call).
 ///
-/// Expansion types are reached by name only, through <see cref="TypeRegistry"/>: core never references
-/// an expansion's types, and this test must not either, or it would prove nothing.
+/// Generic on purpose: it knows no expansion's types, only what each one registered, so it keeps working
+/// as expansions grow and never references their code, which core must not do.
 /// </summary>
 public static class ExpansionSelfTest
 {
     public const string Arg = "expansion_selftest";
-
-    private const string ExpansionId = "total_war";
-    private const string CardClass = "SpikeCard";
-    private const string MessageClass = "SpikePingPresentationEvent";
-    private const string MessageDiscriminator = "TW.SpikePing";
 
     public static bool Requested => CliArgs.GetBool(Arg);
 
@@ -39,97 +35,14 @@ public static class ExpansionSelfTest
             }
         }
 
-        LoadedExpansion expansion = ExpansionRegistry.Find(ExpansionId);
-
-        Check("manifest discovered, assembly found", () =>
+        Check("expansions found", () =>
         {
-            Require(expansion != null, $"no '{ExpansionId}' under {ExpansionRegistry.Root}");
-            Require(expansion.AssemblyPath != null,
-                $"{expansion.Error} (looked in {string.Join(", ", ExpansionLoader.CandidatePaths(expansion.Manifest.Assembly))})");
-            return expansion.AssemblyPath;
+            Require(ExpansionRegistry.All.Count > 0, $"none under {ExpansionRegistry.Root}");
+            return string.Join(", ", ExpansionRegistry.All.Select(e => e.Manifest.Id));
         });
 
-        Check("assembly loaded next to the game assembly", () =>
-        {
-            Require(expansion?.Assembly != null, expansion?.Error ?? "not loaded");
-            AssemblyLoadContext gameContext = AssemblyLoadContext.GetLoadContext(typeof(CardLogic).Assembly);
-            AssemblyLoadContext expansionContext = AssemblyLoadContext.GetLoadContext(expansion.Assembly);
-            Require(gameContext == expansionContext, $"game in '{gameContext?.Name}', expansion in '{expansionContext?.Name}'");
-            Require(expansion.IsAvailable, expansion.Error);
-            return $"context '{gameContext?.Name}', {expansion.Rules.Count} rules class(es)";
-        });
-
-        Type cardType = null;
-        Check($"TypeRegistry resolves {CardClass} to a CardLogic", () =>
-        {
-            cardType = TypeRegistry.Resolve(CardClass);
-            Require(cardType != null, "not found");
-            Require(typeof(CardLogic).IsAssignableFrom(cardType), $"{cardType.FullName} is not a CardLogic");
-            Require(cardType.Assembly == expansion?.Assembly, $"resolved from {cardType.Assembly.GetName().Name}");
-            return cardType.AssemblyQualifiedName;
-        });
-
-        Check("Godot sees the card as a script", () =>
-        {
-            Require(cardType != null, "no card type");
-            CardLogic card = (CardLogic)Activator.CreateInstance(cardType);
-            try
-            {
-                Script script = card.GetScript().As<Script>();
-                Require(script != null, "instance has no script attached");
-                string echoed = card.Call("SpikeEcho", "x").AsString();
-                Require(echoed == "x", $"SpikeEcho through Godot returned '{echoed}'");
-                return $"script '{script.ResourcePath}', Call(\"SpikeEcho\") ok";
-            }
-            finally
-            {
-                card.Free();
-            }
-        });
-
-        Check("card OnActivate runs", () =>
-        {
-            Require(cardType != null, "no card type");
-            CardLogic card = (CardLogic)Activator.CreateInstance(cardType);
-            try
-            {
-                return $"{card.OnActivate().Count} step(s)";
-            }
-            finally
-            {
-                card.Free();
-            }
-        });
-
-        Check($"expansion message round-trips as '{MessageDiscriminator}'", () =>
-        {
-            Type messageType = TypeRegistry.Resolve(MessageClass);
-            Require(messageType != null, $"{MessageClass} not found");
-            GameMessage sent = (GameMessage)Activator.CreateInstance(messageType, Faction.UNITED_KINGDOM, "ping");
-            try
-            {
-                string json = JsonSerializer.Serialize(sent.ToDto(), typeof(GameMessageDto), GameMessageJson.Options);
-                Require(json.Contains($"\"$type\":\"{MessageDiscriminator}\""), $"no discriminator in {json}");
-
-                GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(json, GameMessageJson.Options);
-                GameMessage received = GameMessage.FromDto(dto);
-                try
-                {
-                    Require(received.GetType() == messageType, $"came back as {received.GetType().Name}");
-                    Require(received.SummaryText() == "ping" && received.TriggeringFaction == Faction.UNITED_KINGDOM,
-                        $"came back as '{received.SummaryText()}' from {received.TriggeringFaction}");
-                    return json;
-                }
-                finally
-                {
-                    received.Free();
-                }
-            }
-            finally
-            {
-                sent.Free();
-            }
-        });
+        foreach (LoadedExpansion expansion in ExpansionRegistry.All)
+            CheckExpansion(expansion, Check);
 
         Check("core card and message unchanged", () =>
         {
@@ -155,8 +68,53 @@ public static class ExpansionSelfTest
 
         bool allPassed = passed == results.Count;
         GD.Print($"[expansion selftest] {(allPassed ? "PASS" : "FAIL")} {passed}/{results.Count} " +
-                 $"({(OS.HasFeature("template") ? "exported build" : "editor/dev build")}, install root {ExpansionLoader.InstallRoot})");
+                 $"(game {BuildInfo.Version}, {(OS.HasFeature("template") ? "exported build" : "editor/dev build")}, " +
+                 $"install root {ExpansionLoader.InstallRoot})");
         tree.Quit(allPassed ? 0 : 1);
+    }
+
+    private static void CheckExpansion(LoadedExpansion expansion, Action<string, Func<string>> check)
+    {
+        string id = expansion.Manifest.Id;
+
+        check($"{id}: loaded", () =>
+        {
+            Require(expansion.IsLoaded, expansion.Error ?? "not loaded");
+            return expansion.Manifest.HasAssembly ? expansion.AssemblyPath : "content only";
+        });
+
+        if (!expansion.Manifest.HasAssembly || !expansion.IsLoaded) return;
+
+        check($"{id}: assembly shares the game's load context", () =>
+        {
+            AssemblyLoadContext gameContext = AssemblyLoadContext.GetLoadContext(typeof(CardLogic).Assembly);
+            AssemblyLoadContext expansionContext = AssemblyLoadContext.GetLoadContext(expansion.Assembly);
+            Require(gameContext == expansionContext, $"game in '{gameContext?.Name}', expansion in '{expansionContext?.Name}'");
+            return $"'{gameContext?.Name}'";
+        });
+
+        check($"{id}: rules registered", () =>
+        {
+            Require(expansion.Rules.Count > 0, "no IExpansionRules");
+            return string.Join(", ", expansion.Rules.Select(rules => rules.GetType().Name));
+        });
+
+        check($"{id}: messages round-trip", () =>
+        {
+            List<(Type DtoType, string Discriminator)> messages = GameMessageJson.RegisteredMessages(id);
+            foreach ((Type dtoType, string discriminator) in messages)
+            {
+                GameMessageDto sent = (GameMessageDto)Activator.CreateInstance(dtoType);
+                string json = JsonSerializer.Serialize(sent, typeof(GameMessageDto), GameMessageJson.Options);
+                Require(json.Contains($"\"$type\":\"{discriminator}\""), $"no discriminator in {json}");
+
+                GameMessageDto received = JsonSerializer.Deserialize<GameMessageDto>(json, GameMessageJson.Options);
+                Require(received?.GetType() == dtoType, $"{discriminator} came back as {received?.GetType().Name}");
+                Require(GameMessageJson.TryCreateExpansionMessage(received, out GameMessage message), $"{discriminator} has no factory");
+                message.Free();
+            }
+            return messages.Count == 0 ? "none registered" : string.Join(", ", messages.Select(m => m.Discriminator));
+        });
     }
 
     private static void Require(bool condition, string failure)
