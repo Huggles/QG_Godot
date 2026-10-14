@@ -812,7 +812,7 @@ public partial class NetworkApi : Node
                 ErrorInjection.MaybeThrow(ErrorInjection.Site.ClientInput, dto.GetType().Name);
             await dto.Execute();
 
-            if (dto.IsForCurrentPeer)
+            if (dto.IsForCurrentPeer && HasSessionToAnswer)
             {
                 Rpc(nameof(ReceiveInputResponse), dto.ToJson());
             }
@@ -825,7 +825,7 @@ public partial class NetworkApi : Node
             // StepSkippedException path instead of waiting forever. If `dto` is null the request
             // could not even be parsed — we cannot know whether it was for this peer, so there is
             // nothing safe to send and the host's bounded wait is the only cover.
-            if (dto != null && dto.IsForCurrentPeer)
+            if (dto != null && dto.IsForCurrentPeer && HasSessionToAnswer)
             {
                 try
                 {
@@ -842,6 +842,13 @@ public partial class NetworkApi : Node
 
 
     
+
+    /// <summary>
+    /// Whether an answer still has somewhere to go. Not after leaving the game: SceneFlow closes the peer
+    /// and then cancels the pending prompt, which resolves this peer's open request, and the answer to
+    /// an abandoned game is no answer at all.
+    /// </summary>
+    private bool HasSessionToAnswer => Multiplayer.MultiplayerPeer != null && MultiplayerSession.Instance != null;
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     private void ReceiveInputResponse(string dtoJson)
