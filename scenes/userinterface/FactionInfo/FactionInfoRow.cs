@@ -345,8 +345,8 @@ public partial class FactionInfoRow : Control
 	private int CombinedScore => FactionState.Score + _minors.Sum(minor => FactionState.ForEnum(minor)?.Score ?? 0);
 
 	/// <summary>
-	/// One tab per minor faction, hung under the row: its flag, then its army (and navy, if it has any)
-	/// pieces in reserve, coloured like the row's own counters are in the patron's colour. Built in code
+	/// One tab per minor faction, hung under the row: its army (and navy, if it has any) pieces in reserve,
+	/// on its own colour, which is what says whose they are. Built in code
 	/// from the row's own icons and labels so the scene needs no extra nodes, and the base game, which
 	/// has no minor factions, draws exactly what it did.
 	/// </summary>
@@ -358,7 +358,8 @@ public partial class FactionInfoRow : Control
 			Faction minor = _minors[i];
 			FactionData data = StaticGameData.FactionDataMap[minor];
 
-			Panel tab = new() { MouseFilter = MouseFilterEnum.Ignore };
+			// Pass, not Ignore, so the tab can show whose pieces these are on hover.
+			Panel tab = new() { MouseFilter = MouseFilterEnum.Pass, TooltipText = $"{data.Label}: pieces in reserve" };
 			StyleBoxFlat style = (StyleBoxFlat)BackgroundPanel2.GetThemeStylebox("panel").Duplicate();
 			style.BgColor = data.FactionColor;
 			tab.AddThemeStyleboxOverride("panel", style);
@@ -371,14 +372,6 @@ public partial class FactionInfoRow : Control
 			cells.SetAnchorsPreset(LayoutPreset.FullRect);
 			tab.AddChild(cells);
 
-			cells.AddChild(new TextureRect
-			{
-				Texture = data.FlagTexture,
-				ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-				StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
-				CustomMinimumSize = new Vector2(35, MinorTabHeight - 6),
-				TooltipText = $"{data.Label}: pieces in reserve",
-			});
 			AddMinorCounter(cells, minor, UnitType.ARMY, ArmyIcon, ArmyCountLabel, data.FactionColor);
 			if (data.NumberOfNavyUnits > 0)
 				AddMinorCounter(cells, minor, UnitType.NAVY, NavyIcon, NavyCountLabel, data.FactionColor);
