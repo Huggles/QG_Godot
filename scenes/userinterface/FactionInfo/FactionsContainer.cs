@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class FactionsContainer : Control
 {
@@ -86,8 +87,9 @@ public partial class FactionsContainer : Control
 
         FactionInfoNodes.Clear();
 
-        // Every faction on the board, minor factions (France, China) after the six that take turns.
-        List<Faction> playerFactions = StaticGameData.BoardFactions;
+        // One row per faction that takes turns. A minor faction (France, China) shares its patron's row:
+        // FactionInfoRow folds its score in and hangs its pieces in a tab under the row.
+        List<Faction> playerFactions = StaticGameData.PlayableFactions;
         
         // If no factions assigned yet, don't show any rows
         if (playerFactions.Count == 0)
@@ -99,9 +101,18 @@ public partial class FactionsContainer : Control
         {
             FactionInfoRow rowInstance = AssetRepository.FactionInfoRowScenePacked.Instantiate<FactionInfoRow>();
             rowInstance.Faction = faction;
+            // Rows keep their own height when the strip grows for the minor-faction tabs below:
+            // their panels are anchored to the row's bottom edge and would stretch otherwise.
+            rowInstance.SizeFlagsVertical = Control.SizeFlags.ShrinkBegin;
             HorizontalContainer.AddChild(rowInstance);
             FactionInfoNodes[faction] = rowInstance;
         }
+
+        // Make room for the tallest stack of minor-faction tabs, so they sit inside the panel. The base
+        // game has no minor factions and keeps the strip's height from the scene.
+        int tabs = playerFactions.Max(faction => StaticGameData.MinorsOf(faction).Count);
+        if (tabs > 0)
+            HorizontalContainer.CustomMinimumSize += new Vector2(0, tabs * FactionInfoRow.MinorTabHeight);
     }
 
     public FactionInfoRow GetFactionInfoNodeForFaction(Faction faction)

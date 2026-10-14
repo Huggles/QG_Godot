@@ -112,12 +112,12 @@ public partial class FactionInfoRow : Control
 		ReactionSkipToggleButton.Faction = Faction;
 		ReactionSkipToggleButton.Refresh();
 
-		// A minor faction (France, China) has pieces and points but no cards: keep the card widgets off.
-		bool hasCards = !FactionState.FactionData.IsMinor;
-		DiscardDeckButton.Visible = hasCards;
-		PlayedCardsButton.Visible = hasCards;
+		// The minor factions this faction acts for share its row: their points fold into its score and
+		// their pieces in reserve hang in a tab under it, one per minor faction.
+		_minors = StaticGameData.MinorsOf(Faction);
+		AddMinorTabs();
 
-		SetScore(FactionState.Score);
+		SetScore(CombinedScore);
 		SetUnitCounts();
 		SetCardCounts();
 
@@ -147,15 +147,15 @@ public partial class FactionInfoRow : Control
 
 	private void OnFactionScoredPoints(Faction faction, int newScore)
 	{
-		if (faction == Faction)
+		if (IsShownHere(faction))
 		{
-			SetScore(newScore);
+			SetScore(CombinedScore);
 		}
 	}
 
 	private void OnUnitDeployed(int unitId, int countryId)
 	{
-		if (UnitState.ForId(unitId).Faction == Faction)
+		if (IsShownHere(UnitState.ForId(unitId).Faction))
 		{
 			SetUnitCounts();
 		}
@@ -163,7 +163,7 @@ public partial class FactionInfoRow : Control
 
 	private void OnUnitRemoved(int unitId, int countryId)
 	{
-		if (UnitState.ForId(unitId).Faction == Faction)
+		if (IsShownHere(UnitState.ForId(unitId).Faction))
 		{
 			SetUnitCounts();
 		}
@@ -222,12 +222,11 @@ public partial class FactionInfoRow : Control
 	}
 	private void SetModulation()
 	{        
-		// A minor faction's row lights up with its patron's: whoever plays the patron acts for it.
-		bool isLocal = PlayerFactionRegistry.GetLocalPlayerFactions().Contains(StaticGameData.ControllerOf(Faction));
+		bool isLocal = PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction);
 		// Re-tested here rather than once in LoadUI so a rejoin or a faction reassignment is picked up.
 		// A setting on a faction this peer does not control would do nothing, and hiding it leaves the
-		// other five rows exactly as they were. A minor faction has no reactions to skip.
-		ReactionSkipToggleButton.Visible = isLocal && !FactionState.FactionData.IsMinor;
+		// other five rows exactly as they were.
+		ReactionSkipToggleButton.Visible = isLocal;
 
 		if (isLocal)
 		{            
@@ -260,6 +259,8 @@ public partial class FactionInfoRow : Control
 	{
 		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY));
 		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY));
+		foreach (((Faction minor, UnitType type), Label label) in _minorCountLabels)
+			SetUnitCount(label, UnitPool.AvailableUnitCount(minor, type));
 	}
 
 	/// <summary>
@@ -306,7 +307,10 @@ public partial class FactionInfoRow : Control
 	{
 		TurnSummariesRichText.Text = string.Empty;
 		var textRows = new List<string>();
-		var vpSummaries = GameFlow.Instance.VictoryPointSummaries.GetValueOrDefault(Faction, new List<VPTurnSummary>());
+		// This faction's summaries, then those of the minor factions it acts for, whose points the row's
+		// score includes. Within a round they keep that order, so the patron's own lines come first.
+		var vpSummaries = _minors.Prepend(Faction)
+			.SelectMany(faction => GameFlow.Instance.VictoryPointSummaries.GetValueOrDefault(faction, new List<VPTurnSummary>()));
 
 		// Grouped by round, not by turn: a faction can pick up points outside its own turn (a card
 		// scoring on a reaction, or the empty-deck discard penalty during the attacker's turn), so
@@ -314,13 +318,92 @@ public partial class FactionInfoRow : Control
 		foreach (IGrouping<int, VPTurnSummary> round in vpSummaries.GroupBy(s => s.Round).OrderBy(g => g.Key))
 		{
 			textRows.Add($"Round {round.Key} — {round.Sum(s => s.TotalScore)} VP");
-			foreach (VPEntry victoryPointEntry in round.SelectMany(s => s.victoryPointEntries))
+			foreach (VPTurnSummary summary in round)
 			{
-				textRows.Add(victoryPointEntry.Description);
+				// "(France)" on a minor faction's lines, so the row says whose points they are.
+				string whose = summary.Faction == Faction ? string.Empty : $" ({summary.Faction.Label()})";
+				foreach (VPEntry victoryPointEntry in summary.victoryPointEntries)
+					textRows.Add(victoryPointEntry.Description + whose);
 			}
 		}
 
 		TurnSummariesRichText.Text = string.Join("\n", textRows);
+	}
+
+	// ── Minor factions sharing this row ──────────────────────────────────────
+
+	/// <summary>Height of one minor faction's tab under the row; FactionsContainer makes room for them.</summary>
+	public const float MinorTabHeight = 25f;
+
+	private List<Faction> _minors = new();
+	private readonly Dictionary<(Faction, UnitType), Label> _minorCountLabels = new();
+
+	/// <summary>This row's faction, or a minor faction it acts for.</summary>
+	private bool IsShownHere(Faction faction) => faction == Faction || _minors.Contains(faction);
+
+	/// <summary>The row's headline score: this faction's points plus those of the minor factions it acts for.</summary>
+	private int CombinedScore => FactionState.Score + _minors.Sum(minor => FactionState.ForEnum(minor)?.Score ?? 0);
+
+	/// <summary>
+	/// One tab per minor faction, hung under the row: its flag, then its army (and navy, if it has any)
+	/// pieces in reserve, coloured like the row's own counters are in the patron's colour. Built in code
+	/// from the row's own icons and labels so the scene needs no extra nodes, and the base game, which
+	/// has no minor factions, draws exactly what it did.
+	/// </summary>
+	private void AddMinorTabs()
+	{
+		float rowHeight = CustomMinimumSize.Y;
+		for (int i = 0; i < _minors.Count; i++)
+		{
+			Faction minor = _minors[i];
+			FactionData data = StaticGameData.FactionDataMap[minor];
+
+			Panel tab = new() { MouseFilter = MouseFilterEnum.Ignore };
+			StyleBoxFlat style = (StyleBoxFlat)BackgroundPanel2.GetThemeStylebox("panel").Duplicate();
+			style.BgColor = data.FactionColor;
+			tab.AddThemeStyleboxOverride("panel", style);
+			tab.Position = new Vector2(0, rowHeight + i * MinorTabHeight);
+			tab.Size = new Vector2(CustomMinimumSize.X, MinorTabHeight);
+			AddChild(tab);
+
+			HBoxContainer cells = new() { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+			cells.AddThemeConstantOverride("separation", 2);
+			cells.SetAnchorsPreset(LayoutPreset.FullRect);
+			tab.AddChild(cells);
+
+			cells.AddChild(new TextureRect
+			{
+				Texture = data.FlagTexture,
+				ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+				StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+				CustomMinimumSize = new Vector2(35, MinorTabHeight - 6),
+				TooltipText = $"{data.Label}: pieces in reserve",
+			});
+			AddMinorCounter(cells, minor, UnitType.ARMY, ArmyIcon, ArmyCountLabel, data.FactionColor);
+			if (data.NumberOfNavyUnits > 0)
+				AddMinorCounter(cells, minor, UnitType.NAVY, NavyIcon, NavyCountLabel, data.FactionColor);
+		}
+
+		// What hangs below the row moves down with it, so the VP popup and the card-delta animation do
+		// not cover the tabs.
+		float tabsHeight = _minors.Count * MinorTabHeight;
+		DetailPanel.OffsetTop += tabsHeight;
+		CardsAnimationControl.Position += new Vector2(0, tabsHeight);
+	}
+
+	private void AddMinorCounter(HBoxContainer cells, Faction minor, UnitType type, TextureRect iconTemplate, Label labelTemplate, Color color)
+	{
+		TextureRect icon = (TextureRect)iconTemplate.Duplicate(0);
+		icon.UniqueNameInOwner = false;
+		icon.SelfModulate = color;
+		cells.AddChild(icon);
+
+		// Its own LabelSettings: SetUnitCount recolours each counter separately.
+		Label label = (Label)labelTemplate.Duplicate(0);
+		label.UniqueNameInOwner = false;
+		label.LabelSettings = (LabelSettings)labelTemplate.LabelSettings.Duplicate();
+		cells.AddChild(label);
+		_minorCountLabels[(minor, type)] = label;
 	}
 
 	public void ShowCardDelta(int delta)
