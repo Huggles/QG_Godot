@@ -20,9 +20,10 @@ public static class SaveGameService
 
     /// <summary>
     /// Indented on purpose. A save is a debugging artifact as much as a player feature — being able to
-    /// open one and read the event log is worth the extra bytes, and these files are small.
+    /// open one and read the event log is worth the extra bytes, and these files are small. Shared with
+    /// the message stream so a save's event log can hold an expansion's messages too.
     /// </summary>
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static JsonSerializerOptions JsonOptions => GameMessageJson.IndentedOptions;
 
     /// <summary>Writes a save and returns its path, or null on failure.</summary>
     public static string Save(SaveGame save)
@@ -107,7 +108,7 @@ public static class SaveGameService
                 return null;
             }
 
-            return JsonSerializer.Deserialize<SaveGame>(file.GetAsText());
+            return JsonSerializer.Deserialize<SaveGame>(file.GetAsText(), JsonOptions);
         }
         catch (Exception e)
         {

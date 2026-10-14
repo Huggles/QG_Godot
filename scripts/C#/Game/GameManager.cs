@@ -147,6 +147,13 @@ public partial class GameManager : Node
     {
         Instance = this;
         DebugUtilities.PrintPeerFinest("GameManager Ready");
+
+        // First, ahead of anything that reads game data or the network: a card's ExecutionClass or a
+        // message on the wire may name a type only an expansion's assembly provides, and the message
+        // serializer freezes on first use.
+        ExpansionRegistry.Discover();
+        ExpansionLoader.LoadAll();
+
         LoadAvailableScenarios();
 
         // Chat is game-agnostic; this is where it learns our names and teams.
@@ -154,6 +161,9 @@ public partial class GameManager : Node
 
         // Listen for scene changes
         GetTree().NodeAdded += OnNodeAdded;
+
+        if (ExpansionSelfTest.Requested)
+            ExpansionSelfTest.RunAndQuit(GetTree());
     }
 
     public override void _ExitTree()

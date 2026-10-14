@@ -189,7 +189,7 @@ public partial class SessionRestore : Node
         foreach (GameMessageDto dto in events)
         {
             // Against GameMessageDto explicitly, as GameMessage.BroadCast does, so "$type" is written.
-            string json = JsonSerializer.Serialize(dto, typeof(GameMessageDto));
+            string json = JsonSerializer.Serialize(dto, typeof(GameMessageDto), GameMessageJson.Options);
             if (current.Count > 0 && size + json.Length > RestoreChunkBytes)
             {
                 chunks.Add($"[{string.Join(",", current)}]");
@@ -229,7 +229,7 @@ public partial class SessionRestore : Node
             ReplayContext.IsApplyingRestoreLog = true;
             _expectedRestoreHash = finalHash;
 
-            List<GameMessageDto> dtos = JsonSerializer.Deserialize<List<GameMessageDto>>(eventsJson);
+            List<GameMessageDto> dtos = JsonSerializer.Deserialize<List<GameMessageDto>>(eventsJson, GameMessageJson.Options);
             DebugUtilities.PrintPeer($"ReceiveRestoreLog: chunk {chunkIndex + 1}/{chunkCount}, {dtos.Count} event(s)");
             foreach (GameMessageDto dto in dtos)
             {

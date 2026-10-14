@@ -1,0 +1,41 @@
+<Project>
+  <!--
+    The Total War expansion's code: builds TotalWar.dll, which ships in the DLC depot next to the
+    expansion's .pck and is loaded at runtime by ExpansionLoader. It is not part of the game assembly;
+    the game's csproj builds this project after itself (target BuildExpansions).
+
+    Explicit Sdk imports rather than <Project Sdk="...">: Godot.NET.Sdk works out its output paths, and the
+    res:// paths of the script attributes its generators emit, from GodotProjectDir inside its Sdk.props,
+    before the project body is read. That has to be the game's project folder, so this assembly's
+    scripts are addressed res://expansions/total_war/... and its output lands next to the game assembly.
+  -->
+  <PropertyGroup>
+    <GodotProjectDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../'))</GodotProjectDir>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <!-- Its own obj/: the game project's restore and build state lives in .godot/mono/temp/obj/. -->
+    <BaseIntermediateOutputPath>$(GodotProjectDir).godot/mono/expansions/total_war/obj/</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)/</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Godot.NET.Sdk" Version="4.7.1" />
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <LangVersion>14.0</LangVersion>
+    <AssemblyName>TotalWar</AssemblyName>
+    <RootNamespace>TotalWar</RootNamespace>
+    <!-- Passed by the game's build; this default covers building the project on its own. -->
+    <GameAssemblyPath Condition=" '$(GameAssemblyPath)' == '' ">$(GodotProjectDir).godot/mono/temp/bin/$(Configuration)/Quartermaster General.dll</GameAssemblyPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compiled against, never copied: at runtime the game's own copy is the one already loaded. -->
+    <Reference Include="Quartermaster General">
+      <HintPath>$(GameAssemblyPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Godot.NET.Sdk" Version="4.7.1" />
+</Project>

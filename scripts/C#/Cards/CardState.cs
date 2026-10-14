@@ -113,7 +113,8 @@ public partial class CardState : StateObject
 
     public CardLogic InitiateCardLogicClass()
     {
-        Type cardType = Type.GetType(CardData.ExecutionClass);
+        // TypeRegistry rather than Type.GetType, which cannot see a card class in an expansion assembly.
+        Type cardType = TypeRegistry.Resolve(CardData.ExecutionClass);
         if(cardType != null) {            
             CardLogic cardLogic = (CardLogic)Activator.CreateInstance(cardType);
             cardLogic.CardState = this;

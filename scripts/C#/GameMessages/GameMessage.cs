@@ -189,7 +189,10 @@ public abstract partial class GameMessage : GodotObject
             ShowActionLabelPresentationEventDto d => new ShowActionLabelPresentationEvent(d.TriggeringFaction, d.Text),
             ShowCommanderMessagePresentationEventDto d => new ShowCommanderMessagePresentationEvent(d.TriggeringFaction, d.Text, d.Wait, d.Arrow),
 
-            _ => throw new NotSupportedException($"Unknown GameMessageDto type: {dto.GetType().Name}")
+            // ── Registered at boot by an expansion (ExpansionRegistrar.AddMessage) ───────────
+            _ => GameMessageJson.TryCreateExpansionMessage(dto, out GameMessage expansionMessage)
+                ? expansionMessage
+                : throw new NotSupportedException($"Unknown GameMessageDto type: {dto.GetType().Name}")
         };
 
         msg.ApplyDtoFields(dto);
@@ -217,7 +220,7 @@ public abstract partial class GameMessage : GodotObject
         // ToDto() override can never cost us the "$type" discriminator.
         GameMessageDto dto = ToDto();
         if (this is ChangeEvent) BroadcastJournal.Record(dto);
-        string dtoJson = JsonSerializer.Serialize(dto, typeof(GameMessageDto));
+        string dtoJson = JsonSerializer.Serialize(dto, typeof(GameMessageDto), GameMessageJson.Options);
         DebugUtilities.PrintPeer($"[color={"blue"}]Emitting {ScriptName} to clients (Id: {Id}{BroadcastLogDetail})");
         DebugUtilities.PrintPeerFinest($"{dtoJson}");
         NetworkApi.Instance.Rpc(nameof(NetworkApi.ReceiveGameMessage), dtoJson);
@@ -229,7 +232,7 @@ public abstract partial class GameMessage : GodotObject
     {
         EnsureId();
         OnBeforeBroadcast();
-        string dtoJson = JsonSerializer.Serialize(ToDto(), typeof(GameMessageDto));
+        string dtoJson = JsonSerializer.Serialize(ToDto(), typeof(GameMessageDto), GameMessageJson.Options);
         NetworkApi.Instance.RpcId(peer, nameof(NetworkApi.ReceiveGameMessage), dtoJson);
     }
 

@@ -319,7 +319,7 @@ public partial class RejoinService : Node
         IsCatchingUp = false;
         foreach (string json in _buffered)
         {
-            GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(json);
+            GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(json, GameMessageJson.Options);
             if (dto is PresentationEventDto or RecalculateTagsMessageDto || _logged.Contains(dto.Id)) continue;
             NetworkApi.Instance.EnqueueReplicated(dto, "RejoinBuffer");
         }

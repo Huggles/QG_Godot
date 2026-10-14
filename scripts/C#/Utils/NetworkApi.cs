@@ -187,7 +187,7 @@ public partial class NetworkApi : Node
         if (RejoinService.Instance?.BufferIfCatchingUp(dtoJson) == true) return;
         if (MultiplayerSession.Instance == null) return;
 
-        GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(dtoJson);
+        GameMessageDto dto = JsonSerializer.Deserialize<GameMessageDto>(dtoJson, GameMessageJson.Options);
         DebugUtilities.PrintPeerFinest($"{dtoJson}");
         EnqueueReplicated(dto, "ReceiveGameMessage");
     }

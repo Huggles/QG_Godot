@@ -16,4 +16,34 @@
     <Compile Remove="sim/**" />
     <None Remove="sim/**" />
   </ItemGroup>
+
+  <!--
+    expansions/<id>/ holds an expansion's data, art and code. Its code is its own project
+    (expansions/<id>/<Name>.csproj) building its own assembly, which ExpansionLoader loads at runtime, so
+    it can ship in the DLC depot instead of the base game. Keep those sources out of the game assembly,
+    for the same glob reason as sim/ above.
+  -->
+  <ItemGroup>
+    <Compile Remove="expansions/**" />
+    <None Remove="expansions/**" />
+  </ItemGroup>
+
+  <!--
+    Build each expansion project after the game, against the game assembly this build just produced
+    (GameAssemblyPath). Outside an export its output lands next to the game assembly, in
+    .godot/mono/temp/bin/<Configuration>/, which is where ExpansionLoader looks for it there.
+    A separate dotnet process rather than an MSBuild task: the expansion restores and evaluates its own
+    Godot.NET.Sdk, and none of that should leak into this build. SkipExpansionBuild=true turns it off.
+  -->
+  <Target Name="BuildExpansions" AfterTargets="Build" Condition=" '$(SkipExpansionBuild)' != 'true' ">
+    <ItemGroup>
+      <ExpansionProject Include="expansions/*/*.csproj" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_ExpansionDotnet>$(DOTNET_HOST_PATH)</_ExpansionDotnet>
+      <_ExpansionDotnet Condition=" '$(_ExpansionDotnet)' == '' ">dotnet</_ExpansionDotnet>
+    </PropertyGroup>
+    <Exec Condition=" '@(ExpansionProject)' != '' "
+          Command="&quot;$(_ExpansionDotnet)&quot; build &quot;%(ExpansionProject.FullPath)&quot; -c $(Configuration) -v q --nologo &quot;-p:GameAssemblyPath=$(TargetPath)&quot;" />
+  </Target>
 </Project>

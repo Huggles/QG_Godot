@@ -1,0 +1,7 @@
+{
+  "id": "total_war",
+  "displayName": "Total War",
+  "assembly": "TotalWar",
+  "steamDlcAppId": 0,
+  "minGameVersion": "0.9.4.3"
+}
