@@ -16,8 +16,38 @@ using System.Linq;
 /// could only ever be wrong, and it would turn "why did my click do nothing" into a two-layer
 /// question.
 /// </summary>
+/// <summary>How well an AI seat plays. See <see cref="AiSeatRuntime.HardSwitches"/>.</summary>
+public enum AiDifficulty
+{
+    Normal,
+    Hard,
+}
+
 public static class AiSeatRuntime
 {
+    /// <summary>
+    /// The valuation terms a Hard seat plays with, on top of <see cref="SeatRules"/>: pieces worth
+    /// what it costs to rebuild them, income one build away, cards priced by the plays in hand, and the
+    /// deck running out (see ProjectionValuer). Measured in the sim at +14 and +16 points of win rate
+    /// for the Allies on two deals (sim/lessons/2026-10-12-lookahead-and-unit-value.md), at about half
+    /// again the thinking time. The multi-turn lookahead is left out: three to six times the time per
+    /// move, and no gain yet measured on top of these.
+    /// </summary>
+    public static readonly string[] HardSwitches = { "bot_material", "bot_reach", "bot_card_value", "bot_scarcity" };
+
+    /// <summary>Set the forced valuation switches for <paramref name="factions"/> to the session's difficulty.</summary>
+    private static void ApplyDifficulty(IEnumerable<Faction> factions)
+    {
+        bool hard = GameManager.PendingAiDifficulty == AiDifficulty.Hard;
+        foreach (Faction faction in factions)
+            foreach (string name in HardSwitches)
+                BotSides.Force(name, faction, hard);
+    }
+
+    /// <summary>The factions <paramref name="seat"/> plays.</summary>
+    private static List<Faction> FactionsOf(PlayerScene seat) =>
+        StaticGameData.PlayableFactions.Where(f => PlayerFactionRegistry.GetPlayerSceneForFaction(f) == seat).ToList();
+
     /// <summary>The live installation, or null when this session has no bots on this peer.</summary>
     public static AiSeatInstallation Current { get; private set; }
 
@@ -78,12 +108,13 @@ public static class AiSeatRuntime
                 installation.Seats.Add(seat);
             }
 
+            ApplyDifficulty(aiFactions);
             Current = installation;
             InputServices.Override(new AiSeatInputProvider());
 
             DebugUtilities.PrintPeer(
                 $"AI seats installed for {string.Join(", ", aiFactions)} " +
-                $"({installation.Seats.Count} seat(s))");
+                $"({installation.Seats.Count} seat(s), {GameManager.PendingAiDifficulty})");
         }
         catch (Exception e)
         {
@@ -111,6 +142,7 @@ public static class AiSeatRuntime
         }
 
         seat.Bot ??= BuildBot(seat);
+        ApplyDifficulty(FactionsOf(seat));
         if (!Current.Seats.Contains(seat)) Current.Seats.Add(seat);
         DebugUtilities.PrintPeer($"AI seat took over {seat.PlayerName}");
     }
@@ -119,6 +151,7 @@ public static class AiSeatRuntime
     public static void ReleaseSeat(PlayerScene seat)
     {
         if (seat == null || Current == null) return;
+        foreach (Faction faction in FactionsOf(seat)) BotSides.Unforce(faction);
         seat.Bot = null;
         Current.Seats.Remove(seat);
         if (Current.Seats.Count == 0) Reset();
@@ -206,7 +239,11 @@ public static class AiSeatRuntime
     /// </summary>
     public static void Reset()
     {
-        if (Current != null) InputServices.Override(Current.DisplacedProvider);
+        if (Current != null)
+        {
+            InputServices.Override(Current.DisplacedProvider);
+            BotSides.ClearForced();
+        }
         Current = null;
     }
 

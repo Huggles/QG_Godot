@@ -56,6 +56,13 @@ public partial class GameManager : Node
     public static bool? PendingOpeningDiscard { get; set; } = null;
 
     /// <summary>
+    /// How well the next session's AI seats play; see <see cref="AiSeatRuntime"/>. Hard unless the
+    /// skirmish screen says otherwise — a seat a bot takes over mid-game, or a restored save, gets it
+    /// too. A player's preference rather than a scenario's, so picking a scenario leaves it alone.
+    /// </summary>
+    public static AiDifficulty PendingAiDifficulty { get; set; } = AiDifficulty.Hard;
+
+    /// <summary>
     /// Scenario JSON for the next session, overriding <see cref="PendingScenarioPath"/>. Set when a save
     /// is being restored: a save carries its scenario rather than pointing at one, so it does not matter
     /// whether the original file still exists, still lives at the same path, or still has the same

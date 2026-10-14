@@ -133,6 +133,13 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 button_pressed = true
 text = "Discard 3 cards at start"
 
+[node name="AiDifficultyOptionButton" type="OptionButton" parent="ButtonContainer" unique_id=1740263519]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Normal: the original AI. Hard: values its pieces, the income within reach, its cards and its deck — a stronger, slightly slower opponent."
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
 [node name="StartGameButton" parent="ButtonContainer" unique_id=163641719 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(600, 50)

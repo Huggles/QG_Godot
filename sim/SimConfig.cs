@@ -51,6 +51,21 @@ public sealed class SimConfig
     /// <summary>Who counts Status-card VP income when valuing (all, none, AXIS, ALLIES), passed to <c>bot_value_status=</c>. Empty means all.</summary>
     public string BotValueStatus { get; private set; } = "";
 
+    /// <summary>Who scores card plays by a multi-turn line (all, none, AXIS, ALLIES), passed to <c>bot_lookahead=</c>. Empty means none.</summary>
+    public string BotLookahead { get; private set; } = "";
+
+    /// <summary>Own turns the lookahead plays out, passed to <c>bot_lookahead_depth=</c>. Empty means the game default.</summary>
+    public string BotLookaheadDepth { get; private set; } = "";
+
+    /// <summary>Follow-up cards the lookahead explores per turn, passed to <c>bot_lookahead_beam=</c>. Empty means the game default.</summary>
+    public string BotLookaheadBeam { get; private set; } = "";
+
+    /// <summary>Who values table cards over the enemy turns to come (all, none, AXIS, ALLIES), passed to <c>bot_enemy_turns=</c>. Empty means none.</summary>
+    public string BotEnemyTurns { get; private set; } = "";
+
+    /// <summary>Further key=value args passed verbatim to the game (<c>--game-arg</c>, repeatable), for knobs with no flag of their own.</summary>
+    public List<string> GameArgs { get; } = new();
+
 
     /// <summary>
     /// Which goal profile the bot runs, passed through verbatim to <c>bot_profile=</c>. Empty means the
@@ -108,7 +123,7 @@ public sealed class SimConfig
         foreach (string scenario in Scenarios)
             foreach (int seed in Seeds)
                 foreach (int decisionSeed in DecisionSeeds)
-                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules, BotProfile, BotRulesFor, BotRulesOther, BotForecast, BotValueStatus));
+                    jobs.Add(new SimJob(scenario, seed, decisionSeed, BotPass, BotDiscard, BotHollow, BotRules, BotProfile, BotRulesFor, BotRulesOther, BotForecast, BotValueStatus, BotLookahead, BotLookaheadDepth, BotLookaheadBeam, BotEnemyTurns, GameArgs));
         return jobs;
     }
 
@@ -146,6 +161,15 @@ public sealed class SimConfig
                     case "--bot-rules-other": c.BotRulesOther = Next(arg); break;
                     case "--bot-forecast": c.BotForecast = Next(arg); break;
                     case "--bot-value-status": c.BotValueStatus = Next(arg); break;
+                    case "--bot-lookahead": c.BotLookahead = Next(arg); break;
+                    case "--bot-lookahead-depth": c.BotLookaheadDepth = Next(arg); break;
+                    case "--bot-lookahead-beam": c.BotLookaheadBeam = Next(arg); break;
+                    case "--bot-enemy-turns": c.BotEnemyTurns = Next(arg); break;
+                    case "--game-arg":
+                        string gameArg = Next(arg);
+                        if (!gameArg.Contains('=')) throw new ArgumentException($"--game-arg expects key=value, got '{gameArg}'");
+                        c.GameArgs.Add(gameArg);
+                        break;
                     case "--bot-profile": c.BotProfile = Next(arg); break;
                     case "--workers" or "-j": workers = int.Parse(Next(arg)); break;
                     case "--timeout": c.JobTimeout = TimeSpan.FromSeconds(double.Parse(Next(arg),
@@ -251,6 +275,11 @@ public sealed class SimConfig
               --bot-rules-other LIST   what the factions outside --bot-rules-for play (default: the defaults)
               --bot-forecast WHO       who forecasts after-reactions: all, none, AXIS, ALLIES (default all)
               --bot-value-status WHO   who counts Status-card VP income when valuing (default all)
+              --bot-lookahead WHO      who scores card plays by a multi-turn line of own turns (default none)
+              --bot-lookahead-depth N  own turns in that line (default 3)
+              --bot-lookahead-beam K   follow-up cards explored per later turn (default 3)
+              --bot-enemy-turns WHO    who values table cards over the enemy turns to come, blocks included (default none)
+              --game-arg KEY=VALUE     any other game arg, passed verbatim; repeatable (e.g. bot_material=ALLIES)
               --bot-profile NAME       goal profile: none, generic, faction  (default none)
                                        (run the game with bot_rules_list=true to see them)
               -j, --workers N          concurrent Godot processes (default cores/2)

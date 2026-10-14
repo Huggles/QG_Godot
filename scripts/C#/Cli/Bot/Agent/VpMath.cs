@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// The game's own victory-point formula, exposed so the bot can value a board position and the CHANGE a
@@ -77,6 +78,33 @@ public static class VpMath
     ///
     /// Assumes the deploy is legal; legality is the offer set's job, never this class's.
     /// </summary>
+    public static int VpDeltaOfDeploy(CountryState country, Faction faction, BoardState board)
+    {
+        if (country == null || !country.IsSupply) return 0;
+        Dictionary<Faction, int> units = board.UnitsIn(country);
+        if (units.ContainsKey(faction)) return 0;
+
+        FactionTeam team = StaticGameData.FactionTeamForFaction(faction);
+        int before = TeamStarVpAt(country, units, team);
+        int after = (OccupantsOnTeam(units, team) + 1) * PayoutFor(units.Count + 1);
+        return after - before;
+    }
+
+    /// <summary>
+    /// The most per-turn VP <paramref name="faction"/>'s team could add with one build on
+    /// <paramref name="board"/>: the best <see cref="VpDeltaOfDeploy(CountryState, Faction, BoardState)"/>
+    /// over the spaces it may build in now. How close its pieces stand to income it does not have yet.
+    /// </summary>
+    public static int BestBuildVp(Faction faction, BoardState board)
+    {
+        int best = 0;
+        foreach (CountryState country in board.BuildableLand(faction).Concat(board.BuildableSea(faction)))
+            best = Math.Max(best, VpDeltaOfDeploy(country, faction, board));
+        return best;
+    }
+
+    /// <inheritdoc cref="VpDeltaOfDeploy(CountryState, Faction, BoardState)"/>
+    /// <remarks>On the live board.</remarks>
     public static int VpDeltaOfDeploy(CountryState country, Faction faction)
     {
         if (country == null || !country.IsSupply) return 0;

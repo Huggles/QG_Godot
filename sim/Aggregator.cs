@@ -491,6 +491,12 @@ public static class Aggregator
             sb.AppendLine($"  bot_forecast   {config.BotForecast}");
         if (!string.IsNullOrWhiteSpace(config.BotValueStatus))
             sb.AppendLine($"  bot_value_status   {config.BotValueStatus}");
+        if (!string.IsNullOrWhiteSpace(config.BotLookahead))
+            sb.AppendLine($"  bot_lookahead   {config.BotLookahead} depth={config.BotLookaheadDepth} beam={config.BotLookaheadBeam}");
+        if (!string.IsNullOrWhiteSpace(config.BotEnemyTurns))
+            sb.AppendLine($"  bot_enemy_turns   {config.BotEnemyTurns}");
+        if (config.GameArgs.Count > 0)
+            sb.AppendLine($"  game_args   {string.Join(" ", config.GameArgs)}");
         sb.AppendLine($"  bot_profile    {(string.IsNullOrWhiteSpace(config.BotProfile) ? "(none)" : config.BotProfile)}");
         sb.AppendLine($"  workers        {config.Workers}");
         sb.AppendLine();

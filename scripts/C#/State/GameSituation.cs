@@ -35,8 +35,16 @@ public sealed class GameSituation
     /// <summary>How many card activations are running; above 0 only event-triggered cards may activate.</summary>
     public int ReactionDepth { get; }
 
+    /// <summary>
+    /// A later turn projected on a fork: every card's steps count as re-armed, as
+    /// <see cref="CardLogic.OnNewTurnStarted"/> would leave them. Step progress lives on the shared
+    /// CardStep objects rather than on the board, so a fork cannot reset it itself.
+    /// </summary>
+    public bool Rearmed { get; }
+
     private GameSituation(BoardState board, ChangeEvent reactionTrigger, ChangeEvent blockTrigger,
-                          IReadOnlyList<ChangeEvent> pool, IReadOnlyList<CardState> cardPool, int reactionDepth)
+                          IReadOnlyList<ChangeEvent> pool, IReadOnlyList<CardState> cardPool, int reactionDepth,
+                          bool rearmed = false)
     {
         Board = board;
         ReactionTrigger = reactionTrigger;
@@ -44,6 +52,7 @@ public sealed class GameSituation
         Pool = pool;
         CardPool = cardPool;
         ReactionDepth = reactionDepth;
+        Rearmed = rearmed;
     }
 
     /// <summary>The situation the game is in now. Read it where it is needed: the round moves on.</summary>
@@ -59,7 +68,14 @@ public sealed class GameSituation
 
     /// <summary>The same moment on a different board.</summary>
     public GameSituation WithBoard(BoardState board) =>
-        new(board, ReactionTrigger, BlockTrigger, Pool, CardPool, ReactionDepth);
+        new(board, ReactionTrigger, BlockTrigger, Pool, CardPool, ReactionDepth, Rearmed);
+
+    /// <summary>
+    /// The start of a later turn on <paramref name="board"/>, a fork already moved to it: no window
+    /// open, nothing in the round's pools, every card re-armed. For the bot's lookahead.
+    /// </summary>
+    public static GameSituation NewTurnOn(BoardState board) =>
+        new(board, null, null, NoEvents, NoCards, 0, rearmed: true);
 
     /// <summary>
     /// The after-reaction window of <paramref name="trigger"/>, which has just applied: it is the
@@ -67,11 +83,18 @@ public sealed class GameSituation
     /// is at least one.
     /// </summary>
     public GameSituation ReactingTo(ChangeEvent trigger) =>
-        new(Board, trigger, null, Pool.Append(trigger).ToList(), CardPool, System.Math.Max(ReactionDepth, 1));
+        new(Board, trigger, null, Pool.Append(trigger).ToList(), CardPool, System.Math.Max(ReactionDepth, 1), Rearmed);
+
+    /// <summary>
+    /// The block window for <paramref name="trigger"/>, which has not applied yet: the event a block
+    /// card's triggers read, as CardPlayRound.RequestBlockReactions offers it. For the bot's forecast.
+    /// </summary>
+    public GameSituation OfferingForBlock(ChangeEvent trigger) =>
+        new(Board, ReactionTrigger, trigger, Pool, CardPool, ReactionDepth, Rearmed);
 
     /// <summary>The same moment once <paramref name="applied"/> has happened: it joins the pool, the trigger stays.</summary>
     public GameSituation After(ChangeEvent applied) =>
-        new(Board, ReactionTrigger, BlockTrigger, Pool.Append(applied).ToList(), CardPool, ReactionDepth);
+        new(Board, ReactionTrigger, BlockTrigger, Pool.Append(applied).ToList(), CardPool, ReactionDepth, Rearmed);
 
     public T TriggerAs<T>() where T : ChangeEvent => ReactionTrigger as T;
 

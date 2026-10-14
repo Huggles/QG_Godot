@@ -45,6 +45,12 @@ public static class CliArgs
         => Args.TryGetValue(key, out string value) && int.TryParse(value, out int parsed)
             ? parsed : fallback;
 
+    /// <summary>A number, read culture-invariant so "0.5" means the same on every machine.</summary>
+    public static double GetDouble(string key, double fallback)
+        => Args.TryGetValue(key, out string value)
+           && double.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double parsed)
+            ? parsed : fallback;
+
     /// <summary>Console logging stays suppressed in CLI mode unless this is set — see DebugUtilities.</summary>
     public static bool Verbose => GetBool("verbose");
 }

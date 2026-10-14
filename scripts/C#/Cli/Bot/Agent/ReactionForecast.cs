@@ -14,7 +14,11 @@ using System.Linq;
 /// a reaction is always optional. A reaction's own events open their windows in turn, to
 /// <see cref="MaxDepth"/>.
 ///
-/// Block windows are not forecast: a block cancels the event, which is a different shape of answer.
+/// Before an event applies, its block window is forecast too — for a valuer under
+/// <c>bot_enemy_turns</c>, and always while <see cref="EnemyTurnValue"/> measures: the team that did
+/// not cause the event may block it with a card whose real triggers accept it (Radar saving a supplied
+/// US Navy). The blocker pays the card's cost steps, the event never happens, and it is played only
+/// when that is worth more to its team than letting the event through.
 /// </summary>
 public static class ReactionForecast
 {
@@ -27,6 +31,10 @@ public static class ReactionForecast
     /// </summary>
     private static bool Forecasts(Faction valuer) => BotSides.Includes("bot_forecast", "all", valuer);
 
+    /// <summary>Who forecasts block windows; see the summary.</summary>
+    private static bool ForecastsBlocks(Faction valuer) =>
+        EnemyTurnValue.Measuring || BotSides.Includes("bot_enemy_turns", "none", valuer);
+
     /// <summary>
     /// Apply <paramref name="changeEvent"/> to <paramref name="situation"/>'s board, a fork, and play out
     /// the window it opens. Returns the board as it ends — possibly a further fork — or null when the
@@ -35,6 +43,9 @@ public static class ReactionForecast
     public static BoardState Apply(ChangeEvent changeEvent, GameSituation situation, Faction valuer, int depth, List<StepOption> built)
     {
         if (changeEvent == null) return situation.Board;
+        if (changeEvent.IsTrigger && depth < MaxDepth && ForecastsBlocks(valuer)
+            && Block(changeEvent, situation, valuer, depth, built) is { } blocked)
+            return blocked;
         if (!situation.Board.Apply(changeEvent, situation, cardTags: false)) return null;
         if (!changeEvent.IsTrigger || depth >= MaxDepth || !Forecasts(valuer)) return situation.Board;
 
@@ -47,7 +58,7 @@ public static class ReactionForecast
             {
                 if (used.Contains(card.Id) || !card.CardLogic.CanBeActivated(window)) continue;
 
-                GameSituation tried = ProjectionValuer.PlaySteps(card.CardLogic.CardSteps.Where(s => !s.StepFinished),
+                GameSituation tried = ProjectionValuer.PlaySteps(ProjectionValuer.Unfinished(card.CardLogic, window),
                     window.WithBoard(window.Board.Fork()), card.Faction, depth + 1, built);
                 if (tried == null) continue;
 
@@ -63,10 +74,49 @@ public static class ReactionForecast
         return window.Board;
     }
 
-    /// <summary>The team's cards on the table that the valuing faction can see and that could react to an event.</summary>
-    private static IEnumerable<CardState> Candidates(GameSituation window, FactionTeam team, Faction valuer)
+    /// <summary>
+    /// The board as it would be if <paramref name="changeEvent"/> were blocked — a fork of
+    /// <paramref name="situation"/>'s board with the best block card's cost paid — or null when nobody
+    /// would block it. Only the team that did not cause the event may block, and nobody blocks their
+    /// own action, as in CardPlayRound.RequestBlockReactions. Letting it through is valued as the event
+    /// alone, without the reactions it would open.
+    /// </summary>
+    private static BoardState Block(ChangeEvent changeEvent, GameSituation situation, Faction valuer, int depth, List<StepOption> built)
     {
-        bool ownTeam = team == StaticGameData.FactionTeamForFaction(valuer);
+        FactionTeam team = StaticGameData.OpponentFactionTeamForFaction(changeEvent.TriggeringFaction);
+        if (team == FactionTeam.NONE) return null;
+
+        GameSituation window = situation.OfferingForBlock(changeEvent);
+        List<CardState> blockers = Candidates(window, team, valuer, blocks: true)
+            .Where(card => card.Faction != changeEvent.TriggeringFaction && card.CardLogic.CanBeActivated(window))
+            .ToList();
+        if (blockers.Count == 0) return null;
+
+        BoardState through = situation.Board.Fork();
+        if (!through.Apply(changeEvent, situation, cardTags: false)) return null;
+
+        BoardState best = null;
+        foreach (CardState card in blockers)
+        {
+            // PlaySteps skips the Block step itself: what is left is what the block costs.
+            GameSituation tried = ProjectionValuer.PlaySteps(ProjectionValuer.Unfinished(card.CardLogic, window),
+                window.WithBoard(situation.Board.Fork()), card.Faction, depth + 1, built);
+            if (tried == null) continue;
+            if (ProjectionValuer.Value(tried.Board, card.Faction) <= ProjectionValuer.Value(best ?? through, card.Faction)) continue;
+
+            best = tried.Board;
+            if (CliArgs.Verbose)
+                DebugUtilities.PrintPeer($"FORECAST block {card.CardName} ({card.Faction}) stops {changeEvent.ScriptName}");
+        }
+        return best;
+    }
+
+    /// <summary>The team's cards on the table that the valuing faction can see and that could react to an event.</summary>
+    private static IEnumerable<CardState> Candidates(GameSituation window, FactionTeam team, Faction valuer, bool blocks = false)
+    {
+        // While EnemyTurnValue measures, what the measuring faction knows: its own hidden Responses too.
+        Faction knower = EnemyTurnValue.Measuring ? EnemyTurnValue.MeasuringFor : valuer;
+        bool ownTeam = team == StaticGameData.FactionTeamForFaction(knower);
         foreach (Faction faction in StaticGameData.FactionsForTeam(team))
         {
             if (FactionState.ForEnum(faction) == null) continue;
@@ -75,7 +125,7 @@ public static class ReactionForecast
             foreach (CardState card in CardState.ForIds(piles.Status.Concat(piles.Response).ToList()))
             {
                 CardLogic logic = card.CardLogic;
-                if (logic == null || logic.IsBlockReaction || !logic.HasEventBasedTrigger) continue;
+                if (logic == null || logic.IsBlockReaction != blocks || !logic.HasEventBasedTrigger) continue;
                 bool visible = ownTeam || logic.IsStatus || window.Board.Of(card).IsRevealed;
                 if (visible) yield return card;
             }

@@ -171,7 +171,8 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
 
         // For an unplayed card TriggerConditionsMet resolves to _defaultPlayConditions, which is
         // the correct gate for a play.
-        if (IsActivationFinished || !TriggerConditionsMet(situation))
+        // On a re-armed projection the shared activation state is last turn's, not this one's.
+        if ((IsActivationFinished && !situation.Rearmed) || !TriggerConditionsMet(situation))
             return false;
 
         if (IsTableCardInHandOn(board))
@@ -182,7 +183,9 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
             return situation.ReactionDepth == 0;
         }
 
-        if (!HasExecutableCardStepsOn(board))
+        // A re-armed projection has no IsExecutable tags to read: forks skip the card-tag pass. The
+        // projector already skips any step that cannot say what it would do.
+        if (!situation.Rearmed && !HasExecutableCardStepsOn(board))
             return false;
 
         // "Once per turn" cards (MultipleActivationsPerTurn = false) may not activate

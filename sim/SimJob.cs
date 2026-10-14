@@ -20,7 +20,12 @@ public sealed record SimJob(
     string BotRulesFor = "",
     string BotRulesOther = "",
     string BotForecast = "",
-    string BotValueStatus = "")
+    string BotValueStatus = "",
+    string BotLookahead = "",
+    string BotLookaheadDepth = "",
+    string BotLookaheadBeam = "",
+    string BotEnemyTurns = "",
+    IReadOnlyList<string> GameArgs = null)
 {
     /// <summary>Stable, filesystem-safe identity. Also the sort key that makes a run diffable.</summary>
     public string Id => $"{Scenario}_s{Seed}_d{DecisionSeed}";
@@ -53,6 +58,14 @@ public sealed record SimJob(
         if (!string.IsNullOrWhiteSpace(BotForecast)) yield return $"bot_forecast={BotForecast}";
         // Who counts Status-card income when valuing; absent means everyone (the game's default).
         if (!string.IsNullOrWhiteSpace(BotValueStatus)) yield return $"bot_value_status={BotValueStatus}";
+        // Who scores card plays by a multi-turn line; absent means nobody (the game's default).
+        if (!string.IsNullOrWhiteSpace(BotLookahead)) yield return $"bot_lookahead={BotLookahead}";
+        if (!string.IsNullOrWhiteSpace(BotLookaheadDepth)) yield return $"bot_lookahead_depth={BotLookaheadDepth}";
+        if (!string.IsNullOrWhiteSpace(BotLookaheadBeam)) yield return $"bot_lookahead_beam={BotLookaheadBeam}";
+        // Who values table cards over the enemy turns to come; absent means nobody.
+        if (!string.IsNullOrWhiteSpace(BotEnemyTurns)) yield return $"bot_enemy_turns={BotEnemyTurns}";
+        // Anything else the game reads, passed verbatim (--game-arg key=value).
+        foreach (string arg in GameArgs ?? []) yield return arg;
         // Same contract as bot_rules: absent means the game applies its own default, which for the
         // profile is "no agent at all".
         if (!string.IsNullOrWhiteSpace(BotProfile)) yield return $"bot_profile={BotProfile}";

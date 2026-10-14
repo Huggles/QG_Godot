@@ -292,9 +292,17 @@ public sealed class FactionRecord : BoardRecord
     public List<int> Response = new();
     public List<int> Status = new();
 
+    /// <summary>
+    /// VP a bot's projection has charged this faction on a fork for something no pile shows — see
+    /// ProjectionValuer.PlayBestCandidate. Never set on the live board, so always 0 there, and not
+    /// part of any digest.
+    /// </summary>
+    public double ProjectedCharge;
+
     public FactionRecord Clone() => CloneTagsInto(new FactionRecord
     {
         Score = Score,
+        ProjectedCharge = ProjectedCharge,
         Deck = new List<int>(Deck),
         Hand = new List<int>(Hand),
         Discarded = new List<int>(Discarded),

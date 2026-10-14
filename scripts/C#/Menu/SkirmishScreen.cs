@@ -40,6 +40,7 @@ public partial class SkirmishScreen : Control
 	private GridContainer _seatGrid;
 	private Label _seatsLabel;
 	private CheckBox _openingDiscardCheckBox;
+	private OptionButton _aiDifficultyPicker;
 
 	/// <summary>
 	/// The factions the human will play. Everything not in here is a bot, so this one set is the whole
@@ -105,6 +106,12 @@ public partial class SkirmishScreen : Control
 		_seatGrid         = GetNode<GridContainer>("ButtonContainer/SeatGrid");
 		_seatsLabel       = GetNode<Label>("ButtonContainer/SeatsLabel");
 		_openingDiscardCheckBox = GetNode<CheckBox>("ButtonContainer/OpeningDiscardCheckBox");
+
+		// Item ids are the enum values, so the pick reads straight back as an AiDifficulty.
+		_aiDifficultyPicker = GetNode<OptionButton>("ButtonContainer/AiDifficultyOptionButton");
+		_aiDifficultyPicker.AddItem("AI: Normal", (int)AiDifficulty.Normal);
+		_aiDifficultyPicker.AddItem("AI: Hard", (int)AiDifficulty.Hard);
+		_aiDifficultyPicker.Select(_aiDifficultyPicker.GetItemIndex((int)GameManager.PendingAiDifficulty));
 
 		_seedInput           = GetNode<LineEdit>("ButtonContainer/SeedRow/SeedInput");
 		_randomizeSeedButton = GetNode<Button>("ButtonContainer/SeedRow/RandomizeSeedButton");
@@ -357,6 +364,7 @@ public partial class SkirmishScreen : Control
 		// box's value unconditionally is also what stops an override left over from a lobby session
 		// earlier in the same process from leaking into this game.
 		GameManager.PendingOpeningDiscard = _openingDiscardCheckBox.ButtonPressed;
+		GameManager.PendingAiDifficulty = (AiDifficulty)_aiDifficultyPicker.GetSelectedId();
 
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(BuildAssignments());
 
