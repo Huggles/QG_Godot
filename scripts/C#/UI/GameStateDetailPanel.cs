@@ -57,7 +57,7 @@ public partial class GameStateDetailPanel : PanelContainer
             return;
         }
 
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        foreach (Faction faction in StaticGameData.BoardFactions)
             AddFactionSection(faction);
     }
 

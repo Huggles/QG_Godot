@@ -35,30 +35,43 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
 
         vpTurnSummary.Faction = faction;
 
-        ScoreSupplyCountryVPs();
-        HandleStatusCardVictoryPoints();
+        ScoreSupplyCountryVPs(faction, vpTurnSummary);
+        HandleStatusCardVictoryPoints(faction, vpTurnSummary);
 
         await new ScorePointsChangeEvent(vpTurnSummary).Apply();
+
+        // The minor factions this faction acts for score in its Victory step, each on its own summary
+        // so the points land on the minor faction (and through it on the team). Skipped for one with no
+        // pieces left, which has nothing to score and would only add an empty line to the history.
+        foreach (Faction minor in StaticGameData.MinorsOf(faction))
+        {
+            if (FactionState.ForEnum(minor).OccupiedCountryIds.Count == 0) continue;
+
+            VPTurnSummary minorSummary = new VPTurnSummary(vpTurnSummary.TurnNumber, minor);
+            ScoreSupplyCountryVPs(minor, minorSummary);
+            HandleStatusCardVictoryPoints(minor, minorSummary);
+            await new ScorePointsChangeEvent(minorSummary).Apply();
+        }
     }
 
-    public void ScoreSupplyCountryVPs()
+    public void ScoreSupplyCountryVPs(Faction scoringFaction, VPTurnSummary summary)
     {
-        List<CountryState> occupiedCountries = CountryState.ForIds(FactionState.OccupiedCountryIds);
+        List<CountryState> occupiedCountries = CountryState.ForIds(FactionState.ForEnum(scoringFaction).OccupiedCountryIds);
         foreach (CountryState cs in occupiedCountries)
         {
             if (cs.IsSupply)
             {
                 int score = Math.Max(3 - cs.Units.Keys.Count, 1);
                 VPEntry vPEntry = VPEntry.ForCountry(score, $"supply star on {cs.StaticCountryData.Label}", cs.Id);
-                vpTurnSummary.AddScore(vPEntry);                
+                summary.AddScore(vPEntry);
             }
         }
     }
-    public void HandleStatusCardVictoryPoints()
+    public void HandleStatusCardVictoryPoints(Faction scoringFaction, VPTurnSummary summary)
     {
-        foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>().Where(m => m.Faction == Faction))
+        foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>().Where(m => m.Faction == scoringFaction))
         {
-            vpTurnSummary.AddScore(modifier.AddVictoryPoints(BoardState.Live));
+            summary.AddScore(modifier.AddVictoryPoints(BoardState.Live));
         }
     }
 

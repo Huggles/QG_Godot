@@ -19,7 +19,7 @@ public static class CliStateView
         StringBuilder sb = new();
         sb.AppendLine($"turn {flow.GameTurn}  round {flow.Round}  {flow.CurrentFaction} ({flow.CurrentFactionTeam})  step {flow.TurnStep}");
         sb.AppendLine($"hash {GameState.ComputeHash():X8}");
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        foreach (Faction faction in StaticGameData.BoardFactions)
         {
             DeckState deck = DeckState.ForFaction(faction);
             sb.AppendLine($"  {faction,-15} vp {FactionState.ForEnum(faction).Score,3}   " +
@@ -32,11 +32,11 @@ public static class CliStateView
 
     public static string Score()
     {
-        int axis = StaticGameData.FactionsForTeam(FactionTeam.AXIS).Sum(f => FactionState.ForEnum(f).Score);
-        int allies = StaticGameData.FactionsForTeam(FactionTeam.ALLIES).Sum(f => FactionState.ForEnum(f).Score);
+        int axis = StaticGameData.ScoreForTeam(FactionTeam.AXIS);
+        int allies = StaticGameData.ScoreForTeam(FactionTeam.ALLIES);
         StringBuilder sb = new();
         sb.AppendLine($"AXIS {axis}   ALLIES {allies}");
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        foreach (Faction faction in StaticGameData.BoardFactions)
             sb.AppendLine($"  {faction,-15} {FactionState.ForEnum(faction).Score}");
         return sb.ToString().TrimEnd();
     }
@@ -78,7 +78,7 @@ public static class CliStateView
         StringBuilder sb = new();
         sb.AppendLine($"[{country.Id}] {country.Label ?? country.Name}");
         sb.AppendLine($"  units:     {Occupants(country)}");
-        sb.AppendLine($"  full:      {country.IsCountryFull}  ({country.Units.Count}/3 factions)");
+        sb.AppendLine($"  full:      {country.IsCountryFull}  ({country.Units.Count}/{StaticGameData.MaxFactionsPerSpace} factions)");
         sb.AppendLine($"  neighbours: {string.Join(", ", country.ConnectedCountryStates.Select(n => n.Label ?? n.Name))}");
         return sb.ToString().TrimEnd();
     }

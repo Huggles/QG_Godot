@@ -155,7 +155,8 @@ public sealed partial class BoardState
         foreach (StraightState ss in live.StraightStates.OrderBy(s => s.Id))
             sb.Append($"S{ss.Id}:{ss.ControllingCountryId}|");
 
-        foreach (Faction faction in live.PlayableFactionStatesByFaction.Keys.OrderBy(f => (int)f))
+        // Board factions: a minor faction scores too. The base game has none, so its hash is unchanged.
+        foreach (Faction faction in StaticGameData.BoardFactions.OrderBy(f => (int)f))
         {
             FactionRecord fr = ForFaction(faction);
             sb.Append($"F{(int)faction}:{fr.Score}," +

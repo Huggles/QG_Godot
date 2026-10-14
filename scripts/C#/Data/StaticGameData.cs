@@ -34,6 +34,78 @@ public static partial class StaticGameData
     public static Faction FactionForTurn(int turnNumber) =>
         turnNumber > 0 ? PlayableFactions[(turnNumber - 1) % PlayableFactions.Count] : Faction.GERMANY;
     public static List<FactionData> FactionDataList { get; set; } = new();
+
+    // ── Minor factions ──────────────────────────────────────────────────────
+    //
+    // A minor faction (France, China) is one whose FactionData names a PatronFaction. It has pieces on
+    // the board but no seat, no deck and no turn: its patron checks its supply, scores it and answers
+    // its prompts. Which ones exist is decided by the faction data the session loaded, so the base game
+    // has none and every list below collapses to exactly what it was before minor factions existed.
+
+    private static List<FactionData> _minorFactionsSource;
+    private static List<Faction> _minorFactions = new();
+    private static List<Faction> _boardFactions = PlayableFactions;
+
+    /// <summary>The minor factions in this session, in faction-data order (empty for the base game).</summary>
+    public static List<Faction> MinorFactions
+    {
+        get
+        {
+            RefreshFactionLists();
+            return _minorFactions;
+        }
+    }
+
+    /// <summary>
+    /// Every faction with pieces on the board this session: <see cref="PlayableFactions"/>, then the
+    /// minor factions. For anything about the board (supply, buildability, scoring, the sync hash);
+    /// turn order and everything about cards and seats stay on PlayableFactions.
+    /// </summary>
+    public static List<Faction> BoardFactions
+    {
+        get
+        {
+            RefreshFactionLists();
+            return _boardFactions;
+        }
+    }
+
+    // Keyed on the list instance: LoadDataFiles replaces FactionDataList wholesale for every session.
+    // Rebuilt into fresh lists rather than mutated, because the calculator iterates these in parallel.
+    private static void RefreshFactionLists()
+    {
+        List<FactionData> source = FactionDataList;
+        if (ReferenceEquals(source, _minorFactionsSource)) return;
+
+        List<Faction> minors = source.Where(data => data.IsMinor).Select(data => data.Faction).ToList();
+        _boardFactions = minors.Count == 0 ? PlayableFactions : PlayableFactions.Concat(minors).ToList();
+        _minorFactions = minors;
+        _minorFactionsSource = source;
+    }
+
+    /// <summary>The playable faction acting for <paramref name="faction"/>, or NONE if it is not a minor faction.</summary>
+    public static Faction PatronOf(Faction faction)
+        => FactionDataMap.GetValueOrDefault(faction) is { IsMinor: true } data ? data.Patron : Faction.NONE;
+
+    /// <summary>The minor factions <paramref name="patron"/> acts for. Empty for the base game.</summary>
+    public static List<Faction> MinorsOf(Faction patron)
+        => MinorFactions.Count == 0 ? new List<Faction>() : MinorFactions.Where(minor => PatronOf(minor) == patron).ToList();
+
+    /// <summary>The faction that answers for <paramref name="faction"/>: its patron if it is a minor faction, else itself.</summary>
+    public static Faction ControllerOf(Faction faction)
+        => PatronOf(faction) is var patron && patron != Faction.NONE ? patron : faction;
+
+    /// <summary>Every faction of <paramref name="team"/> with pieces on the board, minor factions included.</summary>
+    public static List<Faction> BoardFactionsForTeam(FactionTeam team)
+        => BoardFactions.Where(faction => FactionTeamForFaction(faction) == team).ToList();
+
+    /// <summary>
+    /// How many factions can share one space. A space never holds both teams (CountryState.CanRecruit),
+    /// so it is the size of the largest team on the board: 3 in the base game, 5 when France and China
+    /// join the Allies.
+    /// </summary>
+    public static int MaxFactionsPerSpace
+        => Math.Max(BoardFactionsForTeam(FactionTeam.AXIS).Count, BoardFactionsForTeam(FactionTeam.ALLIES).Count);
     public static List<CardData> CardDataList { get; set; } = new();
     public static List<DeckData> DeckDataList { get; set; } = new();
     public static List<CountryData> CountryDataList { get; set; } = new();
@@ -210,7 +282,7 @@ public static partial class StaticGameData
         {
             Faction.GERMANY or Faction.JAPAN or Faction.ITALY => FactionTeam.AXIS,
             Faction.UNITED_KINGDOM or Faction.SOVIET or Faction.UNITED_STATES => FactionTeam.ALLIES,
-            _ => FactionTeam.NONE
+            _ => MinorFactionTeam(faction)
         };
     }
     public static FactionTeam OpponentFactionTeamForFaction(Faction faction)
@@ -219,9 +291,14 @@ public static partial class StaticGameData
         {
             Faction.UNITED_KINGDOM or Faction.SOVIET or Faction.UNITED_STATES => FactionTeam.AXIS,
             Faction.GERMANY or Faction.JAPAN or Faction.ITALY => FactionTeam.ALLIES,
-            _ => FactionTeam.NONE
+            _ => OpponentTeam(MinorFactionTeam(faction))
         };
     }
+
+    /// <summary>A minor faction's team, from its faction data. NONE for anything else (NONE, ALL).</summary>
+    private static FactionTeam MinorFactionTeam(Faction faction)
+        => FactionDataMap.GetValueOrDefault(faction) is { IsMinor: true } data
+           && Enum.TryParse(data.Team, out FactionTeam team) ? team : FactionTeam.NONE;
     /// <summary>
     /// The other of the two playing teams. NONE and ALL have no opposite and map to themselves, so a
     /// caller alternating between the teams of a reaction window terminates rather than ping-ponging
@@ -266,7 +343,8 @@ public static partial class StaticGameData
     public static int ScoreForTeam(FactionTeam team)
     {
         if (MultiplayerSession.Instance?.GameState == null) return 0;
-        return FactionsForTeam(team).Sum(faction => FactionState.ForEnum(faction)?.Score ?? 0);
+        // Board factions, not FactionsForTeam: a minor faction's points count for its team.
+        return BoardFactionsForTeam(team).Sum(faction => FactionState.ForEnum(faction)?.Score ?? 0);
     }
 
    

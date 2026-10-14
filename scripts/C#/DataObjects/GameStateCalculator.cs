@@ -464,7 +464,8 @@ public class GameStateCalculator
         BoardState board = situation.Board;
         if (scope.HasFlag(RecalcScope.Board))
         {
-            System.Threading.Tasks.Parallel.ForEach(StaticGameData.PlayableFactions,
+            // Board factions, minor ones included: a French Army needs supply and build tags too.
+            System.Threading.Tasks.Parallel.ForEach(StaticGameData.BoardFactions,
                 faction => CalculateBoardTagsForFaction(board, faction));
 
             // Straight control writes global (non-faction-scoped) tags — run once after parallel

@@ -42,38 +42,44 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
         // Recalculate supply for all units
         GameStateCalculator.CalculateAll();
 
+        // The faction whose turn it is, then the minor factions it acts for: France and China trace
+        // their own supply, but their patron's Supply step is when their unsupplied pieces go. One
+        // calculation covers them all — no faction traces supply through another's pieces, so removing
+        // one faction's units cannot change another's answer.
+        bool removedAny = false;
+        foreach (Faction checkedFaction in StaticGameData.MinorsOf(this.faction).Prepend(this.faction))
+            removedAny |= await RemoveOutOfSupplyUnits(checkedFaction);
+
+        // Give player time to see the changes
+        await Task.Delay(removedAny ? GameSettings.DurationMedium : GameSettings.DurationShort);
+    }
+
+    /// <summary>Remove <paramref name="checkedFaction"/>'s out-of-supply units. True if there were any.</summary>
+    private async Task<bool> RemoveOutOfSupplyUnits(Faction checkedFaction)
+    {
         // Get active units for this faction and filter for those out of supply
-        List<int> activeUnitIds = GameAPI.ActiveUnitsForFaction(this.faction);
+        List<int> activeUnitIds = GameAPI.ActiveUnitsForFaction(checkedFaction);
         List<UnitState> outOfSupplyUnits = UnitState.ForIds(activeUnitIds)
             .Where(unit => !unit.InSupply)
             .ToList();
 
-        // Remove out-of-supply units
-        if (outOfSupplyUnits.Count > 0)
+        if (outOfSupplyUnits.Count == 0) return false;
+
+        string message = $"{checkedFaction.WithPlayer()} loses {outOfSupplyUnits.Count} unit(s) to lack of supply";
+        await new ShowActionLabelPresentationEvent(checkedFaction, message).Apply();
+        DebugUtilities.PrintPeer($"Removing {outOfSupplyUnits.Count} out-of-supply units for {checkedFaction}");
+
+        // Create removal events for each out-of-supply unit
+        foreach (var unit in outOfSupplyUnits)
         {
-            string message = $"{this.faction.WithPlayer()} loses {outOfSupplyUnits.Count} unit(s) to lack of supply";
-            await new ShowActionLabelPresentationEvent(this.faction, message).Apply();
-            DebugUtilities.PrintPeer($"Removing {outOfSupplyUnits.Count} out-of-supply units for {this.faction}");
-            
-            // Create removal events for each out-of-supply unit
-            foreach (var unit in outOfSupplyUnits)
-            {
-                RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(
-                    unit.Faction, 
-                    unit.Id, 
-                    UnitRemovalReason.SUPPLY
-                );
-                DebugUtilities.PrintPeer($"  - Removing {unit.Faction} {unit.Type} from {CountryState.ForId(unit.CountryId).Label}");
-                await removeEvent.Apply();
-            }
-            
-            // Give player time to see the changes
-            await Task.Delay(GameSettings.DurationMedium);
+            RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(
+                unit.Faction,
+                unit.Id,
+                UnitRemovalReason.SUPPLY
+            );
+            DebugUtilities.PrintPeer($"  - Removing {unit.Faction} {unit.Type} from {CountryState.ForId(unit.CountryId).Label}");
+            await removeEvent.Apply();
         }
-        else
-        {
-            // No units out of supply
-            await Task.Delay(GameSettings.DurationShort);
-        }
+        return true;
     }
 }

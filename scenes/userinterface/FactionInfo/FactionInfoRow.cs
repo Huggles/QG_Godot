@@ -112,6 +112,11 @@ public partial class FactionInfoRow : Control
 		ReactionSkipToggleButton.Faction = Faction;
 		ReactionSkipToggleButton.Refresh();
 
+		// A minor faction (France, China) has pieces and points but no cards: keep the card widgets off.
+		bool hasCards = !FactionState.FactionData.IsMinor;
+		DiscardDeckButton.Visible = hasCards;
+		PlayedCardsButton.Visible = hasCards;
+
 		SetScore(FactionState.Score);
 		SetUnitCounts();
 		SetCardCounts();
@@ -217,11 +222,12 @@ public partial class FactionInfoRow : Control
 	}
 	private void SetModulation()
 	{        
-		bool isLocal = PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction);
+		// A minor faction's row lights up with its patron's: whoever plays the patron acts for it.
+		bool isLocal = PlayerFactionRegistry.GetLocalPlayerFactions().Contains(StaticGameData.ControllerOf(Faction));
 		// Re-tested here rather than once in LoadUI so a rejoin or a faction reassignment is picked up.
 		// A setting on a faction this peer does not control would do nothing, and hiding it leaves the
-		// other five rows exactly as they were.
-		ReactionSkipToggleButton.Visible = isLocal;
+		// other five rows exactly as they were. A minor faction has no reactions to skip.
+		ReactionSkipToggleButton.Visible = isLocal && !FactionState.FactionData.IsMinor;
 
 		if (isLocal)
 		{            

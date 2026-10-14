@@ -1,0 +1,30 @@
+[
+  {
+    "UniqueName": "FRANCE",
+    "Index": 8,
+    "Label": "France",
+    "AdjectiveLabel": "French",
+    "ColorString": "#1f4fa8",
+    "ColorStringText": "#ffffff",
+    "Team": "ALLIES",
+    "Homespace": "WESTERN_EUROPE",
+    "PatronFaction": "UNITED_KINGDOM",
+    "FlagPath": "res://expansions/total_war/assets/factions/france/France_Flag.png",
+    "NumberOfArmyUnits": 3,
+    "NumberOfNavyUnits": 2
+  },
+  {
+    "UniqueName": "CHINA",
+    "Index": 9,
+    "Label": "China",
+    "AdjectiveLabel": "Chinese",
+    "ColorString": "#7b4a22",
+    "ColorStringText": "#ffffff",
+    "Team": "ALLIES",
+    "Homespace": "CHINA",
+    "PatronFaction": "UNITED_STATES",
+    "FlagPath": "res://expansions/total_war/assets/factions/china/China_Flag.png",
+    "NumberOfArmyUnits": 2,
+    "NumberOfNavyUnits": 0
+  }
+]

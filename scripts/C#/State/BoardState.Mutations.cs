@@ -56,11 +56,12 @@ public sealed partial class BoardState
         // Fullness cannot block a rebuild in place: the slot being filled is the faction's own. The two
         // reasons stay distinct — a full country and a target that stopped being legal have different
         // causes, and conflating them sends a reader of the log looking in the wrong place.
-        if ((units.Count == 3 && !rebuildInPlace) || !deployable)
+        int capacity = StaticGameData.MaxFactionsPerSpace;
+        if ((units.Count >= capacity && !rebuildInPlace) || !deployable)
         {
             string reason = !deployable
                 ? $"Country is not {(deployType == DeployType.BUILD ? "buildable" : "recruitable")} for {faction}"
-                : $"Country is full ({units.Count}/3 factions: {string.Join(", ", units.Keys)})";
+                : $"Country is full ({units.Count}/{capacity} factions: {string.Join(", ", units.Keys)})";
             string exceptionMessage = $"Cannot {deployType} unit of type {unitType} for faction {faction} to country {countryState.StaticCountryData.Label}. {reason}.";
             if (IsLive) DebugUtilities.PrintPeer(exceptionMessage);
             throw new GameAPI.GameAPIException(exceptionMessage);

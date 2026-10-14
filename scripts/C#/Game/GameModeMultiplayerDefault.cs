@@ -48,6 +48,8 @@ public partial class GameModeMultiplayerDefault : IGameMode
         using var factionDataFile = FileAccess.Open(FACTIONS_DATA_PATH, FileAccess.ModeFlags.Read);
         string factionDataString = factionDataFile.GetAsText();
         List<FactionData> factionDataArray      = JsonSerializer.Deserialize<List<FactionData>>(factionDataString);
+        // After the base rows, so the base factions' units are numbered exactly as without expansions.
+        ExpansionContent.AddFactions(factionDataArray);
         foreach (FactionData factionData in factionDataArray) {
             factionData.LoadTextures();
         }
@@ -83,8 +85,10 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 FactionState factionState = new FactionState(factionData);
                 gameState.FactionStates.Add(factionState);
             }
-            else
+            else if (faction is Faction.NONE or Faction.ALL)
             {
+                // Placeholders for the two sentinels, which several lookups expect to resolve. A minor
+                // faction this session has no data for is simply not in the game.
                 FactionState factionState = new FactionState(faction);
                 gameState.FactionStates.Add(factionState);
             }
@@ -108,7 +112,8 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 {
 
                     CardData cardData  = StaticGameData.CardDataByName[$"{deckCardData.CardName}"];
-                     Type cardType = Type.GetType(cardData.ExecutionClass);
+                    // TypeRegistry, not Type.GetType: an expansion's card classes live in its own assembly.
+                    Type cardType = TypeRegistry.Resolve(cardData.ExecutionClass);
                     if(cardType == null) {            
                         throw new Exception($"ExecutionClass not found for {cardData.UniqueName}, {cardData.ExecutionClass}");
                     }
@@ -245,6 +250,8 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
         InitialGameStateData initialStateData = ReadScenario();
         ApplyScenarioConfiguration(initialStateData);
+        // Fresh games only: a restore replays these deployments from its log like everything else.
+        ExpansionContent.AddSetup(initialStateData);
 
         GameStateCalculator.CalculateAll();
         GameStateCalculator.Enabled = false;

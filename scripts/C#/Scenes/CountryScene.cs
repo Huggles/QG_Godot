@@ -12,9 +12,12 @@ public partial class CountryScene : Control
 	public CountryData StaticCountryData => CountryState.StaticCountryData;
 	public StraightState StraightState => CountryState.StraightState;
 
-	public UnitScene UnitScene1;
-	public UnitScene UnitScene2;
-	public UnitScene UnitScene3;
+	/// <summary>
+	/// The unit drawn in each slot; index 0 is slot 1. Five, because a space can hold one piece per
+	/// faction of a team and the Allies have five once France and China join; the base game never gets
+	/// past three, which are the ones the country data positions (UnitTransformData.Position1..3).
+	/// </summary>
+	private readonly UnitScene[] _unitSlots = new UnitScene[5];
 
 	public Control UnitContainerNode => GetNode<Control>("UnitContainer");
 	public TextureRect SupplyStarSprite => GetNode<TextureRect>("SupplyStarSprite");
@@ -388,7 +391,7 @@ public partial class CountryScene : Control
 	public List<Faction> OccupyingUnitFactions()
 	{
 		List<Faction> factions = new List<Faction>();
-		foreach (UnitScene unitScene in new[] { UnitScene1, UnitScene2, UnitScene3 })
+		foreach (UnitScene unitScene in _unitSlots)
 		{
 			if (unitScene == null) continue;
 			// Two armies of the same faction are one stripe, not two — the overlay answers "who is here",
@@ -468,22 +471,34 @@ public partial class CountryScene : Control
 		UnitTransformData transformData = StaticCountryData.UnitTransformData;
 		if (transformData == null) return;
 
-		var key = $"Position{position}";
-		TransformData transform = (TransformData)transformData.GetValue(key);
-
 		// Slot offsets are measured from the middle of the country. UnitContainer used to be a Node2D
 		// sitting on that middle; as a Control its origin is the country's top-left corner, so the
 		// half-size has to be added back or every unit is drawn a corner away from its slot.
-		unitScene.Position = (TextureSize / 2f) + new Vector2(transform.XPosition, transform.YPosition);
+		unitScene.Position = (TextureSize / 2f) + SlotOffset(transformData, position);
 	}
 
-	private int GetUnitPosition(UnitScene unitScene)
+	/// <summary>
+	/// Where slot <paramref name="position"/> sits, from the middle of the country. Slots 1-3 come from
+	/// the country data. Slots 4 and 5 continue the row slot 3 sits on, one slot-1-to-slot-2 spacing
+	/// either side of it, so they follow each country's own layout without any new data.
+	/// </summary>
+	private static Vector2 SlotOffset(UnitTransformData data, int position)
 	{
-		if (unitScene == UnitScene1) return 1;
-		if (unitScene == UnitScene2) return 2;
-		if (unitScene == UnitScene3) return 3;
-		return -1;
+		static Vector2 Of(TransformData t) => new(t.XPosition, t.YPosition);
+
+		Vector2 spacing = Of(data.Position1) - Of(data.Position2);
+		return position switch
+		{
+			1 => Of(data.Position1),
+			2 => Of(data.Position2),
+			3 => Of(data.Position3),
+			4 => Of(data.Position3) + spacing,
+			_ => Of(data.Position3) - spacing,
+		};
 	}
+
+	/// <summary>The 1-based slot <paramref name="unitScene"/> holds here, or -1.</summary>
+	private int GetUnitPosition(UnitScene unitScene) => Array.IndexOf(_unitSlots, unitScene) is var index && index >= 0 ? index + 1 : -1;
 
 	private int SetUnitOnAvailablePosition(UnitScene unitScene)
 	{
@@ -493,22 +508,11 @@ public partial class CountryScene : Control
 		int existing = GetUnitPosition(unitScene);
 		if (existing > 0) return existing;
 
-		if (UnitScene1 == null)
-		{
-			UnitScene1 = unitScene;
-			return 1;
-		}
-		if (UnitScene2 == null)
-		{
-			UnitScene2 = unitScene;
-			return 2;
-		}
-		if (UnitScene3 == null)
-		{
-			UnitScene3 = unitScene;
-			return 3;
-		}
-		return -1;
+		int free = Array.IndexOf(_unitSlots, null);
+		if (free < 0) return -1;
+
+		_unitSlots[free] = unitScene;
+		return free + 1;
 	}
 
 	public void RemoveUnit(UnitScene unitScene)
@@ -525,12 +529,7 @@ public partial class CountryScene : Control
 		// transform back to Unit.tscn's, undoing the removal tween. AddUnit shows it again.
 		unitScene.ResetToPoolState();
 
-		switch (position)
-		{
-			case 1: UnitScene1 = null; break;
-			case 2: UnitScene2 = null; break;
-			case 3: UnitScene3 = null; break;
-		}
+		_unitSlots[position - 1] = null;
 
 		// After the slot is cleared, not before: the departing faction must be gone from the palette.
 		UpdateOccupyingFactionColors();

@@ -43,7 +43,8 @@ public partial class CountryState : StateObject
     public bool IsSea => Type == CountryType.SEA;
 
     public bool IsCountryEmpty => Units.Count == 0;
-    public bool IsCountryFull => Units.Count == 3;
+    /// <summary>Every faction of the team holding it is here; see StaticGameData.MaxFactionsPerSpace.</summary>
+    public bool IsCountryFull => Units.Count >= StaticGameData.MaxFactionsPerSpace;
 
     public List<Faction> OccupyingFactions => Units.Keys.ToList();
 

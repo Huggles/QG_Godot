@@ -278,7 +278,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             if (OpeningDiscardEnabled)
                 await OpeningDiscard.Run(StaticGameData.OpeningDiscardCount);
 
-            foreach (Faction faction in StaticGameData.PlayableFactions)
+            foreach (Faction faction in StaticGameData.BoardFactions)
             {
                 VictoryPointSummaries[faction] = new List<VPTurnSummary>();
             }
@@ -351,7 +351,8 @@ public partial class GameFlow : SingletonNode<GameFlow>
             EndReason = reason
         };
 
-        foreach (Faction faction in StaticGameData.PlayableFactions)
+        // Board factions: a minor faction's points are part of its team's total, so they get a row too.
+        foreach (Faction faction in StaticGameData.BoardFactions)
         {
             FactionState factionState = FactionState.ForEnum(faction);
             List<VPTurnSummary> summaries = VictoryPointSummaries.GetValueOrDefault(faction, new List<VPTurnSummary>());

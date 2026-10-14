@@ -15,7 +15,23 @@ public partial class FactionData : DataObject
     public int NumberOfArmyUnits { get; set; }
     public int NumberOfNavyUnits { get; set; }
 
+    /// <summary>
+    /// Set only on a minor faction: the playable faction that acts for it (checks its supply, scores it,
+    /// answers its prompts). A minor faction has pieces on the board but no seat, no deck and no turn.
+    /// </summary>
+    public string PatronFaction { get; set; }
+
+    /// <summary>Optional. "French", for rules text; the six base factions use FactionAdjactiveLabels.</summary>
+    public string AdjectiveLabel { get; set; }
+
+    /// <summary>Optional res:// path of the flag; the six base factions use FactionFlags.</summary>
+    public string FlagPath { get; set; }
+
     public Faction Faction => (Faction)Index;
+
+    [JsonIgnore] public Faction Patron => Enum.TryParse(PatronFaction, out Faction patron) ? patron : Faction.NONE;
+
+    [JsonIgnore] public bool IsMinor => Patron != Faction.NONE;
 
     [JsonIgnore] public Color FactionColor => Color.FromString(ColorString, new Color(1, 1, 1, 1));
 
@@ -38,9 +54,11 @@ public partial class FactionData : DataObject
         }
     }
 
-    [JsonIgnore] public Texture2D FlagTexture => FactionFlags[Faction];
+    [JsonIgnore] public Texture2D FlagTexture
+        => FlagPath == null ? FactionFlags[Faction] : _flagTexture ??= GD.Load<Texture2D>(FlagPath);
+    private Texture2D _flagTexture;
 
-    public string FactionAdjactiveLabel => FactionAdjactiveLabels[Faction];
+    public string FactionAdjactiveLabel => AdjectiveLabel ?? FactionAdjactiveLabels[Faction];
 
     public static Dictionary<Faction, string> FactionAdjactiveLabels => new Dictionary<Faction, string>
             {
@@ -85,6 +103,8 @@ public partial class FactionData : DataObject
     {
         // A headless/dedicated server has no rendering and does not import textures — skip entirely.
         if (GameContext.IsHeadless) return;
+        // A minor faction has no deck, so no card art either.
+        if (IsMinor) return;
         LoadCardTextures();
     }
     private void LoadCardTextures()

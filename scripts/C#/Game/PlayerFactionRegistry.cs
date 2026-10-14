@@ -173,7 +173,10 @@ public static class PlayerFactionRegistry
     /// </summary>
     public static int GetPeerIdForFaction(Faction faction)
     {
-        if (_factionToPeerId.TryGetValue(faction, out int peerId))
+        // A minor faction (France, China) has no seat of its own: its patron's player answers for it.
+        // Resolved here, in the three lookups that read the map, so every query built on them — the
+        // answering peer, the PlayerScene, CanPeerControlFaction — follows without knowing about it.
+        if (_factionToPeerId.TryGetValue(StaticGameData.ControllerOf(faction), out int peerId))
         {
             return peerId;
         }
@@ -192,7 +195,7 @@ public static class PlayerFactionRegistry
     /// </summary>
     public static string GetDisplayNameForFaction(Faction faction)
     {
-        if (!_factionToPeerId.TryGetValue(faction, out int peerId)) return null;
+        if (!_factionToPeerId.TryGetValue(StaticGameData.ControllerOf(faction), out int peerId)) return null;
         if (!_peerIdToPlayerScene.TryGetValue(peerId, out PlayerScene playerScene)) return null;
         if (!GodotObject.IsInstanceValid(playerScene)) return null;
         return string.IsNullOrWhiteSpace(playerScene.DisplayName) ? null : playerScene.DisplayName;
@@ -289,7 +292,7 @@ public static class PlayerFactionRegistry
     /// wrongly handing a person's seat to a bot is far worse than wrongly showing a bot a chime.
     /// </summary>
     public static bool IsFactionAi(Faction faction)
-        => _factionToPeerId.TryGetValue(faction, out int peerId) && IsAiSeatId(peerId);
+        => _factionToPeerId.TryGetValue(StaticGameData.ControllerOf(faction), out int peerId) && IsAiSeatId(peerId);
 
     /// <summary>
     /// The peer that will actually ANSWER for this faction — as opposed to

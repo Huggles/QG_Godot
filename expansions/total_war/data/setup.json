@@ -1,0 +1,6 @@
+{
+  "factions": {
+    "FRANCE": { "unitDeployments": [ { "countryName": "WESTERN_EUROPE" } ] },
+    "CHINA":  { "unitDeployments": [ { "countryName": "CHINA" } ] }
+  }
+}

@@ -86,8 +86,8 @@ public partial class FactionsContainer : Control
 
         FactionInfoNodes.Clear();
 
-        // Only show factions controlled by the local player
-        List<Faction> playerFactions = StaticGameData.PlayableFactions;
+        // Every faction on the board, minor factions (France, China) after the six that take turns.
+        List<Faction> playerFactions = StaticGameData.BoardFactions;
         
         // If no factions assigned yet, don't show any rows
         if (playerFactions.Count == 0)
