@@ -18,6 +18,9 @@ public static class GameOptions
 
     public static bool IsExpansionEnabled(string id) => EnabledExpansions.Contains(id);
 
+    /// <summary>What those expansions add to the rules, e.g. extra turn steps. Empty for the base game.</summary>
+    public static RuleSet Rules { get; private set; } = new();
+
     /// <summary>
     /// Fixes this session's expansions. Throws, naming what is missing, when this install cannot play one
     /// of them. The menus refuse to start such a game, so reaching this means a peer the lobby could not
@@ -31,6 +34,7 @@ public static class GameOptions
             throw new InvalidOperationException($"This game is played with {ExpansionIds.Describe(ids)}, which cannot be played here: {string.Join("; ", missing)}");
 
         EnabledExpansions = ids;
+        Rules = RuleSet.For(ids);
         DebugUtilities.PrintPeer($"Session expansions: {ExpansionIds.Describe(ids)}");
     }
 }

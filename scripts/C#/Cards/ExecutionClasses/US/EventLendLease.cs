@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 
@@ -31,6 +32,8 @@ public partial class EventLendLease : EventCardLogic
                 var cardResp = await new InputRequest.HandCardPlayRequestHandler(_selectedFaction)
                 {
                     TargetCardIds = DeckState.ForFaction(_selectedFaction).HandCardIds
+                        .Where(id => CardState.ForId(id).CardData.CardType.IsPlayedFromHand())
+                        .ToList()
                 }.BroadCast();
 
                 // Nothing, not StepSkippedException: an ally who declines the gift still gets the

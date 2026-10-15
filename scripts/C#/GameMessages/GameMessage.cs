@@ -182,6 +182,7 @@ public abstract partial class GameMessage : GodotObject
             RegisterBulletinCardChangeEventDto d => new RegisterBulletinCardChangeEvent(d.TargetFaction, d.CardId, d.MutatorClassName, d.FromRound, d.ToRound),
             DeployAirForceChangeEventDto d      => new DeployAirForceChangeEvent(d.TriggeringFaction, d.CountryId),
             MoveAirForceChangeEventDto d        => new MoveAirForceChangeEvent(d.TriggeringFaction, d.UnitId, d.FromCountryId, d.ToCountryId, d.Reason),
+            AirSuperiorityChangeEventDto d      => new AirSuperiorityChangeEvent(d.TriggeringFaction, d.CountryId),
 
             // ── Derived-state delivery ───────────────────────────────────────
             RecalculateTagsMessageDto d     => new RecalculateTagsMessage(d.Snapshot),

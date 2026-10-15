@@ -124,6 +124,12 @@ public partial class FactionData : DataObject
             {
                 texturePath = String.Format(CardTexturePath, factionName, factionNameCapitalized, "CardBack");
             }
+            else if (!cardType.IsPlayedFromHand())
+            {
+                // Expansion card types: their art ships with the expansion, and a session without it has none of these cards.
+                texturePath = ContentPaths.Resolve($"factions/{factionName}/cards/{factionNameCapitalized}_{cardType.ToString().Capitalize().Replace(" ", "")}.png");
+                if (!ResourceLoader.Exists(texturePath)) continue;
+            }
             else
             {
                 texturePath = String.Format(CardTexturePath, factionName, factionNameCapitalized, cardType.ToString().Capitalize().Replace(" ", ""));

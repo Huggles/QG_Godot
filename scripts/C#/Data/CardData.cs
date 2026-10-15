@@ -26,6 +26,8 @@ public partial class CardData : DataObject
                 case "RESPONSE": return CardType.RESPONSE;
                 case "EVENT": return CardType.EVENT;
                 case "EW": return CardType.ECONOMIC_WARFARE;
+                case "AIR_POWER": return CardType.AIR_POWER;
+                case "BOLSTER": return CardType.BOLSTER;
                 default: return CardType.NONE;
             }
         }

@@ -309,6 +309,9 @@ public sealed class CliCommands
 								 RequireInt(named, "unit"),
 								 RequireCountry(named, "country"),
 								 ParseEnum(named.GetValueOrDefault("reason"), AirForceMoveReason.MARSHAL)),
+			"airsuperiority" => new AirSuperiorityChangeEvent(
+								 RequireFaction(named, "faction"),
+								 RequireCountry(named, "country")),
 			"drawcards"   => new DrawCardsChangeEvent(
 								 RequireFaction(named, "faction"),
 								 RequireFaction(named, "target", fallbackKey: "faction"),
@@ -325,7 +328,7 @@ public sealed class CliCommands
 		if (changeEvent == null)
 		{
 			_out.Error($"unknown effect '{effect}'. Known: deployUnit, removeUnit, battle, battleUnit, " +
-					   "deployAirForce, moveAirForce, drawCards, playCard, recycleCard");
+					   "deployAirForce, moveAirForce, airSuperiority, drawCards, playCard, recycleCard");
 			return;
 		}
 
@@ -485,6 +488,7 @@ public sealed class CliCommands
 		"INJECT   api deployUnit --faction F --country C [--deploy RECRUIT]",
 		"         api removeUnit --faction F --unit N | api battle --faction F --country C",
 		"         api deployAirForce --faction F --country C | api moveAirForce --faction F --unit N --country C",
+		"         api airSuperiority --faction F --country C",
 		"         api drawCards --faction F --n N | api playCard --card <name|id>",
 		"         api recycleCard --faction F --card <name|id> [--destination ShuffleIntoDeck]",
 		"         (api = reactions offered;  force = same args, applied directly, no reactions)",

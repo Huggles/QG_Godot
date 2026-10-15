@@ -1,0 +1,11 @@
+[
+  {
+    "UniqueName": "AirPower",
+    "Number": "AP",
+    "Type": "AIR_POWER",
+    "ExecutionClass": "AirPower",
+    "Label": "Air Power",
+    "Text": "Discard in your Air step to deploy an Air Force or to use Air Superiority.",
+    "MultipleActivationsPerTurn": false
+  }
+]

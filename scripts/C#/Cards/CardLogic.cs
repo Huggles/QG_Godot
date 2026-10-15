@@ -175,6 +175,10 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
         if ((IsActivationFinished && !situation.Rearmed) || !TriggerConditionsMet(situation))
             return false;
 
+        // An Air Power or Bolster card in hand is never the card played; a card with no steps would otherwise pass below.
+        if (!board.IsPlayed(CardState) && !CardData.CardType.IsPlayedFromHand())
+            return false;
+
         if (IsTableCardInHandOn(board))
         {
             // Playing it onto the table is a Play-step action, never a reaction from hand.

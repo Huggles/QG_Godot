@@ -27,6 +27,23 @@ public static class ExpansionContent
     /// </summary>
     public const string SetupFile = "setup.json";
 
+    /// <summary>Card definitions, in the shape of QGData_Cards_V2.json.</summary>
+    public const string CardsFile = "cards.json";
+
+    /// <summary>
+    /// Cards added to factions' decks: <c>[{ "FactionIndex": 1, "Add": [{ "CardName": "AirPower", "Number": 3 }] }]</c>.
+    /// They are numbered after every base card, so the base cards keep their ids.
+    /// </summary>
+    public const string DecksFile = "decks.json";
+
+    /// <summary>One faction's row in <see cref="DecksFile"/>.</summary>
+    public sealed class DeckAddition
+    {
+        public int FactionIndex { get; set; } = -1;
+        public List<DeckCardData> Add { get; set; } = new();
+        public Faction Faction => (Faction)FactionIndex;
+    }
+
     /// <summary>
     /// <paramref name="fileName"/> from each enabled expansion that ships one, deserialized, with the id
     /// of the expansion it came from. Throws on a file that does not parse: an expansion with broken data
@@ -90,6 +107,22 @@ public static class ExpansionContent
 
             property.SetValue(faction, field.Value.Deserialize(property.PropertyType));
         }
+    }
+
+    /// <summary>Appends the enabled expansions' card definitions. See <see cref="CardsFile"/>.</summary>
+    public static void AddCards(List<CardData> cards)
+    {
+        foreach ((string _, List<CardData> added) in Read<List<CardData>>(CardsFile))
+            cards.AddRange(added);
+    }
+
+    /// <summary>The enabled expansions' deck additions, in GameOptions order. See <see cref="DecksFile"/>.</summary>
+    public static List<DeckAddition> DeckAdditions()
+    {
+        List<DeckAddition> additions = new();
+        foreach ((string _, List<DeckAddition> rows) in Read<List<DeckAddition>>(DecksFile))
+            additions.AddRange(rows);
+        return additions;
     }
 
     /// <summary>Adds the enabled expansions' faction setups to a scenario, leaving the scenario's own alone.</summary>

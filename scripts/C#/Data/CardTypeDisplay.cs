@@ -20,6 +20,8 @@ public static class CardTypeDisplay
         CardType.RESPONSE          => "Response",
         CardType.STATUS            => "Status",
         CardType.ECONOMIC_WARFARE  => "Economic Warfare",
+        CardType.AIR_POWER         => "Air Power",
+        CardType.BOLSTER           => "Bolster",
         _                          => cardType.ToString(),
     };
 }

@@ -59,6 +59,11 @@ public class DeployAirForceChangeEventDto : ChangeEventDto
     public int CountryId { get; set; }
 }
 
+public class AirSuperiorityChangeEventDto : ChangeEventDto
+{
+    public int CountryId { get; set; }
+}
+
 public class MoveAirForceChangeEventDto : ChangeEventDto
 {
     public int                UnitId        { get; set; }

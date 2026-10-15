@@ -106,7 +106,12 @@ public static partial class StaticGameData
     /// </summary>
     public static int MaxFactionsPerSpace
         => Math.Max(BoardFactionsForTeam(FactionTeam.AXIS).Count, BoardFactionsForTeam(FactionTeam.ALLIES).Count);
-    public static List<CardData> CardDataList { get; set; } = new();
+    /// <summary>Setting it drops the lookups built from it: a session with an expansion's cards follows one without them in the same process.</summary>
+    public static List<CardData> CardDataList
+    {
+        get;
+        set { field = value; _cardDataByName = null; _cardDataByNumber = null; }
+    } = new();
     public static List<DeckData> DeckDataList { get; set; } = new();
     public static List<CountryData> CountryDataList { get; set; } = new();
 

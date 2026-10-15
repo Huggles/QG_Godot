@@ -8,6 +8,11 @@ public sealed class TotalWarRules : IExpansionRules
 
     public void Register(ExpansionRegistrar registrar)
     {
-        // Nothing to contribute yet: the engine hooks Total War switches on arrive with M1 onwards.
+        // No messages of its own: the Air step uses core events and prompts.
+    }
+
+    public void Configure(RuleSet rules)
+    {
+        rules.AddTurnStep(TurnStep.AIR, after: TurnStep.PLAY_CARD, AirStep.Run);
     }
 }

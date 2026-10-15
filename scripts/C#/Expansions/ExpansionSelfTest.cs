@@ -99,6 +99,14 @@ public static class ExpansionSelfTest
             return string.Join(", ", expansion.Rules.Select(rules => rules.GetType().Name));
         });
 
+        check($"{id}: rules configure a session", () =>
+        {
+            RuleSet rules = RuleSet.For(new[] { id });
+            return rules.ExtraTurnSteps.Count == 0
+                ? "no extra turn steps"
+                : string.Join(", ", rules.ExtraTurnSteps.Select(extra => $"{extra.Step} after {extra.After}"));
+        });
+
         check($"{id}: messages round-trip", () =>
         {
             List<(Type DtoType, string Discriminator)> messages = GameMessageJson.RegisteredMessages(id);

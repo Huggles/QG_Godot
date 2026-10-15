@@ -16,6 +16,9 @@ public interface IExpansionRules
 
     /// <summary>Contribute this expansion's types to the engine. Runs before any game data is loaded.</summary>
     void Register(ExpansionRegistrar registrar);
+
+    /// <summary>Add this expansion's rules to a session it is enabled for. Runs on every peer, before any state is built.</summary>
+    void Configure(RuleSet rules) { }
 }
 
 /// <summary>What an expansion may add to the engine at boot. Handed to <see cref="IExpansionRules.Register"/>.</summary>

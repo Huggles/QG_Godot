@@ -182,15 +182,31 @@ public partial class GameFlow : SingletonNode<GameFlow>
     protected virtual List<GameTurnStep> BuildTurnSteps()
         => Program?.BuildTurnSteps(this) ?? DefaultTurnSteps();
 
-    protected List<GameTurnStep> DefaultTurnSteps() => new List<GameTurnStep> {
-        new GameTurnStep(TurnStep.START, StartTurnStep),
-        new GameTurnStep(TurnStep.PLAY_CARD, PlayCardStep),
-        new GameTurnStep(TurnStep.SUPPLY, SupplyStep),
-        new GameTurnStep(TurnStep.VICTORY_POINT, VictoryPointStep),
-        new GameTurnStep(TurnStep.DISCARD, DiscardStep),
-        new GameTurnStep(TurnStep.DRAW, DrawStep),
-        new GameTurnStep(TurnStep.END, StartNewTurn)
-    };
+    /// <summary>
+    /// The base steps plus any the session's RuleSet adds. From GameOptions rather than host state: every
+    /// peer builds this table and indexes it by the replicated counter, and a save stores that counter.
+    /// </summary>
+    protected List<GameTurnStep> DefaultTurnSteps()
+    {
+        List<GameTurnStep> steps = new List<GameTurnStep> {
+            new GameTurnStep(TurnStep.START, StartTurnStep),
+            new GameTurnStep(TurnStep.PLAY_CARD, PlayCardStep),
+            new GameTurnStep(TurnStep.SUPPLY, SupplyStep),
+            new GameTurnStep(TurnStep.VICTORY_POINT, VictoryPointStep),
+            new GameTurnStep(TurnStep.DISCARD, DiscardStep),
+            new GameTurnStep(TurnStep.DRAW, DrawStep),
+            new GameTurnStep(TurnStep.END, StartNewTurn)
+        };
+
+        foreach (ExtraTurnStep extra in GameOptions.Rules.ExtraTurnSteps)
+        {
+            int after = steps.FindIndex(step => step.TurnStep == extra.After);
+            if (after < 0 || extra.After == TurnStep.END)
+                throw new InvalidOperationException($"{extra.Step} is to follow {extra.After}, which is not a step it can follow");
+            steps.Insert(after + 1, new GameTurnStep(extra.Step, () => ExtraStep(extra)));
+        }
+        return steps;
+    }
 
     public InputRequest CurrentInputRequest { get; set; }
 
@@ -473,9 +489,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
         // resumed step's condition checks see current state.
         GameStateCalculator.CalculateAll();
 
-        // The branch is required, not defensive. The table has 7 entries and the dispatch indexes
-        // [counter - 1], so a failure during TurnStep.END (counter 7) would make TurnStepCounter++
-        // index [7] and throw ArgumentOutOfRangeException from inside the recovery path itself.
+        // The branch is required, not defensive. The dispatch indexes [counter - 1], so a failure during
+        // TurnStep.END (the last entry) would make TurnStepCounter++ index past the table and throw
+        // ArgumentOutOfRangeException from inside the recovery path itself.
         //
         // Re-running the LAST entry's handler rather than naming StartNewTurn: those are the same
         // thing for the default table, and stay the same thing for a program that supplies its own.
@@ -783,6 +799,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
             case TurnStep.VICTORY_POINT: await VictoryPointStepBody(); break;
             case TurnStep.DISCARD:       DiscardStepBody(); break;
             case TurnStep.DRAW:          DrawStepBody(); break;
+            case var _ when GameOptions.Rules.FindTurnStep(step) is { } extra:
+                await ExtraStepBody(extra);
+                break;
             default:
                 // TurnStep.END is StartNewTurn, which opens no step and raises no prompt, so it can
                 // never be what a save was taken in. Advance rather than stall the loop.
@@ -907,6 +926,31 @@ public partial class GameFlow : SingletonNode<GameFlow>
     {
         drawStepHandler.DrawStepFinished -= DrawStepFinishedHandler;
         FinishStep(TurnStep.DRAW);
+    }
+
+    private async Task ExtraStep(ExtraTurnStep extra)
+    {
+        await BeginStep(extra.Step);
+        await ExtraStepBody(extra);
+    }
+
+    /// <summary>
+    /// A step a RuleSet added. Its round is the one BeginStep opened, so what it applies through
+    /// CardPlayPool.DoChangeEvent gets reaction windows. A skipped prompt ends the step rather than
+    /// escaping: Guard treats StepSkippedException as benign, so the loop would stall without a word.
+    /// </summary>
+    private async Task ExtraStepBody(ExtraTurnStep extra)
+    {
+        DebugUtilities.PrintPeer($"{extra.Step} step");
+        try
+        {
+            await extra.Body(CurrentFaction);
+        }
+        catch (StepSkippedException)
+        {
+            DebugUtilities.PrintPeer($"{extra.Step} step selection skipped");
+        }
+        FinishStep(extra.Step);
     }
 
     public class GameTurnStep

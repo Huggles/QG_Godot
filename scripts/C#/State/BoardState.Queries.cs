@@ -177,6 +177,38 @@ public sealed partial class BoardState
             .ToList();
     }
 
+    /// <summary>The faction's Air Forces on the board whose Army or Navy is in supply.</summary>
+    public List<int> SuppliedAirForceIds(Faction faction) =>
+        ActiveAirForceIds(faction).Where(unitId => InSupply(UnitState.ForId(unitId))).ToList();
+
+    /// <summary>Every space the faction could deploy an Air Force to now. See <see cref="CanDeployAirForce"/>.</summary>
+    public List<int> AirDeployTargets(Faction faction) => CountryState.AllCountryStates
+        .Where(country => CanDeployAirForce(faction, country))
+        .Select(country => country.Id)
+        .ToList();
+
+    /// <summary>
+    /// Where a marshal may take <paramref name="airForce"/>: any space with its faction's supplied Army or
+    /// Navy and none of its other Air Forces. Its own space counts: a marshal may stay put to trigger a reaction.
+    /// </summary>
+    public List<int> MarshalTargets(UnitState airForce) => CountryState.AllCountryStates
+        .Where(country => HasSuppliedGroundUnit(airForce.Faction, country)
+                          && AirForceIn(airForce.Faction, country) is var there && (there < 0 || there == airForce.Id))
+        .Select(country => country.Id)
+        .ToList();
+
+    /// <summary>The spaces adjacent to one of the faction's supplied Air Forces: what its Air Superiority may target.</summary>
+    public List<int> AirSuperiorityTargets(Faction faction) => SuppliedAirForceIds(faction)
+        .SelectMany(unitId => AdjacentCountryIds(faction, CountryStateOf(UnitState.ForId(unitId))))
+        .Distinct()
+        .OrderBy(countryId => countryId)
+        .ToList();
+
+    /// <summary>The Air Forces in <paramref name="country"/> belonging to the faction's enemies, minor factions included.</summary>
+    public List<int> EnemyAirForcesIn(Faction faction, CountryState country) => AirForcesIn(country)
+        .Where(unitId => StaticGameData.FactionTeamForFaction(UnitState.ForId(unitId).Faction) != StaticGameData.FactionTeamForFaction(faction))
+        .ToList();
+
     public List<int> SuppliedUnitIds(Faction faction) =>
         ActiveUnitIds(faction).Where(id => InSupply(UnitState.ForId(id))).ToList();
 

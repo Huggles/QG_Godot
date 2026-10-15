@@ -61,6 +61,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
         using var cardDataFile = FileAccess.Open(CARDS_DATA_PATH, FileAccess.ModeFlags.Read);
         string cardDataString = cardDataFile.GetAsText();
         List<CardData> cardDataArray            = JsonSerializer.Deserialize<List<CardData>>(cardDataString);
+        ExpansionContent.AddCards(cardDataArray);
         StaticGameData.CardDataList = cardDataArray;
 
         using var deckDataFile = FileAccess.Open(DECKS_DATA_PATH, FileAccess.ModeFlags.Read);
@@ -99,40 +100,45 @@ public partial class GameModeMultiplayerDefault : IGameMode
         foreach (DeckData deckData in StaticGameData.DeckDataList)
         {
             // lookup the corresponding FactionState
-            FactionState factionState = FactionState.ForEnum(deckData.Faction); 
-            // collect the CardState objects for this faction (if you need them later)
-            var cardStatesForFaction = new List<CardState>();
+            FactionState factionState = FactionState.ForEnum(deckData.Faction);
 
             // deckData.cards is an array of Dictionaries, each with "card_name" and "number"
             foreach (DeckCardData deckCardData in deckData.Cards)
-            {                
-
+            {
                 // for each instance in the count
                 for (int i = 0; i < deckCardData.Number; i++)
-                {
-
-                    CardData cardData  = StaticGameData.CardDataByName[$"{deckCardData.CardName}"];
-                    // TypeRegistry, not Type.GetType: an expansion's card classes live in its own assembly.
-                    Type cardType = TypeRegistry.Resolve(cardData.ExecutionClass);
-                    if(cardType == null) {            
-                        throw new Exception($"ExecutionClass not found for {cardData.UniqueName}, {cardData.ExecutionClass}");
-                    }
-                    CardState cardState = new CardState(cardData);
-
-                    cardState.Id      = cardCounter;
-                    cardState.Faction = factionState.Faction;
-
-                    // add to the master list
-                    gameState.CardStates.Add(cardState);
-
-                    // increment and register in both lists
-                    cardCounter++;
-                    cardStatesForFaction.Add(cardState);
-                    factionState.DeckState.DeckCardIds.Add(cardState.Id);
-                }
+                    AddCardToDeck(factionState, deckCardData.CardName, ref cardCounter);
             }
         }
 
+        // After every base card, so the base cards keep the ids they have without expansions.
+        foreach (ExpansionContent.DeckAddition addition in ExpansionContent.DeckAdditions())
+        {
+            FactionState factionState = FactionState.ForEnum(addition.Faction);
+            foreach (DeckCardData deckCardData in addition.Add)
+                for (int i = 0; i < deckCardData.Number; i++)
+                    AddCardToDeck(factionState, deckCardData.CardName, ref cardCounter);
+        }
+    }
+
+    private void AddCardToDeck(FactionState factionState, string cardName, ref int cardCounter)
+    {
+        CardData cardData  = StaticGameData.CardDataByName[cardName];
+        // TypeRegistry, not Type.GetType: an expansion's card classes live in its own assembly.
+        Type cardType = TypeRegistry.Resolve(cardData.ExecutionClass);
+        if(cardType == null) {
+            throw new Exception($"ExecutionClass not found for {cardData.UniqueName}, {cardData.ExecutionClass}");
+        }
+        CardState cardState = new CardState(cardData);
+
+        cardState.Id      = cardCounter;
+        cardState.Faction = factionState.Faction;
+
+        // add to the master list
+        gameState.CardStates.Add(cardState);
+
+        cardCounter++;
+        factionState.DeckState.DeckCardIds.Add(cardState.Id);
     }
 
     public void InstantiateCountryStates(){

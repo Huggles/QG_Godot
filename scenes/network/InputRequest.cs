@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 [JsonDerivedType(typeof(SelectOptionRequestHandler),         "SelectOption")]
 [JsonDerivedType(typeof(ReorderCardsRequestHandler),         "ReorderCards")]
 [JsonDerivedType(typeof(BlockReactionRequestHandler),        "BlockReaction")]
+[JsonDerivedType(typeof(AirStepRequestHandler),              "AirStep")]
 public abstract partial class InputRequest
 {   
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -614,6 +615,9 @@ public abstract partial class InputRequest
 
     public class SelectCountryRequestHandler : InputRequest
     {
+        /// <summary>False for a choice that places no Army or Navy (an Air Force's destination), where an occupied space is no rebuild.</summary>
+        public bool MarkRebuildTargets { get; set; } = true;
+
         public SelectCountryRequestHandler(Faction targetFaction, List<int> targetCountryIds) : base(targetFaction)
         {
             TargetCountryIds = targetCountryIds;
@@ -623,7 +627,7 @@ public abstract partial class InputRequest
         {
             // TargetFaction so the handler can draw offered countries this faction already occupies as
             // rebuild-in-place targets. See SelectCountryHandler.RebuildTargetCountries.
-            int countryId = await new SelectCountryHandler(TargetCountryIds, TargetFaction).Handle();
+            int countryId = await new SelectCountryHandler(TargetCountryIds, MarkRebuildTargets ? TargetFaction : Faction.NONE).Handle();
             if (countryId == -1)
             {
                 WasSkipped = true;
@@ -990,6 +994,17 @@ public abstract partial class InputRequest
             }
             ResponseCardIds.Add(result.SelectedItems[0]);
         }
+    }
+
+    /// <summary>
+    /// The Air step's choice of action, Pass included as an option. A SelectOption in every respect, so the
+    /// GUI, CLI and bots answer it as one; its own type lets a bot or a transcript tell it apart.
+    /// </summary>
+    public class AirStepRequestHandler : SelectOptionRequestHandler
+    {
+        [JsonConstructor]
+        public AirStepRequestHandler(Faction targetFaction, List<string> targetOptionLabels, List<int> targetOptionIds, string modalTitle)
+            : base(targetFaction, targetOptionLabels, targetOptionIds, modalTitle) { }
     }
 
     public class ReorderCardsRequestHandler : InputRequest

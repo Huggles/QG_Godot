@@ -38,6 +38,7 @@ public static class GameMessageDisplay
         // Its expansion ships the sprite, so the path is resolved rather than a constant.
         DeployAirForceChangeEvent             => ContentPaths.Resolve(AssetRepository.AirForceSpriteAsset),
         MoveAirForceChangeEvent               => ContentPaths.Resolve(AssetRepository.AirForceSpriteAsset),
+        AirSuperiorityChangeEvent             => ContentPaths.Resolve(AssetRepository.AirForceSpriteAsset),
 
         PlayCardChangeEvent                   => IconPlayCard,
 
@@ -193,7 +194,7 @@ public static class GameMessageDisplay
 
         return data.CardType switch
         {
-            CardType.STATUS or CardType.RESPONSE or CardType.EVENT
+            CardType.STATUS or CardType.RESPONSE or CardType.EVENT or CardType.AIR_POWER or CardType.BOLSTER
                 => $"{name} ({data.CardType.Label()} card)",
             _   => name,
         };

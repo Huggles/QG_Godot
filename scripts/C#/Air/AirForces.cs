@@ -102,7 +102,8 @@ public static class AirForces
                 $"{faction.WithPlayer()}'s Air Force in {country.Label} must reposition to an adjacent space").Apply();
             try
             {
-                destination = (await new InputRequest.SelectCountryRequestHandler(faction, targets).BroadCast()).ResponseCountryIds[0];
+                destination = (await new InputRequest.SelectCountryRequestHandler(faction, targets) { MarkRebuildTargets = false }
+                    .BroadCast()).ResponseCountryIds[0];
             }
             catch (StepSkippedException)
             {
