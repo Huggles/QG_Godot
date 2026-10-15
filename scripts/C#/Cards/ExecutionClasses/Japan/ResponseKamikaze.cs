@@ -16,7 +16,8 @@ public partial class ResponseKamikaze : ResponseCardLogic
             Condition.Build(new Condition.CustomCondition(s => {
                 var trigger = s.ReactionTrigger as DeployUnitChangeEvent;
                 if (trigger == null) return false;
-                return trigger.CountryState.ConnectedCountryStates
+                // Adjacent for Japan: a strait the Allies hold separates the seas on either side.
+                return s.Board.AdjacentCountryStates(Faction, trigger.CountryState)
                     .Any(cs => s.Board.UnitsIn(cs).ContainsKey(Faction));
             }), this)
         };

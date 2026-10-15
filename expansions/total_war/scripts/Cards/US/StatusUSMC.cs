@@ -7,7 +7,9 @@ public partial class StatusUSMC : StatusCardLogic
     private CountryState BuiltIn(GameSituation situation)
     {
         CountryState sea = TriggerContextAs<DeployUnitChangeEvent>(situation)?.CountryState;
-        bool pacific = sea != null && (TotalWarCards.IsPacificSea(sea) || sea.ConnectedCountryStates.Any(TotalWarCards.IsPacificSea));
+        // Adjacent for the US: across the Latin America strait only while the Allies hold it.
+        bool pacific = sea != null && (TotalWarCards.IsPacificSea(sea)
+                                       || situation.Board.AdjacentCountryStates(Faction, sea).Any(TotalWarCards.IsPacificSea));
         return pacific ? sea : null;
     }
 
