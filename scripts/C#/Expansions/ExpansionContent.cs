@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.Json;
 
 /// <summary>
@@ -12,7 +13,11 @@ using System.Text.Json;
 /// </summary>
 public static class ExpansionContent
 {
-    /// <summary>Faction rows to add: the minor factions. Same shape as QGData_Factions_V2.json.</summary>
+    /// <summary>
+    /// Faction rows, in the shape of QGData_Factions_V2.json. A row whose Index is a new faction adds
+    /// it (France, China); a row whose Index already exists patches that faction with the fields it
+    /// names and nothing else (the base factions' NumberOfAirUnits).
+    /// </summary>
     public const string FactionsFile = "factions.json";
 
     /// <summary>
@@ -47,19 +52,43 @@ public static class ExpansionContent
         return contents;
     }
 
-    /// <summary>Adds the enabled expansions' faction rows to <paramref name="factions"/>.</summary>
+    /// <summary>
+    /// Applies the enabled expansions' faction rows to <paramref name="factions"/>: new factions are
+    /// appended, existing ones patched field by field. See <see cref="FactionsFile"/>.
+    /// </summary>
     public static void AddFactions(List<FactionData> factions)
     {
-        foreach ((string id, List<FactionData> rows) in Read<List<FactionData>>(FactionsFile))
+        foreach ((string id, List<JsonElement> rows) in Read<List<JsonElement>>(FactionsFile))
         {
-            foreach (FactionData row in rows)
+            foreach (JsonElement row in rows)
             {
-                // Replacing a base faction's row would renumber nothing but silently change its rules;
-                // an expansion that wants that needs a deliberate merge, not a second row.
-                if (factions.Exists(existing => existing.Index == row.Index))
-                    throw new System.Exception($"Expansion '{id}' adds faction {row.Faction}, which already exists");
-                factions.Add(row);
+                if (!row.TryGetProperty(nameof(FactionData.Index), out JsonElement index))
+                    throw new System.Exception($"Expansion '{id}': a row in {FactionsFile} has no Index");
+
+                FactionData existing = factions.Find(faction => faction.Index == index.GetInt32());
+                if (existing == null)
+                    factions.Add(row.Deserialize<FactionData>());
+                else
+                    Patch(id, existing, row);
             }
+        }
+    }
+
+    /// <summary>
+    /// Overwrite the fields <paramref name="row"/> names on <paramref name="faction"/>, leaving the rest
+    /// as the base data has them. Index identifies the row and is never written.
+    /// </summary>
+    private static void Patch(string expansionId, FactionData faction, JsonElement row)
+    {
+        foreach (JsonProperty field in row.EnumerateObject())
+        {
+            if (field.Name == nameof(FactionData.Index)) continue;
+
+            PropertyInfo property = typeof(FactionData).GetProperty(field.Name);
+            if (property == null || !property.CanWrite)
+                throw new System.Exception($"Expansion '{expansionId}' patches {faction.Faction}.{field.Name}, which is not a faction field");
+
+            property.SetValue(faction, field.Value.Deserialize(property.PropertyType));
         }
     }
 

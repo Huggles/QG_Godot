@@ -82,6 +82,36 @@ public static class UnitPoolShortfall
     }
 
     /// <summary>
+    /// The same for an Air Force: with none left in the pool, the faction first takes one of its Air
+    /// Forces off the board. Simpler than a ground deploy, because an Air Force supports nothing: taking
+    /// one away cannot make the destination illegal, and the destination never holds one of its own.
+    /// </summary>
+    public static async Task ResolveBeforeAirDeploy(DeployAirForceChangeEvent deploy)
+    {
+        Faction faction = deploy.TriggeringFaction;
+        if (UnitPool.FactionHasAvailableUnits(faction, UnitType.AIR_FORCE)) return;
+
+        List<int> candidates = BoardState.Live.ActiveAirForceIds(faction);
+        if (candidates.Count == 0)
+            throw new GameRuleException(
+                $"{faction} must free an Air Force to deploy to {deploy.CountryState.Label} but has none deployed. " +
+                $"Check NumberOfAirUnits for {faction}.");
+
+        await new ShowActionLabelPresentationEvent(
+            faction, $"{faction.WithPlayer()} has no Air Force left in the pool and must first remove one of its Air Forces").Apply();
+
+        int unitId = (await new InputRequest.SelectUnitRequestHandler(faction, candidates, allowSkip: false)
+            .BroadCast()).ResponseUnitIds[0];
+
+        // A recall, like a ground one: bookkeeping, outside the reaction pipeline.
+        await new RemoveUnitChangeEvent(faction, unitId, UnitRemovalReason.RECALL)
+        {
+            IsTrigger = false,
+            RegisterInPool = false,
+        }.Apply();
+    }
+
+    /// <summary>
     /// The recall may have destroyed the very supply chain that made the destination legal. When it
     /// has, ask for a new destination rather than letting the deploy fail.
     ///

@@ -112,6 +112,14 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
     /// </summary>
     protected virtual Task OnLiveMutatedAsync() => Task.CompletedTask;
 
+    /// <summary>
+    /// Host-only consequences of this event that are game events in their own right, run once it has
+    /// been applied and broadcast — e.g. an Air Force repositioning after its Army is removed. Unlike
+    /// <see cref="OnLiveMutatedAsync"/> it may prompt a player and apply further events. Skipped while
+    /// replaying a save: its log already holds whatever this did.
+    /// </summary>
+    protected virtual Task AfterAppliedAsync() => Task.CompletedTask;
+
     protected virtual List<ChangeEventAnimation> BeforeAnimations { get; } = new();
     protected virtual List<ChangeEventAnimation> AfterAnimations  { get; } = new();
 
@@ -152,9 +160,10 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
         ErrorReporter.MutationDepth++;
         bool broadcastSentOnEntry = ErrorReporter.BroadcastSent;
         ErrorReporter.BroadcastSent = false;
+        bool applied;
         try
         {
-            return await ApplyMutation(capturedEpoch);
+            applied = await ApplyMutation(capturedEpoch);
         }
         catch (Exception e)
         {
@@ -186,6 +195,13 @@ public abstract partial class ChangeEvent : GameMessage, ITargetSetProvider
             ErrorReporter.MutationDepth--;
             ErrorReporter.BroadcastSent = broadcastSentOnEntry;
         }
+
+        // Outside the mutation window: this event is applied and replicated, and a follow-up can be a
+        // prompt and further events of its own. Host-only, and not while replaying a save, whose log
+        // already holds whatever the follow-up did.
+        if (applied && IsServer && !ReplayContext.IsReplaying)
+            await AfterAppliedAsync();
+        return applied;
     }
 
     private async Task<bool> ApplyMutation(int capturedEpoch)

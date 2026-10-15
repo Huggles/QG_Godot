@@ -234,6 +234,16 @@ public class GameStateCalculator
                 record.Tags.Add(Tag.OutOfSupply, faction);
             }
         }
+
+        // An Air Force traces no supply of its own: it is supplied when its faction's Army or Navy in
+        // the same space is, so it takes that unit's answer, settled just above.
+        foreach (int airForceId in board.ActiveAirForceIds(faction))
+        {
+            UnitState airForce = UnitState.ForId(airForceId);
+            UnitRecord record = board.Of(airForce);
+            bool supplied = record.SuppliedForTurn || board.HasSuppliedGroundUnit(faction, board.CountryStateOf(airForce));
+            record.Tags.Add(supplied ? Tag.InSupply : Tag.OutOfSupply, faction);
+        }
     }
 
     private static bool CalculateSupplyForUnit(BoardState board, PathFindingService pathFinding, UnitState unit, Faction faction)

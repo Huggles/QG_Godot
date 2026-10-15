@@ -78,6 +78,11 @@ public static class CardPlayPool
         // its deploys with a bare Apply() rather than coming through here.
         if (changeEvent is DeployUnitChangeEvent deployEvent)
             await UnitPoolShortfall.ResolveBeforeDeploy(deployEvent);
+        if (changeEvent is DeployAirForceChangeEvent airDeployEvent)
+            await UnitPoolShortfall.ResolveBeforeAirDeploy(airDeployEvent);
+
+        // No block window outside a round, but an Air Force can still take the hit for a battle.
+        if (await AirForces.ResolveAirDefense(changeEvent)) return;
 
         await changeEvent.Apply();
     }

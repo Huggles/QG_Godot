@@ -16,7 +16,12 @@ public partial class AssetRepository : Node
     public static readonly PackedScene MarginTextureButtonScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/MarginTextureButton.tscn");
     public static readonly PackedScene PresentationModalScenePacked = GD.Load<PackedScene>("res://scenes/userinterface/PresentationModal/PresentationModal.tscn");
     public static readonly Texture2D ArmySprite = GD.Load<Texture2D>(ArmySpritePath);
-    public static readonly Texture2D NavySprite = GD.Load<Texture2D>(NavySpritePath);    
+    public static readonly Texture2D NavySprite = GD.Load<Texture2D>(NavySpritePath);
+
+    /// <summary>Relative to assets/: the expansion that brings Air Forces ships the sprite. See ContentPaths.</summary>
+    public const string AirForceSpriteAsset = "textures/Units/QGAirForce.png";
+    /// <summary>Resolved per use rather than once: which expansion supplies it can change between sessions.</summary>
+    public static Texture2D AirForceSprite => GD.Load<Texture2D>(ContentPaths.Resolve(AirForceSpriteAsset));
     public static readonly Texture2D StraightIcon = GD.Load<Texture2D>("res://assets/textures/Other/StraightIcon.png");
     public static readonly Texture2D StraightIconInverse = GD.Load<Texture2D>("res://assets/textures/Other/StraightIconInverse.png");
     public static readonly Texture2D TargetSprite = GD.Load<Texture2D>("res://assets/textures/Other/target.png");

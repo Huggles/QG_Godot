@@ -180,6 +180,8 @@ public abstract partial class GameMessage : GodotObject
             ReorderDeckChangeEventDto d        => new ReorderDeckChangeEvent(d.TriggeringFaction, d.ReorderedCardIds) { ReorderedFromTop = d.ReorderedFromTop },
             GrantSupplyChangeEventDto d         => new GrantSupplyChangeEvent(d.TriggeringFaction, d.UnitIds),
             RegisterBulletinCardChangeEventDto d => new RegisterBulletinCardChangeEvent(d.TargetFaction, d.CardId, d.MutatorClassName, d.FromRound, d.ToRound),
+            DeployAirForceChangeEventDto d      => new DeployAirForceChangeEvent(d.TriggeringFaction, d.CountryId),
+            MoveAirForceChangeEventDto d        => new MoveAirForceChangeEvent(d.TriggeringFaction, d.UnitId, d.FromCountryId, d.ToCountryId, d.Reason),
 
             // ── Derived-state delivery ───────────────────────────────────────
             RecalculateTagsMessageDto d     => new RecalculateTagsMessage(d.Snapshot),

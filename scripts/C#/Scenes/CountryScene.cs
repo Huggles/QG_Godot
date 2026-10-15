@@ -448,6 +448,12 @@ public partial class CountryScene : Control
 
 	public void AddUnit(UnitScene unitScene)
 	{
+		if (unitScene.IsAirForce)
+		{
+			AddAirForce(unitScene);
+			return;
+		}
+
 		int position = SetUnitOnAvailablePosition(unitScene);
 		if (position <= 0) return;
 
@@ -497,6 +503,53 @@ public partial class CountryScene : Control
 		};
 	}
 
+	// ── Air Forces ───────────────────────────────────────────────────────────
+	//
+	// Not in a unit slot: an Air Force stands with its faction's Army or Navy, so it is drawn on that
+	// piece's slot, up and to the right of it, and never counts as an occupant (OccupyingUnitFactions).
+
+	/// <summary>Where an Air Force sits relative to the Army or Navy it stands with.</summary>
+	private static readonly Vector2 AirForceOffsetFromUnit = new(34f, -34f);
+
+	/// <summary>The Air Force drawn here for each faction.</summary>
+	private readonly Dictionary<Faction, UnitScene> _airForces = new();
+
+	private void AddAirForce(UnitScene unitScene)
+	{
+		_airForces[unitScene.Faction] = unitScene;
+		unitScene.Show();
+
+		if (unitScene.GetParent() != UnitContainerNode)
+		{
+			unitScene.GetParent().RemoveChild(unitScene);
+			UnitContainerNode.AddChild(unitScene);
+		}
+
+		UnitTransformData transformData = StaticCountryData.UnitTransformData;
+		if (transformData == null) return;
+
+		// On its faction's slot when that piece is drawn here, else where slot 3 is: a replay or a fast
+		// animation can place the Air Force a moment before its Army.
+		int slot = Array.FindIndex(_unitSlots, scene => scene != null && scene.Faction == unitScene.Faction);
+		Vector2 groundOffset = SlotOffset(transformData, slot >= 0 ? slot + 1 : 3);
+		unitScene.Position = (TextureSize / 2f) + groundOffset + AirForceOffsetFromUnit;
+	}
+
+	/// <summary>
+	/// Take an Air Force off this country without returning it to the pool: re-parented to the units node
+	/// where it is on screen, so a move can fly it from here. RemoveUnit pools it as well.
+	/// </summary>
+	public void DetachAirForce(UnitScene unitScene)
+	{
+		if (!_airForces.TryGetValue(unitScene.Faction, out UnitScene drawn) || drawn != unitScene) return;
+		_airForces.Remove(unitScene.Faction);
+
+		Vector2 onScreen = unitScene.GlobalPosition;
+		unitScene.GetParent().RemoveChild(unitScene);
+		NodeUtilities.Instance.UnitsNode.AddChild(unitScene);
+		unitScene.GlobalPosition = onScreen;
+	}
+
 	/// <summary>The 1-based slot <paramref name="unitScene"/> holds here, or -1.</summary>
 	private int GetUnitPosition(UnitScene unitScene) => Array.IndexOf(_unitSlots, unitScene) is var index && index >= 0 ? index + 1 : -1;
 
@@ -517,6 +570,14 @@ public partial class CountryScene : Control
 
 	public void RemoveUnit(UnitScene unitScene)
 	{
+		if (unitScene.IsAirForce)
+		{
+			DetachAirForce(unitScene);
+			unitScene.Position = Vector2.Zero;
+			unitScene.ResetToPoolState();
+			return;
+		}
+
 		int position = GetUnitPosition(unitScene);
 		if (position <= 0) return;
 

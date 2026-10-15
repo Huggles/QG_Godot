@@ -97,13 +97,84 @@ public sealed partial class BoardState
 
     public bool ImmuneForTurn(UnitState unit) => Of(unit).ImmuneForTurn;
 
-    /// <summary>The faction's units on the board, in ownership order.</summary>
+    /// <summary>
+    /// The faction's Armies and Navies on the board, in ownership order. Air Forces are left out: they
+    /// never occupy, supply, battle or score, so every rule that walks a faction's units means its
+    /// ground units — see <see cref="ActiveAirForceIds"/> for the others.
+    /// </summary>
     public List<int> ActiveUnitIds(Faction faction)
     {
         List<int> active = new();
         foreach (int unitId in FactionState.ForEnum(faction).AllUnits)
-            if (CountryOf(UnitState.ForId(unitId)) >= 0) active.Add(unitId);
+        {
+            UnitState unit = UnitState.ForId(unitId);
+            if (!unit.IsAirForce && CountryOf(unit) >= 0) active.Add(unitId);
+        }
         return active;
+    }
+
+    // ── Air Forces ──────────────────────────────────────────────────────────
+    //
+    // An Air Force stands in a space with its own faction's Army or Navy, at most one per faction per
+    // space. It is NOT in CountryRecord.Units, which holds the ground piece that occupies the space, so
+    // occupancy, battle targets, supply paths and scoring never see it; where it is comes from its own
+    // UnitRecord.CountryId, which the sync hash and snapshots already cover.
+
+    /// <summary>The faction's Air Forces on the board, in ownership order.</summary>
+    public List<int> ActiveAirForceIds(Faction faction)
+    {
+        List<int> active = new();
+        FactionState factionState = FactionState.ForEnum(faction);
+        if (factionState == null) return active;
+        foreach (int unitId in factionState.AllUnits)
+        {
+            UnitState unit = UnitState.ForId(unitId);
+            if (unit.IsAirForce && CountryOf(unit) >= 0) active.Add(unitId);
+        }
+        return active;
+    }
+
+    /// <summary>The faction's Air Force in <paramref name="country"/>, or -1.</summary>
+    public int AirForceIn(Faction faction, CountryState country)
+    {
+        foreach (int unitId in ActiveAirForceIds(faction))
+            if (CountryOf(UnitState.ForId(unitId)) == country.Id) return unitId;
+        return -1;
+    }
+
+    /// <summary>Every Air Force in <paramref name="country"/>, of any faction.</summary>
+    public List<int> AirForcesIn(CountryState country) => StaticGameData.BoardFactions
+        .Select(faction => AirForceIn(faction, country))
+        .Where(unitId => unitId >= 0)
+        .ToList();
+
+    /// <summary>The faction has an Army or Navy here, and it is in supply: what an Air Force needs to stand here.</summary>
+    public bool HasSuppliedGroundUnit(Faction faction, CountryState country)
+        => UnitsIn(country).TryGetValue(faction, out int unitId) && InSupply(UnitState.ForId(unitId));
+
+    /// <summary>Where the faction could deploy an Air Force: with its own supplied Army or Navy, and none of its Air Forces yet.</summary>
+    public bool CanDeployAirForce(Faction faction, CountryState country)
+        => HasSuppliedGroundUnit(faction, country) && AirForceIn(faction, country) < 0;
+
+    /// <summary>
+    /// Where an Air Force left without its own Army or Navy may go: an adjacent space with one of its
+    /// faction's supplied Armies or Navies, and none of its Air Forces. Empty means it is lost.
+    /// </summary>
+    public List<int> RepositionTargets(UnitState airForce) => AdjacentCountryStates(airForce.Faction, CountryStateOf(airForce))
+        .Where(country => CanDeployAirForce(airForce.Faction, country))
+        .Select(country => country.Id)
+        .ToList();
+
+    /// <summary>
+    /// The faction's supplied Air Forces in spaces adjacent to <paramref name="country"/>: what may pay
+    /// for an air attack on it. An Air Force is supplied when the Army or Navy it stands with is.
+    /// </summary>
+    public List<int> SuppliedAirForcesAdjacentTo(Faction faction, CountryState country)
+    {
+        HashSet<int> adjacent = new(AdjacentCountryIds(faction, country));
+        return ActiveAirForceIds(faction)
+            .Where(unitId => adjacent.Contains(CountryOf(UnitState.ForId(unitId))) && InSupply(UnitState.ForId(unitId)))
+            .ToList();
     }
 
     public List<int> SuppliedUnitIds(Faction faction) =>

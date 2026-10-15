@@ -106,7 +106,47 @@ public sealed partial class BoardState
         }
 
         Of(unitState).CountryId = -1;
-        UnitsIn(countryState).Remove(unitState.Faction);
+        // An Air Force was never in the country's ground slot: removing it by faction would take the
+        // Army or Navy it stood with off the board instead.
+        if (!unitState.IsAirForce) UnitsIn(countryState).Remove(unitState.Faction);
+    }
+
+    /// <summary>
+    /// Put one of the faction's Air Forces into a country, with its own supplied Army or Navy, and return
+    /// its id. Like DeployUnit, the first undeployed one in creation order, so peers agree without the id.
+    /// </summary>
+    public int DeployAirForce(Faction faction, int countryId)
+    {
+        CountryState countryState = CountryState.ForId(countryId);
+        if (!TrustsRecordedOutcome && !CanDeployAirForce(faction, countryState))
+            throw new GameAPI.GameAPIException(
+                $"Cannot deploy an Air Force for {faction} to {countryState.StaticCountryData.Label}: it needs {faction}'s supplied Army or Navy there, and no {faction} Air Force.");
+
+        // Throws GameRuleException on an empty pool, also before any write.
+        int unitId = UnitPool.GetAvailableUnitForFaction(faction, UnitType.AIR_FORCE, this);
+        ForUnit(unitId).CountryId = countryId;
+        return unitId;
+    }
+
+    /// <summary>
+    /// Move an Air Force to another country, keeping the same piece: a marshal or a reposition. The
+    /// destination must hold its faction's Army or Navy and none of its other Air Forces; whether that
+    /// unit must also be supplied, and how far away it may be, is the caller's rule.
+    /// </summary>
+    public void MoveAirForce(int unitId, int toCountryId)
+    {
+        UnitState unitState = UnitState.ForId(unitId);
+        CountryState destination = CountryState.ForId(toCountryId);
+
+        if (!unitState.IsAirForce || !IsDeployed(unitState))
+            throw new GameAPI.GameAPIException($"Cannot move unit {unitId}: only an Air Force on the board moves.");
+
+        int alreadyThere = AirForceIn(unitState.Faction, destination);
+        if (!TrustsRecordedOutcome && (!HasUnit(unitState.Faction, destination) || (alreadyThere >= 0 && alreadyThere != unitId)))
+            throw new GameAPI.GameAPIException(
+                $"Cannot move {unitState.Faction}'s Air Force to {destination.StaticCountryData.Label}: it needs {unitState.Faction}'s Army or Navy there, and no other {unitState.Faction} Air Force.");
+
+        Of(unitState).CountryId = toCountryId;
     }
 
     public void AddScore(Faction faction, int points) => ForFaction(faction).Score += points;

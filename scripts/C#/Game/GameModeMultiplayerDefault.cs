@@ -167,6 +167,12 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 gameState.UnitStates.Add(unitState);
             }
         }
+
+        // Air Forces in a pass of their own, after every Army and Navy, so a game with them numbers
+        // its ground units exactly as a game without them does.
+        foreach (FactionData factionData in StaticGameData.FactionDataList)
+            for (int i = 0; i < factionData.NumberOfAirUnits; i++)
+                gameState.UnitStates.Add(new UnitState(UnitType.AIR_FORCE, factionData.Faction));
     }
 
     public async Task InitStartingState()

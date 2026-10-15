@@ -31,6 +31,7 @@ public partial class UnitState : StateObject
 
     public bool IsArmy => Type == UnitType.ARMY;
     public bool IsNavy => Type == UnitType.NAVY;
+    public bool IsAirForce => Type == UnitType.AIR_FORCE;
 
     [JsonIgnore] public UnitScene UnitScene { get; set; }
     [JsonIgnore] public Callable ClickableCallback { get; set; }

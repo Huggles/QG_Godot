@@ -338,12 +338,19 @@ public partial class CardPlayRound : GodotObject
         if (changeEvent.IsTrigger)
             await RequestBlockReactions(changeEvent);
 
+        // After the card block window, so a card that saves the unit outright is offered first; an Air
+        // Force taking the hit blocks the battle the same way. See AirForces.
+        if (!changeEvent.IsBlocked)
+            await AirForces.ResolveAirDefense(changeEvent);
+
         if (!changeEvent.IsBlocked)
         {
             // After the block window, before Apply(): a faction whose pool is empty must free a unit
             // first, but only once the deploy is actually going to happen. See UnitPoolShortfall.
             if (changeEvent is DeployUnitChangeEvent deployEvent)
                 await UnitPoolShortfall.ResolveBeforeDeploy(deployEvent);
+            if (changeEvent is DeployAirForceChangeEvent airDeployEvent)
+                await UnitPoolShortfall.ResolveBeforeAirDeploy(airDeployEvent);
 
             LastChangeEvent = changeEvent;
             DebugUtilities.PrintPeer($"Applying change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");

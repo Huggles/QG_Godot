@@ -54,6 +54,19 @@ public class BattleUnitChangeEventDto : ChangeEventDto
     public int UnitId { get; set; }
 }
 
+public class DeployAirForceChangeEventDto : ChangeEventDto
+{
+    public int CountryId { get; set; }
+}
+
+public class MoveAirForceChangeEventDto : ChangeEventDto
+{
+    public int                UnitId        { get; set; }
+    public int                FromCountryId { get; set; }
+    public int                ToCountryId   { get; set; }
+    public AirForceMoveReason Reason        { get; set; }
+}
+
 public class PlayCardChangeEventDto : ChangeEventDto { }
 
 public class ActivateReactionChangeEventDto : ChangeEventDto

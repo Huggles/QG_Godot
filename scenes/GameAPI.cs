@@ -121,6 +121,12 @@ public partial class GameAPI : Node
         EventBus.Emit(EventBus.SignalName.UnitRemoved, unitId, countryId);
     }
 
+    /// <summary>An Air Force flying to another space. No pool changes, so no UnitDeployed/UnitRemoved signal.</summary>
+    public static void PresentMove(int unitId, int fromCountryId, int toCountryId, bool awaitAnimation = true)
+    {
+        _ = PresentationServices.Animation.Enqueue(new MoveAirForceAnimation(unitId, fromCountryId, toCountryId){ BlockQueue = awaitAnimation });
+    }
+
     /**
     * Faction/ Deck API
     */

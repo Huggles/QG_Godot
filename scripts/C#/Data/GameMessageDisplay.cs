@@ -35,6 +35,10 @@ public static class GameMessageDisplay
     {
         DeployUnitChangeEvent d               => DeployIcon(d),
 
+        // Its expansion ships the sprite, so the path is resolved rather than a constant.
+        DeployAirForceChangeEvent             => ContentPaths.Resolve(AssetRepository.AirForceSpriteAsset),
+        MoveAirForceChangeEvent               => ContentPaths.Resolve(AssetRepository.AirForceSpriteAsset),
+
         PlayCardChangeEvent                   => IconPlayCard,
 
         DrawCardsChangeEvent                  => IconDraw,

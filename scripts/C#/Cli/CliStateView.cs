@@ -66,7 +66,11 @@ public static class CliStateView
         {
             UnitState unit = UnitState.ForId(kv.Value);
             string supply = unit != null && unit.InSupply ? "" : " unsupplied";
-            return $"{kv.Key} {unit?.Type.ToString().ToLowerInvariant() ?? "?"}#{kv.Value}{supply}";
+            // The faction's Air Force stands with its Army or Navy, so it is listed on the same entry.
+            int airForceId = BoardState.Live.AirForceIn(kv.Key, country);
+            string air = airForceId < 0 ? ""
+                : $" +air#{airForceId}{(UnitState.ForId(airForceId).InSupply ? "" : " unsupplied")}";
+            return $"{kv.Key} {unit?.Type.ToString().ToLowerInvariant() ?? "?"}#{kv.Value}{supply}{air}";
         }));
     }
 

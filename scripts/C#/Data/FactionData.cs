@@ -15,6 +15,9 @@ public partial class FactionData : DataObject
     public int NumberOfArmyUnits { get; set; }
     public int NumberOfNavyUnits { get; set; }
 
+    /// <summary>Air Forces in the faction's pool. 0 unless an expansion gives it some.</summary>
+    public int NumberOfAirUnits { get; set; }
+
     /// <summary>
     /// Set only on a minor faction: the playable faction that acts for it (checks its supply, scores it,
     /// answers its prompts). A minor faction has pieces on the board but no seat, no deck and no turn.

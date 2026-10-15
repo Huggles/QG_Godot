@@ -77,9 +77,24 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
         return Task.CompletedTask;
     }
 
+    /// <summary>An Army or Navy leaving a space may strand its faction's Air Force there.</summary>
+    protected override Task AfterAppliedAsync() =>
+        UnitState.IsAirForce ? Task.CompletedTask : AirForces.RepositionStranded(UnitState.Faction, CountryId);
+
     public override string SummaryText()
     {
-        return $"Removed {UnitState.Faction.Label()} unit from {CountryState.ForId(CountryId).Label}";
+        if (!UnitState.IsAirForce)
+            return $"Removed {UnitState.Faction.Label()} unit from {CountryState.ForId(CountryId).Label}";
+
+        string why = Reason switch
+        {
+            UnitRemovalReason.AIR_DEFENSE     => " to save the unit it was defending",
+            UnitRemovalReason.AIR_ATTACK      => " to press the attack",
+            UnitRemovalReason.AIR_SUPERIORITY => " by air superiority",
+            UnitRemovalReason.REPOSITION_LOST => ": nowhere left to reposition to",
+            _                                 => string.Empty,
+        };
+        return $"Removed {UnitState.Faction.Label()} Air Force from {CountryState.ForId(CountryId).Label}{why}";
     }
 
     public override string DebugText()

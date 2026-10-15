@@ -16,6 +16,13 @@ public partial class UnitScene : Node2D
 	// Properties
 	public bool IsArmy => UnitType == UnitType.ARMY;
 	public bool IsNavy => UnitType == UnitType.NAVY;
+	public bool IsAirForce => UnitType == UnitType.AIR_FORCE;
+
+	/// <summary>An Air Force is drawn smaller than the Army or Navy it stands with, so the pair reads as one stack.</summary>
+	public const float AirForceScale = 0.7f;
+
+	/// <summary>This piece's scale when at rest, which ResetToPoolState returns it to.</summary>
+	private Vector2 RestScale => IsAirForce ? new Vector2(AirForceScale, AirForceScale) : Vector2.One;
 
 	public UnitType UnitType => UnitState.Type;
 	public Faction Faction => UnitState.Faction;
@@ -71,8 +78,14 @@ public partial class UnitScene : Node2D
 
 	private void SetSprite()
 	{
-		UnitSpriteNode.Texture = IsArmy ? AssetRepository.ArmySprite : AssetRepository.NavySprite;
+		UnitSpriteNode.Texture = UnitType switch
+		{
+			UnitType.ARMY      => AssetRepository.ArmySprite,
+			UnitType.AIR_FORCE => AssetRepository.AirForceSprite,
+			_                  => AssetRepository.NavySprite,
+		};
 		UnitSpriteNode.Modulate = FactionData.FactionColor;
+		Scale = RestScale;
 	}
 
 	public void SetClickable()
@@ -173,7 +186,7 @@ public partial class UnitScene : Node2D
 	{
 		Hide();
 		Rotation = 0f;
-		Scale = Vector2.One;
+		Scale = RestScale;
 		UnitSpriteNode.Rotation = 0f;
 		UnitSpriteNode.Scale = new Vector2(DefaultSpriteScale, DefaultSpriteScale);
 		SetUnclickable();

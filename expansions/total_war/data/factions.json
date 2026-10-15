@@ -11,7 +11,8 @@
     "PatronFaction": "UNITED_KINGDOM",
     "FlagPath": "res://expansions/total_war/assets/factions/france/France_Flag.png",
     "NumberOfArmyUnits": 3,
-    "NumberOfNavyUnits": 2
+    "NumberOfNavyUnits": 2,
+    "NumberOfAirUnits": 1
   },
   {
     "UniqueName": "CHINA",
@@ -25,6 +26,31 @@
     "PatronFaction": "UNITED_STATES",
     "FlagPath": "res://expansions/total_war/assets/factions/china/China_Flag.png",
     "NumberOfArmyUnits": 2,
-    "NumberOfNavyUnits": 0
+    "NumberOfNavyUnits": 0,
+    "NumberOfAirUnits": 1
+  },
+  {
+    "Index": 1,
+    "NumberOfAirUnits": 2
+  },
+  {
+    "Index": 2,
+    "NumberOfAirUnits": 2
+  },
+  {
+    "Index": 3,
+    "NumberOfAirUnits": 2
+  },
+  {
+    "Index": 4,
+    "NumberOfAirUnits": 1
+  },
+  {
+    "Index": 5,
+    "NumberOfAirUnits": 1
+  },
+  {
+    "Index": 6,
+    "NumberOfAirUnits": 3
   }
 ]
