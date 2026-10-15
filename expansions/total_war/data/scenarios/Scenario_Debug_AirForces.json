@@ -17,7 +17,8 @@
     "UNITED_KINGDOM": {
       "unitDeployments": [ { "countryName": "UNITED_KINGDOM" }, { "countryName": "NORTH_SEA" }, { "countryName": "WESTERN_EUROPE" } ],
       "airForceDeployments": [ { "countryName": "WESTERN_EUROPE" } ],
-      "initialHandCards": [ { "name": "AirPower" } ],
+      "initialHandCards": [ { "name": "AirPower" }, { "name": "BuildNavy" }, { "name": "BuildArmy" }, { "name": "LandBattle" }, { "name": "SeaBattle" },
+                            { "name": "EventSingaporeFortified" }, { "name": "EWBomberCommand" } ],
       "startingVP": 0
     },
     "FRANCE": {

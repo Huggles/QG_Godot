@@ -1141,5 +1141,50 @@
     "Label": "Somaliland",
     "Text": "Use at the beginning of your Victory step. Recruit an Army in Africa.",
     "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventLedoAndBurmaRoads_TotalWar",
+    "Number": "1129",
+    "Type": "EVENT",
+    "ExecutionClass": "EventLedoAndBurmaRoads_TotalWar",
+    "Label": "Ledo and Burma Roads",
+    "Text": "To use, the Allies must have an Army in Southeast Asia. Recruit a Chinese Army in China or Szechuan, or eliminate an Axis Army in China or Szechuan.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventDutchEastIndies_TotalWar",
+    "Number": "1130",
+    "Type": "EVENT",
+    "ExecutionClass": "EventDutchEastIndies_TotalWar",
+    "Label": "Dutch East Indies",
+    "Text": "Recruit French Armies in both Indonesia and New Guinea, and a French Navy in the South China Sea.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusAmericanVolunteerGroupExpands_TotalWar",
+    "Number": "1131",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusAmericanVolunteerGroupExpands_TotalWar",
+    "Label": "American Volunteer Group Expands",
+    "Text": "Allied Armies in Szechuan are always in supply. During your Play step, instead of playing a card from hand, you may recruit a Chinese Army in Szechuan.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusFreeFrance_TotalWar",
+    "Number": "1132",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusFreeFrance_TotalWar",
+    "Label": "Free France",
+    "Text": "French pieces are always in supply. (Other rules about building new pieces still apply.)",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventFreeFrenchAllies_TotalWar",
+    "Number": "1133",
+    "Type": "EVENT",
+    "ExecutionClass": "EventFreeFrenchAllies_TotalWar",
+    "Label": "Free French Allies",
+    "Text": "Recruit 1 or 2 French Armies in Western Europe, Africa, and/or North Africa.",
+    "MultipleActivationsPerTurn": false
   }
 ]

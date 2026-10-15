@@ -24,7 +24,11 @@
     { "CardName": "EventFallWeiss", "Number": 1 },
     { "CardName": "BolsterG7eTorpedo", "Number": 1 }
   ] },
-  { "FactionIndex": 2, "Add": [
+  { "FactionIndex": 2, "Remove": [
+    { "CardName": "EventLedoAndBurmaRoads", "Number": 1 },
+    { "CardName": "EventDutchEastIndies", "Number": 1 },
+    { "CardName": "StatusFreeFrance", "Number": 1 }
+  ], "Add": [
     { "CardName": "AirPower", "Number": 3 },
     { "CardName": "BolsterWarsawUprising", "Number": 1 },
     { "CardName": "ResponseFrenchPatriotsJoinAllies", "Number": 1 },
@@ -46,7 +50,10 @@
     { "CardName": "ResponseElan", "Number": 1 },
     { "CardName": "EventPolskiePanstwoPodziemne", "Number": 1 },
     { "CardName": "EventForeignLegion", "Number": 1 },
-    { "CardName": "EventArmeedeTerre", "Number": 1 }
+    { "CardName": "EventArmeedeTerre", "Number": 1 },
+    { "CardName": "EventDutchEastIndies_TotalWar", "Number": 1 },
+    { "CardName": "StatusFreeFrance_TotalWar", "Number": 1 },
+    { "CardName": "EventFreeFrenchAllies_TotalWar", "Number": 1 }
   ] },
   { "FactionIndex": 3, "Add": [
     { "CardName": "AirPower", "Number": 3 },
@@ -117,7 +124,10 @@
     { "CardName": "StatusIrredentismoItaliano", "Number": 1 },
     { "CardName": "BolsterSomaliland", "Number": 1 }
   ] },
-  { "FactionIndex": 6, "Add": [
+  { "FactionIndex": 6, "Remove": [
+    { "CardName": "EventFreeFrenchAllies", "Number": 1 },
+    { "CardName": "StatusAmericanVolunteerGroupExpands", "Number": 1 }
+  ], "Add": [
     { "CardName": "AirPower", "Number": 3 },
     { "CardName": "BolsterNavajoCodeTalkers", "Number": 1 },
     { "CardName": "EWOilEmbargo", "Number": 1 },
@@ -143,6 +153,8 @@
     { "CardName": "StatusVictoryGardens", "Number": 1 },
     { "CardName": "EWStalemateInChina", "Number": 1 },
     { "CardName": "EventTheHundredRegimentsOffensive", "Number": 1 },
-    { "CardName": "EWUnitedStatesSubmarinesPatrolJapaneseShippingLanes", "Number": 1 }
+    { "CardName": "EWUnitedStatesSubmarinesPatrolJapaneseShippingLanes", "Number": 1 },
+    { "CardName": "StatusAmericanVolunteerGroupExpands_TotalWar", "Number": 1 },
+    { "CardName": "EventLedoAndBurmaRoads_TotalWar", "Number": 1 }
   ] }
 ]

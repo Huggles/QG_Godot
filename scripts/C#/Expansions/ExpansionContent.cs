@@ -31,15 +31,17 @@ public static class ExpansionContent
     public const string CardsFile = "cards.json";
 
     /// <summary>
-    /// Cards added to factions' decks: <c>[{ "FactionIndex": 1, "Add": [{ "CardName": "AirPower", "Number": 3 }] }]</c>.
-    /// They are numbered after every base card, so the base cards keep their ids.
+    /// Changes to factions' decks: <c>[{ "FactionIndex": 2, "Remove": [...], "Add": [{ "CardName": "AirPower", "Number": 3 }] }]</c>.
+    /// Added cards are numbered after every base card, and a removed base card leaves its id unused, so
+    /// every base card that stays keeps its id.
     /// </summary>
     public const string DecksFile = "decks.json";
 
-    /// <summary>One faction's row in <see cref="DecksFile"/>.</summary>
+    /// <summary>One faction's row in <see cref="DecksFile"/>. Remove takes base cards out, e.g. the ones an expansion substitutes.</summary>
     public sealed class DeckAddition
     {
         public int FactionIndex { get; set; } = -1;
+        public List<DeckCardData> Remove { get; set; } = new();
         public List<DeckCardData> Add { get; set; } = new();
         public Faction Faction => (Faction)FactionIndex;
     }

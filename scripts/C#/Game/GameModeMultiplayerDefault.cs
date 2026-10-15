@@ -96,6 +96,12 @@ public partial class GameModeMultiplayerDefault : IGameMode
         }
 
         int cardCounter = 0;
+        List<ExpansionContent.DeckAddition> deckChanges = ExpansionContent.DeckAdditions();
+        Dictionary<(Faction, string), int> removals = new();
+        foreach (ExpansionContent.DeckAddition change in deckChanges)
+            foreach (DeckCardData removed in change.Remove)
+                removals[(change.Faction, removed.CardName)] = removals.GetValueOrDefault((change.Faction, removed.CardName)) + removed.Number;
+
         // Second pass: build decks & card states
         foreach (DeckData deckData in StaticGameData.DeckDataList)
         {
@@ -107,12 +113,25 @@ public partial class GameModeMultiplayerDefault : IGameMode
             {
                 // for each instance in the count
                 for (int i = 0; i < deckCardData.Number; i++)
+                {
+                    // A removed card leaves its id unused, so every card after it keeps the id it has without expansions.
+                    if (removals.GetValueOrDefault((deckData.Faction, deckCardData.CardName)) > 0)
+                    {
+                        removals[(deckData.Faction, deckCardData.CardName)]--;
+                        cardCounter++;
+                        continue;
+                    }
                     AddCardToDeck(factionState, deckCardData.CardName, ref cardCounter);
+                }
             }
         }
 
+        foreach (((Faction faction, string cardName), int left) in removals)
+            if (left > 0)
+                throw new Exception($"An expansion removes {left} more {cardName} from {faction}'s deck than it holds");
+
         // After every base card, so the base cards keep the ids they have without expansions.
-        foreach (ExpansionContent.DeckAddition addition in ExpansionContent.DeckAdditions())
+        foreach (ExpansionContent.DeckAddition addition in deckChanges)
         {
             FactionState factionState = FactionState.ForEnum(addition.Faction);
             foreach (DeckCardData deckCardData in addition.Add)

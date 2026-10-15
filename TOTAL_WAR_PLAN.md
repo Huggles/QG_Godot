@@ -131,8 +131,10 @@ never shift.
 - `data/scenarios/`: listed in the menus next to the base scenarios.
 - `ContentPaths.Resolve("textures/…")`: an enabled expansion's `assets/` first, then base `assets/`.
 - `data/cards.json`: card definitions appended to `CardDataList` (setting it resets the by-name cache).
-- `data/decks.json`: per-faction `Add` lists, instantiated after every base card so base card ids never
-  move. Built in M3 for the Air Power cards; `Remove` (the substitutes) is still M5.
+- `data/decks.json`: per-faction `Add` lists, instantiated after every base card, and `Remove` lists, whose
+  cards leave their ids unused, so every base card that stays keeps its id. An expansion removing a card
+  the deck doesn't hold stops the session. `Scenario_Debug_AirForces` deals the UK its whole opening hand,
+  so the Air step tests don't depend on the UK's deck.
 - Card art for expansion card types (`AIR_POWER`, `BOLSTER`) resolves through `ContentPaths`;
   `FactionData.LoadCardTextures` skips a type with no art, so the base game loads none.
 
@@ -299,8 +301,7 @@ Rule parameters on the `RuleSet`, supplied by `TotalWarRules`; core only reads t
 - Discard step: no card discarded → the team loses 1 VP (`Steps/DiscardStepHandlerDefault.cs`, via
   `ScorePointsChangeEvent`).
 - Reallocate Resources costs 3 (`MutatorReallocateResources`).
-- Deck overlay: per-faction `Remove` lists in `data/decks.json` (substitutes remove base cards). The `Add`
-  lists and `data/cards.json` exist since M3.
+- Deck overlay: done (`Add` since M3, `Remove` with the substitutes).
 
 ### M6 — Bots and sim
 Bots answer every new prompt at random (pass included), no new rules or valuation.
@@ -344,8 +345,11 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
   same way, under `scripts/Cards/Japan|UK|Italy/`; five `ECONOMIC_WARFARE` → `EW`. All six countries'
   cards are now in (127 Total War cards, 1000–1128 less 1040/1042). Check in the GUI that "Polskie Państwo
   Podziemne" renders: "ń" is outside Latin-1, unlike the other accented names.
-- **Not in any of the six files:** the five substitutes (Dutch East Indies, Free France, Free French Allies,
-  American Volunteer Group Expands, Ledo and Burma Roads), which need `decks.json` `Remove` (M5).
+- **Substitutes: data in, effects not built.** From `TW_Substitutes.json` (printed #129–133): each replaces
+  the base card of the same name through a `decks.json` `Remove`, as `<BaseName>_TotalWar` (1129–1133,
+  following base's `EventPlunder_Germany`). Dutch East Indies and Free France stay with the UK, American
+  Volunteer Group Expands with the US. Two switch decks, each to the patron of the minor faction it now
+  acts for (confirmed): Ledo and Burma Roads UK → US (China), Free French Allies US → UK (France).
 - Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);
   unbuilt Bolsters cannot be used until M4.
 - **Numbering:** Total War cards are `1000 + printed number` (US #1–25 → 1001–1025, Germany 1026–1047);

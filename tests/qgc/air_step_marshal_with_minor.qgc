@@ -3,7 +3,8 @@
 # Total War Air step: Marshal, then the patron's extra marshal of its minor ally's Air Force. A marshal
 # asks which Air Force, then where, then which card pays. The UK moves its Air Force from Western
 # Europe to the North Sea (any space with its own supplied Army or Navy), then marshals France's Air
-# Force, which may stay where it is (its only French space) to trigger a reaction.
+# Force, which may stay where it is (its only French space) to trigger a reaction. The scenario deals
+# the UK its whole opening hand, so the UK's cards are named rather than numbered.
 #
 # Run:  tests/run-cli.sh tests/qgc/air_step_marshal_with_minor.qgc
 
@@ -15,16 +16,16 @@ pass                                    # Germany's Discard step
 
 assert handsize UNITED_KINGDOM == 7     # turn 2, the United Kingdom
 pass                                    # no play
-answer id=64                            # discard Singapore Fortified
+select Singapore Fortified              # discard it
 select Marshal
 answer id=65                            # the UK's Air Force: asked even though it is the only one
 select North Sea
-answer id=246                           # pay with the Air Power card: any card will do
+select Air Power                        # pay with the Air Power card: any card will do
 assert promptfaction == UNITED_KINGDOM  # France has no seat: its patron is asked
 select Marshal
 answer id=74                            # France's Air Force
 select Western Europe
-answer id=47                            # pay with Build Navy
+select Build Navy                       # pay with it
 
 prompt                                  # wait for the moves to settle
 assert airforce NORTH_SEA UNITED_KINGDOM == 1
