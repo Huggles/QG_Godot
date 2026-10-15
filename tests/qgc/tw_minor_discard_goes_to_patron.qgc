@@ -1,0 +1,26 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# France and China have no deck or hand, so a discard aimed at one falls to its patron (UK, US).
+# Here France battles Germany's Army in Western Europe and Germany's base Atlantic Wall makes "the
+# attacker" discard 3: the United Kingdom pays, and nobody loses VP for an empty deck.
+# Set up by injection: Atlantic Wall (22) onto Germany's table, Free France (270) onto the UK's so the
+# French Navy in the North Sea is supplied, and a German Army in place of the French one.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_minor_discard_goes_to_patron.qgc
+
+prompt                                  # turn 1, Germany
+force playcard --card 22
+force playcard --card 270
+force removeunit --faction GERMANY --unit 56 --reason ELIMINATE
+force deployunit --faction GERMANY --country WESTERN_EUROPE
+force deployunit --faction FRANCE --country NORTH_SEA
+
+api battleunit --faction FRANCE --unit 2
+prompt                                  # Germany's after-reaction window
+select Atlantic Wall
+
+assert decksize UNITED_KINGDOM == 54
+assert discardsize UNITED_KINGDOM == 3
+assert score UNITED_KINGDOM == 0
+assert score FRANCE == 0
+quit

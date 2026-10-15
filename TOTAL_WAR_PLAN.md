@@ -233,7 +233,9 @@ in Exile) and China; own supply; scored in the patron's Victory step; the patron
 supply, scores them, may additionally marshal their Air Force in the Air step, and repositions it. Cards
 that don't name France/China never act on or react to their pieces. France and China have no deck or
 hand: whatever would make them discard (Landkreuzers, Westwall, base Atlantic Wall after a French battle)
-makes their patron discard instead (confirmed).
+makes their patron discard instead, France → UK and China → US (confirmed). Done in core: the two forced-
+discard events send a minor target to `StaticGameData.ControllerOf` (base unchanged, there are no minors);
+`tests/qgc/tw_minor_discard_goes_to_patron.qgc`.
 
 **Air Forces:** at most one per country per space, only with its own Army or Navy; supplied if that piece
 is. In the Air step a country does at most one of:

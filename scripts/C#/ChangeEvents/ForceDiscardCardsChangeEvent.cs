@@ -24,10 +24,11 @@ public partial class ForceDiscardCardsChangeEvent : ChangeEvent
     /// </summary>
     public bool ModifiersApplied { get; set; } = false;
 
+    /// <summary>A minor faction (France, China) has no deck: its patron discards instead. The base game has none, so there it is the target itself.</summary>
     public ForceDiscardCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards) : base(triggeringFaction)
     {
         TriggeringFaction = triggeringFaction;
-        TargetFaction = targetFaction;
+        TargetFaction = StaticGameData.ControllerOf(targetFaction);
         NumberOfCards = numberOfCards;
     }
 

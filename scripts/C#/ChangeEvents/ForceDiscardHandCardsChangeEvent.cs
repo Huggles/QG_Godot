@@ -36,10 +36,11 @@ public partial class ForceDiscardHandCardsChangeEvent : ChangeEvent
     /// </summary>
     public bool AutoDiscardOnAbort { get; set; }
 
+    /// <summary>A minor faction (France, China) has no hand: its patron discards instead. The base game has none, so there it is the target itself.</summary>
     public ForceDiscardHandCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, int numberOfCards) : base(triggeringFaction)
     {
         TriggeringFaction = triggeringFaction;
-        TargetFaction = targetFaction;
+        TargetFaction = StaticGameData.ControllerOf(targetFaction);
         NumberOfCards = numberOfCards;
     }
 
