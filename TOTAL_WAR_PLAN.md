@@ -340,6 +340,12 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
   same way, under `scripts/Cards/Soviet/` (Response cards extend `ResponseCardLogic`). Only fix needed:
   `PeopleSLiberationArmy` → `StatusPeoplesLiberationArmy`. Operation Zet has exactly Flying Tigers' text;
   check it against the card.
+- **Japan, United Kingdom, Italy: data in, effects not built.** 22 + 21 + 19 cards (printed #67–128), the
+  same way, under `scripts/Cards/Japan|UK|Italy/`; five `ECONOMIC_WARFARE` → `EW`. All six countries'
+  cards are now in (127 Total War cards, 1000–1128 less 1040/1042). Check in the GUI that "Polskie Państwo
+  Podziemne" renders: "ń" is outside Latin-1, unlike the other accented names.
+- **Not in any of the six files:** the five substitutes (Dutch East Indies, Free France, Free French Allies,
+  American Volunteer Group Expands, Ledo and Burma Roads), which need `decks.json` `Remove` (M5).
 - Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);
   unbuilt Bolsters cannot be used until M4.
 - **Numbering:** Total War cards are `1000 + printed number` (US #1–25 → 1001–1025, Germany 1026–1047);

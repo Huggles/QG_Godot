@@ -1,0 +1,6 @@
+using System.Collections.Generic;
+
+public partial class EventLesForcesNavalesFrancaisesLibres : EventCardLogic
+{
+    public override List<CardStep> OnActivate() => new();
+}

@@ -583,5 +583,563 @@
     "Label": "Retreat and Regroup",
     "Text": "Use when your Army in Moscow or Ukraine is removed. Recruit Armies in both Siberia and Kazakhstan.",
     "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseJapanArmsIndianNationalists",
+    "Number": "1067",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseJapanArmsIndianNationalists",
+    "Label": "Japan Arms Indian Nationalists",
+    "Text": "Use when you battle in India. Build an Army in India.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseMarcoPoloBridgeIncident",
+    "Number": "1068",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseMarcoPoloBridgeIncident",
+    "Label": "Marco Polo Bridge Incident",
+    "Text": "Use at the beginning of your Play step. Battle in China or an adjacent land space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWFuGoBalloonBombs",
+    "Number": "1069",
+    "Type": "EW",
+    "ExecutionClass": "EWFuGoBalloonBombs",
+    "Label": "Fu-Go Balloon Bombs",
+    "Text": "Gain +1 Victory Point. Instead of discarding this card, you may discard 3 other cards from hand and return this card to your hand.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseSubmarinesSupportFleet",
+    "Number": "1070",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseSubmarinesSupportFleet",
+    "Label": "Submarines Support Fleet",
+    "Text": "Use when you build a Navy. Sea battle 1 or 2 times adjacent to the Navy just built.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseSNLFParatroopers",
+    "Number": "1071",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseSNLFParatroopers",
+    "Label": "SNLF Paratroopers",
+    "Text": "Use when you build a Navy. Land battle 1 or 2 times adjacent to the Navy just built.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusJapaneseMandateForTheSouthSeasIslands",
+    "Number": "1072",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusJapaneseMandateForTheSouthSeasIslands",
+    "Label": "Japanese Mandate for the South Seas Islands",
+    "Text": "During your Victory step, gain +1 Victory Point if you have a Navy in the Central Pacific.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWJapaneseFleetBlockadesVladivostok",
+    "Number": "1073",
+    "Type": "EW",
+    "ExecutionClass": "EWJapaneseFleetBlockadesVladivostok",
+    "Label": "Japanese Fleet Blockades Vladivostok",
+    "Text": "For each Japanese Navy and Air Force in the Sea of Japan, gain a +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseKantaiKessen",
+    "Number": "1074",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseKantaiKessen",
+    "Label": "Kantai Kessen",
+    "Text": "Use at the beginning of your Play step. Battle a sea space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterMitsubishiJ8M",
+    "Number": "1075",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterMitsubishiJ8M",
+    "Label": "Mitsubishi J8M",
+    "Text": "Use at the beginning of your Draw step. Eliminate an Allied Air Force adjacent to your Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusAbsoluteNationalDefenseSphere",
+    "Number": "1076",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusAbsoluteNationalDefenseSphere",
+    "Label": "Absolute National Defense Sphere",
+    "Text": "During your Victory step, gain +1 Victory Point if you have 3 or more Navies on the board.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterTorai",
+    "Number": "1077",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterTorai",
+    "Label": "Torai",
+    "Text": "Use when you gain air superiority in or adjacent to the Central Pacific. Discard a Response card from your hand to battle the space from which the enemy Air Force was just removed.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterImperialJapaneseNavy",
+    "Number": "1078",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterImperialJapaneseNavy",
+    "Label": "Imperial Japanese Navy",
+    "Text": "Use when you build a Navy. Discard a Response card from your hand to build an additional Navy.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterNagumoCommandsTheFirstAirFleet",
+    "Number": "1079",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterNagumoCommandsTheFirstAirFleet",
+    "Label": "Nagumo Commands the First Air Fleet",
+    "Text": "Use when you deploy or marshal an Air Force to a sea space. Discard a Response card from your hand to battle a space adjacent to that Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseImperialManchukuoArmy",
+    "Number": "1080",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseImperialManchukuoArmy",
+    "Label": "Imperial Manchukuo Army",
+    "Text": "Use at the beginning of your Play step. Recruit an Army in China.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterYamamotoAboardTheYamato",
+    "Number": "1081",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterYamamotoAboardTheYamato",
+    "Label": "Yamamoto aboard the Yamato",
+    "Text": "Use at the beginning of your Play step. Discard a Response card from your hand to deploy an Air Force in a space with your supplied Navy.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWBombingOfChongqing",
+    "Number": "1082",
+    "Type": "EW",
+    "ExecutionClass": "EWBombingOfChongqing",
+    "Label": "Bombing of Chongqing",
+    "Text": "For each Japanese Air Force in or adjacent to Szechuan, gain +1 Victory Point and the United States must discard the top 2 cards of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterThePacificEmpire",
+    "Number": "1083",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterThePacificEmpire",
+    "Label": "The Pacific Empire",
+    "Text": "Use during your Victory step. Score +1 Victory Point for each Japanese Navy that occupies a space with \"Pacific\" in the title.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterIslandFortresses",
+    "Number": "1084",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterIslandFortresses",
+    "Label": "Island Fortresses",
+    "Text": "Use at the beginning of your Victory step. Discard a Response card from your hand to recruit an Army in Indonesia, New Guinea, Iwo Jima, or the Philippines.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusHokushinRon",
+    "Number": "1085",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusHokushinRon",
+    "Label": "Hokushin-ron",
+    "Text": "During your Victory step, gain +1 Victory Point for each Army you have in Vladivostok and Siberia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseChineseCivilWar",
+    "Number": "1086",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseChineseCivilWar",
+    "Label": "Chinese Civil War",
+    "Text": "Use at the beginning of your Play step. Eliminate a Chinese Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseThailand",
+    "Number": "1087",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseThailand",
+    "Label": "Thailand",
+    "Text": "Use at the beginning of your Play step. Recruit an Army in Southeast Asia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterCodeOfBushido",
+    "Number": "1088",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterCodeOfBushido",
+    "Label": "Code of Bushido",
+    "Text": "Use when your Army is battled. Discard a Response card from your hand and do not remove the Army due to that battle.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterWarsawUprising",
+    "Number": "1089",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterWarsawUprising",
+    "Label": "Warsaw Uprising",
+    "Text": "Use at the beginning of your Victory step. Discard 2 cards from your hand to recruit an Army in Eastern Europe.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseFrenchPatriotsJoinAllies",
+    "Number": "1090",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseFrenchPatriotsJoinAllies",
+    "Label": "French Patriots Join Allies",
+    "Text": "Use immediately after the United States, France, or the United Kingdom battles in North Africa, Africa, Middle East, or Western Europe. Recruit a French Army in the space battled.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterBletchleyPark",
+    "Number": "1091",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterBletchleyPark",
+    "Label": "Bletchley Park",
+    "Text": "Use when the Axis declares its intention to use a Bolster card, but before any text is resolved. Discard 1 card from hand to discard the Axis Bolster card without resolving its text.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventFranceCombattante",
+    "Number": "1092",
+    "Type": "EVENT",
+    "ExecutionClass": "EventFranceCombattante",
+    "Label": "France Combattante",
+    "Text": "Build a French Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterKeepCalmandCarryOn",
+    "Number": "1093",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterKeepCalmandCarryOn",
+    "Label": "Keep Calm and Carry On",
+    "Text": "Use when the Axis declares its intention to use a Status card, but before any text is resolved. Discard 1 card from your hand to prevent the Axis from using that Status card this turn.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusPolishSovereignty",
+    "Number": "1094",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusPolishSovereignty",
+    "Label": "Polish Sovereignty",
+    "Text": "United Kingdom Armies in Eastern Europe are always in supply. During your Play step, instead of playing a card from hand, you may recruit a United Kingdom Army in Eastern Europe.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterMaginotLine",
+    "Number": "1095",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterMaginotLine",
+    "Label": "Maginot Line",
+    "Text": "Use at any time. Discard 4 cards from hand to prevent a French Army in Western Europe from being removed this turn.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventLesForcesNavalesFrancaisesLibres",
+    "Number": "1096",
+    "Type": "EVENT",
+    "ExecutionClass": "EventLesForcesNavalesFrancaisesLibres",
+    "Label": "Les Forces Navales Françaises Libres",
+    "Text": "Build a French Navy.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusHobartsFunnies",
+    "Number": "1097",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusHobartsFunnies",
+    "Label": "Hobart's Funnies",
+    "Text": "Axis Status cards are ignored during the United Kingdom turn.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventFreeForcesoftheLowCountries",
+    "Number": "1098",
+    "Type": "EVENT",
+    "ExecutionClass": "EventFreeForcesoftheLowCountries",
+    "Label": "Free Forces of the Low Countries",
+    "Text": "Recruit a French Army in Western Europe, or battle Western Europe if a supplied French piece is adjacent.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventRhinetDanube",
+    "Number": "1099",
+    "Type": "EVENT",
+    "ExecutionClass": "EventRhinetDanube",
+    "Label": "Rhin et Danube",
+    "Text": "Battle a land space adjacent to a supplied French piece.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterArmeedelAir",
+    "Number": "1100",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterArmeedelAir",
+    "Label": "Armée de l'Air",
+    "Text": "Use at the beginning of your Air step. Deploy a French Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterSpecialAirServiceRaidsAirfields",
+    "Number": "1101",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterSpecialAirServiceRaidsAirfields",
+    "Label": "Special Air Service Raids Airfields",
+    "Text": "Use at the beginning of your Play step. Discard 2 cards from your hand to eliminate an Axis Air Force adjacent to your Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusGovernmentinExile",
+    "Number": "1102",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusGovernmentinExile",
+    "Label": "Government in Exile",
+    "Text": "If Western Europe is occupied by an Axis Army, the United Kingdom is France's Home space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventLaRoyale",
+    "Number": "1103",
+    "Type": "EVENT",
+    "ExecutionClass": "EventLaRoyale",
+    "Label": "La Royale",
+    "Text": "Build a French Navy.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterBritishColonialForces",
+    "Number": "1104",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterBritishColonialForces",
+    "Label": "British Colonial Forces",
+    "Text": "Use at the beginning of your Victory step. Discard 2 cards from your hand to recruit an Army in North Africa, Middle East, Southeast Asia, or Indonesia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusSenegaleseTirailleurs",
+    "Number": "1105",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusSenegaleseTirailleurs",
+    "Label": "Senegalese Tirailleurs",
+    "Text": "Allied Armies in Africa are always in supply. During your Play step, instead of playing a card from hand, you may recruit a French Army in Africa.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseElan",
+    "Number": "1106",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseElan",
+    "Label": "Élan",
+    "Text": "Use when a French Army is about to be removed. Do not remove that Army this turn.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventPolskiePanstwoPodziemne",
+    "Number": "1107",
+    "Type": "EVENT",
+    "ExecutionClass": "EventPolskiePanstwoPodziemne",
+    "Label": "Polskie Państwo Podziemne",
+    "Text": "Eliminate an Axis Army in Eastern Europe.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventForeignLegion",
+    "Number": "1108",
+    "Type": "EVENT",
+    "ExecutionClass": "EventForeignLegion",
+    "Label": "Foreign Legion",
+    "Text": "Recruit a French Army in Africa, North Africa, Madagascar, Southeast Asia, New Guinea, or the Middle East.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventArmeedeTerre",
+    "Number": "1109",
+    "Type": "EVENT",
+    "ExecutionClass": "EventArmeedeTerre",
+    "Label": "Armée de Terre",
+    "Text": "Build a French Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusTurkeyOpensTheStraits",
+    "Number": "1110",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusTurkeyOpensTheStraits",
+    "Label": "Turkey Opens the Straits",
+    "Text": "For the Axis, the Middle East is adjacent to the Balkans, and the Black Sea is adjacent to the Mediterranean Sea.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventSpain",
+    "Number": "1111",
+    "Type": "EVENT",
+    "ExecutionClass": "EventSpain",
+    "Label": "Spain",
+    "Text": "Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean or North Sea.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterSupermarina",
+    "Number": "1112",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterSupermarina",
+    "Label": "Supermarina",
+    "Text": "Use during your Victory step. Gain +1 Victory Point per Italian Navy on the board.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseAlpini",
+    "Number": "1113",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseAlpini",
+    "Label": "Alpini",
+    "Text": "Use when your Army is battled in or adjacent to Italy. Do not remove that Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterBETASOM",
+    "Number": "1114",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterBETASOM",
+    "Label": "BETASOM",
+    "Text": "Use when Germany plays an Economic Warfare card with the word \"Submarines\" in its title. The Allied country targeted by the card must discard 3 additional cards from the top of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterPactOfSteel",
+    "Number": "1115",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterPactOfSteel",
+    "Label": "Pact of Steel",
+    "Text": "Use at any time. Germany may discard between 0 and 5 cards from its hand, then Italy may take the same number of random cards from its discard pile and place them on top of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseOperationUnthinkable",
+    "Number": "1116",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseOperationUnthinkable",
+    "Label": "Operation Unthinkable",
+    "Text": "Use immediately after the Soviet Union builds an Army. If the United Kingdom or United States has an Army adjacent to the Soviet Army just built, eliminate that Soviet Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterGoldenSquareCoup",
+    "Number": "1117",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterGoldenSquareCoup",
+    "Label": "Golden Square Coup",
+    "Text": "Use at the beginning of your Victory step. Recruit an Army in the Middle East.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventRezaShahSupportsAxis",
+    "Number": "1118",
+    "Type": "EVENT",
+    "ExecutionClass": "EventRezaShahSupportsAxis",
+    "Label": "Reza Shah supports Axis",
+    "Text": "Eliminate an Allied Army in the Middle East.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWOperationPike",
+    "Number": "1119",
+    "Type": "EW",
+    "ExecutionClass": "EWOperationPike",
+    "Label": "Operation Pike",
+    "Text": "If the United Kingdom has an Army within 2 spaces of Ukraine, the Soviet Union must discard the top 2 cards of its draw deck. Gain +1 Victory Point.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusSpanishTroopsSeizeGibraltar",
+    "Number": "1120",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusSpanishTroopsSeizeGibraltar",
+    "Label": "Spanish Troops Seize Gibraltar",
+    "Text": "The North Sea and Mediterranean are never adjacent for the Allies, and always adjacent for the Axis.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterRegiaAeronautica",
+    "Number": "1121",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterRegiaAeronautica",
+    "Label": "Regia Aeronautica",
+    "Text": "Use when you are the target of an Economic Warfare card. Remove your Air Force from the board instead of discarding cards.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventWafdistUprising",
+    "Number": "1122",
+    "Type": "EVENT",
+    "ExecutionClass": "EventWafdistUprising",
+    "Label": "Wafdist Uprising",
+    "Text": "Eliminate an Allied Army in North Africa.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWOperationLobster",
+    "Number": "1123",
+    "Type": "EW",
+    "ExecutionClass": "EWOperationLobster",
+    "Label": "Operation Lobster",
+    "Text": "The United Kingdom must discard the top 2 cards of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventOperationHerkules",
+    "Number": "1124",
+    "Type": "EVENT",
+    "ExecutionClass": "EventOperationHerkules",
+    "Label": "Operation Herkules",
+    "Text": "Recruit an Italian Navy and a German Navy in the Mediterranean.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventGiulianiCappelliniAndTorelli",
+    "Number": "1125",
+    "Type": "EVENT",
+    "ExecutionClass": "EventGiulianiCappelliniAndTorelli",
+    "Label": "Giuliani, Cappellini, and Torelli",
+    "Text": "Germany, Italy, and Japan takes a random card from their discard pile and places it on top of their draw decks. Gain +1 Victory Point.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterItalyCompletesCarriers",
+    "Number": "1126",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterItalyCompletesCarriers",
+    "Label": "Italy Completes Carriers",
+    "Text": "Use at the beginning of your Play step. Discard 1 card from your hand to deploy or marshal an Air Force in a space with your Navy.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusIrredentismoItaliano",
+    "Number": "1127",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusIrredentismoItaliano",
+    "Label": "Irredentismo Italiano",
+    "Text": "During your Victory step, gain +1 Victory Point if you have an Army in Western Europe.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterSomaliland",
+    "Number": "1128",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterSomaliland",
+    "Label": "Somaliland",
+    "Text": "Use at the beginning of your Victory step. Recruit an Army in Africa.",
+    "MultipleActivationsPerTurn": false
   }
 ]
