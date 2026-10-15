@@ -1,0 +1,40 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Total War country cards that move cards between piles:
+#   - Strategic Planning: take 1 or 2 cards from the draw deck into hand, discard 1, shuffle.
+#   - Fu-Go Balloon Bombs: +1 VP; discarding 3 other cards brings it back to hand once the Play step
+#     ends (moved mid-play, the card would be re-armed and run again).
+# Card ids are pinned to the seed in the #!args line.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_cards_deck_and_return.qgc
+
+prompt                                  # turn 1, Germany
+select Strategic Planning
+answer id=2                             # Build Army from the deck
+answer id=12                            # and Land Battle
+select Sweden Supports Finland          # the discard
+
+prompt                                  # Germany's Air step
+assert card 2 in hand
+assert card 12 in hand
+assert handsize GERMANY == 7
+assert decksize GERMANY == 57
+select Pass
+pass                                    # Germany's Discard step
+
+prompt                                  # turn 2, the United Kingdom
+select Rhin et Danube
+answer id=38
+select Pass
+pass
+
+prompt                                  # turn 3, Japan
+select Fu-Go Balloon Bombs
+answer id=0                             # discard 3 to take it back
+answer id=293,281,294
+
+prompt                                  # Japan's Air step: the Play step is over
+assert card 277 in hand
+assert score JAPAN == 1
+assert discardsize JAPAN == 3
+quit

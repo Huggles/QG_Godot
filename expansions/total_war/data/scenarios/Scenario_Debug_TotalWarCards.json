@@ -10,7 +10,7 @@
   "factions": {
     "GERMANY": {
       "unitDeployments": [ { "countryName": "GERMANY" }, { "countryName": "EASTERN_EUROPE" }, { "countryName": "BALTIC_SEA" } ],
-      "initialHandCards": [ { "name": "EventFallWeiss" }, { "name": "EventSeaLion" }, { "name": "EWElektrobootSubmarines" }, { "name": "EventTurkeyJoinsAxis" },
+      "initialHandCards": [ { "name": "EventFallWeiss" }, { "name": "EventProductionInitiative" }, { "name": "EWElektrobootSubmarines" }, { "name": "EventStrategicPlanning" },
                             { "name": "BuildArmy" }, { "name": "LandBattle" }, { "name": "EventSwedenSupportsFinland" } ],
       "startingVP": 0
     },
@@ -23,7 +23,7 @@
     "JAPAN": {
       "unitDeployments": [ { "countryName": "JAPAN" }, { "countryName": "SEA_OF_JAPAN" } ],
       "initialHandCards": [ { "name": "ResponseThailand" }, { "name": "StatusHokushinRon" }, { "name": "EWJapaneseFleetBlockadesVladivostok" }, { "name": "ResponseKantaiKessen" },
-                            { "name": "ResponseChineseCivilWar" }, { "name": "StatusAbsoluteNationalDefenseSphere" }, { "name": "ResponseImperialManchukuoArmy" } ],
+                            { "name": "ResponseChineseCivilWar" }, { "name": "EWFuGoBalloonBombs" }, { "name": "ResponseImperialManchukuoArmy" } ],
       "startingVP": 0
     },
     "SOVIET": {

@@ -231,7 +231,9 @@ Resources costs 3 cards.
 **France and China:** Allied minor countries, home spaces Western Europe (moves to the UK via Government
 in Exile) and China; own supply; scored in the patron's Victory step; the patron (UK / US) checks their
 supply, scores them, may additionally marshal their Air Force in the Air step, and repositions it. Cards
-that don't name France/China never act on or react to their pieces.
+that don't name France/China never act on or react to their pieces. France and China have no deck or
+hand: whatever would make them discard (Landkreuzers, Westwall, base Atlantic Wall after a French battle)
+makes their patron discard instead (confirmed).
 
 **Air Forces:** at most one per country per space, only with its own Army or Navy; supplied if that piece
 is. In the Air step a country does at most one of:
@@ -350,8 +352,8 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
   following base's `EventPlunder_Germany`). Dutch East Indies and Free France stay with the UK, American
   Volunteer Group Expands with the US. Two switch decks, each to the patron of the minor faction it now
   acts for (confirmed): Ledo and Burma Roads UK → US (China), Free French Allies US → UK (France).
-- **Effects, the Easy batch: built.** 64 of the 81 Status/Event/Response/EW cards (all but the 17 below),
-  in the expansion only, on shared helpers in `scripts/Cards/TotalWarCards.cs`:
+- **Effects, the Easy batch: built.** 64 Status/Event/Response/EW cards, in the expansion only, on
+  shared helpers in `scripts/Cards/TotalWarCards.cs`:
   - `DeployStep`/`BattleStep` read the card's faction when the step runs, because `OnActivate` builds
     steps before the card is dealt to a country (capturing `Faction` there gives `NONE`).
   - `DeployStepFor`/`BattleStepFor` act for a country the card names. France and China battle as
@@ -362,12 +364,16 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     `ImmuneForTurn`). Alpini protects for the turn, as the base removal-blockers do.
   - Test setup: `Scenario_Debug_TotalWarCards` deals each country its own cards;
     `tests/qgc/tw_cards_minor_and_extra_play.qgc`.
-- **Effects, Medium (11): each needs one small core hook.**
+- **Effects, three more: built.** First counted as Medium, but existing pieces cover them:
+  - Production Initiative and Strategic Planning shuffle with `ReorderDeckChangeEvent` and a
+    host-drawn order (`TotalWarCards.ShuffleStep`), as the opening shuffle does.
+  - Fu-Go Balloon Bombs returns to hand through `MutatorRecycleAfterStep` after the Play step, as
+    Women Conscripts does: a card moved mid-play is re-armed and DoCard would run it again.
+  - Tested by `tests/qgc/tw_cards_deck_and_return.qgc`.
+- **Effects, Medium (8): each needs one small core hook.**
   - "Every time" Statuses are re-armed only per turn: Landkreuzers, Westwall, Anti-Japanese Volunteer Armies.
   - Reallocate Resources has no modifier seam: War Bonds, Victory Gardens (and M5's cost of 3).
-  - There is no shuffle event: Production Initiative, Strategic Planning.
   - Removal protection doesn't cover ELIMINATE/SUPPLY, and supply removals open no window: Élan.
-  - A played card can't return to hand: Fu-Go Balloon Bombs.
   - The Discard step exposes no discarded cards: Attrition.
   - There is no strait-control override: Spanish Troops Seize Gibraltar.
 - **Effects, Hard (6): each needs a new rule system.**

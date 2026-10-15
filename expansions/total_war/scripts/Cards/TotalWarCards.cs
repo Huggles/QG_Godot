@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Board questions the Total War cards share. A card that doesn't name France or China never acts on
@@ -86,6 +87,28 @@ public static class TotalWarCards
         new ResultStep(card, Choose.BattleTargetFrom(c => targets(c.Situation), (target, c) => target.ToAttackChangeEvent(attacker(), c.Board)))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => (canUse == null || canUse(s.Board)) && targets(s).Count > 0), card))
             .WithGuidance(guidance);
+
+    /// <summary>
+    /// "Shuffle your draw deck": the host draws the order from GameRandom and the reorder event carries it,
+    /// as the opening shuffle does. Free-form, not Choose.Fixed, whose factory a preview may run and must not draw.
+    /// </summary>
+    public static CardStep ShuffleStep(CardLogic card) =>
+        new RequirementStep(card, async () => {
+            List<int> order = new(DeckState.ForFaction(card.Faction).DeckCardIds);
+            GameRandom.Shuffle(order);
+            await Task.CompletedTask;
+            return new ReorderDeckChangeEvent(card.Faction, order);
+        })
+        .WithGuidance("Shuffle its draw deck");
+
+    /// <summary>The faction's draw deck, one card per name in name order: copies are interchangeable, and the list says nothing of the deck's order.</summary>
+    public static List<int> DeckChoices(BoardState board, Faction faction, Func<CardData, bool> filter = null) =>
+        board.ForFaction(faction).Deck
+            .Where(cardId => filter == null || filter(CardState.ForId(cardId).CardData))
+            .GroupBy(cardId => CardState.ForId(cardId).CardData.UniqueName)
+            .OrderBy(sameName => CardState.ForId(sameName.First()).CardData.Label)
+            .Select(sameName => sameName.First())
+            .ToList();
 
     /// <summary>"Use at the beginning of your Play step": your Play step with the play unspent, as ResponseMobileForce. Pair with IsFreePlayStepActivation.</summary>
     public static List<Condition> AtPlayStepStart(CardLogic card) => new()
