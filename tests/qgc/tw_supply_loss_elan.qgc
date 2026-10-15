@@ -1,0 +1,37 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# A unit lost to supply goes through the reaction pipeline: the block window opens for the unit's own
+# team, and only for a faction holding a card that answers the removal (no always-ask cover). Élan
+# saves the French Army, and "do not remove that Army this turn" then also stops an elimination later
+# in the same turn.
+# Set up by injection on Germany's turn: Élan (265) onto the UK's table and a French Army in North
+# Africa, which has no supply line.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_supply_loss_elan.qgc
+
+prompt                                  # turn 1, Germany
+force playcard --card 265
+force deployunit --faction FRANCE --country NORTH_AFRICA
+pass                                    # no play: discard 1
+select Sweden Supports Finland
+prompt
+select Pass                             # Germany's Air step
+prompt
+pass                                    # Germany's Discard step
+
+prompt                                  # turn 2, the United Kingdom
+pass                                    # no play: discard 1
+prompt
+select Foreign Legion
+prompt
+select Pass                             # the UK's Air step
+
+prompt                                  # Supply step: France's Army in North Africa is unsupplied
+select Élan
+
+prompt                                  # the UK's Discard step
+assert occupant NORTH_AFRICA == FRANCE
+api removeunit --faction GERMANY --unit 57 --reason ELIMINATE
+assert occupant NORTH_AFRICA == FRANCE  # still protected this turn
+assert errors == 0
+quit

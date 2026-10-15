@@ -337,6 +337,17 @@ public partial class CardPlayRound : GodotObject
                 "DoChangeEvent must not be called for introduction events. Use DoCard instead.");
         }
 
+        // "Do not remove that Army this turn" holds against every removal, not only battles: an
+        // elimination or supply loss of a protected unit is blocked here, before any window.
+        if (changeEvent is RemoveUnitChangeEvent { Reason: UnitRemovalReason.BATTLE or UnitRemovalReason.ELIMINATE or UnitRemovalReason.SUPPLY } removal
+            && BoardState.Live.ImmuneForTurn(removal.UnitState))
+        {
+            changeEvent.IsBlocked = true;
+            await new ShowActionLabelPresentationEvent(removal.UnitState.Faction,
+                $"{removal.UnitState.Faction.WithPlayer()}'s {removal.UnitState.Type.ToString().ToLower()} is protected this turn and is not removed").Apply();
+            return;
+        }
+
         RegisterChangeEvent(changeEvent);
 
         // Which team is offered the block is RequestBlockReactions' own business now — it is the
@@ -525,8 +536,12 @@ public partial class CardPlayRound : GodotObject
         {
             // Only the team that did not cause the event is offered a block. Every block card in the
             // game reacts to an opponent's unit removal or forced discard, so a turn for the acting
-            // team would be an empty window in every case that actually exists.
-            FactionTeam team = StaticGameData.OpponentFactionTeamForFaction(changeEvent.TriggeringFaction);
+            // team would be an empty window in every case that actually exists. A supply loss has no
+            // cause: the unit's own team is asked, its owner included (Leningrad saves a Soviet Army).
+            bool supplyLoss = IsSupplyLoss(changeEvent);
+            FactionTeam team = supplyLoss
+                ? ((RemoveUnitChangeEvent)changeEvent).UnitState.FactionTeam
+                : StaticGameData.OpponentFactionTeamForFaction(changeEvent.TriggeringFaction);
             HashSet<Faction> passed = new();
 
             while (!changeEvent.IsBlocked)
@@ -549,11 +564,11 @@ public partial class CardPlayRound : GodotObject
                 Dictionary<Faction, List<int>> offers = new();
                 foreach (Faction faction in StaticGameData.FactionsForTeam(team))
                 {
-                    if (faction == changeEvent.TriggeringFaction) continue;   // nobody blocks their own action
+                    if (!supplyLoss && faction == changeEvent.TriggeringFaction) continue;   // nobody blocks their own action
                     if (passed.Contains(faction)) continue;
 
                     List<int> options = GetBlockReactionOptions(faction);
-                    if (!ShouldOpenReactionWindow(faction, options))
+                    if (!ShouldOpenReactionWindow(faction, options, coverHidden: !supplyLoss))
                     {
                         DebugUtilities.PrintPeer(
                             $"{faction} is not offered a block window (no block reactions, and nothing hidden to cover for)");
@@ -629,7 +644,7 @@ public partial class CardPlayRound : GodotObject
                     // A faction the gate declines is re-evaluated on this team's next turn rather than
                     // recorded as having passed, exactly as a faction with no options always has been —
                     // the gate is a local state read, so there is no round-trip to save by caching it.
-                    if (!ShouldOpenReactionWindow(faction, options)) continue;
+                    if (!ShouldOpenReactionWindow(faction, options, coverHidden: !IsSupplyLoss(triggerEvent))) continue;
 
                     candidates.Add(faction);
                     offers[faction] = options;
@@ -1046,9 +1061,11 @@ public partial class CardPlayRound : GodotObject
 
     /// <summary>
     /// Whether to open a reaction window for this faction, given the reactions it can actually play.
-    /// The single gate for both the block and the after-reaction path.
+    /// The single gate for both the block and the after-reaction path. <paramref name="coverHidden"/>
+    /// false opens it only when something can be played: a supply loss asks nobody else, accepting
+    /// that the window shows the faction holds a card for it.
     /// </summary>
-    private static bool ShouldOpenReactionWindow(Faction faction, List<int> options)
+    private static bool ShouldOpenReactionWindow(Faction faction, List<int> options, bool coverHidden = true)
     {
         // A scoped skip only silences the windows that exist to hide information. A face-up Status
         // card (or an already-revealed Response) is public knowledge, so the player keeps that
@@ -1056,8 +1073,12 @@ public partial class CardPlayRound : GodotObject
         if (GameFlow.Instance.IsSkippingReactions(faction))
             return options.Any(IsPubliclyVisibleTableCard);
 
-        return options.Count > 0 || HasHiddenResponseCards(faction);
+        return options.Count > 0 || (coverHidden && HasHiddenResponseCards(faction));
     }
+
+    /// <summary>A unit lost to the Supply step: nobody caused it, and its windows open only for a card that can answer it.</summary>
+    private static bool IsSupplyLoss(ChangeEvent changeEvent) =>
+        changeEvent is RemoveUnitChangeEvent { Reason: UnitRemovalReason.SUPPLY };
 
     public List<T> GetChangeEvents<T>() where T : ChangeEvent
     {

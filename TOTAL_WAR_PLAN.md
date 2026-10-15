@@ -395,8 +395,18 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     (which re-arms it) and plays it.
   - **Test:** `Scenario_Debug_TotalWarReallocate` (Italy moves first, the US second);
     `tests/qgc/tw_reallocate_war_bonds.qgc`.
-- **Effects, Medium (3): each needs one small core hook.**
-  - Removal protection doesn't cover ELIMINATE/SUPPLY, and supply removals open no window: Élan.
+- **Effects, Élan: built,** on two rule changes for the whole game, base included (decided):
+  - **Supply losses get reaction windows.** `SupplyStepHandlerDefault` sends each removal through
+    `CardPlayPool.DoChangeEvent`, re-checking the unit just before. The block window goes to the unit's
+    own team, its owner included. Windows open only for a faction with a card that can answer the
+    removal; that shows the faction holds one, and we accept that.
+  - **Protection lasts the turn.** "Do not remove that Army this turn" (`ImmuneForTurn`) blocks every
+    battle, elimination or supply removal of the unit, in `CardPlayRound.DoChangeEvent`.
+  - **Effect on base cards:** Leningrad, Moscow, Stalingrad, Monte Cassino and RAF (no supply condition)
+    now also answer supply losses. Every base protection now also stops a later elimination that turn.
+    The 10-game gate stayed identical.
+  - Tested by `tests/qgc/tw_supply_loss_elan.qgc`.
+- **Effects, Medium (2): each needs one small core hook.**
   - The Discard step exposes no discarded cards: Attrition.
   - There is no strait-control override: Spanish Troops Seize Gibraltar.
 - **Effects, Hard (6): each needs a new rule system.**

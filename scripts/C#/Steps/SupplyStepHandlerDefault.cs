@@ -57,10 +57,11 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
     /// <summary>Remove <paramref name="checkedFaction"/>'s out-of-supply units. True if there were any.</summary>
     private async Task<bool> RemoveOutOfSupplyUnits(Faction checkedFaction)
     {
-        // Get active units for this faction and filter for those out of supply
+        // Get active units for this faction and filter for those out of supply. A unit protected this
+        // turn ("do not remove that Army this turn") stays.
         List<int> activeUnitIds = GameAPI.ActiveUnitsForFaction(checkedFaction);
         List<UnitState> outOfSupplyUnits = UnitState.ForIds(activeUnitIds)
-            .Where(unit => !unit.InSupply)
+            .Where(unit => !unit.InSupply && !BoardState.Live.ImmuneForTurn(unit))
             .ToList();
 
         if (outOfSupplyUnits.Count == 0) return false;
@@ -69,16 +70,20 @@ public partial class SupplyStepHandlerDefault : GodotObject, ISupplyStepHandler
         await new ShowActionLabelPresentationEvent(checkedFaction, message).Apply();
         DebugUtilities.PrintPeer($"Removing {outOfSupplyUnits.Count} out-of-supply units for {checkedFaction}");
 
-        // Create removal events for each out-of-supply unit
+        // Each removal goes through the reaction pipeline, so a card that answers a removal (Leningrad,
+        // Élan, Retreat and Regroup) may be used; its windows open only for a faction holding one.
         foreach (var unit in outOfSupplyUnits)
         {
+            // Asked again per unit: a reaction to an earlier removal may have protected or resupplied it.
+            if (unit.InSupply || BoardState.Live.ImmuneForTurn(unit) || !BoardState.Live.IsDeployed(unit)) continue;
+
             RemoveUnitChangeEvent removeEvent = new RemoveUnitChangeEvent(
                 unit.Faction,
                 unit.Id,
                 UnitRemovalReason.SUPPLY
             );
             DebugUtilities.PrintPeer($"  - Removing {unit.Faction} {unit.Type} from {CountryState.ForId(unit.CountryId).Label}");
-            await removeEvent.Apply();
+            await CardPlayPool.DoChangeEvent(removeEvent);
         }
         return true;
     }

@@ -94,7 +94,8 @@ public sealed partial class BoardState
                 throw new GameAPI.GameAPIException(
                     $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for SUPPLY: the unit is in supply.");
 
-            // Not ELIMINATE: whether immunity stops an elimination is an open rules question.
+            // Immunity stops eliminations and supply losses too, but those are blocked before they get
+            // here (CardPlayRound.DoChangeEvent); a battle never targets an immune unit, so one is a bug.
             case UnitRemovalReason.BATTLE when ImmuneForTurn(unitState):
                 throw new GameAPI.GameAPIException(
                     $"Cannot remove {unitState.Faction} {unitState.Type} in {countryState.Label} for BATTLE: the unit is immune this turn.");
