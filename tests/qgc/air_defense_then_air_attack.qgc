@@ -10,7 +10,7 @@
 # Run:  tests/run-cli.sh tests/qgc/air_defense_then_air_attack.qgc
 
 prompt                                  # turn 1, Germany — synchronise with the running game
-answer id=11                            # play a Land Battle
+answer id=12                            # play a Land Battle
 answer id=56                            # battle France's Army in Western Europe (unit 56)
 assert promptfaction == FRANCE
 answer id=0                             # Air Defense: France's Air Force takes the hit

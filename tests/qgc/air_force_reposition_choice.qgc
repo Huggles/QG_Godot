@@ -5,7 +5,7 @@
 #
 # Scenario_Debug_AirForces (expansions/total_war/data/scenarios/) enables Total War itself and puts a
 # Soviet Army and Air Force in Ukraine, with Soviet Armies in both Moscow and Russia. Germany opens
-# holding Land Battles. Ids are pinned to the seed above (card 11 is a Land Battle in Germany's hand).
+# holding Land Battles. Ids are pinned to the seed above (card 12 is a Land Battle in Germany's hand).
 #
 # Run:  tests/run-cli.sh tests/qgc/air_force_reposition_choice.qgc
 
@@ -13,7 +13,7 @@ prompt                                  # turn 1, Germany — synchronise with t
 assert airforce UKRAINE SOVIET == 1
 assert pool SOVIET AIR_FORCE == 0
 
-answer id=11                            # play a Land Battle
+answer id=12                            # play a Land Battle
 answer id=31                            # battle the Soviet Army in Ukraine (unit 31)
 assert promptfaction == SOVIET          # Air Defense is the defender's choice
 answer id=1                             # decline it: option 1 is "Remove the Army"
