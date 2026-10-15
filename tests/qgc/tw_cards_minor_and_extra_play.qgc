@@ -1,0 +1,32 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Total War country cards, two patterns:
+#   - Fall Weiss: pay the top card, recruit, then play another card from hand (Elektroboot
+#     Submarines, which makes an Allied country of Germany's choice discard and scores 2 VP).
+#   - Rhin et Danube: France does the battling, so the targets are what lies next to its supplied
+#     Army in Western Europe; here the Italian Army in Italy.
+# The scenario deals each country a full hand of its Total War cards, so cards are named.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_cards_minor_and_extra_play.qgc
+
+prompt                                  # turn 1, Germany
+select Fall Weiss
+select Eastern Europe                   # recruit, rebuilding in place
+select Elektroboot Submarines           # the extra play
+select UNITED_STATES
+
+prompt                                  # Germany's Air step: the VP step has not scored yet
+assert score GERMANY == 2
+assert discardsize UNITED_STATES == 1
+assert discardsize GERMANY == 3         # Fall Weiss, its cost and Elektroboot Submarines
+select Pass
+pass                                    # Germany's Discard step
+
+prompt                                  # turn 2, the United Kingdom
+select Rhin et Danube
+answer id=38                            # the Italian Army in Italy
+
+prompt                                  # the UK's Air step
+assert occupant ITALY == none
+assert occupant WESTERN_EUROPE == FRANCE
+quit

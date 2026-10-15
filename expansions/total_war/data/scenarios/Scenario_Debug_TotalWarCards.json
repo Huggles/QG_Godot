@@ -1,0 +1,48 @@
+{
+  "title": "Debug: Total War cards",
+  "description": "Total War test setup for the country cards: each country opens with a full hand of its own Total War cards.\nFrance and China start in Western Europe and China.",
+  "debug": true,
+  "expansions": [ "total_war" ],
+  "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [ { "countryName": "GERMANY" }, { "countryName": "EASTERN_EUROPE" }, { "countryName": "BALTIC_SEA" } ],
+      "initialHandCards": [ { "name": "EventFallWeiss" }, { "name": "EventSeaLion" }, { "name": "EWElektrobootSubmarines" }, { "name": "EventTurkeyJoinsAxis" },
+                            { "name": "BuildArmy" }, { "name": "LandBattle" }, { "name": "EventSwedenSupportsFinland" } ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [ { "countryName": "UNITED_KINGDOM" }, { "countryName": "NORTH_SEA" } ],
+      "initialHandCards": [ { "name": "EventFranceCombattante" }, { "name": "EventRhinetDanube" }, { "name": "EventForeignLegion" }, { "name": "StatusPolishSovereignty" },
+                            { "name": "EventPolskiePanstwoPodziemne" }, { "name": "StatusFreeFrance_TotalWar" }, { "name": "EventFreeFrenchAllies_TotalWar" } ],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [ { "countryName": "JAPAN" }, { "countryName": "SEA_OF_JAPAN" } ],
+      "initialHandCards": [ { "name": "ResponseThailand" }, { "name": "StatusHokushinRon" }, { "name": "EWJapaneseFleetBlockadesVladivostok" }, { "name": "ResponseKantaiKessen" },
+                            { "name": "ResponseChineseCivilWar" }, { "name": "StatusAbsoluteNationalDefenseSphere" }, { "name": "ResponseImperialManchukuoArmy" } ],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [ { "countryName": "MOSCOW" }, { "countryName": "UKRAINE" }, { "countryName": "RUSSIA" } ],
+      "initialHandCards": [ { "name": "ResponseHeavyTanks" }, { "name": "EventSiberianTransfer" }, { "name": "StatusTankDesant" }, { "name": "BuildArmy" },
+                            { "name": "LandBattle" }, { "name": "StatusPeoplesLiberationArmy" }, { "name": "EventKurilIslandsLandingOperation" } ],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [ { "countryName": "ITALY" }, { "countryName": "MEDITERRANEAN_SEA" } ],
+      "initialHandCards": [ { "name": "EventGiulianiCappelliniAndTorelli" }, { "name": "EWOperationLobster" }, { "name": "EventOperationHerkules" }, { "name": "EventSpain" },
+                            { "name": "StatusIrredentismoItaliano" }, { "name": "EWOperationPike" }, { "name": "ResponseAlpini" } ],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [ { "countryName": "US_EAST" }, { "countryName": "US_WEST" }, { "countryName": "EAST_PACIFIC" } ],
+      "initialHandCards": [ { "name": "EWOilEmbargo" }, { "name": "EventAmericanPublicSympathizesWithChinesePeople" }, { "name": "StatusArtificialHarbors" }, { "name": "BuildNavy" },
+                            { "name": "EventTheHundredRegimentsOffensive" }, { "name": "EventShootFirstAndArgueAfterwards" }, { "name": "EWStalemateInChina" } ],
+      "startingVP": 0
+    }
+  }
+}
