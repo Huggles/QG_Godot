@@ -53,11 +53,23 @@ public sealed partial class BoardState
 
     // ── Adjacency ───────────────────────────────────────────────────────────
 
-    /// <summary>A strait belongs to its controlling country's team, and to the Allies while that is empty.</summary>
+    /// <summary>
+    /// A strait belongs to its controlling country's team, and to the Allies while that is empty — unless
+    /// a card in play decides it (<see cref="ForcedStraitController"/>).
+    /// </summary>
     public FactionTeam StraitController(StraightState strait)
     {
+        if (ForcedStraitController(strait) is { } forced) return forced;
         FactionTeam team = OccupyingTeam(strait.ControllingCountryState);
         return team == FactionTeam.NONE ? FactionTeam.ALLIES : team;
+    }
+
+    /// <summary>The team an IStraitControlModifier card gives <paramref name="strait"/>, or null when none has a say (always, in the base game).</summary>
+    public FactionTeam? ForcedStraitController(StraightState strait)
+    {
+        foreach (IStraitControlModifier modifier in Modifiers<IStraitControlModifier>())
+            if (modifier.StraitControl(strait) is { } team) return team;
+        return null;
     }
 
     public bool IsStraitControlledBy(StraightState strait, Faction faction) =>

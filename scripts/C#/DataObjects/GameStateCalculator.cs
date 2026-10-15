@@ -329,10 +329,12 @@ public class GameStateCalculator
             board.Of(straightState).Tags.RemoveForAll(Tag.AlliesControlled);
         }
 
-        // Calculate control for each straight based on controlling country's team
+        // Calculate control for each straight based on controlling country's team, unless a card in play
+        // decides it (BoardState.ForcedStraitController), so the icon shows what adjacency uses.
         foreach (var straightState in GameSession.Current.GameState.StraightStates)
         {
-            FactionTeam controllingTeam = board.OccupyingTeam(straightState.ControllingCountryState);
+            FactionTeam controllingTeam = board.ForcedStraitController(straightState)
+                                          ?? board.OccupyingTeam(straightState.ControllingCountryState);
 
             if (controllingTeam == FactionTeam.AXIS)
                 board.Of(straightState).Tags.AddForAll(Tag.AxisControlled);

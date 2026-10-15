@@ -1,0 +1,33 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Spanish Troops Seize Gibraltar (Italy, Status): the North Africa strait (North Sea–Mediterranean Sea)
+# is the Axis's whatever stands in North Africa (IStraitControlModifier, read by
+# BoardState.StraitController). North Africa is empty here, so without the card the strait is the
+# Allies' and the UK's Sea Battle from the North Sea also offers the Italian Navy in the Mediterranean.
+# With it, that target is gone, and the Italian Navy may battle the UK Navy in the North Sea instead.
+# Set up by injection on Germany's turn: Gibraltar (332) onto Italy's table, a Sea Battle (55) into the
+# UK hand.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_gibraltar_strait.qgc
+
+prompt                                  # turn 1, Germany
+force playcard --card 332
+force recyclecard --faction UNITED_KINGDOM --card 55 --destination Hand
+pass                                    # no play: discard 1
+select Sweden Supports Finland
+prompt
+select Pass                             # Germany's Air step
+prompt
+pass                                    # Germany's Discard step
+
+prompt                                  # turn 2, the United Kingdom
+select Sea Battle
+prompt
+assert promptoptions == 3               # North Atlantic, South Atlantic, the German Navy in the Baltic
+pass                                    # no battle
+
+prompt                                  # the UK's Air step
+api battleunit --faction ITALY --unit 15
+assert occupant NORTH_SEA == none       # the Italian Navy reached across the strait
+assert errors == 0
+quit

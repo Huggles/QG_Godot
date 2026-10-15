@@ -413,13 +413,23 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     (`GameState.GameMessages`) back to the step's start, finds the flagged discard and scores +1 VP per
     Build Army over the home space. No prompt and no window.
   - Tested by `tests/qgc/tw_attrition.qgc`.
-- **Effects, Medium (1): needs one small core hook.**
-  - There is no strait-control override: Spanish Troops Seize Gibraltar.
+- **Effects, Spanish Troops Seize Gibraltar: built.** All the Medium cards are done.
+  - **Core:** `IStraitControlModifier`. `BoardState.StraitController` asks the modifiers first
+    (`ForcedStraitController`), so faction-aware adjacency follows it, and through adjacency so do supply,
+    battles and building. The strait icon's tag pass uses the same override.
+  - **The card:** holds the North Africa strait for the Axis.
+  - **Related fix:** the only card code that read raw map adjacency across a strait (Kamikaze, Indian
+    Ocean Patrols, USMC) now uses `AdjacentCountryStates`. Everything else that reads
+    `ConnectedCountryStates` looks at land, or at seas without a strait, or measures map distance on
+    purpose.
+  - Tested by `tests/qgc/tw_gibraltar_strait.qgc`.
 - **Effects, Hard (6): each needs a new rule system.**
   - Supply through other countries' pieces: SHAEF.
   - Home/Supply spaces that move during play: Government Evacuates to Kuibyshev, Government in Exile.
   - Switching off Axis Statuses: Hobart's Funnies (pairs with Bolster Keep Calm and Carry On).
-  - Axis-only adjacencies: Turkey Opens the Straits.
+  - Axis-only adjacencies: Turkey Opens the Straits. It adds new links (Middle East–Balkans, Black
+    Sea–Mediterranean) to `AdjacentCountryIds`. It needs a modifier like `IStraitControlModifier`, and a
+    check of the few card reads of those spaces' plain-map neighbours.
   - A "use at any time" window: Endless Expanses (with M4's windows).
 - Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);
   unbuilt Bolsters cannot be used until M4.
