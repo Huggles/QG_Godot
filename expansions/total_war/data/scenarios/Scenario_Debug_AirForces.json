@@ -11,12 +11,13 @@
     "GERMANY": {
       "unitDeployments": [ { "countryName": "GERMANY" }, { "countryName": "EASTERN_EUROPE" } ],
       "airForceDeployments": [ { "countryName": "GERMANY" }, { "countryName": "EASTERN_EUROPE" } ],
-      "initialHandCards": [ { "name": "LandBattle" }, { "name": "LandBattle" }, { "name": "LandBattle" } ],
+      "initialHandCards": [ { "name": "LandBattle" }, { "name": "LandBattle" }, { "name": "LandBattle" }, { "name": "AirPower" } ],
       "startingVP": 0
     },
     "UNITED_KINGDOM": {
       "unitDeployments": [ { "countryName": "UNITED_KINGDOM" }, { "countryName": "NORTH_SEA" }, { "countryName": "WESTERN_EUROPE" } ],
       "airForceDeployments": [ { "countryName": "WESTERN_EUROPE" } ],
+      "initialHandCards": [ { "name": "AirPower" } ],
       "startingVP": 0
     },
     "FRANCE": {

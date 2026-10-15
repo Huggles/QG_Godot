@@ -2,13 +2,13 @@
 #
 # Total War Air step: Deploy, after backing out of another action. The UK picks Air Superiority,
 # passes on its target and is asked again, having paid nothing; it then discards its Air Power card
-# (224) to deploy its second Air Force with its Army in the United Kingdom.
+# (246) to deploy its second Air Force with its Army in the United Kingdom.
 #
 # Run:  tests/run-cli.sh tests/qgc/air_step_deploy.qgc
 
 prompt                                  # turn 1, Germany — synchronise with the running game
 pass                                    # Germany: no play
-answer id=25                            # discard Jet Fighters
+answer id=20                            # discard Dive Bombers
 select Pass                             # Germany's Air step
 pass                                    # Germany's Discard step
 
@@ -26,5 +26,5 @@ select Pass                             # decline to marshal France's Air Force
 prompt                                  # wait for the deploy to settle
 assert airforce UNITED_KINGDOM UNITED_KINGDOM == 1
 assert pool UNITED_KINGDOM AIR_FORCE == 0
-assert card 224 == discard
+assert card 246 == discard
 assert handsize UNITED_KINGDOM == 5

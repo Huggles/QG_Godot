@@ -1,6 +1,6 @@
 #!args scenario=Scenario_Debug_AirForces seed=42
 #
-# Total War Air step: Air Superiority. Germany discards its Air Power card (222) to eliminate an enemy
+# Total War Air step: Air Superiority. Germany discards its Air Power card (221) to eliminate an enemy
 # Air Force adjacent to one of its supplied Air Forces. Western Europe holds two, the UK's and
 # France's, so Germany is asked which. Deploy is not offered: both German Air Forces are on the board
 # and every space with a supplied German Army already has one.
@@ -9,7 +9,7 @@
 
 prompt                                  # turn 1, Germany — synchronise with the running game
 pass                                    # no play: costs a discard
-answer id=25                            # discard Jet Fighters
+answer id=20                            # discard Dive Bombers
 assert step == AIR
 assert promptoptions == 3               # Marshal, Air Superiority, Pass
 select Air Superiority
@@ -20,4 +20,4 @@ prompt                                  # wait for the removal to settle
 assert airforce WESTERN_EUROPE FRANCE == 0
 assert airforce WESTERN_EUROPE UNITED_KINGDOM == 1
 assert pool FRANCE AIR_FORCE == 1
-assert card 222 == discard
+assert card 221 == discard

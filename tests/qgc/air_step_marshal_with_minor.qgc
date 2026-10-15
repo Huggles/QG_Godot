@@ -9,7 +9,7 @@
 
 prompt                                  # turn 1, Germany — synchronise with the running game
 pass                                    # Germany: no play
-answer id=25                            # discard Jet Fighters
+answer id=20                            # discard Dive Bombers
 select Pass                             # Germany's Air step
 pass                                    # Germany's Discard step
 
@@ -19,7 +19,7 @@ answer id=67                            # discard Bomber Command
 select Marshal
 answer id=65                            # the UK's Air Force: asked even though it is the only one
 select North Sea
-answer id=224                           # pay with the Air Power card: any card will do
+answer id=246                           # pay with the Air Power card: any card will do
 assert promptfaction == UNITED_KINGDOM  # France has no seat: its patron is asked
 select Marshal
 answer id=74                            # France's Air Force

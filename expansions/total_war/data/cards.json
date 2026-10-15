@@ -1,11 +1,416 @@
 [
   {
     "UniqueName": "AirPower",
-    "Number": "AP",
+    "Number": "1000",
     "Type": "AIR_POWER",
     "ExecutionClass": "AirPower",
     "Label": "Air Power",
     "Text": "Discard in your Air step to deploy an Air Force or to use Air Superiority.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterNavajoCodeTalkers",
+    "Number": "1001",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterNavajoCodeTalkers",
+    "Label": "Navajo Code Talkers",
+    "Text": "Use at the beginning of your Play step. Take a Bolster card from your hand and place it face down on the table. You may use it as if it were a Response card.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWOilEmbargo",
+    "Number": "1002",
+    "Type": "EW",
+    "ExecutionClass": "EWOilEmbargo",
+    "Label": "Oil Embargo",
+    "Text": "Germany, Italy, and Japan must each choose to remove a piece from the board or discard the top 2 cards of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterRangers",
+    "Number": "1003",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterRangers",
+    "Label": "Rangers",
+    "Text": "Use when you deploy or marshal an Air Force. Discard the top 1 card of your draw deck to eliminate an Army adjacent to that Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterPappyBoyington",
+    "Number": "1004",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterPappyBoyington",
+    "Label": "Pappy Boyington",
+    "Text": "Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to deploy an Air Force in or adjacent to the Central Pacific.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterOurPhilosophyOfGovernment",
+    "Number": "1005",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterOurPhilosophyOfGovernment",
+    "Label": "Our Philosophy of Government",
+    "Text": "Use at the beginning of your Draw step. Discard the top 2 cards of your draw deck to allow the United Kingdom to place a Response card from its discard pile face down on the table.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusWarBonds",
+    "Number": "1006",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusWarBonds",
+    "Label": "War Bonds",
+    "Text": "When you Reallocate Resources, you may take a card from your discard pile instead of your draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterFlyingTigers",
+    "Number": "1007",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterFlyingTigers",
+    "Label": "Flying Tigers",
+    "Text": "Use at the beginning of your Air step. Deploy a Chinese Air Force, or a Chinese Air Force may gain air superiority.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterEagleSquadrons",
+    "Number": "1008",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterEagleSquadrons",
+    "Label": "Eagle Squadrons",
+    "Text": "Use at the beginning of your Air step. The United Kingdom may deploy an Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusUSMC",
+    "Number": "1009",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusUSMC",
+    "Label": "USMC",
+    "Text": "Use when you build a Navy in or adjacent to a sea space with 'Pacific' in the title. Discard the top 1 card of your draw deck to battle a land space adjacent to the Navy just built.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterPacificBases",
+    "Number": "1010",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterPacificBases",
+    "Label": "Pacific Bases",
+    "Text": "Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to recruit an Army in a space adjacent to the Central Pacific.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventShootFirstAndArgueAfterwards",
+    "Number": "1011",
+    "Type": "EVENT",
+    "ExecutionClass": "EventShootFirstAndArgueAfterwards",
+    "Label": "Shoot First and Argue Afterwards",
+    "Text": "Build a Navy in a sea space with 'Pacific' in the title, then battle a sea space adjacent to the Navy just built.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventTheBrazilianExpeditionaryForce",
+    "Number": "1012",
+    "Type": "EVENT",
+    "ExecutionClass": "EventTheBrazilianExpeditionaryForce",
+    "Label": "The Brazilian Expeditionary Force",
+    "Text": "Build an Army in Latin America and a Navy in the South Atlantic or the Southern Ocean.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventCashAndCarryReplacesNeutralityActs",
+    "Number": "1013",
+    "Type": "EVENT",
+    "ExecutionClass": "EventCashAndCarryReplacesNeutralityActs",
+    "Label": "Cash and Carry Replaces Neutrality Acts",
+    "Text": "Recruit any 1 available Allied Army or Navy in or adjacent to the corresponding country's Home space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventAmericanPublicSympathizesWithChinesePeople",
+    "Number": "1014",
+    "Type": "EVENT",
+    "ExecutionClass": "EventAmericanPublicSympathizesWithChinesePeople",
+    "Label": "American Public Sympathizes with Chinese People",
+    "Text": "Build a Chinese Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterAGreatSleepingGiant",
+    "Number": "1015",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterAGreatSleepingGiant",
+    "Label": "A Great, Sleeping Giant",
+    "Text": "Use when you build a Navy in a space with 'Pacific' in the title. Discard the top 1 card of your draw deck to build an Army or Navy in an adjacent space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterP51Mustang",
+    "Number": "1016",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterP51Mustang",
+    "Label": "P-51 Mustang",
+    "Text": "Use when you play an Economic Warfare card. The country attacked must discard an additional card for each United States Air Force within 2 spaces of the opponent's Home space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusAntiJapaneseVolunteerArmies",
+    "Number": "1017",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusAntiJapaneseVolunteerArmies",
+    "Label": "Anti-Japanese Volunteer Armies",
+    "Text": "Each time a Chinese Army is battled, built, or recruited, the Japanese player must discard 1 card from its hand.",
+    "MultipleActivationsPerTurn": true
+  },
+  {
+    "UniqueName": "BolsterCarpetBombing",
+    "Number": "1018",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterCarpetBombing",
+    "Label": "Carpet Bombing",
+    "Text": "Use when you battle. Discard an Economic Warfare card from your hand to battle the same space again.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWDoolittlesBombers",
+    "Number": "1019",
+    "Type": "EW",
+    "ExecutionClass": "EWDoolittlesBombers",
+    "Label": "Doolittle's Bombers",
+    "Text": "Use if you have a supplied Navy within 3 spaces of Japan. Japan must discard the top 1 card of its draw deck. Gain 3 Victory Points.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusArtificialHarbors",
+    "Number": "1020",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusArtificialHarbors",
+    "Label": "Artificial Harbors",
+    "Text": "Use once per turn when you build a Navy. Discard the top 1 card of your draw deck to build an Army adjacent to the Navy just built.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusSHAEF",
+    "Number": "1021",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusSHAEF",
+    "Label": "SHAEF",
+    "Text": "France, the United States, and the United Kingdom may trace supply through each other's pieces, including the Army in the Supply space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusVictoryGardens",
+    "Number": "1022",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusVictoryGardens",
+    "Label": "Victory Gardens",
+    "Text": "The United States only has to discard 1 card from its hand to use Reallocate Resources.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWStalemateInChina",
+    "Number": "1023",
+    "Type": "EW",
+    "ExecutionClass": "EWStalemateInChina",
+    "Label": "Stalemate in China",
+    "Text": "For each Chinese Army or Air Force on the board, Japan must discard the top 2 cards of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventTheHundredRegimentsOffensive",
+    "Number": "1024",
+    "Type": "EVENT",
+    "ExecutionClass": "EventTheHundredRegimentsOffensive",
+    "Label": "The Hundred Regiments Offensive",
+    "Text": "Battle a land space adjacent to a supplied Chinese piece.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWUnitedStatesSubmarinesPatrolJapaneseShippingLanes",
+    "Number": "1025",
+    "Type": "EW",
+    "ExecutionClass": "EWUnitedStatesSubmarinesPatrolJapaneseShippingLanes",
+    "Label": "United States Submarines Patrol Japanese Shipping Lanes",
+    "Text": "For each United States Navy within 2 spaces of Japan, Japan must discard the top 2 cards of its draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterAdmiralGrafSpee",
+    "Number": "1026",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterAdmiralGrafSpee",
+    "Label": "Admiral Graf Spee",
+    "Text": "Use when you build a Navy. Discard the top 1 card of your draw deck to battle the North Sea, North Atlantic, or South Atlantic.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterJu52sAirliftSupplies",
+    "Number": "1027",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterJu52sAirliftSupplies",
+    "Label": "Ju-52's Airlift Supplies",
+    "Text": "Use at the beginning of your Play step. If you have an Air Force on the board, all German pieces are in supply for the rest of the turn.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterOperationWeserubung",
+    "Number": "1028",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterOperationWeserubung",
+    "Label": "Operation Weserübung",
+    "Text": "Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to recruit an Army in Scandinavia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterFallschirmjager",
+    "Number": "1029",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterFallschirmjager",
+    "Label": "Fallschirmjäger",
+    "Text": "Use at the beginning of your Play step. Discard the top 1 card of your draw deck to battle a land space adjacent to your Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventSwedenSupportsFinland",
+    "Number": "1030",
+    "Type": "EVENT",
+    "ExecutionClass": "EventSwedenSupportsFinland",
+    "Label": "Sweden Supports Finland",
+    "Text": "To use, Germany or the Soviet Union must have an Army in Russia. Build a Navy in the Baltic and recruit an Army in Scandinavia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "Bolster128cmFlakzwilling40",
+    "Number": "1031",
+    "Type": "BOLSTER",
+    "ExecutionClass": "Bolster128cmFlakzwilling40",
+    "Label": "12.8cm Flakzwilling 40",
+    "Text": "Use when an Allied player gains air superiority to eliminate an Italian Air Force. The Air Force used to gain air superiority is eliminated.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWElektrobootSubmarines",
+    "Number": "1032",
+    "Type": "EW",
+    "ExecutionClass": "EWElektrobootSubmarines",
+    "Label": "Elektroboot Submarines",
+    "Text": "The Allied country of your choice must discard the top 1 card of its draw deck. Gain +2 Victory Points.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterTacticalInnovations",
+    "Number": "1033",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterTacticalInnovations",
+    "Label": "Tactical Innovations",
+    "Text": "Use at the beginning of your Play step. Discard your Status card from the table to place a Status card from your hand on the table.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusLandkreuzers",
+    "Number": "1034",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusLandkreuzers",
+    "Label": "Landkreuzers",
+    "Text": "Use every time a German Army is battled. The country initiating the battle must discard the top 2 cards of its draw deck.",
+    "MultipleActivationsPerTurn": true
+  },
+  {
+    "UniqueName": "StatusWestwall",
+    "Number": "1035",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusWestwall",
+    "Label": "Westwall",
+    "Text": "Use every time an Axis Army is battled in Germany. The country initiating the battle must discard the top 3 cards of its draw deck.",
+    "MultipleActivationsPerTurn": true
+  },
+  {
+    "UniqueName": "EventSeaLion",
+    "Number": "1036",
+    "Type": "EVENT",
+    "ExecutionClass": "EventSeaLion",
+    "Label": "Sea Lion",
+    "Text": "Build a Navy in the North Sea, then battle the United Kingdom space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventProductionInitiative",
+    "Number": "1037",
+    "Type": "EVENT",
+    "ExecutionClass": "EventProductionInitiative",
+    "Label": "Production Initiative",
+    "Text": "Take your choice of 1 Status card from your draw deck and play it. Then shuffle your draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterCloudCover",
+    "Number": "1038",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterCloudCover",
+    "Label": "Cloud Cover",
+    "Text": "Use at the beginning of your Play step. Air Defense cannot be used this turn.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventStrategicPlanning",
+    "Number": "1039",
+    "Type": "EVENT",
+    "ExecutionClass": "EventStrategicPlanning",
+    "Label": "Strategic Planning",
+    "Text": "Take your choice of 1 or 2 cards from your draw deck and add them to your hand, then discard 1 card from your hand. Shuffle your draw deck.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterTheBlitz",
+    "Number": "1041",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterTheBlitz",
+    "Label": "The Blitz",
+    "Text": "Use when you play an Economic Warfare card. The United Kingdom must discard the top 2 cards of its draw deck for each German Air Force within 2 spaces of the United Kingdom.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterJu87",
+    "Number": "1043",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterJu87",
+    "Label": "Ju-87",
+    "Text": "Use when you deploy or marshal an Air Force. Discard the top 1 card of your draw deck to battle a land space adjacent to that Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventTurkeyJoinsAxis",
+    "Number": "1044",
+    "Type": "EVENT",
+    "ExecutionClass": "EventTurkeyJoinsAxis",
+    "Label": "Turkey Joins Axis",
+    "Text": "Build a Navy in the Black Sea, then recruit an Army in the Middle East.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EWArkhangelskFalls",
+    "Number": "1045",
+    "Type": "EW",
+    "ExecutionClass": "EWArkhangelskFalls",
+    "Label": "Arkhangelsk Falls",
+    "Text": "To use, the Axis must have Armies in both Scandinavia and Russia. The Soviet Union must discard the top 5 cards of its draw deck. Gain +1 Victory Point.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventFallWeiss",
+    "Number": "1046",
+    "Type": "EVENT",
+    "ExecutionClass": "EventFallWeiss",
+    "Label": "Fall Weiss",
+    "Text": "Discard the top 1 card of your draw deck to recruit an Army in Eastern Europe. Then play another card from your hand.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterG7eTorpedo",
+    "Number": "1047",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterG7eTorpedo",
+    "Label": "G7e Torpedo",
+    "Text": "Use when you play an Economic Warfare card with the word \"Submarines\" in the title. Discard the top 1 card of your draw deck to battle a sea space.",
     "MultipleActivationsPerTurn": false
   }
 ]
