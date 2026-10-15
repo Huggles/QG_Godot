@@ -1,0 +1,40 @@
+{
+  "title": "Debug: Reallocate Resources",
+  "description": "Total War test setup for Reallocate Resources: Italy moves first and the United States second.\nThe US hand holds Victory Gardens, War Bonds and Build and Battle cards.",
+  "debug": true,
+  "expansions": [ "total_war" ],
+  "startingFaction": "ITALY",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [ { "countryName": "GERMANY" } ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [ { "countryName": "UNITED_KINGDOM" } ],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [ { "countryName": "JAPAN" } ],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [ { "countryName": "MOSCOW" } ],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [ { "countryName": "ITALY" } ],
+      "initialHandCards": [ { "name": "EWOperationLobster" }, { "name": "EventSpain" }, { "name": "StatusIrredentismoItaliano" }, { "name": "BuildArmy" },
+                            { "name": "LandBattle" }, { "name": "EventOperationHerkules" }, { "name": "EWOperationPike" } ],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [ { "countryName": "US_EAST" }, { "countryName": "US_WEST" }, { "countryName": "EAST_PACIFIC" } ],
+      "initialHandCards": [ { "name": "StatusVictoryGardens" }, { "name": "StatusWarBonds" }, { "name": "LandBattle" }, { "name": "BuildNavy" },
+                            { "name": "BuildArmy" }, { "name": "SeaBattle" }, { "name": "EWStalemateInChina" } ],
+      "startingVP": 0
+    }
+  }
+}

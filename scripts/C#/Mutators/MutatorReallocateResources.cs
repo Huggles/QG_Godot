@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// The one action every faction always has beside its hand: instead of playing a card, discard 4 cards
-/// from hand and take a Build or Battle card straight out of the draw deck, playing it immediately.
+/// The one action every faction always has beside its hand: instead of playing a card, discard cards
+/// from hand (4 in the base game, see <see cref="DiscardCostFor"/>) and take a Build or Battle card
+/// straight out of the draw deck, playing it immediately.
 ///
 /// Not a scenario rule — unlike MutatorSyntheticFuelAnyFaction this is registered unconditionally by
 /// GameModeMultiplayerDefault.RegisterMutators rather than declared in a scenario's "mutators" array,
@@ -19,11 +20,31 @@ using System.Linq;
 /// </summary>
 public partial class MutatorReallocateResources : ActivatableMutator
 {
-    /// <summary>How many hand cards the action costs. Also the availability gate below.</summary>
-    private const int DiscardCost = 4;
-
     private static readonly List<CardType> DrawableTypes = new()
         { CardType.BUILD_ARMY, CardType.BUILD_NAVY, CardType.LAND_BATTLE, CardType.SEA_BATTLE };
+
+    /// <summary>
+    /// How many hand cards the action costs <paramref name="faction"/> on <paramref name="board"/>: the session's
+    /// base, then each of its IReallocateCostModifier cards in play. Also the availability gate below. Public
+    /// so an expansion's variant of this action (Total War's War Bonds) charges the same.
+    /// </summary>
+    public static int DiscardCostFor(Faction faction, BoardState board) =>
+        board.Modifiers<IReallocateCostModifier>()
+            .Where(modifier => modifier.Faction == faction)
+            .Aggregate(GameOptions.Rules.ReallocateDiscardCost, (cost, modifier) => modifier.ReallocateCost(cost));
+
+    private int DiscardCost(BoardState board) => DiscardCostFor(Faction, board);
+
+    /// <summary>
+    /// The cards of <paramref name="pile"/> this action may take: Build and Battle cards that could do
+    /// something if played now, one per name. Public for the same reason as <see cref="DiscardCostFor"/>.
+    /// </summary>
+    public static List<int> TakeOptions(IEnumerable<int> pile, GameSituation situation) =>
+        pile.Where(cardId => DrawableTypes.Contains(CardState.ForId(cardId).CardData.CardType))
+            .Where(cardId => CanPlayNow(cardId, situation))
+            .GroupBy(cardId => CardState.ForId(cardId).CardData.UniqueName)
+            .Select(sameNamedCards => sameNamedCards.First())
+            .ToList();
 
     public override string Label => "Reallocate Resources";
 
@@ -45,7 +66,8 @@ public partial class MutatorReallocateResources : ActivatableMutator
                 .Distinct()
                 .ToList();
 
-            return $"Instead of playing a card: discard {DiscardCost} cards from your hand, then take "
+            int cost = DiscardCost(BoardState.Live);
+            return $"Instead of playing a card: discard {cost} card{(cost == 1 ? "" : "s")} from your hand, then take "
                  + "one of these from your draw deck and play it immediately.\n\n"
                  + (available.Count > 0
                         ? $"Available: {string.Join(", ", available)}."
@@ -62,13 +84,7 @@ public partial class MutatorReallocateResources : ActivatableMutator
     /// </summary>
     // Only cards that could actually do something if played now — a Build Navy with no sea to build in
     // is not offered, so the four discarded cards can never buy a play that does nothing.
-    private List<int> DrawOptions(GameSituation situation) =>
-        situation.Board.ForFaction(Faction).Deck
-            .Where(cardId => DrawableTypes.Contains(CardState.ForId(cardId).CardData.CardType))
-            .Where(cardId => CanPlayNow(cardId, situation))
-            .GroupBy(cardId => CardState.ForId(cardId).CardData.UniqueName)
-            .Select(sameNamedCards => sameNamedCards.First())
-            .ToList();
+    private List<int> DrawOptions(GameSituation situation) => TakeOptions(situation.Board.ForFaction(Faction).Deck, situation);
 
     /// <summary>
     /// No event-scoped condition here, deliberately — unlike MutatorSyntheticFuelAnyFaction this is a
@@ -87,7 +103,7 @@ public partial class MutatorReallocateResources : ActivatableMutator
             Condition.Build(new Condition.IsPlayCardStep(), this),
             Condition.Build(new Condition.IsFactionTurn(Faction), this),
             Condition.Build(new Condition.CustomCondition(s =>
-                s.Board.ForFaction(Faction).Hand.Count >= DiscardCost), this),
+                s.Board.ForFaction(Faction).Hand.Count >= DiscardCost(s.Board)), this),
             // Nothing left to take would make the discard a pure loss, so the action is unavailable
             // (drawn greyed out) rather than a trap.
             Condition.Build(new Condition.CustomCondition(s => DrawOptions(s).Count > 0), this)
@@ -110,10 +126,11 @@ public partial class MutatorReallocateResources : ActivatableMutator
             // PlayCardChangeEvent increments the same counter again, which is harmless —
             // CardsPlayedThisTurnStep is only ever tested > 0 and is cleared each round.
             new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithGuidance($"Discard {DiscardCost} cards to take a Build or Battle card from its deck and play it"),
+            // No count in the label: the steps are built once, and the cost can change during the game.
+            .WithGuidance("Discard cards from its hand to take a Build or Battle card from its deck and play it"),
 
             // Raises its own required selection and round-trips the picks to clients.
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost)))
+            new RequirementStep(this, Choose.Fixed(c => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost(c.Board))))
             .RequiringPreviousStep(),
 
             // The full pipeline, deliberately: this play triggers responses like any other.

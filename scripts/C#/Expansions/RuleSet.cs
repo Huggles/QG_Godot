@@ -16,6 +16,9 @@ public sealed class RuleSet
 
     public IReadOnlyList<ExtraTurnStep> ExtraTurnSteps => _extraTurnSteps;
 
+    /// <summary>How many hand cards Reallocate Resources costs before any card changes it (MutatorReallocateResources.DiscardCostFor).</summary>
+    public int ReallocateDiscardCost { get; set; } = 4;
+
     /// <summary>The rules of a session played with <paramref name="expansionIds"/>, which must all be loaded.</summary>
     public static RuleSet For(IEnumerable<string> expansionIds)
     {

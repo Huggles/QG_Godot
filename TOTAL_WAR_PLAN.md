@@ -304,7 +304,8 @@ Rule parameters on the `RuleSet`, supplied by `TotalWarRules`; core only reads t
   start-of-game draw, `Game/OpeningDiscard.cs`).
 - Discard step: no card discarded → the team loses 1 VP (`Steps/DiscardStepHandlerDefault.cs`, via
   `ScorePointsChangeEvent`).
-- Reallocate Resources costs 3 (`MutatorReallocateResources`).
+- Reallocate Resources costs 3: set `rules.ReallocateDiscardCost = 3` in `TotalWarRules.Configure` (the
+  seam exists since War Bonds/Victory Gardens; the base default stays 4).
 - Deck overlay: done (`Add` since M3, `Remove` with the substitutes).
 
 ### M6 — Bots and sim
@@ -384,8 +385,17 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
   - **Base unchanged:** Women Conscripts is pool-scoped, not immediate, so it keeps the once-a-turn re-arm;
     the 10-game gate is identical.
   - Tested by `tests/qgc/tw_every_time_status.qgc`.
-- **Effects, Medium (5): each needs one small core hook.**
-  - Reallocate Resources has no modifier seam: War Bonds, Victory Gardens (and M5's cost of 3).
+- **Effects, Reallocate Resources: built.** War Bonds, Victory Gardens.
+  - **Core:** the cost is `MutatorReallocateResources.DiscardCostFor(faction, board)`. It starts from
+    `RuleSet.ReallocateDiscardCost` (default 4), then each `IReallocateCostModifier` card in play adjusts
+    it. `TakeOptions` is public too.
+  - **Victory Gardens:** a modifier, `min(cost, 1)`.
+  - **War Bonds:** a second Play-step action beside the hand, shaped like base Guards. It picks a
+    Build/Battle card from the discard pile before paying, pays the same cost, recycles the card to hand
+    (which re-arms it) and plays it.
+  - **Test:** `Scenario_Debug_TotalWarReallocate` (Italy moves first, the US second);
+    `tests/qgc/tw_reallocate_war_bonds.qgc`.
+- **Effects, Medium (3): each needs one small core hook.**
   - Removal protection doesn't cover ELIMINATE/SUPPLY, and supply removals open no window: Élan.
   - The Discard step exposes no discarded cards: Attrition.
   - There is no strait-control override: Spanish Troops Seize Gibraltar.

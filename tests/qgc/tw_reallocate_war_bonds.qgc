@@ -1,0 +1,34 @@
+#!args scenario=Scenario_Debug_TotalWarReallocate seed=42
+#
+# Reallocate Resources with Total War's US Status cards:
+#   - Victory Gardens cuts the cost to 1 card (MutatorReallocateResources.DiscardCostFor).
+#   - War Bonds is the same action from the discard pile: the Land Battle goes back to hand (re-armed)
+#     and is played from there, as base Guards plays its Build Army card.
+# Set up by injection on Italy's turn: both Status cards (365, 349) onto the US table, and a Land
+# Battle (191) played straight to the US discard pile.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_reallocate_war_bonds.qgc
+
+prompt                                  # turn 5, Italy
+force playcard --card 365
+force playcard --card 349
+force playcard --card 191
+pass                                    # no play: discard 1
+select Operation Lobster
+prompt
+select Pass                             # Italy's Air step
+prompt
+pass                                    # Italy's Discard step
+
+prompt                                  # turn 6, the United States
+select War Bonds
+answer id=191                           # the Land Battle in the discard pile
+select Stalemate in China               # the whole cost: 1 card
+answer id=7                             # Land Battle: battle Canada
+
+prompt                                  # the US Air step
+assert handsize UNITED_STATES == 3      # 4, less the 1-card cost; the Land Battle came and went
+assert discardsize UNITED_STATES == 2   # Stalemate in China and the Land Battle, played again
+assert card 191 in discard
+assert errors == 0
+quit
