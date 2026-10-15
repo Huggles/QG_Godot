@@ -311,7 +311,13 @@ public partial class CardPlayRound : GodotObject
             // Released only once every step is done: a card whose remaining steps are resumed later
             // by ContinueWithNextSteps must keep the event it originally reacted to.
             if (cardLogic.CardSteps.All(s => s.StepFinished))
+            {
                 cardLogic.ActivationTrigger = previousActivationTrigger;
+                // An "every time" card is ready for its next event at once; CardLogic.HasAnswered keeps it
+                // off this one, and ContinueWithNextSteps skips it while no trigger is pinned.
+                if (!isTableCardPlay && cardLogic.RearmsAfterEachUse && cardLogic.ActivationTrigger == null)
+                    cardLogic.RearmSteps();
+            }
         }
 
         ReactionDepth--;
@@ -671,7 +677,9 @@ public partial class CardPlayRound : GodotObject
             hasMoreSteps = false;
             foreach (CardState cardState in CardPool.AsEnumerable().Reverse())
             {
-                if (cardState.CardLogic == null) continue;                                
+                if (cardState.CardLogic == null) continue;
+                // A re-armed "every time" card with no trigger pinned has finished, not paused: only a new event may run it.
+                if (cardState.CardLogic.RearmsAfterEachUse && cardState.CardLogic.ActivationTrigger == null) continue;
                 if (cardState.CardLogic.ExecutableCardSteps.Count > 0 && cardState.IsBlocked == false)
                 {
                     DebugUtilities.PrintPeer($"Continuing with next step for {cardState.CardName}");

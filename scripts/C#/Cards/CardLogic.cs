@@ -58,6 +58,29 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
 
     public bool HasEventBasedTrigger => CardTriggers().Any(c => c.RequiresEventContext);
     public bool HasImmediateTrigger => CardTriggers().Any(c => c is Condition.EventCondition ec && ec.IsImmediate);
+
+    /// <summary>
+    /// An "every time" Status card: MultipleActivationsPerTurn, reacting to its window's own event. Its steps
+    /// re-arm as soon as an activation finishes (CardPlayRound.DoCard), and <see cref="HasAnswered"/> keeps it
+    /// to one use per event. Pool-scoped cards (Women Conscripts) keep the once-a-turn re-arm.
+    /// </summary>
+    public bool RearmsAfterEachUse => IsStatus && CardData.MultipleActivationsPerTurn && HasImmediateTrigger;
+
+    /// <summary>Whether this card already answered the open window's event: its activation for it is in the round's pool, which outlives no trigger.</summary>
+    private bool HasAnswered(GameSituation situation) =>
+        situation.ReactionTrigger != null
+        && situation.Pool.OfType<ActivateReactionChangeEvent>().Any(activation =>
+            activation.SourceCardId == CardState.Id && ReferenceEquals(activation.ReactedTo, situation.ReactionTrigger));
+
+    /// <summary>
+    /// Clear every step's progress so the card can run again. StepSucceeded goes too: a re-armed step must
+    /// not count the last run's success towards a CardStep.RequiringPreviousStep prerequisite.
+    /// </summary>
+    public void RearmSteps() => CardSteps.ForEach(step =>
+    {
+        step.StepFinished = false;
+        step.StepSucceeded = false;
+    });
     public bool HasExecutableCardSteps => HasExecutableCardStepsOn(BoardState.Live);
     public bool HasExecutableCardStepsOn(BoardState board) =>
         CardSteps.Count == 0 || CardSteps.Any(step => board.Of(step).Tags.HasForAny(Tag.IsExecutable));
@@ -197,6 +220,10 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
         if (!CardData.MultipleActivationsPerTurn && card.ActivatedInTurns.Contains(board.GameTurn))
             return false;
 
+        // "Every time" cards answer each event once: re-armed after use, the window would offer them again.
+        if (RearmsAfterEachUse && HasAnswered(situation))
+            return false;
+
         // Cards whose triggers are purely state-based (no event/block conditions) must not
         // appear as options inside a reaction chain — only at reaction depth 0.
         if (!HasEventBasedTrigger)
@@ -279,13 +306,7 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     public virtual void OnNewTurnStarted(int turnNumber)
     {
         if (IsStatus)
-            CardSteps.ForEach(step =>
-            {
-                step.StepFinished = false;
-                // Cleared with StepFinished: a step re-armed for this turn must not still count last
-                // turn's success as satisfying a CardStep.RequiringPreviousStep prerequisite.
-                step.StepSucceeded = false;
-            });
+            RearmSteps();
 
         // Safety net: DoCard releases the binding when the card's steps finish, but an activation
         // abandoned mid-way (exception, aborted epoch) would otherwise leave it dangling.

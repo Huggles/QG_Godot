@@ -372,8 +372,19 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
   - Fu-Go Balloon Bombs returns to hand through `MutatorRecycleAfterStep` after the Play step, as
     Women Conscripts does: a card moved mid-play is re-armed and DoCard would run it again.
   - Tested by `tests/qgc/tw_cards_deck_and_return.qgc`.
-- **Effects, Medium (8): each needs one small core hook.**
-  - "Every time" Statuses are re-armed only per turn: Landkreuzers, Westwall, Anti-Japanese Volunteer Armies.
+- **Effects, "every time" Statuses: built.** Landkreuzers, Westwall, Anti-Japanese Volunteer Armies.
+  - **Problem:** `MultipleActivationsPerTurn` only lifted the once-a-turn check; a Status card's steps
+    stayed finished until the next turn.
+  - **Core change (`CardLogic.RearmsAfterEachUse`):** applies to a flagged Status card with an immediate
+    trigger.
+    - `DoCard` re-arms its steps as an activation finishes.
+    - `CanBeActivated` refuses it for a trigger it already answered. That record is its
+      `ActivateReactionChangeEvent` in the round's pool, so it adds no state.
+    - `ContinueWithNextSteps` skips it while no trigger is pinned.
+  - **Base unchanged:** Women Conscripts is pool-scoped, not immediate, so it keeps the once-a-turn re-arm;
+    the 10-game gate is identical.
+  - Tested by `tests/qgc/tw_every_time_status.qgc`.
+- **Effects, Medium (5): each needs one small core hook.**
   - Reallocate Resources has no modifier seam: War Bonds, Victory Gardens (and M5's cost of 3).
   - Removal protection doesn't cover ELIMINATE/SUPPLY, and supply removals open no window: Élan.
   - The Discard step exposes no discarded cards: Attrition.

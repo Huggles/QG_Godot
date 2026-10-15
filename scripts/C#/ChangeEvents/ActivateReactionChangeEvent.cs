@@ -9,6 +9,9 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
     private ChangeEvent SourceChangeEvent;
     protected int StepId;
 
+    /// <summary>The event this activation answered, or null. Host-side only, like the field it reads: CardLogic.HasAnswered finds it in the round's pool.</summary>
+    public ChangeEvent ReactedTo => SourceChangeEvent;
+
     /// <summary>
     /// True when this activation opens the card's first step. A multi-step card is resumed by
     /// CardPlayRound.ContinueWithNextSteps -> DoCard, which emits a fresh ActivateReactionChangeEvent for

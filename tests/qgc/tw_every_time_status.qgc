@@ -1,0 +1,27 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# "Every time" Status cards (MultipleActivationsPerTurn, immediate trigger): Landkreuzers answers each
+# battle on a German Army once, and again for the next battle in the same turn. Its steps re-arm as an
+# activation finishes; CardLogic.HasAnswered keeps it off the battle it already answered, so the window
+# closes after one use (the assert below would wait on a reopened window).
+# Set up by injection: Landkreuzers (231) onto Germany's table, Soviet battles against the Army in
+# Eastern Europe, rebuilt in between.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_every_time_status.qgc
+
+prompt                                  # turn 1, Germany
+force playcard --card 231
+
+api battleunit --faction SOVIET --unit 1
+prompt                                  # Germany's after-reaction window
+select Landkreuzers
+assert decksize SOVIET == 47            # 2 discarded, and no second offer for this battle
+
+force deployunit --faction GERMANY --country EASTERN_EUROPE
+api battleunit --faction SOVIET --unit 1
+prompt
+select Landkreuzers                     # the same turn, a new battle: offered again
+assert decksize SOVIET == 45
+assert discardsize SOVIET == 4
+assert errors == 0
+quit
