@@ -406,8 +406,14 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     now also answer supply losses. Every base protection now also stops a later elimination that turn.
     The 10-game gate stayed identical.
   - Tested by `tests/qgc/tw_supply_loss_elan.qgc`.
-- **Effects, Medium (2): each needs one small core hook.**
-  - The Discard step exposes no discarded cards: Attrition.
+- **Effects, Attrition: built.**
+  - **Core:** `DiscardHandCardsChangeEvent.IsDiscardStep`, set by `DiscardStepHandlerDefault`, replicated
+    and saved.
+  - **The card:** an `IStepMutator` (DISCARD, AFTER) like Rosie the Riveter. It walks the game's journal
+    (`GameState.GameMessages`) back to the step's start, finds the flagged discard and scores +1 VP per
+    Build Army over the home space. No prompt and no window.
+  - Tested by `tests/qgc/tw_attrition.qgc`.
+- **Effects, Medium (1): needs one small core hook.**
   - There is no strait-control override: Spanish Troops Seize Gibraltar.
 - **Effects, Hard (6): each needs a new rule system.**
   - Supply through other countries' pieces: SHAEF.

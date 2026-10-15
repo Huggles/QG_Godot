@@ -8,6 +8,12 @@ public partial class DiscardHandCardsChangeEvent : ChangeEvent
 {    
     public List<int> CardIds { get; set; }
 
+    /// <summary>
+    /// The turn's own Discard step discard (DiscardStepHandlerDefault), as opposed to a card's cost or
+    /// effect. Replicated and saved, so the game's journal keeps it: Total War's Attrition reads it there.
+    /// </summary>
+    public bool IsDiscardStep { get; set; }
+
     public DiscardHandCardsChangeEvent(Faction triggeringFaction, Faction targetFaction, List<int> cardIds) : base(triggeringFaction)
     {
         TriggeringFaction = triggeringFaction;
@@ -19,6 +25,7 @@ public partial class DiscardHandCardsChangeEvent : ChangeEvent
     {
         DiscardHandCardsChangeEventDto dto = ChangeEventDto.Build<DiscardHandCardsChangeEventDto>(this, Id);
         dto.CardIds = CardIds;
+        dto.IsDiscardStep = IsDiscardStep;
         return dto;
     }
 

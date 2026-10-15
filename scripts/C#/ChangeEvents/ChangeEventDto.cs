@@ -111,6 +111,7 @@ public class SetStartingScoreChangeEventDto : ChangeEventDto
 public class DiscardHandCardsChangeEventDto : ChangeEventDto
 {
     public List<int> CardIds { get; set; }
+    public bool IsDiscardStep { get; set; }
 }
 
 public class ForceDiscardHandCardsChangeEventDto : ChangeEventDto

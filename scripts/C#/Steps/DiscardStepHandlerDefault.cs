@@ -65,6 +65,7 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
             List<int> sortedResponseCardIds = response.ResponseCardIds.OrderBy(id => id).ToList();
             DiscardHandCardsChangeEvent discardHandCardsChangeEvent = new DiscardHandCardsChangeEvent(faction, faction, sortedResponseCardIds);
             discardHandCardsChangeEvent.IsTrigger = false;
+            discardHandCardsChangeEvent.IsDiscardStep = true;
             await CardPlayPool.DoChangeEvent(discardHandCardsChangeEvent);
         }
         else

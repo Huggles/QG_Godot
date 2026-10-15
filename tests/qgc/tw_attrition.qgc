@@ -1,0 +1,51 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Attrition (Soviet Status): +1 VP per Build Army card discarded in the Soviet Discard step. It runs as
+# the step ends and finds the discard in the game's journal by its IsDiscardStep flag; no prompt and no
+# reaction window. The points show over Moscow, the home space.
+# Set up by injection on Germany's turn: Attrition (302) onto the Soviet table and a second Build Army
+# (115) into the Soviet hand.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_attrition.qgc
+
+prompt                                  # turn 1, Germany
+force playcard --card 302
+force recyclecard --faction SOVIET --card 115 --destination Hand
+pass
+select Sweden Supports Finland
+prompt
+select Pass
+prompt
+pass
+
+prompt                                  # turn 2, the United Kingdom
+pass
+prompt
+select Foreign Legion
+prompt
+select Pass
+prompt
+pass
+
+prompt                                  # turn 3, Japan
+pass
+prompt
+select Hokushin-ron
+prompt
+select Pass
+prompt
+pass
+
+prompt                                  # turn 4, the Soviet Union
+pass                                    # no play: a Play-step discard, which Attrition ignores
+prompt
+select Kuril Islands Landing Operation
+prompt
+select Pass                             # Air step
+prompt                                  # Discard step
+answer id=115,116                       # both Build Army cards
+
+prompt                                  # turn 5, Italy
+assert score SOVIET == 6                # 4 from the Victory step, 2 from Attrition
+assert errors == 0
+quit

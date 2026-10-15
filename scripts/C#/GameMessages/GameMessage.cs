@@ -166,7 +166,7 @@ public abstract partial class GameMessage : GodotObject
             // ModifiersApplied: d.NumberOfCards is the server's post-modifier count, so the client must
             // not run the IDiscardModifier pass again — see ForceDiscardCardsChangeEvent.
             ForceDiscardCardsChangeEventDto d     => new ForceDiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards) { ModifiersApplied = true },
-            DiscardHandCardsChangeEventDto d       => new DiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardIds),
+            DiscardHandCardsChangeEventDto d       => new DiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardIds) { IsDiscardStep = d.IsDiscardStep },
             ForceDiscardHandCardsChangeEventDto d   => new ForceDiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
             DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards, d.ShowDrawnCards),
             DrawCardByNameChangeEventDto d   => new DrawCardByNameChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardName),
