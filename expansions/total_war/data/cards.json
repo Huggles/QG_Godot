@@ -412,5 +412,176 @@
     "Label": "G7e Torpedo",
     "Text": "Use when you play an Economic Warfare card with the word \"Submarines\" in the title. Discard the top 1 card of your draw deck to battle a sea space.",
     "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusTankDesant",
+    "Number": "1048",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusTankDesant",
+    "Label": "Tank Desant",
+    "Text": "Use when you build an Army. Discard both a Build Army card and a Land Battle card from your hand to battle a land space adjacent to the Army just built.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterAsianReserves",
+    "Number": "1049",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterAsianReserves",
+    "Label": "Asian Reserves",
+    "Text": "Use at the beginning of your Draw step. Take 2 Build Army cards from your discard pile and add them to your hand.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusAttrition",
+    "Number": "1050",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusAttrition",
+    "Label": "Attrition",
+    "Text": "During your Discard step, gain +1 Victory Point for each Build Army card you discard from your hand.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseEndlessExpanses",
+    "Number": "1051",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseEndlessExpanses",
+    "Label": "Endless Expanses",
+    "Text": "Use at any time. Do not remove Soviet Armies in Siberia and/or Kazakhstan this turn.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventBattlesOfKhalkhinGol",
+    "Number": "1052",
+    "Type": "EVENT",
+    "ExecutionClass": "EventBattlesOfKhalkhinGol",
+    "Label": "Battles of Khalkhin Gol",
+    "Text": "Recruit an Army in Mongolia, then battle Vladivostok or China.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterOperationZet",
+    "Number": "1053",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterOperationZet",
+    "Label": "Operation Zet",
+    "Text": "Use at the beginning of your Air step. Deploy a Chinese Air Force, or a Chinese Air Force may gain air superiority.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterFortressRebuilt",
+    "Number": "1054",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterFortressRebuilt",
+    "Label": "Fortress Rebuilt",
+    "Text": "Use at the beginning of your Draw step. Discard a Build Army card from your hand to place a Response card from your discard pile face down on the table.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterZhukovDrivesWest",
+    "Number": "1055",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterZhukovDrivesWest",
+    "Label": "Zhukov Drives West",
+    "Text": "Use when you battle Russia, Eastern Europe, Ukraine, or the Balkans. Discard a Build Army card from your hand to build an Army in the space just battled.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventSiberianTransfer",
+    "Number": "1056",
+    "Type": "EVENT",
+    "ExecutionClass": "EventSiberianTransfer",
+    "Label": "Siberian Transfer",
+    "Text": "Recruit an Army in or adjacent to Siberia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterParatroops",
+    "Number": "1057",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterParatroops",
+    "Label": "Paratroops",
+    "Text": "Use when you deploy or marshal an Air Force. Discard a Build Army card from your hand to build an Army adjacent to that Air Force.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusPeoplesLiberationArmy",
+    "Number": "1058",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusPeoplesLiberationArmy",
+    "Label": "People's Liberation Army",
+    "Text": "Chinese Armies are always in supply. During your Play step, instead of playing a card from your hand, you may recruit a Chinese Army in Szechuan, China, or Mongolia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusQuantityHasAQualityAllItsOwn",
+    "Number": "1059",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusQuantityHasAQualityAllItsOwn",
+    "Label": "Quantity has a Quality All Its Own",
+    "Text": "Use once per turn when you build an Army. Discard a Build Army card from your hand to build an additional Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterVitebskGate",
+    "Number": "1060",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterVitebskGate",
+    "Label": "Vitebsk Gate",
+    "Text": "Use at the beginning of your Victory step. Discard a Build Army card and 2 other cards from your hand to eliminate an Axis Army in Moscow or Russia.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "EventKurilIslandsLandingOperation",
+    "Number": "1061",
+    "Type": "EVENT",
+    "ExecutionClass": "EventKurilIslandsLandingOperation",
+    "Label": "Kuril Islands Landing Operation",
+    "Text": "Build a Navy in the Sea of Japan, then battle the Japan space.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterBattleOfMoscow",
+    "Number": "1062",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterBattleOfMoscow",
+    "Label": "Battle of Moscow",
+    "Text": "Use immediately after your last Army on the board is removed. Discard a Build Army card from your hand to eliminate an Axis Army in or adjacent to Moscow.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseHeavyTanks",
+    "Number": "1063",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseHeavyTanks",
+    "Label": "Heavy Tanks",
+    "Text": "Use when your Army is battled. The attacker must discard 4 cards from its hand or your Army is not removed.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "BolsterCavalryCorps",
+    "Number": "1064",
+    "Type": "BOLSTER",
+    "ExecutionClass": "BolsterCavalryCorps",
+    "Label": "Cavalry Corps",
+    "Text": "Use at the beginning of your Play step. Discard a Build Army card from your hand and eliminate a Soviet Army from the board. Then build an Army.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "StatusGovernmentEvacuatesToKuibyshev",
+    "Number": "1065",
+    "Type": "STATUS",
+    "ExecutionClass": "StatusGovernmentEvacuatesToKuibyshev",
+    "Label": "Government Evacuates to Kuibyshev",
+    "Text": "Siberia is now the Soviet Union Home space, and a Supply space for the Soviet Union (only). Place a Home space marker on Siberia. Moscow is no longer a Supply space for any country.",
+    "MultipleActivationsPerTurn": false
+  },
+  {
+    "UniqueName": "ResponseRetreatAndRegroup",
+    "Number": "1066",
+    "Type": "RESPONSE",
+    "ExecutionClass": "ResponseRetreatAndRegroup",
+    "Label": "Retreat and Regroup",
+    "Text": "Use when your Army in Moscow or Ukraine is removed. Recruit Armies in both Siberia and Kazakhstan.",
+    "MultipleActivationsPerTurn": false
   }
 ]

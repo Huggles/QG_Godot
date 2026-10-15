@@ -336,6 +336,10 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
 - **United States: data in, effects not built.** The 25 cards from `TW_US.json` (printed #1–25), the same
   way, under `scripts/Cards/US/`. On import: the four `ECONOMIC_WARFARE` → `EW`; Anti-Japanese Volunteer
   Armies ("Each time") gets `MultipleActivationsPerTurn: true`. None overlapped a base card.
+- **Soviet Union: data in, effects not built.** The 19 cards from `TW_Soviet.json` (printed #48–66), the
+  same way, under `scripts/Cards/Soviet/` (Response cards extend `ResponseCardLogic`). Only fix needed:
+  `PeopleSLiberationArmy` → `StatusPeoplesLiberationArmy`. Operation Zet has exactly Flying Tigers' text;
+  check it against the card.
 - Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);
   unbuilt Bolsters cannot be used until M4.
 - **Numbering:** Total War cards are `1000 + printed number` (US #1–25 → 1001–1025, Germany 1026–1047);
