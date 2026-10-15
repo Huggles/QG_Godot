@@ -14,7 +14,7 @@ Line numbers in this file are approximate: they were taken while the code was mo
 
 ---
 
-## Status (as of commit `a26e0a4`, 2026-10-15)
+## Status (as of M3, 2026-10-15)
 
 | Milestone | State | Commit |
 |---|---|---|
@@ -25,19 +25,33 @@ Line numbers in this file are approximate: they were taken while the code was mo
 | M1 follow-ups | France/China folded into the UK/US faction rows; strip fixes; strip plate and turn tint removed; quit-mid-prompt RPC fix. | `acaaad4`…`2907597` |
 | M2 — Air Forces | Done: units, supply, Air Defense, Air Attack, Reposition, recall, rendering. | `5c4eb80` |
 | Air Forces debug scenario + `.qgc` tests | Done. | `3ce4282`, `a26e0a4` |
-| **Next: M3** | Air step and the Air Power card type. | |
+| M3 — Air step, Air Power and Bolster card types | Done: AIR step via `RuleSet`, Deploy/Marshal/Air Superiority, minor-faction marshal, card and deck overlays (Add only), placeholder art, `.qgc` tests. | (this branch) |
+| **Next: M4** | Bolster cards. | |
 
 **Branches** (stacked; each contains the ones above it):
-`feature/total-war-m0a-dll-spike` → `feature/total-war-m0b` → `feature/total-war-m1` → `feature/total-war-m2`.
-`master` is `d7c290a` (bot lookahead work). Continue from `feature/total-war-m2`, and start a new branch
-per milestone (`feature/total-war-m3`, …).
+`feature/total-war-m0a-dll-spike` → `feature/total-war-m0b` → `feature/total-war-m1` → `feature/total-war-m2` →
+`feature/total-war-m3`.
+`master` is `d7c290a` (bot lookahead work). Continue from `feature/total-war-m3`, and start a new branch
+per milestone (`feature/total-war-m4`, …).
 
 **Still owed (by hand):**
 - Windows self-test of M0a (steps under Verification).
 - A look at: the lobby and skirmish "Expansion: Total War" checkboxes; the faction strip with the
   France/China tabs; Air Force placement on the map and the fly animation (use the debug scenario).
+- M3 in the GUI (skirmish with Total War ticked, or the debug scenario): the Air step prompt (a
+  button modal); the card picker for a Marshal's discard; the country picker for Deploy/Marshal/Air
+  Superiority (no subdued "rebuild" markers); the placeholder Air Power card in hand, shown greyed in
+  the Play prompt; the "Discarded cards" modal after each Air action.
+- Multiplayer with Total War on (verification step 6), now that M3 adds the AIR step.
 
 **Deferred decisions:**
+- **Air Power counts are placeholders:** 3 per country in `data/decks.json`, so the Air step can be
+  played and simmed. Replace with the real counts with the card content.
+- **The Air step prompt opens on public facts only** (a hand with cards, and a supplied Air Force or a
+  space to deploy one), never on whether the hand holds an Air Power card, so it often offers only
+  Pass. A client-side auto-pass (like `UNTIL_ACTIVATABLE`) would spare humans the click; not built.
+- **Total War saves from before M3** don't line up: the AIR step shifts the stored step counter. Base
+  saves are unaffected.
 - **China card routing.** A Soviet card acting for China should prompt the Soviet player. Today every
   prompt for a minor faction goes to its patron (China → US). Handle with the card content.
 - **Victory skip.** The base engine never applies "skip the Victory step if an enemy Army holds your home
@@ -67,15 +81,20 @@ expansions/Directory.Build.props      stamps every expansion DLL with the game v
 expansions/total_war/
   expansion.json                      manifest: id, displayName, assembly, steamDlcAppId (0 = not on Steam yet), minGameVersion
   TotalWar.csproj                     builds TotalWar.dll against the game assembly
-  scripts/TotalWarRules.cs            IExpansionRules entry point (registers nothing yet)
+  scripts/TotalWarRules.cs            IExpansionRules entry point: Configure adds the AIR step
+  scripts/Air/AirStep.cs              the Air step: Deploy, Marshal, Air Superiority, minor-faction marshal
+  scripts/Cards/AirPower.cs           ExecutionClass of the Air Power card (no steps)
   data/factions.json                  France/China rows (added) + NumberOfAirUnits for the six base factions (patched)
   data/setup.json                     starting Armies: France in WESTERN_EUROPE, China in CHINA
+  data/cards.json                     the Air Power card definition
+  data/decks.json                     3 Air Power cards per country (placeholder count)
   data/scenarios/Scenario_Debug_AirForces.json
   assets/factions/france|china/       placeholder flags
+  assets/factions/<faction>/cards/    placeholder <Faction>_AirPower.png and <Faction>_Bolster.png
   assets/textures/Units/QGAirForce.png  placeholder Air Force sprite
 scripts/C#/Expansions/                ExpansionManifest, ExpansionRegistry (+LoadedExpansion), ExpansionLoader,
-                                      IExpansionRules (+ExpansionRegistrar), TypeRegistry, ExpansionIds,
-                                      ExpansionContent, ContentPaths, ExpansionSelfTest
+                                      IExpansionRules (+ExpansionRegistrar), RuleSet (+ExtraTurnStep),
+                                      TypeRegistry, ExpansionIds, ExpansionContent, ContentPaths, ExpansionSelfTest
 scripts/C#/Game/GameOptions.cs        the session's enabled expansions
 scripts/C#/GameMessages/GameMessageJson.cs   shared serializer options (expansion message types)
 scripts/C#/Air/AirForces.cs           Air Defense, Air Attack, Reposition
@@ -113,7 +132,38 @@ never shift.
 - `data/setup.json`: scenario-shaped; adds factions the scenario doesn't set up itself.
 - `data/scenarios/`: listed in the menus next to the base scenarios.
 - `ContentPaths.Resolve("textures/…")`: an enabled expansion's `assets/` first, then base `assets/`.
-- Not built yet: `data/cards.json` and `data/decks.json` (M5).
+- `data/cards.json`: card definitions appended to `CardDataList` (setting it resets the by-name cache).
+- `data/decks.json`: per-faction `Add` lists, instantiated after every base card so base card ids never
+  move. Built in M3 for the Air Power cards; `Remove` (the substitutes) is still M5.
+- Card art for expansion card types (`AIR_POWER`, `BOLSTER`) resolves through `ContentPaths`;
+  `FactionData.LoadCardTextures` skips a type with no art, so the base game loads none.
+
+### Session rules (`RuleSet`)
+- `IExpansionRules.Configure(RuleSet)` (default no-op) runs in `GameOptions.SetForSession` on every peer;
+  the result is `GameOptions.Rules`. Empty for the base game.
+- `RuleSet.AddTurnStep(step, after, body)`: `GameFlow.DefaultTurnSteps` inserts the step after `after`;
+  `ExtraStep` runs `BeginStep` (so a `CardPlayRound` is open and actions get reaction windows), then the
+  body for the current faction, then `FinishStep`. `RestartStepBody` re-runs a body for a save taken on
+  its prompt. A `StepSkippedException` out of the body ends the step.
+
+### Air step (Total War, `AirStep.Run`)
+- Asked only on public facts: the hand has a card, and the country has a supplied Air Force or a space
+  to deploy one. Options: Deploy (Air Power card, then a space), Marshal (the Air Force, always asked
+  even when there is one; then a space, its own allowed; then any card to pay), Air Superiority (Air
+  Power card, then an adjacent space, then which enemy Air Force if several), Pass. Passing on an Air
+  Force or space pick returns to the choice; the card to discard is required (exactly 1).
+- The prompt is `InputRequest.AirStepRequestHandler`, a `SelectOptionRequestHandler` subclass (Kind
+  "AirStep"), so the GUI, CLI and bots already answer it. Picks reuse SelectCard/SelectUnit/SelectCountry;
+  identical cards (Air Power) and a single enemy Air Force are taken without asking. Country picks set
+  `MarkRebuildTargets = false`.
+- The cost is a `DiscardHandCardsChangeEvent` (`IsTrigger=false`); the action goes through
+  `CardPlayPool.DoChangeEvent` (`IsTrigger=true`): `DeployAirForceChangeEvent`,
+  `MoveAirForceChangeEvent(MARSHAL)`, `RemoveUnitChangeEvent(AIR_SUPERIORITY)`, or the no-op
+  `AirSuperiorityChangeEvent` for a space with no enemy Air Force.
+- Then, for the UK/US, each minor ally with a supplied Air Force: "Marshal the French Air Force" or Pass,
+  paid from the patron's hand.
+- Air Power and Bolster cards are never the card played (`CardLogic.CanBeActivated`, Lend-Lease's offer);
+  they can still be discarded to satisfy the Play step.
 
 ### Minor factions (France, China)
 - A minor faction is one whose faction data names a `PatronFaction`: pieces on the board, no seat, deck or
@@ -191,7 +241,7 @@ is. In the Air step a country does at most one of:
 - **Air Superiority:** discard an Air Power card; eliminate an enemy Air Force adjacent to one of its
   supplied Air Forces (a space with none is allowed, to trigger a reaction).
 
-Air Defense, Air Attack and Reposition are built (M2).
+Air Defense, Air Attack and Reposition are built (M2); the Air step is built (M3).
 
 **Pieces (Army / Navy / Air):** Germany 7/3/2, Italy 4/3/1, Japan 5/5/2, UK 5/5/2, Soviet 7/1/1,
 US 5/6/3, France 3/2/1, China 2/0/1.
@@ -201,39 +251,6 @@ US 5/6/3, France 3/2/1, China 2/0/1.
 ---
 
 ## Remaining milestones (each gets its own go-ahead)
-
-### M3 — Air step and the Air Power card type
-**Card types**
-- Add `CardType.AIR_POWER` and `BOLSTER` (at the end) and map them in `Data/CardData.cs` (`CardType` getter).
-- Labels in `CardTypeDisplay` and `GameMessageDisplay.CauseText`.
-- Card art per faction (`<Faction>_AirPower.png`, `<Faction>_Bolster.png`) under
-  `expansions/total_war/assets/factions/<faction>/cards/`, resolved through `ContentPaths` in
-  `FactionData.LoadCardTextures` (its `excludeCards` must tolerate the new types without the expansion).
-  Placeholders until real art exists.
-- Air Power and Bolster cards are not playable as the Play-step card (`GameStateCalculator`
-  `CalculatePlayableCardsForFaction`, `InputRequest.HandCardPlayRequestHandler.PopulateTargets`), but may
-  be discarded to satisfy it.
-- A generic `AirPower` ExecutionClass in `expansions/total_war/scripts/Cards/`, resolved via `TypeRegistry`.
-
-**Step**
-- Add `TurnStep.AIR` at the end of the enum. Saves store the step counter as a position in the step
-  table, so the table only gets AIR when an enabled expansion asks for it (base saves unchanged).
-- First real `IExpansionRules` hook: `ExtraTurnSteps` (AIR after PLAY_CARD), merged into a `RuleSet` on
-  `GameOptions.Rules`; `GameFlow.DefaultTurnSteps` reads it. `RestartStepBody` needs a case.
-- The step table is built on every peer, so it must come from `GameOptions` (already set before `Init()`).
-- An Air step handler following the Play/Supply handler pattern in `GameFlow`. It opens a `CardPlayRound`
-  so reactions work. Generic engine pieces go in core; the Total War wiring in `expansions/total_war/scripts/Air/`.
-
-**Prompt**
-- A new `AirStepRequestHandler` in `scenes/network/InputRequest.cs` (see the `player-input-routing` skill:
-  every player prompt is an InputRequest broadcast). Choices: Deploy (Air Power card, then a space),
-  Marshal (any card, an Air Force, then a space), Air Superiority (Air Power card, then a target space),
-  Pass.
-- Then, for the UK or US: an optional "marshal the French/Chinese Air Force" by discarding a card.
-- Actions dispatch through `CardPlayPool.DoChangeEvent` with `IsTrigger=true`, so cards like Ju-87 ("when
-  you deploy or marshal an Air Force") can react. Air Superiority removes with reason `AIR_SUPERIORITY`.
-- The CLI answers it via `Cli/InputRequestSpec.cs`.
-- The empty-pool recall and reposition already exist (M2).
 
 ### M4 — Bolster cards
 Two kinds: **event-triggered** ("when you build a Navy…", "when the Axis declares…"), which fit the
@@ -246,7 +263,8 @@ reveals that the card is in their hand.
 2. `CardLogic.CanBeActivated`: a hand Bolster can be used whenever its own triggers are met and it has
    executable steps (once-per-turn still applies). Event triggers also need an open block/reaction
    window; step-timed triggers need the matching step-boundary window. The depth-0 rule for table cards
-   still in hand must not apply to Bolsters.
+   still in hand must not apply to Bolsters. M3 made `CanBeActivated` refuse every hand `AIR_POWER`/`BOLSTER`
+   card (`CardTypeRules.IsPlayedFromHand`); lift that for Bolsters here.
    - **Step-boundary windows (core):** `StepBoundaryChangeEvent(step, BEGIN|END, activeFaction)` with
      `IsTrigger=true` via `CardPlayPool.DoChangeEvent` (game-mechanic trigger: the team on turn reacts
      second). BEGIN in `GameFlow.BeginStep` after `ChangeStepChangeEvent` and the BEFORE mutators; END
@@ -282,14 +300,15 @@ Rule parameters on the `RuleSet`, supplied by `TotalWarRules`; core only reads t
 - Discard step: no card discarded → the team loses 1 VP (`Steps/DiscardStepHandlerDefault.cs`, via
   `ScorePointsChangeEvent`).
 - Reallocate Resources costs 3 (`MutatorReallocateResources`).
-- Deck overlay: `data/decks.json` with per-faction `Add`/`Remove` lists (substitutes remove base cards),
-  applied in `InstantiateFactionStates` after the base cards; `data/cards.json` loaded after
-  `QGData_Cards_V2.json`.
+- Deck overlay: per-faction `Remove` lists in `data/decks.json` (substitutes remove base cards). The `Add`
+  lists and `data/cards.json` exist since M3.
 
 ### M6 — Bots and sim
 Bots answer every new prompt at random (pass included), no new rules or valuation.
-- `Cli/InputRequestSpec.cs` mappings for: the Air step action; Air Defense/Air Attack (yes/no, already a
-  generic SelectOption); reposition target (SelectCountry); the minor-faction marshal; Bolster windows.
+- `Cli/InputRequestSpec.cs` mappings for Bolster windows. The Air step (Kind "AirStep", a SelectOption
+  subclass, minor-faction marshal included), Air Defense/Air Attack and reposition are already answered,
+  at random. The random bot marshals often and so burns cards: decks run dry about twice as often as in
+  a base game (148 vs 61 "Deck is empty" lines, seed 42 d1).
 - The bot's reaction default is `passChance: 0` (`Ai/AiSeatRuntime.cs`), which would spend every Bolster:
   the Air step and Bolster windows must allow passing. Check a hand Bolster offered in an `ActivateCard`
   window doesn't fall under `PreferValuableCardRule`.
@@ -332,25 +351,27 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
    `DOTNET_ROLL_FORWARD=Major`. The full 60-game set (seeds 42,1,7 × 1–20) is only for suspected drift.
 2. **Total War smoke test.** The same command with `--game-arg expansions=total_war` (3 games is enough):
    no `stalled` or `result+errors` in `failures.txt`.
-3. **Expansion self-test.** `Godot --headless --path . -- expansion_selftest=true` must print all PASS.
+3. **Expansion self-test.** `Godot --headless --path . -- expansion_selftest=true` must print all PASS (7/7 since M3).
 4. **Windows exported self-test (owed from M0a):**
    1. `/export-windows`;
    2. `New-Item -ItemType Directory -Force Builds\dlc; Copy-Item .godot\mono\temp\bin\ExportRelease\TotalWar.dll Builds\dlc\`;
    3. `Start-Process "Builds\Quartermaster General.exe" -ArgumentList '--headless','--','expansion_selftest=true' -Wait -PassThru -RedirectStandardOutput selftest.log`;
-   4. expect exit code 0 and `PASS 6/6`. A release exe may write nothing to stdout; then read `godot.log`
+   4. expect exit code 0 and `PASS 7/7`. A release exe may write nothing to stdout; then read `godot.log`
       in the game's user-data `logs` folder.
-5. **Rule tests.** `tests/qgc/*.qgc` (including the three `air_*` ones) are run by hand with
+5. **Rule tests.** `tests/qgc/*.qgc` (including the six `air_*` ones) are run by hand with
    `tests/run-cli.sh`; Claude doesn't run `run-cli.sh` or `run-all.sh` (standing project rule). Claude
    checks command sequences by piping them into the Godot CLI directly.
-6. **Multiplayer (when M3+ lands):** two instances with Total War on — no hash divergence; a rejoining
+6. **Multiplayer (owed since M3):** two instances with Total War on — no hash divergence; a rejoining
    client rebuilds France/China and Air Forces; Air Defense prompts the defender's machine; a lobby member
    without the expansion blocks Start.
 7. **Saves:** a base save from before this work loads; a Total War save round-trips (verified for Air
-   Forces in M2).
+   Forces in M2; in M3, a save on the Air step prompt resumes on it, and one whose log holds an
+   `AirSuperiorityChangeEvent` replays to the same hash).
 
 **CLI helpers:** `scenario=Scenario_Debug_AirForces` enables Total War by itself. `force …` injects an
 event without reactions; `api …` opens reaction windows (answer them with `pass`). Inject verbs include
-`deployAirForce --faction F --country C` and `moveAirForce --faction F --unit N --country C`.
+`deployAirForce --faction F --country C`, `moveAirForce --faction F --unit N --country C` and
+`airSuperiority --faction F --country C`.
 `assert airforce <country> <faction>` checks for an Air Force. Saving refuses while the current step's
 event pool is non-empty, so save at the start of a later step.
 
