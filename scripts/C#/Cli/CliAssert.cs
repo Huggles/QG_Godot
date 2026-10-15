@@ -100,7 +100,8 @@ public static class CliAssert
             case "vp":
             {
                 FactionTeam team = ParseEnum<FactionTeam>(arg1, "team");
-                return StaticGameData.FactionsForTeam(team).Sum(f => FactionState.ForEnum(f).Score).ToString();
+                // The game's own team total, so a minor faction's points (France, China) count too.
+                return StaticGameData.ScoreForTeam(team).ToString();
             }
 
             // CountryState.Units maps faction -> unit id, so "how many units" is the number of
@@ -111,6 +112,15 @@ public static class CliAssert
                 if (subject.Count > 2)
                     return country.Units.ContainsKey(ParseFaction(subject[2])) ? "1" : "0";
                 return country.Units.Count.ToString();
+            }
+
+            // Whether the faction has an Air Force here: `assert airforce UKRAINE SOVIET == 1`. Air Forces
+            // stand beside the Army or Navy rather than occupying the space, so `units` never counts them.
+            case "airforce":
+            {
+                CountryState country = ParseCountry(arg1);
+                Faction faction = ParseFaction(subject.Count > 2 ? subject[2] : null);
+                return BoardState.Live.AirForceIn(faction, country) >= 0 ? "1" : "0";
             }
 
             // How many pieces of a type the faction still has to play: `assert pool GERMANY NAVY == 0`.

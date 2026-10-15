@@ -80,6 +80,13 @@ public class FactionScenarioData
     [JsonPropertyName("unitDeployments")]
     public List<UnitDeploymentData> UnitDeployments { get; set; } = new List<UnitDeploymentData>();
 
+    /// <summary>
+    /// Air Forces placed after every faction's Armies and Navies, each in a space where this faction
+    /// has one. Only meaningful in a game whose expansions give the faction Air Forces.
+    /// </summary>
+    [JsonPropertyName("airForceDeployments")]
+    public List<UnitDeploymentData> AirForceDeployments { get; set; } = new List<UnitDeploymentData>();
+
     [JsonPropertyName("initialCards")]
     public List<InitialCardEntry> InitialCards { get; set; } = new List<InitialCardEntry>();
 

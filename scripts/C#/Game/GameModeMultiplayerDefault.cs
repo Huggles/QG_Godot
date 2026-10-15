@@ -472,6 +472,43 @@ public partial class GameModeMultiplayerDefault : IGameMode
                 await deployUnitChangeEvent.Apply();
             }
         }
+
+        await DeployAirForces(initialStateData);
+    }
+
+    /// <summary>
+    /// Place the scenario's Air Forces, once every Army and Navy is down: an Air Force needs its own
+    /// supplied Army or Navy in the space. The calculator is off during setup, so supply is worked out
+    /// for that first — only when there is an Air Force to place, which leaves every other scenario's
+    /// setup exactly as it was.
+    /// </summary>
+    private async Task DeployAirForces(InitialGameStateData initialStateData)
+    {
+        List<(Faction Faction, UnitDeploymentData Deployment)> airForces = initialStateData.Factions
+            .Where(entry => Enum.TryParse(entry.Key, out Faction _))
+            .SelectMany(entry => entry.Value.AirForceDeployments.Select(deployment => (Enum.Parse<Faction>(entry.Key), deployment)))
+            .ToList();
+        if (airForces.Count == 0) return;
+
+        GameStateCalculator.Enabled = true;
+        GameStateCalculator.CalculateAll(RecalcScope.Board);
+        GameStateCalculator.Enabled = false;
+
+        foreach ((Faction faction, UnitDeploymentData deployment) in airForces)
+        {
+            CountryState countryState = CountryState.ForName(deployment.CountryName)
+                ?? throw new Exception($"Country '{deployment.CountryName}' not found for {faction}'s Air Force in the scenario.");
+
+            if (!BoardState.Live.CanDeployAirForce(faction, countryState))
+                throw new Exception(
+                    $"Scenario places {faction}'s Air Force in '{deployment.CountryName}', which needs {faction}'s supplied Army or Navy there and no other {faction} Air Force.");
+            if (!UnitPool.FactionHasAvailableUnits(faction, UnitType.AIR_FORCE))
+                throw new Exception(
+                    $"Scenario places more Air Forces for {faction} than it has. Is the expansion that gives {faction} Air Forces enabled?");
+
+            await new DeployAirForceChangeEvent(faction, countryState.Id)
+                { IsTrigger = false, BlockAnimationQueue = false, PlayAnimations = false }.Apply();
+        }
     }
     /// <summary>
     /// Randomise every faction's draw deck before the opening hands are dealt.

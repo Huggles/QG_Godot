@@ -1,0 +1,26 @@
+#!args scenario=Scenario_Debug_AirForces seed=42
+#
+# Total War: when an Army standing with its Air Force is battled, its owner may remove the Air Force
+# instead (Air Defense); the attacker may then remove one of its own supplied Air Forces adjacent to
+# the battled space to remove the Army anyway (Air Attack).
+#
+# Scenario_Debug_AirForces puts France's Army and Air Force in Western Europe, next to Germany's Army
+# and Air Force. France has no seat: its prompts go to its patron, the United Kingdom.
+#
+# Run:  tests/run-cli.sh tests/qgc/air_defense_then_air_attack.qgc
+
+prompt                                  # turn 1, Germany — synchronise with the running game
+answer id=11                            # play a Land Battle
+answer id=56                            # battle France's Army in Western Europe (unit 56)
+assert promptfaction == FRANCE
+answer id=0                             # Air Defense: France's Air Force takes the hit
+assert promptfaction == GERMANY
+answer id=0                             # Air Attack: Germany spends its Air Force in Germany
+
+prompt                                  # wait for the removals to settle
+assert units WESTERN_EUROPE FRANCE == 0           # the Army is removed after all
+assert airforce WESTERN_EUROPE FRANCE == 0        # ...and France's Air Force went first
+assert airforce GERMANY GERMANY == 0              # Germany paid with its own
+assert airforce WESTERN_EUROPE UNITED_KINGDOM == 1  # the UK's pieces beside them are untouched
+assert pool FRANCE AIR_FORCE == 1
+assert pool GERMANY AIR_FORCE == 1

@@ -1,0 +1,47 @@
+{
+  "title": "Debug: Air Forces",
+  "description": "Total War test setup for Air Forces. Germany moves first and Italy fifth, each holding Land Battles.\n\nWestern Europe: France and the UK each have an Army and an Air Force there. Battle one: its owner may give up the Air Force instead (Air Defense), and the attacker may then spend its own adjacent Air Force to remove the Army anyway (Air Attack). If France declines, its Air Force has nowhere French to go and is lost; the UK's repositions to the UK Navy in the North Sea.\n\nUkraine (from Eastern Europe): a Soviet Army and Air Force, with Soviet Armies in both Moscow and Russia, so a reposition there asks where to go.\n\nPlay several factions yourself to answer both sides' prompts.",
+  "debug": true,
+  "expansions": [ "total_war" ],
+  "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [ { "countryName": "GERMANY" }, { "countryName": "EASTERN_EUROPE" } ],
+      "airForceDeployments": [ { "countryName": "GERMANY" }, { "countryName": "EASTERN_EUROPE" } ],
+      "initialHandCards": [ { "name": "LandBattle" }, { "name": "LandBattle" }, { "name": "LandBattle" } ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [ { "countryName": "UNITED_KINGDOM" }, { "countryName": "NORTH_SEA" }, { "countryName": "WESTERN_EUROPE" } ],
+      "airForceDeployments": [ { "countryName": "WESTERN_EUROPE" } ],
+      "startingVP": 0
+    },
+    "FRANCE": {
+      "unitDeployments": [ { "countryName": "WESTERN_EUROPE" } ],
+      "airForceDeployments": [ { "countryName": "WESTERN_EUROPE" } ],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [ { "countryName": "JAPAN" } ],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [ { "countryName": "MOSCOW" }, { "countryName": "UKRAINE" }, { "countryName": "RUSSIA" } ],
+      "airForceDeployments": [ { "countryName": "UKRAINE" } ],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [ { "countryName": "ITALY" } ],
+      "airForceDeployments": [ { "countryName": "ITALY" } ],
+      "initialHandCards": [ { "name": "LandBattle" }, { "name": "LandBattle" } ],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [ { "countryName": "US_EAST" } ],
+      "startingVP": 0
+    }
+  }
+}

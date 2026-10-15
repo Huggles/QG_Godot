@@ -1,0 +1,17 @@
+#!args scenario=Scenario_Debug_AirForces seed=42
+#
+# Total War: an Air Force left without its own Army or Navy, and with no adjacent space holding one
+# of its faction's supplied Armies or Navies, is removed. France declines Air Defense in Western
+# Europe, and no other French piece is on the board for its Air Force to go to.
+#
+# Run:  tests/run-cli.sh tests/qgc/air_force_lost.qgc
+
+prompt                                  # turn 1, Germany — synchronise with the running game
+answer id=11                            # play a Land Battle
+answer id=56                            # battle France's Army in Western Europe (unit 56)
+answer id=1                             # France declines Air Defense: "Remove the Army"
+
+prompt                                  # wait for the battle and the loss to settle
+assert units WESTERN_EUROPE FRANCE == 0
+assert airforce WESTERN_EUROPE FRANCE == 0
+assert pool FRANCE AIR_FORCE == 1       # back in the pool: lost, not moved

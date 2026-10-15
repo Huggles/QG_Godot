@@ -203,10 +203,28 @@ public partial class GameManager : Node
 
     private void LoadAvailableScenarios()
     {
-        using DirAccess dir = DirAccess.Open(ScenarioDirectory);
+        LoadScenariosFrom(ScenarioDirectory, required: true);
+
+        // An installed expansion can ship scenarios of its own, in its data/scenarios/ folder (Total
+        // War's debug setups, for one). They name the expansion they need, so picking one ticks it.
+        foreach (LoadedExpansion expansion in ExpansionRegistry.All.Where(expansion => expansion.IsLoaded))
+            LoadScenariosFrom($"{expansion.ResFolder}data/scenarios/", required: false);
+
+        AvailableScenarios = AvailableScenarios.OrderBy(s => s.Name).ToList();
+        SelectedScenario = AvailableScenarios.FirstOrDefault(s => s.Name.Equals("Scenario_Basic", StringComparison.OrdinalIgnoreCase))
+                           ?? AvailableScenarios.FirstOrDefault();
+
+        if (SelectedScenario != null)
+            PendingScenarioPath = SelectedScenario.Path;
+    }
+
+    /// <summary>Add every scenario file in <paramref name="directory"/>. A missing folder is an error only for the base game's.</summary>
+    private void LoadScenariosFrom(string directory, bool required)
+    {
+        using DirAccess dir = DirAccess.Open(directory);
         if (dir == null)
         {
-            DebugUtilities.PrintPeerError($"GameManager: failed to open scenario directory {ScenarioDirectory}");
+            if (required) DebugUtilities.PrintPeerError($"GameManager: failed to open scenario directory {directory}");
             return;
         }
 
@@ -220,7 +238,7 @@ public partial class GameManager : Node
             if (!fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            string path = $"{ScenarioDirectory}{fileName}";
+            string path = $"{directory}{fileName}";
             try
             {
                 using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
@@ -240,12 +258,12 @@ public partial class GameManager : Node
                 if (root.TryGetProperty("description", out JsonElement descriptionElement) && descriptionElement.ValueKind == JsonValueKind.String)
                     info.Description = descriptionElement.GetString();
 
-                // Absent means true — the same default InitialGameStateData carries, so a scenario
-                // file that predates the setting keeps the opening discard.
                 // The expansions this scenario is meant for: what the menus tick by default when it is
                 // picked. Absent means none.
                 info.Expansions = ExpansionIds.FromScenario(root);
 
+                // Absent means true — the same default InitialGameStateData carries, so a scenario
+                // file that predates the setting keeps the opening discard.
                 if (root.TryGetProperty("openingDiscard", out JsonElement openingDiscardElement)
                     && (openingDiscardElement.ValueKind == JsonValueKind.True || openingDiscardElement.ValueKind == JsonValueKind.False))
                     info.OpeningDiscard = openingDiscardElement.GetBoolean();
@@ -281,12 +299,6 @@ public partial class GameManager : Node
         }
 
         dir.ListDirEnd();
-        AvailableScenarios = AvailableScenarios.OrderBy(s => s.Name).ToList();
-        SelectedScenario = AvailableScenarios.FirstOrDefault(s => s.Name.Equals("Scenario_Basic", StringComparison.OrdinalIgnoreCase))
-                           ?? AvailableScenarios.FirstOrDefault();
-
-        if (SelectedScenario != null)
-            PendingScenarioPath = SelectedScenario.Path;
     }
 
     public void SetSelectedScenarioByIndex(int index)
