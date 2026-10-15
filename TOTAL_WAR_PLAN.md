@@ -257,7 +257,8 @@ before/after a step), which have no window today. The engine removed its old STA
 purpose (comment near `Condition.IsPlayCardStep`): a window that opens only when someone can use it
 reveals that the card is in their hand.
 
-1. `BolsterCardLogic` base class (core) whose play conditions are `CardTriggers()`.
+1. `BolsterCardLogic` base class (core) whose play conditions are `CardTriggers()`. A minimal one (no
+   steps, nothing else) exists since the German cards were added.
 2. `CardLogic.CanBeActivated`: a hand Bolster can be used whenever its own triggers are met and it has
    executable steps (once-per-turn still applies). Event triggers also need an open block/reaction
    window; step-timed triggers need the matching step-boundary window. The depth-0 rule for table cards
@@ -324,6 +325,21 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
   `expansion_selftest` with `dlc/` in place; upload the third depot; add both to the preflight checks.
 
 ### Card content (follow-up, once the texts are available)
+- **Germany: data in, effects not built.** The 22 cards from `TW_Germany.json` (printed #26–47) are in
+  `data/cards.json` and Germany's `data/decks.json` row, each with a class under `scripts/Cards/Germany/`
+  that extends its type's base (`EventCardLogic`, `EWCardLogic`, `StatusCardLogic`, `BolsterCardLogic`)
+  and has no steps. Normalised on import: UniqueName/ExecutionClass prefixed by type like the base cards
+  (`EventSeaLion`, `Bolster128cmFlakzwilling40`); `ECONOMIC_WARFARE` → `EW`; Landkreuzers and Westwall
+  ("every time") get `MultipleActivationsPerTurn: true`; straight quotes. Land Battle (#40) and Ardennes
+  Offensive (#42) reuse the base cards (Ardennes was defined in base data but in no base deck).
+  12.8cm Flakzwilling 40's text ("eliminate an Italian Air Force") reads oddly; check it against the card.
+- **United States: data in, effects not built.** The 25 cards from `TW_US.json` (printed #1–25), the same
+  way, under `scripts/Cards/US/`. On import: the four `ECONOMIC_WARFARE` → `EW`; Anti-Japanese Volunteer
+  Armies ("Each time") gets `MultipleActivationsPerTurn: true`. None overlapped a base card.
+- Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);
+  unbuilt Bolsters cannot be used until M4.
+- **Numbering:** Total War cards are `1000 + printed number` (US #1–25 → 1001–1025, Germany 1026–1047);
+  Air Power is 1000. Base cards are 1–146.
 - `data/cards.json` entries per country plus one ExecutionClass per card under
   `expansions/total_war/scripts/Cards/<Faction>/`, including Air Power deck counts and the 5 substitutes
   (Dutch East Indies, Free France, Free French Allies, American Volunteer Group Expands, Ledo and Burma
