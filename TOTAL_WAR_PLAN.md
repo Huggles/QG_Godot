@@ -25,14 +25,12 @@ Line numbers in this file are approximate: they were taken while the code was mo
 | M1 follow-ups | France/China folded into the UK/US faction rows; strip fixes; strip plate and turn tint removed; quit-mid-prompt RPC fix. | `acaaad4`…`2907597` |
 | M2 — Air Forces | Done: units, supply, Air Defense, Air Attack, Reposition, recall, rendering. | `5c4eb80` |
 | Air Forces debug scenario + `.qgc` tests | Done. | `3ce4282`, `a26e0a4` |
-| M3 — Air step, Air Power and Bolster card types | Done: AIR step via `RuleSet`, Deploy/Marshal/Air Superiority, minor-faction marshal, card and deck overlays (Add only), placeholder art, `.qgc` tests. | (this branch) |
+| M3 — Air step, Air Power and Bolster card types | Done: AIR step via `RuleSet`, Deploy/Marshal/Air Superiority, minor-faction marshal, card and deck overlays (Add only), placeholder art, `.qgc` tests. | `cdafe03`, `73d466f` |
 | **Next: M4** | Bolster cards. | |
 
-**Branches** (stacked; each contains the ones above it):
-`feature/total-war-m0a-dll-spike` → `feature/total-war-m0b` → `feature/total-war-m1` → `feature/total-war-m2` →
-`feature/total-war-m3`.
-`master` is `d7c290a` (bot lookahead work). Continue from `feature/total-war-m3`, and start a new branch
-per milestone (`feature/total-war-m4`, …).
+**Branches:** `master` contains M0a–M3 (fast-forwarded to `fd05018`, 2026-10-15). Start each milestone on
+its own branch from `master` (`feature/total-war-m4`, …). The old milestone branches
+(`feature/total-war-m0a-dll-spike` … `feature/total-war-m3`) are all contained in `master`.
 
 **Still owed (by hand):**
 - Windows self-test of M0a (steps under Verification).
@@ -379,7 +377,7 @@ event pool is non-empty, so save at the start of a later step.
 
 ## Working agreements
 
-- One milestone at a time, each with its own go-ahead, on its own branch stacked on the last.
+- One milestone at a time, each with its own go-ahead, on its own branch from `master`.
 - Keep sim runs small: the 10-game gate per milestone, not 60.
 - The user checks visuals and UI by hand; say what to look at.
 - Commits are signed; end commit messages with the Co-Authored-By line used so far.
