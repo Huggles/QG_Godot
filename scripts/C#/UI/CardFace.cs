@@ -36,15 +36,20 @@ public readonly struct CardFace
         new(BulletinArt.Front, label, text);
 
     /// <summary>
-    /// An option drawn as a card: <paramref name="faction"/>'s front for the option's card type, or the Bulletin
-    /// front. A minor faction has no card art, so it borrows its patron's.
+    /// An option drawn as a card: its faction's flag card, else <paramref name="faction"/>'s front for its card type,
+    /// else the Bulletin front. A minor faction has no card art, so it borrows its patron's or falls back to its flag.
     /// </summary>
     public static CardFace ForOption(InputRequest.OptionCard option, Faction faction)
     {
-        Texture2D front = option.ArtCardType == CardType.NONE ? null
-            : FactionState.ForEnum(StaticGameData.ControllerOf(faction))?.FactionData.CardFrontTextures.GetValueOrDefault(option.ArtCardType);
+        Texture2D front = option.FlagFaction != Faction.NONE ? FlagFront(option.FlagFaction)
+            : option.ArtCardType != CardType.NONE
+                ? FactionState.ForEnum(StaticGameData.ControllerOf(faction))?.FactionData.CardFrontTextures.GetValueOrDefault(option.ArtCardType)
+            : null;
         return new(front ?? BulletinArt.Front, option.Title, option.Text);
     }
+
+    private static Texture2D FlagFront(Faction faction) =>
+        StaticGameData.FactionDataMap.GetValueOrDefault(faction) is { } data ? data.FlagCardTexture ?? data.FlagTexture : null;
 }
 
 /// <summary>

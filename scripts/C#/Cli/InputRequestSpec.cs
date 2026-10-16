@@ -122,9 +122,9 @@ public sealed class InputRequestSpec
                 spec.Pass = PassMode.Skip;
                 break;
 
-            // Answer goes into ResponseCardIds holding (int)faction — a real quirk of the modal
-            // (PresentationItem.ForFactions uses the enum value as the item id) that EventLendLease
-            // reads back as (Faction)ResponseCardIds[0]. Do not "fix" it.
+            // Answer goes into ResponseCardIds holding (int)faction — a real quirk of the prompt (its
+            // flag cards use the enum value as the option id) that EventLendLease reads back as
+            // (Faction)ResponseCardIds[0]. Do not "fix" it.
             case InputRequest.SelectFactionRequestHandler:
                 spec.Title = "Select a faction";
                 spec.Options = (request.TargetFactions ?? new List<Faction>())

@@ -61,6 +61,21 @@ public partial class FactionData : DataObject
         => FlagPath == null ? FactionFlags[Faction] : _flagTexture ??= GD.Load<Texture2D>(FlagPath);
     private Texture2D _flagTexture;
 
+    /// <summary>The flag as a full card front, for a faction drawn as a card; null for one without (the minor factions).</summary>
+    [JsonIgnore] public Texture2D FlagCardTexture
+        => FlagCardPaths.TryGetValue(Faction, out string path) ? _flagCardTexture ??= GD.Load<Texture2D>(path) : null;
+    private Texture2D _flagCardTexture;
+
+    private static readonly Dictionary<Faction, string> FlagCardPaths = new()
+    {
+        { Faction.GERMANY,        "res://assets/factions/germany/Germany_FlagCard.png" },
+        { Faction.UNITED_KINGDOM, "res://assets/factions/united_kingdom/UK_FlagCard.png" },
+        { Faction.JAPAN,          "res://assets/factions/japan/Japan_FlagCard.png" },
+        { Faction.SOVIET,         "res://assets/factions/soviet/Soviet_FlagCard.png" },
+        { Faction.ITALY,          "res://assets/factions/italy/Italy_FlagCard.png" },
+        { Faction.UNITED_STATES,  "res://assets/factions/united_states/US_FlagCard.png" },
+    };
+
     public string FactionAdjactiveLabel => AdjectiveLabel ?? FactionAdjactiveLabels[Faction];
 
     public static Dictionary<Faction, string> FactionAdjactiveLabels => new Dictionary<Faction, string>

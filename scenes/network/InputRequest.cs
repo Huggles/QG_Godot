@@ -562,6 +562,20 @@ public abstract partial class InputRequest
         }
     }
 
+    /// <summary>Draw <paramref name="cards"/> in the hand fan and wait for one: its option id, or -1 for Skip or a released prompt.</summary>
+    protected async Task<int> AwaitOptionCard(List<OptionCard> cards, string title, string skipText = null)
+    {
+        PlayerScene.Current.InputManager.SetCardSelectionActive(
+            TargetFaction, new List<int>(), optionCards: cards, title: title, skipText: skipText);
+        // Hidden again with the hand when the prompt closes, as for a reaction window.
+        if (TriggerSummaryText != null)
+            TriggerContextDisplay.Current?.ShowCard(
+                TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,
+                TriggerTargetCountryIds, TriggerTargetUnitIds);
+        Variant[] results = await AwaitCardSelection();
+        return results is { Length: > 0 } ? (int)results[0] : -1;
+    }
+
     /// <summary>
     /// Answer this reaction window as a pass without ever drawing it, when the player has pre-armed a
     /// <see cref="ReactionSkipPreference"/> and the window offers nothing. Returns true if it did, in
@@ -960,21 +974,25 @@ public abstract partial class InputRequest
             TargetFactions = targetFactions;
         }
 
+        /// <summary>The factions as flag cards in the hand fan, answered with the faction's enum value in ResponseCardIds.</summary>
         public override async Task Handle()
         {
-            var items = PresentationItem.ForFactions(TargetFactions);
-            ModalResult result = await ModalStack.Current.Show(
-                ModalConfig.SelectOne("Select a faction", items));
-            // Count as well as WasCancelled: SelectOne's default gates Apply behind one selection, so an
-            // empty result is unreachable today — but indexing [0] on one is an exception thrown out of
-            // card execution, and a SelectOne(required: false) would make it reachable.
-            if (result.WasCancelled || result.SelectedItems.Count == 0)
+            int faction = await AwaitOptionCard(TargetFactions.Select(FlagCard).ToList(), "Select a faction");
+            if (faction < 0)
             {
                 WasSkipped = true;
                 return;
             }
-            ResponseCardIds.Add(result.SelectedItems[0]);
+            ResponseCardIds.Add(faction);
         }
+
+        private static OptionCard FlagCard(Faction faction) => new()
+        {
+            OptionId = (int)faction,
+            Title = faction.WithPlayer(),
+            Text = StaticGameData.FactionTeamForFaction(faction) == FactionTeam.AXIS ? "Axis" : "Allies",
+            FlagFaction = faction,
+        };
     }
 
     /// <summary>One option of a <see cref="SelectOptionRequestHandler"/> drawn as a card in the hand fan, with no card definition behind it.</summary>
@@ -986,6 +1004,9 @@ public abstract partial class InputRequest
 
         /// <summary>The front is the prompted faction's art for this card type; NONE draws the Bulletin front.</summary>
         public CardType ArtCardType { get; set; }
+
+        /// <summary>For an option that stands for a faction: its flag card is the front, over <see cref="ArtCardType"/>.</summary>
+        public Faction FlagFaction { get; set; }
 
         /// <summary>What hovering the option lights on the board, like a card's target preview.</summary>
         public List<int> TargetCountryIds { get; set; }
@@ -1029,7 +1050,7 @@ public abstract partial class InputRequest
                 .Select((label, i) => (PresentationItem)new PresentationItemTextButton(TargetOptionIds[i], label, true))
                 .ToList();
             ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectOne(ModalTitle, items));
-            // See SelectFactionRequestHandler: guarded against an empty result for the same reason.
+            // Count as well as WasCancelled: an empty result is unreachable today, but indexing [0] on one would throw out of card execution.
             if (result.WasCancelled || result.SelectedItems.Count == 0)
             {
                 WasSkipped = true;
@@ -1038,22 +1059,12 @@ public abstract partial class InputRequest
             ResponseCardIds.Add(result.SelectedItems[0]);
         }
 
-        /// <summary>The option cards go through the card prompt, which answers with the clicked option's id, or -1 for Skip.</summary>
         private async Task HandleAsCards()
         {
             List<string> cardless = TargetOptionLabels
                 .Where((label, i) => OptionCards.All(card => card.OptionId != TargetOptionIds[i]))
                 .ToList();
-            PlayerScene.Current.InputManager.SetCardSelectionActive(
-                TargetFaction, new List<int>(), optionCards: OptionCards, title: ModalTitle,
-                skipText: cardless.Count == 1 ? cardless[0] : null);
-            // Hidden again with the hand when the prompt closes, as for a reaction window.
-            if (TriggerSummaryText != null)
-                TriggerContextDisplay.Current?.ShowCard(
-                    TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,
-                    TriggerTargetCountryIds, TriggerTargetUnitIds);
-            Variant[] results = await AwaitCardSelection();
-            int optionId = results is { Length: > 0 } ? (int)results[0] : -1;
+            int optionId = await AwaitOptionCard(OptionCards, ModalTitle, cardless.Count == 1 ? cardless[0] : null);
             if (optionId < 0)
             {
                 WasSkipped = true;
