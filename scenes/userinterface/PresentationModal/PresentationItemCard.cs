@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 public partial class PresentationItemCard : PresentationItem
 {
-    public Vector2 CardSize = new Vector2(250, 350);
+    // 70% of the 250x350 card, so a modal of draw or discard choices leaves more of the board in view.
+    public Vector2 CardSize = new Vector2(175, 245);
     private int cardId = -1;
 
     public CardScene CardSceneInstance {
