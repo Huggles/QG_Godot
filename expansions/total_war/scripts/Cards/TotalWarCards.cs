@@ -101,13 +101,16 @@ public static class TotalWarCards
         })
         .WithGuidance("Shuffle its draw deck");
 
-    /// <summary>The faction's draw deck, one card per name in name order: copies are interchangeable, and the list says nothing of the deck's order.</summary>
-    public static List<int> DeckChoices(BoardState board, Faction faction, Func<CardData, bool> filter = null) =>
+    /// <summary>
+    /// The faction's draw deck, up to <paramref name="perName"/> cards per name in name order: copies are interchangeable,
+    /// and the list says nothing of the deck's order. A pick of several cards needs as many copies to take two of a name.
+    /// </summary>
+    public static List<int> DeckChoices(BoardState board, Faction faction, Func<CardData, bool> filter = null, int perName = 1) =>
         board.ForFaction(faction).Deck
             .Where(cardId => filter == null || filter(CardState.ForId(cardId).CardData))
             .GroupBy(cardId => CardState.ForId(cardId).CardData.UniqueName)
             .OrderBy(sameName => CardState.ForId(sameName.First()).CardData.Label)
-            .Select(sameName => sameName.First())
+            .SelectMany(sameName => sameName.Take(perName))
             .ToList();
 
     /// <summary>"Use at the beginning of your Play step": your Play step with the play unspent, as ResponseMobileForce. Pair with IsFreePlayStepActivation.</summary>
