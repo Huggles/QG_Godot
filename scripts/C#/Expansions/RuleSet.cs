@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>A turn step an expansion adds, run straight after <see cref="After"/> for the faction whose turn it is.</summary>
-public sealed record ExtraTurnStep(TurnStep Step, TurnStep After, Func<Faction, Task> Body);
+public sealed record ExtraTurnStep(TurnStep Step, TurnStep After, Func<Faction, Task> Body, TurnStepText Text);
 
 /// <summary>
 /// The rules a session adds to the base game, filled in by each enabled expansion's
@@ -29,12 +29,12 @@ public sealed class RuleSet
         return rules;
     }
 
-    /// <summary>Adds <paramref name="step"/> to the turn, straight after <paramref name="after"/>.</summary>
-    public void AddTurnStep(TurnStep step, TurnStep after, Func<Faction, Task> body)
+    /// <summary>Adds <paramref name="step"/> to the turn, straight after <paramref name="after"/>, shown on the HUD as <paramref name="text"/>.</summary>
+    public void AddTurnStep(TurnStep step, TurnStep after, Func<Faction, Task> body, TurnStepText text)
     {
         if (step <= TurnStep.END || _extraTurnSteps.Any(extra => extra.Step == step))
             throw new InvalidOperationException($"{step} is already a step of the turn");
-        _extraTurnSteps.Add(new ExtraTurnStep(step, after, body));
+        _extraTurnSteps.Add(new ExtraTurnStep(step, after, body, text));
     }
 
     /// <summary>The added step <paramref name="step"/>, or null when it is a base step or not in this session.</summary>

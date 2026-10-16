@@ -174,6 +174,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     protected List<GameTurnStep> TurnSteps => _turnSteps ??= BuildTurnSteps();
 
+    /// <summary>The turn's steps in the order they run, START and END included. Builds and caches the table, so only read it once the game has started.</summary>
+    public IReadOnlyList<TurnStep> StepOrder => TurnSteps.Select(step => step.TurnStep).ToList();
+
     /// <summary>
     /// The step table this session runs. A <see cref="ITurnProgram"/> may supply its own; returning
     /// null from the program — which is what every program that only brackets the normal loop does —

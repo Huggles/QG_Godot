@@ -13,6 +13,7 @@ public sealed class TotalWarRules : IExpansionRules
 
     public void Configure(RuleSet rules)
     {
-        rules.AddTurnStep(TurnStep.AIR, after: TurnStep.PLAY_CARD, AirStep.Run);
+        rules.AddTurnStep(TurnStep.AIR, after: TurnStep.PLAY_CARD, AirStep.Run,
+            new TurnStepText("Air", "Deploy or marshal an Air Force, or gain air superiority.", Optional: true));
     }
 }

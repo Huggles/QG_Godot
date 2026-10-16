@@ -389,6 +389,8 @@ public abstract partial class InputRequest
                 // is for any AI faction. ShowTurnBadgeAnimation sets BlockQueue = false, so letting it
                 // ride costs the turn loop nothing.
                 if (asked) TurnBadge.DismissNow();
+
+                MarkPromptClosed(Answering);
             }
         }
         else
@@ -455,6 +457,7 @@ public abstract partial class InputRequest
     /// <summary>Drop everything, for a session ending with prompts still nominally open.</summary>
     public static void ClearAwaitingInput()
     {
+        OpenPrompts.Clear();
         if (AwaitedFactions.Count == 0) return;
         AwaitedFactions.Clear();
         RenderAwaitingText();
@@ -473,6 +476,28 @@ public abstract partial class InputRequest
 
     private static string AwaitingLabel() =>
         string.Join(", ", AwaitedFactions.Select(f => f.WithPlayer()));
+
+    // ── Open prompts, for the HUD's input bucket ─────────────────────────────────
+    //
+    // Every faction a prompt is open for, this peer's own included, where AwaitedFactions is only those
+    // being waited on elsewhere. Opened as the request arrives, ahead of the queue drain, so the host's
+    // close for it cannot land first: both come over the same reliable RPC channel, in order.
+
+    private static readonly HashSet<Faction> OpenPrompts = new();
+
+    public static IReadOnlyCollection<Faction> OpenPromptFactions => OpenPrompts;
+
+    public static void MarkPromptOpen(IReadOnlyList<Faction> factions) => UpdateOpenPrompts(factions, open: true);
+
+    /// <summary>Idempotent: the answering peer closes its own prompt, then hears the host announce the same close.</summary>
+    public static void MarkPromptClosed(IReadOnlyList<Faction> factions) => UpdateOpenPrompts(factions, open: false);
+
+    private static void UpdateOpenPrompts(IReadOnlyList<Faction> factions, bool open)
+    {
+        bool changed = false;
+        foreach (Faction faction in factions) changed |= open ? OpenPrompts.Add(faction) : OpenPrompts.Remove(faction);
+        if (changed && EventBus.Instance != null) EventBus.Emit(EventBus.SignalName.OpenPromptsChanged);
+    }
 
     public async Task<InputRequest> BroadCast()
     {

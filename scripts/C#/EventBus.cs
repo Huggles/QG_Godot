@@ -110,6 +110,9 @@ public partial class EventBus : GodotObject
     [Signal] public delegate void NewTurnStartedEventHandler(int turnNumber);
     [Signal] public delegate void NextStepStartedEventHandler(int turnStep);
 
+    /// <summary>A prompt opened or closed for some faction; read InputRequest.OpenPromptFactions for who is being asked.</summary>
+    [Signal] public delegate void OpenPromptsChangedEventHandler();
+
     /// <summary>
     /// A win condition was met and the serialized <see cref="GameResult"/> is final. Emitted on every
     /// peer at the top of MultiplayerSession.BeginEndGame, i.e. BEFORE the queue drain and the switch

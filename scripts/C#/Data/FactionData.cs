@@ -66,6 +66,21 @@ public partial class FactionData : DataObject
         => FlagCardPaths.TryGetValue(Faction, out string path) ? _flagCardTexture ??= GD.Load<Texture2D>(path) : null;
     private Texture2D _flagCardTexture;
 
+    /// <summary>The flag cut to a disc, for the HUD's open-input bucket; null for a minor faction, whose patron answers its prompts.</summary>
+    [JsonIgnore] public Texture2D FlagCircleTexture
+        => FlagCirclePaths.TryGetValue(Faction, out string path) ? _flagCircleTexture ??= GD.Load<Texture2D>(path) : null;
+    private Texture2D _flagCircleTexture;
+
+    private static readonly Dictionary<Faction, string> FlagCirclePaths = new()
+    {
+        { Faction.GERMANY,        "res://assets/factions/germany/Germany_Flag_Circle.png" },
+        { Faction.UNITED_KINGDOM, "res://assets/factions/united_kingdom/UK_Flag_Circle.png" },
+        { Faction.JAPAN,          "res://assets/factions/japan/Japan_Flag_Circle.png" },
+        { Faction.SOVIET,         "res://assets/factions/soviet/Soviet_Flag_Circle.png" },
+        { Faction.ITALY,          "res://assets/factions/italy/Italy_Flag_Circle.png" },
+        { Faction.UNITED_STATES,  "res://assets/factions/united_states/US_Flag_Circle.png" },
+    };
+
     private static readonly Dictionary<Faction, string> FlagCardPaths = new()
     {
         { Faction.GERMANY,        "res://assets/factions/germany/Germany_FlagCard.png" },

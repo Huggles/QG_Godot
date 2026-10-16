@@ -726,7 +726,9 @@ public partial class NetworkApi : Node
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void InputRequestAnswered(int[] factions)
     {
-        InputRequest.MarkInputClosed(factions.Select(faction => (Faction)faction).ToList());
+        List<Faction> closed = factions.Select(faction => (Faction)faction).ToList();
+        InputRequest.MarkInputClosed(closed);
+        InputRequest.MarkPromptClosed(closed);
     }
 
     /// <summary>
@@ -803,6 +805,7 @@ public partial class NetworkApi : Node
             dto = InputRequest.FromJson(dtoJson);
             DebugUtilities.PrintPeer($"[color={"purple"}]ReceiveInputRequest:  {dto.GetType().Name} (For me: {dto.IsForCurrentPeer})");
             DebugUtilities.PrintPeerFinest($"{dtoJson}");
+            InputRequest.MarkPromptOpen(dto.Answering);
 
             // WhenDrained() instead of `if (!IsIdle) await ToSignal(QueueDrained)`: that was a
             // check-then-await race — if the queue drained in between, QueueDrained had already

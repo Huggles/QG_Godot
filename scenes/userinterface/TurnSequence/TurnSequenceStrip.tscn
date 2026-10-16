@@ -1,0 +1,78 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/userinterface/TurnSequence/TurnSequenceStrip.cs" id="1_strip"]
+[ext_resource type="Script" path="res://scenes/userinterface/TurnSequence/InputBucket.cs" id="2_bucket"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint"]
+content_margin_left = 10.0
+content_margin_top = 5.0
+content_margin_right = 10.0
+content_margin_bottom = 7.0
+bg_color = Color(0.1, 0.1, 0.1, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.25)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="LabelSettings" id="LabelSettings_hint_title"]
+font_size = 15
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hint_rule"]
+font_size = 14
+font_color = Color(0.86, 0.86, 0.86, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[node name="TurnSequenceStrip" type="Control"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("1_strip")
+
+[node name="Steps" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+z_index = -1
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="Bucket" type="Control" parent="."]
+unique_name_in_owner = true
+z_index = -1
+layout_mode = 0
+mouse_filter = 2
+script = ExtResource("2_bucket")
+
+[node name="Hint" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hint")
+
+[node name="HintContent" type="VBoxContainer" parent="Hint"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="HintTitle" type="Label" parent="Hint/HintContent"]
+unique_name_in_owner = true
+layout_mode = 2
+label_settings = SubResource("LabelSettings_hint_title")
+
+[node name="HintRule" type="Label" parent="Hint/HintContent"]
+unique_name_in_owner = true
+layout_mode = 2
+label_settings = SubResource("LabelSettings_hint_rule")
