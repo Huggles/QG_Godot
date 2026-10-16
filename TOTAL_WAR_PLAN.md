@@ -423,8 +423,17 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     `ConnectedCountryStates` looks at land, or at seas without a strait, or measures map distance on
     purpose.
   - Tested by `tests/qgc/tw_gibraltar_strait.qgc`.
-- **Effects, Hard (6): each needs a new rule system.**
-  - Supply through other countries' pieces: SHAEF.
+- **Effects, SHAEF: built.** First counted as Hard, but supply is a connection check, so only its inputs
+  change.
+  - **Core:** `ISupplyShareModifier`. `BoardState.SupplyLinkFactions` returns the country plus every
+    country a card in play shares supply with. The supply calculation accepts their pieces as links
+    (`PathFindingNodeDefault`) and their Armies in Supply spaces as sources (`SupplySourceIds`).
+    Supply-blocking cards are checked for the tracing country.
+  - **Unchanged:** `SupplyCountryIds` (GameAPI and the bot: spaces the country holds itself), building
+    (still next to a supplied piece of your own), harbours (already any Allied Army), scoring.
+  - **The card:** France, the US and the UK share. China does not.
+  - Tested by `tests/qgc/tw_shaef_supply.qgc`, with a new `assert supplied <space> <faction>`.
+- **Effects, Hard (5): each needs a new rule system.**
   - Home/Supply spaces that move during play: Government Evacuates to Kuibyshev, Government in Exile.
   - Switching off Axis Statuses: Hobart's Funnies (pairs with Bolster Keep Calm and Carry On).
   - Axis-only adjacencies: Turkey Opens the Straits. It adds new links (Middle East–Balkans, Black

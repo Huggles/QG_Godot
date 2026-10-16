@@ -1,0 +1,50 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# SHAEF (US, Status): France, the US and the UK trace supply through each other's pieces, and to a
+# Supply space holding another's Army (ISupplyShareModifier, read by BoardState.SupplyLinkFactions).
+# Set up by injection on Germany's turn:
+#  - a UK Army in Hawaii, linked only by the US Navy in the East Pacific to the US Army in US West;
+#  - a US Army in Iceland and a French Army in Scandinavia, linked only by the UK Navy in the North Sea
+#    to the UK Army in the United Kingdom;
+#  - a Chinese Army in Canada, next to the US Army in US East: China is not on the card.
+# All four are unsupplied until SHAEF (364) goes onto the US table; then all but China are supplied,
+# and the UK's Supply step removes nothing.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_shaef_supply.qgc
+
+prompt                                  # turn 1, Germany
+force deployunit --faction UNITED_KINGDOM --country HAWAII
+force deployunit --faction UNITED_STATES --country ICELAND
+force deployunit --faction FRANCE --country SCANDINAVIA
+force deployunit --faction CHINA --country CANADA
+assert supplied HAWAII UNITED_KINGDOM == false
+assert supplied ICELAND UNITED_STATES == false
+assert supplied SCANDINAVIA FRANCE == false
+assert supplied CANADA CHINA == false
+
+force playcard --card 364
+assert supplied HAWAII UNITED_KINGDOM == true
+assert supplied ICELAND UNITED_STATES == true
+assert supplied SCANDINAVIA FRANCE == true
+assert supplied CANADA CHINA == false
+
+pass                                    # no play: discard 1
+select Sweden Supports Finland
+prompt
+select Pass                             # Germany's Air step
+prompt
+pass                                    # Germany's Discard step
+
+prompt                                  # turn 2, the United Kingdom
+pass                                    # no play: discard 1
+prompt
+select Foreign Legion
+prompt
+select Pass                             # the UK's Air step
+
+prompt                                  # the UK's Discard step: its Supply step removed nothing
+assert step == DISCARD
+assert occupant HAWAII == UNITED_KINGDOM
+assert occupant SCANDINAVIA == FRANCE
+assert errors == 0
+quit

@@ -144,6 +144,14 @@ public static class CliAssert
                     changeEvent.GetType().Name.Equals(arg1, StringComparison.OrdinalIgnoreCase)).ToString();
             }
 
+            // Whether the faction's piece here is in supply: `assert supplied HAWAII UNITED_KINGDOM == true`.
+            case "supplied":
+            {
+                CountryState country = ParseCountry(arg1);
+                Faction faction = ParseFaction(subject.Count > 2 ? subject[2] : null);
+                return country.Units.TryGetValue(faction, out int unitId) && UnitState.ForId(unitId).InSupply ? "true" : "false";
+            }
+
             case "occupant":
             {
                 CountryState country = ParseCountry(arg1);

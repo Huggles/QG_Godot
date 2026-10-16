@@ -216,7 +216,8 @@ public class GameStateCalculator
         ClearTagsForFaction(board, faction, Tag.InSupply);
         ClearTagsForFaction(board, faction, Tag.OutOfSupply);
 
-        var pathFindingService = new PathFindingService(new PathFindingNodeDefault(), faction, board);
+        var pathFindingService = new PathFindingService(new PathFindingNodeDefault(board.SupplyLinkFactions(faction)), faction, board);
+        List<int> supplySourceIds = board.SupplySourceIds(faction);
         List<UnitState> activeUnits = UnitState.ForIds(board.ActiveUnitIds(faction));
 
         foreach (UnitState unit in activeUnits)
@@ -225,7 +226,7 @@ public class GameStateCalculator
             bool modifierGrantsSupply = board.Modifiers<IUnitSupplyModifier>()
                 .Any(m => m.GrantsSupply(board, unit));
 
-            if (modifierGrantsSupply || record.SuppliedForTurn || CalculateSupplyForUnit(board, pathFindingService, unit, faction))
+            if (modifierGrantsSupply || record.SuppliedForTurn || CalculateSupplyForUnit(board, pathFindingService, supplySourceIds, unit, faction))
             {
                 record.Tags.Add(Tag.InSupply, faction);
             }
@@ -246,10 +247,10 @@ public class GameStateCalculator
         }
     }
 
-    private static bool CalculateSupplyForUnit(BoardState board, PathFindingService pathFinding, UnitState unit, Faction faction)
+    private static bool CalculateSupplyForUnit(BoardState board, PathFindingService pathFinding, List<int> supplySourceIds, UnitState unit, Faction faction)
     {
         int countryId = board.CountryOf(unit);
-        foreach (var supplyId in board.SupplyCountryIds(faction))
+        foreach (var supplyId in supplySourceIds)
         {
             if (pathFinding.CalculatePath(countryId, supplyId) >= 0)
             {

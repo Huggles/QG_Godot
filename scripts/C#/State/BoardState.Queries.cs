@@ -243,13 +243,28 @@ public sealed partial class BoardState
                    && (UnitState.ForId(unitId) is { } unit && InSupply(unit)));
 
     /// <summary>The supply spaces a faction holds that no modifier blocks, as GameAPI.GetSupplyCountryIds lists them.</summary>
-    public List<int> SupplyCountryIds(Faction faction)
+    public List<int> SupplyCountryIds(Faction faction) => SupplySpaceIds(faction, new List<Faction> { faction });
+
+    /// <summary>The supply spaces <paramref name="faction"/> traces to: those held by any <see cref="SupplyLinkFactions"/> country, the same as SupplyCountryIds in the base game.</summary>
+    public List<int> SupplySourceIds(Faction faction) => SupplySpaceIds(faction, SupplyLinkFactions(faction));
+
+    /// <summary>The countries whose pieces <paramref name="faction"/> traces supply through: itself, plus any an ISupplyShareModifier card adds.</summary>
+    public List<Faction> SupplyLinkFactions(Faction faction)
+    {
+        var factions = new List<Faction> { faction };
+        foreach (Faction owner in StaticGameData.BoardFactions)
+            if (owner != faction && Modifiers<ISupplyShareModifier>().Any(m => m.SharesSupply(faction, owner)))
+                factions.Add(owner);
+        return factions;
+    }
+
+    private List<int> SupplySpaceIds(Faction faction, List<Faction> holders)
     {
         var response = new List<int>();
         foreach (CountryState countryState in CountryState.AllCountryStates)
         {
             bool blocked = Modifiers<ISupplyBlockModifier>().Any(m => m.BlocksSupply(countryState.Id, faction));
-            if (!blocked && countryState.IsSupply && UnitsIn(countryState).ContainsKey(faction))
+            if (!blocked && countryState.IsSupply && holders.Any(UnitsIn(countryState).ContainsKey))
                 response.Insert(0, countryState.Id);
         }
         return response;
