@@ -78,7 +78,7 @@ public static class AirStep
             actions.Add(new(Marshal, "Marshal an Air Force (discard any card)", Card(Marshal, "Marshal an Air Force",
                 "Discard any card: move one of your supplied Air Forces to a space with one of your supplied Armies or Navies.",
                 unitIds: board.SuppliedAirForceIds(faction))));
-        if (hasAirPower && hasSuppliedAirForce)
+        if (hasAirPower && board.AirSuperiorityTargets(faction).Count > 0)
             actions.Add(new(AirSuperiority, "Air Superiority (discard an Air Power card)", Card(AirSuperiority, "Air Superiority",
                 "Discard an Air Power card: eliminate an enemy Air Force adjacent to one of your supplied Air Forces.",
                 countryIds: board.AirSuperiorityTargets(faction))));

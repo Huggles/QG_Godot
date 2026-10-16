@@ -209,12 +209,19 @@ public sealed partial class BoardState
         .Select(country => country.Id)
         .ToList();
 
-    /// <summary>The spaces adjacent to one of the faction's supplied Air Forces: what its Air Superiority may target.</summary>
+    /// <summary>
+    /// The spaces adjacent to one of the faction's supplied Air Forces that hold no Air Force of its own team:
+    /// what its Air Superiority may target. A space with no Air Force at all counts, to trigger a reaction.
+    /// </summary>
     public List<int> AirSuperiorityTargets(Faction faction) => SuppliedAirForceIds(faction)
         .SelectMany(unitId => AdjacentCountryIds(faction, CountryStateOf(UnitState.ForId(unitId))))
         .Distinct()
+        .Where(countryId => !HasFriendlyAirForce(faction, CountryState.ForId(countryId)))
         .OrderBy(countryId => countryId)
         .ToList();
+
+    private bool HasFriendlyAirForce(Faction faction, CountryState country)
+        => AirForcesIn(country).Count > EnemyAirForcesIn(faction, country).Count;
 
     /// <summary>The Air Forces in <paramref name="country"/> belonging to the faction's enemies, minor factions included.</summary>
     public List<int> EnemyAirForcesIn(Faction faction, CountryState country) => AirForcesIn(country)
