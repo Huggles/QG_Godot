@@ -144,7 +144,6 @@ public partial class CountryScene : Control
 			ShowSupplyStar();
 		else
 			HideSupplyStar();
-		ShowHomeMarker();
 
 		SetUnclickable();
 		
@@ -747,14 +746,22 @@ public partial class CountryScene : Control
 	}
 
 	/// <summary>
-	/// The flag circle of a country whose Home space this is, when the session's rules mark that country
-	/// (RuleSet.HomeSpaceMarkers: Total War's Soviet Union, France and China). Hidden otherwise.
+	/// The country whose Home space marker <paramref name="countryId"/> shows, or null. The board prints
+	/// the base countries' Home spaces, so theirs shows only once a card moves it (Government Evacuates
+	/// to Kuibyshev); a minor country's (France, China) is not printed, so it always shows.
 	/// </summary>
+	public static FactionData HomeMarkerFor(BoardState board, int countryId) =>
+		StaticGameData.BoardFactions
+			.Select(faction => StaticGameData.FactionDataMap.GetValueOrDefault(faction))
+			.FirstOrDefault(data => data != null
+				&& board.HomeSpaceOf(data.Faction).Id == countryId
+				&& (data.IsMinor || data.HomeSpaceCountryState.Id != countryId)
+				&& data.FlagCircleTexture != null);
+
+	/// <summary>Shows <see cref="HomeMarkerFor"/>'s flag circle here, or hides the marker.</summary>
 	private void ShowHomeMarker()
 	{
-		FactionData home = GameOptions.Rules.HomeSpaceMarkers
-			.Select(faction => StaticGameData.FactionDataMap.GetValueOrDefault(faction))
-			.FirstOrDefault(data => data?.HomeSpaceCountryState?.Id == CountryId && data.FlagCircleTexture != null);
+		FactionData home = HomeMarkerFor(BoardState.Live, CountryId);
 		HomeMarkerSprite.Visible = home != null;
 		if (home == null) return;
 
@@ -762,10 +769,12 @@ public partial class CountryScene : Control
 		CenterSprite(HomeMarkerSprite, StaticCountryData.HomeMarkerTransformData);
 	}
 
-	/// <summary>Swaps in the crossed-out star while a status card (e.g. Scorched Earth) denies this
-	/// space as a supply source to anyone, and back once the card leaves play.</summary>
+	/// <summary>Moves the Home space marker with any card that moves a Home space, and swaps in the
+	/// crossed-out star while a status card (e.g. Scorched Earth) denies this space as a supply source
+	/// to anyone, and back once the card leaves play.</summary>
 	private void OnGameStateRecalculated()
 	{
+		ShowHomeMarker();
 		if (!CountryState.IsSupply) return;
 		bool blocked = BoardState.Live.Modifiers<ISupplyBlockModifier>().Any(m =>
 			Enum.GetValues<Faction>().Any(f => f != Faction.NONE && f != Faction.ALL && m.BlocksSupply(CountryId, f)));

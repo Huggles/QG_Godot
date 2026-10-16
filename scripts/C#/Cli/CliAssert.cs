@@ -144,6 +144,12 @@ public static class CliAssert
                     changeEvent.GetType().Name.Equals(arg1, StringComparison.OrdinalIgnoreCase)).ToString();
             }
 
+            // The faction's Home space, after any card that moves it: `assert homespace SOVIET == SIBERIA`.
+            case "homespace": return BoardState.Live.HomeSpaceOf(ParseFaction(arg1)).Name;
+
+            // Whose Home space marker the map draws here, or none: `assert homemarker SIBERIA == SOVIET`.
+            case "homemarker": return CountryScene.HomeMarkerFor(BoardState.Live, ParseCountry(arg1).Id)?.Faction.ToString() ?? "none";
+
             // Whether the faction's piece here is in supply: `assert supplied HAWAII UNITED_KINGDOM == true`.
             case "supplied":
             {

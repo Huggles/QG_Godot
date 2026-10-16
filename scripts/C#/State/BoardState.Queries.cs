@@ -291,6 +291,14 @@ public sealed partial class BoardState
 
     // ── Placement ───────────────────────────────────────────────────────────
 
+    /// <summary>A country's Home space: its printed one, unless an IHomeSpaceModifier card in play moves it (never in the base game).</summary>
+    public CountryState HomeSpaceOf(Faction faction)
+    {
+        foreach (IHomeSpaceModifier modifier in Modifiers<IHomeSpaceModifier>())
+            if (modifier.HomeSpace(this, faction) is { } moved) return moved;
+        return StaticGameData.FactionDataMap[faction].HomeSpaceCountryState;
+    }
+
     /// <summary>
     /// Recruitable, and off the home space an adjacent supplied unit, and at sea a harbour. A faction may
     /// build where it already stands — see CountryState.CanBuild for why that is not excluded.

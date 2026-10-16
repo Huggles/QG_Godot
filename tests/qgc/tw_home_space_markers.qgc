@@ -1,0 +1,25 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Home space markers. The board prints the base countries' Home spaces, so the map draws no Soviet
+# circle on Moscow; France and China are not printed, so theirs always show. Government Evacuates to
+# Kuibyshev (317) moves the Soviet Home space to Siberia (IHomeSpaceModifier, read by
+# BoardState.HomeSpaceOf), and the Soviet circle then shows there.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_home_space_markers.qgc
+
+prompt                                  # turn 1, Germany
+assert homespace SOVIET == MOSCOW
+assert homemarker MOSCOW == none
+assert homemarker SIBERIA == none
+assert homemarker WESTERN_EUROPE == FRANCE
+assert homemarker CHINA == CHINA
+assert homemarker GERMANY == none
+
+force playcard --card 317
+assert homespace SOVIET == SIBERIA
+assert homemarker SIBERIA == SOVIET
+assert homemarker MOSCOW == none
+assert homemarker WESTERN_EUROPE == FRANCE
+assert homemarker CHINA == CHINA
+assert errors == 0
+quit
