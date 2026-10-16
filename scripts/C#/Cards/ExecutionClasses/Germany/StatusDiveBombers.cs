@@ -53,7 +53,7 @@ public partial class StatusDiveBombers : StatusCardLogic
         if (cs == null) return new List<int>();
 
         var ids = new List<int> { cs.Id };
-        ids.AddRange(cs.ConnectedCountryStates.Where(adj => adj.Type == CountryType.LAND).Select(adj => adj.Id));
+        ids.AddRange(situation.Board.AdjacentCountryStates(Faction, cs).Where(adj => adj.Type == CountryType.LAND).Select(adj => adj.Id));
         return ids;
     }
 

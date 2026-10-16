@@ -75,8 +75,20 @@ public sealed partial class BoardState
     public bool IsStraitControlledBy(StraightState strait, Faction faction) =>
         StraitController(strait) == StaticGameData.FactionTeamForFaction(faction);
 
-    /// <summary>The neighbours a faction can reach from a country: all of them, less any strait the enemy holds.</summary>
+    /// <summary>
+    /// The neighbours a faction can reach from a country: all of them, less any strait the enemy holds,
+    /// plus any an IAdjacencyModifier card adds for it (none in the base game).
+    /// </summary>
     public List<int> AdjacentCountryIds(Faction faction, CountryState country)
+    {
+        List<int> ids = MapAdjacentCountryIds(faction, country);
+        foreach (IAdjacencyModifier modifier in Modifiers<IAdjacencyModifier>())
+            foreach (int id in modifier.ExtraAdjacentCountryIds(faction, country))
+                if (!ids.Contains(id)) ids.Add(id);
+        return ids;
+    }
+
+    private List<int> MapAdjacentCountryIds(Faction faction, CountryState country)
     {
         List<StraightState> straits = country.ControlledByStraightStates;
         if (straits.Count == 0) return new List<int>(country.ConnectedCountryIds);

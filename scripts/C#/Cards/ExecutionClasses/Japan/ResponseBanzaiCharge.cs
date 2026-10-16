@@ -17,7 +17,7 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
         var battleLocation = TriggerContextAs<BattleCountryChangeEvent>(situation)?.CountryState;
         if (battleLocation == null) return new List<BattleTarget>();
 
-        var targetCountries = battleLocation.ConnectedCountryStates
+        var targetCountries = board.AdjacentCountryStates(Faction, battleLocation)
             .Append(battleLocation)
             .Distinct()
             .Where(cs => cs.Type == CountryType.LAND && board.Of(cs).Tags.Has(Tag.Attackable, Faction))

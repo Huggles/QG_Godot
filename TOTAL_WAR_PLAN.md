@@ -433,12 +433,24 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     (still next to a supplied piece of your own), harbours (already any Allied Army), scoring.
   - **The card:** France, the US and the UK share. China does not.
   - Tested by `tests/qgc/tw_shaef_supply.qgc`, with a new `assert supplied <space> <faction>`.
-- **Effects, Hard (5): each needs a new rule system.**
+- **Effects, Turkey Opens the Straits: built.** First counted as Hard.
+  - **Core:** `IAdjacencyModifier`. `BoardState.AdjacentCountryIds` adds the neighbours a card in play
+    gives a faction, so supply, building, battles and attack options follow.
+  - **Rule (decided):** an Axis country's card or rule sees the links, and an Allied one never does.
+    Broad Front, Dive Bombers, Banzai Charge and Operation Unthinkable read the plain map, so they now
+    use `AdjacentCountryStates` from their own side. None of them crosses a strait, so the base game is
+    unchanged. Map distance ("within N spaces") keeps the plain map: the only Axis card that measures
+    it, Operation Pike, can't get a shorter path from the links.
+  - **Display (decided):** hovering the card highlights the four spaces. The map draws no link.
+  - **Network:** nothing new is sent. The modifier is registered on every peer as the Status card is
+    played, and the host's tag snapshot carries the derived results. Caveat for every modifier card: the
+    unused full-state snapshot path (`NetworkApi.ReceiveFullSnapshot`) fills the piles directly and
+    would not register modifiers.
+  - Tested by `tests/qgc/tw_turkey_opens_the_straits.qgc`, with a new
+    `assert adjacent <space> <space> <faction>`.
+- **Effects, Hard (4): each needs a new rule system.**
   - Home/Supply spaces that move during play: Government Evacuates to Kuibyshev, Government in Exile.
   - Switching off Axis Statuses: Hobart's Funnies (pairs with Bolster Keep Calm and Carry On).
-  - Axis-only adjacencies: Turkey Opens the Straits. It adds new links (Middle East–Balkans, Black
-    Sea–Mediterranean) to `AdjacentCountryIds`. It needs a modifier like `IStraitControlModifier`, and a
-    check of the few card reads of those spaces' plain-map neighbours.
   - A "use at any time" window: Endless Expanses (with M4's windows).
 - Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);
   unbuilt Bolsters cannot be used until M4.

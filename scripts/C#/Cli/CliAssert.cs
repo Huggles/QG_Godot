@@ -152,6 +152,15 @@ public static class CliAssert
                 return country.Units.TryGetValue(faction, out int unitId) && UnitState.ForId(unitId).InSupply ? "true" : "false";
             }
 
+            // Whether the faction reaches the second space from the first: `assert adjacent MIDDLE_EAST BALKANS GERMANY == true`.
+            case "adjacent":
+            {
+                CountryState from = ParseCountry(arg1);
+                CountryState to = ParseCountry(subject.Count > 2 ? subject[2] : null);
+                Faction faction = ParseFaction(subject.Count > 3 ? subject[3] : null);
+                return BoardState.Live.AdjacentCountryIds(faction, from).Contains(to.Id) ? "true" : "false";
+            }
+
             case "occupant":
             {
                 CountryState country = ParseCountry(arg1);

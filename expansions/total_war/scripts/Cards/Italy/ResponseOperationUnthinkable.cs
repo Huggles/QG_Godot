@@ -5,11 +5,11 @@ public partial class ResponseOperationUnthinkable : ResponseCardLogic
 {
     private static readonly List<Faction> westernAllies = [Faction.UNITED_KINGDOM, Faction.UNITED_STATES];
 
-    /// <summary>The Soviet Army just built, when a UK or US Army stands next to it; else null.</summary>
-    private static DeployUnitChangeEvent Target(GameSituation situation, DeployUnitChangeEvent built)
+    /// <summary>The Soviet Army just built, when a UK or US Army stands next to it (as the Axis sees adjacency); else null.</summary>
+    private DeployUnitChangeEvent Target(GameSituation situation, DeployUnitChangeEvent built)
     {
         if (built is not { TriggeringFaction: Faction.SOVIET, DeploymentType: DeployType.BUILD, UnitType: UnitType.ARMY }) return null;
-        List<int> neighbours = built.CountryState.ConnectedCountryIds;
+        List<int> neighbours = situation.Board.AdjacentCountryIds(Faction, built.CountryState);
         bool watched = westernAllies.Any(ally => situation.Board.ActiveUnits(ally).Any(unit => unit.IsArmy && neighbours.Contains(situation.Board.CountryOf(unit))));
         return watched ? built : null;
     }

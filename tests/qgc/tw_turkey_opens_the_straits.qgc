@@ -1,0 +1,36 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Turkey Opens the Straits (Italy, Status): for the Axis only, the Middle East is adjacent to the
+# Balkans and the Black Sea to the Mediterranean Sea (IAdjacencyModifier, read by
+# BoardState.AdjacentCountryIds). Set up by injection on Germany's turn: a German Army in the Balkans,
+# a UK Army in the Middle East and an Italian Navy in the Black Sea, which reaches Italy only through
+# the Italian Navy in the Mediterranean. Then Turkey (322) goes onto Italy's table: the links appear
+# for every Axis country and no Allied one, the Italian Navy is supplied, and Germany's Land Battle
+# may hit the UK Army.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_turkey_opens_the_straits.qgc
+
+prompt                                  # turn 1, Germany
+force deployunit --faction GERMANY --country BALKANS
+force deployunit --faction UNITED_KINGDOM --country MIDDLE_EAST
+force deployunit --faction ITALY --country BLACK_SEA
+assert adjacent MIDDLE_EAST BALKANS GERMANY == false
+assert adjacent BLACK_SEA MEDITERRANEAN_SEA ITALY == false
+assert supplied BLACK_SEA ITALY == false
+
+force playcard --card 322
+assert adjacent MIDDLE_EAST BALKANS GERMANY == true
+assert adjacent BALKANS MIDDLE_EAST JAPAN == true
+assert adjacent BLACK_SEA MEDITERRANEAN_SEA ITALY == true
+assert adjacent MEDITERRANEAN_SEA BLACK_SEA GERMANY == true
+assert adjacent MIDDLE_EAST BALKANS UNITED_KINGDOM == false
+assert adjacent BLACK_SEA MEDITERRANEAN_SEA SOVIET == false
+assert supplied BLACK_SEA ITALY == true
+
+select Land Battle
+assert promptoptions == 5               # Scandinavia, the Soviet Armies in Ukraine and Russia, the French Army, and now the UK Army in the Middle East
+select UNITED_KINGDOM ARMY in Middle East
+prompt
+assert occupant MIDDLE_EAST == none
+assert errors == 0
+quit

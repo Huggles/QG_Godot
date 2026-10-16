@@ -55,7 +55,7 @@ public partial class EventBroadFront : EventCardLogic
 
         return board.ActiveUnits(Faction.SOVIET)
             .Where(us => us.Type == UnitType.ARMY
-                      && CountryState.ForId(board.CountryOf(us)).ConnectedCountryStates
+                      && board.AdjacentCountryStates(Faction, CountryState.ForId(board.CountryOf(us)))
                              .Any(adj => germanArmyCountryIds.Contains(adj.Id)))
             .Select(us => us.Id)
             .ToList();
