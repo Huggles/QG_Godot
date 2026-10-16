@@ -117,12 +117,13 @@ public partial class InputManager : Node2D
 	/// </param>
 	/// <param name="optionCards">Options drawn as cards with no card behind them; a click answers the option's id.</param>
 	/// <param name="title">The banner text in place of the card-prompt wording, for a prompt that is not about cards.</param>
+	/// <param name="skipText">The Skip button's whole label, when skipping is itself a named choice ("Pass", "Let it stand").</param>
 	public InputHandlerPlayCard SetCardSelectionActive(
 		Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
 		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null,
 		TriggerKind triggerKind = TriggerKind.NONE, bool isHandPlayPrompt = false, string passCostText = null,
 		IReadOnlyList<Faction> answeringFactions = null, List<InputRequest.OptionCard> optionCards = null,
-		string title = null)
+		string title = null, string skipText = null)
 	{
 		_pendingReactionSkipScope = ReactionSkipScope.NONE;
 
@@ -156,7 +157,7 @@ public partial class InputManager : Node2D
 		// only finds out about the discard once the modal opens has already spent the choice.
 		if (SelectionSkipButton.Current != null)
 		{
-			SelectionSkipButton.Current.ButtonText = passCostText == null ? "Skip" : $"Skip ({passCostText})";
+			SelectionSkipButton.Current.ButtonText = skipText ?? (passCostText == null ? "Skip" : $"Skip ({passCostText})");
 			SelectionSkipButton.Current.Show();
 		}
 		EventBus.Instance.SelectionSkipped += OnPlayCardSkipped;

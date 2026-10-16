@@ -935,13 +935,7 @@ public partial class CardPlayRound : GodotObject
     private void StampTrigger(InputRequest request, ChangeEvent trigger)
     {
         if (trigger == null) return;
-
-        request.TriggerCardId = GetTriggerCardId(trigger);
-        request.TriggerSummaryText = trigger.SummaryText();
-        // Not derivable from TriggerCardId above: that falls back to the last card in the pool
-        // when the event has no source card, so it is what to SHOW, not what caused this.
-        request.TriggerCauseText = trigger.CauseText();
-        StampTriggerTargets(request, trigger);
+        request.StampTrigger(trigger, GetTriggerCardId(trigger));
     }
 
     /// <summary>Card IDs of hand cards the faction can play from hand.</summary>
@@ -1116,21 +1110,5 @@ public partial class CardPlayRound : GodotObject
     {
         if (trigger?.SourceCardId > -1) return trigger.SourceCardId;
         return CardPool.LastOrDefault()?.Id ?? -1;
-    }
-
-    /// <summary>
-    /// Split the trigger's board targets by kind for the wire, so the prompt can show the player WHERE
-    /// the event they are reacting to landed and not just what caused it.
-    ///
-    /// TargetsOrNone, never Targets(): the removal events resolve a unit that the very next step may
-    /// have taken off the board, and a read that threw here would cost a turn rather than a preview.
-    /// Same rule <see cref="InputRequest.PopulateCardTargetPreviews"/> follows. A null trigger is fine
-    /// — RequestBlock's CurrentBlockTrigger is nullable and TargetsOrNone answers None for it.
-    /// </summary>
-    private static void StampTriggerTargets(InputRequest request, ChangeEvent trigger)
-    {
-        TargetSet targets = trigger.TargetsOrNone();
-        request.TriggerTargetCountryIds = targets.CountryIds.ToList();
-        request.TriggerTargetUnitIds = targets.UnitIds.ToList();
     }
 }

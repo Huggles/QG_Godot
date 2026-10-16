@@ -299,6 +299,21 @@ public abstract partial class InputRequest
         TargetFaction = targetFaction;
     }
 
+    /// <summary>
+    /// Put the event this prompt is about on it, so the client can show it the way a reaction window does.
+    /// <paramref name="cardId"/> is the card to SHOW, which may be a fallback rather than the cause.
+    /// </summary>
+    public void StampTrigger(ChangeEvent trigger, int cardId)
+    {
+        TriggerCardId = cardId;
+        TriggerSummaryText = trigger.SummaryText();
+        TriggerCauseText = trigger.CauseText();
+        // TargetsOrNone, never Targets(): a removal event's unit may already be off the board, and a throw here would cost a turn.
+        TargetSet targets = trigger.TargetsOrNone();
+        TriggerTargetCountryIds = targets.CountryIds.ToList();
+        TriggerTargetUnitIds = targets.UnitIds.ToList();
+    }
+
     public static InputRequest FromJson(string jsonDto) => JsonSerializer.Deserialize<InputRequest>(jsonDto);
     public string ToJson() => JsonSerializer.Serialize(this);
 
@@ -984,7 +999,8 @@ public abstract partial class InputRequest
 
         /// <summary>
         /// Draws these options as cards in the hand fan instead of buttons in a modal; null keeps the modal.
-        /// An option without a card is not drawn: Skip answers the prompt as skipped, so a Pass needs none.
+        /// An option without a card is not drawn: Skip answers the prompt as skipped, so a Pass needs none,
+        /// and the Skip button takes its label when it is the only one.
         /// </summary>
         public List<OptionCard> OptionCards { get; set; }
 
@@ -1025,8 +1041,17 @@ public abstract partial class InputRequest
         /// <summary>The option cards go through the card prompt, which answers with the clicked option's id, or -1 for Skip.</summary>
         private async Task HandleAsCards()
         {
+            List<string> cardless = TargetOptionLabels
+                .Where((label, i) => OptionCards.All(card => card.OptionId != TargetOptionIds[i]))
+                .ToList();
             PlayerScene.Current.InputManager.SetCardSelectionActive(
-                TargetFaction, new List<int>(), optionCards: OptionCards, title: ModalTitle);
+                TargetFaction, new List<int>(), optionCards: OptionCards, title: ModalTitle,
+                skipText: cardless.Count == 1 ? cardless[0] : null);
+            // Hidden again with the hand when the prompt closes, as for a reaction window.
+            if (TriggerSummaryText != null)
+                TriggerContextDisplay.Current?.ShowCard(
+                    TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,
+                    TriggerTargetCountryIds, TriggerTargetUnitIds);
             Variant[] results = await AwaitCardSelection();
             int optionId = results is { Length: > 0 } ? (int)results[0] : -1;
             if (optionId < 0)

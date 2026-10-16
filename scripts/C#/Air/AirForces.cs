@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -43,7 +44,9 @@ public static class AirForces
 
         bool defend = await Ask(target.Faction,
             $"{attacker.Label()} battles {target.Faction.Label()}'s {piece} in {country.Label}",
-            "Remove the Air Force instead", $"Remove the {piece}");
+            "Remove the Air Force instead", $"Remove the {piece}",
+            YesCard("Air Defense", $"Remove your Air Force in {country.Label} instead of your {piece}.", defendingAirForce),
+            battle, TriggerKind.BLOCK);
         if (!defend) return false;
 
         await Remove(target.Faction, defendingAirForce, UnitRemovalReason.AIR_DEFENSE);
@@ -54,7 +57,10 @@ public static class AirForces
 
         bool attack = await Ask(attacker,
             $"{target.Faction.Label()}'s Air Force took the hit for its {piece} in {country.Label}",
-            $"Spend an Air Force to remove the {piece} anyway", "Let it stand");
+            $"Spend an Air Force to remove the {piece} anyway", "Let it stand",
+            YesCard("Air Attack", $"Remove one of your supplied Air Forces next to {country.Label} to remove the {piece} anyway.",
+                attackingAirForces.Append(target.Id).ToArray()),
+            battle, TriggerKind.NONE);
         if (!attack) return true;
 
         int spent = attackingAirForces[0];
@@ -118,12 +124,22 @@ public static class AirForces
         }.Apply();
     }
 
-    /// <summary>A yes/no prompt to <paramref name="faction"/>'s player. A skip or time-out answers no.</summary>
-    private static async Task<bool> Ask(Faction faction, string title, string yes, string no)
+    /// <summary>
+    /// A yes/no prompt to <paramref name="faction"/>'s player: yes is <paramref name="yesCard"/> in the hand fan, no
+    /// the Skip button, with <paramref name="battle"/> shown as a reaction window shows its trigger. A skip or time-out answers no.
+    /// </summary>
+    private static async Task<bool> Ask(Faction faction, string title, string yes, string no, InputRequest.OptionCard yesCard,
+        ChangeEvent battle, TriggerKind kind)
     {
         try
         {
-            InputRequest answer = await new InputRequest.SelectOptionRequestHandler(faction, new List<string> { yes, no }, title).BroadCast();
+            InputRequest request = new InputRequest.SelectOptionRequestHandler(faction, new List<string> { yes, no }, title)
+            {
+                OptionCards = new List<InputRequest.OptionCard> { yesCard },
+                TriggerReactionKind = kind,
+            };
+            request.StampTrigger(battle, battle.SourceCardId);
+            InputRequest answer = await request.BroadCast();
             return answer.ResponseCardIds.Count > 0 && answer.ResponseCardIds[0] == 0;
         }
         catch (StepSkippedException)
@@ -131,6 +147,12 @@ public static class AirForces
             return false;
         }
     }
+
+    /// <summary>The yes of <see cref="Ask"/> (option 0) as a card, lighting the pieces it would remove.</summary>
+    private static InputRequest.OptionCard YesCard(string title, string text, params int[] unitIds) => new()
+    {
+        OptionId = 0, Title = title, Text = text, ArtCardType = CardType.AIR_POWER, TargetUnitIds = unitIds.ToList(),
+    };
 
     private static Task Remove(Faction faction, int airForceId, UnitRemovalReason reason) =>
         new RemoveUnitChangeEvent(faction, airForceId, reason)
