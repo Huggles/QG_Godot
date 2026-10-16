@@ -117,6 +117,19 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		Show(summaryText, kind, causeText);
 	}
 
+	/// <summary>Show just a card, with no summary or focus view: the card whose step is asking, not an event to answer.</summary>
+	public void ShowCardOnly(int cardId)
+	{
+		if (Panel == null) return;
+
+		CardSceneNode.Visible = true;
+		CardSceneNode.ShowCard(cardId);
+		CardSceneNode.SetActivatable(true);
+		ShowFocus(null, null);
+		Panel.Visible = true;
+		TriggerLabelPanel.Visible = false;
+	}
+
 	/// <summary>Show a Bulletin as the trigger — a scenario mutator asking this player for input.</summary>
 	public void ShowBulletin(CardFace face, string summaryText)
 	{

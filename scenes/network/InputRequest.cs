@@ -562,7 +562,10 @@ public abstract partial class InputRequest
         }
     }
 
-    /// <summary>Draw <paramref name="cards"/> in the hand fan and wait for one: its option id, or -1 for Skip or a released prompt.</summary>
+    /// <summary>
+    /// Draw <paramref name="cards"/> in the hand fan and wait for one: its option id, or -1 for Skip or a released prompt.
+    /// Beside them, what is asking: the stamped trigger, else the card whose step raised the prompt.
+    /// </summary>
     protected async Task<int> AwaitOptionCard(List<OptionCard> cards, string title, string skipText = null)
     {
         PlayerScene.Current.InputManager.SetCardSelectionActive(
@@ -572,6 +575,8 @@ public abstract partial class InputRequest
             TriggerContextDisplay.Current?.ShowCard(
                 TriggerCardId, TriggerSummaryText, TriggerReactionKind, TriggerCauseText,
                 TriggerTargetCountryIds, TriggerTargetUnitIds);
+        else if (CardState.ForId(OriginCardId) != null)
+            TriggerContextDisplay.Current?.ShowCardOnly(OriginCardId);
         Variant[] results = await AwaitCardSelection();
         return results is { Length: > 0 } ? (int)results[0] : -1;
     }
@@ -977,7 +982,8 @@ public abstract partial class InputRequest
         /// <summary>The factions as flag cards in the hand fan, answered with the faction's enum value in ResponseCardIds.</summary>
         public override async Task Handle()
         {
-            int faction = await AwaitOptionCard(TargetFactions.Select(FlagCard).ToList(), "Select a faction");
+            // The enum is turn order, minor factions last, so the cards always sit in the same order whoever offers them.
+            int faction = await AwaitOptionCard(TargetFactions.OrderBy(f => f).Select(FlagCard).ToList(), "Select a faction");
             if (faction < 0)
             {
                 WasSkipped = true;
@@ -986,13 +992,8 @@ public abstract partial class InputRequest
             ResponseCardIds.Add(faction);
         }
 
-        private static OptionCard FlagCard(Faction faction) => new()
-        {
-            OptionId = (int)faction,
-            Title = faction.WithPlayer(),
-            Text = StaticGameData.FactionTeamForFaction(faction) == FactionTeam.AXIS ? "Axis" : "Allies",
-            FlagFaction = faction,
-        };
+        // No title or text: the flag says which faction it is, and an empty text hides the whole text box.
+        private static OptionCard FlagCard(Faction faction) => new() { OptionId = (int)faction, FlagFaction = faction };
     }
 
     /// <summary>One option of a <see cref="SelectOptionRequestHandler"/> drawn as a card in the hand fan, with no card definition behind it.</summary>
