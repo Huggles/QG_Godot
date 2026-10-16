@@ -10,6 +10,7 @@
     "Homespace": "WESTERN_EUROPE",
     "PatronFaction": "UNITED_KINGDOM",
     "FlagPath": "res://expansions/total_war/assets/factions/france/France_Flag.png",
+    "FlagCirclePath": "res://expansions/total_war/assets/factions/france/France_Flag_Circle.png",
     "NumberOfArmyUnits": 3,
     "NumberOfNavyUnits": 2,
     "NumberOfAirUnits": 1
@@ -25,6 +26,7 @@
     "Homespace": "CHINA",
     "PatronFaction": "UNITED_STATES",
     "FlagPath": "res://expansions/total_war/assets/factions/china/China_Flag.png",
+    "FlagCirclePath": "res://expansions/total_war/assets/factions/china/China_Flag_Circle.png",
     "NumberOfArmyUnits": 2,
     "NumberOfNavyUnits": 0,
     "NumberOfAirUnits": 1

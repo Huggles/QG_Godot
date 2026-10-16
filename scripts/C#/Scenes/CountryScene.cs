@@ -21,6 +21,7 @@ public partial class CountryScene : Control
 
 	public Control UnitContainerNode => GetNode<Control>("UnitContainer");
 	public TextureRect SupplyStarSprite => GetNode<TextureRect>("SupplyStarSprite");
+	public TextureRect HomeMarkerSprite => GetNode<TextureRect>("HomeMarkerSprite");
 	public TextureRect StraightSpriteNode => GetNode<TextureRect>("StraightSprite");
 
 	public MarginContainer CountrySpriteTextureRectContainer => GetNode<MarginContainer>("%TextureRectContainer");
@@ -143,6 +144,7 @@ public partial class CountryScene : Control
 			ShowSupplyStar();
 		else
 			HideSupplyStar();
+		ShowHomeMarker();
 
 		SetUnclickable();
 		
@@ -742,6 +744,22 @@ public partial class CountryScene : Control
 	private void HideSupplyStar()
 	{
 		SupplyStarSprite.Visible = false;
+	}
+
+	/// <summary>
+	/// The flag circle of a country whose Home space this is, when the session's rules mark that country
+	/// (RuleSet.HomeSpaceMarkers: Total War's Soviet Union, France and China). Hidden otherwise.
+	/// </summary>
+	private void ShowHomeMarker()
+	{
+		FactionData home = GameOptions.Rules.HomeSpaceMarkers
+			.Select(faction => StaticGameData.FactionDataMap.GetValueOrDefault(faction))
+			.FirstOrDefault(data => data?.HomeSpaceCountryState?.Id == CountryId && data.FlagCircleTexture != null);
+		HomeMarkerSprite.Visible = home != null;
+		if (home == null) return;
+
+		HomeMarkerSprite.Texture = home.FlagCircleTexture;
+		CenterSprite(HomeMarkerSprite, StaticCountryData.HomeMarkerTransformData);
 	}
 
 	/// <summary>Swaps in the crossed-out star while a status card (e.g. Scorched Earth) denies this

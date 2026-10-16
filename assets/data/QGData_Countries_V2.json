@@ -618,6 +618,12 @@
             "YPosition": 50,
             "ZPosition": 0
         },
+        "HomeMarkerTransformData": {
+            "Scale": 1,
+            "XPosition": -30,
+            "YPosition": 130,
+            "ZPosition": 0
+        },
         "LabelTransformData": {
             "Scale": 1,
             "XPosition": 0,
@@ -1793,6 +1799,12 @@
             "YPosition": 25,
             "ZPosition": 0
         },
+        "HomeMarkerTransformData": {
+            "Scale": 1,
+            "XPosition": -155,
+            "YPosition": 20,
+            "ZPosition": 0
+        },
         "LabelTransformData": {
             "Scale": 1,
             "XPosition": 0,
@@ -2579,6 +2591,12 @@
             "YPosition": 0,
             "ZPosition": 0
         },
+        "HomeMarkerTransformData": {
+            "Scale": 1,
+            "XPosition": 130,
+            "YPosition": 60,
+            "ZPosition": 0
+        },
         "LabelTransformData": {
             "Scale": 1,
             "XPosition": 0,
@@ -3176,6 +3194,12 @@
             "YPosition": 0,
             "ZPosition": 0
         },
+        "HomeMarkerTransformData": {
+            "Scale": 1,
+            "XPosition": 10,
+            "YPosition": 95,
+            "ZPosition": 0
+        },
         "LabelTransformData": {
             "Scale": 1,
             "XPosition": 0,
@@ -3430,6 +3454,12 @@
             "YPosition": -2,
             "ZPosition": 0
         },
+        "HomeMarkerTransformData": {
+            "Scale": 1,
+            "XPosition": 20,
+            "YPosition": 82,
+            "ZPosition": 0
+        },
         "LabelTransformData": {
             "Scale": 1,
             "XPosition": 0,
@@ -3439,20 +3469,20 @@
         "UnitTransformData": {
             "Position1": {
                 "Scale": 1,
-                "XPosition": 30,
-                "YPosition": 30,
+                "XPosition": 0,
+                "YPosition": 160,
                 "ZPosition": 0
             },
             "Position2": {
                 "Scale": 1,
-                "XPosition": -50,
-                "YPosition": 100,
+                "XPosition": -100,
+                "YPosition": 160,
                 "ZPosition": 0
             },
             "Position3": {
                 "Scale": 1,
-                "XPosition": 0,
-                "YPosition": 100,
+                "XPosition": -50,
+                "YPosition": 215,
                 "ZPosition": 0
             }
         },

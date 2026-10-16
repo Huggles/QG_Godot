@@ -30,6 +30,9 @@ public partial class FactionData : DataObject
     /// <summary>Optional res:// path of the flag; the six base factions use FactionFlags.</summary>
     public string FlagPath { get; set; }
 
+    /// <summary>Optional res:// path of the flag cut to a disc; the six base factions use FlagCirclePaths.</summary>
+    public string FlagCirclePath { get; set; }
+
     public Faction Faction => (Faction)Index;
 
     [JsonIgnore] public Faction Patron => Enum.TryParse(PatronFaction, out Faction patron) ? patron : Faction.NONE;
@@ -66,9 +69,12 @@ public partial class FactionData : DataObject
         => FlagCardPaths.TryGetValue(Faction, out string path) ? _flagCardTexture ??= GD.Load<Texture2D>(path) : null;
     private Texture2D _flagCardTexture;
 
-    /// <summary>The flag cut to a disc, for the HUD's open-input bucket; null for a minor faction, whose patron answers its prompts.</summary>
+    /// <summary>
+    /// The flag cut to a disc: the HUD's open-input bucket (never a minor faction's, whose patron answers
+    /// its prompts) and the Home space marker on the map. Null when the faction has none.
+    /// </summary>
     [JsonIgnore] public Texture2D FlagCircleTexture
-        => FlagCirclePaths.TryGetValue(Faction, out string path) ? _flagCircleTexture ??= GD.Load<Texture2D>(path) : null;
+        => (FlagCirclePath ?? FlagCirclePaths.GetValueOrDefault(Faction)) is { } path ? _flagCircleTexture ??= GD.Load<Texture2D>(path) : null;
     private Texture2D _flagCircleTexture;
 
     private static readonly Dictionary<Faction, string> FlagCirclePaths = new()

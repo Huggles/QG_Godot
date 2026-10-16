@@ -23,6 +23,16 @@ shader_parameter/fill_color = Color(1, 0.011764706, 0, 1)
 shader_parameter/pulse_speed = 4.0
 shader_parameter/pulse_min = 0.2570000122075
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hmshd"]
+bg_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 40
+corner_radius_top_right = 40
+corner_radius_bottom_right = 40
+corner_radius_bottom_left = 40
+corner_detail = 20
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 12
+
 [node name="CountryRoot" type="Control" unique_id=2093193981]
 layout_mode = 3
 anchors_preset = 0
@@ -63,6 +73,37 @@ mouse_filter = 2
 texture = ExtResource("5_twgbx")
 expand_mode = 4
 stretch_mode = 5
+
+[node name="HomeMarkerSprite" type="TextureRect" parent="." unique_id=1907734412]
+unique_name_in_owner = true
+visible = false
+z_index = 25
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Shadow" type="Panel" parent="HomeMarkerSprite" unique_id=1907734413]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hmshd")
 
 [node name="StraightSprite" type="TextureRect" parent="." unique_id=1827087014]
 unique_name_in_owner = true

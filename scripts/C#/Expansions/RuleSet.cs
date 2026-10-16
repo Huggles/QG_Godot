@@ -19,6 +19,16 @@ public sealed class RuleSet
     /// <summary>How many hand cards Reallocate Resources costs before any card changes it (MutatorReallocateResources.DiscardCostFor).</summary>
     public int ReallocateDiscardCost { get; set; } = 4;
 
+    private readonly List<Faction> _homeSpaceMarkers = new();
+
+    /// <summary>The countries whose Home space the map marks with their flag circle (CountryScene). None in the base game.</summary>
+    public IReadOnlyList<Faction> HomeSpaceMarkers => _homeSpaceMarkers;
+
+    public void MarkHomeSpace(Faction faction)
+    {
+        if (!_homeSpaceMarkers.Contains(faction)) _homeSpaceMarkers.Add(faction);
+    }
+
     /// <summary>The rules of a session played with <paramref name="expansionIds"/>, which must all be loaded.</summary>
     public static RuleSet For(IEnumerable<string> expansionIds)
     {

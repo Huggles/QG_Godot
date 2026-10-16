@@ -16,6 +16,8 @@ public partial class CountryData : DataObject
     public StraightData StraightData { get; set; }
     public TransformData WorldTransformData { get; set; }
     public TransformData SupplyStarTransformData { get; set; }
+    /// <summary>Where a Home space marker sits, from the middle of the country; only spaces that can hold one have it.</summary>
+    public TransformData HomeMarkerTransformData { get; set; }
     public UnitTransformData UnitTransformData { get; set; }
 
     public TransformData LabelTransformData { get; set; }
