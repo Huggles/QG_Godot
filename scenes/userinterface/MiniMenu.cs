@@ -213,9 +213,10 @@ public partial class MiniMenu : Control
 
 		// The hand-play prompt is the hand, plus the table cards that can be activated instead of playing
 		// one — so it covers the hand even though its display set is deliberately wider than it. The
-		// card-id comparison below cannot see that, which is why the request says so itself.
+		// card-id comparison below cannot see that, which is why the request says so itself. An option
+		// prompt draws no hand cards, so its empty card set must not read as covering the hand.
 		return prompt.IsHandPlay
-			|| !prompt.DisplayCardIds.Except(deckState.HandCardIds).Any();
+			|| (prompt.OptionCards is not { Count: > 0 } && !prompt.DisplayCardIds.Except(deckState.HandCardIds).Any());
 	}
 
 	/// <summary>

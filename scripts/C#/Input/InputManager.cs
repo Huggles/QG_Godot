@@ -115,11 +115,14 @@ public partial class InputManager : Node2D
 	/// <paramref name="faction"/> stays the representative — the tint, the recall and CardPromptOpened
 	/// all keep using it — because those are all "which hand is this" questions with one answer.
 	/// </param>
+	/// <param name="optionCards">Options drawn as cards with no card behind them; a click answers the option's id.</param>
+	/// <param name="title">The banner text in place of the card-prompt wording, for a prompt that is not about cards.</param>
 	public InputHandlerPlayCard SetCardSelectionActive(
 		Faction faction, List<int> cardIds, bool isReactionWindow = false, List<int> displayCardIds = null,
 		bool separateNonHandCards = false, List<InputRequest.CardTargetPreview> cardTargetPreviews = null,
 		TriggerKind triggerKind = TriggerKind.NONE, bool isHandPlayPrompt = false, string passCostText = null,
-		IReadOnlyList<Faction> answeringFactions = null)
+		IReadOnlyList<Faction> answeringFactions = null, List<InputRequest.OptionCard> optionCards = null,
+		string title = null)
 	{
 		_pendingReactionSkipScope = ReactionSkipScope.NONE;
 
@@ -134,15 +137,15 @@ public partial class InputManager : Node2D
 
 		CurrentCardPrompt = new ActiveCardPrompt(
 			faction, displayCardIds ?? cardIds, cardIds, separateNonHandCards,
-			isHandPlayPrompt, isReactionWindow, ToPreviewMap(cardTargetPreviews), answering);
+			isHandPlayPrompt, isReactionWindow, ToPreviewMap(cardTargetPreviews), answering, optionCards);
 
 		PlayerActionLabel.ShowText(
-			BannerText(triggerKind, cardIds.Count > 0, isHandPlayPrompt, passCostText, answering), faction);
+			BannerText(triggerKind, cardIds.Count > 0, isHandPlayPrompt, passCostText, answering, title), faction);
 		// The faction is passed explicitly: the one-argument Show overload reads it off cardIds[0]
 		// and would resolve Faction.NONE for an empty always-ask prompt.
 		FactionHandDisplay.Current.Show(
 			DrawnCardIds(CurrentCardPrompt), faction, cardIds, separateNonHandCards,
-			isReactionWindow, answering);
+			isReactionWindow, answering, optionCards);
 		FactionHandDisplay.Current.CardSelected += HandleItemSelected;
 		EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
 		// A card prompt is recallable for as long as it is open: the player can browse another faction's
@@ -188,9 +191,9 @@ public partial class InputManager : Node2D
 	/// one fan, and every banner line also lands in chat, where an unnamed prompt says nothing.
 	/// </param>
 	private static string BannerText(TriggerKind kind, bool hasOptions, bool isHandPlay = false,
-		string passCostText = null, List<Faction> answering = null)
+		string passCostText = null, List<Faction> answering = null, string title = null)
 	{
-		string text = kind switch
+		string text = title ?? kind switch
 		{
 			TriggerKind.BLOCK => hasOptions ? "Choose a block reaction" : "No block available",
 			TriggerKind.AFTER => hasOptions ? "Choose an after reaction" : "No reaction available",
@@ -290,7 +293,7 @@ public partial class InputManager : Node2D
 		FactionHandDisplay.Current.Show(
 			DrawnCardIds(CurrentCardPrompt), CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds,
 			CurrentCardPrompt.SeparateNonHandCards, CurrentCardPrompt.IsReactionWindow,
-			CurrentCardPrompt.Answering);
+			CurrentCardPrompt.Answering, CurrentCardPrompt.OptionCards);
 		return true;
 	}
 

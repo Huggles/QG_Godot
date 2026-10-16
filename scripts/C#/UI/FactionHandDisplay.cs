@@ -277,13 +277,14 @@ public partial class FactionHandDisplay : Control
 	/// faction would mean generalising the fan geometry and the right-edge clamp for N fans that would
 	/// overflow the screen anyway. Null (every prompt but a merged window) keeps the plain id sort.
 	/// </param>
+	/// <param name="optionCards">Options drawn as cards after the card ids, in the side fan when the prompt splits one off.</param>
 	public void Show(List<int> cardIds, Faction faction, List<int> selectableCardIds = null,
 		bool separateNonHandCards = false, bool isReactionWindow = false,
-		IReadOnlyList<Faction> answeringFactions = null)
+		IReadOnlyList<Faction> answeringFactions = null, List<InputRequest.OptionCard> optionCards = null)
 	{
 		showingFaction = faction;
 		ResetVisibility();
-		InitCards(cardIds, selectableCardIds, separateNonHandCards, isReactionWindow, answeringFactions);
+		InitCards(cardIds, selectableCardIds, separateNonHandCards, isReactionWindow, answeringFactions, optionCards);
 	}
 
 	private void ResetVisibility()
@@ -309,7 +310,7 @@ public partial class FactionHandDisplay : Control
 
 	private void InitCards(List<int> cardIds, List<int> selectableCardIds = null,
 		bool separateNonHandCards = false, bool isReactionWindow = false,
-		IReadOnlyList<Faction> answeringFactions = null)
+		IReadOnlyList<Faction> answeringFactions = null, List<InputRequest.OptionCard> optionCards = null)
 	{
 		// Only initialize cards if LoadUI has been called
 		DebugUtilities.PrintPeerFinest($"Initializing cards {string.Join(", ", cardIds)}");
@@ -343,16 +344,21 @@ public partial class FactionHandDisplay : Control
 		SortForDisplay(handIds, answeringFactions);
 		SortForDisplay(sideIds, answeringFactions);
 
+		List<FanEntry> handFan = handIds.Select(FanEntry.ForCard).ToList();
+		List<FanEntry> sideFan = sideIds.Select(FanEntry.ForCard).ToList();
+		// An option is never a hand card, so a split prompt draws it in the side fan.
+		(separateNonHandCards ? sideFan : handFan).AddRange((optionCards ?? new()).Select(FanEntry.ForOption));
+
 		float containerWidth = ContainerWidth();
 		float containerCentreX = containerWidth * 0.5f;
 		float miniStepSize = HandCardStepSize * (MiniCardScale / HandCardScale);
-		float miniHalfWidth = FanHalfWidth(sideIds.Count, miniStepSize, MiniCardScale);
+		float miniHalfWidth = FanHalfWidth(sideFan.Count, miniStepSize, MiniCardScale);
 
 		// The hand keeps the centre it has always had, so cards never shift under the cursor when a
 		// table card becomes activatable or stops being so.
-		float miniCentreX = handIds.Count == 0
+		float miniCentreX = handFan.Count == 0
 			? containerCentreX
-			: containerCentreX + FanHalfWidth(handIds.Count, HandCardStepSize, HandCardScale)
+			: containerCentreX + FanHalfWidth(handFan.Count, HandCardStepSize, HandCardScale)
 				+ FanGap + miniHalfWidth;
 		// A hand wide enough to push the side fan off screen is worth an overlap, not a fan nobody can see.
 		miniCentreX = Mathf.Min(miniCentreX, containerWidth - miniHalfWidth - FanEdgeMargin);
@@ -361,10 +367,17 @@ public partial class FactionHandDisplay : Control
 		// -Size.Y/3 + halfHeight is literally the hand's centre today.
 		float fanCentreY = -CardScene.DEFAULT_SIZE.Y / 3f + CardScene.DEFAULT_SIZE.Y * 0.5f;
 
-		LayoutFan(handIds, selectableCardIds, containerCentreX, fanCentreY, HandCardStepSize, HandCardScale, 0,
+		LayoutFan(handFan, selectableCardIds, containerCentreX, fanCentreY, HandCardStepSize, HandCardScale, 0,
 			isReactionWindow);
-		LayoutFan(sideIds, selectableCardIds, miniCentreX, fanCentreY + MiniFanDropY, miniStepSize, MiniCardScale, handIds.Count,
+		LayoutFan(sideFan, selectableCardIds, miniCentreX, fanCentreY + MiniFanDropY, miniStepSize, MiniCardScale, handFan.Count,
 			isReactionWindow);
+	}
+
+	/// <summary>One card of a fan: a real card by id, or an option drawn as one.</summary>
+	private readonly record struct FanEntry(int CardId, InputRequest.OptionCard Option)
+	{
+		public static FanEntry ForCard(int cardId) => new(cardId, null);
+		public static FanEntry ForOption(InputRequest.OptionCard option) => new(-1, option);
 	}
 
 	/// <summary>
@@ -445,15 +458,15 @@ public partial class FactionHandDisplay : Control
 	/// <param name="zIndexOffset">
 	/// Keeps the side fan above the hand wherever the clamp has had to overlap the two.
 	/// </param>
-	private void LayoutFan(List<int> cardIds, List<int> selectableCardIds, float centreX, float centreY,
+	private void LayoutFan(List<FanEntry> entries, List<int> selectableCardIds, float centreX, float centreY,
 		float stepSize, float scale, int zIndexOffset, bool isReactionWindow = false)
 	{
-		float totalRotationSize = (cardIds.Count - 1) * RotationStepSize;
-		float totalSizeX = (cardIds.Count - 1) * stepSize;
+		float totalRotationSize = (entries.Count - 1) * RotationStepSize;
+		float totalSizeX = (entries.Count - 1) * stepSize;
 
-		foreach (var (cardId, index) in cardIds.Select((cardId, index) => (cardId, index)))
+		foreach (var (entry, index) in entries.Select((entry, index) => (entry, index)))
 		{
-			CardState cardState = CardState.ForId(cardId);
+			int cardId = entry.CardId;
 			var cardSceneInstance = CardScene.CardScenePackedPath.Instantiate<CardScene>();
 			cardSceneInstance.Size = CardScene.DEFAULT_SIZE;
 			cardSceneInstance.Scale = new Vector2(scale, scale);
@@ -471,6 +484,18 @@ public partial class FactionHandDisplay : Control
 
 			cardSceneInstance.Selected += OnCardSelected;
 			CardScenes.Add(cardSceneInstance);
+
+			// An option has no CardState, so no tag can grey it out: it was offered, so it is clickable.
+			if (entry.Option != null)
+			{
+				cardSceneInstance.ShowOption(entry.Option, CardFace.ForOption(entry.Option, showingFaction));
+				cardSceneInstance.SetClickable(true);
+				cardSceneInstance.SetAvailability(CardScene.CardAvailability.Available);
+				cardSceneInstance.SetEmphasized(false);
+				continue;
+			}
+
+			CardState cardState = CardState.ForId(cardId);
 			cardSceneInstance.ShowCard(cardId);
 
 			// The caller's list wins when it gave one. Tag.IsActivatable is the right default for the
@@ -554,6 +579,10 @@ public partial class FactionHandDisplay : Control
 			CardPreview.ShowCard(cardId);
 		}
 	}
+
+	/// <summary>The enlarged preview for a face with no card behind it, such as an option card.</summary>
+	public void ShowFaceEmphasis(CardFace face) => CardPreview?.ShowFace(face);
+
 	public void HideCardEmphasis()
 	{
 		// Only access CardPreview if it's been initialized (in LoadUI)

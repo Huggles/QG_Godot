@@ -48,28 +48,50 @@ public static class AirStep
         string airForce = $"the {FactionState.ForEnum(minor).FactionData.FactionAdjactiveLabel} Air Force";
         while (DeckState.ForFaction(patron).HandCardIds.Count > 0 && BoardState.Live.SuppliedAirForceIds(minor).Count > 0)
         {
-            List<(int, string)> options = new() { (Marshal, $"Marshal {airForce} (discard any card)"), (Pass, "Pass") };
+            List<AirAction> options = new()
+            {
+                new(Marshal, $"Marshal {airForce} (discard any card)", Card(Marshal, $"Marshal {airForce}",
+                    $"Discard any card: move {airForce} to a space with one of its supplied Armies or Navies.",
+                    unitIds: BoardState.Live.SuppliedAirForceIds(minor))),
+                new(Pass, "Pass"),
+            };
             if (await Choose(patron, options, $"Air step: {minor.Label()}") != Marshal || await TryMarshal(patron, minor))
                 return;
         }
     }
 
-    private static List<(int Id, string Label)> Actions(Faction faction)
+    /// <summary>One choice of the Air step prompt: its label for the CLI and bots, and the card the GUI draws for it (none for Pass, which is the Skip button).</summary>
+    private sealed record AirAction(int Id, string Label, InputRequest.OptionCard Card = null);
+
+    private static List<AirAction> Actions(Faction faction)
     {
         BoardState board = BoardState.Live;
         bool hasAirPower = AirPowerCards(faction).Count > 0;
         bool hasSuppliedAirForce = board.SuppliedAirForceIds(faction).Count > 0;
 
-        List<(int, string)> actions = new();
+        List<AirAction> actions = new();
         if (hasAirPower && HasAirForces(faction) && board.AirDeployTargets(faction).Count > 0)
-            actions.Add((Deploy, "Deploy an Air Force (discard an Air Power card)"));
+            actions.Add(new(Deploy, "Deploy an Air Force (discard an Air Power card)", Card(Deploy, "Deploy an Air Force",
+                "Discard an Air Power card: place an Air Force with one of your supplied Armies or Navies.",
+                countryIds: board.AirDeployTargets(faction))));
         if (hasSuppliedAirForce)
-            actions.Add((Marshal, "Marshal an Air Force (discard any card)"));
+            actions.Add(new(Marshal, "Marshal an Air Force (discard any card)", Card(Marshal, "Marshal an Air Force",
+                "Discard any card: move one of your supplied Air Forces to a space with one of your supplied Armies or Navies.",
+                unitIds: board.SuppliedAirForceIds(faction))));
         if (hasAirPower && hasSuppliedAirForce)
-            actions.Add((AirSuperiority, "Air Superiority (discard an Air Power card)"));
-        actions.Add((Pass, "Pass"));
+            actions.Add(new(AirSuperiority, "Air Superiority (discard an Air Power card)", Card(AirSuperiority, "Air Superiority",
+                "Discard an Air Power card: eliminate an enemy Air Force adjacent to one of your supplied Air Forces.",
+                countryIds: board.AirSuperiorityTargets(faction))));
+        actions.Add(new(Pass, "Pass"));
         return actions;
     }
+
+    private static InputRequest.OptionCard Card(int id, string title, string text,
+        List<int> countryIds = null, List<int> unitIds = null) => new()
+    {
+        OptionId = id, Title = title, Text = text, ArtCardType = CardType.AIR_POWER,
+        TargetCountryIds = countryIds, TargetUnitIds = unitIds,
+    };
 
     private static async Task<bool> TryDeploy(Faction faction)
     {
@@ -117,12 +139,15 @@ public static class AirStep
     }
 
     /// <summary>The chosen option's id; Pass for a skip, a release, or an answer that was not offered.</summary>
-    private static async Task<int> Choose(Faction faction, List<(int Id, string Label)> options, string title)
+    private static async Task<int> Choose(Faction faction, List<AirAction> options, string title)
     {
         try
         {
             InputRequest answer = await new InputRequest.AirStepRequestHandler(faction,
-                options.Select(option => option.Label).ToList(), options.Select(option => option.Id).ToList(), title).BroadCast();
+                options.Select(option => option.Label).ToList(), options.Select(option => option.Id).ToList(), title)
+            {
+                OptionCards = options.Where(option => option.Card != null).Select(option => option.Card).ToList(),
+            }.BroadCast();
             return answer.ResponseCardIds.Where(id => options.Any(option => option.Id == id)).DefaultIfEmpty(Pass).First();
         }
         catch (StepSkippedException)

@@ -37,6 +37,10 @@ public partial class CardScene : Control
 	// Same holding pattern as availability above.
 	private bool emphasized = false;
 
+	/// <summary>The option this card stands for, and the face drawn for it; null for a real card. See <see cref="ShowOption"/>.</summary>
+	private InputRequest.OptionCard option;
+	private CardFace optionFace;
+
 	private VBoxContainer textBackgroundContainerNode => GetNode<VBoxContainer>("%TextBackgroundBox");
 	private VBoxContainer textContainerNode => GetNode<VBoxContainer>("%TextContainer");
 	private VBoxContainer textInnerContainerNode => GetNode<VBoxContainer>("%TextInnerContainer");
@@ -62,14 +66,20 @@ public partial class CardScene : Control
 
 	private void CardButton_Pressed()
 	{
-		EmitSignal(SignalName.Selected, this.CardId);
+		// An option's CardId is -1, which would read as a pass.
+		EmitSignal(SignalName.Selected, option?.OptionId ?? CardId);
 	}
 	// Both handlers are null-guarded on Current: a CardScene can now be rendered outside the hand
 	// (a Bulletin in a modal or the trigger context), where FactionHandDisplay.Current may not exist.
 	// MouseExited in particular ignored triggersEmphasis, so TriggersEmphasis(false) was not enough.
 	private void CardButton_MouseEntered()
 	{
-		if (triggersEmphasis)
+		if (triggersEmphasis && option != null)
+		{
+			FactionHandDisplay.Current?.ShowFaceEmphasis(optionFace);
+			CardTargetPreviewDisplay.ShowOption(option);
+		}
+		else if (triggersEmphasis)
 		{
 			FactionHandDisplay.Current?.ShowCardEmphasis(CardId);
 			// Inside the triggersEmphasis guard on purpose: the CardScene copies rendered in the
@@ -86,7 +96,8 @@ public partial class CardScene : Control
 		// Ownership-checked rather than unconditional: Godot can deliver this exit after the next
 		// card's MouseEntered, and clearing then would blank a preview that has already moved on.
 		// Unguarded by triggersEmphasis so a card that stops emphasising mid-hover still cleans up.
-		CardTargetPreviewDisplay.Clear(CardId);
+		if (option != null) CardTargetPreviewDisplay.ClearOption(option.OptionId);
+		else CardTargetPreviewDisplay.Clear(CardId);
 	}
 
 	public void ShowCard(int cardId)
@@ -118,6 +129,7 @@ public partial class CardScene : Control
 		Visible = true;
 		MouseFilter = mousePassthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
 		CardId = -1;
+		option = null;
 
 		cardTextureNode.Texture = face.Front;
 		if (!string.IsNullOrEmpty(face.Text))
@@ -133,6 +145,14 @@ public partial class CardScene : Control
 			textBackgroundContainerNode.Visible = false;
 		}
 		RecalculateSizes();
+	}
+
+	/// <summary>Render an option as a card: it has no CardState, so a click emits the option's id and hovering lights its own targets.</summary>
+	public void ShowOption(InputRequest.OptionCard optionCard, CardFace face)
+	{
+		ShowFace(face);
+		option = optionCard;
+		optionFace = face;
 	}
 
 	/// <summary>

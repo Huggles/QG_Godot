@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 /// <summary>
 /// Everything CardScene needs to draw a card front: art, title, body. Exists so the scene can render
@@ -33,6 +34,14 @@ public readonly struct CardFace
 
     public static CardFace Bulletin(string label, string text) =>
         new(BulletinArt.Front, label, text);
+
+    /// <summary>An option drawn as a card: <paramref name="faction"/>'s front for the option's card type, or the Bulletin front.</summary>
+    public static CardFace ForOption(InputRequest.OptionCard option, Faction faction)
+    {
+        Texture2D front = option.ArtCardType == CardType.NONE ? null
+            : FactionState.ForEnum(faction)?.FactionData.CardFrontTextures.GetValueOrDefault(option.ArtCardType);
+        return new(front ?? BulletinArt.Front, option.Title, option.Text);
+    }
 }
 
 /// <summary>

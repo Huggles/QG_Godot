@@ -962,10 +962,31 @@ public abstract partial class InputRequest
         }
     }
 
+    /// <summary>One option of a <see cref="SelectOptionRequestHandler"/> drawn as a card in the hand fan, with no card definition behind it.</summary>
+    public sealed class OptionCard
+    {
+        public int OptionId { get; set; }
+        public string Title { get; set; }
+        public string Text { get; set; }
+
+        /// <summary>The front is the prompted faction's art for this card type; NONE draws the Bulletin front.</summary>
+        public CardType ArtCardType { get; set; }
+
+        /// <summary>What hovering the option lights on the board, like a card's target preview.</summary>
+        public List<int> TargetCountryIds { get; set; }
+        public List<int> TargetUnitIds { get; set; }
+    }
+
     public class SelectOptionRequestHandler : InputRequest
     {
         public List<int> TargetOptionIds { get; set; } = new();
         public string ModalTitle { get; set; }
+
+        /// <summary>
+        /// Draws these options as cards in the hand fan instead of buttons in a modal; null keeps the modal.
+        /// An option without a card is not drawn: Skip answers the prompt as skipped, so a Pass needs none.
+        /// </summary>
+        public List<OptionCard> OptionCards { get; set; }
 
         [JsonConstructor]
         public SelectOptionRequestHandler(Faction targetFaction, List<string> targetOptionLabels, List<int> targetOptionIds, string modalTitle) : base(targetFaction)
@@ -982,6 +1003,12 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
+            if (OptionCards is { Count: > 0 })
+            {
+                await HandleAsCards();
+                return;
+            }
+
             var items = TargetOptionLabels
                 .Select((label, i) => (PresentationItem)new PresentationItemTextButton(TargetOptionIds[i], label, true))
                 .ToList();
@@ -993,6 +1020,21 @@ public abstract partial class InputRequest
                 return;
             }
             ResponseCardIds.Add(result.SelectedItems[0]);
+        }
+
+        /// <summary>The option cards go through the card prompt, which answers with the clicked option's id, or -1 for Skip.</summary>
+        private async Task HandleAsCards()
+        {
+            PlayerScene.Current.InputManager.SetCardSelectionActive(
+                TargetFaction, new List<int>(), optionCards: OptionCards, title: ModalTitle);
+            Variant[] results = await AwaitCardSelection();
+            int optionId = results is { Length: > 0 } ? (int)results[0] : -1;
+            if (optionId < 0)
+            {
+                WasSkipped = true;
+                return;
+            }
+            ResponseCardIds.Add(optionId);
         }
     }
 

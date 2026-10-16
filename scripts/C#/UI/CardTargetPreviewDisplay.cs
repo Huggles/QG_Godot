@@ -31,6 +31,9 @@ public static class CardTargetPreviewDisplay
     /// </summary>
     private static int owningCardId = -1;
 
+    /// <summary>The option card whose targets are lit, or -1; kept apart from <see cref="owningCardId"/> because option ids are not card ids.</summary>
+    private static int owningOptionId = -1;
+
     /// <summary>
     /// Exactly the countries this class raised the tag on, so teardown cannot clear a tag somebody
     /// else raised or miss one whose target set has since changed.
@@ -57,23 +60,39 @@ public static class CardTargetPreviewDisplay
         ClearAll();
         owningCardId = cardId;
 
-        if (!prompt.PreviewsByCardId.TryGetValue(cardId, out InputRequest.CardTargetPreview preview)
-            || preview == null || preview.IsEmpty)
-        {
-            // The card is in the prompt but reaches nothing — a Status card with no declared preview,
-            // or a card whose targets have all gone. An empty board IS the answer for a card that
-            // cannot do anything right now.
-            return;
-        }
+        // A card that reaches nothing — no declared preview, or its targets have all gone — leaves the
+        // board empty, which IS the answer for a card that cannot do anything right now.
+        prompt.PreviewsByCardId.TryGetValue(cardId, out InputRequest.CardTargetPreview preview);
+        Light(preview?.CountryIds, preview?.UnitIds);
+    }
 
+    /// <summary>Light up what an option drawn as a card could reach, carried on the option itself.</summary>
+    public static void ShowOption(InputRequest.OptionCard option)
+    {
+        if (InputManager.CurrentCardPrompt == null) return;
+
+        ClearAll();
+        owningOptionId = option.OptionId;
+        Light(option.TargetCountryIds, option.TargetUnitIds);
+    }
+
+    /// <summary>Clear the preview if <paramref name="optionId"/>'s option card still owns it — see <see cref="Clear"/>.</summary>
+    public static void ClearOption(int optionId)
+    {
+        if (optionId != owningOptionId) return;
+        ClearAll();
+    }
+
+    private static void Light(List<int> countryIds, List<int> unitIds)
+    {
         // Resolved and filtered rather than passed straight to AddTag: ForIds yields a null for an id
         // it does not know, and the tag extensions dereference every element. These ids arrived over
         // the wire, so an unresolvable one must cost the preview and not the prompt.
-        List<CountryState> countryStates = CountryState.ForIds((preview.CountryIds ?? new List<int>()).Distinct())
+        List<CountryState> countryStates = CountryState.ForIds((countryIds ?? new List<int>()).Distinct())
             .Where(countryState => countryState != null)
             .ToList();
 
-        List<UnitState> unitStates = UnitState.ForIds((preview.UnitIds ?? new List<int>()).Distinct())
+        List<UnitState> unitStates = UnitState.ForIds((unitIds ?? new List<int>()).Distinct())
             .Where(unitState => unitState != null)
             .ToList();
 
@@ -120,5 +139,6 @@ public static class CardTargetPreviewDisplay
         }
 
         owningCardId = -1;
+        owningOptionId = -1;
     }
 }

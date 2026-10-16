@@ -66,6 +66,7 @@ using System.Collections.Generic;
 /// Read through <see cref="ActiveCardPrompt.Answering"/>, which falls back to
 /// <paramref name="Faction"/> alone, so no caller has to handle a null or a single-faction prompt.
 /// </param>
+/// <param name="OptionCards">Options drawn as cards beside the card ids, each selectable; null for a plain card prompt.</param>
 public sealed record ActiveCardPrompt(
     Faction Faction,
     List<int> DisplayCardIds,
@@ -74,7 +75,8 @@ public sealed record ActiveCardPrompt(
     bool IsHandPlay = false,
     bool IsReactionWindow = false,
     Dictionary<int, InputRequest.CardTargetPreview> PreviewsByCardId = null,
-    IReadOnlyList<Faction> AnsweringFactions = null)
+    IReadOnlyList<Faction> AnsweringFactions = null,
+    List<InputRequest.OptionCard> OptionCards = null)
 {
     /// <summary>
     /// The factions this prompt answers for, always non-empty — <see cref="AnsweringFactions"/> when the
