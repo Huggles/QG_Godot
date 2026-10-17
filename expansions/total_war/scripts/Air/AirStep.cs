@@ -21,7 +21,8 @@ public static class AirStep
 
     private static async Task TakeAction(Faction faction)
     {
-        // Asked on public facts only. Asking only when the hand held an Air Power card would tell everyone it does.
+        // Asked on public facts only. Asking only when the hand held an Air Power card would tell everyone it does;
+        // a Pass-only prompt is instead answered on the player's own client (AirStepRequestHandler.Handle).
         if (DeckState.ForFaction(faction).HandCardIds.Count == 0) return;
         BoardState board = BoardState.Live;
         if (board.SuppliedAirForceIds(faction).Count == 0 && !(HasAirForces(faction) && board.AirDeployTargets(faction).Count > 0))

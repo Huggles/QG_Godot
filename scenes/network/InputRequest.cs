@@ -1109,6 +1109,21 @@ public abstract partial class InputRequest
         [JsonConstructor]
         public AirStepRequestHandler(Faction targetFaction, List<string> targetOptionLabels, List<int> targetOptionIds, string modalTitle)
             : base(targetFaction, targetOptionLabels, targetOptionIds, modalTitle) { }
+
+        /// <summary>
+        /// Pass as the only option is answered without drawing it while the faction's reaction toggle skips,
+        /// as an empty reaction window is (TryAutoPassArmedReactionWindow). The CLI never calls Handle, so scripts still see it.
+        /// </summary>
+        public override async Task Handle()
+        {
+            if (TargetOptionIds.Count == 1 && ReactionSkipPreference.ActiveScope(TargetFaction) != ReactionSkipScope.NONE)
+            {
+                DebugUtilities.PrintPeer($"{TargetFaction} auto-passed an Air step with nothing to do");
+                ResponseCardIds.Add(TargetOptionIds[0]);
+                return;
+            }
+            await base.Handle();
+        }
     }
 
     public class ReorderCardsRequestHandler : InputRequest
