@@ -105,15 +105,15 @@ public static class AirStep
         return true;
     }
 
-    /// <summary>Marshal one of <paramref name="owner"/>'s Air Forces, paid for from <paramref name="payer"/>'s hand: which one, where to, then the card.</summary>
+    /// <summary>Marshal one of <paramref name="owner"/>'s Air Forces, paid for from <paramref name="payer"/>'s hand: the card, which one, then where to.</summary>
     private static async Task<bool> TryMarshal(Faction payer, Faction owner)
     {
+        int card = await PickCard(payer, DeckState.ForFaction(payer).HandCardIds, "Discard a card to marshal the Air Force");
+        if (card < 0) return false;
         int airForce = await PickUnit(payer, BoardState.Live.SuppliedAirForceIds(owner), alwaysAsk: true);
         if (airForce < 0) return false;
         int country = await PickCountry(payer, BoardState.Live.MarshalTargets(UnitState.ForId(airForce)));
         if (country < 0) return false;
-        int card = await PickCard(payer, DeckState.ForFaction(payer).HandCardIds, "Discard a card to marshal the Air Force");
-        if (card < 0) return false;
 
         await Discard(payer, card);
         await CardPlayPool.DoChangeEvent(new MoveAirForceChangeEvent(owner, airForce, country, AirForceMoveReason.MARSHAL));
