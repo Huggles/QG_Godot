@@ -149,8 +149,8 @@ public class GameStateCalculator
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
             // IsPlayed: a card can only be used as a reaction once it is on the table. A hand card
-            // tagged IsActivatable is offering a *play*, not a reaction.
-            if (board.IsPlayed(cardState) && board.Of(cardState).Tags.Has(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
+            // tagged IsActivatable is offering a *play*, not a reaction; a Bolster in hand is the exception.
+            if (IsReactionCard(board, cardState) && board.Of(cardState).Tags.Has(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == false)
                 board.Of(cardState).Tags.Add(Tag.IsAfterReaction, faction);
         });
     }
@@ -166,10 +166,14 @@ public class GameStateCalculator
         ClearTagsForFaction(board, faction, Tag.IsBlockReaction);
         CardState.AllForFaction(faction).Values.ToList().ForEach(cardState =>
         {
-            if (board.IsPlayed(cardState) && board.Of(cardState).Tags.Has(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == true)
+            if (IsReactionCard(board, cardState) && board.Of(cardState).Tags.Has(Tag.IsActivatable, faction) && cardState.CardLogic?.IsBlockReaction == true)
                 board.Of(cardState).Tags.Add(Tag.IsBlockReaction, faction);
         });
     }
+
+    /// <summary>A card that can answer a reaction window: one on the table, or a Bolster used straight from hand.</summary>
+    private static bool IsReactionCard(BoardState board, CardState cardState) =>
+        board.IsPlayed(cardState) || cardState.CardLogic?.IsBolsterInHandOn(board) == true;
 
     private static void CalculatePlayableCardsForFaction(BoardState board, Faction faction)
     {

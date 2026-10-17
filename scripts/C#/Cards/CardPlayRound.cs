@@ -254,10 +254,13 @@ public partial class CardPlayRound : GodotObject
 
         try
         {
-            // Step 1: Introduction event 
-            ChangeEvent introEvent = !cardState.IsPlayed
-                ? new PlayCardChangeEvent(cardState.Id)
-                : new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, activationTrigger);
+            // Step 1: Introduction event. A Bolster in hand is used, not played: UseBolsterChangeEvent
+            // discards it and spends no play. Resumed from the discard pile, it falls to the activation branch.
+            ChangeEvent introEvent = cardLogic.IsBolsterInHand
+                ? new UseBolsterChangeEvent(cardState.Id)
+                : !cardState.IsPlayed
+                    ? new PlayCardChangeEvent(cardState.Id)
+                    : new ActivateReactionChangeEvent(cardState.Faction, cardState.Id, activationTrigger);
             introEvent.IsTrigger = false;
             await introEvent.Apply();        
 
@@ -953,7 +956,8 @@ public partial class CardPlayRound : GodotObject
     public List<int> GetBlockReactionOptions(Faction faction) => CardState.AllForFaction(faction).Values.Where(cs => cs.Tags.Has(Tag.IsBlockReaction, faction)).Select(cs => cs.Id).ToList();
 
     /// <summary>
-    /// True if the faction holds at least one face-down Response card on the table.
+    /// True if the faction holds at least one face-down Response card on the table, or a Bolster card in
+    /// hand (Total War): either could answer the event unseen.
     ///
     /// Such a faction is offered a reaction window even with nothing activatable. Asking only when a
     /// reaction is actually available makes the mere appearance of the prompt proof that the hidden
@@ -965,8 +969,8 @@ public partial class CardPlayRound : GodotObject
     /// have been asked about — its own — does not exist.
     /// </summary>
     public static bool HasHiddenResponseCards(Faction faction) =>
-        DeckState.ForFaction(faction).ResponseCardIds
-            .Any(id => CardState.ForId(id)?.IsRevealed == false);
+        DeckState.ForFaction(faction).ResponseCardIds.Any(id => CardState.ForId(id)?.IsRevealed == false)
+        || DeckState.ForFaction(faction).HandCardIds.Any(id => CardState.ForId(id)?.CardData.CardType == CardType.BOLSTER);
 
     /// <summary>
     /// Every event-triggered card the faction has on the table: the full set a reaction prompt puts
@@ -1045,12 +1049,12 @@ public partial class CardPlayRound : GodotObject
     /// <summary>
     /// True when every player can already see what this table card is: a Status card sits face up,
     /// and a Response card stays face up once an earlier activation revealed it. A window opened by
-    /// such a card leaks nothing whether it appears or not.
+    /// such a card leaks nothing whether it appears or not. A Bolster in hand is hidden like a face-down Response.
     /// </summary>
     private static bool IsPubliclyVisibleTableCard(int cardId)
     {
         CardState card = CardState.ForId(cardId);
-        return card != null && (card.CardData.CardType != CardType.RESPONSE || card.IsRevealed);
+        return card != null && (card.CardData.CardType is not (CardType.RESPONSE or CardType.BOLSTER) || card.IsRevealed);
     }
 
     /// <summary>

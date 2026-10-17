@@ -22,6 +22,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(BattleUnitChangeEventDto),       "BattleUnit")]
 [JsonDerivedType(typeof(PlayCardChangeEventDto),         "PlayCard")]
 [JsonDerivedType(typeof(ActivateReactionChangeEventDto), "ActivateReaction")]
+[JsonDerivedType(typeof(UseBolsterChangeEventDto),       "UseBolster")]
 [JsonDerivedType(typeof(ForceDiscardCardsChangeEventDto),     "DiscardCards")]
 [JsonDerivedType(typeof(DrawCardsChangeEventDto),        "DrawCards")]
 [JsonDerivedType(typeof(ScorePointsChangeEventDto),      "ScorePoints")]

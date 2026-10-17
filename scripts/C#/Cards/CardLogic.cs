@@ -174,6 +174,12 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
 
     // A Status/Response card still in hand is being PLAYED onto the table, not activated.
     // Its CardSteps are the later activation effect, so their executability must not gate the play.
+    public bool IsBolster => CardData.CardType == CardType.BOLSTER;
+
+    /// <summary>A Bolster still in hand: used from there when its own triggers are met (UseBolsterChangeEvent), never played.</summary>
+    public bool IsBolsterInHand => IsBolsterInHandOn(BoardState.Live);
+    public bool IsBolsterInHandOn(BoardState board) => IsBolster && board.ForFaction(Faction).Hand.Contains(CardState.Id);
+
     public bool IsTableCardInHand => IsTableCardInHandOn(BoardState.Live);
     private bool IsTableCardInHandOn(BoardState board) => (IsStatus || IsResponse) && !board.IsPlayed(CardState);
 
@@ -201,8 +207,9 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
         if ((IsActivationFinished && !situation.Rearmed) || !TriggerConditionsMet(situation))
             return false;
 
-        // An Air Power or Bolster card in hand is never the card played; a card with no steps would otherwise pass below.
-        if (!board.IsPlayed(CardState) && !CardData.CardType.IsPlayedFromHand())
+        // An Air Power card in hand is never the card played; a card with no steps would otherwise pass below.
+        // A Bolster is the exception: used from hand whenever its own triggers are met.
+        if (!board.IsPlayed(CardState) && !CardData.CardType.IsPlayedFromHand() && !IsBolster)
             return false;
 
         if (IsTableCardInHandOn(board))
@@ -259,6 +266,9 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// <summary>The play conditions while the card is in hand on <paramref name="board"/>, its triggers once it is on the table.</summary>
     private List<Condition> ConditionsOn(BoardState board)
     {
+        // A Bolster is used from hand on its own triggers, never on the Play-step play conditions.
+        if (IsBolster)
+            return CardTriggers().Count > 0 ? CardTriggers() : new List<Condition> { new Condition.Never() };
         if (!board.IsPlayed(CardState))
             return _defaultPlayConditions;
         if (CardTriggers().Count > 0)

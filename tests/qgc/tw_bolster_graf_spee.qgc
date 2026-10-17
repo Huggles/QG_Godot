@@ -1,0 +1,52 @@
+#!args scenario=Scenario_Debug_TotalWarBolsters seed=42
+#
+# The Bolster engine, through Admiral Graf Spee (Germany): "Use when you build a Navy. Discard the top 1
+# card of your draw deck to battle the North Sea, North Atlantic, or South Atlantic."
+#  - A Bolster in hand is never offered as the turn's play.
+#  - It is offered from hand in the after-reaction window of Germany's own Navy build.
+#  - Used, it is introduced once by UseBolsterChangeEvent (no ActivateReactionChangeEvent), goes to the
+#    discard pile, pays its cost (Germany's deck 59 -> 58) and battles.
+#  - It spends no play: Build Navy was the play, so the Play step ends and the Air step follows.
+#  - Holding a Bolster puts a faction under the always-ask cover: the Allies, and Japan and Italy, are
+#    asked in every window here with nothing to play, and pass.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_bolster_graf_spee.qgc
+
+prompt                                  # turn 1, Germany
+assert card 223 in hand
+assert promptoptions == 6               # Build Army, Build Navy, Land Battle, Sea Battle, Elektroboot, Reallocate: no Graf Spee
+assert decksize GERMANY == 59
+select Build Navy
+prompt
+select North Sea
+prompt                                  # the Allies' block window: always-ask cover
+pass
+prompt                                  # the Allies' after window: cover again
+pass
+
+prompt                                  # Germany's after window: Graf Spee from hand
+assert promptfaction == GERMANY
+assert promptoptions == 1
+select Admiral Graf Spee
+prompt
+select North Atlantic
+prompt                                  # the Allies' block window on the battle
+assert poolevents UseBolsterChangeEvent == 1
+assert poolevents ActivateReactionChangeEvent == 0
+assert card 223 in discard
+assert decksize GERMANY == 58
+pass
+prompt
+pass
+prompt
+pass
+prompt
+pass
+prompt
+pass
+
+prompt                                  # Germany's Air step: the Play step is over
+assert step == AIR
+assert promptfaction == GERMANY
+assert errors == 0
+quit

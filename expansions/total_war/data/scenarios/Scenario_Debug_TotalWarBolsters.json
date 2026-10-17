@@ -1,0 +1,38 @@
+{
+  "title": "Debug: Bolster cards",
+  "description": "Total War test setup for Bolster cards used from hand: Germany moves first, holding Scandinavia, the Baltic Sea and Germany.\nIts hand holds Admiral Graf Spee and a Build Navy; the North Sea is empty.",
+  "debug": true,
+  "expansions": [ "total_war" ],
+  "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [ { "countryName": "GERMANY" }, { "countryName": "SCANDINAVIA" }, { "countryName": "BALTIC_SEA" } ],
+      "initialHandCards": [ { "name": "BolsterAdmiralGrafSpee" }, { "name": "BuildNavy" }, { "name": "BuildArmy" }, { "name": "LandBattle" },
+                            { "name": "SeaBattle" }, { "name": "EventSwedenSupportsFinland" }, { "name": "EWElektrobootSubmarines" } ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [ { "countryName": "UNITED_KINGDOM" } ],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [ { "countryName": "JAPAN" } ],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [ { "countryName": "MOSCOW" } ],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [ { "countryName": "ITALY" } ],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [ { "countryName": "US_EAST" } ],
+      "startingVP": 0
+    }
+  }
+}

@@ -74,6 +74,8 @@ public class MoveAirForceChangeEventDto : ChangeEventDto
 
 public class PlayCardChangeEventDto : ChangeEventDto { }
 
+public class UseBolsterChangeEventDto : ChangeEventDto { }
+
 public class ActivateReactionChangeEventDto : ChangeEventDto
 {
     /// <summary>Id of the ChangeEvent being reacted to. Looked up via ChangeEvent.ForId() on the client.</summary>

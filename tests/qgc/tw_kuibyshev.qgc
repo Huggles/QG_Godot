@@ -30,10 +30,16 @@ force deployunit --faction UNITED_KINGDOM --country MOSCOW   # shared, so Moscow
 answer id=115                           # Build Army
 prompt
 select Siberia
+prompt                                  # always-ask cover: Japan, Italy, the UK and the US hold Bolsters
+pass
 prompt
+pass
+prompt
+pass
+prompt                                  # the Soviet Air step
 assert occupant SIBERIA == SOVIET
 assert supplied SIBERIA SOVIET == true
-select Pass                             # the Soviet Air step
+select Pass
 
 prompt                                  # the Soviet Discard step, after Supply and Victory
 assert occupant MOSCOW == SOVIET,UNITED_KINGDOM

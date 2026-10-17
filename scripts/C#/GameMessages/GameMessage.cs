@@ -163,6 +163,7 @@ public abstract partial class GameMessage : GodotObject
             BattleUnitChangeEventDto d       => new BattleUnitChangeEvent(d.TriggeringFaction, d.UnitId),
             PlayCardChangeEventDto d         => new PlayCardChangeEvent(d.SourceCardId),
             ActivateReactionChangeEventDto d => new ActivateReactionChangeEvent(d.TriggeringFaction, d.SourceCardId, ChangeEvent.ForId(d.SourceChangeEventId)),
+            UseBolsterChangeEventDto d       => new UseBolsterChangeEvent(d.SourceCardId),
             // ModifiersApplied: d.NumberOfCards is the server's post-modifier count, so the client must
             // not run the IDiscardModifier pass again — see ForceDiscardCardsChangeEvent.
             ForceDiscardCardsChangeEventDto d     => new ForceDiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards) { ModifiersApplied = true },
