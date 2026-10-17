@@ -485,12 +485,13 @@ public partial class FactionHandDisplay : Control
 			cardSceneInstance.Selected += OnCardSelected;
 			CardScenes.Add(cardSceneInstance);
 
-			// An option has no CardState, so no tag can grey it out: it was offered, so it is clickable.
+			// An option has no CardState, so no tag can grey it out: the option itself says whether it is offered.
 			if (entry.Option != null)
 			{
 				cardSceneInstance.ShowOption(entry.Option, CardFace.ForOption(entry.Option, showingFaction));
-				cardSceneInstance.SetClickable(true);
-				cardSceneInstance.SetAvailability(CardScene.CardAvailability.Available);
+				cardSceneInstance.SetClickable(entry.Option.Available);
+				cardSceneInstance.SetAvailability(entry.Option.Available
+					? CardScene.CardAvailability.Available : CardScene.CardAvailability.Unavailable);
 				cardSceneInstance.SetEmphasized(false);
 				continue;
 			}

@@ -1037,6 +1037,9 @@ public abstract partial class InputRequest
         /// <summary>What hovering the option lights on the board, like a card's target preview.</summary>
         public List<int> TargetCountryIds { get; set; }
         public List<int> TargetUnitIds { get; set; }
+
+        /// <summary>False draws it greyed out and unclickable, shown so the player sees what exists; its id is then not among the prompt's options.</summary>
+        public bool Available { get; set; } = true;
     }
 
     public class SelectOptionRequestHandler : InputRequest

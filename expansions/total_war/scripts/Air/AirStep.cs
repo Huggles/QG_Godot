@@ -62,36 +62,41 @@ public static class AirStep
     }
 
     /// <summary>One choice of the Air step prompt: its label for the CLI and bots, and the card the GUI draws for it (none for Pass, which is the Skip button).</summary>
-    private sealed record AirAction(int Id, string Label, InputRequest.OptionCard Card = null);
+    private sealed record AirAction(int Id, string Label, InputRequest.OptionCard Card = null)
+    {
+        public bool Available => Card?.Available ?? true;
+    }
 
+    /// <summary>All three actions and Pass. One that cannot be taken now is drawn greyed out and is not an answer.</summary>
     private static List<AirAction> Actions(Faction faction)
     {
         BoardState board = BoardState.Live;
         bool hasAirPower = AirPowerCards(faction).Count > 0;
-        bool hasSuppliedAirForce = board.SuppliedAirForceIds(faction).Count > 0;
 
-        List<AirAction> actions = new();
-        if (hasAirPower && HasAirForces(faction) && board.AirDeployTargets(faction).Count > 0)
-            actions.Add(new(Deploy, "Deploy an Air Force (discard an Air Power card)", Card(Deploy, "Deploy an Air Force",
+        return new List<AirAction>
+        {
+            new(Deploy, "Deploy an Air Force (discard an Air Power card)", Card(Deploy, "Deploy an Air Force",
                 "Discard an Air Power card: place an Air Force with one of your supplied Armies or Navies.",
-                countryIds: board.AirDeployTargets(faction))));
-        if (hasSuppliedAirForce)
-            actions.Add(new(Marshal, "Marshal an Air Force (discard any card)", Card(Marshal, "Marshal an Air Force",
+                countryIds: board.AirDeployTargets(faction),
+                available: hasAirPower && HasAirForces(faction) && board.AirDeployTargets(faction).Count > 0)),
+            new(Marshal, "Marshal an Air Force (discard any card)", Card(Marshal, "Marshal an Air Force",
                 "Discard any card: move one of your supplied Air Forces to a space with one of your supplied Armies or Navies.",
-                unitIds: board.SuppliedAirForceIds(faction))));
-        if (hasAirPower && board.AirSuperiorityTargets(faction).Count > 0)
-            actions.Add(new(AirSuperiority, "Air Superiority (discard an Air Power card)", Card(AirSuperiority, "Air Superiority",
+                unitIds: board.SuppliedAirForceIds(faction),
+                available: board.SuppliedAirForceIds(faction).Count > 0)),
+            new(AirSuperiority, "Air Superiority (discard an Air Power card)", Card(AirSuperiority, "Air Superiority",
                 "Discard an Air Power card: eliminate an enemy Air Force adjacent to one of your supplied Air Forces.",
-                countryIds: board.AirSuperiorityTargets(faction))));
-        actions.Add(new(Pass, "Pass"));
-        return actions;
+                countryIds: board.AirSuperiorityTargets(faction),
+                available: hasAirPower && board.AirSuperiorityTargets(faction).Count > 0)),
+            new(Pass, "Pass"),
+        };
     }
 
+    // An unavailable option lights nothing on hover: its targets would suggest an action that cannot be taken.
     private static InputRequest.OptionCard Card(int id, string title, string text,
-        List<int> countryIds = null, List<int> unitIds = null) => new()
+        List<int> countryIds = null, List<int> unitIds = null, bool available = true) => new()
     {
-        OptionId = id, Title = title, Text = text, ArtCardType = CardType.AIR_POWER,
-        TargetCountryIds = countryIds, TargetUnitIds = unitIds,
+        OptionId = id, Title = title, Text = text, ArtCardType = CardType.AIR_POWER, Available = available,
+        TargetCountryIds = available ? countryIds : null, TargetUnitIds = available ? unitIds : null,
     };
 
     private static async Task<bool> TryDeploy(Faction faction)
@@ -142,14 +147,16 @@ public static class AirStep
     /// <summary>The chosen option's id; Pass for a skip, a release, or an answer that was not offered.</summary>
     private static async Task<int> Choose(Faction faction, List<AirAction> options, string title)
     {
+        // Only the available options are answers; the GUI draws the rest greyed out beside them.
+        List<AirAction> offered = options.Where(option => option.Available).ToList();
         try
         {
             InputRequest answer = await new InputRequest.AirStepRequestHandler(faction,
-                options.Select(option => option.Label).ToList(), options.Select(option => option.Id).ToList(), title)
+                offered.Select(option => option.Label).ToList(), offered.Select(option => option.Id).ToList(), title)
             {
                 OptionCards = options.Where(option => option.Card != null).Select(option => option.Card).ToList(),
             }.BroadCast();
-            return answer.ResponseCardIds.Where(id => options.Any(option => option.Id == id)).DefaultIfEmpty(Pass).First();
+            return answer.ResponseCardIds.Where(id => offered.Any(option => option.Id == id)).DefaultIfEmpty(Pass).First();
         }
         catch (StepSkippedException)
         {
