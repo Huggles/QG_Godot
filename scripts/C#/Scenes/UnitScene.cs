@@ -9,6 +9,7 @@ public partial class UnitScene : Node2D
 	public Sprite2D UnitSpriteNode => GetNode<Sprite2D>("UnitSprite2D");
 	public ClickableTextureRect TargetSprite => GetNode<ClickableTextureRect>("TargetSprite");
 	public TextureRect OutOfSupplyNode => GetNode<TextureRect>("OutOfSupplyIcon");
+	public TextureRect ProtectedNode => GetNode<TextureRect>("ProtectedIcon");
 	public static float DefaultSpriteScale = 0.2f;    
 	[Signal] public delegate void UnitClickedEventHandler();
 	[Signal] public delegate void UnitDoubleClickedEventHandler();
@@ -59,6 +60,7 @@ public partial class UnitScene : Node2D
 		{
 			HideOutOfSupply();
 		}
+		ProtectedNode.Visible = UnitState.ImmuneForTurn;
 		
 		TargetSprite.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
 
@@ -191,6 +193,7 @@ public partial class UnitScene : Node2D
 		UnitSpriteNode.Scale = new Vector2(DefaultSpriteScale, DefaultSpriteScale);
 		SetUnclickable();
 		HideOutOfSupply();
+		ProtectedNode.Hide();
 	}
 
 	private void OnTagAdded(Tag tag, Faction faction)
@@ -215,6 +218,10 @@ public partial class UnitScene : Node2D
 		{
 			Callable.From(ShowOutOfSupply).CallDeferred();
 		}
+		else if (tag == Tag.Immune)
+		{
+			Callable.From(ProtectedNode.Show).CallDeferred();
+		}
 	}
 
 	private void OnTagRemoved(Tag tag, Faction faction)
@@ -238,6 +245,10 @@ public partial class UnitScene : Node2D
 		else if ((tag == Tag.OutOfSupply || tag == Tag.SuppliedForTurn) && UnitState.InSupply)
 		{
 			Callable.From(HideOutOfSupply).CallDeferred();
+		}
+		else if (tag == Tag.Immune)
+		{
+			Callable.From(ProtectedNode.Hide).CallDeferred();
 		}
 		
 	}

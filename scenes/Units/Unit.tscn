@@ -7,6 +7,7 @@
 [ext_resource type="Material" uid="uid://kvokyv2saed0" path="res://BlinkingMaterial.tres" id="5_3bedt"]
 [ext_resource type="Texture2D" uid="uid://cgx3wjhrptpt5" path="res://assets/textures/Other/Target_Unit.png" id="6_3bedt"]
 [ext_resource type="PackedScene" path="res://scenes/World/VpScoreLabel.tscn" id="7_vpscr"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/ProtectedIcon.svg" id="8_prot"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n4c3c"]
 content_margin_left = 0.0
@@ -85,6 +86,19 @@ offset_bottom = -16.0
 grow_horizontal = 0
 mouse_filter = 2
 texture = ExtResource("3_ided0")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ProtectedIcon" type="TextureRect" parent="." unique_id=1907734414]
+unique_name_in_owner = true
+visible = false
+z_index = 61
+offset_left = -40.0
+offset_top = -50.0
+offset_right = -8.0
+offset_bottom = -18.0
+mouse_filter = 2
+texture = ExtResource("8_prot")
 expand_mode = 1
 stretch_mode = 5
 

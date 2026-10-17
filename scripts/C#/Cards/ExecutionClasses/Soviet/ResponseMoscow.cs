@@ -23,7 +23,7 @@ public partial class ResponseMoscow : ResponseCardLogic
         return new List<CardStep>
         {
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
-                removeEvent.UnitState.ImmuneForTurn = true;
+                await new ProtectUnitsChangeEvent(Faction, new List<int> { removeEvent.UnitState.Id }).Apply();
                 await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Moscow: its army in {CountryState.ForId(targetCountries[0]).Label} will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();

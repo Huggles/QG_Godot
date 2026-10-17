@@ -168,6 +168,11 @@ public class ReorderDeckChangeEventDto : ChangeEventDto
     public int ReorderedFromTop { get; set; } = -1;
 }
 
+public class ProtectUnitsChangeEventDto : ChangeEventDto
+{
+    public List<int> UnitIds { get; set; }
+}
+
 public class GrantSupplyChangeEventDto : ChangeEventDto
 {
     public List<int> UnitIds { get; set; }

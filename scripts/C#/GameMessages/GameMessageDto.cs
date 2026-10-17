@@ -36,6 +36,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(SpendPlayActionChangeEventDto),  "SpendPlayAction")]
 [JsonDerivedType(typeof(ReorderDeckChangeEventDto),      "ReorderDeck")]
 [JsonDerivedType(typeof(GrantSupplyChangeEventDto),       "GrantSupply")]
+[JsonDerivedType(typeof(ProtectUnitsChangeEventDto),      "ProtectUnits")]
 [JsonDerivedType(typeof(RegisterBulletinCardChangeEventDto), "RegisterBulletinCard")]
 [JsonDerivedType(typeof(DeployAirForceChangeEventDto),   "DeployAirForce")]
 [JsonDerivedType(typeof(MoveAirForceChangeEventDto),     "MoveAirForce")]

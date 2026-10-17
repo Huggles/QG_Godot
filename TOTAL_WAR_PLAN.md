@@ -406,6 +406,11 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     now also answer supply losses. Every base protection now also stops a later elimination that turn.
     The 10-game gate stayed identical.
   - Tested by `tests/qgc/tw_supply_loss_elan.qgc`.
+  - **Protection is an event (fixed later):** every "do not remove that piece this turn" card (the 10 base
+    ones, Élan, Alpini) wrote `ImmuneForTurn` on the host only, so clients reported a desync on the next
+    event and a rejoin or save replay lost it (confirmed with a network restore). They now apply
+    `ProtectUnitsChangeEvent`: replicated, in the journal, out of the reaction pool. A protected unit
+    shows a shield (`Unit.tscn` ProtectedIcon) until the turn ends.
 - **Effects, Attrition: built.**
   - **Core:** `DiscardHandCardsChangeEvent.IsDiscardStep`, set by `DiscardStepHandlerDefault`, replicated
     and saved.

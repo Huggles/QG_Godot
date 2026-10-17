@@ -23,7 +23,7 @@ public partial class ResponseAlpini : ResponseCardLogic
     public override List<CardStep> OnActivate() => new()
     {
         new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
-            removeEvent.UnitState.ImmuneForTurn = true;
+            await new ProtectUnitsChangeEvent(Faction, new List<int> { removeEvent.UnitState.Id }).Apply();
             await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Alpini: the Italian Army is not removed").Apply();
             await Task.Delay(GameSettings.DurationMedium);
             return CardStepResult.Block();

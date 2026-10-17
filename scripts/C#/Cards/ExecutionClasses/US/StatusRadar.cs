@@ -46,7 +46,7 @@ public partial class StatusRadar : StatusCardLogic
             // registers itself into ChangeEventsPool and would have moved LastNoneNewCardChangeEvent
             // off the removal this card exists to block.
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
-                removeEvent.UnitState.ImmuneForTurn = true;
+                await new ProtectUnitsChangeEvent(Faction, new List<int> { removeEvent.UnitState.Id }).Apply();
                 await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Radar: the US Navy will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
