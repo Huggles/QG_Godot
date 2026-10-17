@@ -1,0 +1,31 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Government in Exile (UK, Status): "If Western Europe is occupied by an Axis Army, the United Kingdom
+# is France's Home space." (IHomeSpaceModifier, read by BoardState.HomeSpaceOf each time.) Set up by
+# injection on Germany's turn: the card (261) onto the UK table, then the French Army (56) out of
+# Western Europe and a German Army (2) in. France's Home space, flag circle and building rights move
+# to the United Kingdom, and come back as soon as the German Army is gone.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_government_in_exile.qgc
+
+prompt                                  # turn 1, Germany
+assert homespace FRANCE == WESTERN_EUROPE
+assert homemarker WESTERN_EUROPE == FRANCE
+assert buildable UNITED_KINGDOM FRANCE == false
+
+force playcard --card 261
+assert homespace FRANCE == WESTERN_EUROPE     # no Axis Army there yet
+
+force removeunit --faction FRANCE --unit 56 --reason ELIMINATE
+force deployunit --faction GERMANY --country WESTERN_EUROPE
+assert occupant WESTERN_EUROPE == GERMANY
+assert homespace FRANCE == UNITED_KINGDOM
+assert homemarker UNITED_KINGDOM == FRANCE
+assert homemarker WESTERN_EUROPE == none
+assert buildable UNITED_KINGDOM FRANCE == true  # France holds no piece: only its Home space allows it
+
+force removeunit --faction GERMANY --unit 2 --reason ELIMINATE
+assert homespace FRANCE == WESTERN_EUROPE
+assert homemarker WESTERN_EUROPE == FRANCE
+assert errors == 0
+quit
