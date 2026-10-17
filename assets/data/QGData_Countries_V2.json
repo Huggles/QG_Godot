@@ -2587,14 +2587,14 @@
         },
         "SupplyStarTransformData": {
             "Scale": 1,
-            "XPosition": 0,
-            "YPosition": 0,
+            "XPosition": 140,
+            "YPosition": -20,
             "ZPosition": 0
         },
         "HomeMarkerTransformData": {
             "Scale": 1,
-            "XPosition": 130,
-            "YPosition": 60,
+            "XPosition": 140,
+            "YPosition": 70,
             "ZPosition": 0
         },
         "LabelTransformData": {

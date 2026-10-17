@@ -282,12 +282,19 @@ public sealed partial class BoardState
         var response = new List<int>();
         foreach (CountryState countryState in CountryState.AllCountryStates)
         {
-            bool blocked = Modifiers<ISupplyBlockModifier>().Any(m => m.BlocksSupply(countryState.Id, faction));
-            if (!blocked && countryState.IsSupply && holders.Any(UnitsIn(countryState).ContainsKey))
+            if (IsSupplySpace(countryState, faction) && holders.Any(UnitsIn(countryState).ContainsKey))
                 response.Insert(0, countryState.Id);
         }
         return response;
     }
+
+    /// <summary>
+    /// Whether a space is a Supply space for a faction, both to trace supply to and to score its star:
+    /// the map's star or an ISupplySpaceModifier card's, unless an ISupplyBlockModifier card denies it.
+    /// </summary>
+    public bool IsSupplySpace(CountryState country, Faction faction) =>
+        (country.IsSupply || Modifiers<ISupplySpaceModifier>().Any(m => m.AddsSupplySpace(country.Id, faction)))
+        && !Modifiers<ISupplyBlockModifier>().Any(m => m.BlocksSupply(country.Id, faction));
 
     // ── Placement ───────────────────────────────────────────────────────────
 
@@ -299,13 +306,15 @@ public sealed partial class BoardState
         return StaticGameData.FactionDataMap[faction].HomeSpaceCountryState;
     }
 
+    public bool IsHomeSpace(Faction faction, CountryState country) => HomeSpaceOf(faction).Id == country.Id;
+
     /// <summary>
     /// Recruitable, and off the home space an adjacent supplied unit, and at sea a harbour. A faction may
     /// build where it already stands — see CountryState.CanBuild for why that is not excluded.
     /// </summary>
     public bool CanBuild(Faction faction, CountryState country) =>
         CanRecruit(faction, country) &&
-        (!country.IsHomeSpace(faction) ? HasAdjacentSuppliedUnit(faction, country) : true) &&
+        (!IsHomeSpace(faction, country) ? HasAdjacentSuppliedUnit(faction, country) : true) &&
         (country.IsSea ? HasHarbor(faction, country) : true);
 
     public int AvailableUnitCount(Faction faction, UnitType unitType)

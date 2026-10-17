@@ -36,7 +36,7 @@ public partial class ScorePointsChangeEvent : ChangeEvent
     private Dictionary<int, int> HomeSpaceFallback(VPEntry entry)
     {
         if (entry.SourceUnitVPs != null || entry.VictoryPoints == 0) return null;
-        CountryState home = StaticGameData.FactionDataMap[VPTurnSummary.Faction].HomeSpaceCountryState;
+        CountryState home = BoardState.Live.HomeSpaceOf(VPTurnSummary.Faction);
         return home == null ? null : new Dictionary<int, int> { [home.Id] = entry.VictoryPoints };
     }
 

@@ -448,8 +448,28 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
     would not register modifiers.
   - Tested by `tests/qgc/tw_turkey_opens_the_straits.qgc`, with a new
     `assert adjacent <space> <space> <faction>`.
-- **Effects, Hard (4): each needs a new rule system.**
-  - Home/Supply spaces that move during play: Government Evacuates to Kuibyshev, Government in Exile.
+- **Effects, Government Evacuates to Kuibyshev: built.** First counted as Hard. Home and Supply spaces
+  stay map data; cards in play adjust them through modifiers, so nothing new is stored or sent.
+  - **Home space:** `IHomeSpaceModifier`; `BoardState.HomeSpaceOf` / `IsHomeSpace` answer for building
+    without a supplied neighbour (`CanBuild`, the unit pool), Cash and Carry, and where faction-level VP
+    (Attrition) show.
+  - **Supply spaces:** `ISupplySpaceModifier` adds one, `ISupplyBlockModifier` takes one away, and a
+    block wins. `BoardState.IsSupplySpace(country, faction)` drives supply sources and the Victory
+    step's star VP.
+  - **Rule (decided), base included:** "not a Supply space" means no supply source and no star VP. So
+    base Scorched Earth now also stops the Axis scoring Ukraine. The 10-game gate stayed identical (the
+    case never came up there); `tests/qgc/scorched_earth_scoring.qgc` covers it.
+  - **Map:** a base country's flag circle shows only once its Home space moves (the board prints the
+    rest); France's and China's always show. A card-added star appears (Siberia, data moved clear of the
+    units) and a denied one is crossed out (Moscow, Ukraine under Scorched Earth).
+  - **The card:** Siberia is the Soviet Home space and its Supply space (Soviet only); Moscow is no one's.
+  - **Not yet:** the bot's VP valuation (`VpMath`, `BoardAssessment`) still reads the map's stars.
+  - Tested by `tests/qgc/tw_kuibyshev.qgc` (`Scenario_Debug_TotalWarHomeSpaces`, the Soviet Union first)
+    and `tests/qgc/tw_home_space_markers.qgc`, with new `assert homespace / homemarker / supplyspace /
+    buildable` checks.
+- **Effects, left small:** Government in Exile, the same `IHomeSpaceModifier` while an Axis Army holds
+  Western Europe (France's circle then moves to the United Kingdom).
+- **Effects, Hard (2): each needs a new rule system.**
   - Switching off Axis Statuses: Hobart's Funnies (pairs with Bolster Keep Calm and Carry On).
   - A "use at any time" window: Endless Expanses (with M4's windows).
 - Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);

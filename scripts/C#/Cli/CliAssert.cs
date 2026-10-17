@@ -147,6 +147,14 @@ public static class CliAssert
             // The faction's Home space, after any card that moves it: `assert homespace SOVIET == SIBERIA`.
             case "homespace": return BoardState.Live.HomeSpaceOf(ParseFaction(arg1)).Name;
 
+            // Whether the space is a Supply space for the faction (supply and star VP): `assert supplyspace MOSCOW SOVIET == false`.
+            case "supplyspace":
+                return BoardState.Live.IsSupplySpace(ParseCountry(arg1), ParseFaction(subject.Count > 2 ? subject[2] : null)) ? "true" : "false";
+
+            // Whether the faction may build there now: `assert buildable SIBERIA SOVIET == true`.
+            case "buildable":
+                return BoardState.Live.CanBuild(ParseFaction(subject.Count > 2 ? subject[2] : null), ParseCountry(arg1)) ? "true" : "false";
+
             // Whose Home space marker the map draws here, or none: `assert homemarker SIBERIA == SOVIET`.
             case "homemarker": return CountryScene.HomeMarkerFor(BoardState.Live, ParseCountry(arg1).Id)?.Faction.ToString() ?? "none";
 

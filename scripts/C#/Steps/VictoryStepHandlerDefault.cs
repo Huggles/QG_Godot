@@ -59,7 +59,8 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
         List<CountryState> occupiedCountries = CountryState.ForIds(FactionState.ForEnum(scoringFaction).OccupiedCountryIds);
         foreach (CountryState cs in occupiedCountries)
         {
-            if (cs.IsSupply)
+            // A Supply space for this faction: a card may add one (Kuibyshev) or deny one (Scorched Earth).
+            if (BoardState.Live.IsSupplySpace(cs, scoringFaction))
             {
                 int score = Math.Max(3 - cs.Units.Keys.Count, 1);
                 VPEntry vPEntry = VPEntry.ForCountry(score, $"supply star on {cs.StaticCountryData.Label}", cs.Id);

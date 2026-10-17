@@ -6,7 +6,7 @@ public partial class EventCashAndCarryReplacesNeutralityActs : EventCardLogic
     /// <summary>Where an Allied country could recruit a piece it still has available: in or next to its Home space.</summary>
     private static List<CountryState> RecruitTargets(BoardState board, Faction ally)
     {
-        CountryState home = StaticGameData.FactionDataMap[ally].HomeSpaceCountryState;
+        CountryState home = board.HomeSpaceOf(ally);
         List<CountryState> open = new();
         if (board.AvailableUnitCount(ally, UnitType.ARMY) > 0) open.AddRange(board.RecruitableLand(ally));
         if (board.AvailableUnitCount(ally, UnitType.NAVY) > 0) open.AddRange(board.RecruitableSea(ally));

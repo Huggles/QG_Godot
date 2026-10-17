@@ -36,8 +36,8 @@ public partial class DeployState : Node
             }
         }
 
-        if (FactionState.ForEnum(faction).FactionData.HomeSpaceCountryState.CanBuild(faction)) {
-            deployState.BuildableCountries.Add(FactionState.ForEnum(faction).FactionData.HomeSpaceCountryState.Id);
+        if (BoardState.Live.HomeSpaceOf(faction).CanBuild(faction)) {
+            deployState.BuildableCountries.Add(BoardState.Live.HomeSpaceOf(faction).Id);
         }
 
         foreach (CountryState countryState in GameState.CountryStates)

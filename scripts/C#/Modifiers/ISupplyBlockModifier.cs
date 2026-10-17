@@ -1,7 +1,7 @@
 /// <summary>
-/// Implemented by status cards that block specific countries from acting as supply sources
-/// for specific factions (e.g. StatusScorchedEarth: Ukraine is not a supply space for the Axis).
-/// Checked in GameAPI.GetSupplyCountryIds.
+/// Implemented by status cards that stop specific countries being Supply spaces for specific factions
+/// (e.g. StatusScorchedEarth: Ukraine is not a Supply space for the Axis): no supply source and no star
+/// VP. Checked in BoardState.IsSupplySpace.
 /// </summary>
 public interface ISupplyBlockModifier : IModifier
 {

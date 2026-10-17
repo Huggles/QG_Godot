@@ -43,7 +43,7 @@ public partial class StatusAttrition : StatusCardLogic, IStepMutator
     public async Task Run(Faction activeFaction)
     {
         int count = DiscardedBuildArmies().Count;
-        VPEntry entry = VPEntry.ForCountry(count, "Build Army cards discarded (Attrition)", FactionData.HomeSpaceCountryState.Id);
+        VPEntry entry = VPEntry.ForCountry(count, "Build Army cards discarded (Attrition)", BoardState.Live.HomeSpaceOf(Faction).Id);
         await this.Do(new ScorePointsChangeEvent(entry, Faction), isTrigger: false);
     }
 }

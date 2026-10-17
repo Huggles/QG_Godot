@@ -1,0 +1,42 @@
+#!args scenario=Scenario_Debug_TotalWarHomeSpaces seed=42
+#
+# Government Evacuates to Kuibyshev (Soviet Union, Status): Siberia becomes the Soviet Home space and
+# a Supply space for the Soviet Union only, and Moscow is a Supply space for no one
+# (IHomeSpaceModifier, ISupplySpaceModifier, ISupplyBlockModifier, read by BoardState.HomeSpaceOf and
+# IsSupplySpace). The Soviet Union holds only Ukraine, so Siberia is buildable only as its Home space.
+# Set up by injection: the card (317) onto the Soviet table, and Soviet and UK Armies into Moscow. Then the
+# Soviet Union builds an Army in Siberia, which Siberia itself supplies, and its Victory step scores
+# Ukraine and Siberia (2 each) but not Moscow.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_kuibyshev.qgc
+
+prompt                                  # turn 1, the Soviet Union
+assert homespace SOVIET == MOSCOW
+assert supplyspace MOSCOW SOVIET == true
+assert supplyspace SIBERIA SOVIET == false
+assert buildable SIBERIA SOVIET == false
+
+force playcard --card 317
+assert homespace SOVIET == SIBERIA
+assert homemarker SIBERIA == SOVIET
+assert supplyspace SIBERIA SOVIET == true
+assert supplyspace SIBERIA JAPAN == false
+assert supplyspace MOSCOW SOVIET == false
+assert supplyspace MOSCOW GERMANY == false
+assert buildable SIBERIA SOVIET == true
+force deployunit --faction SOVIET --country MOSCOW
+force deployunit --faction UNITED_KINGDOM --country MOSCOW   # shared, so Moscow would be worth 1 under the old rule
+
+answer id=115                           # Build Army
+prompt
+select Siberia
+prompt
+assert occupant SIBERIA == SOVIET
+assert supplied SIBERIA SOVIET == true
+select Pass                             # the Soviet Air step
+
+prompt                                  # the Soviet Discard step, after Supply and Victory
+assert occupant MOSCOW == SOVIET,UNITED_KINGDOM
+assert score SOVIET == 4                # Ukraine 2 and Siberia 2; Moscow no longer scores (the map's stars alone would give 3)
+assert errors == 0
+quit

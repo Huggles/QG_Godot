@@ -1,0 +1,38 @@
+{
+  "title": "Debug: Home spaces",
+  "description": "Total War test setup for the cards that move a Home space: the Soviet Union moves first, holding only Ukraine.\nIts hand holds Government Evacuates to Kuibyshev and Build Army cards.",
+  "debug": true,
+  "expansions": [ "total_war" ],
+  "startingFaction": "SOVIET",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [ { "countryName": "GERMANY" } ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [ { "countryName": "UNITED_KINGDOM" } ],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [ { "countryName": "JAPAN" } ],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [ { "countryName": "UKRAINE" } ],
+      "initialHandCards": [ { "name": "StatusGovernmentEvacuatesToKuibyshev" }, { "name": "BuildArmy" }, { "name": "BuildArmy" }, { "name": "LandBattle" },
+                            { "name": "EventSiberianTransfer" }, { "name": "StatusTankDesant" }, { "name": "ResponseHeavyTanks" } ],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [ { "countryName": "ITALY" } ],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [ { "countryName": "US_EAST" } ],
+      "startingVP": 0
+    }
+  }
+}

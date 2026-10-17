@@ -140,11 +140,6 @@ public partial class CountryScene : Control
 		DebugUtilities.PrintPeer($"{this.StaticCountryData.Label}");
 		Name = CountryState.Name;
 		//SetUnclickable();
-		if (CountryState.IsSupply)
-			ShowSupplyStar();
-		else
-			HideSupplyStar();
-
 		SetUnclickable();
 		
 		StraightState.OnReady();
@@ -769,14 +764,29 @@ public partial class CountryScene : Control
 		CenterSprite(HomeMarkerSprite, StaticCountryData.HomeMarkerTransformData);
 	}
 
-	/// <summary>Moves the Home space marker with any card that moves a Home space, and swaps in the
-	/// crossed-out star while a status card (e.g. Scorched Earth) denies this space as a supply source
-	/// to anyone, and back once the card leaves play.</summary>
+	/// <summary>Moves the Home space marker and the star with any card that changes them, and back once
+	/// the card leaves play.</summary>
 	private void OnGameStateRecalculated()
 	{
 		ShowHomeMarker();
-		if (!CountryState.IsSupply) return;
-		bool blocked = BoardState.Live.Modifiers<ISupplyBlockModifier>().Any(m =>
+		UpdateSupplyStar();
+	}
+
+	/// <summary>
+	/// The map's star, or one a status card adds for any country (Siberia under Kuibyshev); crossed out
+	/// while a status card denies the space to anyone (Scorched Earth, Moscow under Kuibyshev).
+	/// </summary>
+	private void UpdateSupplyStar()
+	{
+		BoardState board = BoardState.Live;
+		bool added = board.Modifiers<ISupplySpaceModifier>().Any(m => StaticGameData.BoardFactions.Any(f => m.AddsSupplySpace(CountryId, f)));
+		if (!CountryState.IsSupply && !added)
+		{
+			HideSupplyStar();
+			return;
+		}
+		ShowSupplyStar();
+		bool blocked = board.Modifiers<ISupplyBlockModifier>().Any(m =>
 			Enum.GetValues<Faction>().Any(f => f != Faction.NONE && f != Faction.ALL && m.BlocksSupply(CountryId, f)));
 		SupplyStarSprite.Texture = blocked ? SupplyStarLostTexture : SupplyStarTexture;
 	}

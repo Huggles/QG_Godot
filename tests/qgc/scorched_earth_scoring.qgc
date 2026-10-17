@@ -1,0 +1,27 @@
+#!args scenario=Scenario_Basic seed=42
+#
+# Scorched Earth (Soviet Union, Status): "Ukraine is not a Supply space for the Axis." Since
+# BoardState.IsSupplySpace drives both supply and the Victory step, that also means no star VP for an
+# Axis country in Ukraine (decided). Set up by injection on Germany's turn: German Armies into Eastern
+# Europe and Ukraine, and the card (145) onto the Soviet table. Ukraine's Army stays supplied through
+# Eastern Europe, and Germany's Victory step scores only its own star (2); without the card it would
+# score 4.
+#
+# Run:  tests/run-cli.sh tests/qgc/scorched_earth_scoring.qgc
+
+prompt                                  # turn 1, Germany
+force deployunit --faction GERMANY --country EASTERN_EUROPE
+force deployunit --faction GERMANY --country UKRAINE
+force playcard --card 145
+assert supplyspace UKRAINE GERMANY == false
+assert supplyspace UKRAINE SOVIET == true
+
+pass                                    # no play: discard 1
+prompt
+answer id=15                            # a Sea Battle
+
+prompt                                  # Germany's Discard step, after Supply and Victory
+assert occupant UKRAINE == GERMANY
+assert score GERMANY == 2               # Germany's star only: Ukraine's is no Supply space for the Axis
+assert errors == 0
+quit

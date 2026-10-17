@@ -137,7 +137,7 @@ public partial class CountryState : StateObject
     public bool CanBuild(Faction faction) => BoardState.Live.CanBuild(faction, this);
     public bool CanRecruit(Faction faction) => BoardState.Live.CanRecruit(faction, this);
     public bool HasUnit(Faction faction) => Units.ContainsKey(faction);
-    public bool IsHomeSpace(Faction faction) => FactionState.ForEnum(faction).FactionData.HomeSpaceCountryState.Id == this.Id;
+    public bool IsHomeSpace(Faction faction) => BoardState.Live.IsHomeSpace(faction, this);
     public List<int> AdjacentUnits(Faction faction) => BoardState.Live.AdjacentUnits(faction, this);
     public List<int> AdjacentSuppliedUnits(Faction faction) => BoardState.Live.AdjacentSuppliedUnits(faction, this);
     public bool HasAdjacentSuppliedUnit(Faction faction) => BoardState.Live.HasAdjacentSuppliedUnit(faction, this);
