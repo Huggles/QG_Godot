@@ -472,11 +472,27 @@ Bots answer every new prompt at random (pass included), no new rules or valuatio
   - Tested by `tests/qgc/tw_kuibyshev.qgc` (`Scenario_Debug_TotalWarHomeSpaces`, the Soviet Union first)
     and `tests/qgc/tw_home_space_markers.qgc`, with new `assert homespace / homemarker / supplyspace /
     buildable` checks.
-- **Effects, left small:** Government in Exile, the same `IHomeSpaceModifier` while an Axis Army holds
-  Western Europe (France's circle then moves to the United Kingdom).
-- **Effects, Hard (2): each needs a new rule system.**
-  - Switching off Axis Statuses: Hobart's Funnies (pairs with Bolster Keep Calm and Carry On).
-  - A "use at any time" window: Endless Expanses (with M4's windows).
+- **Effects, Government in Exile: built.** The same `IHomeSpaceModifier`, read from the board each time:
+  while an Axis Army holds Western Europe, France's Home space (building, the flag circle) is the United
+  Kingdom. Tested by `tests/qgc/tw_government_in_exile.qgc`.
+- **Effects, Hobart's Funnies: built.** First counted as Hard.
+  - **Core:** `IStatusIgnoreModifier`. `BoardState.Modifiers` leaves an ignored card's modifiers out
+    (`RegisteredModifiers` keeps the unfiltered list, for the check itself and for cleanup), and
+    `CardLogic.CanBeActivated` refuses it. The step mutators and the Victory step's status VP now go
+    through the board too; the bot's VP forecast keeps the unfiltered list, since it predicts later turns.
+  - **The card:** Axis Status cards during the UK turn. A new turn recalculates everything, so it
+    switches at the turn's edges with no extra hook.
+  - **Display (decided):** the Active Cards window dims an ignored card and captions it "Ignored
+    (Hobart's Funnies)" (`PresentationItemCard.DimCaption`).
+  - **Later:** Keep Calm and Carry On can block one Axis Status for a turn with the per-card `IsBlocked`
+    flag, already cleared each turn.
+  - Tested by `tests/qgc/tw_hobarts_funnies.qgc` (Gibraltar's strait opens and Atlantic Wall stays silent
+    during the UK turn, both return on Japan's), with a new `assert ignored <card>`.
+- **Effects, Endless Expanses: built.** First counted as Hard. Offered in the removal block window
+  (decided), like Élan: every Soviet Army in Siberia and Kazakhstan is protected for the turn through
+  `ProtectUnitsChangeEvent`, and the removal is blocked. A true "any time" window, and a per-space record
+  for Armies that arrive later that turn, would come with M4's windows. Tested by
+  `tests/qgc/tw_endless_expanses.qgc`. **All Total War Status, Event, Response and EW cards are built.**
 - Unbuilt Event, EW and Status cards are playable and resolve with no effect (decided: keep them so);
   unbuilt Bolsters cannot be used until M4.
 - **Numbering:** Total War cards are `1000 + printed number` (US #1–25 → 1001–1025, Germany 1026–1047);

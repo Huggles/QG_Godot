@@ -1,0 +1,34 @@
+#!args scenario=Scenario_Debug_TotalWarHomeSpaces seed=42
+#
+# Endless Expanses (Soviet Union, Response): "Use at any time. Do not remove Soviet Armies in Siberia
+# and/or Kazakhstan this turn." Offered in the removal block window; it protects every Soviet Army in
+# both spaces for the turn (ProtectUnitsChangeEvent) and blocks the removal. Set up by injection on the
+# Soviet turn: the card (303) onto the Soviet table, the Ukraine Army (30) removed, and Soviet Armies into
+# Siberia (31), Kazakhstan (32) and Mongolia (33), none of them supplied. In the Supply step the card saves
+# Siberia and Kazakhstan; Mongolia, not on the card, is lost. A later elimination this turn fails too.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_endless_expanses.qgc
+
+prompt                                  # turn 1, the Soviet Union
+force playcard --card 303
+force removeunit --faction SOVIET --unit 30 --reason ELIMINATE
+force deployunit --faction SOVIET --country SIBERIA
+force deployunit --faction SOVIET --country KAZAKHSTAN
+force deployunit --faction SOVIET --country MONGOLIA
+assert supplied SIBERIA SOVIET == false
+assert supplied KAZAKHSTAN SOVIET == false
+assert supplied MONGOLIA SOVIET == false
+pass                                    # the Soviet Union has played: the card came from its own deck
+
+prompt                                  # Supply step: a Soviet Army in the expanses is about to go
+assert promptfaction == SOVIET
+select Endless Expanses
+
+prompt                                  # the Soviet Discard step
+assert occupant SIBERIA == SOVIET
+assert occupant KAZAKHSTAN == SOVIET
+assert occupant MONGOLIA == none
+api removeunit --faction GERMANY --unit 31 --reason ELIMINATE
+assert occupant SIBERIA == SOVIET       # still protected this turn
+assert errors == 0
+quit
