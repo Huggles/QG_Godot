@@ -47,7 +47,8 @@ its own branch from `master` (`feature/total-war-m4`, …). The old milestone br
   played and simmed. Replace with the real counts with the card content.
 - **The Air step prompt opens on public facts only** (a hand with cards, and a supplied Air Force or a
   space to deploy one), never on whether the hand holds an Air Power card, so it often offers only
-  Pass. A client-side auto-pass (like `UNTIL_ACTIVATABLE`) would spare humans the click; not built.
+  Pass. Built: the player's client answers a Pass-only prompt while the reaction toggle skips
+  (`AirStepRequestHandler.Handle`), and unavailable actions are drawn greyed out.
 - **Total War saves from before M3** don't line up: the AIR step shifts the stored step counter. Base
   saves are unaffected.
 - **China card routing.** A Soviet card acting for China should prompt the Soviet player. Today every
