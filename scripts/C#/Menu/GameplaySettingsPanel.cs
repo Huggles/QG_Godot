@@ -2,7 +2,8 @@ using Godot;
 
 /// <summary>
 /// The Gameplay tab of <see cref="SettingsDialog"/>: presentation speed, debug verbosity, whether
-/// display-only modals dismiss themselves, and whether the hand-play fan shows the active table cards.
+/// display-only modals dismiss themselves, whether the hand-play fan shows the active table cards, and
+/// whether empty reaction windows are answered for you (the default of each faction's reaction toggle).
 ///
 /// These three used to be loose <c>PanelContainer</c>s pinned to the top-left of
 /// <c>user_interface.tscn</c> — permanent HUD clutter for settings that get changed once and then
@@ -19,6 +20,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
     private OptionButton _debugLevel;
     private CheckButton  _autoDismiss;
     private CheckButton  _activeCards;
+    private CheckButton  _reactionPrompts;
     private OptionButton _chatHide;
 
     public override void _Ready() => Guard.Try(ReadyInternal, "GameplaySettingsPanel._Ready");
@@ -29,6 +31,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _debugLevel  = GetNode<OptionButton>("%DebugLevelOption");
         _autoDismiss = GetNode<CheckButton>("%AutoDismissToggle");
         _activeCards = GetNode<CheckButton>("%ActiveCardsToggle");
+        _reactionPrompts = GetNode<CheckButton>("%ReactionPromptsToggle");
         _chatHide    = GetNode<OptionButton>("%ChatHideOption");
 
         // The picker entries are authored in the scene, and their *ids* — not their row order — are
@@ -43,6 +46,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _debugLevel.Selected       = (int)settings.DebugLevel;
         _autoDismiss.ButtonPressed = settings.AutoDismissModal;
         _activeCards.ButtonPressed = settings.ShowActiveCardsInFan;
+        _reactionPrompts.ButtonPressed = settings.AskOnlyWhenICanReact;
         // Ids are the seconds themselves (0, 5, 10), so this one is looked up by id, not by row.
         _chatHide.Selected         = _chatHide.GetItemIndex(settings.ChatHideSeconds);
 
@@ -56,6 +60,9 @@ public partial class GameplaySettingsPanel : VBoxContainer
             GameSettings.Instance.SetChatHideSeconds(_chatHide.GetItemId((int)index));
         _autoDismiss.Toggled += value =>
             GameSettings.Instance.SetAutoDismissModal(value);
+        // The starting point of every faction's reaction toggle; a choice already made in a game stands.
+        _reactionPrompts.Toggled += value =>
+            GameSettings.Instance.SetAskOnlyWhenICanReact(value);
         _activeCards.Toggled += value =>
         {
             GameSettings.Instance.SetShowActiveCardsInFan(value);

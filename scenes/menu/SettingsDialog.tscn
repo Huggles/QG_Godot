@@ -269,10 +269,31 @@ theme_override_font_sizes/font_size = 18
 text = "How long the chat stays on screen after a player message or once the mouse leaves it."
 autowrap_mode = 3
 
-[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="8" unique_id=1904471010]
+[node name="ReactionPromptsRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="8" unique_id=1904471023]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ReactionPromptsLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ReactionPromptsRow" index="0" unique_id=1904471024]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Only Ask When I Can React"
+
+[node name="ReactionPromptsToggle" type="CheckButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ReactionPromptsRow" index="1" unique_id=1904471025]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="9" unique_id=1904471011]
+[node name="ReactionPromptsHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="9" unique_id=1904471026]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "A reaction window with nothing you can play is answered for you after a moment, so other players cannot tell. The toggle in each faction's info row still changes it for one game."
+autowrap_mode = 3
+
+[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="10" unique_id=1904471010]
+layout_mode = 2
+
+[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="11" unique_id=1904471011]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -293,7 +314,7 @@ popup/item_0/id = 0
 popup/item_1/text = "Finest"
 popup/item_1/id = 1
 
-[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="10" unique_id=1904471014]
+[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="12" unique_id=1904471014]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18

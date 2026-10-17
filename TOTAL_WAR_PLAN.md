@@ -257,6 +257,23 @@ US 5/6/3, France 3/2/1, China 2/0/1.
 ## Remaining milestones (each gets its own go-ahead)
 
 ### M4 — Bolster cards
+**Built so far (the engine core):**
+- `UseBolsterChangeEvent`: `CardPlayRound.DoCard` introduces a Bolster in hand with it instead of
+  `PlayCardChangeEvent`. It discards the card, turns it face up, counts its activation this turn and never
+  calls `CountPlay`. Shown once: a step resumed from the discard pile gets `ActivateReactionChangeEvent`.
+- A hand Bolster is used on its own `CardTriggers()` (`CardLogic.ConditionsOn`), may be activated
+  (`CanBeActivated`), and is tagged for the block and after-reaction windows like a table card
+  (`GameStateCalculator.IsReactionCard`). It is never offered as the turn's play; a "beginning of your Play
+  step" Bolster is offered in the play prompt as a free activation (`BolsterCardLogic.IsFreePlayStepActivation`).
+- Always-ask cover: a Bolster in hand counts as a hidden card (`HasHiddenResponseCards`,
+  `IsPubliclyVisibleTableCard`). In TW sims this added about 5% prompts.
+- **Default reaction setting (decided):** "Only Ask When I Can React" in Settings → Gameplay, on by default.
+  It is where each faction's info-row toggle starts and falls back to (`ReactionSkipPreference`); an explicit
+  "always ask" is stored. An auto-passed window waits 1–2 s at random (`InputRequest.AutoPassDelay`) so it
+  looks like a player passing. Never applied in a CLI run.
+- First card: Admiral Graf Spee, on `Scenario_Debug_TotalWarBolsters`; `tests/qgc/tw_bolster_graf_spee.qgc`.
+- Not yet: type-only costs, step-boundary windows, the "declares intention" trigger, bot pass chance (M6).
+
 Two kinds: **event-triggered** ("when you build a Navy…", "when the Axis declares…"), which fit the
 existing block and after-reaction windows; and **step-timed** ("at the beginning of your Play step",
 before/after a step), which have no window today. The engine removed its old START card round on

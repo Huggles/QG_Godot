@@ -35,31 +35,38 @@ public static class ReactionSkipPreference
     };
 
     /// <summary>
-    /// The faction's setting right now, or NONE if it was never armed or has since expired. Expired
-    /// entries are dropped on read rather than swept — there is no clearing hook to keep in step with
-    /// the turn loop, the same reasoning as the host's registries.
+    /// Where every faction starts, and falls back to once a choice expires: the player's saved "Only Ask
+    /// When I Can React" setting (UNTIL_ACTIVATABLE, on by default), else NONE. Always NONE in a CLI run,
+    /// so tests and sims keep seeing every prompt.
+    /// </summary>
+    private static ReactionSkipScope DefaultScope =>
+        !GameContext.IsCli && GameSettings.IsAskOnlyWhenICanReact ? ReactionSkipScope.UNTIL_ACTIVATABLE : ReactionSkipScope.NONE;
+
+    /// <summary>
+    /// The faction's setting right now, or <see cref="DefaultScope"/> if it was never chosen or has since
+    /// expired. Expired entries are dropped on read rather than swept — there is no clearing hook to keep in
+    /// step with the turn loop, the same reasoning as the host's registries.
     /// </summary>
     public static ReactionSkipScope ActiveScope(Faction faction)
     {
-        if (!Armings.TryGetValue(faction, out Armed armed)) return ReactionSkipScope.NONE;
+        if (!Armings.TryGetValue(faction, out Armed armed)) return DefaultScope;
 
         if (IsStillActive(faction, armed)) return armed.Scope;
 
         Armings.Remove(faction);
-        return ReactionSkipScope.NONE;
+        return DefaultScope;
     }
 
-    /// <summary>Arm (or clear, with NONE) a faction's setting and repaint anything showing it.</summary>
+    /// <summary>
+    /// Choose a faction's setting and repaint anything showing it. NONE is stored too: with the default
+    /// "only ask when I can react", an explicit "always ask" must not fall back to it.
+    /// </summary>
     public static void Set(Faction faction, ReactionSkipScope scope)
     {
-        if (scope == ReactionSkipScope.NONE)
-        {
-            Armings.Remove(faction);
-        }
-        else if (GameFlow.Instance is GameFlow gameFlow)
-        {
+        if (GameFlow.Instance is GameFlow gameFlow)
             Armings[faction] = new Armed(scope, gameFlow.GameTurn, gameFlow.TurnStep, gameFlow.Round);
-        }
+        else
+            Armings.Remove(faction);
 
         EventBus.Emit(EventBus.SignalName.ReactionSkipPreferenceChanged, (int)faction);
     }
@@ -101,8 +108,10 @@ public static class ReactionSkipPreference
                 return armed.Turn == gameFlow.GameTurn || gameFlow.CurrentFaction != faction;
 
             case ReactionSkipScope.UNTIL_ACTIVATABLE:
-                // A standing preference. It costs the player nothing to leave on — a window with real
-                // options still reaches them — so there is no window for it to expire at the end of.
+            case ReactionSkipScope.NONE:
+                // Standing preferences, chosen explicitly. UNTIL_ACTIVATABLE costs the player nothing to
+                // leave on — a window with real options still reaches them — and an explicit "always ask"
+                // stands until changed, so neither has a window to expire at the end of.
                 return true;
 
             default:

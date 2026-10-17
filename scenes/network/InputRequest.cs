@@ -655,6 +655,14 @@ public abstract partial class InputRequest
     }
 
     /// <summary>
+    /// How long an auto-passed window waits before answering: 1 to 2 seconds at random, so its quick "no" looks
+    /// like a player deciding and the "Waiting on X input…" line others see cannot tell the two apart. Local
+    /// randomness, never GameRandom: it must not draw from the replicated game stream.
+    /// </summary>
+    protected static Task AutoPassDelay() => Task.Delay(1000 + AutoPassJitter.Next(1001));
+    private static readonly Random AutoPassJitter = new();
+
+    /// <summary>
     /// The less silencing of two armed scopes, for a merged prompt whose factions armed different ones.
     /// The response carries one scope for the whole group (see <see cref="ReactionSkipScope"/>), so it
     /// has to be the one that takes the fewest windows away: a faction that asked for TURN_STEP must not
@@ -774,7 +782,7 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            if (TryAutoPassArmedReactionWindow()) return;
+            if (TryAutoPassArmedReactionWindow()) { await AutoPassDelay(); return; }
 
             // The host's list, not a local re-derivation — same rule as BlockReactionRequestHandler.
             //
@@ -1151,9 +1159,9 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
-            // Before the delay as well as before the UI — an auto-passed window should not stall the
-            // host for the prompt-pacing delay of a prompt nobody is going to see.
-            if (TryAutoPassArmedReactionWindow()) return;
+            // Before the UI, and in place of the prompt-pacing delay: an auto-passed window waits its own
+            // random AutoPassDelay instead, so it cannot be told from a player passing.
+            if (TryAutoPassArmedReactionWindow()) { await AutoPassDelay(); return; }
 
             await Task.Delay(GameSettings.DurationMedium);
             // Only the block-eligible cards the host sent — not every activatable card — may be chosen here.
