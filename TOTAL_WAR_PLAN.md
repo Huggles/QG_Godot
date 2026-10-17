@@ -269,8 +269,9 @@ US 5/6/3, France 3/2/1, China 2/0/1.
   `IsPubliclyVisibleTableCard`). In TW sims this added about 5% prompts.
 - **Default reaction setting (decided):** "Only Ask When I Can React" in Settings → Gameplay, on by default.
   It is where each faction's info-row toggle starts and falls back to (`ReactionSkipPreference`); an explicit
-  "always ask" is stored. An auto-passed window waits 1–2 s at random (`InputRequest.AutoPassDelay`) so it
-  looks like a player passing. Never applied in a CLI run.
+  "always ask" is stored. Never applied in a CLI run. An auto-passed window answers at once (decided): a
+  random 1–2 s wait to disguise it held up nearly every Total War action, since the other team almost always
+  holds a Bolster, and AI seats already answer empty windows instantly.
 - First card: Admiral Graf Spee, on `Scenario_Debug_TotalWarBolsters`; `tests/qgc/tw_bolster_graf_spee.qgc`.
 - Not yet: type-only costs, step-boundary windows, the "declares intention" trigger, bot pass chance (M6).
 

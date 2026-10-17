@@ -287,7 +287,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "A reaction window with nothing you can play is answered for you after a moment, so other players cannot tell. The toggle in each faction's info row still changes it for one game."
+text = "A reaction window with nothing you can play is answered for you, so it never stops the game. The toggle in each faction's info row still changes it for one game."
 autowrap_mode = 3
 
 [node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="10" unique_id=1904471010]
