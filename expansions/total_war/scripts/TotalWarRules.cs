@@ -15,5 +15,6 @@ public sealed class TotalWarRules : IExpansionRules
     {
         rules.AddTurnStep(TurnStep.AIR, after: TurnStep.PLAY_CARD, AirStep.Run,
             new TurnStepText("Air", "Deploy or marshal an Air Force, or gain air superiority.", Optional: true));
+        rules.ReallocateDiscardCost = 3;
     }
 }

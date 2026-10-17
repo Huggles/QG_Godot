@@ -322,8 +322,8 @@ Rule parameters on the `RuleSet`, supplied by `TotalWarRules`; core only reads t
   start-of-game draw, `Game/OpeningDiscard.cs`).
 - Discard step: no card discarded → the team loses 1 VP (`Steps/DiscardStepHandlerDefault.cs`, via
   `ScorePointsChangeEvent`).
-- Reallocate Resources costs 3: set `rules.ReallocateDiscardCost = 3` in `TotalWarRules.Configure` (the
-  seam exists since War Bonds/Victory Gardens; the base default stays 4).
+- Reallocate Resources costs 3: done (`rules.ReallocateDiscardCost = 3` in `TotalWarRules.Configure`;
+  the base default stays 4).
 - Deck overlay: done (`Add` since M3, `Remove` with the substitutes).
 
 ### M6 — Bots and sim
