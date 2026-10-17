@@ -207,12 +207,18 @@ public partial class FactionInfoRow : Control
 	{
 		DeckState deckState = DeckState.ForFaction(Faction);
 		List<int> playedCardIds = [.. deckState.StatusCardIds, .. deckState.ResponseCardIds];
-		List<PresentationItem> presentationItems = (List<PresentationItem>)PresentationItemCard.FromCardIds(playedCardIds, false);            
+		List<PresentationItem> presentationItems = playedCardIds
+			.Select(cardId => (PresentationItem)new PresentationItemCard(cardId, false) { DimCaption = IgnoredCaption(cardId) })
+			.ToList();
 		_ = ModalStack.Current.Show(
 			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Active Cards", presentationItems)
 				.WithDedupeKey($"played-cards:{Faction}"));
 	}
 	
+	/// <summary>"Ignored (Hobart's Funnies)" while a card in play ignores this one, else null: the table dims it.</summary>
+	private static string IgnoredCaption(int cardId) =>
+		BoardState.Live.IgnoredBy(CardState.ForId(cardId).CardLogic) is { } by ? $"Ignored ({by.CardData.Label})" : null;
+
 	private void OnDiscardDeckButtonPressed()
 	{   
 		List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardedCardIds, false);

@@ -223,6 +223,9 @@ public static class CliAssert
             // activated" (ActivatedInTurns): recycling a spent card back into play hides it again.
             case "cardrevealed": return ParseCard(arg1).IsRevealed ? "true" : "false";
 
+            // The card that ignores this one right now, or none: `assert ignored 332 == Hobart's Funnies`.
+            case "ignored": return BoardState.Live.IgnoredBy(ParseCard(arg1).CardLogic)?.CardData.Label ?? "none";
+
             default: return null;
         }
     }

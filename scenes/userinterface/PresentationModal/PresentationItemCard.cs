@@ -16,6 +16,10 @@ public partial class PresentationItemCard : PresentationItem
         }
     }
 
+    /// <summary>Set before the control loads: the card is drawn under the unavailable scrim with this line across it (an ignored Status card).</summary>
+    public string DimCaption { get; set; }
+    private Label _dimCaption;
+
     public PresentationItemCard(int cardId, bool selectable) : base(cardId, selectable)
     {
         this.cardId = cardId;
@@ -37,6 +41,18 @@ public partial class PresentationItemCard : PresentationItem
         _orderBadge.Position = new Vector2(8, 8);
         _orderBadge.ZIndex = 100;
         Control.AddChild(_orderBadge);
+        _dimCaption = new Label
+        {
+            Visible = false,
+            Position = new Vector2(0, CardSize.Y / 2 - 24),
+            Size = new Vector2(CardSize.X, 48),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            ZIndex = 100,
+            LabelSettings = new LabelSettings { FontSize = 18, OutlineSize = 6, OutlineColor = Colors.Black },
+        };
+        Control.AddChild(_dimCaption);
         return cardSceneInstance;
     }
     public override void LoadControl()
@@ -46,7 +62,13 @@ public partial class PresentationItemCard : PresentationItem
         CardSceneInstance.ShowCard(cardId);
         CardSceneInstance.SetClickable(Selectable);
         CardSceneInstance.TriggersEmphasis(false);
-        CardSceneInstance.Selected += (cardId) => { EmitSignal(SignalName.ItemClicked, Identifier); };       
+        CardSceneInstance.Selected += (cardId) => { EmitSignal(SignalName.ItemClicked, Identifier); };
+        if (DimCaption != null)
+        {
+            CardSceneInstance.SetAvailability(CardScene.CardAvailability.Unavailable);
+            _dimCaption.Text = DimCaption;
+            _dimCaption.Visible = true;
+        }
     }
 
     public static List<PresentationItem> FromCardIds(List<int> cardIds, bool selectable)

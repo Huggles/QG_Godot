@@ -34,7 +34,8 @@ public static class StepMutatorRunner
 
         // OrderBy is a stable sort, so an equal Order keeps registration order: scenario mutators
         // (registered during setup) ahead of card mutators, each group in the order it was added.
-        List<IStepMutator> due = ModifierRegistry.GetAll<IStepMutator>()
+        // Through the board, so a mutator an IStatusIgnoreModifier card ignores right now does not run.
+        List<IStepMutator> due = BoardState.Live.Modifiers<IStepMutator>()
             .Where(m => m.Step == step && m.Timing == timing && m.ShouldRun(activeFaction))
             .OrderBy(m => m.Order)
             .ToList();

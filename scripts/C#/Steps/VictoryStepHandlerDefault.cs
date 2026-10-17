@@ -70,7 +70,7 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
     }
     public void HandleStatusCardVictoryPoints(Faction scoringFaction, VPTurnSummary summary)
     {
-        foreach (IVPModifier modifier in ModifierRegistry.GetAll<IVPModifier>().Where(m => m.Faction == scoringFaction))
+        foreach (IVPModifier modifier in BoardState.Live.Modifiers<IVPModifier>().Where(m => m.Faction == scoringFaction))
         {
             summary.AddScore(modifier.AddVictoryPoints(BoardState.Live));
         }

@@ -31,6 +31,8 @@ public sealed partial class BoardState
     private readonly Dictionary<Faction, FactionRecord> _factions;
     private readonly FlowRecord _flow;
     private readonly List<IModifier> _modifiers;
+    /// <summary>A fork's IStatusIgnoreModifier count, the counterpart of ModifierRegistry.HasStatusIgnoreModifiers.</summary>
+    private int _statusIgnoreCount;
 
     public bool IsLive => _source != null;
 
@@ -43,6 +45,7 @@ public sealed partial class BoardState
     {
         _countries = countries; _units = units; _cards = cards; _straits = straits;
         _steps = steps; _factions = factions; _flow = flow; _modifiers = modifiers;
+        _statusIgnoreCount = modifiers.OfType<IStatusIgnoreModifier>().Count();
     }
 
     // ── Records ─────────────────────────────────────────────────────────────
@@ -82,19 +85,39 @@ public sealed partial class BoardState
     // ── Modifiers ───────────────────────────────────────────────────────────
     // Registration order is kept: discard modifiers clamp at zero between steps, so order can matter.
 
-    public IEnumerable<T> Modifiers<T>() where T : IModifier =>
+    /// <summary>The modifiers in effect: every registered one, less a card's that an IStatusIgnoreModifier card ignores right now.</summary>
+    public IEnumerable<T> Modifiers<T>() where T : IModifier
+    {
+        IEnumerable<T> registered = RegisteredModifiers<T>();
+        if (!HasStatusIgnoreModifiers) return registered;
+        return registered.Where(modifier => !(modifier is CardLogic card && IsIgnored(card)));
+    }
+
+    /// <summary>Every registered modifier, ignored or not: for the ignore check itself, and for cleanup.</summary>
+    public IEnumerable<T> RegisteredModifiers<T>() where T : IModifier =>
         _source != null ? ModifierRegistry.GetAll<T>() : _modifiers.OfType<T>();
+
+    private bool HasStatusIgnoreModifiers => _source != null ? ModifierRegistry.HasStatusIgnoreModifiers : _statusIgnoreCount > 0;
+
+    /// <summary>Whether a card in play counts for nothing right now (Hobart's Funnies: Axis Status cards during the UK turn).</summary>
+    public bool IsIgnored(CardLogic card) => IgnoredBy(card) != null;
+
+    /// <summary>The card that ignores <paramref name="card"/> right now, or null: what the table shows as the reason.</summary>
+    public CardLogic IgnoredBy(CardLogic card) => !HasStatusIgnoreModifiers ? null :
+        RegisteredModifiers<IStatusIgnoreModifier>().FirstOrDefault(m => !ReferenceEquals(m, card) && m.Ignores(this, card)) as CardLogic;
 
     public void RegisterModifier(IModifier modifier)
     {
         if (_source != null) { ModifierRegistry.Register(modifier); return; }
-        if (!_modifiers.Contains(modifier)) _modifiers.Add(modifier);
+        if (_modifiers.Contains(modifier)) return;
+        _modifiers.Add(modifier);
+        if (modifier is IStatusIgnoreModifier) _statusIgnoreCount++;
     }
 
     public void UnregisterModifier(IModifier modifier)
     {
         if (_source != null) ModifierRegistry.Unregister(modifier);
-        else _modifiers.Remove(modifier);
+        else if (_modifiers.Remove(modifier) && modifier is IStatusIgnoreModifier) _statusIgnoreCount--;
     }
 
     // ── Fork ────────────────────────────────────────────────────────────────

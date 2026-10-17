@@ -191,6 +191,9 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
             return false;
         if (card.IsBlocked)
             return false;
+        // Ignored right now (Hobart's Funnies: an Axis Status card during the UK turn): it answers nothing.
+        if (board.IsIgnored(this))
+            return false;
 
         // For an unplayed card TriggerConditionsMet resolves to _defaultPlayConditions, which is
         // the correct gate for a play.

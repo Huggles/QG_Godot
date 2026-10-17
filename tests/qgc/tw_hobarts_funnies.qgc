@@ -1,0 +1,52 @@
+#!args scenario=Scenario_Debug_TotalWarCards seed=42
+#
+# Hobart's Funnies (UK, Status): "Axis Status cards are ignored during the United Kingdom turn."
+# (IStatusIgnoreModifier: BoardState.Modifiers leaves an ignored card's modifiers out and CanBeActivated
+# refuses it.) Set up by injection on Germany's turn: Spanish Troops Seize Gibraltar (332, Italy),
+# Hobart's Funnies (256, UK) and Atlantic Wall (22, Germany) onto the tables; a German Army (2) into
+# Western Europe in place of the French one (56); a Land Battle (51) into the UK hand.
+#  - Germany's turn: Gibraltar holds the North Africa strait, so the UK cannot cross it.
+#  - The UK turn: both Axis Statuses are ignored. The strait opens for the UK, and the UK's battle on the
+#    German Army in Western Europe draws no Atlantic Wall (the UK keeps its deck).
+#  - Japan's turn: Gibraltar holds the strait again.
+#
+# Run:  tests/run-cli.sh tests/qgc/tw_hobarts_funnies.qgc
+
+prompt                                  # turn 1, Germany
+force playcard --card 332
+force playcard --card 256
+force playcard --card 22
+force removeunit --faction FRANCE --unit 56 --reason ELIMINATE
+force deployunit --faction GERMANY --country WESTERN_EUROPE
+force recyclecard --faction UNITED_KINGDOM --card 51 --destination Hand
+assert adjacent NORTH_SEA MEDITERRANEAN_SEA UNITED_KINGDOM == false
+assert ignored 332 == none
+pass                                    # Germany has played: Atlantic Wall came from its own deck
+select Pass                             # Germany's Air step
+prompt
+pass                                    # Germany's Discard step
+
+prompt                                  # turn 2, the United Kingdom
+assert faction == UNITED_KINGDOM
+assert ignored 332 == Hobart's Funnies
+assert ignored 22 == Hobart's Funnies
+assert ignored 256 == none
+assert adjacent NORTH_SEA MEDITERRANEAN_SEA UNITED_KINGDOM == true
+assert decksize UNITED_KINGDOM == 55
+answer id=51                            # Land Battle
+prompt
+select GERMANY ARMY in Western Europe
+prompt                                  # straight to the UK's Air step: no Atlantic Wall prompt for Germany
+assert promptfaction == UNITED_KINGDOM
+assert occupant WESTERN_EUROPE == none
+assert decksize UNITED_KINGDOM == 55    # Atlantic Wall would have taken the top 3
+select Pass                             # the UK's Air step
+prompt
+pass                                    # the UK's Discard step
+
+prompt                                  # turn 3, Japan
+assert faction == JAPAN
+assert ignored 332 == none
+assert adjacent NORTH_SEA MEDITERRANEAN_SEA UNITED_KINGDOM == false
+assert errors == 0
+quit
