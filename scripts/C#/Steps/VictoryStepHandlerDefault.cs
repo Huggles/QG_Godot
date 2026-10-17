@@ -42,10 +42,12 @@ public partial class VictoryStepHandlerDefault : IVictoryStepHandler
 
         // The minor factions this faction acts for score in its Victory step, each on its own summary
         // so the points land on the minor faction (and through it on the team). Skipped for one with no
-        // pieces left, which has nothing to score and would only add an empty line to the history.
+        // pieces left, which has nothing to score and would only add an empty line to the history, and
+        // for one whose own Home space an enemy Army holds, as the step itself is (GameFlow.VictoryPointStep).
         foreach (Faction minor in StaticGameData.MinorsOf(faction))
         {
             if (FactionState.ForEnum(minor).OccupiedCountryIds.Count == 0) continue;
+            if (BoardState.Live.IsHomeSpaceHeldByEnemy(minor)) continue;
 
             VPTurnSummary minorSummary = new VPTurnSummary(vpTurnSummary.TurnNumber, minor);
             ScoreSupplyCountryVPs(minor, minorSummary);

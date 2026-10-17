@@ -308,6 +308,14 @@ public sealed partial class BoardState
 
     public bool IsHomeSpace(Faction faction, CountryState country) => HomeSpaceOf(faction).Id == country.Id;
 
+    /// <summary>Whether an enemy Army stands on the faction's Home space, wherever a card has moved it: it then skips its Victory step. Ground units on land are Armies.</summary>
+    public bool IsHomeSpaceHeldByEnemy(Faction faction)
+    {
+        if (HomeSpaceOf(faction) is not { } home) return false;
+        FactionTeam holder = OccupyingTeam(home);
+        return holder != FactionTeam.NONE && holder != StaticGameData.FactionTeamForFaction(faction);
+    }
+
     /// <summary>
     /// Recruitable, and off the home space an adjacent supplied unit, and at sea a harbour. A faction may
     /// build where it already stands — see CountryState.CanBuild for why that is not excluded.

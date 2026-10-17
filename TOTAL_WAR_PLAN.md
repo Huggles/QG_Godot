@@ -52,8 +52,9 @@ its own branch from `master` (`feature/total-war-m4`, …). The old milestone br
   saves are unaffected.
 - **China card routing.** A Soviet card acting for China should prompt the Soviet player. Today every
   prompt for a minor faction goes to its patron (China → US). Handle with the card content.
-- **Victory skip.** The base engine never applies "skip the Victory step if an enemy Army holds your home
-  space", for any faction, so minor factions don't either. Fix it for everyone or not at all.
+- **Victory skip:** done, for everyone. `GameFlow.VictoryPointStep` skips the whole step (no mutators, no
+  "during your Victory step" cards, no minor scoring) while `BoardState.IsHomeSpaceHeldByEnemy`, which
+  reads the Home space after any card moves it. In the step, a minor whose own Home space is held is skipped.
 - **Air Forces in reserve** are not shown in the faction strip yet.
 - The CLI hangs instead of exiting when bootstrap fails (unknown `scenario=`, bad `expansions=`). Predates
   this work.

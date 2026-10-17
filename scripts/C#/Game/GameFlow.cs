@@ -880,6 +880,17 @@ public partial class GameFlow : SingletonNode<GameFlow>
 
     private async Task VictoryPointStep()
     {
+        // Skipped whole while an enemy Army holds the Home space: no step opens, so its mutators and
+        // "during your Victory step" cards do not run either, and its minor factions do not score.
+        if (BoardState.Live.IsHomeSpaceHeldByEnemy(CurrentFaction))
+        {
+            string home = BoardState.Live.HomeSpaceOf(CurrentFaction).StaticCountryData.Label;
+            await new ShowActionLabelPresentationEvent(CurrentFaction,
+                $"{CurrentFaction.WithPlayer()} skips its Victory step: an enemy Army holds {home}").Apply();
+            StartNextStep();
+            return;
+        }
+
         await BeginStep(TurnStep.VICTORY_POINT);
         await VictoryPointStepBody();
     }
