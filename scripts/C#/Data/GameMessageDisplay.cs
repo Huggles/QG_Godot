@@ -41,6 +41,7 @@ public static class GameMessageDisplay
         AirSuperiorityChangeEvent             => ContentPaths.Resolve(AssetRepository.AirForceSpriteAsset),
 
         PlayCardChangeEvent                   => IconPlayCard,
+        UseAirPowerChangeEvent                => IconPlayCard,
 
         DrawCardsChangeEvent                  => IconDraw,
         DrawCardByNameChangeEvent             => IconDraw,

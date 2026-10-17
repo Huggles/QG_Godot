@@ -42,6 +42,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(DeployAirForceChangeEventDto),   "DeployAirForce")]
 [JsonDerivedType(typeof(MoveAirForceChangeEventDto),     "MoveAirForce")]
 [JsonDerivedType(typeof(AirSuperiorityChangeEventDto),   "AirSuperiority")]
+[JsonDerivedType(typeof(UseAirPowerChangeEventDto),      "UseAirPower")]
 // ── Derived-state delivery ───────────────────────────────────────────────────
 [JsonDerivedType(typeof(RecalculateTagsMessageDto),      "RecalculateTags")]
 // ── Presentation only (PresentationEvent) ────────────────────────────────────

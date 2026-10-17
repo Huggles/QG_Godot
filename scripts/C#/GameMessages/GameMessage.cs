@@ -185,6 +185,7 @@ public abstract partial class GameMessage : GodotObject
             DeployAirForceChangeEventDto d      => new DeployAirForceChangeEvent(d.TriggeringFaction, d.CountryId),
             MoveAirForceChangeEventDto d        => new MoveAirForceChangeEvent(d.TriggeringFaction, d.UnitId, d.FromCountryId, d.ToCountryId, d.Reason),
             AirSuperiorityChangeEventDto d      => new AirSuperiorityChangeEvent(d.TriggeringFaction, d.CountryId),
+            UseAirPowerChangeEventDto d         => new UseAirPowerChangeEvent(d.SourceCardId),
 
             // ── Derived-state delivery ───────────────────────────────────────
             RecalculateTagsMessageDto d     => new RecalculateTagsMessage(d.Snapshot),

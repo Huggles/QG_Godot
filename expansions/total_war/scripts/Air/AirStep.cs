@@ -106,7 +106,7 @@ public static class AirStep
         int country = await PickCountry(faction, BoardState.Live.AirDeployTargets(faction));
         if (country < 0) return false;
 
-        await Discard(faction, card);
+        await UseAirPower(card);
         await CardPlayPool.DoChangeEvent(new DeployAirForceChangeEvent(faction, country));
         return true;
     }
@@ -136,7 +136,7 @@ public static class AirStep
         int target = await PickUnit(faction, enemies);
         if (enemies.Count > 0 && target < 0) return false;
 
-        await Discard(faction, card);
+        await UseAirPower(card);
         ChangeEvent action = target < 0
             ? new AirSuperiorityChangeEvent(faction, country)
             : new RemoveUnitChangeEvent(faction, target, UnitRemovalReason.AIR_SUPERIORITY);
@@ -214,9 +214,12 @@ public static class AirStep
         }
     }
 
-    /// <summary>The action's cost. Not a trigger, like a Discard-step discard.</summary>
+    /// <summary>Marshal's cost: any card, discarded face down. Not a trigger, like a Discard-step discard.</summary>
     private static Task Discard(Faction faction, int cardId) =>
         CardPlayPool.DoChangeEvent(new DiscardHandCardsChangeEvent(faction, faction, new List<int> { cardId }) { IsTrigger = false });
+
+    /// <summary>Deploy's and Air Superiority's cost: the Air Power card, shown to everyone as it is discarded.</summary>
+    private static Task UseAirPower(int cardId) => CardPlayPool.DoChangeEvent(new UseAirPowerChangeEvent(cardId));
 
     private static List<int> AirPowerCards(Faction faction) => DeckState.ForFaction(faction).HandCardIds
         .Where(id => CardState.ForId(id).CardData.CardType == CardType.AIR_POWER)
