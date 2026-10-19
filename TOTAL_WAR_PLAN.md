@@ -123,7 +123,8 @@ scripts/C#/Air/AirForces.cs           Air Defense, Air Attack, Reposition
 - Saves store `Expansions`; the load screen and CLI refuse a save whose expansions aren't available.
 - Skirmish shows an `ExpansionToggles` checkbox per installed expansion. A multiplayer host picks them in
   `HostOptionsDialog`, before the lobby exists (a restore shows the save's, locked); the lobby only
-  displays them and offers just the scenarios they allow. Joiners send `RejoinService.ReportExpansions`
+  displays them, and has no scenario picker (`GameManager.MultiplayerScenario`: the standard scenario,
+  or a `scenario=` launch argument's). Joiners send `RejoinService.ReportExpansions`
   before `Hello`, and the host refuses one that can't play them. The Steam lobby publishes them, so a
   friend's game list shows "Needs DLC". The host also can't start while a connected player lacks one.
 

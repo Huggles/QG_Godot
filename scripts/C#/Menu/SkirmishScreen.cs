@@ -124,17 +124,16 @@ public partial class SkirmishScreen : Control
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 
-		// Tutorials are kept, unlike the lobby's picker: this is the only route to one in the GUI. A
-		// scripted scenario locks the seat grid instead — see _scriptedScenario.
-		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios, includeTutorials: true);
+		// Tutorials are included: this is the only route to one in the GUI. A scripted scenario locks the
+		// seat grid instead — see _scriptedScenario.
+		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios);
 
 		if (gameManager.SelectedScenario != null)
 		{
 			// A selection this picker cannot show is a real case now that it filters debug scenarios in
-			// a release build: the static can still be pointing at one a client picked up from a debug
-			// host in the lobby. Falling back in the WIDGET alone would leave the two disagreeing and
-			// Start would play the scenario nobody was shown, so the static is moved too — the same
-			// fallback, and for the same reason, as MultiplayerLobby's.
+			// a release build: the lobby can leave the static on one named by a scenario= launch argument.
+			// Falling back in the WIDGET alone would leave the two disagreeing and Start would play the
+			// scenario nobody was shown, so the static is moved too.
 			bool shown = MenuScenarioPicker.SelectByPath(
 				_scenarioPicker, gameManager.AvailableScenarios, gameManager.SelectedScenario.Path);
 

@@ -289,7 +289,7 @@ public partial class MainMenu : Control
 	private async Task StartSteamHostAsync(HostOptionsDialog.Result choice)
 	{
 		long lobbyId = await HostLaunch.CreateSteamLobbyAsync(
-			this, choice, GameManager.Instance?.SelectedScenario?.Title);
+			this, choice, GameManager.Instance?.MultiplayerScenario()?.Title);
 
 		if (!IsInstanceValid(this) || lobbyId == 0) return;   // the helper has already told the player
 

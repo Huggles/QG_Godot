@@ -4,22 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_description"]
-content_margin_left = 10.0
-content_margin_top = 10.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
-bg_color = Color(0, 0, 0, 0.65)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.5, 0.5, 0.5, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
 [node name="GameRoot" type="Node" unique_id=470098949]
 
 [node name="MultiplayerLobby" type="Control" parent="." unique_id=2064669811]
@@ -86,23 +70,7 @@ theme_override_constants/separation = 8
 [node name="ScenarioLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=2132674987]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Scenario"
-
-[node name="ScenarioOptionButton" type="OptionButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=749994739]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="DescriptionPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=1996894434]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_description")
-
-[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer/DescriptionPanel" unique_id=1330345905]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-bbcode_enabled = true
-text = "Select a scenario to preview details."
+text = "Game options"
 
 [node name="SeedRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ScenarioPanel/VBoxContainer" unique_id=65703041]
 layout_mode = 2

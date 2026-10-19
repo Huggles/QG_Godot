@@ -211,11 +211,30 @@ public partial class GameManager : Node
             LoadScenariosFrom($"{expansion.ResFolder}data/scenarios/", required: false);
 
         AvailableScenarios = AvailableScenarios.OrderBy(s => s.Name).ToList();
-        SelectedScenario = AvailableScenarios.FirstOrDefault(s => s.Name.Equals("Scenario_Basic", StringComparison.OrdinalIgnoreCase))
-                           ?? AvailableScenarios.FirstOrDefault();
+        SelectedScenario = FindScenario(StandardScenarioName) ?? AvailableScenarios.FirstOrDefault();
 
         if (SelectedScenario != null)
             PendingScenarioPath = SelectedScenario.Path;
+    }
+
+    /// <summary>The scenario selected at boot, and the one every multiplayer game is played on.</summary>
+    public const string StandardScenarioName = "Scenario_Basic";
+
+    /// <summary>A loaded scenario by file name (e.g. Scenario_Basic) or res:// path; null when there is none.</summary>
+    public ScenarioInfo FindScenario(string nameOrPath) => AvailableScenarios.FirstOrDefault(
+        s => s.Name.Equals(nameOrPath, StringComparison.OrdinalIgnoreCase) || s.Path == nameOrPath);
+
+    /// <summary>
+    /// What a new multiplayer game is played on: the standard scenario, unless a <c>scenario=</c> launch
+    /// argument names another. The lobby has no picker. A name no loaded scenario has is logged and ignored.
+    /// </summary>
+    public ScenarioInfo MultiplayerScenario()
+    {
+        string requested = CliArgs.Get("scenario");
+        ScenarioInfo match = string.IsNullOrEmpty(requested) ? null : FindScenario(requested);
+        if (match == null && !string.IsNullOrEmpty(requested))
+            DebugUtilities.PrintPeerError($"Unknown scenario '{requested}', playing {StandardScenarioName}. Available: {string.Join(", ", AvailableScenarios.Select(s => s.Name))}");
+        return match ?? FindScenario(StandardScenarioName) ?? AvailableScenarios.FirstOrDefault();
     }
 
     /// <summary>Add every scenario file in <paramref name="directory"/>. A missing folder is an error only for the base game's.</summary>

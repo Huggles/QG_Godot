@@ -106,14 +106,14 @@ public partial class HostOptionsDialog : MenuModal
 	}
 
 	/// <summary>
-	/// One checkbox per installed expansion, ticked by default when the selected scenario asks for it.
+	/// One checkbox per installed expansion, ticked by default when the game's scenario asks for it.
 	/// Hidden on an install without expansions; locked to the save's when restoring.
 	/// </summary>
 	private void SetUpExpansions()
 	{
 		GetNode<Control>("%ExpansionOptions").Visible = ExpansionRegistry.All.Count > 0;
 		_expansionToggles = new ExpansionToggles(GetNode<CheckBox>("%ExpansionTemplate"));
-		_expansionToggles.Set(_fixedExpansions ?? GameManager.Instance?.SelectedScenario?.Expansions);
+		_expansionToggles.Set(_fixedExpansions ?? GameManager.Instance?.MultiplayerScenario()?.Expansions);
 		if (_fixedExpansions == null) return;
 
 		_expansionToggles.SetEditable(false);

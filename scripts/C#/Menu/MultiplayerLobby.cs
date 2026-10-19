@@ -24,8 +24,6 @@ public partial class MultiplayerLobby : Control
 	/// <summary>Authored hidden in the .tscn: only a Steam host ever has anyone to invite.</summary>
 	private Button        _inviteButton;
 	private Label         _statusLabel;
-	private OptionButton  _scenarioPicker;
-	private RichTextLabel _scenarioDescriptionLabel;
 	private LineEdit      _seedInput;
 	private Button        _randomizeSeedButton;
 	private CheckBox      _openingDiscardCheckBox;
@@ -103,6 +101,9 @@ public partial class MultiplayerLobby : Control
 	/// </summary>
 	private List<string> _sessionExpansions = new();
 
+	/// <summary>An auto-start is waiting for expansion reports; see <see cref="AutoStart"/>.</summary>
+	private bool _autoStartPending;
+
 	/// <summary>
 	/// Host-side: peerId → the expansions that peer's install can play, as it reported them. Every peer
 	/// builds the game itself, so an expansion can only be enabled when every connected peer has it.
@@ -135,8 +136,6 @@ public partial class MultiplayerLobby : Control
 		_startGameButton     = GetNode<Button>("%StartGameButton");
 		_inviteButton        = GetNode<Button>("%InviteButton");
 		_statusLabel         = GetNode<Label>("%StatusLabel");
-		_scenarioPicker      = GetNode<OptionButton>("%ScenarioOptionButton");
-		_scenarioDescriptionLabel = GetNode<RichTextLabel>("%ScenarioDescriptionLabel");
 		_seedInput           = GetNode<LineEdit>("%SeedInput");
 		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
 		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
@@ -162,30 +161,15 @@ public partial class MultiplayerLobby : Control
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 
-		// Unfiltered by expansions until this peer turns out to be the host (EnterHostUiState): a client's
-		// picker only shows the host's choice, and must be able to show any of them.
-		FillScenarioPicker(gameManager, expansions: null);
-
-		// Restoring: the scenario came with the save, so nothing is resolved against the local list —
-		// the file may have been renamed, edited or deleted since. Show its title as a one-off entry and
-		// let the picker stay locked.
-		if (_restoreSave != null)
-		{
-			_scenarioPicker.Clear();
-			// id -1: this item resolves against no local scenario, so ScenarioIndexAt answers -1 and the
-			// handlers return early. Defensive — the picker is Disabled on this path — but it keeps the
-			// invariant "an item's id is its AvailableScenarios index" true with no exceptions.
-			_scenarioPicker.AddItem(_restoreSave.ScenarioTitle ?? "Saved scenario", -1);
-			_scenarioPicker.Selected = 0;
-			UpdateScenarioDescription("This scenario is stored inside the save and cannot be changed.");
-		}
-
-		_scenarioPicker.Disabled = true;
-		_scenarioPicker.ItemSelected += OnScenarioSelected;
+		// No scenario picker: a new game is the standard scenario, or a scenario= launch argument's. Only
+		// the host's matters (it alone reads the scenario). Not when restoring: the save carries its own,
+		// and SetSelectedScenarioByIndex would drop the PendingScenarioJson the restore still needs.
+		if (_restoreSave == null && gameManager.MultiplayerScenario() is { } scenario)
+			gameManager.SetSelectedScenarioByIndex(gameManager.AvailableScenarios.IndexOf(scenario));
 
 		// Only the host's seed is ever used (MultiplayerSession.StartNew reads it on the server and
-		// RPCs the value to every peer), so the box is locked alongside the scenario picker until
-		// this peer turns out to be the host. Clients still see the field, greyed out.
+		// RPCs the value to every peer), so the box is locked until this peer turns out to be the
+		// host. Clients still see the field, greyed out.
 		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
 
 		// AFTER Bind, which overwrites the field with a freshly rolled seed. A restore must run on the
@@ -195,7 +179,7 @@ public partial class MultiplayerLobby : Control
 
 		SetSeedFieldEnabled(false);
 
-		// Same story again: host-only, and its starting value is whatever the selected scenario says.
+		// Same story again: host-only, and its starting value is whatever the scenario says.
 		// Set before subscribing, so seeding the box does not look like the host toggling it.
 		_openingDiscardCheckBox.ButtonPressed = _restoreSave?.OpeningDiscard
 			?? gameManager.SelectedScenario?.OpeningDiscard ?? true;
@@ -282,46 +266,6 @@ public partial class MultiplayerLobby : Control
 			long lobbyId = MainMenu.PendingSteamLobbyId;
 			MainMenu.ClearLobbyIntent();
 			StartSteamHost(lobbyId);
-		}
-	}
-
-	/// <summary>
-	/// Fill the scenario picker and point it at the selected scenario. <paramref name="expansions"/>, when
-	/// given, hides every scenario needing another expansion — the host's lobby cannot switch one on.
-	/// </summary>
-	private void FillScenarioPicker(GameManager gameManager, IReadOnlyCollection<string> expansions)
-	{
-		// Tutorials are excluded here and nowhere else: a tutorial drives five factions from a script,
-		// and TutorialRuntime refuses to start one with peers attached, so offering it in a lobby can
-		// only produce a game nobody chose to play that way. The Skirmish screen keeps them. Debug
-		// scenarios are dropped from both pickers in a release build — Populate decides that itself.
-		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios, includeTutorials: false, expansions);
-
-		if (gameManager.SelectedScenario != null)
-		{
-			// A selection this picker cannot show is a real case now that it filters: the player may
-			// have chosen a tutorial on the Skirmish screen and come here instead, leaving the static
-			// pointing at something with no item. Falling back only in the WIDGET would leave the two
-			// disagreeing and silently start the tutorial scenario, so the fallback is pushed into the
-			// static as well.
-			//
-			// Not while restoring: that branch below replaces the picker wholesale with the save's own
-			// scenario, and SetSelectedScenarioByIndex would also drop PendingScenarioJson, which the
-			// restore still needs.
-			bool shown = MenuScenarioPicker.SelectByPath(
-				_scenarioPicker, gameManager.AvailableScenarios, gameManager.SelectedScenario.Path);
-
-			if (!shown && _restoreSave == null && _scenarioPicker.ItemCount > 0)
-			{
-				_scenarioPicker.Selected = 0;
-				gameManager.SetSelectedScenarioByIndex(MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, 0));
-			}
-
-			UpdateScenarioDescription(gameManager.SelectedScenario.Description);
-		}
-		else
-		{
-			UpdateScenarioDescription(MenuScenarioPicker.NoScenariosMessage);
 		}
 	}
 
@@ -556,7 +500,7 @@ public partial class MultiplayerLobby : Control
 	/// <summary>Shared by both host paths, so the ENet flow keeps behaving exactly as it did.</summary>
 	/// <summary>
 	/// Both host paths converge here, so it is the only place the host-editable controls need gating.
-	/// When a save is being restored all three of them come from the save and stay locked.
+	/// When a save is being restored both of them come from the save and stay locked.
 	/// </summary>
 	private void EnterHostUiState()
 	{
@@ -565,7 +509,6 @@ public partial class MultiplayerLobby : Control
 		_startGameButton.Disabled = true; // unlocks once all 6 factions are assigned
 
 		bool restoring = _restoreSave != null;
-		_scenarioPicker.Disabled  = restoring;
 		SetSeedFieldEnabled(!restoring);
 		_openingDiscardCheckBox.Disabled = restoring;
 
@@ -574,10 +517,8 @@ public partial class MultiplayerLobby : Control
 
 		if (!restoring)
 		{
-			// The selection may fall back to a scenario that fits the expansions; its opening discard goes with it.
-			GameManager gameManager = GetNode<GameManager>("/root/GameManager");
-			FillScenarioPicker(gameManager, _sessionExpansions);
-			SetOpeningDiscard(gameManager.SelectedScenario?.OpeningDiscard ?? true);
+			// Logged because the lobby no longer shows it.
+			DebugUtilities.PrintPeer($"Lobby: new game on {GetNode<GameManager>("/root/GameManager").SelectedScenario?.Name}, expansions: {ExpansionIds.Describe(_sessionExpansions)}");
 			return;
 		}
 
@@ -1255,13 +1196,8 @@ public partial class MultiplayerLobby : Control
 			RpcId((int)peerId, nameof(AssignPeerIdentity), (int)peerId);
 			RpcId((int)peerId, nameof(SyncPlayerList),   GetPlayerListData());
 			RpcId((int)peerId, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
-			// Not while restoring: SyncScenarioSelection sends a PATH that the client looks up in its own
-			// AvailableScenarios, and a save carries its scenario rather than pointing at one — the file may
-			// not be there at all. The banner tells them what is being restored instead. Harmless either
-			// way: the scenario is read host-side only.
-			if (_restoreSave == null)
-				RpcId((int)peerId, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
-			else
+			// No scenario is synced: there is no picker, and only the host reads it.
+			if (_restoreSave != null)
 				RpcId((int)peerId, nameof(SyncRestoreBanner), RestoreBannerText());
 
 			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
@@ -1282,7 +1218,7 @@ public partial class MultiplayerLobby : Control
 				{
 					AutoAssignDedicatedFactions();
 					BroadcastFactionState();
-					OnStartGameButtonPressed();
+					AutoStart();
 				}
 			}
 			else if (GameSettings.IsDebugMultiplayer && !_lobbyOnlyMode)
@@ -1290,9 +1226,19 @@ public partial class MultiplayerLobby : Control
 				// F6 debug auto-start: assign default factions, sync to all, then start.
 				AutoAssignDebugFactions((int)peerId);
 				BroadcastFactionState();
-				OnStartGameButtonPressed();
+				AutoStart();
 			}
 		}
+	}
+
+	/// <summary>
+	/// The dedicated-server and F6 auto-starts: start now, or once every peer has reported its
+	/// expansions. They fire on connect, before a peer could report, and a game with expansions needs it.
+	/// </summary>
+	private void AutoStart()
+	{
+		_autoStartPending = !EveryoneHasExpansions(out _);
+		if (!_autoStartPending) OnStartGameButtonPressed();
 	}
 
 	/// <summary>
@@ -1360,6 +1306,7 @@ public partial class MultiplayerLobby : Control
 				.ToList();
 			foreach (var f in released) _assignments.Remove(f);
 			_randomClaims.Remove((int)peerId);
+			_autoStartPending = false; // its factions are gone; the next connect re-runs the auto-start
 
 			// Fold their seat back onto the host, so the lobby stays startable when someone drops.
 			// Broadcasts on its own when restoring; otherwise the call below does it.
@@ -1575,10 +1522,7 @@ public partial class MultiplayerLobby : Control
 		RpcId(requester, nameof(AssignPeerIdentity), requester);
 		RpcId(requester, nameof(SyncPlayerList),   GetPlayerListData());
 		RpcId(requester, nameof(SyncFactionState), SerialiseAssignments(), SerialiseRandomClaims());
-		// See OnPeerConnected: a restored game syncs its banner rather than a scenario path.
-		if (_restoreSave == null)
-			RpcId(requester, nameof(SyncScenarioSelection), GetNode<GameManager>("/root/GameManager").SelectedScenario?.Path ?? string.Empty);
-		else
+		if (_restoreSave != null)
 			RpcId(requester, nameof(SyncRestoreBanner), RestoreBannerText());
 
 		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
@@ -1624,25 +1568,6 @@ public partial class MultiplayerLobby : Control
 		}
 
 		RefreshAllButtons();
-	}
-
-	private void OnScenarioSelected(long selectedIndex)
-	{
-		if (!_isHost) return;
-
-		var gameManager = GetNode<GameManager>("/root/GameManager");
-		// The item's id, not its position: the picker filters tutorials out, so the two differ.
-		int index = MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, (int)selectedIndex);
-		if (index < 0 || index >= gameManager.AvailableScenarios.Count) return;
-
-		gameManager.SetSelectedScenarioByIndex(index);
-		UpdateScenarioDescription(gameManager.AvailableScenarios[index].Description);
-		Rpc(nameof(SyncScenarioSelection), gameManager.SelectedScenario.Path);
-
-		// A new scenario resets the toggle to that scenario's own answer — SetSelectedScenarioByIndex
-		// has just dropped the override that went with the previous one.
-		SetOpeningDiscard(gameManager.AvailableScenarios[index].OpeningDiscard);
-		Rpc(nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 	}
 
 	/// <summary>
@@ -1696,13 +1621,13 @@ public partial class MultiplayerLobby : Control
 
 		_peerExpansions[Multiplayer.GetRemoteSenderId()] = ExpansionIds.FromWire(wire);
 		UpdateStartGameButton();
+		if (_autoStartPending) AutoStart();
 	}
 
 	/// <summary>
 	/// Host-side start gate: every connected peer, the host included, can play every chosen expansion.
 	/// RejoinService.Hello already turns away a peer that cannot, but only once it says hello; until then
-	/// its row is here. The base game needs no report, which keeps the dedicated-server and debug
-	/// auto-starts (which fire the moment a peer connects, before it could report) working as before.
+	/// its row is here. The base game needs no report, so <see cref="AutoStart"/> only waits with expansions.
 	/// </summary>
 	private bool EveryoneHasExpansions(out string problem)
 	{
@@ -1737,38 +1662,11 @@ public partial class MultiplayerLobby : Control
 		return true;
 	}
 
-	/// <summary>Seed entry follows the scenario picker: host-editable, read-only for everyone else.</summary>
+	/// <summary>Seed entry: host-editable, read-only for everyone else.</summary>
 	private void SetSeedFieldEnabled(bool enabled)
 	{
 		_seedInput.Editable = enabled;
 		_randomizeSeedButton.Disabled = !enabled;
-	}
-
-	private void UpdateScenarioDescription(string description)
-	{
-		MenuScenarioPicker.ShowDescription(_scenarioDescriptionLabel, description);
-	}
-
-	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true)]
-	private void SyncScenarioSelection(string selectedScenarioPath)
-	{
-		if (string.IsNullOrEmpty(selectedScenarioPath))
-			return;
-
-		var gameManager = GetNode<GameManager>("/root/GameManager");
-		int selectedIndex = gameManager.AvailableScenarios.FindIndex(s => s.Path == selectedScenarioPath);
-		if (selectedIndex < 0) return;
-
-		gameManager.SetSelectedScenarioByIndex(selectedIndex);
-		// By path rather than by assigning the index: this picker filters, so the scenario's index in
-		// AvailableScenarios is not its position in the list. A host cannot send a tutorial here (its
-		// own picker has none), so a miss means either a scenario this client does not have, or — on a
-		// release build — a debug one its picker hides while the host's shows it. Either way the
-		// selection above has already landed against the FULL list, so the game still starts on the
-		// host's scenario; only the widget is left alone rather than pointed at something arbitrary,
-		// and the description below still names what is about to be played.
-		MenuScenarioPicker.SelectByPath(_scenarioPicker, gameManager.AvailableScenarios, selectedScenarioPath);
-		UpdateScenarioDescription(gameManager.SelectedScenario.Description);
 	}
 
 	private void UpdateStatusLabel(string msg)
