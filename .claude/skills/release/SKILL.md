@@ -24,7 +24,7 @@ Stop and tell the user what is missing if any of these fail:
 `.claude/skills/release/scripts/bump-version.sh` prints the new version, `X.Y.Z`. It reads `config/version` in `project.godot` and writes the new version there and into the Windows preset. Leave the files uncommitted for now.
 
 ## 3. Export
-`.claude/skills/release/scripts/export.sh X.Y.Z`. This takes about a minute and empties `Builds/windows/` and `Builds/macOS/` first. It fails loudly if an exe, pck, .NET data folder or release GodotSteam library is missing, if a debug GodotSteam library slipped in, or if the macOS bundle's version is not `X.Y.Z`.
+`.claude/skills/release/scripts/export.sh X.Y.Z`. This takes about a minute and empties `Builds/windows/`, `Builds/macOS/` and `Builds/dlc/` first. It also stages the Total War DLC's `TotalWar.dll` in `Builds/dlc/` for its depot (5159093, installed to `<install>/dlc/`). It fails loudly if an exe, pck, .NET data folder or release GodotSteam library is missing, if a debug GodotSteam library slipped in, if the macOS bundle's version is not `X.Y.Z`, or if `TotalWar.dll` is missing or stamped with another game version.
 The Windows exe is built without `rcedit`, so it has Godot's default icon and file details. That is expected.
 
 ## 4. Draft the release note

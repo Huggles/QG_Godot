@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Uploads Builds/windows and Builds/macOS to their depots as one Steam build, with steamcmd
+# Uploads Builds/windows, Builds/macOS and Builds/dlc (the Total War DLC) to their depots as one Steam build, with steamcmd
 # ($STEAMCMD, else ~/Steam/steamcmd.sh) and its cached login for $STEAM_BUILD_USER.
 # Usage: upload-steam.sh X.Y.Z [SET_LIVE]   SET_LIVE defaults to '' (upload only). Steam refuses SetLive "default"
 # from a build script for this app (the commit fails), so default goes live by hand in Steamworks.
