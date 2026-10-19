@@ -175,6 +175,7 @@ public abstract partial class GameMessage : GodotObject
             ScorePointsChangeEventDto d      => new ScorePointsChangeEvent(d.VPTurnSummary),
             SetStartingScoreChangeEventDto d => new SetStartingScoreChangeEvent(d.TriggeringFaction, d.Score),
             ChangeStepChangeEventDto d        => new ChangeStepChangeEvent(d.NewStep),
+            StepStartChangeEventDto d         => new StepStartChangeEvent(d.Step, d.TriggeringFaction),
             ChangeRoundChangeEventDto d       => new ChangeRoundChangeEvent(d.NewTurn),
             RecycleCardChangeEventDto d        => new RecycleCardChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardId, d.Destination),
             SpendPlayActionChangeEventDto d    => new SpendPlayActionChangeEvent(d.TriggeringFaction),

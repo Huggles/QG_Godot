@@ -333,10 +333,11 @@ Read the `card-reaction-system` and `reaction-specifics` skills first.
 
 ### M5 — Setup and step rule tweaks (Total War only)
 Rule parameters on the `RuleSet`, supplied by `TotalWarRules`; core only reads them.
-- Opening hand: draw 12, discard 5 (`StaticGameData.OpeningHandSize/OpeningDiscardCount`, `GameFlow`
-  start-of-game draw, `Game/OpeningDiscard.cs`).
-- Discard step: no card discarded → the team loses 1 VP (`Steps/DiscardStepHandlerDefault.cs`, via
-  `ScorePointsChangeEvent`).
+- Opening hand: draw 12, discard 5: done (`rules.OpeningHandSize/OpeningDiscardCount`, read by
+  `GameFlow.StartGame`; the base defaults stay 10 and 3 from `StaticGameData`).
+- Discard step: no card discarded → the country loses 1 VP: done (`rules.DiscardNothingPenaltyVP`, scored by
+  `Steps/DiscardStepHandlerDefault.cs` with a `ScorePointsChangeEvent`; a skip or an empty hand counts as
+  discarding nothing).
 - Reallocate Resources costs 3: done (`rules.ReallocateDiscardCost = 3` in `TotalWarRules.Configure`;
   the base default stays 4).
 - Deck overlay: done (`Add` since M3, `Remove` with the substitutes).

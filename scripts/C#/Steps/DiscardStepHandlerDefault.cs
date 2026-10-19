@@ -31,8 +31,17 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
             DebugUtilities.PrintPeer("Discard step selection skipped");
         }
 
+        // Total War: discarding nothing, a skip or an empty hand included, costs the country VP.
+        int penalty = GameOptions.Rules.DiscardNothingPenaltyVP;
+        if (penalty > 0 && !discarded)
+            await CardPlayPool.DoChangeEvent(new ScorePointsChangeEvent(
+                new VPEntry(-penalty, "Discarded nothing in the Discard step"), faction) { IsTrigger = false });
+
         DiscardStepFinished?.Invoke();
     }
+
+    /// <summary>Set once this step's discard has gone through; read by the Discard-step penalty.</summary>
+    private bool discarded;
 
     private async Task ProcessDiscardStepInternal()
     {
@@ -67,6 +76,7 @@ public partial class DiscardStepHandlerDefault : GodotObject, IDiscardStepHandle
             discardHandCardsChangeEvent.IsTrigger = false;
             discardHandCardsChangeEvent.IsDiscardStep = true;
             await CardPlayPool.DoChangeEvent(discardHandCardsChangeEvent);
+            discarded = true;
         }
         else
         {

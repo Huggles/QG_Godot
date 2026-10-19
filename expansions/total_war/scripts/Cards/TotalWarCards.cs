@@ -120,6 +120,97 @@ public static class TotalWarCards
         Condition.Build(new Condition.IsFactionTurn(card.Faction), card)
     };
 
+    /// <summary>"Use at the beginning of your [step]", plus the card's "To use" test: the window GameFlow opens as the step starts.</summary>
+    public static List<Condition> AtStepStart(CardLogic card, TurnStep step, Func<GameSituation, bool> canUse) => new()
+    {
+        Condition.Build(new Condition.AtStepStart(step), card),
+        Condition.Build(new Condition.CustomCondition(canUse), card)
+    };
+
+    /// <summary>Where <paramref name="faction"/> may deploy an Air Force now, limited to <paramref name="countries"/> when given; none while its pool is empty.</summary>
+    public static List<int> AirDeployTargets(BoardState board, Faction faction, IEnumerable<Country> countries = null) =>
+        board.AvailableUnitCount(faction, UnitType.AIR_FORCE) == 0
+            ? new()
+            : board.AirDeployTargets(faction).Where(countryId => countries == null || countries.Contains(CountryState.ForId(countryId).Country)).ToList();
+
+    /// <summary>"Deploy an [X] Air Force [in these spaces]", for the card's own country or one it names. Skipped when there is nowhere to go.</summary>
+    public static CardStep AirDeployStep(CardLogic card, Faction faction, string guidance, IReadOnlyCollection<Country> countries = null) =>
+        new ResultStep(card, Choose.CountryFrom(c => AirDeployTargets(c.Board, faction, countries), (countryId, _) => new DeployAirForceChangeEvent(faction, countryId)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AirDeployTargets(s.Board, faction, countries).Count > 0), card))
+            .WithGuidance(guidance);
+
+    /// <summary>Where a supplied Chinese Air Force could gain air superiority over an enemy Air Force: the Air step's targets, less the empty spaces.</summary>
+    public static List<int> ChineseAirSuperiorityTargets(BoardState board) => board.AirSuperiorityTargets(Faction.CHINA)
+        .Where(countryId => board.EnemyAirForcesIn(Faction.CHINA, CountryState.ForId(countryId)).Count > 0).ToList();
+
+    /// <summary>
+    /// "Deploy a Chinese Air Force, or a Chinese Air Force may gain air superiority" (Operation Zet, Flying Tigers): one step,
+    /// the half to use picked first when both are open. Air superiority goes through the round as in the Air step, so cards react to it.
+    /// </summary>
+    public static CardStep ChineseAirStep(CardLogic card)
+    {
+        const int deploy = 0, airSuperiority = 1;
+        return new ResultStep(card, async () => {
+            List<int> deployIds = AirDeployTargets(BoardState.Live, Faction.CHINA);
+            List<int> superiorityIds = ChineseAirSuperiorityTargets(BoardState.Live);
+            List<string> labels = new();
+            List<int> ids = new();
+            if (deployIds.Count > 0) { labels.Add("Deploy a Chinese Air Force"); ids.Add(deploy); }
+            if (superiorityIds.Count > 0) { labels.Add("A Chinese Air Force gains air superiority"); ids.Add(airSuperiority); }
+
+            int choice = ids.Count == 1 ? ids[0]
+                : (await new InputRequest.SelectOptionRequestHandler(card.Faction, labels, ids, card.CardState.CardData.Label).BroadCast()).ResponseCardIds[0];
+            if (choice == deploy)
+            {
+                int countryId = (await new InputRequest.SelectCountryRequestHandler(card.Faction, deployIds).BroadCast()).ResponseCountryIds[0];
+                return new DeployAirForceChangeEvent(Faction.CHINA, countryId);
+            }
+            int targetCountry = (await new InputRequest.SelectCountryRequestHandler(card.Faction, superiorityIds).BroadCast()).ResponseCountryIds[0];
+            List<int> enemies = BoardState.Live.EnemyAirForcesIn(Faction.CHINA, CountryState.ForId(targetCountry));
+            int target = enemies.Count == 1 ? enemies[0]
+                : (await new InputRequest.SelectUnitRequestHandler(card.Faction, enemies).BroadCast()).ResponseUnitIds[0];
+            return new RemoveUnitChangeEvent(Faction.CHINA, target, UnitRemovalReason.AIR_SUPERIORITY);
+        })
+        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => CanUseChineseAir(s.Board)), card))
+        .WithGuidance("Deploy a Chinese Air Force, or gain air superiority with one");
+    }
+
+    public static bool CanUseChineseAir(BoardState board) =>
+        AirDeployTargets(board, Faction.CHINA).Count > 0 || ChineseAirSuperiorityTargets(board).Count > 0;
+
+    /// <summary>The Response cards in <paramref name="owner"/>'s discard pile, less <paramref name="card"/> (a used Bolster lies there too).</summary>
+    public static List<int> DiscardedResponses(BoardState board, Faction owner, CardLogic card) => board.ForFaction(owner).Discarded
+        .Where(cardId => cardId != card.CardState.Id && CardState.ForId(cardId).CardData.CardType == CardType.RESPONSE).ToList();
+
+    /// <summary>
+    /// "Place a Response card from [owner]'s discard pile face down on the table": back to hand, then placed as a play
+    /// that spends no play (PlayCardChangeEvent only takes a card from hand or deck). Both halves open no window.
+    /// </summary>
+    public static List<CardStep> ResponseFromDiscardSteps(CardLogic card, Faction owner, string guidance, Func<GameSituation, bool> canUse = null) => new()
+    {
+        new RequirementStep(card, async () => {
+            List<int> options = DiscardedResponses(BoardState.Live, owner, card);
+            int chosen = options.Count == 1 ? options[0]
+                : (await new InputRequest.SelectCardsRequestHandler(card.Faction, options, guidance, 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
+            if (chosen < 0) throw new StepSkippedException();
+            return new RecycleCardChangeEvent(card.Faction, owner, chosen, RecycleDestination.Hand);
+        })
+        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+            DiscardedResponses(s.Board, owner, card).Count > 0 && (canUse == null || canUse(s))), card))
+        .WithGuidance(guidance),
+
+        // The card the first half took back, read from the round's pool; a free-form step, as bot previews may run a fixed one early.
+        new RequirementStep(card, async () => {
+            await Task.CompletedTask;
+            int recycled = CardPlayPool.ChangeEventsPool.OfType<RecycleCardChangeEvent>()
+                .LastOrDefault(recycle => recycle.SourceCardId == card.CardState.Id)?.CardId ?? -1;
+            if (recycled < 0) throw new StepSkippedException();
+            return new PlayCardChangeEvent(recycled) { CountsAsPlay = false };
+        })
+        .RequiringPreviousStep()
+        .WithGuidance(guidance)
+    };
+
     // ── Bolster costs and triggers ──────────────────────────────────────────
 
     /// <summary>The faction's hand cards of this type.</summary>

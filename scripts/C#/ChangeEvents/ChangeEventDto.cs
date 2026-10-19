@@ -149,6 +149,11 @@ public class ChangeStepChangeEventDto : ChangeEventDto
     public TurnStep NewStep { get; set; }
 }
 
+public class StepStartChangeEventDto : ChangeEventDto
+{
+    public TurnStep Step { get; set; }
+}
+
 public class ChangeRoundChangeEventDto : ChangeEventDto
 {
     public int NewTurn { get; set; }

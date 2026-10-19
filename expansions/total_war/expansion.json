@@ -3,5 +3,6 @@
   "displayName": "Total War",
   "assembly": "TotalWar",
   "steamDlcAppId": 5474040,
-  "minGameVersion": "0.9.4.3"
+  "minGameVersion": "0.9.4.3",
+  "menuBanner": "assets/menu/TotalWar_Banner.webp"
 }

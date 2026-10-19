@@ -278,7 +278,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             // The two halves of the opening-discard rule move together: deal the larger hand ONLY if
             // the cut is coming. Dealing OpeningHandSize with the discard switched off would open
             // every faction over the hand cap and dump the surplus at their first DISCARD step.
-            int openingHandSize = OpeningDiscardEnabled ? StaticGameData.OpeningHandSize : StaticGameData.HandSize;
+            int openingHandSize = OpeningDiscardEnabled ? GameOptions.Rules.OpeningHandSize : StaticGameData.HandSize;
             foreach (FactionState faction in gameState.PlayableFactionStates)
             {
                 int cardsToDraw = openingHandSize - DeckState.ForFaction(faction.Faction).HandCardIds.Count;
@@ -295,7 +295,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             // above so the discard modal shows correctly-tagged cards, and before StartNewTurn so it
             // lands ahead of Germany's TurnStep.START rather than inside it.
             if (OpeningDiscardEnabled)
-                await OpeningDiscard.Run(StaticGameData.OpeningDiscardCount);
+                await OpeningDiscard.Run(GameOptions.Rules.OpeningDiscardCount);
 
             foreach (Faction faction in StaticGameData.BoardFactions)
             {
@@ -433,7 +433,14 @@ public partial class GameFlow : SingletonNode<GameFlow>
         if (Program != null) await Program.BeforeStep(step, CurrentFaction);
 
         await StepMutatorRunner.Run(step, MutatorTiming.BEFORE, CurrentFaction);
+
+        // "Use at the beginning of your X step" cards: a window only when one can be used.
+        if (StepStartWindowSteps.Contains(step) && CardPlayRound.Current != null)
+            await CardPlayRound.Current.OpenStepStartWindow(step, CurrentFaction);
     }
+
+    /// <summary>The steps whose start can open a window for Condition.AtStepStart cards.</summary>
+    private static readonly HashSet<TurnStep> StepStartWindowSteps = [TurnStep.AIR, TurnStep.VICTORY_POINT, TurnStep.DRAW];
 
     /// <summary>
     /// A step has completed: run its AFTER mutators, then advance.

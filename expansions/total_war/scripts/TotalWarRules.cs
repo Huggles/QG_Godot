@@ -16,5 +16,9 @@ public sealed class TotalWarRules : IExpansionRules
         rules.AddTurnStep(TurnStep.AIR, after: TurnStep.PLAY_CARD, AirStep.Run,
             new TurnStepText("Air", "Deploy or marshal an Air Force, or gain air superiority.", Optional: true));
         rules.ReallocateDiscardCost = 3;
+        // Draw 12 and discard 5; discarding nothing in the Discard step costs 1 VP.
+        rules.OpeningHandSize = 12;
+        rules.OpeningDiscardCount = 5;
+        rules.DiscardNothingPenaltyVP = 1;
     }
 }

@@ -169,8 +169,10 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     public static bool ShowCountryLabels;
     public static bool ShowPlayersPanel;
-    public static bool ShowDebugMenu;
-    
+    /// <summary>Always false in a release export; the saved preference is kept for debug builds.</summary>
+    public static bool ShowDebugMenu => _showDebugMenu && !GameContext.IsProductionBuild;
+    private static bool _showDebugMenu;
+
     public void SetPresentationSpeed(GameSpeed speed) { PresentationSpeed = speed; Save(); }
     public void SetDebugLevel(DebugVerbosity level)   { DebugLevel        = level; Save(); }
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
@@ -227,7 +229,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     public void SetShowCountryLabels(bool value) { ShowCountryLabels = value; Save(); }
     public void SetShowPlayersPanel(bool value) { ShowPlayersPanel = value; Save(); }
-    public void SetShowDebugMenu(bool value) { ShowDebugMenu = value; Save(); }
+    public void SetShowDebugMenu(bool value) { _showDebugMenu = value; Save(); }
 
     /// <summary>False until a display choice has been saved, so a first launch picks its own size.</summary>
     private bool _hasSavedDisplay;
@@ -277,7 +279,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
             ShowCountryLabels = config.GetValue(Section, "show_country_labels", true).As<bool>();
             ShowPlayersPanel = config.GetValue(Section, "show_players_panel", true).As<bool>();
-            ShowDebugMenu = config.GetValue(Section, "show_debug_menu", false).As<bool>();
+            _showDebugMenu = config.GetValue(Section, "show_debug_menu", false).As<bool>();
 
             MasterVolume = Mathf.Clamp(config.GetValue(Section, "master_volume", 0.5f).As<float>(), 0f, 1f);
             MusicVolume  = Mathf.Clamp(config.GetValue(Section, "music_volume",  0.8f).As<float>(), 0f, 1f);
@@ -344,7 +346,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "last_join_port",        LastJoinPort);
         config.SetValue(Section, "show_country_labels",   ShowCountryLabels);
         config.SetValue(Section, "show_players_panel",    ShowPlayersPanel);
-        config.SetValue(Section, "show_debug_menu",       ShowDebugMenu);
+        config.SetValue(Section, "show_debug_menu",       _showDebugMenu);
         config.SetValue(Section, "master_volume",         MasterVolume);
         config.SetValue(Section, "music_volume",          MusicVolume);
         config.SetValue(Section, "sfx_volume",            SfxVolume);

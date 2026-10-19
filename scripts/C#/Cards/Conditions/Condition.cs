@@ -374,6 +374,20 @@ public abstract class Condition
             => ce is PlayCardChangeEvent playCard && playCard.TriggeringFaction == _faction;
     }
 
+    /// <summary>
+    /// "Use at the beginning of your [step]": the window CardPlayRound.OpenStepStartWindow opens as the card owner's
+    /// Air, Victory or Draw step starts. Always immediate: it answers that window, not a step start earlier in the round.
+    /// </summary>
+    public class AtStepStart : EventCondition
+    {
+        public TurnStep Step { get; }
+
+        public AtStepStart(TurnStep step) { Step = step; Immediately(); }
+
+        public override bool IsMatch(ChangeEvent ce)
+            => ce is StepStartChangeEvent start && start.Step == Step && start.TriggeringFaction == CardLogic?.Faction;
+    }
+
     public class IsBlockRequest : Condition
     {
         public override bool RequiresEventContext => true;

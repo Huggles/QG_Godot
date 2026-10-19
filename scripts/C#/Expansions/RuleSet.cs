@@ -19,6 +19,16 @@ public sealed class RuleSet
     /// <summary>How many hand cards Reallocate Resources costs before any card changes it (MutatorReallocateResources.DiscardCostFor).</summary>
     public int ReallocateDiscardCost { get; set; } = 4;
 
+    /// <summary>
+    /// The opening deal and the discard that follows it (GameFlow.StartGame, OpeningDiscard). The difference must
+    /// stay StaticGameData.HandSize, or turn one starts off the steady-state hand size.
+    /// </summary>
+    public int OpeningHandSize { get; set; } = StaticGameData.OpeningHandSize;
+    public int OpeningDiscardCount { get; set; } = StaticGameData.OpeningDiscardCount;
+
+    /// <summary>The VP a country loses when it discards nothing in its Discard step (DiscardStepHandlerDefault). None in the base game.</summary>
+    public int DiscardNothingPenaltyVP { get; set; } = 0;
+
     /// <summary>The rules of a session played with <paramref name="expansionIds"/>, which must all be loaded.</summary>
     public static RuleSet For(IEnumerable<string> expansionIds)
     {
