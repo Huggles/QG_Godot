@@ -2,6 +2,6 @@
   "id": "total_war",
   "displayName": "Total War",
   "assembly": "TotalWar",
-  "steamDlcAppId": 0,
+  "steamDlcAppId": 5474040,
   "minGameVersion": "0.9.4.3"
 }

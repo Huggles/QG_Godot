@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Release-exports the "Windows Desktop" and "macOS" presets into emptied Builds/windows and Builds/macOS,
-# and checks both are shippable. Usage: export.sh X.Y.Z   (the version the macOS bundle must carry)
+# stages the Total War DLC's TotalWar.dll in an emptied Builds/dlc, and checks all three are shippable.
+# Usage: export.sh X.Y.Z   (the version the macOS bundle and the DLL's GameVersion stamp must carry)
 set -u
 VERSION="${1:?usage: export.sh X.Y.Z}"
 ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
@@ -8,9 +9,13 @@ GODOT="${GODOT:-/Applications/Godot_mono.app/Contents/MacOS/Godot}"
 WIN="$ROOT/Builds/windows"
 MAC="$ROOT/Builds/macOS"
 APP="$MAC/Quartermaster General.app"
+DLC="$ROOT/Builds/dlc"
+# The export's Release build puts the expansion assemblies here (the game csproj's BuildExpansions target).
+EXPANSION_BIN="$ROOT/.godot/mono/temp/bin/ExportRelease"
 LOG="${TMPDIR:-/tmp}/qg-release-export"
 
-rm -rf "$WIN" "$MAC" && mkdir -p "$WIN" "$MAC"
+rm -rf "$WIN" "$MAC" "$DLC" && mkdir -p "$WIN" "$MAC" "$DLC"
+rm -f "$EXPANSION_BIN/TotalWar.dll"
 
 "$GODOT" --headless --path "$ROOT" --export-release "Windows Desktop" "$WIN/Quartermaster General.exe" > "$LOG-windows.log" 2>&1
 win_exit=$?
@@ -39,12 +44,23 @@ debug=()
 [ -e "$APP/Contents/Frameworks/libgodotsteam.macos.template_debug.dylib" ] && debug+=(macOS)
 plist_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist" 2>/dev/null)"
 
-if [ $win_exit -ne 0 ] || [ $mac_exit -ne 0 ] || [ ${#missing[@]} -gt 0 ] || [ ${#debug[@]} -gt 0 ] || [ "$plist_version" != "$VERSION" ]; then
+# The DLC depot: the game loads <install>/dlc/TotalWar.dll, and refuses one stamped with another game version.
+dll_version=""
+if [ -e "$EXPANSION_BIN/TotalWar.dll" ]; then
+    cp "$EXPANSION_BIN/TotalWar.dll" "$DLC/"
+    LC_ALL=C grep -aq "GameVersion.\{0,4\}$VERSION" "$DLC/TotalWar.dll" && dll_version="$VERSION"
+else
+    missing+=("dlc/TotalWar.dll")
+fi
+
+if [ $win_exit -ne 0 ] || [ $mac_exit -ne 0 ] || [ ${#missing[@]} -gt 0 ] || [ ${#debug[@]} -gt 0 ] || [ "$plist_version" != "$VERSION" ] \
+   || [ "$dll_version" != "$VERSION" ]; then
     [ $win_exit -ne 0 ] && tail -40 "$LOG-windows.log"
     [ $mac_exit -ne 0 ] && tail -40 "$LOG-macos.log"
     echo "EXPORT FAILED: godot exit windows $win_exit / macOS $mac_exit; missing: ${missing[*]:-none};" \
-         "debug GodotSteam present: ${debug[*]:-none}; bundle version '$plist_version' (want $VERSION). Logs: $LOG-*.log"
+         "debug GodotSteam present: ${debug[*]:-none}; bundle version '$plist_version' (want $VERSION);" \
+         "TotalWar.dll stamped $VERSION: ${dll_version:+yes}${dll_version:-no}. Logs: $LOG-*.log"
     exit 1
 fi
 
-echo "Export OK: windows $(du -sh "$WIN" | cut -f1), macOS $(du -sh "$MAC" | cut -f1). Logs: $LOG-*.log"
+echo "Export OK: windows $(du -sh "$WIN" | cut -f1), macOS $(du -sh "$MAC" | cut -f1), dlc $(du -sh "$DLC" | cut -f1). Logs: $LOG-*.log"

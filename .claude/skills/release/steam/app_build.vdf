@@ -29,5 +29,14 @@
 			"FileExclusion" "*.zip"
 			"FileExclusion" ".DS_Store"
 		}
+		"5159093"
+		{
+			"FileMapping"
+			{
+				"LocalPath" "dlc/*"
+				"DepotPath" "dlc"
+				"recursive" "1"
+			}
+		}
 	}
 }
