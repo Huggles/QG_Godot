@@ -433,7 +433,14 @@ public partial class GameFlow : SingletonNode<GameFlow>
         if (Program != null) await Program.BeforeStep(step, CurrentFaction);
 
         await StepMutatorRunner.Run(step, MutatorTiming.BEFORE, CurrentFaction);
+
+        // "Use at the beginning of your X step" cards: a window only when one can be used.
+        if (StepStartWindowSteps.Contains(step) && CardPlayRound.Current != null)
+            await CardPlayRound.Current.OpenStepStartWindow(step, CurrentFaction);
     }
+
+    /// <summary>The steps whose start can open a window for Condition.AtStepStart cards.</summary>
+    private static readonly HashSet<TurnStep> StepStartWindowSteps = [TurnStep.AIR, TurnStep.VICTORY_POINT, TurnStep.DRAW];
 
     /// <summary>
     /// A step has completed: run its AFTER mutators, then advance.

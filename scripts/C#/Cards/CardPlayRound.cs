@@ -602,6 +602,47 @@ public partial class CardPlayRound : GodotObject
         }
     }
 
+    /// <summary>
+    /// The window at the start of <paramref name="faction"/>'s Air, Victory or Draw step, for "use at the beginning
+    /// of your X step" cards (Condition.AtStepStart). Opened only when one of its cards can be used right now: the
+    /// hand and table are scanned first, so a game without such cards pays no recalculation and sees no event.
+    /// </summary>
+    public async Task OpenStepStartWindow(TurnStep step, Faction faction)
+    {
+        BoardState board = BoardState.Live;
+        FactionRecord piles = board.ForFaction(faction);
+        if (!piles.Hand.Concat(piles.Status).Concat(piles.Response)
+                .Any(cardId => CardState.ForId(cardId)?.CardLogic?.ListensForStepStart(board, step) == true))
+            return;
+
+        // A reaction window, so depth 1 as inside a card play: at 0, CanBeActivated would offer every Status
+        // with only state triggers (the Victory-step VP cards), which have no steps to run.
+        ReactionDepth++;
+        try
+        {
+            // Usable, not just held: its cost may be unmet. Checked with the trigger in place, then the tags restored.
+            StepStartChangeEvent start = new(step, faction);
+            ChangeEvent previousTrigger = CurrentReactionTrigger;
+            CurrentReactionTrigger = start;
+            GameStateCalculator.CalculateAll(RecalcScope.Flow);
+            bool usable = GetAfterReactionOptions(faction).Count > 0;
+            CurrentReactionTrigger = previousTrigger;
+            if (!usable)
+            {
+                GameStateCalculator.CalculateAll(RecalcScope.Flow);
+                return;
+            }
+
+            await start.Apply();
+            if (await RequestAfterReactions(start))
+                await ContinueWithNextSteps();
+        }
+        finally
+        {
+            ReactionDepth--;
+        }
+    }
+
     private async Task<bool> RequestAfterReactions(ChangeEvent triggerEvent)
     {
         DebugUtilities.PrintPeer("RequestAfterReactions");

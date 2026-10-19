@@ -32,6 +32,7 @@ using System.Text.Json.Serialization;
 [JsonDerivedType(typeof(DrawCardByNameChangeEventDto),   "DrawCardByName")]
 [JsonDerivedType(typeof(DiscardCardByNameChangeEventDto), "DiscardCardByName")]
 [JsonDerivedType(typeof(ChangeStepChangeEventDto),       "ChangeStep")]
+[JsonDerivedType(typeof(StepStartChangeEventDto),        "StepStart")]
 [JsonDerivedType(typeof(ChangeRoundChangeEventDto),      "ChangeRound")]
 [JsonDerivedType(typeof(RecycleCardChangeEventDto),      "RecycleCard")]
 [JsonDerivedType(typeof(SpendPlayActionChangeEventDto),  "SpendPlayAction")]

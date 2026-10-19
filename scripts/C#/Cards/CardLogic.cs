@@ -276,6 +276,10 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
         // Played with no custom triggers = passive modifier, never re-activatable
         return new List<Condition> { new Condition.Never() };
     }
+
+    /// <summary>Whether this card is used "at the beginning of" <paramref name="step"/>: the cheap first test of CardPlayRound.OpenStepStartWindow.</summary>
+    public bool ListensForStepStart(BoardState board, TurnStep step) =>
+        ConditionsOn(board).Any(condition => condition is Condition.AtStepStart start && start.Step == step);
         
 
     protected virtual List<Condition> CardTriggers() => new();
