@@ -11,3 +11,5 @@ sim/runs/
 # steamcmd install (binaries + cached Steam login under steamcmd/config)
 steamcmd/
 QG_for_Beta_Testing_Internal_pkg1786167_start**
+# Steam beta key lists, as exported from the partner site
+*_Beta_Testing_Internal_pkg*_start*
