@@ -34,6 +34,10 @@ public sealed class ExpansionManifest
     [JsonPropertyName("minGameVersion")]
     public string MinGameVersion { get; set; }
 
+    /// <summary>Art the main menu shows bottom-left while the expansion is playable, relative to its folder. Optional.</summary>
+    [JsonPropertyName("menuBanner")]
+    public string MenuBanner { get; set; }
+
     public bool HasAssembly => !string.IsNullOrEmpty(Assembly);
 
     /// <summary>

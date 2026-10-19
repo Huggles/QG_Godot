@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 public partial class MainMenu : Control
@@ -140,6 +141,44 @@ public partial class MainMenu : Control
 		{
 			SteamworksApi.Instance.JoinRequested  += OnSteamJoinRequested;
 			SteamworksApi.Instance.InviteReceived += OnSteamInviteReceived;
+		}
+
+		ShowExpansionBanners();
+	}
+
+	private const float BannerWidth  = 420f;
+	private const float BannerMargin = 40f;
+
+	/// <summary>
+	/// Bottom-left, the banner of every expansion this install can play (its manifest's menuBanner),
+	/// stacked upwards, edges faded into the backdrop. Nothing at all without one.
+	/// </summary>
+	private void ShowExpansionBanners()
+	{
+		Shader fade = GD.Load<Shader>("res://assets/materials/EdgeFade.gdshader");
+		float bottom = -BannerMargin;
+		foreach (LoadedExpansion expansion in ExpansionRegistry.All.Where(e => e.IsAvailable && !string.IsNullOrEmpty(e.Manifest.MenuBanner)))
+		{
+			Texture2D texture = GD.Load<Texture2D>(expansion.ResFolder + expansion.Manifest.MenuBanner);
+			if (texture == null) continue;
+
+			float height = BannerWidth * texture.GetHeight() / texture.GetWidth();
+			TextureRect banner = new()
+			{
+				Name        = $"Banner_{expansion.Manifest.Id}",
+				Texture     = texture,
+				ExpandMode  = TextureRect.ExpandModeEnum.IgnoreSize,
+				StretchMode = TextureRect.StretchModeEnum.KeepAspect,
+				MouseFilter = MouseFilterEnum.Ignore,
+				Material    = new ShaderMaterial { Shader = fade },
+			};
+			AddChild(banner);
+			banner.SetAnchorsPreset(LayoutPreset.BottomLeft);
+			banner.OffsetLeft   = BannerMargin;
+			banner.OffsetRight  = BannerMargin + BannerWidth;
+			banner.OffsetBottom = bottom;
+			banner.OffsetTop    = bottom - height;
+			bottom -= height + BannerMargin / 2;
 		}
 	}
 
