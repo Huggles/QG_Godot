@@ -50,6 +50,8 @@ public partial class MiniMenu : Control
 			GameSettings.Instance.SetShowCountryLabels(ToggleCountryLabelsButton.ButtonPressed);
 		};
 
+		// Debug builds only: a release export never shows the debug overlay (GameSettings.ShowDebugMenu).
+		ToggleDebugMenuButton.Visible = !GameContext.IsProductionBuild;
 		ToggleDebugMenuButton.ButtonPressed = GameSettings.ShowDebugMenu;
 		ToggleDebugMenuButton.Pressed += () => {
 			EventBus.Instance.EmitSignal(EventBus.SignalName.DebugMenuToggled, ToggleDebugMenuButton.ButtonPressed);
