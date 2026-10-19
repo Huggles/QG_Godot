@@ -279,7 +279,16 @@ US 5/6/3, France 3/2/1, China 2/0/1.
   random 1–2 s wait to disguise it held up nearly every Total War action, since the other team almost always
   holds a Bolster, and AI seats already answer empty windows instantly.
 - First card: Admiral Graf Spee, on `Scenario_Debug_TotalWarBolsters`; `tests/qgc/tw_bolster_graf_spee.qgc`.
-- Not yet: type-only costs, step-boundary windows, the "declares intention" trigger, bot pass chance (M6).
+- **Easy batch (22 cards, built):** Graf Spee plus A Great Sleeping Giant, Rangers, Carpet Bombing, Imperial
+  Japanese Navy, Nagumo, Tora! Tora! Tora!, Code of Bushido, Yamamoto, Ju-87, The Blitz, G7e Torpedo, Ju-52s,
+  Fallschirmjäger, Tactical Innovations, Paratroops, Zhukov Drives West, Battle of Moscow, Cavalry Corps,
+  Maginot Line, SAS Raids Airfields, Regia Aeronautica, Italy Completes Carriers.
+  - Shared steps in `TotalWarCards`: `TypedDiscardStep` (a "discard a X card" cost; others see only the type,
+    `DiscardHandCardsChangeEvent.RevealedType`), `HandDiscardStep`, `DeckDiscardStep`.
+  - Tactical Innovations places its Status with `PlayCardChangeEvent.CountsAsPlay = false`: the turn's play
+    is still to come.
+  - Checked by sims and shadow forks only; no qgc tests per card yet.
+- Not yet: step-boundary windows, the "declares intention" trigger, bot pass chance (M6).
 
 Two kinds: **event-triggered** ("when you build a Navy…", "when the Axis declares…"), which fit the
 existing block and after-reaction windows; and **step-timed** ("at the beginning of your Play step",

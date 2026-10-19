@@ -161,13 +161,13 @@ public abstract partial class GameMessage : GodotObject
             BattleCountryChangeEventDto d    => new BattleCountryChangeEvent(d.TriggeringFaction, d.CountryId),
             RemoveUnitChangeEventDto d       => new RemoveUnitChangeEvent(d.TriggeringFaction, d.UnitId, d.Reason),
             BattleUnitChangeEventDto d       => new BattleUnitChangeEvent(d.TriggeringFaction, d.UnitId),
-            PlayCardChangeEventDto d         => new PlayCardChangeEvent(d.SourceCardId),
+            PlayCardChangeEventDto d         => new PlayCardChangeEvent(d.SourceCardId) { CountsAsPlay = d.CountsAsPlay },
             ActivateReactionChangeEventDto d => new ActivateReactionChangeEvent(d.TriggeringFaction, d.SourceCardId, ChangeEvent.ForId(d.SourceChangeEventId)),
             UseBolsterChangeEventDto d       => new UseBolsterChangeEvent(d.SourceCardId),
             // ModifiersApplied: d.NumberOfCards is the server's post-modifier count, so the client must
             // not run the IDiscardModifier pass again — see ForceDiscardCardsChangeEvent.
             ForceDiscardCardsChangeEventDto d     => new ForceDiscardCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards) { ModifiersApplied = true },
-            DiscardHandCardsChangeEventDto d       => new DiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardIds) { IsDiscardStep = d.IsDiscardStep },
+            DiscardHandCardsChangeEventDto d       => new DiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardIds) { IsDiscardStep = d.IsDiscardStep, RevealedType = d.RevealedType },
             ForceDiscardHandCardsChangeEventDto d   => new ForceDiscardHandCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards),
             DrawCardsChangeEventDto d        => new DrawCardsChangeEvent(d.TriggeringFaction, d.TargetFaction, d.NumberOfCards, d.ShowDrawnCards),
             DrawCardByNameChangeEventDto d   => new DrawCardByNameChangeEvent(d.TriggeringFaction, d.TargetFaction, d.CardName),

@@ -10,10 +10,17 @@ public partial class PlayCardChangeEvent : ChangeEvent
         SourceCardId = cardId;
     }
 
+    /// <summary>
+    /// False when a card puts this one on the table outside the Play step's play (Total War: Tactical
+    /// Innovations): the card is placed, the turn's play is not spent. Replicated and saved.
+    /// </summary>
+    public bool CountsAsPlay { get; set; } = true;
+
     public override ChangeEventDto ToDto()
     {
         PlayCardChangeEventDto dto = ChangeEventDto.Build<PlayCardChangeEventDto>(this, Id);
         dto.SourceCardId = SourceCardId;
+        dto.CountsAsPlay = CountsAsPlay;
         return dto;
     }
 
@@ -38,7 +45,7 @@ public partial class PlayCardChangeEvent : ChangeEvent
     public override void Mutate(BoardState board)
     {
         board.PlayCard(SourceCardState.Faction, SourceCardState.Id);
-        board.CountPlay(SourceCardState.Faction);
+        if (CountsAsPlay) board.CountPlay(SourceCardState.Faction);
 
         CardRecord card = board.Of(SourceCardState);
         card.PlayedInTurn.Add(board.GameTurn);

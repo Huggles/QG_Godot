@@ -120,6 +120,67 @@ public static class TotalWarCards
         Condition.Build(new Condition.IsFactionTurn(card.Faction), card)
     };
 
+    // ── Bolster costs and triggers ──────────────────────────────────────────
+
+    /// <summary>The faction's hand cards of this type.</summary>
+    public static List<int> InHand(BoardState board, Faction faction, CardType type) =>
+        board.ForFaction(faction).Hand.Where(cardId => CardState.ForId(cardId).CardData.CardType == type).ToList();
+
+    /// <summary>The faction's hand without <paramref name="card"/>: what a Bolster still in hand can pay with.</summary>
+    public static int OtherHandCards(BoardState board, CardLogic card) =>
+        board.ForFaction(card.Faction).Hand.Count(cardId => cardId != card.CardState.Id);
+
+    /// <summary>
+    /// "Discard a [type] card from your hand", a cost that shows other players only the type
+    /// (DiscardHandCardsChangeEvent.RevealedType). Copies of one name are interchangeable, so the player picks
+    /// only when the cards differ (Responses, EW cards). The card's "To use" test goes here, on its first step.
+    /// </summary>
+    public static CardStep TypedDiscardStep(CardLogic card, CardType type, string guidance, Func<GameSituation, bool> canUse = null) =>
+        new RequirementStep(card, async () => {
+            List<int> options = InHand(BoardState.Live, card.Faction, type);
+            int chosen = options.Select(id => CardState.ForId(id).CardData.UniqueName).Distinct().Count() <= 1
+                ? options.FirstOrDefault(-1)
+                : (await new InputRequest.SelectCardsRequestHandler(card.Faction, options, guidance, 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
+            if (chosen < 0) throw new StepSkippedException();
+            return new DiscardHandCardsChangeEvent(card.Faction, card.Faction, new List<int> { chosen }) { RevealedType = type };
+        })
+        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+            InHand(s.Board, card.Faction, type).Count > 0 && (canUse == null || canUse(s))), card))
+        .WithGuidance(guidance);
+
+    /// <summary>"Discard [count] cards from your hand", the player's choice; counted without the Bolster paying it.</summary>
+    public static CardStep HandDiscardStep(CardLogic card, int count, string guidance, Func<GameSituation, bool> canUse = null) =>
+        new RequirementStep(card, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(card.Faction, card.Faction, count)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                OtherHandCards(s.Board, card) >= count && (canUse == null || canUse(s))), card))
+            .WithGuidance(guidance);
+
+    /// <summary>"Discard the top [count] cards of your draw deck" as a cost, with the card's "To use" test.</summary>
+    public static CardStep DeckDiscardStep(CardLogic card, int count, string guidance, Func<GameSituation, bool> canUse = null) =>
+        new RequirementStep(card, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(card.Faction, card.Faction, count)))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => canUse == null || canUse(s)), card))
+            .WithGuidance(guidance);
+
+    /// <summary>
+    /// Where <paramref name="faction"/>'s Air Force went in <paramref name="trigger"/>, a deploy or a marshal (not a
+    /// reposition), or null: "that Air Force" of "when you deploy or marshal an Air Force".
+    /// </summary>
+    public static CountryState AirForceMovedTo(ChangeEvent trigger, Faction faction) => trigger switch
+    {
+        DeployAirForceChangeEvent deploy when deploy.TriggeringFaction == faction => CountryState.ForId(deploy.CountryId),
+        MoveAirForceChangeEvent move when move.Reason == AirForceMoveReason.MARSHAL && UnitState.ForId(move.UnitId).Faction == faction
+            => CountryState.ForId(move.ToCountryId),
+        _ => null
+    };
+
+    /// <summary>
+    /// The Economic Warfare card <paramref name="faction"/> played this round, or null: "when you play an EW card",
+    /// answered in the windows that card's own steps open (playing a card opens none).
+    /// </summary>
+    public static CardState EconomicWarfarePlayed(GameSituation situation, Faction faction) => situation.Pool.OfType<PlayCardChangeEvent>()
+        .LastOrDefault(play => play.TriggeringFaction == faction && play.SourceCardState.CardData.CardType == CardType.ECONOMIC_WARFARE)
+        ?.SourceCardState;
+
     /// <summary>The first card of this type in the faction's hand, or -1. Build Army and Land Battle cards are all alike, so any one pays a cost.</summary>
     public static int FirstInHand(BoardState board, Faction faction, CardType type) =>
         board.ForFaction(faction).Hand.FirstOrDefault(cardId => CardState.ForId(cardId).CardData.CardType == type, -1);

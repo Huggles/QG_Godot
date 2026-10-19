@@ -72,7 +72,10 @@ public class MoveAirForceChangeEventDto : ChangeEventDto
     public AirForceMoveReason Reason        { get; set; }
 }
 
-public class PlayCardChangeEventDto : ChangeEventDto { }
+public class PlayCardChangeEventDto : ChangeEventDto
+{
+    public bool CountsAsPlay { get; set; } = true;
+}
 
 public class UseBolsterChangeEventDto : ChangeEventDto { }
 
@@ -116,6 +119,7 @@ public class DiscardHandCardsChangeEventDto : ChangeEventDto
 {
     public List<int> CardIds { get; set; }
     public bool IsDiscardStep { get; set; }
+    public CardType? RevealedType { get; set; }
 }
 
 public class ForceDiscardHandCardsChangeEventDto : ChangeEventDto
