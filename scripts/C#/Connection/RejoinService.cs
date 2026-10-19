@@ -33,6 +33,8 @@ public partial class RejoinService : Node
     private readonly Dictionary<int, string> _seatTokens = new();       // seat id → token, from game start
     private readonly Dictionary<int, int> _transportBySeat = new();     // only seats that have rejoined
     private readonly HashSet<int> _rejoining = new();                    // transports mid-catch-up
+    private readonly Dictionary<int, List<string>> _joinerExpansions = new(); // transport id → what it can play
+    private List<string> _lobbyExpansions = new();                       // what the hosted lobby is played with
 
     // ── Client state ─────────────────────────────────────────────────────────
     private TaskCompletionSource<(HelloResult, string)> _hello;
@@ -66,6 +68,8 @@ public partial class RejoinService : Node
         _seatTokens.Clear();
         _transportBySeat.Clear();
         _rejoining.Clear();
+        _joinerExpansions.Clear();
+        _lobbyExpansions = new List<string>();
         _buffered.Clear();
         _logged.Clear();
         IsCatchingUp = false;
@@ -98,6 +102,9 @@ public partial class RejoinService : Node
                && PlayerFactionRegistry.GetPlayerSceneForSeat(seat) != null;
     }
 
+    /// <summary>Host, on opening its lobby: the expansions every joining peer must be able to play.</summary>
+    public void SetLobbyExpansions(IEnumerable<string> ids) => _lobbyExpansions = ExpansionIds.Normalize(ids);
+
     /// <summary>Host, at game start: remember whose token each seat is.</summary>
     public void RecordSeatTokens(IEnumerable<int> seatIds)
     {
@@ -115,7 +122,7 @@ public partial class RejoinService : Node
     public async Task<(HelloResult Result, string Message)> HelloAsync()
     {
         _hello = new TaskCompletionSource<(HelloResult, string)>(TaskCreationOptions.RunContinuationsAsynchronously);
-        RpcId(1, MethodName.Hello, GameSettings.Instance.PlayerToken, BuildInfo.Version);
+        SayHello();
 
         Task timeout = Task.Delay(HelloTimeoutMs);
         if (await Task.WhenAny(_hello.Task, timeout) == timeout)
@@ -124,11 +131,29 @@ public partial class RejoinService : Node
     }
 
     /// <summary>Client, from the lobby: make sure the host has our token, for a rejoin later on.</summary>
-    public void AnnounceToken() => RpcId(1, MethodName.Hello, GameSettings.Instance.PlayerToken, BuildInfo.Version);
+    public void AnnounceToken() => SayHello();
+
+    /// <summary>Reliable and ordered, so the host has our expansions by the time it reads the Hello.</summary>
+    private void SayHello()
+    {
+        RpcId(1, MethodName.ReportExpansions, ExpansionIds.ToWire(ExpansionRegistry.AvailableIds()));
+        RpcId(1, MethodName.Hello, GameSettings.Instance.PlayerToken, BuildInfo.Version);
+    }
 
     /// <summary>
-    /// Host: route a joining peer. The version check comes first and covers every way in — the friends
-    /// list, an accepted Steam invite and a direct IP join all say Hello.
+    /// Client → host, just ahead of Hello: the expansions this install can play. Its own RPC rather than a
+    /// Hello argument, and named to sort after HelloReply: Godot numbers a node's RPCs by name, and an
+    /// older build's Hello must still arrive as Hello to get the version refusal below.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public void ReportExpansions(string wire)
+    {
+        if (IsHost) _joinerExpansions[Multiplayer.GetRemoteSenderId()] = ExpansionIds.FromWire(wire);
+    }
+
+    /// <summary>
+    /// Host: route a joining peer. The version and expansion checks come first and cover every way in —
+    /// the friends list, an accepted Steam invite and a direct IP join all say Hello.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
     public void Hello(string token, string version)
@@ -139,6 +164,14 @@ public partial class RejoinService : Node
         if (version != BuildInfo.Version)
         {
             Refuse(sender, $"Version mismatch: the host is on v{BuildInfo.Version}, you are on v{version}.");
+            return;
+        }
+
+        IEnumerable<string> required = MultiplayerSession.Instance == null ? _lobbyExpansions : GameOptions.EnabledExpansions;
+        List<string> missing = required.Except(_joinerExpansions.GetValueOrDefault(sender) ?? new List<string>()).ToList();
+        if (missing.Count > 0)
+        {
+            Refuse(sender, $"This game is played with {ExpansionIds.Describe(missing)}, which you do not have.");
             return;
         }
 
@@ -174,6 +207,7 @@ public partial class RejoinService : Node
 
     private void Refuse(int peer, string reason)
     {
+        DebugUtilities.PrintPeer($"RejoinService: refusing connection {peer}: {reason}");
         RpcId(peer, MethodName.HelloReply, (int)HelloResult.Refused, reason);
         DropLater(peer, 1.0);
     }
@@ -249,6 +283,7 @@ public partial class RejoinService : Node
 
     private void OnPeerDisconnected(long id)
     {
+        _joinerExpansions.Remove((int)id);
         if (!IsHost || !_rejoining.Remove((int)id)) return;
         int seat = ToSeat((int)id);
         if (seat > 0) ConnectionMonitor.Instance?.AbortRejoin(seat);

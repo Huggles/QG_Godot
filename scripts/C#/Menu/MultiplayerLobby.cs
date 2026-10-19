@@ -94,8 +94,14 @@ public partial class MultiplayerLobby : Control
 
 	private Label _restoreLabel;
 
-	/// <summary>The expansion checkboxes, built beside the opening-discard box; host-editable like it.</summary>
+	/// <summary>The expansion checkboxes, built beside the opening-discard box. Display only, for everyone.</summary>
 	private ExpansionToggles _expansionToggles;
+
+	/// <summary>
+	/// What the game is played with, fixed before the lobby opens: by the host dialog, a restore's save, or
+	/// (auto-hosts) the command line or scenario. A client learns it from <see cref="SyncExpansions"/>.
+	/// </summary>
+	private List<string> _sessionExpansions = new();
 
 	/// <summary>
 	/// Host-side: peerId → the expansions that peer's install can play, as it reported them. Every peer
@@ -156,38 +162,9 @@ public partial class MultiplayerLobby : Control
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 
-		// Tutorials are excluded here and nowhere else: a tutorial drives five factions from a script,
-		// and TutorialRuntime refuses to start one with peers attached, so offering it in a lobby can
-		// only produce a game nobody chose to play that way. The Skirmish screen keeps them. Debug
-		// scenarios are dropped from both pickers in a release build — Populate decides that itself.
-		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios, includeTutorials: false);
-
-		if (gameManager.SelectedScenario != null)
-		{
-			// A selection this picker cannot show is a real case now that it filters: the player may
-			// have chosen a tutorial on the Skirmish screen and come here instead, leaving the static
-			// pointing at something with no item. Falling back only in the WIDGET would leave the two
-			// disagreeing and silently start the tutorial scenario, so the fallback is pushed into the
-			// static as well.
-			//
-			// Not while restoring: that branch below replaces the picker wholesale with the save's own
-			// scenario, and SetSelectedScenarioByIndex would also drop PendingScenarioJson, which the
-			// restore still needs.
-			bool shown = MenuScenarioPicker.SelectByPath(
-				_scenarioPicker, gameManager.AvailableScenarios, gameManager.SelectedScenario.Path);
-
-			if (!shown && _restoreSave == null && _scenarioPicker.ItemCount > 0)
-			{
-				_scenarioPicker.Selected = 0;
-				gameManager.SetSelectedScenarioByIndex(MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, 0));
-			}
-
-			UpdateScenarioDescription(gameManager.SelectedScenario.Description);
-		}
-		else
-		{
-			UpdateScenarioDescription(MenuScenarioPicker.NoScenariosMessage);
-		}
+		// Unfiltered by expansions until this peer turns out to be the host (EnterHostUiState): a client's
+		// picker only shows the host's choice, and must be able to show any of them.
+		FillScenarioPicker(gameManager, expansions: null);
 
 		// Restoring: the scenario came with the save, so nothing is resolved against the local list —
 		// the file may have been renamed, edited or deleted since. Show its title as a one-off entry and
@@ -225,11 +202,15 @@ public partial class MultiplayerLobby : Control
 		_openingDiscardCheckBox.Disabled = true;
 		_openingDiscardCheckBox.Toggled += OnOpeningDiscardToggled;
 
-		// The same again for expansions: a restore plays with the save's, otherwise the scenario suggests.
+		// Expansions are never editable here. Read before ClearLobbyIntent below drops the dialog's choice.
+		_sessionExpansions = ExpansionIds.Normalize(_restoreSave?.Expansions
+			?? MainMenu.PendingHostExpansions
+			?? (CliArgs.Has("expansions") ? ExpansionIds.FromCliArg(CliArgs.Get("expansions")) : null)
+			?? gameManager.SelectedScenario?.Expansions
+			?? new List<string>());
 		_expansionToggles = new ExpansionToggles(_openingDiscardCheckBox);
-		_expansionToggles.Set(_restoreSave?.Expansions ?? gameManager.SelectedScenario?.Expansions);
+		_expansionToggles.Set(_sessionExpansions);
 		_expansionToggles.SetEditable(false);
-		_expansionToggles.Changed += OnExpansionsToggled;
 
 		// Arrived from JoinGameScreen, which already established the client connection.
 		// Adopt it rather than creating a second peer.
@@ -301,6 +282,46 @@ public partial class MultiplayerLobby : Control
 			long lobbyId = MainMenu.PendingSteamLobbyId;
 			MainMenu.ClearLobbyIntent();
 			StartSteamHost(lobbyId);
+		}
+	}
+
+	/// <summary>
+	/// Fill the scenario picker and point it at the selected scenario. <paramref name="expansions"/>, when
+	/// given, hides every scenario needing another expansion — the host's lobby cannot switch one on.
+	/// </summary>
+	private void FillScenarioPicker(GameManager gameManager, IReadOnlyCollection<string> expansions)
+	{
+		// Tutorials are excluded here and nowhere else: a tutorial drives five factions from a script,
+		// and TutorialRuntime refuses to start one with peers attached, so offering it in a lobby can
+		// only produce a game nobody chose to play that way. The Skirmish screen keeps them. Debug
+		// scenarios are dropped from both pickers in a release build — Populate decides that itself.
+		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios, includeTutorials: false, expansions);
+
+		if (gameManager.SelectedScenario != null)
+		{
+			// A selection this picker cannot show is a real case now that it filters: the player may
+			// have chosen a tutorial on the Skirmish screen and come here instead, leaving the static
+			// pointing at something with no item. Falling back only in the WIDGET would leave the two
+			// disagreeing and silently start the tutorial scenario, so the fallback is pushed into the
+			// static as well.
+			//
+			// Not while restoring: that branch below replaces the picker wholesale with the save's own
+			// scenario, and SetSelectedScenarioByIndex would also drop PendingScenarioJson, which the
+			// restore still needs.
+			bool shown = MenuScenarioPicker.SelectByPath(
+				_scenarioPicker, gameManager.AvailableScenarios, gameManager.SelectedScenario.Path);
+
+			if (!shown && _restoreSave == null && _scenarioPicker.ItemCount > 0)
+			{
+				_scenarioPicker.Selected = 0;
+				gameManager.SetSelectedScenarioByIndex(MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, 0));
+			}
+
+			UpdateScenarioDescription(gameManager.SelectedScenario.Description);
+		}
+		else
+		{
+			UpdateScenarioDescription(MenuScenarioPicker.NoScenariosMessage);
 		}
 	}
 
@@ -547,9 +568,18 @@ public partial class MultiplayerLobby : Control
 		_scenarioPicker.Disabled  = restoring;
 		SetSeedFieldEnabled(!restoring);
 		_openingDiscardCheckBox.Disabled = restoring;
-		_expansionToggles.SetEditable(!restoring);
 
-		if (!restoring) return;
+		// From here on a peer that cannot play these is turned away at its Hello.
+		RejoinService.Instance?.SetLobbyExpansions(_sessionExpansions);
+
+		if (!restoring)
+		{
+			// The selection may fall back to a scenario that fits the expansions; its opening discard goes with it.
+			GameManager gameManager = GetNode<GameManager>("/root/GameManager");
+			FillScenarioPicker(gameManager, _sessionExpansions);
+			SetOpeningDiscard(gameManager.SelectedScenario?.OpeningDiscard ?? true);
+			return;
+		}
 
 		ShowRestoreBanner(RestoreBannerText());
 		Rpc(nameof(SyncRestoreBanner), RestoreBannerText());
@@ -750,7 +780,7 @@ public partial class MultiplayerLobby : Control
 			// so a client's own box never affects its game.
 			MenuSeedField.Commit(_seedInput);
 			CommitOpeningDiscard();
-			GameManager.PendingExpansions = _expansionToggles.Checked;
+			GameManager.PendingExpansions = _sessionExpansions;
 		}
 
 		Rpc(nameof(StartGame));
@@ -1235,7 +1265,7 @@ public partial class MultiplayerLobby : Control
 				RpcId((int)peerId, nameof(SyncRestoreBanner), RestoreBannerText());
 
 			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
-			RpcId((int)peerId, nameof(SyncExpansions), ExpansionIds.ToWire(SelectedExpansions));
+			RpcId((int)peerId, nameof(SyncExpansions), ExpansionIds.ToWire(_sessionExpansions));
 
 			// Cannot match by name yet — the peer has not reported one, so _playerNames holds nothing for
 			// it and only the "Player N" placeholder is on the label. Worth doing anyway: passes B and C
@@ -1552,7 +1582,7 @@ public partial class MultiplayerLobby : Control
 			RpcId(requester, nameof(SyncRestoreBanner), RestoreBannerText());
 
 		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
-		RpcId(requester, nameof(SyncExpansions), ExpansionIds.ToWire(SelectedExpansions));
+		RpcId(requester, nameof(SyncExpansions), ExpansionIds.ToWire(_sessionExpansions));
 	}
 
 	/// <summary>
@@ -1613,9 +1643,6 @@ public partial class MultiplayerLobby : Control
 		// has just dropped the override that went with the previous one.
 		SetOpeningDiscard(gameManager.AvailableScenarios[index].OpeningDiscard);
 		Rpc(nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
-
-		_expansionToggles.Set(gameManager.AvailableScenarios[index].Expansions);
-		OnExpansionsToggled();
 	}
 
 	/// <summary>
@@ -1645,21 +1672,6 @@ public partial class MultiplayerLobby : Control
 	// ══════════════════════════════════════════════════════════════════════════
 
 	/// <summary>
-	/// What the game will be played with: a restore's own expansions, otherwise the host's ticks. Read
-	/// rather than the boxes alone because a box only exists for an expansion this install has found.
-	/// </summary>
-	private List<string> SelectedExpansions
-		=> _restoreSave != null ? ExpansionIds.Normalize(_restoreSave.Expansions) : _expansionToggles.Checked;
-
-	/// <summary>Host ticked or unticked an expansion, or picked a scenario that suggests others.</summary>
-	private void OnExpansionsToggled()
-	{
-		if (!_isHost) return;
-		Rpc(nameof(SyncExpansions), ExpansionIds.ToWire(SelectedExpansions));
-		UpdateStartGameButton();
-	}
-
-	/// <summary>
 	/// Host → clients: the expansions the game will use, so everyone sees the rules they are about to play
 	/// under. Display only: the host sends the real list on StartSession. A client that cannot play one of
 	/// them is told why its host cannot start.
@@ -1668,6 +1680,7 @@ public partial class MultiplayerLobby : Control
 	private void SyncExpansions(string wire)
 	{
 		List<string> enabled = ExpansionIds.FromWire(wire);
+		_sessionExpansions = enabled;
 		_expansionToggles.Set(enabled);
 
 		List<string> missing = ExpansionRegistry.Unavailable(enabled);
@@ -1687,13 +1700,14 @@ public partial class MultiplayerLobby : Control
 
 	/// <summary>
 	/// Host-side start gate: every connected peer, the host included, can play every chosen expansion.
-	/// The base game needs no report, which keeps the dedicated-server and debug auto-starts (which fire
-	/// the moment a peer connects, before it could report) working as before.
+	/// RejoinService.Hello already turns away a peer that cannot, but only once it says hello; until then
+	/// its row is here. The base game needs no report, which keeps the dedicated-server and debug
+	/// auto-starts (which fire the moment a peer connects, before it could report) working as before.
 	/// </summary>
 	private bool EveryoneHasExpansions(out string problem)
 	{
 		problem = null;
-		List<string> enabled = SelectedExpansions;
+		List<string> enabled = _sessionExpansions;
 		if (enabled.Count == 0) return true;
 
 		List<string> missingHere = ExpansionRegistry.Unavailable(enabled);

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Games.Indiegesindel;
@@ -23,12 +24,17 @@ public sealed record FriendLobby(
 	int    Members,
 	int    MaxMembers,
 	string DiscoveredVia,
-	string GameVersion)
+	string GameVersion,
+	List<string> Expansions,
+	string ExpansionNames)
 {
 	public bool IsFull => MaxMembers > 0 && Members >= MaxMembers;
 
 	/// <summary>False for a host on a build too old to publish its version, as well as for a real mismatch.</summary>
 	public bool SameVersionAsLocal => GameVersion == BuildInfo.Version;
+
+	/// <summary>The host plays with an expansion this install cannot, so the host would turn us away.</summary>
+	public bool MissingExpansion => Expansions.Except(ExpansionRegistry.AvailableIds()).Any();
 }
 
 /// <summary>Friend presence, exposed so no menu code has to reference <see cref="Steam.PersonaState"/>.</summary>
@@ -88,6 +94,9 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		public const string Scenario    = "scenario";
 		public const string MaxPlayers  = "max_players";
 		public const string GameVersion = "game_version";
+		public const string Expansions  = "expansions";
+		/// <summary>Display names, from the host: a player without the expansion has no manifest to name it.</summary>
+		public const string ExpansionNames = "expansion_names";
 	}
 
 	/// <summary>
@@ -310,7 +319,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	}
 
 	/// <summary>Writes the metadata the friends list reads. Owner only; a safe no-op otherwise.</summary>
-	public void PublishLobbyMetadata(string scenarioTitle, int maxPlayers)
+	public void PublishLobbyMetadata(string scenarioTitle, int maxPlayers, List<string> expansions)
 	{
 		if (!_available || CurrentLobbyId == 0 || !IsLobbyOwner) return;
 
@@ -321,6 +330,8 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.Scenario,    scenarioTitle ?? string.Empty);
 		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.MaxPlayers,  maxPlayers.ToString());
 		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.GameVersion, BuildInfo.Version);
+		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.Expansions,  ExpansionIds.ToWire(expansions));
+		_steam.SetLobbyData(CurrentLobbyId, LobbyKeys.ExpansionNames, expansions.Count == 0 ? string.Empty : ExpansionIds.Describe(expansions));
 	}
 
 	/// <summary>
@@ -443,7 +454,9 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 				Members:       (int)_steam.GetNumLobbyMembers(lobbyId),
 				MaxMembers:    (int)_steam.GetLobbyMemberLimit(lobbyId),
 				DiscoveredVia: via,
-				GameVersion:   _steam.GetLobbyData(lobbyId, LobbyKeys.GameVersion)));
+				GameVersion:   _steam.GetLobbyData(lobbyId, LobbyKeys.GameVersion),
+				Expansions:    ExpansionIds.FromWire(_steam.GetLobbyData(lobbyId, LobbyKeys.Expansions)),
+				ExpansionNames: _steam.GetLobbyData(lobbyId, LobbyKeys.ExpansionNames)));
 		}
 
 		return result;

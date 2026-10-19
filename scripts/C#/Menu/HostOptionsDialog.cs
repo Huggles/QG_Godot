@@ -1,9 +1,13 @@
 using Godot;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 /// <summary>
-/// "Host Game" step one: collect the Steam lobby size and visibility, or host over plain Godot
-/// networking (ENet) instead through the small button at the bottom.
+/// "Host Game" step one: pick the expansions the game is played with, collect the Steam lobby size and
+/// visibility, or host over plain Godot networking (ENet) instead through the small button at the bottom.
+///
+/// The expansions are chosen here, before any lobby exists, because they decide who may join: the host
+/// turns away anyone who cannot play them (RejoinService.Hello), and the lobby cannot change them.
 ///
 /// Layout lives in <c>res://scenes/menu/HostOptionsDialog.tscn</c>, an inherited scene of
 /// <see cref="MenuModal"/>'s shell — see that class for how the pair fit together.
@@ -12,27 +16,34 @@ public partial class HostOptionsDialog : MenuModal
 {
 	public enum HostMode { Cancelled, Godot, Steam }
 
-	public sealed record Result(HostMode Mode, int MaxPlayers, SteamLobbyPrivacy Privacy);
+	/// <param name="Expansions">The expansions the game is played with, in <see cref="ExpansionIds"/> order.</param>
+	public sealed record Result(HostMode Mode, int MaxPlayers, SteamLobbyPrivacy Privacy, List<string> Expansions);
 
-	private static readonly Result CancelledResult = new(HostMode.Cancelled, 0, SteamLobbyPrivacy.FriendsOnly);
+	private static readonly Result CancelledResult = new(HostMode.Cancelled, 0, SteamLobbyPrivacy.FriendsOnly, new List<string>());
 
 	private static readonly PackedScene Scene =
 		GD.Load<PackedScene>("res://scenes/menu/HostOptionsDialog.tscn");
 
 	private readonly TaskCompletionSource<Result> _result = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-	private VBoxContainer _steamOptions;
-	private SpinBox       _maxPlayers;
-	private OptionButton  _privacy;
-	private Button        _confirmButton;
+	private VBoxContainer    _steamOptions;
+	private SpinBox          _maxPlayers;
+	private OptionButton     _privacy;
+	private Button           _confirmButton;
+	private ExpansionToggles _expansionToggles;
+
+	/// <summary>A restore's expansions, which the save fixes; null when the player chooses.</summary>
+	private List<string> _fixedExpansions;
 
 	/// <summary>
 	/// Opens the dialog over <paramref name="parent"/> and completes when the user chooses or cancels.
 	/// Always completes — _ExitTree resolves it — so a scene change cannot leave the caller awaiting forever.
+	/// <paramref name="fixedExpansions"/> shows a save's expansions, locked, instead of a choice.
 	/// </summary>
-	public static Task<Result> PromptAsync(Node parent)
+	public static Task<Result> PromptAsync(Node parent, IEnumerable<string> fixedExpansions = null)
 	{
 		HostOptionsDialog dialog = Scene.Instantiate<HostOptionsDialog>();
+		dialog._fixedExpansions = fixedExpansions == null ? null : ExpansionIds.Normalize(fixedExpansions);
 		parent.AddChild(dialog);
 		return dialog._result.Task;
 	}
@@ -59,6 +70,8 @@ public partial class HostOptionsDialog : MenuModal
 
 		GetNode<Button>("%CancelButton").Pressed += Cancel;
 		_confirmButton.Pressed += OnConfirmSteam;
+
+		SetUpExpansions();
 
 		// The %Privacy entries are authored in the scene, and their *ids* — not their order — are the
 		// SteamLobbyPrivacy values OnConfirmSteam reads back. Private is 0 and FriendsOnly is 1, so the
@@ -92,6 +105,23 @@ public partial class HostOptionsDialog : MenuModal
 		warning.Visible = true;
 	}
 
+	/// <summary>
+	/// One checkbox per installed expansion, ticked by default when the selected scenario asks for it.
+	/// Hidden on an install without expansions; locked to the save's when restoring.
+	/// </summary>
+	private void SetUpExpansions()
+	{
+		GetNode<Control>("%ExpansionOptions").Visible = ExpansionRegistry.All.Count > 0;
+		_expansionToggles = new ExpansionToggles(GetNode<CheckBox>("%ExpansionTemplate"));
+		_expansionToggles.Set(_fixedExpansions ?? GameManager.Instance?.SelectedScenario?.Expansions);
+		if (_fixedExpansions == null) return;
+
+		_expansionToggles.SetEditable(false);
+		GetNode<Label>("%ExpansionHint").Text = "The save was played with these, so they cannot be changed.";
+	}
+
+	private List<string> ChosenExpansions => _fixedExpansions ?? _expansionToggles.Checked;
+
 	/// <summary>Null when Steam hosting is possible, otherwise the reason to show the player.</summary>
 	private static string SteamUnavailableReason()
 	{
@@ -105,7 +135,7 @@ public partial class HostOptionsDialog : MenuModal
 	// ══════════════════════════════════════════════════════════════════════════
 
 	/// <summary>Resolves straight away: the Godot path must stay exactly as many clicks as before.</summary>
-	private void OnGodotPressed() => Resolve(new Result(HostMode.Godot, 0, SteamLobbyPrivacy.FriendsOnly));
+	private void OnGodotPressed() => Resolve(new Result(HostMode.Godot, 0, SteamLobbyPrivacy.FriendsOnly, ChosenExpansions));
 
 	private void OnConfirmSteam()
 	{
@@ -113,7 +143,8 @@ public partial class HostOptionsDialog : MenuModal
 		Resolve(new Result(
 			HostMode.Steam,
 			(int)_maxPlayers.Value,
-			(SteamLobbyPrivacy)_privacy.GetSelectedId()));
+			(SteamLobbyPrivacy)_privacy.GetSelectedId(),
+			ChosenExpansions));
 	}
 
 	protected override void Cancel() => Resolve(CancelledResult);

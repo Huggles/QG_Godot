@@ -177,20 +177,20 @@ public partial class LoadGameScreen : Control
                 return;
             }
 
-            HostOptionsDialog.Result choice = await HostOptionsDialog.PromptAsync(this);
+            HostOptionsDialog.Result choice = await HostOptionsDialog.PromptAsync(this, save.Expansions);
             if (!IsInstanceValid(this)) return;
 
             switch (choice.Mode)
             {
                 case HostOptionsDialog.HostMode.Godot:
-                    MainMenu.SetHostGodot();
+                    MainMenu.SetHostGodot(choice.Expansions);
                     HandOff(save);
                     break;
 
                 case HostOptionsDialog.HostMode.Steam:
                     long lobbyId = await HostLaunch.CreateSteamLobbyAsync(this, choice, save.ScenarioTitle);
                     if (!IsInstanceValid(this) || lobbyId == 0) return; // the helper already explained
-                    MainMenu.SetHostSteam(lobbyId, choice.MaxPlayers);
+                    MainMenu.SetHostSteam(lobbyId, choice.MaxPlayers, choice.Expansions);
                     HandOff(save);
                     break;
             }

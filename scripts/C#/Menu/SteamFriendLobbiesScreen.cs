@@ -156,6 +156,7 @@ public partial class SteamFriendLobbiesScreen : Control
 		row.AddChild(MakeLabel(lobby.HostName, 22, new Vector2(260, 0)));
 
 		string scenario = string.IsNullOrWhiteSpace(lobby.ScenarioTitle) ? "—" : lobby.ScenarioTitle;
+		if (!string.IsNullOrWhiteSpace(lobby.ExpansionNames)) scenario += $" ({lobby.ExpansionNames})";
 		Label scenarioLabel = MakeLabel(scenario, 20, Vector2.Zero);
 		scenarioLabel.SizeFlagsHorizontal = SizeFlags.ExpandFill;
 		scenarioLabel.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
@@ -166,11 +167,13 @@ public partial class SteamFriendLobbiesScreen : Control
 
 		// A plain Button, not MenuPanelButton: Disabled has to genuinely block the click for a full
 		// lobby, and MenuPanelButton's own Pressed signal ignores Disabled.
-		// The host refuses a mismatched build anyway (RejoinService.Hello); this just says so up front.
+		// The host refuses a mismatched build or a missing expansion anyway (RejoinService.Hello); this
+		// just says so up front.
 		var join = new Button
 		{
-			Text = !lobby.SameVersionAsLocal ? "Wrong version" : lobby.IsFull ? "Full" : "Join",
-			Disabled = lobby.IsFull || !lobby.SameVersionAsLocal,
+			Text = !lobby.SameVersionAsLocal ? "Wrong version" : lobby.MissingExpansion ? "Needs DLC" : lobby.IsFull ? "Full" : "Join",
+			Disabled = lobby.IsFull || !lobby.SameVersionAsLocal || lobby.MissingExpansion,
+			TooltipText = lobby.MissingExpansion ? $"This game is played with {lobby.ExpansionNames}, which you do not have." : string.Empty,
 			CustomMinimumSize = new Vector2(120, 44),
 		};
 		join.Pressed += () => OnJoinPressed(lobby);

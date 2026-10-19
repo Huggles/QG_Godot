@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,9 +15,6 @@ public sealed class ExpansionToggles
     private readonly Dictionary<string, CheckBox> _boxes = new();
     private bool _editable = true;
 
-    /// <summary>The player ticked or unticked a box. Not raised by <see cref="Set"/>.</summary>
-    public event Action Changed;
-
     public ExpansionToggles(CheckBox styleFrom)
     {
         Control after = styleFrom;
@@ -29,10 +25,10 @@ public sealed class ExpansionToggles
             CheckBox box = (CheckBox)styleFrom.Duplicate(0);
             box.Name = $"Expansion_{expansion.Manifest.Id}";
             box.UniqueNameInOwner = false;
+            box.Visible = true; // the host dialog copies a hidden template
             box.Text = $"Expansion: {expansion.Manifest.DisplayName}";
             box.ButtonPressed = false;
             box.TooltipText = expansion.UnavailableReason ?? string.Empty;
-            box.Toggled += _ => Changed?.Invoke();
 
             after.AddSibling(box);
             after = box;
@@ -45,8 +41,8 @@ public sealed class ExpansionToggles
     public List<string> Checked => ExpansionIds.Normalize(_boxes.Where(kv => kv.Value.ButtonPressed).Select(kv => kv.Key));
 
     /// <summary>
-    /// Tick exactly those of <paramref name="ids"/> this install can play, without raising Changed. A
-    /// scenario naming an expansion that is not available here simply starts without it.
+    /// Tick exactly those of <paramref name="ids"/> this install can play. A scenario naming an
+    /// expansion that is not available here simply starts without it.
     /// </summary>
     public void Set(IEnumerable<string> ids)
     {
@@ -55,7 +51,7 @@ public sealed class ExpansionToggles
             box.SetPressedNoSignal(wanted.Contains(id) && ExpansionRegistry.Find(id)?.IsAvailable == true);
     }
 
-    /// <summary>Whether this player may change the boxes: the host, before a restore pins them.</summary>
+    /// <summary>Whether this player may change the boxes. The lobby's never are: the host dialog fixed them.</summary>
     public void SetEditable(bool editable)
     {
         _editable = editable;

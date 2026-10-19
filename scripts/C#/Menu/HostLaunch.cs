@@ -38,7 +38,7 @@ public static class HostLaunch
             return 0;
         }
 
-        SteamworksApi.Instance.PublishLobbyMetadata(scenarioTitle ?? string.Empty, choice.MaxPlayers);
+        SteamworksApi.Instance.PublishLobbyMetadata(scenarioTitle ?? string.Empty, choice.MaxPlayers, choice.Expansions);
         return lobbyId;
     }
 }

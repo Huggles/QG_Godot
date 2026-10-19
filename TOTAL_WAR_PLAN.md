@@ -121,8 +121,11 @@ scripts/C#/Air/AirForces.cs           Air Defense, Air Attack, Reposition
   They travel on `StartSession` (and `RejoinService.BeginRejoin`); every peer fixes them in
   `GameOptions.SetForSession` before building any state, and stops with a reason if it can't play one.
 - Saves store `Expansions`; the load screen and CLI refuse a save whose expansions aren't available.
-- Lobby and skirmish show an `ExpansionToggles` checkbox per installed expansion. Lobby clients report
-  what they can play; the host can't start while a connected player lacks a ticked expansion.
+- Skirmish shows an `ExpansionToggles` checkbox per installed expansion. A multiplayer host picks them in
+  `HostOptionsDialog`, before the lobby exists (a restore shows the save's, locked); the lobby only
+  displays them and offers just the scenarios they allow. Joiners send `RejoinService.ReportExpansions`
+  before `Hello`, and the host refuses one that can't play them. The Steam lobby publishes them, so a
+  friend's game list shows "Needs DLC". The host also can't start while a connected player lacks one.
 
 ### Data overlays (`ExpansionContent`)
 Only enabled expansions' files are read, and their rows are appended after the base data, so base ids

@@ -21,6 +21,9 @@ public partial class MainMenu : Control
 	/// <summary>Player cap chosen in the host dialog; only meaningful for a Steam host.</summary>
 	public static int PendingMaxPlayers { get; private set; } = 6;
 
+	/// <summary>Expansions chosen in the host dialog, fixed for the lobby's life. Null unless hosting.</summary>
+	public static List<string> PendingHostExpansions { get; private set; }
+
 	/// <summary>
 	/// Lobby the player was invited to through the Steam overlay, picked up by the friends screen.
 	/// 0 when there is no pending invite.
@@ -35,17 +38,19 @@ public partial class MainMenu : Control
 		return lobbyId;
 	}
 
-	public static void SetHostGodot()
+	public static void SetHostGodot(List<string> expansions)
 	{
-		PendingLobbyIntent  = LobbyIntent.HostGodot;
-		PendingSteamLobbyId = 0;
+		PendingLobbyIntent    = LobbyIntent.HostGodot;
+		PendingSteamLobbyId   = 0;
+		PendingHostExpansions = expansions;
 	}
 
-	public static void SetHostSteam(long lobbyId, int maxPlayers)
+	public static void SetHostSteam(long lobbyId, int maxPlayers, List<string> expansions)
 	{
-		PendingLobbyIntent  = LobbyIntent.HostSteam;
-		PendingSteamLobbyId = lobbyId;
-		PendingMaxPlayers   = maxPlayers;
+		PendingLobbyIntent    = LobbyIntent.HostSteam;
+		PendingSteamLobbyId   = lobbyId;
+		PendingMaxPlayers     = maxPlayers;
+		PendingHostExpansions = expansions;
 	}
 
 	public static void SetJoinSteam(long lobbyId)
@@ -56,8 +61,9 @@ public partial class MainMenu : Control
 
 	public static void ClearLobbyIntent()
 	{
-		PendingLobbyIntent  = LobbyIntent.None;
-		PendingSteamLobbyId = 0;
+		PendingLobbyIntent    = LobbyIntent.None;
+		PendingSteamLobbyId   = 0;
+		PendingHostExpansions = null;
 		// An invite nobody consumed is stale the moment another lobby flow starts: leaving it set makes
 		// the next visit to the friends screen auto-join a lobby that is probably already gone.
 		PendingInviteLobbyId = 0;
@@ -260,7 +266,7 @@ public partial class MainMenu : Control
 			switch (choice.Mode)
 			{
 				case HostOptionsDialog.HostMode.Godot:
-					SetHostGodot();
+					SetHostGodot(choice.Expansions);
 					SceneFlow.ChangeScene(this, LobbyScenePath);
 					break;
 
@@ -287,7 +293,7 @@ public partial class MainMenu : Control
 
 		if (!IsInstanceValid(this) || lobbyId == 0) return;   // the helper has already told the player
 
-		SetHostSteam(lobbyId, choice.MaxPlayers);
+		SetHostSteam(lobbyId, choice.MaxPlayers, choice.Expansions);
 		SceneFlow.ChangeScene(this, LobbyScenePath);
 	}
 

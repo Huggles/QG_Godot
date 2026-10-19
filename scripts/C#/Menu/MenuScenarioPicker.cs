@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// The scenario dropdown shared by the two screens that can start a game — the Skirmish screen and the
@@ -46,8 +47,12 @@ public static class MenuScenarioPicker
 	/// build, the files all ship (export_filter is all_resources), and MultiplayerLobby.SyncScenarioSelection
 	/// resolves the host's choice against that full list — so a release client joining a host who picked
 	/// a debug scenario still loads and plays it, and only its own picker cannot offer one.
+	///
+	/// <paramref name="expansions"/>, when given, also hides every scenario that needs an expansion not
+	/// in it: a hosted lobby's expansions are fixed before it opens.
 	/// </summary>
-	public static void Populate(OptionButton picker, List<ScenarioInfo> scenarios, bool includeTutorials)
+	public static void Populate(OptionButton picker, List<ScenarioInfo> scenarios, bool includeTutorials,
+								IReadOnlyCollection<string> expansions = null)
 	{
 		picker.Clear();
 		if (scenarios == null) return;
@@ -55,6 +60,7 @@ public static class MenuScenarioPicker
 		for (int i = 0; i < scenarios.Count; i++)
 		{
 			if (!includeTutorials && scenarios[i].IsTutorial) continue;
+			if (expansions != null && scenarios[i].Expansions.Any(id => !expansions.Contains(id))) continue;
 			if (GameContext.IsProductionBuild && scenarios[i].IsDebug) continue;
 			picker.AddItem(scenarios[i].Title, i);
 		}
