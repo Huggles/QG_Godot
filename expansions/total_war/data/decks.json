@@ -1,6 +1,6 @@
 [
   { "FactionIndex": 1, "Add": [
-    { "CardName": "AirPower", "Number": 3 },
+    { "CardName": "AirPower", "Number": 5 },
     { "CardName": "BolsterAdmiralGrafSpee", "Number": 1 },
     { "CardName": "BolsterJu52sAirliftSupplies", "Number": 1 },
     { "CardName": "BolsterOperationWeserubung", "Number": 1 },
@@ -27,7 +27,8 @@
     { "CardName": "EventDutchEastIndies", "Number": 1 },
     { "CardName": "StatusFreeFrance", "Number": 1 }
   ], "Add": [
-    { "CardName": "AirPower", "Number": 3 },
+    { "CardName": "AirPower", "Number": 4 },
+    { "CardName": "BuildNavy", "Number": 1 },
     { "CardName": "BolsterWarsawUprising", "Number": 1 },
     { "CardName": "ResponseFrenchPatriotsJoinAllies", "Number": 1 },
     { "CardName": "EventFranceCombattante", "Number": 1 },
@@ -52,7 +53,8 @@
     { "CardName": "EventFreeFrenchAllies_TotalWar", "Number": 1 }
   ] },
   { "FactionIndex": 3, "Add": [
-    { "CardName": "AirPower", "Number": 3 },
+    { "CardName": "AirPower", "Number": 5 },
+    { "CardName": "BuildNavy", "Number": 1 },
     { "CardName": "ResponseJapanArmsIndianNationalists", "Number": 1 },
     { "CardName": "ResponseMarcoPoloBridgeIncident", "Number": 1 },
     { "CardName": "EWFuGoBalloonBombs", "Number": 1 },
@@ -78,6 +80,8 @@
   ] },
   { "FactionIndex": 4, "Add": [
     { "CardName": "AirPower", "Number": 3 },
+    { "CardName": "BuildArmy", "Number": 1 },
+    { "CardName": "LandBattle", "Number": 1 },
     { "CardName": "StatusTankDesant", "Number": 1 },
     { "CardName": "BolsterAsianReserves", "Number": 1 },
     { "CardName": "StatusAttrition", "Number": 1 },
@@ -100,6 +104,8 @@
   ] },
   { "FactionIndex": 5, "Add": [
     { "CardName": "AirPower", "Number": 3 },
+    { "CardName": "BuildNavy", "Number": 1 },
+    { "CardName": "LandBattle", "Number": 1 },
     { "CardName": "StatusTurkeyOpensTheStraits", "Number": 1 },
     { "CardName": "EventSpain", "Number": 1 },
     { "CardName": "BolsterSupermarina", "Number": 1 },
@@ -124,7 +130,7 @@
     { "CardName": "EventFreeFrenchAllies", "Number": 1 },
     { "CardName": "StatusAmericanVolunteerGroupExpands", "Number": 1 }
   ], "Add": [
-    { "CardName": "AirPower", "Number": 3 },
+    { "CardName": "AirPower", "Number": 6 },
     { "CardName": "EWOilEmbargo", "Number": 1 },
     { "CardName": "BolsterRangers", "Number": 1 },
     { "CardName": "BolsterPappyBoyington", "Number": 1 },

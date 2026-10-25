@@ -29,6 +29,8 @@
 [ext_resource type="PackedScene" uid="uid://bchatbox0qg01" path="res://scenes/userinterface/Chat/ChatBox.tscn" id="32_chatbox"]
 [ext_resource type="PackedScene" uid="uid://bplayerspanel1" path="res://scenes/userinterface/Connection/PlayersPanel.tscn" id="33_players"]
 [ext_resource type="Script" path="res://scenes/userinterface/Connection/PauseInputBlocker.cs" id="34_blocker"]
+[ext_resource type="Texture2D" uid="uid://deodddhcuupnq" path="res://assets/textures/Other/Icons/DeckIcon.png" id="35_deckicon"]
+[ext_resource type="PackedScene" path="res://scenes/userinterface/DeckComposition/DeckCompositionPanel.tscn" id="36_deckcomp"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_skipbtn"]
 font_size = 13
@@ -383,6 +385,12 @@ layout_mode = 2
 TextureNormal = ExtResource("25_playedcards")
 TexturePressed = ExtResource("25_playedcards")
 
+[node name="DeckCompositionButton" parent="MiniMenu/MiniMenuContainer/MiniMenuHBox" unique_id=628711104 instance=ExtResource("22_x2nnb")]
+unique_name_in_owner = true
+layout_mode = 2
+TextureNormal = ExtResource("35_deckicon")
+TexturePressed = ExtResource("35_deckicon")
+
 [node name="GameMenuTrigger" type="Node" parent="." unique_id=804170072]
 script = ExtResource("27_gamemenu")
 
@@ -403,6 +411,10 @@ scale = Vector2(0.4, 0.4)
 [node name="ChatBox" parent="." unique_id=1730245519 instance=ExtResource("32_chatbox")]
 offset_right = 513.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_fpk7i")
+
+[node name="DeckCompositionPanel" parent="." unique_id=1730245522 instance=ExtResource("36_deckcomp")]
+unique_name_in_owner = true
+z_index = 150
 
 [editable path="Control/VBoxContainer/SelectionSkipButton"]
 [editable path="Control/VBoxContainer/SkipTurnStepButton"]
