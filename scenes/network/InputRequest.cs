@@ -415,10 +415,12 @@ public abstract partial class InputRequest
         }
         else
         {
-            // Every faction the prompt answers for, not just its representative: a merged window left
-            // its other factions in the set forever, and MarkInputClosed only hides the countdown once
-            // the set empties.
-            MarkInputOpen(Answering);
+            // Every faction the prompt answers for, but only those still open: the host's close does not
+            // wait for this peer's queue to drain, so an instant answer (an auto-pass, a bot) can land
+            // first, and adding its faction now would pin "Waiting on" it for the rest of the game.
+            List<Faction> stillOpen = Answering.Where(OpenPrompts.Contains).ToList();
+            if (stillOpen.Count == 0) return;
+            MarkInputOpen(stillOpen);
 
             // No finally to hide it here: this branch returns immediately rather than awaiting anything,
             // so the countdown is cleared where the waiting text already is — NetworkApi's
