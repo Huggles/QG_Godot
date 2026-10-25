@@ -232,26 +232,26 @@ text = "Pop-up Card Size"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
-selected = 2
+selected = 0
 item_count = 6
-popup/item_0/text = "50%"
-popup/item_0/id = 50
-popup/item_1/text = "60%"
-popup/item_1/id = 60
-popup/item_2/text = "70%"
-popup/item_2/id = 70
-popup/item_3/text = "80%"
-popup/item_3/id = 80
-popup/item_4/text = "90%"
-popup/item_4/id = 90
-popup/item_5/text = "100%"
-popup/item_5/id = 100
+popup/item_0/text = "70%"
+popup/item_0/id = 70
+popup/item_1/text = "80%"
+popup/item_1/id = 80
+popup/item_2/text = "90%"
+popup/item_2/id = 90
+popup/item_3/text = "100%"
+popup/item_3/id = 100
+popup/item_4/text = "110%"
+popup/item_4/id = 110
+popup/item_5/text = "120%"
+popup/item_5/id = 120
 
 [node name="ModalCardSizeHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="5" unique_id=1904471030]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "How big cards are drawn in pop-ups that show drawn, discarded or offered cards. Smaller cards leave more of the board in view."
+text = "How big cards are drawn in pop-ups that show drawn, discarded or offered cards. Bigger cards are easier to read; smaller ones leave more of the board in view."
 autowrap_mode = 3
 
 [node name="ActiveCardsRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471015]

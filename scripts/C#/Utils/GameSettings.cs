@@ -56,7 +56,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>Size of the cards in card modals (draws, discards, card choices), as a percentage of the full card.</summary>
     public int ModalCardPercent { get; private set; } = 70;
 
-    private static readonly int[] ModalCardChoices = { 50, 60, 70, 80, 90, 100 };
+    private static readonly int[] ModalCardChoices = { 70, 80, 90, 100, 110, 120 };
 
     /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
     public string LastJoinIp { get; private set; } = "127.0.0.1";
