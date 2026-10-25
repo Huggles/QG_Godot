@@ -31,9 +31,6 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 
 	/// <summary>How much bigger than the slot an announced card first pops in.</summary>
 	private const float PopInScale = 1.4f;
-	private const int SlideMilliseconds = 500;
-	private const int ShrinkMilliseconds = 400;
-	private const int ToTableMilliseconds = 450;
 
 	/// <summary>Where the popped-in card stops, from the screen's right edge: clear of the 48px history strip.</summary>
 	[Export] private float PopInRightMargin = 70f;
@@ -268,7 +265,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_announcedToTable = toTable;
 		ShowAnnouncement();
 
-		double slide = GameSettings.GetFixedDurationSeconds(SlideMilliseconds);
+		double slide = GameSettings.ShowHideSeconds;
 		if (slide <= 0) return Task.CompletedTask;
 
 		// The slot is laid out now but kept transparent, so its rect has settled by the time the card lands.
@@ -320,7 +317,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		if (deck == null || !(deck.StatusCardIds.Contains(cardId) || deck.ResponseCardIds.Contains(cardId))) return false;
 		if (FactionsContainer.Current?.FactionInfoNodes.GetValueOrDefault(card.Faction) is not { } row
 			|| !row.IsVisibleInTree()) return false;
-		double seconds = GameSettings.GetFixedDurationSeconds(ToTableMilliseconds);
+		double seconds = GameSettings.ShowHideSeconds;
 		if (seconds <= 0) return false;
 
 		Rect2 slot = CardSceneNode.GetGlobalRect();
@@ -338,7 +335,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// <summary>The way back out for a card leaving an empty slot: off to the right, behind the history strip.</summary>
 	private void SlideShownCardOff()
 	{
-		double seconds = GameSettings.GetFixedDurationSeconds(SlideMilliseconds);
+		double seconds = GameSettings.ShowHideSeconds;
 		if (seconds <= 0) return;
 		int cardId = _announcedCardId;
 		Rect2 slot = CardSceneNode.GetGlobalRect();
@@ -382,7 +379,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	private void ShrinkIntoSlot()
 	{
 		Rect2 slot = CardSceneNode.GetGlobalRect();
-		double shrink = GameSettings.GetFixedDurationSeconds(ShrinkMilliseconds);
+		double shrink = GameSettings.ShowHideSeconds;
 		_flight = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut);
 		_flight.TweenProperty(Flight, "global_position", slot.Position, shrink);
 		_flight.TweenProperty(Flight, "scale", Vector2.One * (slot.Size.X / Flight.Size.X), shrink);

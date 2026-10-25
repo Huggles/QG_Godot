@@ -173,6 +173,9 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public static int    DurationVeryShort        => GetDuration(DurationScale.VeryShort);
     public static double DurationVeryShortSeconds => GetDurationSeconds(DurationScale.VeryShort);
 
+    /// <summary>Every show and hide animation: 500ms whatever the speed setting, still skipped with it.</summary>
+    public static double ShowHideSeconds => GetFixedDurationSeconds(500);
+
     public static bool ShowCountryLabels;
     public static bool ShowPlayersPanel;
     /// <summary>Always false in a release export; the saved preference is kept for debug builds.</summary>

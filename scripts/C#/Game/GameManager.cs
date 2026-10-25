@@ -426,7 +426,7 @@ public partial class GameManager : Node
         }
 
         Tween tween = CreateTween();
-        tween.TweenProperty(cover, "modulate:a", 0.0, GameSettings.DurationMediumSeconds)
+        tween.TweenProperty(cover, "modulate:a", 0.0, GameSettings.ShowHideSeconds)
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.InOut);
         tween.Finished += () => overlay.QueueFree();
