@@ -346,9 +346,10 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		Vector2 screen = GetViewportRect().Size;
 		float separation = GridCardContainer.GetThemeConstant("h_separation");
 		int fitColumns = (int)((screen.X - frameWidth + separation) / (itemSize.X + separation));
-		int columns = Math.Clamp(fitColumns, 1, Math.Min(presentationItems.Count, maxColumns));
-		GridCardContainer.Columns = columns;
-		int rows = (int)Math.Ceiling((double)presentationItems.Count / columns);
+		int columnLimit = Math.Clamp(fitColumns, 1, maxColumns);
+		int rows = (int)Math.Ceiling((double)presentationItems.Count / columnLimit);
+		// Spread the items evenly over the rows they need: 7 cards where 5 fit go 4 and 3, not 5 and 2.
+		GridCardContainer.Columns = (int)Math.Ceiling((double)presentationItems.Count / rows);
 
 		CardScrollContainer.CustomMinimumSize =
 			new Vector2(0, Mathf.Min(itemSize.Y * Mathf.Clamp(rows, 1, 2.1f), maxCardAreaHeight));
