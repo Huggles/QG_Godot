@@ -61,9 +61,12 @@ public partial class MutatorReallocateResources : ActivatableMutator
     {
         get
         {
+            // The count is every copy left in the deck, not just the one representative DrawOptions keeps.
+            List<int> deck = BoardState.Live.ForFaction(Faction).Deck;
             List<string> available = DrawOptions(GameSituation.Live)
                 .Select(cardId => CardState.ForId(cardId).CardData.Label)
                 .Distinct()
+                .Select(label => $"{label} ({deck.Count(cardId => CardState.ForId(cardId).CardData.Label == label)})")
                 .ToList();
 
             int cost = DiscardCost(BoardState.Live);
