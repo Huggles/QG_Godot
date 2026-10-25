@@ -62,6 +62,22 @@ public abstract partial class InputRequest
     [JsonIgnore]
     public bool IsEmptyReactionWindow => IsReactionWindow && (TargetCardIds?.Count ?? 0) == 0;
 
+    /// <summary>
+    /// An empty reaction window every answering faction has armed a skip for: TryAutoPassArmedReactionWindow passes it unseen.
+    /// All or nothing across a merged prompt, since the standing preference is set per faction: auto-passing for a group
+    /// with one faction that never asked to be silenced would answer for a player who wanted the click.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsArmedEmptyReactionWindow =>
+        IsEmptyReactionWindow && Answering.All(faction => ReactionSkipPreference.ActiveScope(faction) != ReactionSkipScope.NONE);
+
+    /// <summary>
+    /// This client will skip the prompt for its player without drawing it (an armed skip), so nobody is being asked: Execute plays no chime and starts
+    /// no countdown for it. Read on the peer that answers, where the skip preferences live.
+    /// </summary>
+    [JsonIgnore]
+    public virtual bool WillAutoSkip => IsArmedEmptyReactionWindow;
+
     public Faction TargetFaction { get; set; }
 
     /// <summary>
@@ -346,7 +362,8 @@ public abstract partial class InputRequest
             // it is true when a bot on this peer is the one deciding. One flag rather than four
             // conditionals, and the same flag guards the matching teardown in the finally — two of
             // those are concurrency fixes rather than cosmetics, see there.
-            bool asked = !IsForLocalBot;
+            // Nor when this peer passes the prompt unseen (an armed skip): the chime is for input that is actually needed.
+            bool asked = !IsForLocalBot && !WillAutoSkip;
 
             // Inside the IsForCurrentPeer branch on purpose: only the player actually being asked
             // hears it. Every request subclass funnels through here, so this covers card, country,
@@ -635,19 +652,11 @@ public abstract partial class InputRequest
     /// </summary>
     protected bool TryAutoPassArmedReactionWindow()
     {
-        if (!IsEmptyReactionWindow) return false;
+        if (!IsArmedEmptyReactionWindow) return false;
 
-        // All or nothing across a merged prompt. One press of a scoped skip button arms every faction
-        // the prompt answers for, but the standing preference is set per faction in the faction info
-        // rows — so a group can hold one armed faction beside one that never asked to be silenced, and
-        // auto-passing there would answer a window on behalf of a player who wanted the click.
         ReactionSkipScope armed = ReactionSkipScope.NONE;
         foreach (Faction faction in Answering)
-        {
-            ReactionSkipScope factionScope = ReactionSkipPreference.ActiveScope(faction);
-            if (factionScope == ReactionSkipScope.NONE) return false;
-            armed = Narrower(armed, factionScope);
-        }
+            armed = Narrower(armed, ReactionSkipPreference.ActiveScope(faction));
 
         DebugUtilities.PrintPeer($"{string.Join(", ", Answering)} auto-passed an empty reaction window ({armed})");
         ReactionSkipScope = armed;
@@ -1117,9 +1126,12 @@ public abstract partial class InputRequest
         /// Pass as the only option is answered without drawing it while the faction's reaction toggle skips,
         /// as an empty reaction window is (TryAutoPassArmedReactionWindow). The CLI never calls Handle, so scripts still see it.
         /// </summary>
+        public override bool WillAutoSkip =>
+            TargetOptionIds.Count == 1 && ReactionSkipPreference.ActiveScope(TargetFaction) != ReactionSkipScope.NONE;
+
         public override async Task Handle()
         {
-            if (TargetOptionIds.Count == 1 && ReactionSkipPreference.ActiveScope(TargetFaction) != ReactionSkipScope.NONE)
+            if (WillAutoSkip)
             {
                 DebugUtilities.PrintPeer($"{TargetFaction} auto-passed an Air step with nothing to do");
                 ResponseCardIds.Add(TargetOptionIds[0]);
