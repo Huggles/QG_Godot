@@ -243,14 +243,12 @@ public partial class InputManager : Node2D
 	private void OnReactionSkipScoped(int scope)
 	{
 		_pendingReactionSkipScope = (ReactionSkipScope)scope;
-		// Mirrored into the standing preference so the faction info row toggle shows what was just
-		// chosen, and so the choice keeps applying to the windows that follow. Read the factions
-		// BEFORE HandleItemSelected, which nulls CurrentCardPrompt.
+		// Mirrored into the standing preference so the choice keeps applying to the windows that
+		// follow. Read the factions BEFORE HandleItemSelected, which nulls CurrentCardPrompt.
 		//
 		// Every faction the prompt answers for, not just its representative: on a merged window the
 		// player pressed one button about one prompt, and arming only one of their factions would keep
-		// the merged prompts coming and make the button look broken. The per-faction control is the
-		// toggle in each faction's info row, which writes this same dictionary.
+		// the merged prompts coming and make the button look broken.
 		if (CurrentCardPrompt != null)
 			foreach (Faction faction in CurrentCardPrompt.Answering)
 				ReactionSkipPreference.Set(faction, (ReactionSkipScope)scope);
