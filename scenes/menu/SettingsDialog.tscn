@@ -218,7 +218,43 @@ theme_override_font_sizes/font_size = 18
 text = "Messages that only report what happened close themselves after a moment instead of waiting for a click."
 autowrap_mode = 3
 
-[node name="ActiveCardsRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="4" unique_id=1904471015]
+[node name="ModalCardSizeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="4" unique_id=1904471027]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ModalCardSizeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ModalCardSizeRow" index="0" unique_id=1904471028]
+custom_minimum_size = Vector2(230, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Pop-up Card Size"
+
+[node name="ModalCardSizeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/ModalCardSizeRow" index="1" unique_id=1904471029]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+selected = 2
+item_count = 6
+popup/item_0/text = "50%"
+popup/item_0/id = 50
+popup/item_1/text = "60%"
+popup/item_1/id = 60
+popup/item_2/text = "70%"
+popup/item_2/id = 70
+popup/item_3/text = "80%"
+popup/item_3/id = 80
+popup/item_4/text = "90%"
+popup/item_4/id = 90
+popup/item_5/text = "100%"
+popup/item_5/id = 100
+
+[node name="ModalCardSizeHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="5" unique_id=1904471030]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
+theme_override_font_sizes/font_size = 18
+text = "How big cards are drawn in pop-ups that show drawn, discarded or offered cards. Smaller cards leave more of the board in view."
+autowrap_mode = 3
+
+[node name="ActiveCardsRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471015]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -232,14 +268,14 @@ text = "Show Active Cards"
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ActiveCardsHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="5" unique_id=1904471018]
+[node name="ActiveCardsHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="7" unique_id=1904471018]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
 text = "When choosing a card to play, your Status and Response cards already on the table are drawn beside your hand, next to the cards you can activate instead of playing."
 autowrap_mode = 3
 
-[node name="ChatHideRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="6" unique_id=1904471019]
+[node name="ChatHideRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="8" unique_id=1904471019]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -262,14 +298,14 @@ popup/item_1/id = 5
 popup/item_2/text = "10 seconds"
 popup/item_2/id = 10
 
-[node name="ChatHideHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="7" unique_id=1904471022]
+[node name="ChatHideHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="9" unique_id=1904471022]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
 text = "How long the chat stays on screen after a player message or once the mouse leaves it."
 autowrap_mode = 3
 
-[node name="ReactionPromptsRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="8" unique_id=1904471023]
+[node name="ReactionPromptsRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="10" unique_id=1904471023]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -283,17 +319,17 @@ text = "Only Ask When I Can React"
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ReactionPromptsHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="9" unique_id=1904471026]
+[node name="ReactionPromptsHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="11" unique_id=1904471026]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
 text = "A reaction window with nothing you can play is answered for you, so it never stops the game. The toggle in each faction's info row still changes it for one game."
 autowrap_mode = 3
 
-[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="10" unique_id=1904471010]
+[node name="GameplaySeparator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="12" unique_id=1904471010]
 layout_mode = 2
 
-[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="11" unique_id=1904471011]
+[node name="DebugLevelRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="13" unique_id=1904471011]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -314,7 +350,7 @@ popup/item_0/id = 0
 popup/item_1/text = "Finest"
 popup/item_1/id = 1
 
-[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="12" unique_id=1904471014]
+[node name="DebugLevelHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay" index="14" unique_id=1904471014]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18

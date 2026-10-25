@@ -2,8 +2,9 @@ using Godot;
 
 /// <summary>
 /// The Gameplay tab of <see cref="SettingsDialog"/>: presentation speed, debug verbosity, whether
-/// display-only modals dismiss themselves, whether the hand-play fan shows the active table cards, and
-/// whether empty reaction windows are answered for you (the default of each faction's reaction toggle).
+/// display-only modals dismiss themselves, how big card modals draw their cards, whether the hand-play
+/// fan shows the active table cards, and whether empty reaction windows are answered for you (the
+/// default of each faction's reaction toggle).
 ///
 /// These three used to be loose <c>PanelContainer</c>s pinned to the top-left of
 /// <c>user_interface.tscn</c> — permanent HUD clutter for settings that get changed once and then
@@ -22,6 +23,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
     private CheckButton  _activeCards;
     private CheckButton  _reactionPrompts;
     private OptionButton _chatHide;
+    private OptionButton _modalCardSize;
 
     public override void _Ready() => Guard.Try(ReadyInternal, "GameplaySettingsPanel._Ready");
 
@@ -33,6 +35,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _activeCards = GetNode<CheckButton>("%ActiveCardsToggle");
         _reactionPrompts = GetNode<CheckButton>("%ReactionPromptsToggle");
         _chatHide    = GetNode<OptionButton>("%ChatHideOption");
+        _modalCardSize = GetNode<OptionButton>("%ModalCardSizeOption");
 
         // The picker entries are authored in the scene, and their *ids* — not their row order — are
         // the enum values the handlers below read back. Same guard as VideoSettingsPanel applies to
@@ -49,6 +52,8 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _reactionPrompts.ButtonPressed = settings.AskOnlyWhenICanReact;
         // Ids are the seconds themselves (0, 5, 10), so this one is looked up by id, not by row.
         _chatHide.Selected         = _chatHide.GetItemIndex(settings.ChatHideSeconds);
+        // Ids are the percentages themselves, looked up by id like the chat timer.
+        _modalCardSize.Selected    = _modalCardSize.GetItemIndex(settings.ModalCardPercent);
 
         // Wired after seeding: assigning Selected/ButtonPressed would otherwise write the value
         // straight back out again on open.
@@ -58,6 +63,8 @@ public partial class GameplaySettingsPanel : VBoxContainer
             GameSettings.Instance.SetDebugLevel((DebugVerbosity)_debugLevel.GetItemId((int)index));
         _chatHide.ItemSelected += index =>
             GameSettings.Instance.SetChatHideSeconds(_chatHide.GetItemId((int)index));
+        _modalCardSize.ItemSelected += index =>
+            GameSettings.Instance.SetModalCardPercent(_modalCardSize.GetItemId((int)index));
         _autoDismiss.Toggled += value =>
             GameSettings.Instance.SetAutoDismissModal(value);
         // The starting point of every faction's reaction toggle; a choice already made in a game stands.
