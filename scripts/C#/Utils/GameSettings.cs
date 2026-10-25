@@ -54,7 +54,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     private static readonly int[] ChatHideChoices = { 0, 5, 10 };
 
     /// <summary>Size of the cards in card modals (draws, discards, card choices), as a percentage of the full card.</summary>
-    public int ModalCardPercent { get; private set; } = 70;
+    public int ModalCardPercent { get; private set; } = 100;
 
     private static readonly int[] ModalCardChoices = { 70, 80, 90, 100, 110, 120 };
 
@@ -191,7 +191,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetModalCardPercent(int percent)       { ModalCardPercent = ValidModalCardPercent(percent); Save(); }
 
     /// <summary>Same guard as <see cref="ValidChatHide"/>: only sizes the picker offers.</summary>
-    private static int ValidModalCardPercent(int percent) => System.Array.IndexOf(ModalCardChoices, percent) >= 0 ? percent : 70;
+    private static int ValidModalCardPercent(int percent) => System.Array.IndexOf(ModalCardChoices, percent) >= 0 ? percent : 100;
     public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
 
     /// <summary>
@@ -282,7 +282,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             ShowActiveCardsInFan = config.GetValue(Section, "show_active_cards_in_fan", true).As<bool>();
             AskOnlyWhenICanReact = config.GetValue(Section, "ask_only_when_i_can_react", true).As<bool>();
             ChatHideSeconds   = ValidChatHide(config.GetValue(Section, "chat_hide_seconds", 5).As<int>());
-            ModalCardPercent  = ValidModalCardPercent(config.GetValue(Section, "modal_card_percent", 70).As<int>());
+            ModalCardPercent  = ValidModalCardPercent(config.GetValue(Section, "modal_card_percent", 100).As<int>());
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
             _playerToken      = config.GetValue(Section, "player_token", "").AsString();
             LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
