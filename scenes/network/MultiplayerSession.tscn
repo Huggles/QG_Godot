@@ -18,6 +18,9 @@ properties/2/replication_mode = 2
 properties/3/path = NodePath("GameFlow:TurnStep")
 properties/3/spawn = true
 properties/3/replication_mode = 2
+properties/4/path = NodePath("GameFlow:MaxRound")
+properties/4/spawn = true
+properties/4/replication_mode = 2
 
 [node name="MultiplayerSession" type="Node"]
 script = ExtResource("1_fxsb3")

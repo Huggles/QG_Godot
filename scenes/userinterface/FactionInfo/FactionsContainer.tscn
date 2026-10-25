@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dy33p3st34r4r" path="res://assets/factions/AxisFlag.png" id="3_axis"]
 [ext_resource type="Texture2D" uid="uid://dq2mrgd1e7e6" path="res://assets/factions/AlliesFlag.png" id="4_allies"]
 [ext_resource type="PackedScene" path="res://scenes/userinterface/TurnSequence/TurnSequenceStrip.tscn" id="5_strip"]
+[ext_resource type="PackedScene" path="res://scenes/userinterface/RoundTrack/RoundTrack.tscn" id="6_round"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_plate"]
 content_margin_left = 0.0
@@ -128,3 +129,13 @@ text = "0"
 label_settings = SubResource("LabelSettings_allies")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="RoundTrack" parent="." instance=ExtResource("6_round")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 495.0
+offset_top = 66.0
+offset_right = 710.0
+offset_bottom = 114.0

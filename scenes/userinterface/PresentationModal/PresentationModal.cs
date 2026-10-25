@@ -323,9 +323,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		const int maxColumns = 7;
 		if (presentationItems == null || presentationItems.Count == 0) return;
 
-		GridCardContainer.Columns = Math.Min(presentationItems.Count, maxColumns);
 		PresentationItems = presentationItems;
-		int rows = (int)Math.Ceiling((double)presentationItems.Count / maxColumns);
 
 		foreach (PresentationItem item in presentationItems)
 		{
@@ -339,8 +337,22 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 				control.Modulate = new Color(0.5f, 0.5f, 0.5f);
 		}
 
+		// The grid never scrolls sideways, so a row of cards above 100% Pop-up Card Size is cut to what
+		// fits across the screen inside the frame (MenuPanel's 50px margins, plus the scrollbar). The card
+		// area is at most one and a half full-size cards tall, so bigger cards scroll rather than grow the modal.
+		const float frameWidth = 120f;
+		float maxCardAreaHeight = PresentationItemCard.FullCardSize.Y * 1.5f;
+		Vector2 itemSize = PresentationItemControls[0].Size;
+		Vector2 screen = GetViewportRect().Size;
+		float separation = GridCardContainer.GetThemeConstant("h_separation");
+		int fitColumns = (int)((screen.X - frameWidth + separation) / (itemSize.X + separation));
+		int columnLimit = Math.Clamp(fitColumns, 1, maxColumns);
+		int rows = (int)Math.Ceiling((double)presentationItems.Count / columnLimit);
+		// Spread the items evenly over the rows they need: 7 cards where 5 fit go 4 and 3, not 5 and 2.
+		GridCardContainer.Columns = (int)Math.Ceiling((double)presentationItems.Count / rows);
+
 		CardScrollContainer.CustomMinimumSize =
-			new Vector2(0, PresentationItemControls[0].Size.Y * Mathf.Clamp(rows, 1, 2.1f));
+			new Vector2(0, Mathf.Min(itemSize.Y * Mathf.Clamp(rows, 1, 2.1f), maxCardAreaHeight));
 		CardScrollContainer.ScrollVertical = 0;
 	}
 

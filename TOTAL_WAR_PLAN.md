@@ -274,7 +274,7 @@ US 5/6/3, France 3/2/1, China 2/0/1.
 - Always-ask cover: a Bolster in hand counts as a hidden card (`HasHiddenResponseCards`,
   `IsPubliclyVisibleTableCard`). In TW sims this added about 5% prompts.
 - **Default reaction setting (decided):** "Only Ask When I Can React" in Settings → Gameplay, on by default.
-  It is where each faction's info-row toggle starts and falls back to (`ReactionSkipPreference`); an explicit
+  It is where each faction's reaction setting starts and falls back to (`ReactionSkipPreference`); an explicit
   "always ask" is stored. Never applied in a CLI run. An auto-passed window answers at once (decided): a
   random 1–2 s wait to disguise it held up nearly every Total War action, since the other team almost always
   holds a Bolster, and AI seats already answer empty windows instantly.

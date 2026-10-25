@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public partial class ChangeStepChangeEvent : ChangeEvent
@@ -17,6 +18,9 @@ public partial class ChangeStepChangeEvent : ChangeEvent
     }
 
     public override void Mutate(BoardState board) => board.TurnStep = NewStep;
+
+    // Here rather than on NextStepStarted, which reaches a client by replication, ahead of its queued announcements.
+    protected override List<ChangeEventAnimation> AfterAnimations => new() { new ClearCardAnnouncementAnimation() };
 
     /// <summary>The new step's card round is live machinery: the reaction windows run on it.</summary>
     protected override Task OnLiveMutatedAsync()

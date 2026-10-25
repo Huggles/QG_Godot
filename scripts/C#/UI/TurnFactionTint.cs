@@ -61,7 +61,7 @@ public class TurnFactionTint
 
         Apply(animate: false);
 
-        // The same pair, and for the same reasons, as GameRoundLabel — the other readout derived from
+        // The same pair, and for the same reasons, as RoundTrack — the other readout derived from
         // GameTurn. NOT NewTurnStarted: that is emitted from GameFlow.StartNewTurn, which only the host
         // runs, so a client would sit on the first faction's colour forever. GameChangeEventAfter fires
         // on every peer after every applied ChangeEvent, ChangeRoundChangeEvent included, and so does a

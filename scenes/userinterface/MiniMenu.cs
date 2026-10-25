@@ -10,6 +10,8 @@ public partial class MiniMenu : Control
 	public Control MiniMenuContainer => GetNode<Control>("%MiniMenuHBox");
 	public MarginTextureButton VisibilityButton => GetNode<MarginTextureButton>("%VisibilityButton");
 	public MarginTextureButton ActiveInputRequestButton => GetNode<MarginTextureButton>("%ActiveInputRequestButton");
+	public MarginTextureButton DeckCompositionButton => GetNode<MarginTextureButton>("%DeckCompositionButton");
+	public DeckCompositionPanel DeckCompositionPanel => GetNode<DeckCompositionPanel>("%DeckCompositionPanel");
 	public PanelContainer MiniMenuModal => GetNode<PanelContainer>("%MiniMenuModal");
 
 	public Button ToggleCountryLabelsButton => GetNode<Button>("%CountryLabelsButton");
@@ -43,6 +45,10 @@ public partial class MiniMenu : Control
 		MiniMenuModal.Visible = false;
 		VisibilityButton.TextureButton.Pressed += OnVisibilityButtonPressed;
 		ActiveInputRequestButton.TextureButton.Pressed += OnActiveInputRequestButtonPressed;
+
+		// On the inner button: it stops the mouse, so a tooltip on the margin around it would never show.
+		DeckCompositionButton.TextureButton.TooltipText = "Cards in each deck at the start of the game";
+		DeckCompositionButton.TextureButton.Pressed += DeckCompositionPanel.Toggle;
 
 		ToggleCountryLabelsButton.ButtonPressed = GameSettings.ShowCountryLabels;
 		ToggleCountryLabelsButton.Pressed += () => {

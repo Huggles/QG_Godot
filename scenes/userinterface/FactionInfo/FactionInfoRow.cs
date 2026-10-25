@@ -25,7 +25,6 @@ public partial class FactionInfoRow : Control
 	private TextureRect NavyIcon => GetNode<TextureRect>("%NavyIcon");
 	private Label ArmyCountLabel => GetNode<Label>("%ArmyCountLabel");
 	private Label NavyCountLabel => GetNode<Label>("%NavyCountLabel");
-	private ReactionSkipToggleButton ReactionSkipToggleButton => GetNode<ReactionSkipToggleButton>("%ReactionSkipToggleButton");
 
 	private Timer hoverTimer;
 	private bool isMouseOver = false;
@@ -48,7 +47,6 @@ public partial class FactionInfoRow : Control
 			EventBus.Instance.GameStateRecalculated -= SetCardCounts;
 			EventBus.Instance.CardsDrawn -= OnCardsChanged;
 			EventBus.Instance.CardsDiscarded -= OnCardsChanged;
-			EventBus.Instance.ReactionSkipPreferenceChanged -= OnReactionSkipPreferenceChanged;
 			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
 			EventBus.Instance.GameChangeEventAfter -= OnGameChangeEventAfter;
 			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
@@ -62,7 +60,7 @@ public partial class FactionInfoRow : Control
 	/// turn can move — and NOT on NewTurnStarted, which is where this used to hang: that is emitted
 	/// inside GameFlow.StartNewTurn, which only the host runs, so a joined client sat on the opening
 	/// faction's dimming for the whole game and a save restore never repainted at all. Same pair, and
-	/// same reasoning, as GameRoundLabel and TurnFactionTint.
+	/// same reasoning, as RoundTrack and TurnFactionTint.
 	/// </summary>
 	private void OnGameChangeEventAfter(string changeEventName)
 	{
@@ -109,12 +107,10 @@ public partial class FactionInfoRow : Control
 		ArmyCountLabel.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
 		NavyCountLabel.LabelSettings = (LabelSettings)NavyCountLabel.LabelSettings.Duplicate();
 
-		ReactionSkipToggleButton.Faction = Faction;
-		ReactionSkipToggleButton.Refresh();
-
 		// The minor factions this faction acts for share its row: their points fold into its score and
 		// their pieces in reserve hang in a tab under it, one per minor faction.
 		_minors = StaticGameData.MinorsOf(Faction);
+		AddAirCell();
 		AddMinorTabs();
 
 		SetScore(CombinedScore);
@@ -128,11 +124,9 @@ public partial class FactionInfoRow : Control
 		EventBus.Instance.GameStateRecalculated += SetCardCounts;
 		EventBus.Instance.CardsDrawn += OnCardsChanged;
 		EventBus.Instance.CardsDiscarded += OnCardsChanged;
-		EventBus.Instance.ReactionSkipPreferenceChanged += OnReactionSkipPreferenceChanged;
 		// NextStepStarted, not NewTurnStarted: the latter is emitted inside GameFlow.StartNewTurn, which
 		// only the host runs. TurnStepCounter is a replicated property whose setter emits this on every
-		// peer, so it is the one turn-boundary signal a client can rely on — and it is exactly when a
-		// TURN_STEP arming expires and the toggle has to fall back to "always ask".
+		// peer, so it is the one turn-boundary signal a client can rely on.
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
 		EventBus.Instance.GameChangeEventAfter += OnGameChangeEventAfter;
 		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
@@ -181,20 +175,12 @@ public partial class FactionInfoRow : Control
 		}
 	}
 
-	private void OnReactionSkipPreferenceChanged(int faction)
-	{
-		if ((Faction)faction == Faction) ReactionSkipToggleButton.Refresh();
-	}
-
 	/// <summary>
-	/// A TURN_STEP or ROUND arming can expire without anyone touching the toggle, so repaint the
-	/// toggle at every step boundary rather than only when the setting is changed. The dimming rides
-	/// along because this is also the one turn-boundary signal that reaches a client after a save
+	/// Repaints the dimming: this is the one turn-boundary signal that reaches a client after a save
 	/// restore, where the turn has already moved before any new event lands.
 	/// </summary>
 	private void OnNextStepStarted(int turnStep)
 	{
-		ReactionSkipToggleButton.Refresh();
 		SetModulation();
 	}
 
@@ -229,11 +215,6 @@ public partial class FactionInfoRow : Control
 	private void SetModulation()
 	{        
 		bool isLocal = PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction);
-		// Re-tested here rather than once in LoadUI so a rejoin or a faction reassignment is picked up.
-		// A setting on a faction this peer does not control would do nothing, and hiding it leaves the
-		// other five rows exactly as they were.
-		ReactionSkipToggleButton.Visible = isLocal;
-
 		if (isLocal)
 		{            
 			Modulate = new Color(1, 1, 1, 1f); // Full opacity for factions controlled by the local player
@@ -259,14 +240,14 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>
-	/// Repaints the army/navy pool counters — how many pieces of each type the faction has left to play.
+	/// Repaints the army/navy (and air) pool counters — how many pieces of each type the faction has left to play.
 	/// </summary>
 	private void SetUnitCounts()
 	{
 		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY));
 		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY));
-		foreach (((Faction minor, UnitType type), Label label) in _minorCountLabels)
-			SetUnitCount(label, UnitPool.AvailableUnitCount(minor, type));
+		foreach (((Faction faction, UnitType type), Label label) in _builtCountLabels)
+			SetUnitCount(label, UnitPool.AvailableUnitCount(faction, type));
 	}
 
 	/// <summary>
@@ -336,13 +317,45 @@ public partial class FactionInfoRow : Control
 		TurnSummariesRichText.Text = string.Join("\n", textRows);
 	}
 
+	/// <summary>Counters built in code rather than in the scene: the Air Force one and the minor-faction tabs'.</summary>
+	private readonly Dictionary<(Faction, UnitType), Label> _builtCountLabels = new();
+
+	/// <summary>
+	/// A unit icon's width on a row that shows Air Forces: army, navy and air cells have to share the
+	/// row's 150px, and the scene's 35px icons and 22px labels fit only two.
+	/// </summary>
+	private const float CompactIconWidth = 34f;
+	private const float CompactLabelWidth = 12f;
+
+	/// <summary>
+	/// An air cell after the navy one, when the faction has Air Forces in its pool. Only an expansion
+	/// (Total War) gives any, so the base game's strip stays exactly as the scene draws it.
+	/// </summary>
+	private void AddAirCell()
+	{
+		if (!_minors.Prepend(Faction).Any(HasAirForces)) return;
+
+		// Narrowed before anything is copied from them, so the minor tabs' counters come out narrow too.
+		foreach (Control icon in new Control[] { ArmyIcon, NavyIcon })
+			icon.CustomMinimumSize = icon.CustomMinimumSize with { X = CompactIconWidth };
+		foreach (Control label in new Control[] { ArmyCountLabel, NavyCountLabel })
+			label.CustomMinimumSize = label.CustomMinimumSize with { X = CompactLabelWidth };
+
+		if (!HasAirForces(Faction)) return;
+		HBoxContainer airCell = new() { MouseFilter = MouseFilterEnum.Ignore };
+		airCell.AddThemeConstantOverride("separation", 2);
+		NavyIcon.GetParent().AddSibling(airCell);
+		AddCounter(airCell, Faction, UnitType.AIR_FORCE, FactionState.FactionData.FactionColor);
+	}
+
+	private static bool HasAirForces(Faction faction) => StaticGameData.FactionDataMap[faction].NumberOfAirUnits > 0;
+
 	// ── Minor factions sharing this row ──────────────────────────────────────
 
 	/// <summary>Height of one minor faction's tab under the row; FactionsContainer makes room for them.</summary>
 	public const float MinorTabHeight = 25f;
 
 	private List<Faction> _minors = new();
-	private readonly Dictionary<(Faction, UnitType), Label> _minorCountLabels = new();
 
 	/// <summary>This row's faction, or a minor faction it acts for.</summary>
 	private bool IsShownHere(Faction faction) => faction == Faction || _minors.Contains(faction);
@@ -351,7 +364,7 @@ public partial class FactionInfoRow : Control
 	private int CombinedScore => FactionState.Score + _minors.Sum(minor => FactionState.ForEnum(minor)?.Score ?? 0);
 
 	/// <summary>
-	/// One tab per minor faction, hung under the row: its army (and navy, if it has any) pieces in reserve,
+	/// One tab per minor faction, hung under the row: its army (and navy and air, if it has any) pieces in reserve,
 	/// on its own colour, which is what says whose they are. Built in code
 	/// from the row's own icons and labels so the scene needs no extra nodes, and the base game, which
 	/// has no minor factions, draws exactly what it did.
@@ -378,9 +391,11 @@ public partial class FactionInfoRow : Control
 			cells.SetAnchorsPreset(LayoutPreset.FullRect);
 			tab.AddChild(cells);
 
-			AddMinorCounter(cells, minor, UnitType.ARMY, ArmyIcon, ArmyCountLabel, data.FactionColor);
+			AddCounter(cells, minor, UnitType.ARMY, data.FactionColor);
 			if (data.NumberOfNavyUnits > 0)
-				AddMinorCounter(cells, minor, UnitType.NAVY, NavyIcon, NavyCountLabel, data.FactionColor);
+				AddCounter(cells, minor, UnitType.NAVY, data.FactionColor);
+			if (data.NumberOfAirUnits > 0)
+				AddCounter(cells, minor, UnitType.AIR_FORCE, data.FactionColor);
 		}
 
 		// What hangs below the row moves down with it, so the VP popup and the card-delta animation do
@@ -390,23 +405,33 @@ public partial class FactionInfoRow : Control
 		CardsAnimationControl.Position += new Vector2(0, tabsHeight);
 	}
 
-	private void AddMinorCounter(HBoxContainer cells, Faction minor, UnitType type, TextureRect iconTemplate, Label labelTemplate, Color color)
+	/// <summary>An icon and count for <paramref name="faction"/>'s pool of <paramref name="type"/>, copied from the army counter.</summary>
+	private void AddCounter(HBoxContainer cells, Faction faction, UnitType type, Color color)
 	{
-		TextureRect icon = (TextureRect)iconTemplate.Duplicate(0);
+		TextureRect icon = (TextureRect)ArmyIcon.Duplicate(0);
 		icon.UniqueNameInOwner = false;
+		icon.Texture = type switch
+		{
+			UnitType.NAVY => NavyIcon.Texture,
+			UnitType.AIR_FORCE => AssetRepository.AirForceSprite,
+			_ => ArmyIcon.Texture,
+		};
 		icon.SelfModulate = color;
 		cells.AddChild(icon);
 
 		// Its own LabelSettings: SetUnitCount recolours each counter separately.
-		Label label = (Label)labelTemplate.Duplicate(0);
+		Label label = (Label)ArmyCountLabel.Duplicate(0);
 		label.UniqueNameInOwner = false;
-		label.LabelSettings = (LabelSettings)labelTemplate.LabelSettings.Duplicate();
+		label.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
 		cells.AddChild(label);
-		_minorCountLabels[(minor, type)] = label;
+		_builtCountLabels[(faction, type)] = label;
 	}
 
 	public void ShowCardDelta(int delta)
 	{
 		CardsAnimationControl.ShowCardsAnimation(delta);
 	}
+
+	/// <summary>Where the Active Cards button sits on screen, for a card shown going onto the table.</summary>
+	public Rect2 ActiveCardsButtonRect => PlayedCardsButton.GetGlobalRect();
 }

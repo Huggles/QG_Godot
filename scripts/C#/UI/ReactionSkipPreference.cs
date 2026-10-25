@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// This peer's per-faction "how much do you want to be asked about reactions" setting, armed ahead of
-/// any prompt from the toggle in the faction info row (<see cref="ReactionSkipToggleButton"/>) and
-/// also written back whenever a scope is chosen on a live prompt (<see cref="ReactionSkipScopeButton"/>),
-/// so the two can never disagree.
+/// This peer's per-faction "how much do you want to be asked about reactions" setting, written whenever
+/// a scope is chosen on a live prompt (<see cref="ReactionSkipScopeButton"/>).
 ///
 /// Client-local: nothing here crosses the wire. The only thing that reaches the host is the existing
 /// <see cref="InputRequest.ReactionSkipScope"/> field on the prompt's response, and only when a
@@ -24,15 +22,6 @@ public static class ReactionSkipPreference
     private readonly record struct Armed(ReactionSkipScope Scope, int Turn, TurnStep Step, int Round);
 
     private static readonly Dictionary<Faction, Armed> Armings = new();
-
-    /// <summary>The cycle order the row toggle walks, least to most silencing, and back to NONE.</summary>
-    private static readonly ReactionSkipScope[] CycleOrder =
-    {
-        ReactionSkipScope.NONE,
-        ReactionSkipScope.TURN_STEP,
-        ReactionSkipScope.ROUND,
-        ReactionSkipScope.UNTIL_ACTIVATABLE,
-    };
 
     /// <summary>
     /// Where every faction starts, and falls back to once a choice expires: the player's saved "Only Ask
@@ -58,8 +47,8 @@ public static class ReactionSkipPreference
     }
 
     /// <summary>
-    /// Choose a faction's setting and repaint anything showing it. NONE is stored too: with the default
-    /// "only ask when I can react", an explicit "always ask" must not fall back to it.
+    /// Choose a faction's setting. NONE is stored too: with the default "only ask when I can react", an
+    /// explicit "always ask" must not fall back to it.
     /// </summary>
     public static void Set(Faction faction, ReactionSkipScope scope)
     {
@@ -67,18 +56,6 @@ public static class ReactionSkipPreference
             Armings[faction] = new Armed(scope, gameFlow.GameTurn, gameFlow.TurnStep, gameFlow.Round);
         else
             Armings.Remove(faction);
-
-        EventBus.Emit(EventBus.SignalName.ReactionSkipPreferenceChanged, (int)faction);
-    }
-
-    /// <summary>Advance to the next setting in <see cref="CycleOrder"/> and return it.</summary>
-    public static ReactionSkipScope Cycle(Faction faction)
-    {
-        ReactionSkipScope current = ActiveScope(faction);
-        int index = System.Array.IndexOf(CycleOrder, current);
-        ReactionSkipScope next = CycleOrder[(index + 1) % CycleOrder.Length];
-        Set(faction, next);
-        return next;
     }
 
     /// <summary>Forget every arming. For a game ending or a session being torn down.</summary>
@@ -102,9 +79,8 @@ public static class ReactionSkipPreference
                 // on somebody else's turn. It does not ban the scope during your own turn: an arming
                 // made after the transition survives, because Drop has already run by then.
                 //
-                // Testing CurrentFaction alone was stricter than the host and wrong twice over — the
-                // scope could not be set on your own turn at all, and because the toggle collapsed
-                // straight back to NONE the cycle stalled there and never reached UNTIL_ACTIVATABLE.
+                // Testing CurrentFaction alone was stricter than the host: the scope could not be set
+                // on your own turn at all.
                 return armed.Turn == gameFlow.GameTurn || gameFlow.CurrentFaction != faction;
 
             case ReactionSkipScope.UNTIL_ACTIVATABLE:

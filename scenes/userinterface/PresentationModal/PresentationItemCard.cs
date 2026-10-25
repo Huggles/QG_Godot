@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 public partial class PresentationItemCard : PresentationItem
 {
-    // 70% of the 250x350 card, so a modal of draw or discard choices leaves more of the board in view.
-    public Vector2 CardSize = new Vector2(175, 245);
+    public static readonly Vector2 FullCardSize = new Vector2(250, 350);
+
+    // The full card at the player's Pop-up Card Size (100% by default); a smaller size leaves more of
+    // the board in view behind a modal of draw or discard choices. Read per item, so a change shows on the next modal.
+    public Vector2 CardSize = (FullCardSize * GameSettings.ModalCardScale).Round();
     private int cardId = -1;
 
     public CardScene CardSceneInstance {
