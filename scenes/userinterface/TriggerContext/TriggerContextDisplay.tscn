@@ -174,32 +174,3 @@ offset_left = 0.0
 offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 0.0
-
-[node name="AnnouncementCaptionPanel" type="PanelContainer" parent="AnnouncementFlight" unique_id=1288374016]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 70.0
-offset_bottom = 70.0
-grow_horizontal = 2
-mouse_filter = 2
-theme_override_styles/panel = ExtResource("3_t1u62")
-
-[node name="AnnouncementCaptionContainer" type="MarginContainer" parent="AnnouncementFlight/AnnouncementCaptionPanel" unique_id=913377245]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 7
-theme_override_constants/margin_top = 7
-theme_override_constants/margin_right = 7
-theme_override_constants/margin_bottom = 7
-
-[node name="AnnouncementCaption" type="RichTextLabel" parent="AnnouncementFlight/AnnouncementCaptionPanel/AnnouncementCaptionContainer" unique_id=2047113590]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_filter = 2
-bbcode_enabled = true
-fit_content = true
-scroll_active = false

@@ -5,13 +5,16 @@ public class ShowCardAnnouncementAnimation : ChangeEventAnimation
 {
     private readonly int _cardId;
     private readonly string _title;
+    private readonly bool _toTable;
 
-    public ShowCardAnnouncementAnimation(int cardId, string title)
+    /// <param name="toTable">The card is going onto the table, so it leaves the slot into its faction's Active Cards button.</param>
+    public ShowCardAnnouncementAnimation(int cardId, string title, bool toTable = false)
     {
         _cardId = cardId;
         _title = title;
+        _toTable = toTable;
     }
 
     protected override Task AnimateForTargetFaction()
-        => TriggerContextDisplay.Current?.AnnounceCard(_cardId, _title) ?? Task.CompletedTask;
+        => TriggerContextDisplay.Current?.AnnounceCard(_cardId, _title, _toTable) ?? Task.CompletedTask;
 }

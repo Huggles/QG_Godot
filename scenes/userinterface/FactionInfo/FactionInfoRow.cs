@@ -409,4 +409,7 @@ public partial class FactionInfoRow : Control
 	{
 		CardsAnimationControl.ShowCardsAnimation(delta);
 	}
+
+	/// <summary>Where the Active Cards button sits on screen, for a card shown going onto the table.</summary>
+	public Rect2 ActiveCardsButtonRect => PlayedCardsButton.GetGlobalRect();
 }
