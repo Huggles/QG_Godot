@@ -31,7 +31,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 
 	/// <summary>How much bigger than the slot an announced card first pops in.</summary>
 	private const float PopInScale = 1.4f;
-	private const int SlideMilliseconds = 350;
+	private const int SlideMilliseconds = 500;
 	private const int ShrinkMilliseconds = 400;
 	private const int ToTableMilliseconds = 450;
 
@@ -283,7 +283,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_flight = CreateTween();
 		_flight.TweenProperty(Flight, "global_position:x", screenRight - PopInRightMargin - Flight.Size.X, slide)
 			.SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
-		_flight.TweenInterval(GameSettings.DurationLongSeconds);
+		_flight.TweenInterval(GameSettings.DurationMediumSeconds);
 		_flight.TweenCallback(Callable.From(ShrinkIntoSlot));
 		return _flightDone.Task;
 	}

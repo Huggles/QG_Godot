@@ -29,6 +29,9 @@ public partial class TurnBadge : Control
 	/// <summary>The fade currently running, kept so the next turn can cut it short.</summary>
 	private Tween _fade;
 
+	/// <summary>Each of the fade in and the fade out, whatever the speed setting.</summary>
+	private const int FadeMilliseconds = 500;
+
 	/// <summary>
 	/// The turn already announced, so the catch-up below cannot announce it a second time. -1 until
 	/// the first announcement, which is never turn -1.
@@ -145,17 +148,11 @@ public partial class TurnBadge : Control
 		Modulate = new Color(Modulate, 0f);
 		Show();
 
-		// Its own totals (3s/2s/1s) rather than the duration table, whose steps don't land on them.
-		// GetFixedDurationSeconds still collapses to 0 under a fast-forwarded restore.
-		int totalMs = GameSettings.Instance?.PresentationSpeed switch
-		{
-			GameSpeed.Slow => 3000,
-			GameSpeed.Fast => 1000,
-			_ => 2000,
-		};
-		double fadeIn  = GameSettings.GetFixedDurationSeconds(totalMs / 4);
-		double hold    = GameSettings.GetFixedDurationSeconds(totalMs / 2);
-		double fadeOut = GameSettings.GetFixedDurationSeconds(totalMs / 4);
+		// Only the hold follows the speed setting; the fades are fixed. Both still collapse to 0 under a
+		// fast-forwarded restore.
+		double fadeIn  = GameSettings.GetFixedDurationSeconds(FadeMilliseconds);
+		double hold    = GameSettings.DurationMediumSeconds;
+		double fadeOut = GameSettings.GetFixedDurationSeconds(FadeMilliseconds);
 
 		Tween fade = CreateTween();
 		fade.TweenProperty(this, "modulate:a", 1f, fadeIn)

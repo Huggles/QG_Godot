@@ -132,7 +132,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     private static readonly int[,] DurationTable =
     {
         //  VeryLong  Long  Medium  Short  VeryShort
-        {    6000,   4000,   3000,  2000,   1000 },   // Slow
+        {    6000,   4000,   2000,  1000,   1000 },   // Slow
         {    3000,   2000,   1000,   750,    500 },   // Normal
         {    1500,   1000,    500,   250,    100 },   // Fast
     };
