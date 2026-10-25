@@ -64,13 +64,19 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// change — a peer that arrives mid-turn would otherwise sit on the defaults until the next step.
     /// Setting the counter on a client only drives the HUD (DispatchTurnStep is host-gated).
     /// </summary>
-    public void ApplyReplicatedFlow(bool started, int turn, int counter, TurnStep step)
+    public void ApplyReplicatedFlow(bool started, int turn, int counter, TurnStep step, int maxRound)
     {
         GameStarted = started;
         GameTurn = turn;
         TurnStep = step;
+        MaxRound = maxRound;
         TurnStepCounter = counter;
     }
+
+    /// <summary>
+    /// The round the game ends after. Only the host's copy decides that; it is on the
+    /// GameFlowMultiplayerSynchronizer so a client's RoundTrack shows the scenario's limit, not the default.
+    /// </summary>
     [Export] public int MaxRound { get; set; } = 20;
 
     /// <summary>
@@ -80,7 +86,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// Set from the scenario (with an optional lobby override) in
     /// GameModeMultiplayerDefault.SetupInitialGameState, which is awaited before StartGame. Host-only
     /// and deliberately not on the GameFlowMultiplayerSynchronizer — it gates work whose whole effect
-    /// reaches clients as replicated ChangeEvents, exactly like MaxRound.
+    /// reaches clients as replicated ChangeEvents.
     /// </summary>
     public bool OpeningDiscardEnabled { get; set; } = true;
 

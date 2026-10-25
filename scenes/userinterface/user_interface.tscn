@@ -25,7 +25,6 @@
 [ext_resource type="Script" uid="uid://uq8tqtb6j8iq" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
 [ext_resource type="Script" uid="uid://bhyk2pph2c0qf" path="res://scripts/C#/UI/TutorialArrow.cs" id="28_tutarrow"]
 [ext_resource type="Texture2D" uid="uid://s1w8qwl20na2" path="res://assets/textures/Other/Icons/Arrow.png" id="29_tutarrowtex"]
-[ext_resource type="Script" uid="uid://bqgrndlbl0001" path="res://scripts/C#/UI/GameRoundLabel.cs" id="30_roundlbl"]
 [ext_resource type="PackedScene" uid="uid://cb05yfgtalgy8" path="res://scenes/userinterface/PlayerAction/TurnBadge.tscn" id="31_turnbadge"]
 [ext_resource type="PackedScene" uid="uid://bchatbox0qg01" path="res://scenes/userinterface/Chat/ChatBox.tscn" id="32_chatbox"]
 [ext_resource type="PackedScene" uid="uid://bplayerspanel1" path="res://scenes/userinterface/Connection/PlayersPanel.tscn" id="33_players"]
@@ -33,11 +32,6 @@
 
 [sub_resource type="LabelSettings" id="LabelSettings_skipbtn"]
 font_size = 13
-
-[sub_resource type="LabelSettings" id="LabelSettings_round"]
-font_size = 34
-outline_size = 5
-outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fpk7i"]
 resource_local_to_scene = true
@@ -190,26 +184,6 @@ label_settings = SubResource("LabelSettings_skipbtn")
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
 offset_bottom = -1005.0
 mouse_filter = 2
-
-[node name="GameRoundPanel" type="PanelContainer" parent="." unique_id=102641007]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -72.0
-offset_top = 160.0
-offset_right = -8.0
-offset_bottom = 192.0
-grow_horizontal = 0
-
-[node name="GameRoundLabel" type="Label" parent="GameRoundPanel" unique_id=1493888180]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 1
-text = "Round 1"
-label_settings = SubResource("LabelSettings_round")
-horizontal_alignment = 2
-vertical_alignment = 1
-script = ExtResource("30_roundlbl")
 
 [node name="GameHistoryList" type="VBoxContainer" parent="." unique_id=703922686]
 clip_contents = true

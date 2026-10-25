@@ -268,7 +268,7 @@ public partial class RejoinService : Node
         new RecalculateTagsMessage(GameStateCalculator.BuildTagsSnapshot()).SendTo(sender);
         GameFlow flow = GameFlow.Instance;
         if (flow != null)
-            RpcId(sender, MethodName.SyncFlow, flow.IsStarted, flow.GameTurn, flow.TurnStepCounter, (int)flow.TurnStep);
+            RpcId(sender, MethodName.SyncFlow, flow.IsStarted, flow.GameTurn, flow.TurnStepCounter, (int)flow.TurnStep, flow.MaxRound);
 
         DebugUtilities.PrintPeer($"RejoinService: seat {seat} is back");
         ConnectionMonitor.Instance?.CompleteRejoin(seat);
@@ -365,6 +365,6 @@ public partial class RejoinService : Node
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void SyncFlow(bool started, int turn, int counter, int step)
-        => GameFlow.Instance?.ApplyReplicatedFlow(started, turn, counter, (TurnStep)step);
+    public void SyncFlow(bool started, int turn, int counter, int step, int maxRound)
+        => GameFlow.Instance?.ApplyReplicatedFlow(started, turn, counter, (TurnStep)step, maxRound);
 }

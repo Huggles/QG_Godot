@@ -236,7 +236,8 @@ public partial class GameModeMultiplayerDefault : IGameMode
     /// <summary>
     /// The half of setup that is NOT expressed as ChangeEvents, and so must run on a save restore too.
     ///
-    /// MaxRound and OpeningDiscardEnabled are plain host-side configuration. Step mutators are the
+    /// MaxRound and OpeningDiscardEnabled are plain configuration, set on the host (MaxRound reaches
+    /// clients through GameFlowMultiplayerSynchronizer, for the round track only). Step mutators are the
     /// reason this method has to exist at all: <see cref="RegisterMutators"/> puts them straight into
     /// ModifierRegistry rather than emitting a ChangeEvent, so replaying a save's event log alone would
     /// silently drop every scenario mutator with no error anywhere.
@@ -265,7 +266,7 @@ public partial class GameModeMultiplayerDefault : IGameMode
 
         // The scenario states the intended rule; the host may override it in the lobby. Read here
         // rather than in StartGame because this is where the scenario is parsed, and SetupInitialGameState
-        // is awaited before StartGame runs (MultiplayerSession.StartSession). Host-only, like MaxRound:
+        // is awaited before StartGame runs (MultiplayerSession.StartSession). Host-only:
         // it gates work that reaches clients as replicated ChangeEvents, so it needs no synchronising.
         GameFlow.Instance.OpeningDiscardEnabled = GameManager.PendingOpeningDiscard ?? initialStateData.OpeningDiscard;
 

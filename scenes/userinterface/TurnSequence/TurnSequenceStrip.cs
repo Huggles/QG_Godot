@@ -55,7 +55,7 @@ public partial class TurnSequenceStrip : Control
 		EventBus.Instance.NextStepStarted -= OnNextStepStarted;
 	}
 
-	// The same pair as GameRoundLabel, for the same reason: both fire on clients and during a save replay.
+	// The same pair as RoundTrack, for the same reason: both fire on clients and during a save replay.
 	private void OnGameChangeEventAfter(string changeEventName) => Refresh();
 
 	private void OnNextStepStarted(int turnStep) => Refresh();

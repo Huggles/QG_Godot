@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/userinterface/RoundTrack/RoundTrack.cs" id="1_track"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plate"]
+content_margin_left = 8.0
+content_margin_top = 3.0
+content_margin_right = 8.0
+content_margin_bottom = 7.0
+bg_color = Color(0.1, 0.1, 0.1, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.25)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="RoundTrack" type="PanelContainer"]
+custom_minimum_size = Vector2(215, 0)
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_plate")
+script = ExtResource("1_track")
+
+[node name="Rows" type="VBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="Heading" type="RichTextLabel" parent="Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/normal_font_size = 13
+bbcode_enabled = true
+text = "[center]Round [font_size=20]1[/font_size] of 20[/center]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Segments" type="HBoxContainer" parent="Rows"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2

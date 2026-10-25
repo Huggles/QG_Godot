@@ -62,7 +62,7 @@ public partial class FactionInfoRow : Control
 	/// turn can move — and NOT on NewTurnStarted, which is where this used to hang: that is emitted
 	/// inside GameFlow.StartNewTurn, which only the host runs, so a joined client sat on the opening
 	/// faction's dimming for the whole game and a save restore never repainted at all. Same pair, and
-	/// same reasoning, as GameRoundLabel and TurnFactionTint.
+	/// same reasoning, as RoundTrack and TurnFactionTint.
 	/// </summary>
 	private void OnGameChangeEventAfter(string changeEventName)
 	{
