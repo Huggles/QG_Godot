@@ -50,6 +50,8 @@ public sealed class AiSeatInputProvider : IInputProvider
         int think = ThinkTimeMs(request);
         if (think > 0)
         {
+            int generation = ErrorReporter.SessionGeneration;
+
             // Borrow the watcher treatment for the pause. From the human's point of view "Waiting on
             // Germany input…" is exactly true, even though the prompt is being answered inside their
             // own process. Only while actually pausing, or it would flicker on every empty reaction
@@ -64,6 +66,10 @@ public sealed class AiSeatInputProvider : IInputProvider
             {
                 InputRequest.MarkInputClosed(request.Answering);
             }
+
+            // Quitting mid-pause frees the session under us, and the bot would then read cards off a
+            // null GameSession. Unwind benignly instead, as NetworkApi does after its own awaits.
+            ErrorReporter.ThrowIfSessionAbandoned(generation);
         }
 
         try
