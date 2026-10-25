@@ -8,6 +8,7 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
 
 [node name="PresentationModal" type="PanelContainer" unique_id=2116214158]
+mouse_force_pass_scroll_events = false
 theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 script = ExtResource("1_jje3m")
 
