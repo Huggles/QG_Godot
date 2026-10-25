@@ -335,6 +335,9 @@ public abstract partial class InputRequest
 
     public async Task Execute()
     {
+        // On every peer, for every seat: a prompt asking for or reacting to the announced card keeps it up, any other drops it.
+        TriggerContextDisplay.Current?.ClearAnnouncementUnlessAbout(OriginCardId, TriggerCardId, TriggerBulletinCardId);
+
         if(IsForCurrentPeer)
         {
             // Showing the mutator's context here rather than in each Handle() covers every request

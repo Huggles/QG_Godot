@@ -35,8 +35,8 @@ public partial class PlayCardChangeEvent : ChangeEvent
     /// </summary>
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
-        new ShowCardsModalAnimation(
-            new List<int> { SourceCardId },
+        new ShowCardAnnouncementAnimation(
+            SourceCardId,
             SourceCardState.IsFaceVisibleToLocalPlayer
                 ? $"{TriggeringFaction.WithPlayer()} plays {SourceCardState.CardName}"
                 : $"{TriggeringFaction.WithPlayer()} plays a Response card")

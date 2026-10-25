@@ -17,8 +17,8 @@ public partial class UseAirPowerChangeEvent : ChangeEvent
 
     protected override List<ChangeEventAnimation> AfterAnimations => new()
     {
-        new ShowCardsModalAnimation(
-            new List<int> { SourceCardId },
+        new ShowCardAnnouncementAnimation(
+            SourceCardId,
             $"{TriggeringFaction.WithPlayer()} uses {SourceCardState.CardName}")
     };
 

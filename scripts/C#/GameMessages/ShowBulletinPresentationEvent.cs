@@ -46,8 +46,7 @@ public partial class ShowBulletinPresentationEvent : PresentationEvent
     }
 
     /// <summary>
-    /// The card gets the same modal a played or activated card gets (see PlayCardChangeEvent and
-    /// ActivateReactionChangeEvent), titled with the mutator's Description — so the player is told
+    /// The card gets a modal titled with the mutator's Description — so the player is told
     /// which card is acting *and* what it is doing, which the Bulletin used to carry alone.
     /// </summary>
     protected override List<ChangeEventAnimation> Animations => SourceCardId > -1

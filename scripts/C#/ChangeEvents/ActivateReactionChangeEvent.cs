@@ -51,8 +51,8 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
     protected override List<ChangeEventAnimation> AfterAnimations => IsFirstStep
         ? new()
         {
-            new ShowCardsModalAnimation(
-                new List<int> { SourceCardId },
+            new ShowCardAnnouncementAnimation(
+                SourceCardId,
                 $"{TriggeringFaction.WithPlayer()} activates {SourceCardState.CardName}")
         }
         : new();
@@ -65,7 +65,7 @@ public partial class ActivateReactionChangeEvent : ChangeEvent
         card.ActivatedInTurns.Add(board.GameTurn);
 
         // Flip the card face up for every peer. Set here rather than in AfterAnimations so it is
-        // already true when the "X activates Y" modal builds its CardScene: ChangeEvent.ApplyMutation
+        // already true when the "X activates Y" presentation builds its CardScene: ChangeEvent.ApplyMutation
         // runs Mutate before it enqueues AfterAnimations, on the server and on each client
         // replaying the event off ChangeEventQueue alike. Idempotent — a multi-step Response card
         // emits a second ActivateReactionChangeEvent via CardPlayRound.ContinueWithNextSteps.

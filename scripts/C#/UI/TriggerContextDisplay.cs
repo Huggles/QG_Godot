@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 /// <summary>
 /// The side panel that answers "why am I being asked this?" — it shows the thing that caused the
@@ -22,6 +23,28 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	// Control, not Panel: the node is a PanelContainer so its height follows the text, and only
 	// Visible is ever touched here.
 	private Control TriggerLabelPanel => GetNode<Control>("%TriggerLabelPanel");
+	private Control Column => GetNode<Control>("%TriggerContextColumn");
+
+	// The announced card's flight: a copy drawn under the history strip, handed off to the slot on landing.
+	private Control Flight => GetNode<Control>("%AnnouncementFlight");
+	private CardScene FlightCard => GetNode<CardScene>("%AnnouncementCard");
+	private Control FlightCaptionPanel => GetNode<Control>("%AnnouncementCaptionPanel");
+	private RichTextLabel FlightCaption => GetNode<RichTextLabel>("%AnnouncementCaption");
+
+	/// <summary>How much bigger than the slot an announced card first pops in.</summary>
+	private const float PopInScale = 1.4f;
+	private const int SlideMilliseconds = 350;
+	private const int ShrinkMilliseconds = 400;
+
+	/// <summary>Where the popped-in card stops, from the screen's right edge: clear of the 48px history strip.</summary>
+	[Export] private float PopInRightMargin = 70f;
+
+	// The announced card outlives a prompt that borrows the slot; _showingAnnouncement is whether it is on screen now.
+	private int _announcedCardId = -1;
+	private string _announcedTitle;
+	private bool _showingAnnouncement;
+	private Tween _flight;
+	private TaskCompletionSource _flightDone;
 
 
 	/// <summary>
@@ -81,6 +104,22 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		CardSceneNode.TriggersEmphasis(false);
 		CardSceneNode.SetClickable(false);
 		Panel.Visible = false;
+
+		FlightCard.TriggersEmphasis(false);
+		FlightCard.SetClickable(false);
+		FlightCard.SetMousePassthrough(true);
+		// Built at pop-in size and scaled down on landing, so its text never renders upscaled.
+		Flight.Size = Panel.CustomMinimumSize * PopInScale;
+		FlightCaptionPanel.OffsetTop = FlightCaptionPanel.OffsetBottom = Column.GetThemeConstant("separation") * PopInScale;
+		FlightCaption.AddThemeFontSizeOverride("normal_font_size",
+			Mathf.RoundToInt(Label.GetThemeFontSize("normal_font_size") * PopInScale));
+	}
+
+	// AnimationQueue is an autoload: a flight cut short by leaving the game must not leave it awaiting forever.
+	public override void _ExitTree()
+	{
+		_flightDone?.TrySetResult();
+		if (Current == this) Current = null;
 	}
 
 	/// <summary>Show a real card as the trigger — a played card being reacted to or blocked.</summary>
@@ -101,6 +140,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 						 List<int> targetCountryIds = null, List<int> targetUnitIds = null)
 	{
 		if (Panel == null) return;
+		EndAnnouncement();
 
 		if (cardId > -1)
 		{
@@ -121,6 +161,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	public void ShowCardOnly(int cardId)
 	{
 		if (Panel == null) return;
+		EndAnnouncement();
 
 		CardSceneNode.Visible = true;
 		CardSceneNode.ShowCard(cardId);
@@ -134,6 +175,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	public void ShowBulletin(CardFace face, string summaryText)
 	{
 		if (Panel == null) return;
+		EndAnnouncement();
 
 		CardSceneNode.Visible = true;
 		CardSceneNode.ShowFace(face);
@@ -198,11 +240,106 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		return question == null ? icon : $"{icon} [color={colour}][b]{question}[/b][/color]";
 	}
 
+	/// <summary>Take a prompt's context down, falling back to the announced card while it is still current.</summary>
 	public new void Hide()
 	{
+		if (_announcedCardId > -1)
+		{
+			ShowAnnouncement();
+			return;
+		}
+
+		EndAnnouncement();
 		HideFocus();
 		if (Panel != null)
 			Panel.Visible = false;
+	}
+
+	// ── Announced card ───────────────────────────────
+
+	/// <summary>
+	/// A played, activated or used card slides out from behind the history strip, holds a moment, then shrinks into the
+	/// slot and rests there until a prompt about another card or a step change clears it. Completes once it has landed.
+	/// </summary>
+	public Task AnnounceCard(int cardId, string title)
+	{
+		if (Panel == null) return Task.CompletedTask;
+
+		_announcedCardId = cardId;
+		_announcedTitle = title;
+		ShowAnnouncement();
+
+		double slide = GameSettings.GetFixedDurationSeconds(SlideMilliseconds);
+		if (slide <= 0) return Task.CompletedTask;
+
+		// The slot is laid out now but kept transparent, so its rect has settled by the time the card lands.
+		Column.Modulate = Colors.Transparent;
+		FlightCard.ShowCard(cardId);
+		FlightCaption.Text = title;
+		float screenRight = GetViewportRect().Size.X;
+		Flight.Scale = Vector2.One;
+		Flight.GlobalPosition = new Vector2(screenRight, Column.GlobalPosition.Y);
+		Flight.Visible = true;
+
+		_flightDone = new TaskCompletionSource();
+		_flight = CreateTween();
+		_flight.TweenProperty(Flight, "global_position:x", screenRight - PopInRightMargin - Flight.Size.X, slide)
+			.SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+		_flight.TweenInterval(GameSettings.DurationLongSeconds);
+		_flight.TweenCallback(Callable.From(ShrinkIntoSlot));
+		return _flightDone.Task;
+	}
+
+	/// <summary>
+	/// Drop the announced card unless it is one of <paramref name="cardIds"/>. A prompt's context on screen is
+	/// left alone; the announcement just no longer comes back when that prompt closes.
+	/// </summary>
+	public void ClearAnnouncementUnlessAbout(params int[] cardIds)
+	{
+		if (!cardIds.Contains(_announcedCardId)) ClearAnnouncement();
+	}
+
+	/// <summary>Drop the announced card outright, as a turn step change does.</summary>
+	public void ClearAnnouncement()
+	{
+		if (_announcedCardId < 0) return;
+		_announcedCardId = -1;
+		if (_showingAnnouncement) Hide();
+	}
+
+	private void ShowAnnouncement()
+	{
+		ShowCardOnly(_announcedCardId);
+		Label.Text = _announcedTitle;
+		TriggerLabelPanel.Visible = true;
+		_showingAnnouncement = true;
+	}
+
+	private void ShrinkIntoSlot()
+	{
+		Rect2 slot = CardSceneNode.GetGlobalRect();
+		double shrink = GameSettings.GetFixedDurationSeconds(ShrinkMilliseconds);
+		_flight = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut);
+		_flight.TweenProperty(Flight, "global_position", slot.Position, shrink);
+		_flight.TweenProperty(Flight, "scale", Vector2.One * (slot.Size.X / Flight.Size.X), shrink);
+		_flight.Chain().TweenCallback(Callable.From(EndFlight));
+	}
+
+	private void EndAnnouncement()
+	{
+		_showingAnnouncement = false;
+		EndFlight();
+	}
+
+	/// <summary>Land at once: drop the flying copy, reveal the slot and release the animation awaiting it.</summary>
+	private void EndFlight()
+	{
+		_flight?.Kill();
+		_flight = null;
+		Flight.Visible = false;
+		Column.Modulate = Colors.White;
+		_flightDone?.TrySetResult();
+		_flightDone = null;
 	}
 
 	// ── Focus viewport ───────────────────────────────
