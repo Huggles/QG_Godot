@@ -60,7 +60,16 @@ public partial class VictoryScreen : Control
             $"[center][font_size=64][b]{banner}[/b][/font_size]\n" +
             $"[font_size=24][color={NeutralColor.ToHtml(false)}]" +
             $"Axis {r.AxisTotal}  —  Allies {r.AlliesTotal}\n" +
-            $"Game ended: {r.EndReason} (Round {r.FinalRound})[/color][/font_size][/center]";
+            $"Game ended: {r.EndReason} (Round {r.FinalRound})[/color][/font_size]" +
+            RatingLine(r.LocalRatingChange) + "[/center]";
+    }
+
+    private static string RatingLine(RatingChange change)
+    {
+        if (change == null) return string.Empty;
+        Color color = change.Delta >= 0 ? new Color("#9fd98a") : AxisColor;
+        return $"\n[font_size=24][color={color.ToHtml(false)}]Rating {change.Delta:+0;-0}[/color]" +
+               $"[color={NeutralColor.ToHtml(false)}]  ({string.Join(", ", change.Reasons)})[/color][/font_size]";
     }
 
     private static void BuildColumn(HBoxContainer parent, GameResult r, FactionTeam team, Color teamColor)

@@ -164,6 +164,12 @@ public partial class GameFlow : SingletonNode<GameFlow>
     
     public Dictionary<Faction, List<VPTurnSummary>> VictoryPointSummaries = new Dictionary<Faction, List<VPTurnSummary>>();
 
+    /// <summary>Names this game across saves and restores, so its rating is settled once. Host only.</summary>
+    public string GameId { get; set; }
+
+    /// <summary>Whether the result moves the leaderboard; decided when the session starts. Host only.</summary>
+    public bool IsRanked { get; set; }
+
     public List<CardPlayRound> CardPlayRounds { get; } = new();
     public CardPlayRound CurrentCardPlayRound => CardPlayRounds.LastOrDefault();
 
@@ -341,6 +347,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
             {
                 GameResult result = BuildGameResult(axis, allies, pointLead ? "30-point lead" : $"Round {MaxRound} reached");
                 DebugUtilities.PrintPeer($"Game over ({result.EndReason}) — Axis {axis} / Allies {allies}, winner {result.WinningTeam}");
+                RankedRating.Settle(result, this, MultiplayerSession.Instance.GameState.GameMessages);
                 // Before BeginEndGame: a headless run quits on GameEnded. Opt-in under CLI so sim batches don't flood the saves folder.
                 if (!GameContext.IsCli || CliArgs.GetBool("save_completed"))
                     SaveCapture.CaptureCompleted(result);

@@ -217,6 +217,9 @@ public static class PlayerFactionRegistry
             ? playerScene
             : null;
 
+    /// <summary>Every registered seat (registry ids), people and bots alike.</summary>
+    public static List<int> GetSeatIds() => _peerIdToFactions.Keys.ToList();
+
     /// <summary>The registered seats played by people (registry ids), host included.</summary>
     public static List<int> GetHumanSeatIds()
         => _peerIdToPlayerScene.Keys.Where(id => !_aiSeatIds.Contains(id)).ToList();

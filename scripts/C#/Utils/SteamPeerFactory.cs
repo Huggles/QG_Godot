@@ -20,6 +20,9 @@ public static class SteamPeerFactory
 	/// </summary>
 	public static bool IsSupported => ClassDB.ClassExists("SteamMultiplayerPeer");
 
+	/// <summary>Whether <paramref name="peer"/> is the Steam transport, as opposed to ENet or offline.</summary>
+	public static bool IsSteamTransport(MultiplayerPeer peer) => peer != null && peer.IsClass("SteamMultiplayerPeer");
+
 	/// <summary>
 	/// The one native peer this process ever creates; every session reuses it.
 	///

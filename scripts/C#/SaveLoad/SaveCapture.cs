@@ -108,6 +108,8 @@ public static class SaveCapture
             Expansions     = GameOptions.EnabledExpansions.ToList(),
             Seed           = GameRandom.Seed,
             RngDraws       = GameRandom.DrawCount,
+            GameId         = GameFlow.Instance.GameId,
+            Ranked         = GameFlow.Instance.IsRanked,
 
             // OfType, not a cast: the journal also holds PresentationEvents (which mutate nothing) and
             // RecalculateTagsMessages (derived state the host recomputes per event during replay).
