@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Games.Indiegesindel;
@@ -66,7 +67,7 @@ public sealed record SteamFriend(
 /// Carries no display name: on a global board almost nobody is a friend, so names arrive separately and
 /// late through <see cref="SteamworksApi.PersonaNameOrRequest"/>.
 /// </summary>
-public sealed record LeaderboardRow(int Rank, ulong SteamId, int Score);
+public sealed record LeaderboardRow(int Rank, ulong SteamId, int Score, int[] Details = null);
 
 /// <summary>
 /// The only place in the game that talks to Steamworks. Everything else asks
@@ -227,6 +228,9 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_steam.LeaderboardScoresDownloadedSignal += OnLeaderboardScoresDownloaded;
 		_steam.LeaderboardScoreUploadedSignal    += OnLeaderboardScoreUploaded;
 		_steam.PersonaStateChangeSignal          += OnPersonaStateChange;
+
+		// GodotSteam only includes an entry's details in a download when this is above zero.
+		_steam.LeaderboardDetailsMax = MaxLeaderboardDetails;
 
 		// Only user_stats_received: GodotSteam 4.21 no longer has current_stats_received, although the C#
 		// bindings still list it. If auto-init's stats answer landed before this class existed,
@@ -643,6 +647,12 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	/// </summary>
 	private TaskCompletionSource<bool> _pendingUpload;
 
+	/// <summary>How many detail ints a download reads back per entry, and so the longest tag a write can carry.</summary>
+	private const int MaxLeaderboardDetails = 8;
+
+	/// <summary>Serialises read-then-write on the local entry, so a seed cannot land between a rating's read and write.</summary>
+	private readonly SemaphoreSlim _localEntryWrites = new(1, 1);
+
 	/// <summary>
 	/// Whether <paramref name="leaderboardName"/> exists on this app at all.
 	///
@@ -700,46 +710,95 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		long handle = await FindLeaderboardAsync(leaderboardName);
 		if (handle == 0) return false;
 
-		LeaderboardRow existing = await GetLocalEntryAsync(handle);
-		if (existing != null)
+		await _localEntryWrites.WaitAsync();
+		try
 		{
-			DebugUtilities.PrintPeerFinest(
-				$"Steam: already ranked on '{leaderboardName}' at {existing.Score}, not seeding");
-			return true;
+			(bool downloaded, LeaderboardRow existing) = await GetLocalEntryAsync(handle);
+			// A failed download is not "unranked": seeding then would raise a rating that has dropped below the seed.
+			if (!downloaded) return false;
+			if (existing != null)
+			{
+				DebugUtilities.PrintPeerFinest(
+					$"Steam: already ranked on '{leaderboardName}' at {existing.Score}, not seeding");
+				return true;
+			}
+
+			// keepBest, not force: losing a race with another client seeding the same player must never
+			// cost a score that is already higher.
+			bool posted = await UploadScoreAsync(handle, startingScore, keepBest: true);
+			if (posted) DebugUtilities.PrintPeer($"Steam: seeded '{leaderboardName}' entry at {startingScore}");
+
+			return posted;
 		}
-
-		// keepBest, not force: this is the one write that can race another client seeding the same
-		// player, and losing that race must never cost a score that is already higher. The real Elo
-		// write at the end of a match will have to force instead — an Elo is allowed to go down.
-		bool posted = await UploadScoreAsync(handle, startingScore, keepBest: true);
-		if (posted) DebugUtilities.PrintPeer($"Steam: seeded '{leaderboardName}' entry at {startingScore}");
-
-		return posted;
+		finally
+		{
+			_localEntryWrites.Release();
+		}
 	}
 
 	/// <summary>
-	/// The local player's row on an already-resolved leaderboard, or null when they have no entry.
-	///
-	/// A targeted download rather than a scan of <see cref="GetLeaderboardAsync"/>: one user is one round
-	/// trip whatever the board has grown to, and this runs on every trip through the menu.
+	/// Moves the local player's entry by <paramref name="delta"/>, once per <paramref name="tag"/>: the write
+	/// stores the tag in the entry's details, and an entry already carrying it is left alone. Returns the
+	/// new score, or null when nothing was written.
 	/// </summary>
-	private async Task<LeaderboardRow> GetLocalEntryAsync(long handle)
+	public async Task<int?> SubmitScoreChangeAsync(string leaderboardName, int delta, int startingScore, int[] tag)
+	{
+		if (!_available || string.IsNullOrWhiteSpace(leaderboardName) || tag is not { Length: > 0 and <= MaxLeaderboardDetails })
+			return null;
+
+		long handle = await FindLeaderboardAsync(leaderboardName);
+		if (handle == 0) return null;
+
+		await _localEntryWrites.WaitAsync();
+		try
+		{
+			(bool downloaded, LeaderboardRow existing) = await GetLocalEntryAsync(handle);
+			if (!downloaded)
+			{
+				DebugUtilities.PrintPeerError($"Steam: could not read the current score on '{leaderboardName}', change of {delta} not posted");
+				return null;
+			}
+			if (existing?.Details != null && existing.Details.Take(tag.Length).SequenceEqual(tag))
+			{
+				DebugUtilities.PrintPeer($"Steam: '{leaderboardName}' already holds this game's result ({existing.Score})");
+				return null;
+			}
+
+			// Force, not keepBest: a rating is allowed to go down.
+			int score = (existing?.Score ?? startingScore) + delta;
+			if (!await UploadScoreAsync(handle, score, keepBest: false, tag)) return null;
+
+			DebugUtilities.PrintPeer($"Steam: '{leaderboardName}' {existing?.Score ?? startingScore} → {score} ({delta:+0;-0})");
+			return score;
+		}
+		finally
+		{
+			_localEntryWrites.Release();
+		}
+	}
+
+	/// <summary>
+	/// The local player's row, or null when they have no entry. Downloaded is false when Steam never
+	/// answered, which callers must not mistake for "no entry".
+	/// </summary>
+	private async Task<(bool Downloaded, LeaderboardRow Row)> GetLocalEntryAsync(long handle)
 	{
 		var users = new Godot.Collections.Array { (long)LocalSteamId };
 
 		Godot.Collections.Array entries = await AwaitDownloadAsync(handle, () =>
 			_steam.DownloadLeaderboardEntriesForUsers(users, handle));
+		if (entries == null) return (false, null);
 
 		// An unranked user comes back as an empty array, which is an answer rather than a failure.
 		List<LeaderboardRow> rows = ParseEntries(entries);
-		return rows.Count > 0 ? rows[0] : null;
+		return (true, rows.Count > 0 ? rows[0] : null);
 	}
 
 	/// <summary>
 	/// Posts a score to an already-resolved leaderboard. Returns false when Steam refused the upload or
 	/// never answered — either way the player is simply not on the board, which every reader handles.
 	/// </summary>
-	private async Task<bool> UploadScoreAsync(long handle, int score, bool keepBest)
+	private async Task<bool> UploadScoreAsync(long handle, int score, bool keepBest, int[] details = null)
 	{
 		// One at a time: leaderboard_score_uploaded carries the handle but nothing to tell two writes to
 		// the same board apart.
@@ -748,7 +807,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		_pendingUpload = NewSource<bool>();
 
 		// Empty details rather than null: the binding hands this straight to a PackedInt32Array.
-		_steam.UploadLeaderboardScore(score, keepBest, System.Array.Empty<int>(), handle);
+		_steam.UploadLeaderboardScore(score, keepBest, details ?? System.Array.Empty<int>(), handle);
 
 		bool success = await WithTimeout(_pendingUpload, false, OpTimeoutSeconds);
 		_pendingUpload = null;
@@ -851,7 +910,8 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 			rows.Add(new LeaderboardRow(
 				Rank:    rank > 0 ? rank : index,
 				SteamId: (ulong)idValue.As<long>(),
-				Score:   scoreValue.As<int>()));
+				Score:   scoreValue.As<int>(),
+				Details: fields.TryGetValue("details", out Variant detailsValue) ? detailsValue.As<int[]>() : null));
 		}
 
 		return rows;
@@ -1136,8 +1196,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 
 	/// <summary>
 	/// <paramref name="thisScore"/> carries the score that landed and whether it changed the player's
-	/// standing. Neither is used: the only caller seeds a player who had no entry, so there is nothing to
-	/// compare against and nothing to tell them.
+	/// standing. Unused: both callers already know the score they posted.
 	/// </summary>
 	private void OnLeaderboardScoreUploaded(bool success, long thisHandle, Godot.Collections.Dictionary thisScore)
 	{

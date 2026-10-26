@@ -136,6 +136,11 @@ public partial class MultiplayerSession : Node
                 // game with its bots silently absent. A no-op unless this session has AI seats.
                 AiSeatRuntime.InstallIfRequested();
 
+                // A restored game keeps its id, and can stay ranked but never become ranked.
+                GameFlow.Instance.GameId   = restore?.GameId ?? RankedRating.NewGameId();
+                GameFlow.Instance.IsRanked = (restore == null || restore.Ranked) && RankedRating.SessionQualifies(Multiplayer);
+                DebugUtilities.PrintPeer($"Game {GameFlow.Instance.GameId} is {(GameFlow.Instance.IsRanked ? "ranked" : "unranked")}");
+
                 if (restore != null)
                 {
                     await _restore.RestoreAsync(gameMode, restore);
@@ -240,6 +245,7 @@ public partial class MultiplayerSession : Node
             // The game is decided: a player leaving the victory screen is not a lost connection.
             ConnectionMonitor.Instance?.Reset();
             VictoryScreen.PendingResult = JsonSerializer.Deserialize<GameResult>(resultJson);
+            VictoryScreen.PendingResult.LocalRatingChange = RankedRating.SubmitLocal(VictoryScreen.PendingResult);
 
             // Before the drain, not after: a headless run has no victory screen to reach, and this
             // is its only game-over notification. Announcing it here lets an automated run report the

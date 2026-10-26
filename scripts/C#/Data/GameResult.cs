@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Serializable end-of-game summary. Built on the host when a win condition is met,
@@ -15,6 +16,22 @@ public class GameResult
     public int FinalRound { get; set; }
     public string EndReason { get; set; }          // "30-point lead" | "Round 20 reached"
     public List<FactionResult> Factions { get; set; } = new();
+
+    public string GameId { get; set; }
+    public bool Ranked { get; set; }               // the leaderboard moves; see RankedRating
+    public List<RatingChange> RatingChanges { get; set; } = new();
+
+    /// <summary>This peer's own row, picked out on arrival. Not sent: every peer finds its own.</summary>
+    [JsonIgnore] public RatingChange LocalRatingChange { get; set; }
+}
+
+public class RatingChange
+{
+    public int SeatId { get; set; }
+    public string DisplayName { get; set; }
+    public FactionTeam Team { get; set; }
+    public int Delta { get; set; }
+    public List<string> Reasons { get; set; } = new();
 }
 
 public class FactionResult

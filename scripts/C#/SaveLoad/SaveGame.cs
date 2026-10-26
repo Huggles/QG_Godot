@@ -65,6 +65,12 @@ public class SaveGame
 
     public int Seed { get; set; }
 
+    /// <summary>Kept across restores so the game's rating is only ever settled once. Null in older saves.</summary>
+    public string GameId { get; set; }
+
+    /// <summary>Whether the game began ranked. A restore can keep that, never gain it.</summary>
+    public bool Ranked { get; set; }
+
     /// <summary>
     /// GameRandom.DrawCount at save time. Re-seeding and then fast-forwarding this many draws puts the
     /// restored game's randomness where the saved one left it, rather than handing the continuation the
