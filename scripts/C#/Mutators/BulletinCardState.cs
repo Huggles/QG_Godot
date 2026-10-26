@@ -44,5 +44,5 @@ public partial class BulletinCardState : CardState
     /// Falls back to CardData.Text: CardLogic is null on a card whose ExecutionClass failed to
     /// resolve, and the base class handles that case everywhere else too.
     /// </summary>
-    public override string DisplayText => (CardLogic as ActivatableMutator)?.Text ?? CardData.Text;
+    public override string DisplayText => (CardLogic as ActivatableMutator)?.DisplayText ?? CardData.Text;
 }

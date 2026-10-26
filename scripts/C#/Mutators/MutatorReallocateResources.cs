@@ -49,18 +49,29 @@ public partial class MutatorReallocateResources : ActivatableMutator
     public override string Label => "Reallocate Resources";
 
     /// <summary>
-    /// Computed live rather than fixed, and the reason CardState.DisplayText exists: naming the cards
-    /// still in the draw deck is only useful if the player can read it off the card face BEFORE
-    /// activating, since the activation cannot be undone once it starts. Reconstructing the same answer
-    /// from the discard pile is possible but tedious, so the card says it.
-    ///
-    /// Reads only replicated state (DeckCardIds) and static CardData, so every peer renders the same
-    /// text — see the note on ActivatableMutator.Text.
+    /// The rules text every peer shares: the live cost, but nothing about what is in the deck, which
+    /// only <see cref="DisplayText"/> adds for the owning player. See the note on ActivatableMutator.Text.
     /// </summary>
     public override string Text
     {
         get
         {
+            int cost = DiscardCost(BoardState.Live);
+            return $"Instead of playing a card: discard {cost} card{(cost == 1 ? "" : "s")} from your hand, then take "
+                 + "a Build or Battle card from your draw deck and play it immediately.";
+        }
+    }
+
+    /// <summary>
+    /// For the player who controls this faction, adds the cards still in the draw deck and how many of
+    /// each: the activation cannot be undone, so they read it BEFORE activating. Opponents never see it.
+    /// </summary>
+    public override string DisplayText
+    {
+        get
+        {
+            if (!PresentationServices.Notification.LocalPlayerControls(Faction)) return Text;
+
             // The count is every copy left in the deck, not just the one representative DrawOptions keeps.
             List<int> deck = BoardState.Live.ForFaction(Faction).Deck;
             List<string> available = DrawOptions(GameSituation.Live)
@@ -69,12 +80,9 @@ public partial class MutatorReallocateResources : ActivatableMutator
                 .Select(label => $"{label} ({deck.Count(cardId => CardState.ForId(cardId).CardData.Label == label)})")
                 .ToList();
 
-            int cost = DiscardCost(BoardState.Live);
-            return $"Instead of playing a card: discard {cost} card{(cost == 1 ? "" : "s")} from your hand, then take "
-                 + "one of these from your draw deck and play it immediately.\n\n"
-                 + (available.Count > 0
-                        ? $"Available: {string.Join(", ", available)}."
-                        : "Nothing left in your draw deck to take.");
+            return Text + "\n\n" + (available.Count > 0
+                ? $"Available: {string.Join(", ", available)}."
+                : "Nothing left in your draw deck to take.");
         }
     }
 
