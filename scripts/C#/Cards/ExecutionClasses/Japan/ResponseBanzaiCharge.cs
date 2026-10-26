@@ -7,9 +7,9 @@ using Godot;
 public partial class ResponseBanzaiCharge : ResponseCardLogic
 {
     /// <summary>
-    /// The land spaces this may battle: the one just battled and its neighbours, filtered to what is
-    /// attackable. Lifted out of the step closure so <see cref="Targets"/> reads the very list the
-    /// step offers — the whole point of the preview.
+    /// What is attackable in the land space just battled and its neighbours. Lifted out of the step
+    /// closure so <see cref="Targets"/> reads the very list the step offers. The country tag only marks
+    /// EMPTY spaces, so filtering countries on it first dropped every enemy army; BattleTarget.In reads both.
     /// </summary>
     private List<BattleTarget> BattleTargets(GameSituation situation)
     {
@@ -17,20 +17,12 @@ public partial class ResponseBanzaiCharge : ResponseCardLogic
         var battleLocation = TriggerContextAs<BattleCountryChangeEvent>(situation)?.CountryState;
         if (battleLocation == null) return new List<BattleTarget>();
 
-        var targetCountries = board.AdjacentCountryStates(Faction, battleLocation)
+        var landIds = board.AdjacentCountryStates(Faction, battleLocation)
             .Append(battleLocation)
-            .Distinct()
-            .Where(cs => cs.Type == CountryType.LAND && board.Of(cs).Tags.Has(Tag.Attackable, Faction))
-            .ToList();
-
-        var attackableArmyIds = board.AttackableArmyIds(Faction).ToHashSet();
-        var targets = targetCountries
-            .SelectMany(cs => board.UnitsIn(cs).Values)
-            .Where(uId => attackableArmyIds.Contains(uId))
-            .Select(uId => new BattleTarget(uId, TargetType.UNIT))
-            .ToList();
-        targets.AddRange(targetCountries.Select(cs => new BattleTarget(cs.Id, TargetType.COUNTRY)));
-        return targets;
+            .Where(cs => cs.Type == CountryType.LAND)
+            .Select(cs => cs.Id)
+            .Distinct();
+        return BattleTarget.In(board, landIds, Faction);
     }
 
     public override TargetSet Targets() => TargetSet.FromBattleTargets(BattleTargets(GameSituation.Live));
