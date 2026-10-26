@@ -14,6 +14,8 @@ public partial class StatusRadar : StatusCardLogic
         return new List<Condition> {
             Condition.Build(new Condition.IsBlockRequest(), this),
             Condition.Build(new Condition.UnitAboutToBeRemoved(Faction, UnitType.NAVY, requireInSupply: true), this),
+            // "When your supplied Navy is battled": an elimination (Kamikaze) or supply loss is not a battle.
+            Condition.Build(new Condition.CustomCondition(s => s.BlockTrigger is RemoveUnitChangeEvent { Reason: UnitRemovalReason.BATTLE }), this),
             Condition.Build(new Condition.CardHasNotBeenActivatedThisTurn(CardState), this)
         };
     }
