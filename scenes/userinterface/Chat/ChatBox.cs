@@ -8,7 +8,6 @@ using Godot;
 /// </summary>
 public partial class ChatBox : PanelContainer
 {
-    private const double FadeSeconds = 0.25;
     private const int MaxLines = 100;
 
     private static readonly Color TeamColor = new("#7fd67f");
@@ -215,7 +214,7 @@ public partial class ChatBox : PanelContainer
         Visible = true;
         _fade?.Kill();
         _fade = CreateTween();
-        _fade.TweenProperty(this, "modulate:a", 1.0f, FadeSeconds);
+        _fade.TweenProperty(this, "modulate:a", 1.0f, GameSettings.ShowHideSeconds);
     }
 
     private void FadeOut()
@@ -223,7 +222,7 @@ public partial class ChatBox : PanelContainer
         _shown = false;
         _fade?.Kill();
         _fade = CreateTween();
-        _fade.TweenProperty(this, "modulate:a", 0.0f, FadeSeconds);
+        _fade.TweenProperty(this, "modulate:a", 0.0f, GameSettings.ShowHideSeconds);
         _fade.TweenCallback(Callable.From(() => Visible = false));
     }
 }

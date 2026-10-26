@@ -32,7 +32,8 @@ public class DeployUnitAnimation : ChangeEventAnimation
         Control shadow = sprite.GetNode<Control>("Shadow");
         Vector2 shadowGround = shadow.Position;
         float scale = UnitScene.DefaultSpriteScale;
-        double fall = GameSettings.DurationVeryShortSeconds;
+        // Half the time falling and a quarter each squashing and settling, so Medium in all.
+        double fall = GameSettings.DurationMediumSeconds / 2;
         double settle = fall / 2;
 
         // Start pose now, or the unit flashes on its spot for the frame before the tween's first step.

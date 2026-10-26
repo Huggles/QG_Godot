@@ -36,6 +36,12 @@ public abstract partial class ActivatableMutator : CardLogic
     public abstract string Text { get; }
 
     /// <summary>
+    /// The body text as the local player reads it on the card face — the one read that MAY differ
+    /// between peers, since only BulletinCardState.DisplayText uses it to render. Defaults to <see cref="Text"/>.
+    /// </summary>
+    public virtual string DisplayText => Text;
+
+    /// <summary>
     /// Mirrors CardData.MultipleActivationsPerTurn: false (the default) means once per faction turn.
     /// Read at registration and copied onto the synthetic CardData, which is what CanBeActivated reads.
     /// </summary>

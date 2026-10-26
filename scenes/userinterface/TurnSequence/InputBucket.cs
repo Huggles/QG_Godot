@@ -67,7 +67,7 @@ public partial class InputBucket : Control
 		_tween?.Kill();
 		if (shown.Count == 0) return;
 		_tween = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
-		double duration = GameSettings.DurationShortSeconds;
+		double duration = GameSettings.ShowHideSeconds;
 		for (int i = 0; i < shown.Count; i++)
 		{
 			Vector2 position = new(i * (BucketSize + BucketGap), 0);
@@ -113,7 +113,7 @@ public partial class InputBucket : Control
 		Control bucket = _buckets[faction];
 		_buckets.Remove(faction);
 		Tween fade = bucket.CreateTween();
-		fade.TweenProperty(bucket, "modulate:a", 0f, GameSettings.DurationShortSeconds);
+		fade.TweenProperty(bucket, "modulate:a", 0f, GameSettings.ShowHideSeconds);
 		fade.TweenCallback(Callable.From(bucket.QueueFree));
 	}
 

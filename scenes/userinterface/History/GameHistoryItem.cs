@@ -21,8 +21,8 @@ public partial class GameHistoryItem : Control
 	private const float TintAlpha = 0.35f;
 
 	/// <summary>
-	/// Fixed, not a GameSettings duration: DurationMedium is 3s on Slow speed, and a badge that takes
-	/// three seconds to appear is not feedback.
+	/// Fixed, not a GameSettings duration: DurationMedium is 2s on Slow speed, and a badge that takes
+	/// two seconds to appear is not feedback.
 	/// </summary>
 	private const double AppearSeconds = 0.15;
 
