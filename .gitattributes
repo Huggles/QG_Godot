@@ -1,2 +1,5 @@
 # Normalize EOL for all files that Git considers text files.
 * text=auto eol=lf
+
+# Steamworks bulk-import CSVs keep the CRLF line endings Steam exports and requires on upload.
+steamworks/*.csv -text

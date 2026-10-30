@@ -79,6 +79,9 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     [Export] public int MaxRound { get; set; } = 20;
 
+    /// <summary>A team this far ahead after a round wins on the spot.</summary>
+    public const int DecisiveLead = 30;
+
     /// <summary>
     /// Whether the game opens with the mandatory discard. True: deal OpeningHandSize and cut back to
     /// HandSize before the first turn. False: deal HandSize and start.
@@ -341,7 +344,7 @@ public partial class GameFlow : SingletonNode<GameFlow>
         {
             int axis   = StaticGameData.ScoreForTeam(FactionTeam.AXIS);
             int allies = StaticGameData.ScoreForTeam(FactionTeam.ALLIES);
-            bool pointLead  = Math.Abs(axis - allies) >= 30;
+            bool pointLead  = Math.Abs(axis - allies) >= DecisiveLead;
             bool roundLimit = Round >= MaxRound;
             if (pointLead || roundLimit)
             {

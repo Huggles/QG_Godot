@@ -1,0 +1,65 @@
+﻿api_name (required; must match an api_name from the definitions CSV),field (name or description),english
+SOUTHERN_CROSS_AUSTRALIA,name,The Southern Cross is OURS
+SOUTHERN_CROSS_AUSTRALIA,description,Have a German Army in Australia
+NEW_ROMAN_EMPIRE,name,The New Roman Empire
+NEW_ROMAN_EMPIRE,description,Have an Italian Army in Australia
+SUN_RISES_OVER_EUROPE,name,The Sun Rises Over Europe
+SUN_RISES_OVER_EUROPE,description,Have a Japanese Army in Western Europe
+LONG_WAY_FROM_LONDON,name,A Very Long Way from London
+LONG_WAY_FROM_LONDON,description,Have a United Kingdom Army in Vladivostok
+ALONG_THE_TRANS_SIBERIAN,name,Along the Trans-Siberian
+ALONG_THE_TRANS_SIBERIAN,description,Have a United States Army in Siberia
+RED_ARMY_DOWN_UNDER,name,The Red Army Down Under
+RED_ARMY_DOWN_UNDER,description,Have a Soviet Army in Australia
+FIRST_VICTORY,name,First Victory
+FIRST_VICTORY,description,Win a game
+VICTORY_GERMANY,name,German Victory
+VICTORY_GERMANY,description,Win a game as Germany
+VICTORY_UNITED_KINGDOM,name,British Victory
+VICTORY_UNITED_KINGDOM,description,Win a game as the United Kingdom
+VICTORY_JAPAN,name,Japanese Victory
+VICTORY_JAPAN,description,Win a game as Japan
+VICTORY_SOVIET,name,Soviet Victory
+VICTORY_SOVIET,description,Win a game as the Soviet Union
+VICTORY_ITALY,name,Italian Victory
+VICTORY_ITALY,description,Win a game as Italy
+VICTORY_UNITED_STATES,name,American Victory
+VICTORY_UNITED_STATES,description,Win a game as the United States
+FIRST_BLOOD,name,First Blood
+FIRST_BLOOD,description,Be the first to eliminate an enemy unit in a game
+D_DAY,name,D-Day
+D_DAY,description,Have a United Kingdom or United States Army in Western Europe
+ECONOMIC_WARFARE_UNITED_STATES,name,Strategic Bombing
+ECONOMIC_WARFARE_UNITED_STATES,description,"As the United States, force a single enemy faction to discard 5 cards in one round"
+ECONOMIC_WARFARE_UNITED_KINGDOM,name,Blockade
+ECONOMIC_WARFARE_UNITED_KINGDOM,description,"As the United Kingdom, force a single enemy faction to discard 4 cards in one round"
+SUPPLY_LOSSES_1,name,Cut Off
+SUPPLY_LOSSES_1,description,Have an enemy faction lose a unit to lack of supply
+DECISIVE_VICTORY,name,Decisive Victory
+DECISIVE_VICTORY,description,Win a game by a 30-point lead
+OPERATION_BARBAROSSA,name,Operation Barbarossa
+OPERATION_BARBAROSSA,description,Have a German Army in Moscow
+WAR_OF_ATTRITION,name,War of Attrition
+WAR_OF_ATTRITION,description,Eliminate 100 enemy units across all your games
+ECONOMIC_WARFARE_GERMANY,name,Battle of the Atlantic
+ECONOMIC_WARFARE_GERMANY,description,"As Germany, force a single enemy faction to discard 5 cards in one round"
+ECONOMIC_WARFARE_ITALY,name,Mare Nostrum
+ECONOMIC_WARFARE_ITALY,description,"As Italy, force a single enemy faction to discard 3 cards in one round"
+ECONOMIC_STRANGLEHOLD,name,Economic Stranglehold
+ECONOMIC_STRANGLEHOLD,description,"With a single faction, force enemies to discard 10 cards in one game"
+SUPPLY_LOSSES_2,name,Encirclement
+SUPPLY_LOSSES_2,description,Have an enemy faction lose 2 units to lack of supply in one turn
+LIGHTNING_WAR,name,Lightning War
+LIGHTNING_WAR,description,Win a game by a 30-point lead by the end of round 8
+AGAINST_ALL_ODDS,name,Against All Odds
+AGAINST_ALL_ODDS,description,Win a game after trailing by 20 or more points at the end of a round
+DOWNFALL,name,Downfall
+DOWNFALL,description,Have a United States Army in Japan
+VETERAN_COMMANDER,name,Veteran Commander
+VETERAN_COMMANDER,description,Win 10 games
+FIRST_BLOOD_US,name,Doolittle Raid
+FIRST_BLOOD_US,description,"As the United States, be the first to eliminate an enemy unit in a game"
+ECONOMIC_WARFARE_JAPAN,name,Indian Ocean Raid
+ECONOMIC_WARFARE_JAPAN,description,"As Japan, force a single enemy faction to discard 5 cards in one round"
+SUPPLY_LOSSES_3,name,The Pocket
+SUPPLY_LOSSES_3,description,Have an enemy faction lose 3 units to lack of supply in one turn
