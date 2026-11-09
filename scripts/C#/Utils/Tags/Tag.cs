@@ -69,7 +69,7 @@ public enum Tag
     /// On a COUNTRY or a UNIT: the player is hovering a card in an open card prompt and this is one of
     /// the things the card could affect. Never clickable: the game is still waiting for a card.
     ///
-    /// A country glows faintly (an empty battle target flashes instead); a unit puts up its own target
+    /// A country glows faintly (an empty battle target on one pulse in three); a unit puts up its own target
     /// marker and its country glows faintly too (<see cref="HoldsUnitTarget"/>).
     ///
     /// Raised and cleared only by <see cref="CardTargetPreviewDisplay"/> on the hovering peer. Local
@@ -102,8 +102,8 @@ public enum Tag
     FocusTarget,
 
     /// <summary>
-    /// On a COUNTRY: offered as a battle target because it is empty. Drawn as an occasional flash rather
-    /// than a full glow, so it does not outshine the unit targets. Local, like <see cref="Clickable"/>.
+    /// On a COUNTRY: offered as a battle target because it is empty. Drawn with the faint glow on only one
+    /// pulse in three, so it does not outshine the unit targets. Local, like <see cref="Clickable"/>.
     /// </summary>
     EmptyBattleTarget,
 

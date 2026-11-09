@@ -252,7 +252,7 @@ public partial class CountryScene : Control
 		}
 	}
 
-	/// <summary>Country.tscn's glow settings: the full target look, which the faint and flash styles scale down from.</summary>
+	/// <summary>Country.tscn's glow settings: the full target look, which the faint and sparse styles scale down from.</summary>
 	private float authoredGlowAlpha, authoredFillAlpha, authoredPulseSpeed, authoredPulseMin;
 
 	/// <summary>
@@ -592,7 +592,8 @@ public partial class CountryScene : Control
 	/// <summary>True while the player is hovering a card that could affect this country.</summary>
 	private bool IsPreviewTarget => CountryState.Tags.Has(Tag.PreviewTarget, Faction.ALL);
 
-	private enum GlowStyle { Hidden, Full, Faint, Flash }
+	/// <summary>Sparse is Faint showing only one pulse in <see cref="SparsePulseEvery"/>.</summary>
+	private enum GlowStyle { Hidden, Full, Faint, Sparse }
 
 	/// <summary>
 	/// A previewed country, or one holding a unit target, pulses up to FaintGlowScale of the full glow and
@@ -601,21 +602,16 @@ public partial class CountryScene : Control
 	private const float FaintGlowScale = 0.4f;
 	private const float FaintPulseMin = 0.15f;
 
-	/// <summary>An empty battle target flashes once per period, for FlashDuration seconds, up to FlashPeakScale of the full glow.</summary>
-	private const ulong FlashPeriodMsec = 3000;
-	private const float FlashDuration = 0.8f;
-	private const float FlashPeakScale = 0.4f;
+	/// <summary>An empty battle target: the faint glow, in step with the others, but dark for two pulses of every three.</summary>
+	private const int SparsePulseEvery = 3;
 
-	/// <summary>Every empty target starts flashing in the same frame, so per-country start times keep them in step.</summary>
-	private ulong flashStartMsec;
-
-	/// <summary>Only an offered target gets the full glow; a card preview stays faint. An empty battle target only flashes.</summary>
+	/// <summary>Only an offered target gets the full glow; a card preview stays faint. An empty battle target is sparse.</summary>
 	private GlowStyle CurrentGlowStyle()
 	{
 		if (targetPresentationMode != TargetPresentationMode.Glow) return GlowStyle.Hidden;
 		bool emptyBattle = CountryState.Tags.Has(Tag.EmptyBattleTarget, Faction.ALL);
-		if (IsOfferedTarget) return emptyBattle ? GlowStyle.Flash : GlowStyle.Full;
-		if (IsPreviewTarget) return emptyBattle ? GlowStyle.Flash : GlowStyle.Faint;
+		if (IsOfferedTarget) return emptyBattle ? GlowStyle.Sparse : GlowStyle.Full;
+		if (IsPreviewTarget) return emptyBattle ? GlowStyle.Sparse : GlowStyle.Faint;
 		return CountryState.Tags.Has(Tag.HoldsUnitTarget, Faction.ALL) ? GlowStyle.Faint : GlowStyle.Hidden;
 	}
 
@@ -630,21 +626,18 @@ public partial class CountryScene : Control
 		CountrySpriteTextureRectContainer.Visible = shown;
 		// GUI picking walks children last-first, so a faint silhouette would take the clicks meant for its unit markers.
 		CountrySpriteTextureRect.MouseFilter = style == GlowStyle.Faint ? MouseFilterEnum.Ignore : MouseFilterEnum.Pass;
-		SetFlashing(style == GlowStyle.Flash);
 		if (!shown) return;
 
 		if (isHovered && IsOfferedTarget)
 			ApplyGlow(Colors.Green, 1f, fill: true, authoredPulseMin);
-		else if (style == GlowStyle.Faint)
-			ApplyGlow(Colors.Yellow, FaintGlowScale, fill: false, FaintPulseMin);
-		else if (style == GlowStyle.Flash)
-			ApplyGlow(Colors.Yellow, 0f, fill: false, pulseMin: null);
+		else if (style is GlowStyle.Faint or GlowStyle.Sparse)
+			ApplyGlow(Colors.Yellow, FaintGlowScale, fill: false, FaintPulseMin, style == GlowStyle.Sparse ? SparsePulseEvery : 1);
 		else
 			ApplyGlow(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Orange : Colors.Yellow, 1f, fill: true, authoredPulseMin);
 	}
 
-	/// <summary><paramref name="glowScale"/> scales the authored glow_alpha. A null <paramref name="pulseMin"/> holds the glow steady.</summary>
-	private void ApplyGlow(Color color, float glowScale, bool fill, float? pulseMin)
+	/// <summary><paramref name="glowScale"/> scales the authored glow_alpha; the shader shows one pulse in <paramref name="pulseEvery"/>.</summary>
+	private void ApplyGlow(Color color, float glowScale, bool fill, float pulseMin, int pulseEvery = 1)
 	{
 		ShaderMaterial material = CountryShaderMaterial;
 		if (material == null) return;
@@ -652,24 +645,9 @@ public partial class CountryScene : Control
 		SetCountryColor(color);
 		material.SetShaderParameter("glow_alpha", authoredGlowAlpha * glowScale);
 		material.SetShaderParameter("fill_alpha", fill ? authoredFillAlpha : 0f);
-		material.SetShaderParameter("pulse_speed", pulseMin.HasValue ? authoredPulseSpeed : 0f);
-		material.SetShaderParameter("pulse_min", pulseMin ?? authoredPulseMin);
-	}
-
-	private void SetFlashing(bool flashing)
-	{
-		if (flashing && !IsProcessing()) flashStartMsec = Time.GetTicksMsec();
-		SetProcess(flashing);
-	}
-
-	/// <summary>Only runs while flashing: a short sine bump at the start of every period, held off while hovered.</summary>
-	public override void _Process(double delta)
-	{
-		if (isHovered) return;
-
-		float t = (Time.GetTicksMsec() - flashStartMsec) % FlashPeriodMsec / 1000f;
-		float level = t < FlashDuration ? MathF.Sin(MathF.PI * t / FlashDuration) : 0f;
-		CountryShaderMaterial?.SetShaderParameter("glow_alpha", authoredGlowAlpha * FlashPeakScale * level);
+		material.SetShaderParameter("pulse_speed", authoredPulseSpeed);
+		material.SetShaderParameter("pulse_min", pulseMin);
+		material.SetShaderParameter("pulse_every", pulseEvery);
 	}
 
 	public void SetClickable()

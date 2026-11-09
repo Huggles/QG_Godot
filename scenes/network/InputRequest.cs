@@ -287,7 +287,7 @@ public abstract partial class InputRequest
         /// <summary>Countries the card names outright. NOT the countries its unit targets stand in.</summary>
         public List<int> CountryIds { get; set; }
 
-        /// <summary>Empty countries the card could battle in; drawn as an occasional flash, not a full glow.</summary>
+        /// <summary>Empty countries the card could battle in; drawn faintly on one pulse in three, not a full glow.</summary>
         public List<int> EmptyBattleCountryIds { get; set; }
 
         /// <summary>Units the card names. Each lights its own marker; its country glows faintly.</summary>

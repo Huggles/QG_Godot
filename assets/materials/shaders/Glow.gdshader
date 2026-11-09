@@ -29,6 +29,9 @@ uniform vec4 fill_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 // Pulsing. Set pulse_speed to 0 for a steady glow.
 uniform float pulse_speed = 3.0;
 uniform float pulse_min : hint_range(0.0, 1.0) = 0.35;
+// Shows only one pulse in every pulse_every, dark in between. The shown pulse
+// dips to zero instead of pulse_min at its ends, so it fades in and out cleanly.
+uniform int pulse_every : hint_range(1, 8) = 1;
 
 void fragment() {
 	vec4 tex = texture(TEXTURE, UV);
@@ -61,9 +64,14 @@ void fragment() {
 	float inner = near_empty * tex.a * inner_glow;
 	float edge = pow(clamp(max(outer, inner), 0.0, 1.0), glow_falloff);
 
-	float pulse = pulse_speed == 0.0
-		? 1.0
-		: mix(pulse_min, 1.0, 0.5 + 0.5 * sin(TIME * pulse_speed));
+	float wave = 0.5 + 0.5 * sin(TIME * pulse_speed);
+	float pulse = pulse_speed == 0.0 ? 1.0 : mix(pulse_min, 1.0, wave);
+	if (pulse_speed != 0.0 && pulse_every > 1) {
+		// Cycles run trough to trough, so a pulse is never cut off mid-swell.
+		// Integer modulo: float mod() can land on pulse_every instead of 0 on a GPU.
+		int cycle = int(floor((TIME * pulse_speed + 0.5 * PI) / TAU));
+		pulse = cycle % pulse_every == 0 ? wave : 0.0;
+	}
 
 	// Composite the glow over the texture, so the inner half of the band stays
 	// visible on top of an opaque shape.
