@@ -605,6 +605,9 @@ public partial class CountryScene : Control
 	/// <summary>An empty battle target: the faint glow, in step with the others, but dark for two pulses of every three.</summary>
 	private const int SparsePulseEvery = 3;
 
+	/// <summary>Hovering an empty battle target lights it orange at this share of the full glow, not the green of a real target.</summary>
+	private const float SparseHoverGlowScale = 0.7f;
+
 	/// <summary>Only an offered target gets the full glow; a card preview stays faint. An empty battle target is sparse.</summary>
 	private GlowStyle CurrentGlowStyle()
 	{
@@ -628,7 +631,9 @@ public partial class CountryScene : Control
 		CountrySpriteTextureRect.MouseFilter = style == GlowStyle.Faint ? MouseFilterEnum.Ignore : MouseFilterEnum.Pass;
 		if (!shown) return;
 
-		if (isHovered && IsOfferedTarget)
+		if (isHovered && IsOfferedTarget && style == GlowStyle.Sparse)
+			ApplyGlow(Colors.Orange, SparseHoverGlowScale, fill: true, authoredPulseMin);
+		else if (isHovered && IsOfferedTarget)
 			ApplyGlow(Colors.Green, 1f, fill: true, authoredPulseMin);
 		else if (style is GlowStyle.Faint or GlowStyle.Sparse)
 			ApplyGlow(Colors.Yellow, FaintGlowScale, fill: false, FaintPulseMin, style == GlowStyle.Sparse ? SparsePulseEvery : 1);
