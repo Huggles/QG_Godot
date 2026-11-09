@@ -16,7 +16,8 @@ public partial class PlayersPanel : PanelContainer
     private static readonly Color BadColor = new("#e57373");
     private static readonly Color QuietColor = new("#a0a0a0");
 
-    private VBoxContainer Rows => GetNode<VBoxContainer>("%Rows");
+    /// <summary>Three columns (name, flags, status), so each column lines up across players.</summary>
+    private GridContainer Rows => GetNode<GridContainer>("%Rows");
 
     public override void _Ready()
     {
@@ -49,26 +50,25 @@ public partial class PlayersPanel : PanelContainer
             Rows.RemoveChild(child);
             child.QueueFree();
         }
-        foreach (PlayerConnectionRow row in table) Rows.AddChild(BuildRow(row));
+        foreach (PlayerConnectionRow row in table) AddRow(row);
     }
 
-    private static HBoxContainer BuildRow(PlayerConnectionRow row)
+    /// <summary>One cell per grid column; the flags column takes the spare width so the status stays right.</summary>
+    private void AddRow(PlayerConnectionRow row)
     {
-        HBoxContainer line = new() { MouseFilter = MouseFilterEnum.Ignore };
-        line.AddThemeConstantOverride("separation", 8);
-
         Label name = new() { Text = row.Name };
         name.AddThemeFontSizeOverride("font_size", 14);
-        line.AddChild(name);
-        line.AddChild(BuildFlags(row.SeatId));
-        line.AddChild(new Control { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
+        Rows.AddChild(name);
+
+        HBoxContainer flags = BuildFlags(row.SeatId);
+        flags.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+        Rows.AddChild(flags);
 
         (string text, Color color) = Status(row);
         Label status = new() { Text = text, HorizontalAlignment = HorizontalAlignment.Right };
         status.AddThemeFontSizeOverride("font_size", 14);
         status.AddThemeColorOverride("font_color", color);
-        line.AddChild(status);
-        return line;
+        Rows.AddChild(status);
     }
 
     /// <summary>
