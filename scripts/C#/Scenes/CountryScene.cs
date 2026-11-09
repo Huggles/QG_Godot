@@ -593,7 +593,7 @@ public partial class CountryScene : Control
 
 	private enum GlowStyle { Hidden, Full, Faint, Flash }
 
-	/// <summary>How much of the full glow a country holding a unit target gets.</summary>
+	/// <summary>How much of the full glow a previewed country, or one holding a unit target, gets.</summary>
 	private const float FaintGlowScale = 0.2f;
 
 	/// <summary>An empty battle target flashes once per period, for FlashDuration seconds, up to FlashPeakScale of the full glow.</summary>
@@ -604,11 +604,13 @@ public partial class CountryScene : Control
 	/// <summary>Every empty target starts flashing in the same frame, so per-country start times keep them in step.</summary>
 	private ulong flashStartMsec;
 
-	/// <summary>An offered or previewed target beats a unit target's country; an empty battle target only flashes.</summary>
+	/// <summary>Only an offered target gets the full glow; a card preview stays faint. An empty battle target only flashes.</summary>
 	private GlowStyle CurrentGlowStyle()
 	{
 		if (targetPresentationMode != TargetPresentationMode.Glow) return GlowStyle.Hidden;
-		if (IsOfferedTarget || IsPreviewTarget) return CountryState.Tags.Has(Tag.EmptyBattleTarget, Faction.ALL) ? GlowStyle.Flash : GlowStyle.Full;
+		bool emptyBattle = CountryState.Tags.Has(Tag.EmptyBattleTarget, Faction.ALL);
+		if (IsOfferedTarget) return emptyBattle ? GlowStyle.Flash : GlowStyle.Full;
+		if (IsPreviewTarget) return emptyBattle ? GlowStyle.Flash : GlowStyle.Faint;
 		return CountryState.Tags.Has(Tag.HoldsUnitTarget, Faction.ALL) ? GlowStyle.Faint : GlowStyle.Hidden;
 	}
 

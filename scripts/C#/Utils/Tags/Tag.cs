@@ -67,12 +67,10 @@ public enum Tag
 
     /// <summary>
     /// On a COUNTRY or a UNIT: the player is hovering a card in an open card prompt and this is one of
-    /// the things the card could affect. Drawn with the same visual as an offered target, deliberately
-    /// — the player is being shown "this is what that card reaches" — but WITHOUT the click, because
-    /// the game is still waiting for a card, not for a country or a unit.
+    /// the things the card could affect. Never clickable: the game is still waiting for a card.
     ///
-    /// A country glows; a unit puts up its own target marker and its country only glows faintly
-    /// (<see cref="HoldsUnitTarget"/>), so a card that reaches one army in Egypt says exactly that.
+    /// A country glows faintly (an empty battle target flashes instead); a unit puts up its own target
+    /// marker and its country glows faintly too (<see cref="HoldsUnitTarget"/>).
     ///
     /// Raised and cleared only by <see cref="CardTargetPreviewDisplay"/> on the hovering peer. Local
     /// like <see cref="Clickable"/> and <see cref="RebuildTarget"/>: it is pure presentation and is

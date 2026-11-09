@@ -94,7 +94,7 @@ public static class CardTargetPreviewDisplay
         // the wire, so an unresolvable one must cost the preview and not the prompt.
         List<CountryState> countryStates = Countries(countryIds ?? new List<int>());
 
-        // A country the card also names outright (a build target, say) keeps the full glow.
+        // A country the card also names outright (a build target, say) keeps the steady faint glow.
         List<CountryState> emptyBattleStates = Countries((emptyBattleCountryIds ?? new List<int>()).Except(countryStates.Select(cs => cs.Id)));
 
         List<UnitState> unitStates = UnitState.ForIds((unitIds ?? new List<int>()).Distinct())
