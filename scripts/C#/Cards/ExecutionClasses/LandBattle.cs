@@ -17,7 +17,7 @@ public partial class LandBattle : CardLogic
     private List<int> AttackableCountries(BoardState board) => board.AttackableLandIds(Faction);
 
     public override TargetSet Targets() =>
-        TargetSet.Countries(AttackableCountries(BoardState.Live)).Plus(TargetSet.Units(AttackableArmies(BoardState.Live)));
+        TargetSet.EmptyBattleCountries(AttackableCountries(BoardState.Live)).Plus(TargetSet.Units(AttackableArmies(BoardState.Live)));
 
     public override List<CardStep> OnActivate()
     {

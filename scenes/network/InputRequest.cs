@@ -287,7 +287,10 @@ public abstract partial class InputRequest
         /// <summary>Countries the card names outright. NOT the countries its unit targets stand in.</summary>
         public List<int> CountryIds { get; set; }
 
-        /// <summary>Units the card names. Each lights its own marker, leaving its country dark.</summary>
+        /// <summary>Empty countries the card could battle in; drawn as an occasional flash, not a full glow.</summary>
+        public List<int> EmptyBattleCountryIds { get; set; }
+
+        /// <summary>Units the card names. Each lights its own marker; its country glows faintly.</summary>
         public List<int> UnitIds { get; set; }
 
         /// <summary>True when there is nothing to draw, so the host can leave the entry off the wire.</summary>
@@ -295,6 +298,7 @@ public abstract partial class InputRequest
         // properties, so without this every entry would carry a field the reader recomputes anyway.
         [JsonIgnore]
         public bool IsEmpty => (CountryIds == null || CountryIds.Count == 0)
+                               && (EmptyBattleCountryIds == null || EmptyBattleCountryIds.Count == 0)
                                && (UnitIds == null || UnitIds.Count == 0);
     }
 
@@ -586,6 +590,7 @@ public abstract partial class InputRequest
                     // The two kinds stay apart all the way to the board — see CardTargetPreview. Card
                     // and Faction targets are dropped here: neither names a place to light up.
                     CountryIds = targets.CountryIds.ToList(),
+                    EmptyBattleCountryIds = targets.EmptyBattleCountryIds.ToList(),
                     UnitIds = targets.UnitIds.ToList(),
                 };
             })
