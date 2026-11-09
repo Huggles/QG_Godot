@@ -245,6 +245,7 @@ public partial class CountryScene : Control
 					authoredGlowAlpha = countryShaderMaterial.GetShaderParameter("glow_alpha").AsSingle();
 					authoredFillAlpha = countryShaderMaterial.GetShaderParameter("fill_alpha").AsSingle();
 					authoredPulseSpeed = countryShaderMaterial.GetShaderParameter("pulse_speed").AsSingle();
+					authoredPulseMin = countryShaderMaterial.GetShaderParameter("pulse_min").AsSingle();
 				}
 			}
 			return countryShaderMaterial;
@@ -252,7 +253,7 @@ public partial class CountryScene : Control
 	}
 
 	/// <summary>Country.tscn's glow settings: the full target look, which the faint and flash styles scale down from.</summary>
-	private float authoredGlowAlpha, authoredFillAlpha, authoredPulseSpeed;
+	private float authoredGlowAlpha, authoredFillAlpha, authoredPulseSpeed, authoredPulseMin;
 
 	/// <summary>
 	/// Tints the country silhouette. <paramref name="color"/> is the outline glow; the fill follows it
@@ -593,13 +594,17 @@ public partial class CountryScene : Control
 
 	private enum GlowStyle { Hidden, Full, Faint, Flash }
 
-	/// <summary>How much of the full glow a previewed country, or one holding a unit target, gets.</summary>
-	private const float FaintGlowScale = 0.2f;
+	/// <summary>
+	/// A previewed country, or one holding a unit target, pulses up to FaintGlowScale of the full glow and
+	/// down to FaintPulseMin of that: a wider swing than the full glow's, averaging about a fifth of it.
+	/// </summary>
+	private const float FaintGlowScale = 0.4f;
+	private const float FaintPulseMin = 0.15f;
 
 	/// <summary>An empty battle target flashes once per period, for FlashDuration seconds, up to FlashPeakScale of the full glow.</summary>
 	private const ulong FlashPeriodMsec = 3000;
 	private const float FlashDuration = 0.8f;
-	private const float FlashPeakScale = 0.7f;
+	private const float FlashPeakScale = 0.4f;
 
 	/// <summary>Every empty target starts flashing in the same frame, so per-country start times keep them in step.</summary>
 	private ulong flashStartMsec;
@@ -629,17 +634,17 @@ public partial class CountryScene : Control
 		if (!shown) return;
 
 		if (isHovered && IsOfferedTarget)
-			ApplyGlow(Colors.Green, 1f, fill: true, pulse: true);
+			ApplyGlow(Colors.Green, 1f, fill: true, authoredPulseMin);
 		else if (style == GlowStyle.Faint)
-			ApplyGlow(Colors.Yellow, FaintGlowScale, fill: false, pulse: false);
+			ApplyGlow(Colors.Yellow, FaintGlowScale, fill: false, FaintPulseMin);
 		else if (style == GlowStyle.Flash)
-			ApplyGlow(Colors.Yellow, 0f, fill: false, pulse: false);
+			ApplyGlow(Colors.Yellow, 0f, fill: false, pulseMin: null);
 		else
-			ApplyGlow(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Orange : Colors.Yellow, 1f, fill: true, pulse: true);
+			ApplyGlow(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Orange : Colors.Yellow, 1f, fill: true, authoredPulseMin);
 	}
 
-	/// <summary><paramref name="glowScale"/> scales the authored glow_alpha; fill and pulse are the authored ones or off.</summary>
-	private void ApplyGlow(Color color, float glowScale, bool fill, bool pulse)
+	/// <summary><paramref name="glowScale"/> scales the authored glow_alpha. A null <paramref name="pulseMin"/> holds the glow steady.</summary>
+	private void ApplyGlow(Color color, float glowScale, bool fill, float? pulseMin)
 	{
 		ShaderMaterial material = CountryShaderMaterial;
 		if (material == null) return;
@@ -647,7 +652,8 @@ public partial class CountryScene : Control
 		SetCountryColor(color);
 		material.SetShaderParameter("glow_alpha", authoredGlowAlpha * glowScale);
 		material.SetShaderParameter("fill_alpha", fill ? authoredFillAlpha : 0f);
-		material.SetShaderParameter("pulse_speed", pulse ? authoredPulseSpeed : 0f);
+		material.SetShaderParameter("pulse_speed", pulseMin.HasValue ? authoredPulseSpeed : 0f);
+		material.SetShaderParameter("pulse_min", pulseMin ?? authoredPulseMin);
 	}
 
 	private void SetFlashing(bool flashing)
