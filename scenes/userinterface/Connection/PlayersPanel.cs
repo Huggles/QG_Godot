@@ -1,8 +1,10 @@
 using Godot;
+using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
-/// Top-left list of the people in the game, one row per player (not per faction), each with their
-/// ping or connection state. Fed by <see cref="ConnectionMonitor"/>'s player table and toggled from the
+/// Top-left list of the people in the game, one row per player (not per faction), each with the flags
+/// of the factions they play and their ping or connection state. Fed by <see cref="ConnectionMonitor"/>'s player table and toggled from the
 /// mini menu's visibility list; empty, and so hidden, outside a multiplayer game.
 /// </summary>
 public partial class PlayersPanel : PanelContainer
@@ -52,12 +54,14 @@ public partial class PlayersPanel : PanelContainer
 
     private static HBoxContainer BuildRow(PlayerConnectionRow row)
     {
-        HBoxContainer line = new();
-        line.AddThemeConstantOverride("separation", 16);
+        HBoxContainer line = new() { MouseFilter = MouseFilterEnum.Ignore };
+        line.AddThemeConstantOverride("separation", 8);
 
-        Label name = new() { Text = row.Name, SizeFlagsHorizontal = SizeFlags.ExpandFill };
+        Label name = new() { Text = row.Name };
         name.AddThemeFontSizeOverride("font_size", 14);
         line.AddChild(name);
+        line.AddChild(BuildFlags(row.SeatId));
+        line.AddChild(new Control { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
 
         (string text, Color color) = Status(row);
         Label status = new() { Text = text, HorizontalAlignment = HorizontalAlignment.Right };
@@ -65,6 +69,30 @@ public partial class PlayersPanel : PanelContainer
         status.AddThemeColorOverride("font_color", color);
         line.AddChild(status);
         return line;
+    }
+
+    /// <summary>
+    /// The seat's factions as small flags, in turn order. Read from this peer's own registry: every peer
+    /// holds the same seat-to-faction assignment, so the host's table need not carry it.
+    /// </summary>
+    private static HBoxContainer BuildFlags(int seatId)
+    {
+        HBoxContainer flags = new() { MouseFilter = MouseFilterEnum.Ignore };
+        flags.AddThemeConstantOverride("separation", 3);
+        foreach (Faction faction in PlayerFactionRegistry.GetFactionsForPeerId(seatId).OrderBy(f => (int)f))
+        {
+            if (StaticGameData.FactionDataMap.GetValueOrDefault(faction)?.FlagTexture is not { } texture) continue;
+            flags.AddChild(new TextureRect
+            {
+                Texture = texture,
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                CustomMinimumSize = new Vector2(24, 12),
+                SizeFlagsVertical = SizeFlags.ShrinkCenter,
+                MouseFilter = MouseFilterEnum.Ignore,
+            });
+        }
+        return flags;
     }
 
     private static (string, Color) Status(PlayerConnectionRow row)
