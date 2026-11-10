@@ -7,7 +7,8 @@ public partial class FactionsContainer : Control
 {
     public static FactionsContainer Current;
 
-    private HBoxContainer HorizontalContainer => GetNode<HBoxContainer>("%FactionsHorizontalContainer");
+    private VBoxContainer Column => GetNode<VBoxContainer>("%FactionsColumn");
+    private Panel Pole => GetNode<Panel>("%Pole");
 
     public Dictionary<Faction, FactionInfoRow> FactionInfoNodes = new();
 
@@ -64,9 +65,9 @@ public partial class FactionsContainer : Control
     private void InitChildElements()
     {
         DebugUtilities.PrintPeerFinest("FactionsContainer initializing child elements");
-        foreach (Node child in HorizontalContainer.GetChildren())
+        foreach (Node child in Column.GetChildren())
         {
-            HorizontalContainer.RemoveChild(child);
+            Column.RemoveChild(child);
             child.QueueFree();
         }
 
@@ -86,10 +87,13 @@ public partial class FactionsContainer : Control
         {
             FactionInfoRow rowInstance = AssetRepository.FactionInfoRowScenePacked.Instantiate<FactionInfoRow>();
             rowInstance.Faction = faction;
-            HorizontalContainer.AddChild(rowInstance);
+            Column.AddChild(rowInstance);
             FactionInfoNodes[faction] = rowInstance;
         }
 
+        // The pole runs from the finial to just past the last pennant.
+        float rowHeight = playerFactions.Count * 56f + (playerFactions.Count - 1) * Column.GetThemeConstant("separation");
+        Pole.Size = Pole.Size with { Y = rowHeight + 16f };
     }
 
     public FactionInfoRow GetFactionInfoNodeForFaction(Faction faction)

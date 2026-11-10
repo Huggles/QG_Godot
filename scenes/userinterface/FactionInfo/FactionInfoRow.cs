@@ -3,63 +3,62 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// One faction in the top strip: its flag hanging as a cloth banner from a brass rod, with brass tags
-/// beside it for cards in hand, in the deck and on the table, and pieces in reserve. The banner hangs
-/// lower the more points the faction has, so the strip itself shows who is ahead; the faction whose
-/// turn it is flies its banner harder. Clicking the banner opens the score history.
+/// One faction in the flagpole column on the left: a pennant with the flag at the hoist and the score
+/// on it, and a tail in the faction's colour that flies further out the more points the faction has,
+/// so the column itself is the score race. Cards in hand, deck and on the table, and pieces in reserve,
+/// are printed along the tail. The faction whose turn it is flies hardest. Click for score history.
 /// </summary>
 public partial class FactionInfoRow : Control
 {
 	public Faction Faction;
 	private FactionState FactionState => FactionState.ForEnum(Faction);
 
-	private static readonly Shader ClothShader = GD.Load<Shader>("res://scenes/userinterface/FactionInfo/BannerCloth.gdshader");
+	private static readonly Shader ClothShader = GD.Load<Shader>("res://scenes/userinterface/FactionInfo/PennantCloth.gdshader");
 
 	private ColorRect Cloth => GetNode<ColorRect>("%Cloth");
 	private Label ScoreLabel => GetNode<Label>("%ScoreLabel");
 	private Button FactionInfoButton => GetNode<Button>("%FactionInfoButton");
-	private VBoxContainer Tags => GetNode<VBoxContainer>("%Tags");
+	private VBoxContainer Stats => GetNode<VBoxContainer>("%Stats");
+	private HBoxContainer Pieces => GetNode<HBoxContainer>("%Pieces");
 	private Button HandButton => GetNode<Button>("%HandButton");
 	private Button DeckButton => GetNode<Button>("%DeckButton");
 	private Button TableButton => GetNode<Button>("%TableButton");
-	private PanelContainer ArmyTag => GetNode<PanelContainer>("%ArmyTag");
+	private HBoxContainer ArmyCell => GetNode<HBoxContainer>("%ArmyCell");
 	private TextureRect ArmyIcon => GetNode<TextureRect>("%ArmyIcon");
 	private TextureRect NavyIcon => GetNode<TextureRect>("%NavyIcon");
 	private Label ArmyCountLabel => GetNode<Label>("%ArmyCountLabel");
 	private Label NavyCountLabel => GetNode<Label>("%NavyCountLabel");
 	private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
 
-	// ── Banner geometry ──────────────────────────────────────────────────────
+	// ── Pennant geometry ─────────────────────────────────────────────────────
 
-	/// <summary>Where the cloth hangs from, just under the rod's top edge.</summary>
-	private const float ClothTop = 3f;
-	/// <summary>Tail below the flag at zero points: room for the score and the swallowtail.</summary>
-	private const float MinTail = 40f;
-	/// <summary>Extra tail per point, and the longest it gets, so a runaway leader never curtains the map.</summary>
-	private const float TailPerPoint = 1.6f;
-	private const float MaxTail = 110f;
-	private const float Notch = 16f;
-
-	private static readonly Color TagInk = new(0.255f, 0.141f, 0.008f);
+	/// <summary>Width of the flag at the hoist; the score sits on it.</summary>
+	private const float Head = 80f;
+	/// <summary>Tail at zero points; it is never shorter than the counts printed on it need.</summary>
+	private const float MinTail = 130f;
+	/// <summary>Extra tail per point, and the most it adds, so a runaway leader never spans the map.</summary>
+	private const float TailPerPoint = 3f;
+	private const float MaxExtra = 150f;
+	private const float Notch = 18f;
 
 	private ShaderMaterial _cloth;
-	private float _flagHeight;
+	private float _minTail = MinTail;
 	private float _tail = MinTail;
 	private Tween _tailTween;
 	private int _shownScore = int.MinValue;
+	private Color _ink = Colors.White;
 
-	/// <summary>Length of the tail below the flag; setting it re-lays the cloth, the score and the click area.</summary>
+	/// <summary>Length of the tail after the flag; setting it re-lays the cloth and the click area.</summary>
 	public float Tail
 	{
 		get => _tail;
 		set
 		{
 			_tail = value;
-			Vector2 size = new(Cloth.Size.X, _flagHeight + _tail);
+			Vector2 size = new(Head + _tail, Cloth.Size.Y);
 			Cloth.Size = size;
 			_cloth.SetShaderParameter("size", size);
 			FactionInfoButton.Size = size;
-			ScoreLabel.Position = new Vector2(0, ClothTop + size.Y - Notch - ScoreLabel.Size.Y + 6);
 		}
 	}
 
@@ -102,20 +101,19 @@ public partial class FactionInfoRow : Control
 		FactionData data = FactionState.FactionData;
 		Color factionColor = data.FactionColor;
 
-		// One material per row: every banner has its own flag, length and sway.
+		// One material per row: every pennant has its own flag, length and sway.
 		Texture2D flag = data.FlagTexture;
-		_flagHeight = Mathf.Round(Cloth.Size.X * flag.GetHeight() / flag.GetWidth());
 		_cloth = new ShaderMaterial { Shader = ClothShader };
 		_cloth.SetShaderParameter("flag", flag);
+		_cloth.SetShaderParameter("flag_aspect", (float)flag.GetWidth() / flag.GetHeight());
 		_cloth.SetShaderParameter("tail_color", factionColor);
-		_cloth.SetShaderParameter("flag_height", _flagHeight);
+		_cloth.SetShaderParameter("head", Head);
 		_cloth.SetShaderParameter("notch", Notch);
 		_cloth.SetShaderParameter("phase", GD.Randf() * 10f);
 		Cloth.Material = _cloth;
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 		ScoreLabel.LabelSettings.FontSize = 32;
-		Tail = MinTail;
 
 		FactionInfoButton.TooltipText = $"{data.FactionAdjactiveLabel} score history";
 		FactionInfoButton.MouseEntered += () => _cloth.SetShaderParameter("hover", 1f);
@@ -123,21 +121,29 @@ public partial class FactionInfoRow : Control
 		HandButton.TooltipText = "Cards in hand";
 		DeckButton.TooltipText = "Cards left in the draw deck\nClick to see the discard pile";
 		TableButton.TooltipText = "Status and response cards on the table\nClick to see them";
-		ArmyTag.TooltipText = "Armies in reserve";
-		GetNode<Control>("%NavyTag").TooltipText = "Navies in reserve";
+		ArmyCell.TooltipText = "Armies in reserve";
+		GetNode<Control>("%NavyCell").TooltipText = "Navies in reserve";
 
-		// SelfModulate, not Modulate: the row-level Modulate dimming in SetModulation() composes on top.
-		ArmyIcon.SelfModulate = factionColor;
-		NavyIcon.SelfModulate = factionColor;
 		// Each count label recolours independently, so neither may share a LabelSettings instance.
 		ArmyCountLabel.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
 		NavyCountLabel.LabelSettings = (LabelSettings)NavyCountLabel.LabelSettings.Duplicate();
 
-		// The minor factions this faction acts for share its row: their points fold into its score and
-		// their pieces in reserve hang as extra tags in their own colour.
+		// The minor factions this faction acts for share its pennant: their points fold into its score
+		// and their pieces in reserve are printed after its own, in their own colour.
 		_minors = StaticGameData.MinorsOf(Faction);
-		if (HasAirForces(Faction)) AddCounterTag(Faction, UnitType.AIR_FORCE, null);
-		AddMinorTags();
+		if (HasAirForces(Faction)) AddCounter(Faction, UnitType.AIR_FORCE, null);
+		foreach (Faction minor in _minors)
+		{
+			FactionData minorData = StaticGameData.FactionDataMap[minor];
+			AddCounter(minor, UnitType.ARMY, minorData.FactionColor);
+			if (minorData.NumberOfNavyUnits > 0) AddCounter(minor, UnitType.NAVY, minorData.FactionColor);
+			if (minorData.NumberOfAirUnits > 0) AddCounter(minor, UnitType.AIR_FORCE, minorData.FactionColor);
+		}
+
+		ApplyInk(factionColor);
+		// A row whose minor factions print more than the base tail holds gets a longer baseline.
+		_minTail = Mathf.Max(MinTail, Stats.Position.X - Head + Stats.GetCombinedMinimumSize().X + Notch + 10f);
+		Tail = _minTail;
 
 		RefreshScore();
 		SetUnitCounts();
@@ -160,6 +166,38 @@ public partial class FactionInfoRow : Control
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		DeckButton.Pressed += OnDiscardDeckButtonPressed;
 		SetModulation();
+	}
+
+	/// <summary>
+	/// Counts are printed straight onto the tail: white with a black edge on a dark tail, near-black on a
+	/// pale one (Japan's), so they read without a plate behind them. Unit icons take the same ink.
+	/// </summary>
+	private void ApplyInk(Color tail)
+	{
+		bool pale = tail.Luminance > 0.55f;
+		_ink = pale ? new Color(0.1f, 0.09f, 0.08f) : Colors.White;
+		Color edge = pale ? new Color(1, 1, 1, 0.6f) : Colors.Black;
+		Color hover = pale ? new Color(0.45f, 0.3f, 0.05f) : new Color(0.961f, 0.851f, 0.541f);
+
+		foreach (Button button in new[] { HandButton, DeckButton, TableButton })
+		{
+			button.AddThemeColorOverride("font_color", _ink);
+			button.AddThemeColorOverride("font_pressed_color", _ink);
+			button.AddThemeColorOverride("font_hover_color", button == HandButton ? _ink : hover);
+			button.AddThemeColorOverride("icon_normal_color", _ink == Colors.White ? Colors.White : _ink);
+			button.AddThemeColorOverride("icon_hover_color", button == HandButton ? _ink : hover);
+			button.AddThemeColorOverride("icon_pressed_color", hover);
+			button.AddThemeColorOverride("font_outline_color", edge);
+		}
+		ArmyIcon.SelfModulate = _ink;
+		NavyIcon.SelfModulate = _ink;
+		foreach ((TextureRect icon, Label label, Faction faction, UnitType type) in _untinted)
+		{
+			icon.SelfModulate = _ink;
+			_builtCountLabels[(faction, type)] = (label, _ink);
+		}
+		foreach (Label label in _builtCountLabels.Values.Select(v => v.Item1).Append(ArmyCountLabel).Append(NavyCountLabel))
+			label.LabelSettings.OutlineColor = edge;
 	}
 
 	// ── Event handlers ───────────────────────────────────────────────────────
@@ -219,13 +257,13 @@ public partial class FactionInfoRow : Control
 	private bool IsActive => GameFlow.Instance != null && GameFlow.Instance.IsStarted && GameFlow.Instance.CurrentFaction == Faction;
 
 	/// <summary>
-	/// Local factions at full strength, others dimmed, and dimmer still off their turn. The active
-	/// faction's banner flies hard and its trim glints; the rest barely stir.
+	/// Local factions at full strength, others a little dimmed, more so off their turn. The active
+	/// faction's pennant flies hard and its trim glints; the rest barely stir.
 	/// </summary>
 	private void SetModulation()
 	{
-		// Gentler than a flat panel needs: the active banner already stands out by flying, and dimming
-		// cloth much further turns the whole strip to mud.
+		// Gentle: the active pennant already stands out by flying, and dimming cloth much further
+		// turns the whole column to mud.
 		bool isLocal = PlayerFactionRegistry.GetLocalPlayerFactions().Contains(Faction);
 		float level = isLocal ? 1f : 0.8f;
 		// Guarded because GameChangeEventAfter can reach this before GameFlow exists on a peer.
@@ -234,13 +272,13 @@ public partial class FactionInfoRow : Control
 
 		bool active = IsActive;
 		_cloth.SetShaderParameter("active", active ? 1f : 0f);
-		_cloth.SetShaderParameter("sway", active ? 4.5f : 1.2f);
+		_cloth.SetShaderParameter("sway", active ? 4f : 1.2f);
 		_cloth.SetShaderParameter("speed", active ? 2.6f : 1.2f);
 	}
 
 	/// <summary>
-	/// The score on the banner and the banner's length. A change lets the cloth drop to its new length
-	/// with a little bounce, punches the number, and floats the gain off the hem.
+	/// The score on the flag and the pennant's length. A change lets the tail fly out to its new length
+	/// with a little overshoot, punches the number, and floats the gain off the fly end.
 	/// </summary>
 	private void RefreshScore()
 	{
@@ -250,7 +288,7 @@ public partial class FactionInfoRow : Control
 		_shownScore = score;
 		ScoreLabel.Text = score.ToString();
 
-		float target = Mathf.Clamp(MinTail + score * TailPerPoint, MinTail, MaxTail);
+		float target = _minTail + Mathf.Clamp(score * TailPerPoint, 0f, MaxExtra);
 		_tailTween?.Kill();
 		if (gained == 0 || !IsInsideTree())
 		{
@@ -266,24 +304,24 @@ public partial class FactionInfoRow : Control
 		punch.TweenProperty(ScoreLabel.LabelSettings, "font_size", 46, GameSettings.DurationShortSeconds);
 		punch.TweenProperty(ScoreLabel.LabelSettings, "font_size", 32, GameSettings.DurationShortSeconds);
 
-		FloatGain(gained, ClothTop + _flagHeight + target);
+		FloatGain(gained, Head + target);
 	}
 
-	/// <summary>A gold "+N" that rises from the hem and fades.</summary>
-	private void FloatGain(int gained, float hemY)
+	/// <summary>A gold "+N" that drifts off the fly end and fades.</summary>
+	private void FloatGain(int gained, float flyX)
 	{
 		Label floater = new()
 		{
 			Text = gained > 0 ? $"+{gained}" : gained.ToString(),
-			LabelSettings = new LabelSettings { FontSize = 22, FontColor = new Color(0.961f, 0.851f, 0.541f), OutlineSize = 6, OutlineColor = Colors.Black },
-			HorizontalAlignment = HorizontalAlignment.Center,
-			Size = new Vector2(Cloth.Size.X, 28),
-			Position = new Vector2(0, hemY),
+			LabelSettings = new LabelSettings { FontSize = 24, FontColor = new Color(0.961f, 0.851f, 0.541f), OutlineSize = 6, OutlineColor = Colors.Black },
+			VerticalAlignment = VerticalAlignment.Center,
+			Size = new Vector2(60, Cloth.Size.Y),
+			Position = new Vector2(flyX + 4, 0),
 			MouseFilter = MouseFilterEnum.Ignore,
 		};
 		AddChild(floater);
 		Tween t = floater.CreateTween().SetParallel();
-		t.TweenProperty(floater, "position:y", hemY - 40, 1.6f).SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Cubic);
+		t.TweenProperty(floater, "position:x", flyX + 44, 1.6f).SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Cubic);
 		t.TweenProperty(floater, "modulate:a", 0f, 1.6f).SetEase(Tween.EaseType.In);
 		t.Chain().TweenCallback(Callable.From(floater.QueueFree));
 	}
@@ -291,8 +329,8 @@ public partial class FactionInfoRow : Control
 	/// <summary>Repaints the pool counters: how many pieces of each type the faction has left to play.</summary>
 	private void SetUnitCounts()
 	{
-		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY), TagInk);
-		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY), TagInk);
+		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY), _ink);
+		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY), _ink);
 		foreach (((Faction faction, UnitType type), (Label label, Color ink)) in _builtCountLabels)
 			SetUnitCount(label, UnitPool.AvailableUnitCount(faction, type), ink);
 	}
@@ -312,20 +350,20 @@ public partial class FactionInfoRow : Control
 		TableButton.Text = activeCardCount.ToString();
 	}
 
-	/// <summary>Red when the pool is empty, amber at one, else the tag's own ink.</summary>
+	/// <summary>Red when the pool is empty, amber at one, else the counter's own ink.</summary>
 	private static void SetUnitCount(Label label, int count, Color ink)
 	{
 		label.Text = count.ToString();
 		// FontColor on the LabelSettings: a Label with label_settings ignores theme colour overrides.
 		label.LabelSettings.FontColor = count switch
 		{
-			0 => new Color(0.75f, 0.1f, 0.1f),
-			1 => new Color(0.7f, 0.33f, 0f),
+			0 => new Color(1f, 0.3f, 0.25f),
+			1 => new Color(1f, 0.65f, 0.15f),
 			_ => ink,
 		};
 	}
 
-	// ── Extra tags: Air Forces and minor factions ────────────────────────────
+	// ── Extra counters: Air Forces and minor factions ────────────────────────
 
 	/// <summary>Counters built in code rather than in the scene, with the ink each one rests at.</summary>
 	private readonly Dictionary<(Faction, UnitType), (Label, Color)> _builtCountLabels = new();
@@ -340,32 +378,21 @@ public partial class FactionInfoRow : Control
 	/// <summary>The row's headline score: this faction's points plus those of the minor factions it acts for.</summary>
 	private int CombinedScore => VPHistory.CombinedScore(Faction);
 
-	/// <summary>A minor faction's pieces in reserve hang as tags in its own colour under the row's own.</summary>
-	private void AddMinorTags()
-	{
-		foreach (Faction minor in _minors)
-		{
-			FactionData data = StaticGameData.FactionDataMap[minor];
-			AddCounterTag(minor, UnitType.ARMY, data.FactionColor);
-			if (data.NumberOfNavyUnits > 0) AddCounterTag(minor, UnitType.NAVY, data.FactionColor);
-			if (data.NumberOfAirUnits > 0) AddCounterTag(minor, UnitType.AIR_FORCE, data.FactionColor);
-		}
-	}
-
 	/// <summary>
-	/// A tag for <paramref name="faction"/>'s pool of <paramref name="type"/>, copied from the army tag.
-	/// <paramref name="plate"/> recolours the tag (a minor faction's); null keeps the brass.
+	/// A counter for <paramref name="faction"/>'s pool of <paramref name="type"/>, copied from the army one
+	/// and printed after it. <paramref name="tint"/> colours a minor faction's icon and number so it reads
+	/// as theirs; null takes the pennant's own ink.
 	/// </summary>
-	private void AddCounterTag(Faction faction, UnitType type, Color? plate)
+	private void AddCounter(Faction faction, UnitType type, Color? tint)
 	{
-		PanelContainer tag = (PanelContainer)ArmyTag.Duplicate();
-		tag.UniqueNameInOwner = false;
+		HBoxContainer cell = (HBoxContainer)ArmyCell.Duplicate();
+		cell.UniqueNameInOwner = false;
 		FactionData data = StaticGameData.FactionDataMap[faction];
 		string pieces = type switch { UnitType.NAVY => "navies", UnitType.AIR_FORCE => "air forces", _ => "armies" };
-		tag.TooltipText = $"{data.Label}: {pieces} in reserve";
-		Tags.AddChild(tag);
+		cell.TooltipText = $"{data.Label}: {pieces} in reserve";
+		Pieces.AddChild(cell);
 
-		TextureRect icon = tag.GetNode<TextureRect>("Cell/ArmyIcon");
+		TextureRect icon = cell.GetNode<TextureRect>("ArmyIcon");
 		icon.UniqueNameInOwner = false;
 		icon.Texture = type switch
 		{
@@ -373,23 +400,18 @@ public partial class FactionInfoRow : Control
 			UnitType.AIR_FORCE => AssetRepository.AirForceSprite,
 			_ => ArmyIcon.Texture,
 		};
-		icon.SelfModulate = plate.HasValue ? Colors.White : data.FactionColor;
 
-		Label label = tag.GetNode<Label>("Cell/ArmyCountLabel");
+		Label label = cell.GetNode<Label>("ArmyCountLabel");
 		label.UniqueNameInOwner = false;
 		label.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
-		Color ink = TagInk;
-		if (plate.HasValue)
-		{
-			StyleBoxFlat style = (StyleBoxFlat)tag.GetThemeStylebox("panel").Duplicate();
-			style.BgColor = plate.Value;
-			tag.AddThemeStyleboxOverride("panel", style);
-			ink = Colors.White;
-			label.LabelSettings.OutlineSize = 4;
-			label.LabelSettings.OutlineColor = Colors.Black;
-		}
-		_builtCountLabels[(faction, type)] = (label, ink);
+		// An untinted counter takes the pennant's ink, which ApplyInk fills in once it is known.
+		_builtCountLabels[(faction, type)] = (label, tint ?? Colors.White);
+		if (tint.HasValue) icon.SelfModulate = tint.Value;
+		else _untinted.Add((icon, label, faction, type));
 	}
+
+	/// <summary>Built counters that take the pennant's ink rather than a minor faction's tint.</summary>
+	private readonly List<(TextureRect, Label, Faction, UnitType)> _untinted = new();
 
 	public void ShowCardDelta(int delta)
 	{
