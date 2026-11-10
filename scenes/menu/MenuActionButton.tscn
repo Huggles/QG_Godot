@@ -1,5 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://b8qgactbtn02"]
 
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
 [ext_resource type="Script" uid="uid://cbtnmr7p4xq8g" path="res://scripts/C#/Menu/MenuPanelButton.cs" id="1_script"]
 [ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="2_font"]
 
@@ -71,6 +72,18 @@ DisabledContentTint = Color(1, 1, 1, 0.35)
 HeldContentOffset = 2
 HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
 
+[node name="BrassFrame" type="ColorRect" parent="."]
+layout_mode = 0
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 8.0
+BracketLength = 12.0
+BracketAlpha = 1.0
+SweepSpeed = 200.0
+SweepWidth = 60.0
+GlowAlpha = 0.28
+IdleEnergy = 0.0
+
 [node name="ContentContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -93,3 +106,4 @@ text = "Action"
 horizontal_alignment = 1
 vertical_alignment = 1
 uppercase = true
+

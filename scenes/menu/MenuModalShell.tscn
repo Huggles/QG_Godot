@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://bqmodalshelf"]
 
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
 [ext_resource type="Script" uid="uid://cpbprvfkfgnow" path="res://scripts/C#/Menu/MenuModal.cs" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://cviw1rdhjifft" path="res://scenes/menu/MenuPanel.tscn" id="2_panel"]
 [ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="3_theme"]
@@ -87,5 +88,13 @@ theme_type_variation = &"MenuTitle"
 theme_override_font_sizes/font_size = 44
 horizontal_alignment = 1
 uppercase = true
+
+[node name="BrassFrame" type="ColorRect" parent="Root/Centre/Panel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 14.0
+BracketLength = 30.0
+GlowAlpha = 0.22
 
 [editable path="Root/Centre/Panel"]

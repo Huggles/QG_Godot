@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://djinib8j6dupy"]
 
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
 [ext_resource type="Script" uid="uid://c5fpt5gbmo0lv" path="res://scripts/C#/Menu/MultiplayerLobby.cs" id="1_lobby"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 [ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="4_theme"]
@@ -199,3 +200,17 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(340, 64)
 layout_mode = 2
 ButtonText = "Start Game"
+
+[node name="BrassFrame" type="ColorRect" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/PlayersPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 12.0
+BracketLength = 30.0
+
+[node name="BrassFrame2" type="ColorRect" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 12.0
+BracketLength = 30.0
