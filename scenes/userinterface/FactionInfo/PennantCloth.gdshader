@@ -7,6 +7,7 @@ uniform sampler2D flag : source_color, filter_linear_mipmap;
 uniform vec4 tail_color : source_color = vec4(0.5, 0.1, 0.1, 1.0);
 uniform vec4 brass : source_color = vec4(0.851, 0.678, 0.361, 1.0);
 uniform vec2 size = vec2(260.0, 56.0);    // the cloth's rect in px, set by the row
+uniform float margin = 8.0;               // headroom around the cloth for the ripple, px
 uniform float head = 80.0;                // px of flag at the hoist
 uniform float notch = 18.0;               // depth of the swallowtail cut
 uniform float sway = 1.5;                 // ripple amplitude at the fly end, px
@@ -16,7 +17,9 @@ uniform float hover = 0.0;                // 0..1, brightens the cloth under the
 uniform float active = 0.0;               // 0..1, the faction whose turn it is: trim glints
 
 void fragment() {
-	vec2 p = UV * size;
+	// The rect is the cloth grown by `margin` above, below and past the fly end, so a ripple that
+	// carries the cloth outside its resting outline is drawn instead of clipped.
+	vec2 p = UV * (size + vec2(margin, 2.0 * margin)) - vec2(0.0, margin);
 	float depth = clamp(p.x / size.x, 0.0, 1.0);
 	float t = TIME * speed + phase;
 
@@ -35,10 +38,12 @@ void fragment() {
 		c = tail_color.rgb * weave;
 	}
 
-	// Brass trim: top and bottom edges, the seam after the flag, and a line inside the fly end.
+	// Brass trim on the cloth's outline: top and bottom edges, the swallowtail edge, and the seam
+	// after the flag. The swallowtail band is measured along x, so it is widened to read as thick
+	// as the straight edges where the cut runs diagonally.
 	float trim = step(min(p.y, size.y - p.y), 2.0);
 	trim = max(trim, step(abs(p.x - head), 1.5));
-	trim = max(trim, step(abs(fly - p.x - 4.0), 1.2));
+	trim = max(trim, step(fly - p.x, 2.6));
 	float glint = active * (0.5 + 0.5 * sin(TIME * 2.5 - p.x * 0.04));
 	c = mix(c, brass.rgb * (1.0 + 0.35 * glint), trim);
 

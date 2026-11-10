@@ -40,6 +40,9 @@ public partial class FactionInfoRow : Control
 	private const float TailPerPoint = 3f;
 	private const float MaxExtra = 150f;
 	private const float Notch = 18f;
+	/// <summary>The pennant's height at rest, and the headroom its cloth gets for the ripple.</summary>
+	private const float Height = 52f;
+	private const float RippleMargin = 8f;
 
 	private ShaderMaterial _cloth;
 	private float _minTail = MinTail;
@@ -55,8 +58,10 @@ public partial class FactionInfoRow : Control
 		set
 		{
 			_tail = value;
-			Vector2 size = new(Head + _tail, Cloth.Size.Y);
-			Cloth.Size = size;
+			Vector2 size = new(Head + _tail, Height);
+			// Drawn into a rect with headroom on the free sides, so the ripple is never clipped.
+			Cloth.Position = new Vector2(0, -RippleMargin);
+			Cloth.Size = size + new Vector2(RippleMargin, 2 * RippleMargin);
 			_cloth.SetShaderParameter("size", size);
 			FactionInfoButton.Size = size;
 		}
@@ -104,14 +109,15 @@ public partial class FactionInfoRow : Control
 		// One material per row: every pennant has its own flag, length and sway.
 		Texture2D flag = data.FlagTexture;
 		float aspect = (float)flag.GetWidth() / flag.GetHeight();
-		Head = Mathf.Round(Cloth.Size.Y * aspect);
-		ScoreLabel.Size = new Vector2(Head, Cloth.Size.Y);
+		Head = Mathf.Round(Height * aspect);
+		ScoreLabel.Size = new Vector2(Head, Height);
 		Stats.Position = Stats.Position with { X = Head + 10f };
 		_cloth = new ShaderMaterial { Shader = ClothShader };
 		_cloth.SetShaderParameter("flag", flag);
 		_cloth.SetShaderParameter("tail_color", factionColor);
 		_cloth.SetShaderParameter("head", Head);
 		_cloth.SetShaderParameter("notch", Notch);
+		_cloth.SetShaderParameter("margin", RippleMargin);
 		_cloth.SetShaderParameter("phase", GD.Randf() * 10f);
 		Cloth.Material = _cloth;
 
@@ -317,7 +323,7 @@ public partial class FactionInfoRow : Control
 			Text = gained > 0 ? $"+{gained}" : gained.ToString(),
 			LabelSettings = new LabelSettings { FontSize = 24, FontColor = new Color(0.961f, 0.851f, 0.541f), OutlineSize = 6, OutlineColor = Colors.Black },
 			VerticalAlignment = VerticalAlignment.Center,
-			Size = new Vector2(60, Cloth.Size.Y),
+			Size = new Vector2(60, Height),
 			Position = new Vector2(flyX + 4, 0),
 			MouseFilter = MouseFilterEnum.Ignore,
 		};
