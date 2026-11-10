@@ -58,15 +58,15 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 4
 
-[node name="FactionsHorizontalContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/Rows" unique_id=1572403057]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(650, 81)
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
 [node name="TurnSequenceStrip" parent="PanelContainer/MarginContainer/Rows" instance=ExtResource("5_strip")]
 layout_mode = 2
+
+[node name="FactionsHorizontalContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/Rows" unique_id=1572403057]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(650, 90)
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
 
 [node name="AxisTotal" type="TextureRect" parent="." unique_id=507668837]
 unique_name_in_owner = true

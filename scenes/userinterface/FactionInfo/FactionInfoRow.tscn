@@ -1,265 +1,287 @@
 [gd_scene format=3 uid="uid://bjpmsri3am6gm"]
 
 [ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
-[ext_resource type="Texture2D" uid="uid://ddr7do1nkqeou" path="res://assets/factions/germany/Germany_Flag.png" id="2_s1j4j"]
 [ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="3_gac4n"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/HandCardsIcon.svg" id="3_hand"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/DeckStackIcon.svg" id="4_deck"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/TableCardsIcon.svg" id="5_table"]
-[ext_resource type="Script" path="res://scenes/userinterface/FactionInfo/VPSparkline.cs" id="6_spark"]
 [ext_resource type="Script" uid="uid://nwhfij0f43sv" path="res://scenes/userinterface/FactionInfo/CardsAnimationControl.cs" id="7_0r4er"]
 [ext_resource type="Texture2D" uid="uid://cpfklff0i6sut" path="res://assets/factions/germany/cards/Germany_CardBack.png" id="7_48ey3"]
 [ext_resource type="LabelSettings" uid="uid://cy7n8wr0krac1" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsLarge.tres" id="8_48ey3"]
-[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="8_brass"]
 [ext_resource type="Texture2D" uid="uid://sfhhmtjxiwqx" path="res://assets/textures/Units/QGArmyDetailed.png" id="9_army"]
 [ext_resource type="Texture2D" uid="uid://1gl1q0exfxm2" path="res://assets/textures/Units/QGNavyDetailed.png" id="10_navy"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kb8kt"]
-texture = ExtResource("2_s1j4j")
-axis_stretch_horizontal = 2
-axis_stretch_vertical = 2
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rod"]
+bg_color = Color(0.851, 0.678, 0.361, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.239, 0.169, 0.055, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xyivq"]
-content_margin_left = 0.0
-content_margin_top = 0.0
-content_margin_right = 0.0
-content_margin_bottom = 0.0
-bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0, 0, 0, 1)
-border_blend = true
-corner_detail = 5
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_finial"]
+bg_color = Color(0.949, 0.812, 0.494, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.239, 0.169, 0.055, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
-content_margin_left = 4.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tag"]
+content_margin_left = 3.0
 content_margin_top = 0.0
-content_margin_right = 4.0
+content_margin_right = 5.0
 content_margin_bottom = 0.0
 bg_color = Color(0.851, 0.678, 0.361, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+border_color = Color(0.239, 0.169, 0.055, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
-[sub_resource type="LabelSettings" id="LabelSettings_badge"]
-font_size = 13
-font_color = Color(0.255, 0.141, 0.008, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
-resource_local_to_scene = true
-resource_name = "default_style_box_flat"
-bg_color = Color(0.0820739, 0.699516, 0.566019, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_taghover"]
+content_margin_left = 3.0
+content_margin_top = 0.0
+content_margin_right = 5.0
+content_margin_bottom = 0.0
+bg_color = Color(0.961, 0.851, 0.541, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0, 0, 0, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cell"]
-content_margin_left = 3.0
-content_margin_right = 4.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cellhover"]
-content_margin_left = 3.0
-content_margin_right = 4.0
-bg_color = Color(1, 1, 1, 0.18)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
-bg_color = Color(1, 1, 1, 0.12)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.851, 0.678, 0.361, 0.9)
+border_color = Color(0.239, 0.169, 0.055, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_osvc4"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_army"]
+[sub_resource type="LabelSettings" id="LabelSettings_tag"]
 resource_local_to_scene = true
-font_size = 18
-outline_size = 6
-outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_navy"]
-resource_local_to_scene = true
-font_size = 18
-outline_size = 6
-outline_color = Color(0, 0, 0, 1)
+font_size = 15
+font_color = Color(0.255, 0.141, 0.008, 1)
 
 [node name="FactionInfoRow" type="Control" unique_id=1940069184]
-custom_minimum_size = Vector2(150, 81)
+custom_minimum_size = Vector2(146, 90)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 150.0
-offset_bottom = 81.0
-mouse_default_cursor_shape = 2
+offset_right = 146.0
+offset_bottom = 90.0
+mouse_filter = 2
 script = ExtResource("1_osvc4")
 
-[node name="FlagPanel" type="Panel" parent="." unique_id=146565445]
+[node name="Cloth" type="ColorRect" parent="." unique_id=1366202001]
 unique_name_in_owner = true
-clip_contents = true
 layout_mode = 0
-offset_right = 96.0
-offset_bottom = 57.0
+offset_top = 3.0
+offset_right = 88.0
+offset_bottom = 87.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_kb8kt")
 
-[node name="ScoreLabel" type="Label" parent="FlagPanel" unique_id=1942955123]
+[node name="ScoreLabel" type="Label" parent="." unique_id=1942955123]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_bottom = -6.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+offset_top = 48.0
+offset_right = 88.0
+offset_bottom = 84.0
 text = "9"
 label_settings = ExtResource("3_gac4n")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Sparkline" type="Control" parent="FlagPanel" unique_id=1366201001]
+[node name="FactionInfoButton" type="Button" parent="." unique_id=1138684773]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 3.0
-offset_top = -14.0
-offset_right = -3.0
-offset_bottom = -3.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-script = ExtResource("6_spark")
+layout_mode = 0
+offset_top = 3.0
+offset_right = 88.0
+offset_bottom = 87.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_osvc4")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_osvc4")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_osvc4")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_osvc4")
 
-[node name="DeltaBadge" type="Label" parent="FlagPanel" unique_id=1366201002]
-unique_name_in_owner = true
-visible = false
+[node name="Cord" type="ColorRect" parent="." unique_id=1366202002]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 3.0
+offset_right = 121.0
+offset_bottom = 10.0
+mouse_filter = 2
+color = Color(0.239, 0.169, 0.055, 1)
+
+[node name="Rod" type="Panel" parent="." unique_id=1366202003]
+layout_mode = 0
+offset_left = -5.0
+offset_right = 140.0
+offset_bottom = 7.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_rod")
+
+[node name="FinialLeft" type="Panel" parent="Rod" unique_id=1366202004]
+layout_mode = 0
+offset_left = -4.0
+offset_top = -1.5
+offset_right = 5.0
+offset_bottom = 8.5
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_finial")
+
+[node name="FinialRight" type="Panel" parent="Rod" unique_id=1366202005]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -32.0
-offset_top = 3.0
-offset_right = -3.0
-offset_bottom = 20.0
+offset_left = -5.0
+offset_top = -1.5
+offset_right = 4.0
+offset_bottom = 8.5
 grow_horizontal = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_badge")
-text = "+4"
-label_settings = SubResource("LabelSettings_badge")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Border" type="Panel" parent="FlagPanel" unique_id=1168793567]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_xyivq")
+theme_override_styles/panel = SubResource("StyleBoxFlat_finial")
 
-[node name="BackgroundPanel" type="Panel" parent="." unique_id=52719779]
+[node name="Tags" type="VBoxContainer" parent="." unique_id=1366202006]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 96.0
-offset_right = 150.0
-offset_bottom = 57.0
+offset_top = 10.0
+offset_right = 144.0
+offset_bottom = 110.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0g7yh")
+theme_override_constants/separation = 2
 
-[node name="CardStats" type="VBoxContainer" parent="BackgroundPanel" unique_id=1366201003]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_constants/separation = 0
-
-[node name="HandButton" type="Button" parent="BackgroundPanel/CardStats" unique_id=1366201004]
+[node name="HandButton" type="Button" parent="Tags" unique_id=1366201004]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 19)
 layout_mode = 2
-size_flags_vertical = 3
 focus_mode = 0
-mouse_default_cursor_shape = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_constants/icon_max_width = 17
+theme_override_colors/font_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_colors/font_hover_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_colors/font_pressed_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_constants/icon_max_width = 16
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxEmpty_cell")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_cell")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_cell")
-text = "5"
+theme_override_styles/normal = SubResource("StyleBoxFlat_tag")
+theme_override_styles/hover = SubResource("StyleBoxFlat_tag")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tag")
+text = "7"
 icon = ExtResource("3_hand")
 alignment = 2
 
-[node name="DeckButton" type="Button" parent="BackgroundPanel/CardStats" unique_id=1698971982]
+[node name="DeckButton" type="Button" parent="Tags" unique_id=1698971982]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 19)
 layout_mode = 2
-size_flags_vertical = 3
 focus_mode = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_constants/icon_max_width = 17
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_colors/font_hover_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_colors/font_pressed_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_constants/icon_max_width = 16
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxEmpty_cell")
-theme_override_styles/hover = SubResource("StyleBoxFlat_cellhover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_cellhover")
-text = "27"
+theme_override_styles/normal = SubResource("StyleBoxFlat_tag")
+theme_override_styles/hover = SubResource("StyleBoxFlat_taghover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_taghover")
+text = "33"
 icon = ExtResource("4_deck")
 alignment = 2
 
-[node name="TableButton" type="Button" parent="BackgroundPanel/CardStats" unique_id=1709253810]
+[node name="TableButton" type="Button" parent="Tags" unique_id=1709253810]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 19)
 layout_mode = 2
-size_flags_vertical = 3
 focus_mode = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_constants/icon_max_width = 17
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_colors/font_hover_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_colors/font_pressed_color = Color(0.255, 0.141, 0.008, 1)
+theme_override_constants/icon_max_width = 16
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxEmpty_cell")
-theme_override_styles/hover = SubResource("StyleBoxFlat_cellhover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_cellhover")
+theme_override_styles/normal = SubResource("StyleBoxFlat_tag")
+theme_override_styles/hover = SubResource("StyleBoxFlat_taghover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_taghover")
 text = "0"
 icon = ExtResource("5_table")
 alignment = 2
 
-[node name="FactionInfoButton" type="Button" parent="." unique_id=1138684773]
+[node name="ArmyTag" type="PanelContainer" parent="Tags" unique_id=1151390211]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 96.0
-offset_bottom = 57.0
-focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_osvc4")
-theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_hover")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_osvc4")
+custom_minimum_size = Vector2(48, 19)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tag")
+
+[node name="Cell" type="HBoxContainer" parent="Tags/ArmyTag" unique_id=1366202007]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="ArmyIcon" type="TextureRect" parent="Tags/ArmyTag/Cell" unique_id=1898280267]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 17)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("9_army")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ArmyCountLabel" type="Label" parent="Tags/ArmyTag/Cell" unique_id=1033955341]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "10"
+label_settings = SubResource("LabelSettings_tag")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="NavyTag" type="PanelContainer" parent="Tags" unique_id=1041305104]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 19)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tag")
+
+[node name="Cell" type="HBoxContainer" parent="Tags/NavyTag" unique_id=1366202008]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="NavyIcon" type="TextureRect" parent="Tags/NavyTag/Cell" unique_id=1397946510]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 17)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("10_navy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NavyCountLabel" type="Label" parent="Tags/NavyTag/Cell" unique_id=633649371]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "10"
+label_settings = SubResource("LabelSettings_tag")
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="CardsAnimationControl" type="Control" parent="." unique_id=1551812826]
 anchors_preset = 0
-offset_top = 90.0
+offset_top = 112.0
 offset_right = 50.0
-offset_bottom = 160.0
+offset_bottom = 182.0
 script = ExtResource("7_0r4er")
 
 [node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl" unique_id=1152488689]
@@ -283,82 +305,3 @@ text = "1"
 label_settings = ExtResource("8_48ey3")
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="BackgroundPanel2" type="Panel" parent="." unique_id=1248810872]
-unique_name_in_owner = true
-layout_mode = 0
-offset_top = 57.0
-offset_right = 150.0
-offset_bottom = 81.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0g7yh")
-
-[node name="UnitsStrip" type="HBoxContainer" parent="BackgroundPanel2" unique_id=1893580154]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="ArmyCell" type="HBoxContainer" parent="BackgroundPanel2/UnitsStrip" unique_id=1151390211]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 2
-
-[node name="ArmyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/ArmyCell" unique_id=1898280267]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(35, 24)
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("9_army")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="ArmyCountLabel" type="Label" parent="BackgroundPanel2/UnitsStrip/ArmyCell" unique_id=1033955341]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(22, 24)
-layout_mode = 2
-text = "10"
-label_settings = SubResource("LabelSettings_army")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="NavyCell" type="HBoxContainer" parent="BackgroundPanel2/UnitsStrip" unique_id=1041305104]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 2
-
-[node name="NavyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/NavyCell" unique_id=1397946510]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(35, 24)
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("10_navy")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="NavyCountLabel" type="Label" parent="BackgroundPanel2/UnitsStrip/NavyCell" unique_id=633649371]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(22, 24)
-layout_mode = 2
-text = "10"
-label_settings = SubResource("LabelSettings_navy")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ActiveFrame" type="ColorRect" parent="." unique_id=1366201005]
-unique_name_in_owner = true
-visible = false
-layout_mode = 0
-mouse_filter = 2
-script = ExtResource("8_brass")
-Inset = 6.0
-BracketAlpha = 1.0
-BracketLength = 12.0
-SweepSpeed = 140.0
-SweepWidth = 45.0
-GlowAlpha = 0.4
