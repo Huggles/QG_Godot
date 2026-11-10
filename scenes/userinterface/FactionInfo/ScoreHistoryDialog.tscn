@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bscorehistdlg"]
+
+[ext_resource type="PackedScene" uid="uid://bqmodalshelf" path="res://scenes/menu/MenuModalShell.tscn" id="1_shell"]
+[ext_resource type="Script" path="res://scenes/userinterface/FactionInfo/ScoreHistoryDialog.cs" id="2_script"]
+[ext_resource type="Script" path="res://scenes/userinterface/FactionInfo/ScoreChart.cs" id="3_chart"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_well"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(0, 0, 0, 0.3)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.851, 0.678, 0.361, 0.25)
+
+[node name="ScoreHistoryDialog" instance=ExtResource("1_shell")]
+script = ExtResource("2_script")
+
+[node name="Panel" parent="Root/Centre" index="0"]
+custom_minimum_size = Vector2(860, 0)
+
+[node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
+text = "Score History"
+
+[node name="FactionButtons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ChartWell" type="PanelContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_well")
+
+[node name="Chart" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/ChartWell" index="0"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_chart")
+
+[node name="BreakdownWell" type="PanelContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="3"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_well")
+
+[node name="Scroll" type="ScrollContainer" parent="Root/Centre/Panel/ContentContainer/Box/BreakdownWell" index="0"]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Breakdown" type="RichTextLabel" parent="Root/Centre/Panel/ContentContainer/Box/BreakdownWell/Scroll" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+fit_content = true
+theme_override_font_sizes/normal_font_size = 17
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="4"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="1"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Close"
+
+[editable path="Root/Centre/Panel"]

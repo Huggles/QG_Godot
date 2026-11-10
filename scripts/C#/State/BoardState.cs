@@ -192,7 +192,7 @@ public sealed partial class BoardState
     }
 
     // Raised and cleared by local input and preview code, never by a ChangeEvent or the calculator.
-    private static readonly HashSet<Tag> LocalTags = new() { Tag.Clickable, Tag.RebuildTarget, Tag.PreviewTarget, Tag.FocusTarget };
+    private static readonly HashSet<Tag> LocalTags = new() { Tag.Clickable, Tag.RebuildTarget, Tag.PreviewTarget, Tag.FocusTarget, Tag.EmptyBattleTarget, Tag.HoldsUnitTarget };
 
     /// <summary>
     /// Everything this board holds, one line per object, for checking that a fork changed exactly as

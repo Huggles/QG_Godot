@@ -1,0 +1,74 @@
+[gd_scene load_steps=7 format=3 uid="uid://b8qgcmdbtn01"]
+
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
+[ext_resource type="Script" uid="uid://cbtnmr7p4xq8g" path="res://scripts/C#/Menu/MenuPanelButton.cs" id="1_script"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="S_normal"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 3
+border_color = Color(1, 1, 1, 0.12)
+
+[sub_resource type="StyleBoxFlat" id="S_hover"]
+bg_color = Color(0.851, 0.678, 0.361, 0.14)
+border_width_left = 3
+border_color = Color(0.851, 0.678, 0.361, 1)
+
+[sub_resource type="StyleBoxFlat" id="S_disabled"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 3
+border_color = Color(1, 1, 1, 0.05)
+
+[sub_resource type="StyleBoxEmpty" id="S_focus"]
+
+[node name="MenuCommandButton" type="Button"]
+custom_minimum_size = Vector2(0, 58)
+offset_right = 420.0
+offset_bottom = 58.0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("S_normal")
+theme_override_styles/pressed = SubResource("S_hover")
+theme_override_styles/hover = SubResource("S_hover")
+theme_override_styles/hover_pressed = SubResource("S_hover")
+theme_override_styles/disabled = SubResource("S_disabled")
+theme_override_styles/focus = SubResource("S_focus")
+script = ExtResource("1_script")
+DisabledContentTint = Color(1, 1, 1, 0.3)
+HeldContentOffset = 2
+HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
+HoverContentShift = 10
+
+[node name="BrassFrame" type="ColorRect" parent="."]
+layout_mode = 0
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 6.0
+BracketAlpha = 0.0
+SweepAlpha = 0.0
+GlowAlpha = 0.0
+SheenAlpha = 0.35
+SheenPeriod = 1.8
+IdleEnergy = 0.0
+
+[node name="ContentContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 26
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 0
+
+[node name="Label" type="Label" parent="ContentContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.929, 0.898, 0.82, 1)
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 32
+text = "Command"
+vertical_alignment = 1
+uppercase = true
+

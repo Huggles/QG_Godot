@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://lxs4ht0c4jlg"]
 
 [ext_resource type="Texture2D" uid="uid://bqpfq0aoas6p5" path="res://assets/textures/ScoreScreen.png" id="1_bg"]
-[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="PackedScene" uid="uid://b8qgprmbtn03" path="res://scenes/menu/MenuActionButtonPrimary.tscn" id="2_btn"]
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="5_theme"]
 [ext_resource type="Script" uid="uid://cwsi814d2uspu" path="res://scripts/C#/Menu/VictoryScreen.cs" id="3_script"]
 [ext_resource type="Texture2D" uid="uid://canhirkc65nvb" path="res://assets/textures/Other/ScoreScreenModal.png" id="4_modal"]
 
@@ -23,6 +24,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("5_theme")
 script = ExtResource("3_script")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=2142784661]
@@ -80,20 +82,20 @@ alignment = 1
 
 [node name="ButtonRow" type="HBoxContainer" parent="." unique_id=1977198968]
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = 7
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 441.0
-offset_top = -89.0
-offset_right = 591.0
-offset_bottom = 45.0
+offset_left = -170.0
+offset_top = -120.0
+offset_right = 170.0
+offset_bottom = -56.0
 grow_horizontal = 2
 grow_vertical = 0
-scale = Vector2(0.5, 0.5)
 alignment = 1
 
 [node name="MainMenuButton" parent="ButtonRow" unique_id=1160922925 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(500, 110)
+custom_minimum_size = Vector2(340, 64)
 layout_mode = 2

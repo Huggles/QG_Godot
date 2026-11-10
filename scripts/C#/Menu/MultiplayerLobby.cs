@@ -885,6 +885,7 @@ public partial class MultiplayerLobby : Control
 
 	private void RefreshButton(int rowPeerId, Faction faction, TextureButton btn)
 	{
+		btn.QueueRedraw(); // the claim frame follows Modulate
 		int  me      = SessionIdentity.LocalPeerId(this);
 		bool isMyRow = rowPeerId == me;
 		bool iAmHost = me == 1;
@@ -944,6 +945,7 @@ public partial class MultiplayerLobby : Control
 	/// </summary>
 	private void RefreshRandomButton(int rowPeerId, TextureButton btn)
 	{
+		btn.QueueRedraw(); // the claim frame follows Modulate
 		int  me      = SessionIdentity.LocalPeerId(this);
 		bool isMyRow = rowPeerId == me;
 		bool iAmHost = me == 1;
@@ -1370,29 +1372,38 @@ public partial class MultiplayerLobby : Control
 		if (_playerLabels.ContainsKey(peerId)) return;
 
 		// ── Row background ────────────────────────────────────────────────
+		bool isLocalRow = peerId == SessionIdentity.LocalPeerId(this);
 		var panel = new PanelContainer();
 		var style = new StyleBoxFlat
 		{
-			BgColor                 = new Color(0.15f, 0.15f, 0.15f, 0.55f),
-			CornerRadiusTopLeft     = 4,
-			CornerRadiusTopRight    = 4,
-			CornerRadiusBottomLeft  = 4,
-			CornerRadiusBottomRight = 4
+			BgColor                 = isLocalRow ? new Color(MenuBrass, 0.07f) : new Color(1, 1, 1, 0.035f),
+			BorderColor             = isLocalRow ? new Color(MenuBrass, 0.9f) : new Color(1, 1, 1, 0.1f),
+			BorderWidthLeft         = 3,
+			CornerRadiusTopLeft     = 3,
+			CornerRadiusTopRight    = 3,
+			CornerRadiusBottomLeft  = 3,
+			CornerRadiusBottomRight = 3,
+			ContentMarginLeft       = 18,
+			ContentMarginRight      = 14,
+			ContentMarginTop        = 10,
+			ContentMarginBottom     = 10,
 		};
 		panel.AddThemeStyleboxOverride("panel", style);
 
 		var hbox = new HBoxContainer();
-		hbox.AddThemeConstantOverride("separation", 10);
+		hbox.AddThemeConstantOverride("separation", 14);
 		panel.AddChild(hbox);
 
 		// ── Player name ───────────────────────────────────────────────────
 		var nameLabel = new Label
 		{
 			Text              = playerName,
-			CustomMinimumSize = new Vector2(160, 0),
-			VerticalAlignment = VerticalAlignment.Center
+			CustomMinimumSize = new Vector2(240, 0),
+			VerticalAlignment = VerticalAlignment.Center,
+			TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis,
 		};
-		nameLabel.AddThemeColorOverride("font_color", Colors.White);
+		nameLabel.AddThemeColorOverride("font_color", MenuText);
+		nameLabel.AddThemeFontSizeOverride("font_size", 24);
 		hbox.AddChild(nameLabel);
 		hbox.AddChild(new VSeparator());
 
@@ -1431,6 +1442,7 @@ public partial class MultiplayerLobby : Control
 			Faction capFaction = faction;
 			btn.Pressed += () => OnFactionButtonPressed(capPeerId, capFaction);
 
+			AddClaimFrame(btn);
 			flagsBox.AddChild(btn);
 			_factionButtons[peerId][faction] = btn;
 		}
@@ -1455,6 +1467,7 @@ public partial class MultiplayerLobby : Control
 		int capRandomPeerId = peerId;
 		randomBtn.Pressed += () => OnRandomButtonPressed(capRandomPeerId);
 
+		AddClaimFrame(randomBtn);
 		flagsBox.AddChild(randomBtn);
 		_randomButtons[peerId] = randomBtn;
 

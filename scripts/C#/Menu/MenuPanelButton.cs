@@ -57,6 +57,12 @@ public partial class MenuPanelButton : Button
 	/// <summary>Pixels the content sinks by while held, for the usual pressed-in feel.</summary>
 	[Export] public int HeldContentOffset { get; set; } = 4;
 
+	/// <summary>Label tint while hovered or focused; white leaves the label as authored.</summary>
+	[Export] public Color HoveredContentTint { get; set; } = Colors.White;
+
+	/// <summary>Pixels the label eases rightwards while hovered. 0 keeps it still.</summary>
+	[Export] public int HoverContentShift { get; set; }
+
 	/// <summary>
 	/// Typed as Control, not as the concrete label class: asking for the wrong one gives back null
 	/// rather than an error, so <see cref="ButtonText"/> would go quietly nowhere the next time the
@@ -70,6 +76,8 @@ public partial class MenuPanelButton : Button
 	private Texture2D _authoredTexture;
 	private int _authoredMarginTop;
 	private int _authoredMarginBottom;
+	private int _authoredMarginLeft;
+	private float _shift;
 
 	/// <summary>
 	/// Set from <see cref="_GuiInput"/> rather than read from <see cref="BaseButton.IsPressed"/>:
@@ -94,11 +102,15 @@ public partial class MenuPanelButton : Button
 		{
 			_authoredMarginTop = _content.GetThemeConstant("margin_top");
 			_authoredMarginBottom = _content.GetThemeConstant("margin_bottom");
+			_authoredMarginLeft = _content.GetThemeConstant("margin_left");
 		}
 
 		// The export may have been assigned before this node was in the tree, when the label could not
 		// be reached yet.
 		ApplyLabelText();
+
+		// The child label is the caption; a stray Button.text would draw underneath it.
+		if (_label != null) Text = "";
 
 		MouseDefaultCursorShape = CursorShape.PointingHand;
 
@@ -116,6 +128,19 @@ public partial class MenuPanelButton : Button
 	{
 		ApplyState(ResolveState());
 		RaiseMinimumSizeToArt();
+		EaseHoverShift((float)delta);
+	}
+
+	private void EaseHoverShift(float delta)
+	{
+		if (HoverContentShift == 0 || _content == null) return;
+
+		bool lit = _appliedState is VisualState.Hovered or VisualState.Held or VisualState.Focused;
+		float target = lit ? HoverContentShift : 0f;
+		if (Mathf.IsEqualApprox(_shift, target)) return;
+
+		_shift = Mathf.Abs(_shift - target) < 0.25f ? target : Mathf.Lerp(_shift, target, 1f - Mathf.Exp(-delta * 18f));
+		_content.AddThemeConstantOverride("margin_left", _authoredMarginLeft + Mathf.RoundToInt(_shift));
 	}
 
 	/// <summary>
@@ -270,7 +295,12 @@ public partial class MenuPanelButton : Button
 
 		if (_label != null)
 		{
-			_label.SelfModulate = state == VisualState.Disabled ? DisabledContentTint : Colors.White;
+			_label.SelfModulate = state switch
+			{
+				VisualState.Disabled => DisabledContentTint,
+				VisualState.Hovered or VisualState.Held or VisualState.Focused => HoveredContentTint,
+				_ => Colors.White,
+			};
 		}
 
 		if (_content != null)

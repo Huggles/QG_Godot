@@ -1,261 +1,196 @@
 [gd_scene format=3 uid="uid://bjpmsri3am6gm"]
 
 [ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
-[ext_resource type="StyleBox" uid="uid://iry13465ja03" path="res://scenes/cards/CardButtonStyleHovered.tres" id="2_h8eod"]
-[ext_resource type="Texture2D" uid="uid://ddr7do1nkqeou" path="res://assets/factions/germany/Germany_Flag.png" id="2_s1j4j"]
-[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="3_gac4n"]
-[ext_resource type="Texture2D" uid="uid://deodddhcuupnq" path="res://assets/textures/Other/Icons/DeckIcon.png" id="3_s1j4j"]
-[ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/Icons/PlayedCardsIcon.png" id="4_rhpmq"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/HandCardsIcon.svg" id="3_hand"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/DeckStackIcon.svg" id="4_deck"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/TableCardsIcon.svg" id="5_table"]
 [ext_resource type="Script" uid="uid://nwhfij0f43sv" path="res://scenes/userinterface/FactionInfo/CardsAnimationControl.cs" id="7_0r4er"]
 [ext_resource type="Texture2D" uid="uid://cpfklff0i6sut" path="res://assets/factions/germany/cards/Germany_CardBack.png" id="7_48ey3"]
 [ext_resource type="LabelSettings" uid="uid://cy7n8wr0krac1" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsLarge.tres" id="8_48ey3"]
 [ext_resource type="Texture2D" uid="uid://sfhhmtjxiwqx" path="res://assets/textures/Units/QGArmyDetailed.png" id="9_army"]
 [ext_resource type="Texture2D" uid="uid://1gl1q0exfxm2" path="res://assets/textures/Units/QGNavyDetailed.png" id="10_navy"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_kb8kt"]
-texture = ExtResource("2_s1j4j")
-axis_stretch_horizontal = 2
-axis_stretch_vertical = 2
+[sub_resource type="LabelSettings" id="LabelSettings_score"]
+resource_local_to_scene = true
+font_size = 32
+outline_size = 7
+outline_color = Color(0, 0, 0, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xyivq"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_osvc4"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_stat"]
 content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
-bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0, 0, 0, 1)
-border_blend = true
-corner_detail = 5
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0g7yh"]
+[sub_resource type="LabelSettings" id="LabelSettings_stat"]
 resource_local_to_scene = true
-resource_name = "default_style_box_flat"
-bg_color = Color(0.0820739, 0.699516, 0.566019, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0, 0, 0, 1)
-
-[sub_resource type="Theme" id="Theme_gac4n"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s1j4j"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_0r4er"]
-resource_local_to_scene = true
-outline_size = 7
-outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rhpmq"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sfxx1"]
-resource_local_to_scene = true
-resource_name = "default_style_box_flat_1"
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(0, 0, 0, 1)
-border_blend = true
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_osvc4"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h8eod"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_army"]
-resource_local_to_scene = true
-font_size = 18
-outline_size = 6
-outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_navy"]
-resource_local_to_scene = true
-font_size = 18
-outline_size = 6
+font_size = 15
+outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
 [node name="FactionInfoRow" type="Control" unique_id=1940069184]
-custom_minimum_size = Vector2(150, 75)
+custom_minimum_size = Vector2(220, 52)
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -1820.0
-offset_bottom = -1030.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_default_cursor_shape = 2
+anchors_preset = 0
+offset_right = 220.0
+offset_bottom = 52.0
+mouse_filter = 2
 script = ExtResource("1_osvc4")
 
-[node name="FlagPanel" type="Panel" parent="." unique_id=146565445]
+[node name="Cloth" type="ColorRect" parent="." unique_id=1366202001]
 unique_name_in_owner = true
 layout_mode = 0
-offset_right = 100.0
-offset_bottom = 50.0
-theme_override_styles/panel = SubResource("StyleBoxTexture_kb8kt")
-
-[node name="ScoreLabel" type="Label" parent="FlagPanel" unique_id=1942955123]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "9"
-label_settings = ExtResource("3_gac4n")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel" type="Panel" parent="FlagPanel" unique_id=1168793567]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 220.0
+offset_bottom = 52.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_xyivq")
-
-[node name="BackgroundPanel" type="Panel" parent="." unique_id=52719779]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 50)
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_bottom = -25.0
-grow_horizontal = 0
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0g7yh")
-
-[node name="DiscardDeckButton" type="Button" parent="BackgroundPanel" unique_id=1698971982]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 25)
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -50.0
-offset_bottom = 25.0
-grow_horizontal = 0
-focus_mode = 0
-theme = SubResource("Theme_gac4n")
-theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
-theme_override_styles/normal = SubResource("StyleBoxEmpty_s1j4j")
-icon = ExtResource("3_s1j4j")
-icon_alignment = 1
-expand_icon = true
-
-[node name="DeckCardNumber" type="Label" parent="BackgroundPanel/DiscardDeckButton" unique_id=614173343]
-custom_minimum_size = Vector2(50, 25)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "9"
-label_settings = SubResource("LabelSettings_0r4er")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="PlayedCardsButton" type="Button" parent="BackgroundPanel" unique_id=1709253810]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 25)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -50.0
-offset_top = -25.0
-grow_horizontal = 0
-grow_vertical = 0
-focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_rhpmq")
-icon = ExtResource("4_rhpmq")
-icon_alignment = 1
-expand_icon = true
-
-[node name="PlayedCardsNumber" type="Label" parent="BackgroundPanel/PlayedCardsButton" unique_id=633649374]
-custom_minimum_size = Vector2(50, 25)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "0"
-label_settings = SubResource("LabelSettings_0r4er")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="DetailPanel" type="Panel" parent="." unique_id=1521963942]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(300, 300)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -100.0
-offset_top = 90.0
-offset_right = 100.0
-offset_bottom = 340.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_sfxx1")
-
-[node name="MarginContainer" type="MarginContainer" parent="DetailPanel" unique_id=75594480]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 4
-
-[node name="TurnSummariesRichText" type="RichTextLabel" parent="DetailPanel/MarginContainer" unique_id=952183249]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_force_pass_scroll_events = false
-bbcode_enabled = true
-text = "Lorem Ipsum is slechts een proeftekst uit het drukkerij- en zetterijwezen. Lorem Ipsum is de standaard proeftekst in deze bedrijfstak sinds de 16e eeuw, toen een onbekende drukker een zethaak met letters nam en ze door elkaar husselde om een font-catalogus te maken. Het heeft niet alleen vijf eeuwen overleefd maar is ook, vrijwel onveranderd, overgenomen in elektronische letterzetting. Het is in de jaren '60 populair geworden met de introductie van Letraset vellen met Lorem Ipsum passages en meer recentelijk door desktop publishing software zoals Aldus PageMaker die versies van Lorem Ipsum bevatten."
 
 [node name="FactionInfoButton" type="Button" parent="." unique_id=1138684773]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_right = 8.0
-offset_bottom = -25.0
-grow_vertical = 2
+layout_mode = 0
+offset_right = 220.0
+offset_bottom = 52.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_osvc4")
-theme_override_styles/hover = ExtResource("2_h8eod")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_h8eod")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_osvc4")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_osvc4")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_osvc4")
+
+[node name="ScoreLabel" type="Label" parent="." unique_id=1942955123]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 52.0
+grow_vertical = 2
+text = "9"
+label_settings = SubResource("LabelSettings_score")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stats" type="VBoxContainer" parent="." unique_id=1366202006]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 90.0
+offset_top = 3.0
+offset_right = 200.0
+offset_bottom = 49.0
+mouse_filter = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="Cards" type="HBoxContainer" parent="Stats" unique_id=1366202009]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 9
+
+[node name="HandButton" type="Button" parent="Stats/Cards" unique_id=1366201004]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 21)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_constants/h_separation = 3
+theme_override_constants/icon_max_width = 15
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_stat")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_stat")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
+text = "7"
+icon = ExtResource("3_hand")
+
+[node name="DeckButton" type="Button" parent="Stats/Cards" unique_id=1698971982]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 21)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_constants/h_separation = 3
+theme_override_constants/icon_max_width = 15
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_stat")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_stat")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
+text = "33"
+icon = ExtResource("4_deck")
+
+[node name="TableButton" type="Button" parent="Stats/Cards" unique_id=1709253810]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 21)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_constants/h_separation = 3
+theme_override_constants/icon_max_width = 15
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxEmpty_stat")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_stat")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
+text = "0"
+icon = ExtResource("5_table")
+
+[node name="Pieces" type="HBoxContainer" parent="Stats" unique_id=1366202010]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 9
+
+[node name="ArmyCell" type="HBoxContainer" parent="Stats/Pieces" unique_id=1151390211]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 1
+theme_override_constants/separation = 2
+
+[node name="ArmyIcon" type="TextureRect" parent="Stats/Pieces/ArmyCell" unique_id=1898280267]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 19)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("9_army")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ArmyCountLabel" type="Label" parent="Stats/Pieces/ArmyCell" unique_id=1033955341]
+unique_name_in_owner = true
+layout_mode = 2
+text = "10"
+label_settings = SubResource("LabelSettings_stat")
+vertical_alignment = 1
+
+[node name="NavyCell" type="HBoxContainer" parent="Stats/Pieces" unique_id=1041305104]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 1
+theme_override_constants/separation = 2
+
+[node name="NavyIcon" type="TextureRect" parent="Stats/Pieces/NavyCell" unique_id=1397946510]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 19)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("10_navy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NavyCountLabel" type="Label" parent="Stats/Pieces/NavyCell" unique_id=633649371]
+unique_name_in_owner = true
+layout_mode = 2
+text = "10"
+label_settings = SubResource("LabelSettings_stat")
+vertical_alignment = 1
 
 [node name="CardsAnimationControl" type="Control" parent="." unique_id=1551812826]
 anchors_preset = 0
-offset_top = 84.5
-offset_right = 50.0
-offset_bottom = 154.5
+offset_left = 230.0
+offset_top = -7.0
+offset_right = 280.0
+offset_bottom = 59.0
 script = ExtResource("7_0r4er")
 
 [node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl" unique_id=1152488689]
@@ -277,81 +212,5 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "1"
 label_settings = ExtResource("8_48ey3")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="BackgroundPanel2" type="Panel" parent="." unique_id=1248810872]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 25)
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -150.0
-offset_top = 50.0
-grow_horizontal = 0
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0g7yh")
-
-[node name="UnitsStrip" type="HBoxContainer" parent="BackgroundPanel2" unique_id=1893580154]
-custom_minimum_size = Vector2(150, 25)
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -25.0
-offset_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-theme_override_constants/separation = 2
-alignment = 1
-
-[node name="ArmyCell" type="HBoxContainer" parent="BackgroundPanel2/UnitsStrip" unique_id=1151390211]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 2
-
-[node name="ArmyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/ArmyCell" unique_id=1898280267]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(35, 25)
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("9_army")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="ArmyCountLabel" type="Label" parent="BackgroundPanel2/UnitsStrip/ArmyCell" unique_id=1033955341]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(22, 25)
-layout_mode = 2
-text = "10"
-label_settings = SubResource("LabelSettings_army")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="NavyCell" type="HBoxContainer" parent="BackgroundPanel2/UnitsStrip" unique_id=1041305104]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 2
-
-[node name="NavyIcon" type="TextureRect" parent="BackgroundPanel2/UnitsStrip/NavyCell" unique_id=1397946510]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(35, 25)
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("10_navy")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="NavyCountLabel" type="Label" parent="BackgroundPanel2/UnitsStrip/NavyCell" unique_id=633649371]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(22, 25)
-layout_mode = 2
-text = "10"
-label_settings = SubResource("LabelSettings_navy")
 horizontal_alignment = 1
 vertical_alignment = 1

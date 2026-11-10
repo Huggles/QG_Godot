@@ -7,7 +7,8 @@ public partial class FactionsContainer : Control
 {
     public static FactionsContainer Current;
 
-    private HBoxContainer HorizontalContainer => GetNode<HBoxContainer>("%FactionsHorizontalContainer");
+    private VBoxContainer Column => GetNode<VBoxContainer>("%FactionsColumn");
+    private Panel Pole => GetNode<Panel>("%Pole");
 
     public Dictionary<Faction, FactionInfoRow> FactionInfoNodes = new();
 
@@ -61,22 +62,19 @@ public partial class FactionsContainer : Control
     }
 
 
-    /// <summary>The faction strip's minimum size as the scene sets it, before any minor-faction tabs.</summary>
-    private Vector2? _sceneMinimumSize;
-
     private void InitChildElements()
     {
         DebugUtilities.PrintPeerFinest("FactionsContainer initializing child elements");
-        foreach (Node child in HorizontalContainer.GetChildren())
+        foreach (Node child in Column.GetChildren())
         {
-            HorizontalContainer.RemoveChild(child);
+            Column.RemoveChild(child);
             child.QueueFree();
         }
 
         FactionInfoNodes.Clear();
 
         // One row per faction that takes turns. A minor faction (France, China) shares its patron's row:
-        // FactionInfoRow folds its score in and hangs its pieces in a tab under the row.
+        // FactionInfoRow folds its score in and hangs its pieces as extra tags.
         List<Faction> playerFactions = StaticGameData.PlayableFactions;
         
         // If no factions assigned yet, don't show any rows
@@ -89,20 +87,13 @@ public partial class FactionsContainer : Control
         {
             FactionInfoRow rowInstance = AssetRepository.FactionInfoRowScenePacked.Instantiate<FactionInfoRow>();
             rowInstance.Faction = faction;
-            // Rows keep their own height when the strip grows for the minor-faction tabs below:
-            // their panels are anchored to the row's bottom edge and would stretch otherwise.
-            rowInstance.SizeFlagsVertical = Control.SizeFlags.ShrinkBegin;
-            HorizontalContainer.AddChild(rowInstance);
+            Column.AddChild(rowInstance);
             FactionInfoNodes[faction] = rowInstance;
         }
 
-        // Make room for the tallest stack of minor-faction tabs, so they sit inside the panel. Set from
-        // the scene's own size rather than added to the current one: this runs again on every
-        // join, assignment and session start, and adding would grow the strip each time. The base
-        // game has no minor factions and keeps the scene's height.
-        _sceneMinimumSize ??= HorizontalContainer.CustomMinimumSize;
-        int tabs = playerFactions.Max(faction => StaticGameData.MinorsOf(faction).Count);
-        HorizontalContainer.CustomMinimumSize = _sceneMinimumSize.Value + new Vector2(0, tabs * FactionInfoRow.MinorTabHeight);
+        // The pole runs from the finial to just past the last pennant.
+        float rowHeight = playerFactions.Count * 52f + (playerFactions.Count - 1) * Column.GetThemeConstant("separation");
+        Pole.Size = Pole.Size with { Y = rowHeight + 16f };
     }
 
     public FactionInfoRow GetFactionInfoNodeForFaction(Faction faction)

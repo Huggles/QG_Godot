@@ -43,6 +43,10 @@ public static class CardTargetPreviewDisplay
     /// <inheritdoc cref="litCountryIds"/>
     private static List<int> litUnitIds = new();
 
+    /// <summary>The lit countries also tagged <see cref="Tag.EmptyBattleTarget"/>, and the unit targets' countries tagged <see cref="Tag.HoldsUnitTarget"/>.</summary>
+    private static List<int> litEmptyBattleCountryIds = new();
+    private static List<int> litUnitHostCountryIds = new();
+
     /// <summary>
     /// Light up what <paramref name="cardId"/> could reach. A no-op when no card prompt is open —
     /// hovering a card outside a prompt (browsing another faction's hand, the history popup) must not
@@ -63,7 +67,7 @@ public static class CardTargetPreviewDisplay
         // A card that reaches nothing — no declared preview, or its targets have all gone — leaves the
         // board empty, which IS the answer for a card that cannot do anything right now.
         prompt.PreviewsByCardId.TryGetValue(cardId, out InputRequest.CardTargetPreview preview);
-        Light(preview?.CountryIds, preview?.UnitIds);
+        Light(preview?.CountryIds, preview?.UnitIds, preview?.EmptyBattleCountryIds);
     }
 
     /// <summary>Light up what an option drawn as a card could reach, carried on the option itself.</summary>
@@ -83,25 +87,36 @@ public static class CardTargetPreviewDisplay
         ClearAll();
     }
 
-    private static void Light(List<int> countryIds, List<int> unitIds)
+    private static void Light(List<int> countryIds, List<int> unitIds, List<int> emptyBattleCountryIds = null)
     {
         // Resolved and filtered rather than passed straight to AddTag: ForIds yields a null for an id
         // it does not know, and the tag extensions dereference every element. These ids arrived over
         // the wire, so an unresolvable one must cost the preview and not the prompt.
-        List<CountryState> countryStates = CountryState.ForIds((countryIds ?? new List<int>()).Distinct())
-            .Where(countryState => countryState != null)
-            .ToList();
+        List<CountryState> countryStates = Countries(countryIds ?? new List<int>());
+
+        // A country the card also names outright (a build target, say) glows on every pulse, not one in three.
+        List<CountryState> emptyBattleStates = Countries((emptyBattleCountryIds ?? new List<int>()).Except(countryStates.Select(cs => cs.Id)));
 
         List<UnitState> unitStates = UnitState.ForIds((unitIds ?? new List<int>()).Distinct())
             .Where(unitState => unitState != null)
             .ToList();
 
-        litCountryIds = countryStates.Select(countryState => countryState.Id).ToList();
+        List<CountryState> unitHostStates = Countries(unitStates.Where(us => us.IsDeployedToCountry).Select(us => us.CountryId));
+
+        litCountryIds = countryStates.Concat(emptyBattleStates).Select(countryState => countryState.Id).ToList();
+        litEmptyBattleCountryIds = emptyBattleStates.Select(countryState => countryState.Id).ToList();
+        litUnitHostCountryIds = unitHostStates.Select(countryState => countryState.Id).ToList();
         litUnitIds = unitStates.Select(unitState => unitState.Id).ToList();
 
-        countryStates.AddTag(Tag.PreviewTarget, Faction.ALL);
+        // Styling tags before PreviewTarget, so a country never draws a frame of the wrong style.
+        emptyBattleStates.AddTag(Tag.EmptyBattleTarget, Faction.ALL);
+        unitHostStates.AddTag(Tag.HoldsUnitTarget, Faction.ALL);
+        countryStates.Concat(emptyBattleStates).AddTag(Tag.PreviewTarget, Faction.ALL);
         unitStates.AddTag(Tag.PreviewTarget, Faction.ALL);
     }
+
+    private static List<CountryState> Countries(IEnumerable<int> ids) =>
+        CountryState.ForIds(ids.Distinct()).Where(countryState => countryState != null).ToList();
 
     /// <summary>
     /// Clear the preview, but only if <paramref name="cardId"/> is still the card that owns it. Call
@@ -120,14 +135,12 @@ public static class CardTargetPreviewDisplay
     /// </summary>
     public static void ClearAll()
     {
-        if (litCountryIds.Count > 0)
-        {
-            CountryState.ForIds(litCountryIds)
-                .Where(countryState => countryState != null)
-                .ToList()
-                .RemoveTag(Tag.PreviewTarget, Faction.ALL);
-            litCountryIds = new List<int>();
-        }
+        Countries(litCountryIds).RemoveTag(Tag.PreviewTarget, Faction.ALL);
+        Countries(litEmptyBattleCountryIds).RemoveTag(Tag.EmptyBattleTarget, Faction.ALL);
+        Countries(litUnitHostCountryIds).RemoveTag(Tag.HoldsUnitTarget, Faction.ALL);
+        litCountryIds = new List<int>();
+        litEmptyBattleCountryIds = new List<int>();
+        litUnitHostCountryIds = new List<int>();
 
         if (litUnitIds.Count > 0)
         {

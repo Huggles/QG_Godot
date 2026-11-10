@@ -1,40 +1,12 @@
 [gd_scene format=3 uid="uid://bjoingamescr1"]
 
-[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
+[ext_resource type="PackedScene" uid="uid://b8qgactbtn02" path="res://scenes/menu/MenuActionButton.tscn" id="2_btn"]
 [ext_resource type="Script" uid="uid://dih02qchvrpns" path="res://scripts/C#/Menu/JoinGameScreen.cs" id="3_script"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field"]
-content_margin_left = 12.0
-content_margin_top = 8.0
-content_margin_right = 12.0
-content_margin_bottom = 8.0
-bg_color = Color(0.1, 0.1, 0.1, 0.75)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.5, 0.5, 0.5, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus"]
-content_margin_left = 12.0
-content_margin_top = 8.0
-content_margin_right = 12.0
-content_margin_bottom = 8.0
-bg_color = Color(0.1, 0.1, 0.1, 0.75)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.85, 0.2, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="4_theme"]
+[ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanel.tres" id="5_frost"]
+[ext_resource type="PackedScene" uid="uid://b8qgprmbtn03" path="res://scenes/menu/MenuActionButtonPrimary.tscn" id="6_primary"]
 
 [node name="Control" type="Control" unique_id=219608430]
 layout_mode = 3
@@ -48,103 +20,123 @@ script = ExtResource("3_script")
 [node name="Backdrop" parent="." instance=ExtResource("9_bdrop")]
 layout_mode = 1
 
-[node name="TitleLabel" type="RichTextLabel" parent="." unique_id=191252396]
+[node name="Scrim" type="ColorRect" parent="." unique_id=1702117001]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -400.0
-offset_top = 80.0
-offset_right = 400.0
-offset_bottom = 150.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
-theme_override_font_sizes/normal_font_size = 36
-bbcode_enabled = true
-text = "[center][font_size=42][b]Join Game[/b][/font_size][/center]"
-scroll_active = false
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.024, 0.018, 0.35)
 
-[node name="FormContainer" type="VBoxContainer" parent="." unique_id=1694625084]
+[node name="Card" type="PanelContainer" parent="." unique_id=1702117002]
+material = ExtResource("5_frost")
+custom_minimum_size = Vector2(720, 0)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -371.0
-offset_right = 300.0
-offset_bottom = 371.0
+offset_left = -360.0
+offset_top = -190.0
+offset_right = 360.0
+offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
-alignment = 1
+theme = ExtResource("4_theme")
 
-[node name="IpLabel" type="RichTextLabel" parent="FormContainer" unique_id=663842362]
-custom_minimum_size = Vector2(0, 40)
+[node name="FormContainer" type="VBoxContainer" parent="Card" unique_id=1694625084]
 layout_mode = 2
-theme_override_font_sizes/normal_font_size = 24
-bbcode_enabled = true
-text = "[font_size=24]Server address[/font_size]"
-fit_content = true
-scroll_active = false
-horizontal_alignment = 1
+theme_override_constants/separation = 14
 
-[node name="IpInput" type="LineEdit" parent="FormContainer" unique_id=284536560]
+[node name="Kicker" type="Label" parent="Card/FormContainer" unique_id=1702117003]
+layout_mode = 2
+theme_type_variation = &"MenuKicker"
+text = "MULTIPLAYER  ·  DIRECT CONNECTION"
+
+[node name="TitleLabel" type="Label" parent="Card/FormContainer" unique_id=191252396]
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+text = "JOIN GAME"
+
+[node name="HeaderRule" type="HSeparator" parent="Card/FormContainer" unique_id=1702117004]
+layout_mode = 2
+
+[node name="Gap" type="Control" parent="Card/FormContainer" unique_id=1702117005]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Fields" type="HBoxContainer" parent="Card/FormContainer" unique_id=1702117006]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="AddressColumn" type="VBoxContainer" parent="Card/FormContainer/Fields" unique_id=1702117007]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="IpLabel" type="Label" parent="Card/FormContainer/Fields/AddressColumn" unique_id=663842362]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "SERVER ADDRESS"
+
+[node name="IpInput" type="LineEdit" parent="Card/FormContainer/Fields/AddressColumn" unique_id=284536560]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 56)
+custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_placeholder_color = Color(1, 1, 1, 0.45)
-theme_override_colors/caret_color = Color(1, 1, 1, 1)
-theme_override_colors/selection_color = Color(1, 0.85, 0.2, 0.5)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_field")
-theme_override_styles/focus = SubResource("StyleBoxFlat_focus")
+theme_override_font_sizes/font_size = 26
 placeholder_text = "127.0.0.1"
-alignment = 1
 
-[node name="PortLabel" type="RichTextLabel" parent="FormContainer" unique_id=1556742149]
-custom_minimum_size = Vector2(0, 40)
+[node name="PortColumn" type="VBoxContainer" parent="Card/FormContainer/Fields" unique_id=1702117008]
 layout_mode = 2
-theme_override_font_sizes/normal_font_size = 24
-bbcode_enabled = true
-text = "[font_size=24]Port[/font_size]"
-fit_content = true
-scroll_active = false
-horizontal_alignment = 1
+theme_override_constants/separation = 8
 
-[node name="PortInput" type="LineEdit" parent="FormContainer" unique_id=1458125045]
+[node name="PortLabel" type="Label" parent="Card/FormContainer/Fields/PortColumn" unique_id=1556742149]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "PORT"
+
+[node name="PortInput" type="LineEdit" parent="Card/FormContainer/Fields/PortColumn" unique_id=1458125045]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 56)
+custom_minimum_size = Vector2(160, 58)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_placeholder_color = Color(1, 1, 1, 0.45)
-theme_override_colors/caret_color = Color(1, 1, 1, 1)
-theme_override_colors/selection_color = Color(1, 0.85, 0.2, 0.5)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_field")
-theme_override_styles/focus = SubResource("StyleBoxFlat_focus")
+theme_override_font_sizes/font_size = 26
 placeholder_text = "7777"
 alignment = 1
 
-[node name="StatusLabel" type="RichTextLabel" parent="FormContainer" unique_id=1517358653]
+[node name="StatusLabel" type="RichTextLabel" parent="Card/FormContainer" unique_id=1517358653]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 70)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
-theme_override_font_sizes/normal_font_size = 24
+theme_override_colors/default_color = Color(0.69, 0.66, 0.58, 1)
+theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="JoinButton" parent="FormContainer" unique_id=1549553159 instance=ExtResource("2_btn")]
+[node name="Footer" type="HBoxContainer" parent="Card/FormContainer" unique_id=2001175170]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="LeaveButton" parent="Card/FormContainer/Footer" unique_id=1382638456 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 100)
 layout_mode = 2
 
-[node name="LeaveButton" parent="FormContainer" unique_id=1382638456 instance=ExtResource("2_btn")]
+[node name="FooterSpacer" type="Control" parent="Card/FormContainer/Footer" unique_id=1702117009]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="JoinButton" parent="Card/FormContainer/Footer" unique_id=1549553159 instance=ExtResource("6_primary")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 100)
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="FormContainer" unique_id=2001175170]
+[node name="BrassFrame" type="ColorRect" parent="Card"]
 layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 14.0
+BracketLength = 30.0

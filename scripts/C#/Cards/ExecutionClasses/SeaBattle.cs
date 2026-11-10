@@ -17,7 +17,7 @@ public partial class SeaBattle : CardLogic
     private List<int> AttackableCountries(BoardState board) => board.AttackableSeaIds(Faction);
 
     public override TargetSet Targets() =>
-        TargetSet.Countries(AttackableCountries(BoardState.Live)).Plus(TargetSet.Units(AttackableNavies(BoardState.Live)));
+        TargetSet.EmptyBattleCountries(AttackableCountries(BoardState.Live)).Plus(TargetSet.Units(AttackableNavies(BoardState.Live)));
 
     public override List<CardStep> OnActivate()
     {

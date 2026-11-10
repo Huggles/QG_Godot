@@ -1,24 +1,12 @@
 [gd_scene format=3 uid="uid://cscreengmd5k3"]
 
-[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
 [ext_resource type="Script" uid="uid://bscreengmd5k3" path="res://scripts/C#/Menu/SkirmishScreen.cs" id="3_script"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scenario_bg"]
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
-bg_color = Color(0.05, 0.05, 0.05, 0.8)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.4, 0.4, 0.4, 0.9)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="4_theme"]
+[ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanel.tres" id="5_frost"]
+[ext_resource type="PackedScene" uid="uid://b8qgactbtn02" path="res://scenes/menu/MenuActionButton.tscn" id="6_action"]
+[ext_resource type="PackedScene" uid="uid://b8qgprmbtn03" path="res://scenes/menu/MenuActionButtonPrimary.tscn" id="7_primary"]
 
 [node name="Control" type="Control" unique_id=1686350979]
 layout_mode = 3
@@ -32,120 +20,200 @@ script = ExtResource("3_script")
 [node name="Backdrop" parent="." instance=ExtResource("9_bdrop")]
 layout_mode = 1
 
-[node name="TitleLabel" type="RichTextLabel" parent="." unique_id=334728534]
+[node name="Scrim" type="ColorRect" parent="." unique_id=1502117001]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -400.0
-offset_top = 80.0
-offset_right = 400.0
-offset_bottom = 150.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
-theme_override_font_sizes/normal_font_size = 36
-bbcode_enabled = true
-text = "[center][font_size=42][b]Skirmish[/b][/font_size][/center]"
-scroll_active = false
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.024, 0.018, 0.35)
 
-[node name="ButtonContainer" type="VBoxContainer" parent="." unique_id=746547968]
+[node name="Card" type="PanelContainer" parent="." unique_id=746547968]
+material = ExtResource("5_frost")
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -405.0
-offset_right = 300.0
-offset_bottom = 405.0
+offset_left = -680.0
+offset_top = -430.0
+offset_right = 680.0
+offset_bottom = 430.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
-alignment = 1
+theme = ExtResource("4_theme")
 
-[node name="ScenarioLabel" type="Label" parent="ButtonContainer" unique_id=866633671]
+[node name="Margin" type="MarginContainer" parent="Card" unique_id=1502117002]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 28
-text = "Select a Scenario"
-horizontal_alignment = 1
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 8
 
-[node name="ScenarioOptionButton" type="OptionButton" parent="ButtonContainer" unique_id=1587846790]
-custom_minimum_size = Vector2(0, 60)
+[node name="Layout" type="VBoxContainer" parent="Card/Margin" unique_id=1502117003]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/separation = 22
 
-[node name="DescriptionPanel" type="PanelContainer" parent="ButtonContainer" unique_id=2129022782]
-custom_minimum_size = Vector2(600, 140)
+[node name="Header" type="VBoxContainer" parent="Card/Margin/Layout" unique_id=1502117004]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_scenario_bg")
+theme_override_constants/separation = -4
 
-[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="ButtonContainer/DescriptionPanel" unique_id=476860882]
-custom_minimum_size = Vector2(0, 120)
+[node name="Kicker" type="Label" parent="Card/Margin/Layout/Header" unique_id=1502117005]
+layout_mode = 2
+theme_type_variation = &"MenuKicker"
+text = "NEW GAME  ·  VERSUS THE AI"
+
+[node name="TitleLabel" type="Label" parent="Card/Margin/Layout/Header" unique_id=334728534]
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+text = "SKIRMISH"
+
+[node name="HeaderRule" type="HSeparator" parent="Card/Margin/Layout" unique_id=1502117006]
+layout_mode = 2
+
+[node name="Columns" type="HBoxContainer" parent="Card/Margin/Layout" unique_id=1502117007]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_font_sizes/normal_font_size = 22
+theme_override_constants/separation = 48
+
+[node name="Left" type="VBoxContainer" parent="Card/Margin/Layout/Columns" unique_id=1502117008]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="ScenarioLabel" type="Label" parent="Card/Margin/Layout/Columns/Left" unique_id=866633671]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "SCENARIO"
+
+[node name="ScenarioOptionButton" type="OptionButton" parent="Card/Margin/Layout/Columns/Left" unique_id=1587846790]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+
+[node name="DescriptionPanel" type="PanelContainer" parent="Card/Margin/Layout/Columns/Left" unique_id=2129022782]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+theme_type_variation = &"MenuInset"
+
+[node name="ScenarioDescriptionLabel" type="RichTextLabel" parent="Card/Margin/Layout/Columns/Left/DescriptionPanel" unique_id=476860882]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 21
 bbcode_enabled = true
-text = "[color=#bbbbbb]Select a scenario to see its description.[/color]"
+text = "Select a scenario to see its description."
 fit_content = true
 
-[node name="SeatsLabel" type="Label" parent="ButtonContainer" unique_id=311420001]
+[node name="OptionsGap" type="Control" parent="Card/Margin/Layout/Columns/Left" unique_id=1502117009]
+custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 28
-text = "Your Factions"
-horizontal_alignment = 1
+mouse_filter = 2
 
-[node name="SeatGrid" type="GridContainer" parent="ButtonContainer" unique_id=311420002]
+[node name="OptionsLabel" type="Label" parent="Card/Margin/Layout/Columns/Left" unique_id=1502117010]
 layout_mode = 2
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 8
-columns = 2
+theme_type_variation = &"MenuSection"
+text = "OPTIONS"
 
-[node name="SeedRow" type="HBoxContainer" parent="ButtonContainer" unique_id=2112580064]
+[node name="SeedRow" type="HBoxContainer" parent="Card/Margin/Layout/Columns/Left" unique_id=2112580064]
 layout_mode = 2
-size_flags_horizontal = 4
 theme_override_constants/separation = 12
-alignment = 1
 
-[node name="SeedLabel" type="Label" parent="ButtonContainer/SeedRow" unique_id=1197556295]
+[node name="SeedLabel" type="Label" parent="Card/Margin/Layout/Columns/Left/SeedRow" unique_id=1197556295]
+custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 24
 text = "Seed"
 
-[node name="SeedInput" type="LineEdit" parent="ButtonContainer/SeedRow" unique_id=134324777]
-custom_minimum_size = Vector2(240, 56)
+[node name="SeedInput" type="LineEdit" parent="Card/Margin/Layout/Columns/Left/SeedRow" unique_id=134324777]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
+size_flags_horizontal = 3
 placeholder_text = "random"
-alignment = 1
 
-[node name="RandomizeSeedButton" type="Button" parent="ButtonContainer/SeedRow" unique_id=397362117]
-custom_minimum_size = Vector2(180, 56)
+[node name="RandomizeSeedButton" type="Button" parent="Card/Margin/Layout/Columns/Left/SeedRow" unique_id=397362117]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 text = "Randomize"
 
-[node name="OpeningDiscardCheckBox" type="CheckBox" parent="ButtonContainer" unique_id=311420004]
+[node name="AiRow" type="HBoxContainer" parent="Card/Margin/Layout/Columns/Left" unique_id=1502117011]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/separation = 12
+
+[node name="AiLabel" type="Label" parent="Card/Margin/Layout/Columns/Left/AiRow" unique_id=1502117012]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+text = "Opponents"
+
+[node name="AiDifficultyOptionButton" type="OptionButton" parent="Card/Margin/Layout/Columns/Left/AiRow" unique_id=1740263519]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Normal: the original AI. Hard: values its pieces, the income within reach, its cards and its deck — a stronger, slightly slower opponent."
+
+[node name="OpeningDiscardCheckBox" type="CheckBox" parent="Card/Margin/Layout/Columns/Left" unique_id=311420004]
+unique_name_in_owner = true
+layout_mode = 2
 button_pressed = true
 text = "Discard 3 cards at start"
 
-[node name="AiDifficultyOptionButton" type="OptionButton" parent="ButtonContainer" unique_id=1740263519]
-custom_minimum_size = Vector2(0, 50)
+[node name="Right" type="VBoxContainer" parent="Card/Margin/Layout/Columns" unique_id=1502117013]
 layout_mode = 2
-size_flags_horizontal = 4
-tooltip_text = "Normal: the original AI. Hard: values its pieces, the income within reach, its cards and its deck — a stronger, slightly slower opponent."
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
 
-[node name="StartGameButton" parent="ButtonContainer" unique_id=163641719 instance=ExtResource("2_btn")]
+[node name="SeatsLabel" type="Label" parent="Card/Margin/Layout/Columns/Right" unique_id=311420001]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(600, 50)
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "YOUR FACTIONS"
+
+[node name="SeatsHint" type="Label" parent="Card/Margin/Layout/Columns/Right" unique_id=1502117014]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MenuMuted"
+text = "Click a faction to hand it to the AI, or take it back."
+autowrap_mode = 3
+
+[node name="SeatGrid" type="GridContainer" parent="Card/Margin/Layout/Columns/Right" unique_id=311420002]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="SeatsSummary" type="Label" parent="Card/Margin/Layout/Columns/Right" unique_id=1502117017]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MenuMuted"
+text = "You command 6 factions"
+
+[node name="Footer" type="HBoxContainer" parent="Card/Margin/Layout" unique_id=1502117015]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BackButton" parent="Card/Margin/Layout/Footer" unique_id=311420003 instance=ExtResource("6_action")]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="BackButton" parent="ButtonContainer" unique_id=311420003 instance=ExtResource("2_btn")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(600, 50)
+[node name="FooterSpacer" type="Control" parent="Card/Margin/Layout/Footer" unique_id=1502117016]
 layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="StartGameButton" parent="Card/Margin/Layout/Footer" unique_id=163641719 instance=ExtResource("7_primary")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(340, 64)
+layout_mode = 2
+
+[node name="BrassFrame" type="ColorRect" parent="Card"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 14.0
+BracketLength = 34.0

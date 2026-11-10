@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://dhx7nh0arfht1"]
 
-[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
+[ext_resource type="PackedScene" uid="uid://b8qgactbtn02" path="res://scenes/menu/MenuActionButton.tscn" id="2_btn"]
 [ext_resource type="Script" uid="uid://ctrrbj1b2lxdd" path="res://scripts/C#/Menu/LoadGameScreen.cs" id="3_script"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="3_u8f1o"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="4_theme"]
+[ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanel.tres" id="5_frost"]
 
 [node name="Control" type="Control" unique_id=1704412881]
 layout_mode = 3
@@ -17,72 +19,80 @@ script = ExtResource("3_script")
 [node name="Backdrop" parent="." instance=ExtResource("9_bdrop")]
 layout_mode = 1
 
-[node name="TitleLabel" type="RichTextLabel" parent="." unique_id=1704412883]
+[node name="Scrim" type="ColorRect" parent="." unique_id=1802117001]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -400.0
-offset_top = 60.0
-offset_right = 400.0
-offset_bottom = 130.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
-theme_override_font_sizes/normal_font_size = 36
-bbcode_enabled = true
-text = "[center][font_size=42][b]Load Game[/b][/font_size][/center]"
-scroll_active = false
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.024, 0.018, 0.35)
 
-[node name="FormContainer" type="VBoxContainer" parent="." unique_id=1704412884]
+[node name="Card" type="PanelContainer" parent="." unique_id=1802117002]
+material = ExtResource("5_frost")
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -480.0
-offset_top = -340.0
-offset_right = 480.0
-offset_bottom = 340.0
+offset_left = -580.0
+offset_top = -430.0
+offset_right = 580.0
+offset_bottom = 430.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
-alignment = 1
+theme = ExtResource("4_theme")
 
-[node name="SaveScroll" type="ScrollContainer" parent="FormContainer" unique_id=1704412885]
-custom_minimum_size = Vector2(940, 460)
+[node name="FormContainer" type="VBoxContainer" parent="Card" unique_id=1704412884]
 layout_mode = 2
-theme_override_styles/panel = ExtResource("3_u8f1o")
+theme_override_constants/separation = 14
+
+[node name="Kicker" type="Label" parent="Card/FormContainer" unique_id=1802117003]
+layout_mode = 2
+theme_type_variation = &"MenuKicker"
+text = "CAMPAIGN ARCHIVE"
+
+[node name="TitleLabel" type="Label" parent="Card/FormContainer" unique_id=1704412883]
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+text = "LOAD GAME"
+
+[node name="HeaderRule" type="HSeparator" parent="Card/FormContainer" unique_id=1802117004]
+layout_mode = 2
+
+[node name="SaveScroll" type="ScrollContainer" parent="Card/FormContainer" unique_id=1704412885]
+layout_mode = 2
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="SaveList" type="VBoxContainer" parent="FormContainer/SaveScroll" unique_id=1704412886]
+[node name="SaveList" type="VBoxContainer" parent="Card/FormContainer/SaveScroll" unique_id=1704412886]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(916, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="Panel" type="Panel" parent="FormContainer" unique_id=1704412887]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = ExtResource("3_u8f1o")
-
-[node name="StatusLabel" type="RichTextLabel" parent="FormContainer/Panel" unique_id=1704412888]
+[node name="StatusLabel" type="RichTextLabel" parent="Card/FormContainer" unique_id=1704412888]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 76)
-layout_mode = 0
-offset_right = 960.0
-offset_bottom = 76.0
-theme_override_font_sizes/normal_font_size = 24
+layout_mode = 2
+theme_override_colors/default_color = Color(0.69, 0.66, 0.58, 1)
+theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="ButtonRow" type="HBoxContainer" parent="FormContainer" unique_id=1704412889]
+[node name="ButtonRow" type="HBoxContainer" parent="Card/FormContainer" unique_id=1704412889]
 layout_mode = 2
-theme_override_constants/separation = 20
-alignment = 1
+theme_override_constants/separation = 16
 
-[node name="BackButton" parent="FormContainer/ButtonRow" unique_id=1704412890 instance=ExtResource("2_btn")]
+[node name="BackButton" parent="Card/FormContainer/ButtonRow" unique_id=1704412890 instance=ExtResource("2_btn")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 100)
 layout_mode = 2
+
+[node name="BrassFrame" type="ColorRect" parent="Card"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 14.0
+BracketLength = 34.0

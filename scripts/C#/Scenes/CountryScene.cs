@@ -188,54 +188,38 @@ public partial class CountryScene : Control
 	private void OnTagAdded(Tag tag, Faction faction)
 	{
 		if (tag == Tag.Clickable)
-		{
 			SetClickable();
-		}
-		// Restyle rather than assume an order: SelectCountryHandler raises RebuildTarget before
-		// Clickable, but a caller that ever does it the other way round would otherwise leave the
-		// country drawn as an ordinary target.
-		else if (tag == Tag.RebuildTarget && CountryState.Tags.Has(Tag.Clickable, Faction.ALL))
-		{
-			SetClickable();
-		}
-		else if (tag == Tag.PreviewTarget)
-		{
-			SetPreviewTarget(true);
-		}
+		else if (IsGlowStyleTag(tag))
+			RefreshTargetGlow();
 	}
 
 	private void OnTagRemoved(Tag tag, Faction faction)
 	{
 		if (tag == Tag.Clickable)
-		{
 			SetUnclickable();
-		}
-		// Still an offered target, just no longer a rebuild — back to the ordinary style.
-		else if (tag == Tag.RebuildTarget && CountryState.Tags.Has(Tag.Clickable, Faction.ALL))
-		{
-			SetClickable();
-		}
-		else if (tag == Tag.PreviewTarget)
-		{
-			SetPreviewTarget(false);
-		}
+		else if (IsGlowStyleTag(tag))
+			RefreshTargetGlow();
 	}
 
-	/// <summary>
-	/// Only an offered target answers the cursor. The same overlay is also drawn for a card hover
-	/// preview, which is deliberately NOT clickable — the game is waiting for a card, not a country —
-	/// so tinting it said "click me" about a country nothing was asking for.
-	///
-	/// The exit handler stays ungated: ShowTargetGlow and HideTargetGlow call it directly to set the
-	/// resting colour, not only on a real mouse exit.
-	/// </summary>
+	private static bool IsGlowStyleTag(Tag tag) =>
+		tag is Tag.RebuildTarget or Tag.PreviewTarget or Tag.EmptyBattleTarget or Tag.HoldsUnitTarget;
+
+	/// <summary>True while the cursor is on this country's silhouette and it is an offered target.</summary>
+	private bool isHovered;
+
+	/// <summary>Only an offered target answers the cursor; a preview or faint glow is not asking for a click.</summary>
 	private void OnMouseEnteredOpaque()
 	{
 		if (!IsOfferedTarget) return;
-		SetCountryColor(Colors.Green);
+		isHovered = true;
+		RefreshTargetGlow();
 	}
 
-	private void OnMouseExitedOpaque() => SetCountryColor(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Orange : Colors.Yellow);
+	private void OnMouseExitedOpaque()
+	{
+		isHovered = false;
+		RefreshTargetGlow();
+	}
 
 	private void OnMouseLeftClickOpaque()
 	{
@@ -256,10 +240,20 @@ public partial class CountryScene : Control
 			{
 				countryShaderMaterial = (CountrySpriteTextureRect.Material as ShaderMaterial)?.Duplicate() as ShaderMaterial;
 				CountrySpriteTextureRect.Material = countryShaderMaterial;
+				if (countryShaderMaterial != null)
+				{
+					authoredGlowAlpha = countryShaderMaterial.GetShaderParameter("glow_alpha").AsSingle();
+					authoredFillAlpha = countryShaderMaterial.GetShaderParameter("fill_alpha").AsSingle();
+					authoredPulseSpeed = countryShaderMaterial.GetShaderParameter("pulse_speed").AsSingle();
+					authoredPulseMin = countryShaderMaterial.GetShaderParameter("pulse_min").AsSingle();
+				}
 			}
 			return countryShaderMaterial;
 		}
 	}
+
+	/// <summary>Country.tscn's glow settings: the full target look, which the faint and sparse styles scale down from.</summary>
+	private float authoredGlowAlpha, authoredFillAlpha, authoredPulseSpeed, authoredPulseMin;
 
 	/// <summary>
 	/// Tints the country silhouette. <paramref name="color"/> is the outline glow; the fill follows it
@@ -598,72 +592,83 @@ public partial class CountryScene : Control
 	/// <summary>True while the player is hovering a card that could affect this country.</summary>
 	private bool IsPreviewTarget => CountryState.Tags.Has(Tag.PreviewTarget, Faction.ALL);
 
-	/// <summary>
-	/// Shows the glow overlay, without touching the click handler. Split out of
-	/// <see cref="SetClickable"/> so the hover preview (<see cref="SetPreviewTarget"/>) can draw the
-	/// identical marker for a country that is NOT clickable — the game is waiting for a card, not a
-	/// country, so the same visual must not carry the same interaction.
-	/// </summary>
-	private void ShowTargetGlow()
-	{
-		CountrySpriteTextureRect.Visible = true;
-		CountrySpriteTextureRectContainer.Visible = true;
-		OnMouseExitedOpaque();
-	}
-
-	/// <inheritdoc cref="ShowTargetGlow"/>
-	private void HideTargetGlow()
-	{
-		CountrySpriteTextureRect.Visible = false;
-		CountrySpriteTextureRectContainer.Visible = false;
-		OnMouseExitedOpaque();
-	}
+	/// <summary>Sparse is Faint showing only one pulse in <see cref="SparsePulseEvery"/>.</summary>
+	private enum GlowStyle { Hidden, Full, Faint, Sparse }
 
 	/// <summary>
-	/// Draws (or clears) the hover preview: the same glow an offered target gets, no click handler.
-	///
-	/// An offered target wins outright — it owns the click handler, and letting a preview clearing
-	/// over the top of it call <see cref="HideTargetGlow"/> would blank a live selection prompt.
-	/// Only the Glow presentation draws a preview; the TargetSprite marker is authored as an
-	/// "click this" affordance and previewing with it would be a lie.
+	/// A previewed country, or one holding a unit target, pulses up to FaintGlowScale of the full glow and
+	/// down to FaintPulseMin of that: a wider swing than the full glow's, averaging about a fifth of it.
 	/// </summary>
-	public void SetPreviewTarget(bool isPreviewTarget)
-	{
-		if (targetPresentationMode != TargetPresentationMode.Glow) return;
-		if (IsOfferedTarget) return;
+	private const float FaintGlowScale = 0.4f;
+	private const float FaintPulseMin = 0.15f;
 
-		if (isPreviewTarget)
-			ShowTargetGlow();
+	/// <summary>An empty battle target: the faint glow, in step with the others, but dark for two pulses of every three.</summary>
+	private const int SparsePulseEvery = 3;
+
+	/// <summary>Hovering an empty battle target lights it orange at this share of the full glow, not the green of a real target.</summary>
+	private const float SparseHoverGlowScale = 0.7f;
+
+	/// <summary>Only an offered target gets the full glow; a card preview stays faint. An empty battle target is sparse.</summary>
+	private GlowStyle CurrentGlowStyle()
+	{
+		if (targetPresentationMode != TargetPresentationMode.Glow) return GlowStyle.Hidden;
+		bool emptyBattle = CountryState.Tags.Has(Tag.EmptyBattleTarget, Faction.ALL);
+		if (IsOfferedTarget) return emptyBattle ? GlowStyle.Sparse : GlowStyle.Full;
+		if (IsPreviewTarget) return emptyBattle ? GlowStyle.Sparse : GlowStyle.Faint;
+		return CountryState.Tags.Has(Tag.HoldsUnitTarget, Faction.ALL) ? GlowStyle.Faint : GlowStyle.Hidden;
+	}
+
+	/// <summary>Redraws the overlay from the tags and hover state. Idempotent: hiding the rect can re-enter it via MouseExited.</summary>
+	private void RefreshTargetGlow()
+	{
+		GlowStyle style = CurrentGlowStyle();
+		bool shown = style != GlowStyle.Hidden;
+		if (!shown) isHovered = false;
+
+		CountrySpriteTextureRect.Visible = shown;
+		CountrySpriteTextureRectContainer.Visible = shown;
+		// GUI picking walks children last-first, so a faint silhouette would take the clicks meant for its unit markers.
+		CountrySpriteTextureRect.MouseFilter = style == GlowStyle.Faint ? MouseFilterEnum.Ignore : MouseFilterEnum.Pass;
+		if (!shown) return;
+
+		if (isHovered && IsOfferedTarget && style == GlowStyle.Sparse)
+			ApplyGlow(Colors.Orange, SparseHoverGlowScale, fill: true, authoredPulseMin);
+		else if (isHovered && IsOfferedTarget)
+			ApplyGlow(Colors.Green, 1f, fill: true, authoredPulseMin);
+		else if (style is GlowStyle.Faint or GlowStyle.Sparse)
+			ApplyGlow(Colors.Yellow, FaintGlowScale, fill: false, FaintPulseMin, style == GlowStyle.Sparse ? SparsePulseEvery : 1);
 		else
-			HideTargetGlow();
+			ApplyGlow(CountryState.Tags.Has(Tag.RebuildTarget, Faction.ALL) ? Colors.Orange : Colors.Yellow, 1f, fill: true, authoredPulseMin);
+	}
+
+	/// <summary><paramref name="glowScale"/> scales the authored glow_alpha; the shader shows one pulse in <paramref name="pulseEvery"/>.</summary>
+	private void ApplyGlow(Color color, float glowScale, bool fill, float pulseMin, int pulseEvery = 1)
+	{
+		ShaderMaterial material = CountryShaderMaterial;
+		if (material == null) return;
+
+		SetCountryColor(color);
+		material.SetShaderParameter("glow_alpha", authoredGlowAlpha * glowScale);
+		material.SetShaderParameter("fill_alpha", fill ? authoredFillAlpha : 0f);
+		material.SetShaderParameter("pulse_speed", authoredPulseSpeed);
+		material.SetShaderParameter("pulse_min", pulseMin);
+		material.SetShaderParameter("pulse_every", pulseEvery);
 	}
 
 	public void SetClickable()
 	{
-		if(targetPresentationMode == TargetPresentationMode.Glow)
-		{
-			ShowTargetGlow();
-			// Detach before attaching, so however many times this runs the handler is attached once.
-			// A Godot [Signal] compiles to a plain multicast delegate (add => backing += value) with
-			// no duplicate detection, so a second += fires the handler a second time — and this is
-			// re-entered while already clickable by OnTagAdded's Tag.RebuildTarget restyle, which is
-			// written to tolerate either tag order and so is meant to be reachable. Only one -= ever
-			// follows, in SetUnclickable. Removing a handler that is not attached is a safe no-op.
-			CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
-			CountrySpriteTextureRect.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
-		}        
+		RefreshTargetGlow();
+		if (targetPresentationMode != TargetPresentationMode.Glow) return;
+
+		// Detach first: a [Signal] is a plain multicast delegate with no duplicate check.
+		CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
+		CountrySpriteTextureRect.MouseLeftClickOnOpaque += OnMouseLeftClickOpaque;
 	}
 
 	public void SetUnclickable()
 	{
 		CountrySpriteTextureRect.MouseLeftClickOnOpaque -= OnMouseLeftClickOpaque;
-
-		// The hover preview draws this same overlay, so hiding it unconditionally would blank a
-		// preview that is still meant to be up. The click handler above always goes.
-		if (IsPreviewTarget)
-			ShowTargetGlow();
-		else
-			HideTargetGlow();
+		RefreshTargetGlow();
 	}
 
 	/// <summary>

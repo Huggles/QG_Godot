@@ -122,6 +122,7 @@ text = "Host over IP instead"
 flat = true
 
 [node name="ConfirmButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="3"]
+theme_type_variation = &"MenuPrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 44)
 layout_mode = 2

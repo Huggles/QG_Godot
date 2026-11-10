@@ -51,6 +51,10 @@ public sealed record TargetSet
     public static TargetSet Countries(IEnumerable<CountryState> countries) =>
         Kind(TargetKind.Country, countries?.Where(cs => cs != null).Select(cs => cs.Id));
 
+    /// <summary>Empty countries a battle may be fought in. Not in <see cref="CountryIds"/>.</summary>
+    public static TargetSet EmptyBattleCountries(IEnumerable<int> countryIds) =>
+        Kind(TargetKind.EmptyBattleCountry, countryIds);
+
     public static TargetSet Units(IEnumerable<int> unitIds) => Kind(TargetKind.Unit, unitIds);
 
     public static TargetSet Units(IEnumerable<UnitState> units) =>
@@ -64,13 +68,14 @@ public sealed record TargetSet
     /// <summary>
     /// For a selection that is "an enemy unit OR an empty country" — see <c>LandBattle</c> /
     /// <c>SeaBattle</c> and the eleven cards holding a <see cref="BattleTarget"/> list.
-    /// <see cref="TargetType.NONE"/> entries are dropped rather than guessed at.
+    /// <see cref="TargetType.NONE"/> entries are dropped rather than guessed at; country entries are
+    /// <see cref="TargetKind.EmptyBattleCountry"/>.
     /// </summary>
     public static TargetSet FromBattleTargets(IEnumerable<BattleTarget> battleTargets) =>
         new(battleTargets?
             .Where(target => target != null && target.Type != TargetType.NONE)
             .Select(target => new TargetRef(
-                target.Type == TargetType.UNIT ? TargetKind.Unit : TargetKind.Country,
+                target.Type == TargetType.UNIT ? TargetKind.Unit : TargetKind.EmptyBattleCountry,
                 target.Id)));
 
     /// <summary>
@@ -84,6 +89,7 @@ public sealed record TargetSet
         Targets.Where(target => target.Kind == kind).Select(target => target.Id);
 
     public IEnumerable<int> CountryIds => IdsOf(TargetKind.Country);
+    public IEnumerable<int> EmptyBattleCountryIds => IdsOf(TargetKind.EmptyBattleCountry);
     public IEnumerable<int> UnitIds => IdsOf(TargetKind.Unit);
     public IEnumerable<int> CardIds => IdsOf(TargetKind.Card);
 

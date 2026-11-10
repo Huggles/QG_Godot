@@ -33,8 +33,17 @@ public partial class SelectBattleTargetHandler : IGameEventHandler<BattleTarget>
         void onUnit(int id)    { tcs.TrySetResult(new BattleTarget(id, TargetType.UNIT)); }
         void onSkip()          { tcs.TrySetResult(null); }
 
+        List<CountryState> emptyCountries = CountryState.ForIds(countryIds).Where(cs => cs != null).ToList();
+        List<CountryState> unitCountries = CountryState.ForIds(UnitState.ForIds(unitIds)
+            .Where(us => us != null && us.IsDeployedToCountry)
+            .Select(us => us.CountryId)
+            .Distinct()).ToList();
+
+        // Styling tags before Clickable, as SelectCountryHandler does with RebuildTarget.
+        emptyCountries.AddTag(Tag.EmptyBattleTarget, Faction.ALL);
+        unitCountries.AddTag(Tag.HoldsUnitTarget, Faction.ALL);
         UnitState.ForIds(unitIds).ForEach(us => us.Tags.AddForAll(Tag.Clickable));
-        CountryState.ForIds(countryIds).ForEach(cs => cs.Tags.AddForAll(Tag.Clickable));
+        emptyCountries.ForEach(cs => cs.Tags.AddForAll(Tag.Clickable));
         InputManager.Current.EnableRayTraceCasting();
         SelectionSkipButton.Current?.Show();
 
@@ -57,7 +66,9 @@ public partial class SelectBattleTargetHandler : IGameEventHandler<BattleTarget>
                 EventBus.Instance.SelectionSkipped -= onSkip;
                 SelectionSkipButton.Current?.Hide();
                 UnitState.ForIds(unitIds).RemoveTag(Tag.Clickable, Faction.ALL);
-                CountryState.ForIds(countryIds).RemoveTag(Tag.Clickable, Faction.ALL);
+                emptyCountries.RemoveTag(Tag.Clickable, Faction.ALL);
+                emptyCountries.RemoveTag(Tag.EmptyBattleTarget, Faction.ALL);
+                unitCountries.RemoveTag(Tag.HoldsUnitTarget, Faction.ALL);
                 InputManager.Current.DisableRayTraceCasting();
             }
         }

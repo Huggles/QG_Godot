@@ -19,9 +19,9 @@ public partial class EventGunsAndButter : EventCardLogic
     public override TargetSet Targets() =>
         TargetSet.Countries(CountryState.BuildableLand(Faction))
             .Plus(TargetSet.Countries(CountryState.BuildableSea(Faction)))
-            .Plus(TargetSet.Countries(CountryState.AttackableLandIds(Faction)))
+            .Plus(TargetSet.EmptyBattleCountries(CountryState.AttackableLandIds(Faction)))
             .Plus(TargetSet.Units(UnitState.AttackableArmyIds(Faction)))
-            .Plus(TargetSet.Countries(CountryState.AttackableSeaIds(Faction)))
+            .Plus(TargetSet.EmptyBattleCountries(CountryState.AttackableSeaIds(Faction)))
             .Plus(TargetSet.Units(UnitState.AttackableNavyIds(Faction)));
 
     public override List<CardStep> OnActivate()

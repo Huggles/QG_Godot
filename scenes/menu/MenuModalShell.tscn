@@ -1,7 +1,22 @@
 [gd_scene format=3 uid="uid://bqmodalshelf"]
 
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
 [ext_resource type="Script" uid="uid://cpbprvfkfgnow" path="res://scripts/C#/Menu/MenuModal.cs" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://cviw1rdhjifft" path="res://scenes/menu/MenuPanel.tscn" id="2_panel"]
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="3_theme"]
+[ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanel.tres" id="4_frost"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass"]
+bg_color = Color(0.047, 0.051, 0.039, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.851, 0.678, 0.361, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="MenuModal" type="CanvasLayer" unique_id=97024396]
 process_mode = 3
@@ -17,15 +32,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_force_pass_scroll_events = false
+theme = ExtResource("3_theme")
 
 [node name="Dim" type="ColorRect" parent="Root" unique_id=1830925922]
+material = ExtResource("4_frost")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.72)
+color = Color(0.02, 0.024, 0.018, 0.62)
 
 [node name="Centre" type="CenterContainer" parent="Root" unique_id=1357201429]
 layout_mode = 1
@@ -40,6 +57,25 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(760, 0)
 layout_mode = 2
 
+[node name="BackgroundContainer" parent="Root/Centre/Panel" parent_id_path=PackedInt32Array(440882464) index="0" unique_id=836205175]
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="Panel" parent="Root/Centre/Panel/BackgroundContainer" parent_id_path=PackedInt32Array(440882464, 836205175) index="0" unique_id=1617866188]
+material = ExtResource("4_frost")
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass")
+
+[node name="NinePatchRect" parent="Root/Centre/Panel" parent_id_path=PackedInt32Array(440882464) index="2" unique_id=779728291]
+visible = false
+
+[node name="ContentContainer" parent="Root/Centre/Panel" parent_id_path=PackedInt32Array(440882464) index="3" unique_id=672142930]
+theme_override_constants/margin_left = 44
+theme_override_constants/margin_top = 34
+theme_override_constants/margin_right = 44
+theme_override_constants/margin_bottom = 34
+
 [node name="Box" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer" parent_id_path=PackedInt32Array(440882464, 672142930) index="0" unique_id=1398055271]
 unique_name_in_owner = true
 layout_mode = 2
@@ -48,7 +84,17 @@ theme_override_constants/separation = 14
 [node name="Title" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" unique_id=647576227]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
+theme_type_variation = &"MenuTitle"
+theme_override_font_sizes/font_size = 44
 horizontal_alignment = 1
+uppercase = true
+
+[node name="BrassFrame" type="ColorRect" parent="Root/Centre/Panel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 14.0
+BracketLength = 30.0
+GlowAlpha = 0.22
 
 [editable path="Root/Centre/Panel"]
