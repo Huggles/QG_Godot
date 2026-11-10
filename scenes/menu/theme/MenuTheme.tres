@@ -79,6 +79,11 @@ bg_color = Color(0.851, 0.678, 0.361, 0.06)
 border_width_bottom = 2
 border_color = Color(0.851, 0.678, 0.361, 0.45)
 
+[sub_resource type="StyleBoxFlat" id="Tab_bar"]
+bg_color = Color(1, 1, 1, 0)
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.08)
+
 [sub_resource type="StyleBoxFlat" id="Tab_panel"]
 content_margin_top = 18.0
 bg_color = Color(1, 1, 1, 0)
@@ -464,7 +469,7 @@ TabContainer/styles/panel = SubResource("Tab_panel")
 TabContainer/styles/tab_hovered = SubResource("Tab_hovered")
 TabContainer/styles/tab_selected = SubResource("Tab_selected")
 TabContainer/styles/tab_unselected = SubResource("Tab_unselected")
-TabContainer/styles/tabbar_background = SubResource("Empty")
+TabContainer/styles/tabbar_background = SubResource("Tab_bar")
 TooltipLabel/colors/font_color = Color(0.929, 0.898, 0.82, 1)
 TooltipLabel/font_sizes/font_size = 18
 TooltipPanel/styles/panel = SubResource("Tooltip_panel")

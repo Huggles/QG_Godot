@@ -89,11 +89,16 @@ public partial class AudioSettingsPanel : VBoxContainer
 
         foreach (SfxSettingData setting in audio.SfxSettings)
         {
-            container.AddChild(new Label { Text = setting.Label ?? setting.Name });
+            // Same label-left, control-right row as every other setting in the dialog.
+            HBoxContainer row = new();
+            row.AddThemeConstantOverride("separation", 16);
+            row.AddChild(new Label { Text = setting.Label ?? setting.Name, SizeFlagsHorizontal = SizeFlags.ExpandFill });
+            container.AddChild(row);
 
             OptionButton picker = new OptionButton
             {
                 Name = $"{setting.Name}Picker",
+                CustomMinimumSize = new Vector2(380, 0),
             };
 
             SfxSoundFileData selected = audio.SelectedOptionFor(setting.Name);
@@ -113,7 +118,7 @@ public partial class AudioSettingsPanel : VBoxContainer
             List<SfxSoundFileData> options = setting.SoundFiles;
             picker.ItemSelected += index => OnSfxOptionSelected(settingName, options, (int)index);
 
-            container.AddChild(picker);
+            row.AddChild(picker);
         }
     }
 
