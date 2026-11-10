@@ -29,7 +29,7 @@ public partial class SkirmishScreen : Control
 	/// Height of a seat's flag. Smaller than the lobby's FlagHeight because a seat here is a whole ROW
 	/// rather than one of six flags within one, so six of them have to fit down this screen.
 	/// </summary>
-	private const int SeatFlagHeight = 44;
+	private const int SeatFlagHeight = 54;
 
 	private OptionButton _scenarioPicker;
 	private RichTextLabel _descriptionLabel;
@@ -39,6 +39,8 @@ public partial class SkirmishScreen : Control
 	private Button _randomizeSeedButton;
 	private GridContainer _seatGrid;
 	private Label _seatsLabel;
+	private Label _seatsHint;
+	private Label _seatsSummary;
 	private CheckBox _openingDiscardCheckBox;
 	private ExpansionToggles _expansionToggles;
 	private OptionButton _aiDifficultyPicker;
@@ -85,8 +87,10 @@ public partial class SkirmishScreen : Control
 	private sealed class Seat
 	{
 		public TextureRect Flag;
+		public Label Name;
 		public Label Controller;
 		public Button Click;
+		public StyleBoxFlat Style;
 	}
 
 	// Scene wiring: a GetNode failure here means a broken .tscn, which is a real bug worth
@@ -95,28 +99,30 @@ public partial class SkirmishScreen : Control
 
 	private void ReadyInternal()
 	{
-		_scenarioPicker   = GetNode<OptionButton>("ButtonContainer/ScenarioOptionButton");
-		_descriptionLabel = GetNodeOrNull<RichTextLabel>("ButtonContainer/DescriptionPanel/ScenarioDescriptionLabel");
+		_scenarioPicker   = GetNode<OptionButton>("%ScenarioOptionButton");
+		_descriptionLabel = GetNodeOrNull<RichTextLabel>("%ScenarioDescriptionLabel");
 		if (_descriptionLabel == null)
 		{
 			GD.PrintErr("SkirmishScreen: scenario description label node not found.");
 		}
 
-		_startGameButton  = GetNode<MenuPanelButton>("ButtonContainer/StartGameButton");
-		_backButton       = GetNode<MenuPanelButton>("ButtonContainer/BackButton");
-		_seatGrid         = GetNode<GridContainer>("ButtonContainer/SeatGrid");
-		_seatsLabel       = GetNode<Label>("ButtonContainer/SeatsLabel");
-		_openingDiscardCheckBox = GetNode<CheckBox>("ButtonContainer/OpeningDiscardCheckBox");
+		_startGameButton  = GetNode<MenuPanelButton>("%StartGameButton");
+		_backButton       = GetNode<MenuPanelButton>("%BackButton");
+		_seatGrid         = GetNode<GridContainer>("%SeatGrid");
+		_seatsLabel       = GetNode<Label>("%SeatsLabel");
+		_seatsHint        = GetNode<Label>("%SeatsHint");
+		_seatsSummary     = GetNode<Label>("%SeatsSummary");
+		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
 		_expansionToggles = new ExpansionToggles(_openingDiscardCheckBox);
 
 		// Item ids are the enum values, so the pick reads straight back as an AiDifficulty.
-		_aiDifficultyPicker = GetNode<OptionButton>("ButtonContainer/AiDifficultyOptionButton");
-		_aiDifficultyPicker.AddItem("AI: Normal", (int)AiDifficulty.Normal);
-		_aiDifficultyPicker.AddItem("AI: Hard", (int)AiDifficulty.Hard);
+		_aiDifficultyPicker = GetNode<OptionButton>("%AiDifficultyOptionButton");
+		_aiDifficultyPicker.AddItem("Normal AI", (int)AiDifficulty.Normal);
+		_aiDifficultyPicker.AddItem("Hard AI", (int)AiDifficulty.Hard);
 		_aiDifficultyPicker.Select(_aiDifficultyPicker.GetItemIndex((int)GameManager.PendingAiDifficulty));
 
-		_seedInput           = GetNode<LineEdit>("ButtonContainer/SeedRow/SeedInput");
-		_randomizeSeedButton = GetNode<Button>("ButtonContainer/SeedRow/RandomizeSeedButton");
+		_seedInput           = GetNode<LineEdit>("%SeedInput");
+		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
 		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
 
 		_startGameButton.ButtonText = "Start Game";
@@ -173,6 +179,8 @@ public partial class SkirmishScreen : Control
 	private void BuildSeats()
 	{
 		_seatGrid.Columns = 2;
+		_seatGrid.AddChild(new Label { Text = "AXIS", ThemeTypeVariation = "MenuSection" });
+		_seatGrid.AddChild(new Label { Text = "ALLIES", ThemeTypeVariation = "MenuSection" });
 
 		List<Faction> axis   = AllPlayableFactions.Where(AxisSet.Contains).ToList();
 		List<Faction> allies = AllPlayableFactions.Where(faction => !AxisSet.Contains(faction)).ToList();
@@ -189,25 +197,26 @@ public partial class SkirmishScreen : Control
 	/// <inheritdoc cref="BuildSeats"/>
 	private void AddSeat(Faction faction)
 	{
-		PanelContainer panel = new();
+		PanelContainer panel = new() { SizeFlagsHorizontal = SizeFlags.ExpandFill };
 		StyleBoxFlat style = new()
 		{
-			BgColor = new Color(0.15f, 0.15f, 0.15f, 0.55f),
-			CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4,
-			CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4,
-			ContentMarginLeft = 8, ContentMarginRight = 8,
-			ContentMarginTop = 4, ContentMarginBottom = 4,
+			BorderWidthLeft = 1, BorderWidthTop = 1, BorderWidthRight = 1, BorderWidthBottom = 1,
+			CornerRadiusTopLeft = 3, CornerRadiusTopRight = 3,
+			CornerRadiusBottomLeft = 3, CornerRadiusBottomRight = 3,
+			ContentMarginLeft = 10, ContentMarginRight = 16,
+			ContentMarginTop = 12, ContentMarginBottom = 12,
 		};
 		panel.AddThemeStyleboxOverride("panel", style);
 
 		// Ignore, so the click overlay added last gets the mouse rather than these labels eating it.
 		HBoxContainer row = new() { MouseFilter = MouseFilterEnum.Ignore };
-		row.AddThemeConstantOverride("separation", 10);
+		row.AddThemeConstantOverride("separation", 14);
 
+		// A fixed width: with IgnoreSize and no width the flag collapsed to nothing.
 		TextureRect flag = new()
 		{
 			Texture = GD.Load<Texture2D>(FlagPaths[faction]),
-			CustomMinimumSize = new Vector2(0, SeatFlagHeight),
+			CustomMinimumSize = new Vector2(SeatFlagHeight * 1.5f, SeatFlagHeight),
 			StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
 			ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
 		};
@@ -221,7 +230,8 @@ public partial class SkirmishScreen : Control
 
 		Label controller = new()
 		{
-			CustomMinimumSize = new Vector2(72, 0),
+			ThemeTypeVariation = "MenuSection",
+			CustomMinimumSize = new Vector2(40, 0),
 			HorizontalAlignment = HorizontalAlignment.Right,
 			VerticalAlignment = VerticalAlignment.Center,
 		};
@@ -245,7 +255,7 @@ public partial class SkirmishScreen : Control
 		panel.AddChild(click);
 
 		_seatGrid.AddChild(panel);
-		_seats[faction] = new Seat { Flag = flag, Controller = controller, Click = click };
+		_seats[faction] = new Seat { Flag = flag, Name = name, Controller = controller, Click = click, Style = style };
 	}
 
 	/// <summary>
@@ -263,6 +273,7 @@ public partial class SkirmishScreen : Control
 
 		if (!_humanFactions.Remove(faction)) _humanFactions.Add(faction);
 		RenderSeat(faction);
+		RenderSummary();
 	}
 
 	private void RenderAllSeats()
@@ -270,9 +281,21 @@ public partial class SkirmishScreen : Control
 		foreach (Faction faction in _seats.Keys) RenderSeat(faction);
 
 		if (_seatsLabel != null)
-			_seatsLabel.Text = _scriptedScenario
-				? "This scenario is scripted and plays every faction"
-				: "Your Factions";
+			_seatsLabel.Text = "YOUR FACTIONS";
+		if (_seatsHint != null)
+			_seatsHint.Text = _scriptedScenario
+				? "This scenario is scripted and plays every faction."
+				: "Click a faction to hand it to the AI, or take it back.";
+		RenderSummary();
+	}
+
+	private void RenderSummary()
+	{
+		int human = _seats.Keys.Count(EffectiveHuman);
+		int ai = _seats.Count - human;
+		_seatsSummary.Text = human == 0
+			? "You are watching: all six factions are played by the AI."
+			: $"You command {human} {(human == 1 ? "faction" : "factions")}  ·  the AI plays {(ai == 0 ? "none" : ai.ToString())}";
 	}
 
 	/// <summary>
@@ -280,10 +303,8 @@ public partial class SkirmishScreen : Control
 	/// click changes one, so there is nothing to gain from being clever and a state that can drift from
 	/// the model to lose.
 	///
-	/// The colours are the lobby's, and the mapping is exact rather than approximate: a bot seat is
-	/// literally "owned by another player", and the hover white is literally "available to you".
-	/// ColUnavailable ("wrong team") has no meaning here — a Skirmish has no team constraint, which is
-	/// the point of it — so it goes unused rather than being given an invented role.
+	/// Yours is a brass-framed row in full colour; a bot's is dimmed, and lights up on hover to say it
+	/// can be taken back.
 	///
 	/// "AI" is the string FactionDisplay.PlayerNameFor already returns for a bot faction, and so what
 	/// puts "Germany (AI)" on the history rows and banners in game. This screen matching it exactly is
@@ -295,11 +316,16 @@ public partial class SkirmishScreen : Control
 
 		bool mine = EffectiveHuman(faction);
 
-		seat.Controller.Text = mine ? "You" : "AI";
-		seat.Flag.Modulate = mine
-			? ColClaimed
-			: (_hovered == faction ? ColAvailable : ColOtherOwned);
-		seat.Controller.Modulate = seat.Flag.Modulate;
+		bool hovered = _hovered == faction && !_scriptedScenario;
+
+		seat.Controller.Text = mine ? "YOU" : "AI";
+		seat.Controller.AddThemeColorOverride("font_color", mine ? MenuBrass : MenuMuted);
+		seat.Name.AddThemeColorOverride("font_color", mine || hovered ? MenuText : MenuMuted);
+		seat.Flag.Modulate = mine || hovered ? Colors.White : new Color(0.5f, 0.5f, 0.5f, 0.75f);
+		seat.Style.BgColor = mine ? new Color(MenuBrass, 0.13f) : new Color(1, 1, 1, hovered ? 0.06f : 0.025f);
+		seat.Style.BorderColor = mine
+			? new Color(MenuBrass, hovered ? 1f : 0.75f)
+			: new Color(1, 1, 1, hovered ? 0.35f : 0.08f);
 
 		// Read-only while a tutorial is selected. Disabled rather than merely ignored in OnSeatPressed
 		// so the row stops taking focus and its hover tint stops implying a choice that is not there.

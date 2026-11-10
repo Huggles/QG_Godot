@@ -62,11 +62,32 @@ public static class FactionMenuVisuals
 		{ Faction.UNITED_STATES,  "United States" },
 	};
 
+	// ── Menu palette, matching scenes/menu/theme/MenuTheme.tres ───────────────
+	public static readonly Color MenuBrass = new(0.851f, 0.678f, 0.361f);
+	public static readonly Color MenuText  = new(0.929f, 0.898f, 0.82f);
+	public static readonly Color MenuMuted = new(0.69f, 0.66f, 0.58f);
+
 	// ── Visual colours for button states ──────────────────────────────────────
-	public static readonly Color ColClaimed     = new(1.0f, 0.85f, 0.2f, 1.0f);  // gold  – claimed by this row's player
-	public static readonly Color ColAvailable   = Colors.White;                    // white – available & team-compatible
-	public static readonly Color ColUnavailable = new(0.30f, 0.30f, 0.30f, 0.55f); // dark grey – wrong team
-	public static readonly Color ColOtherOwned  = new(0.50f, 0.50f, 0.50f, 0.75f); // mid grey  – owned by another player
+	public static readonly Color ColClaimed     = Colors.White;                    // full colour + brass frame – claimed by this row's player
+	public static readonly Color ColAvailable   = new(0.80f, 0.80f, 0.80f, 0.95f); // slightly dimmed – available & team-compatible
+	public static readonly Color ColUnavailable = new(0.25f, 0.25f, 0.25f, 0.45f); // dark grey – wrong team
+	public static readonly Color ColOtherOwned  = new(0.45f, 0.45f, 0.45f, 0.70f); // mid grey  – owned by another player
+
+	/// <summary>
+	/// Draws a brass frame round the flag while the button shows <see cref="ColClaimed"/>. Modulate
+	/// changes don't redraw, so whoever restyles the button must QueueRedraw it.
+	/// </summary>
+	public static void AddClaimFrame(TextureButton button)
+	{
+		button.Draw += () =>
+		{
+			if (button.Modulate != ColClaimed || button.TextureNormal == null) return;
+			Vector2 texture = button.TextureNormal.GetSize();
+			float scale = Mathf.Min(button.Size.X / texture.X, button.Size.Y / texture.Y);
+			Rect2 flag = new((button.Size - texture * scale) / 2, texture * scale);
+			button.DrawRect(flag.Grow(3), MenuBrass, false, 2);
+		};
+	}
 
 	// ── Player row sizing ─────────────────────────────────────────────────────
 	/// <summary>

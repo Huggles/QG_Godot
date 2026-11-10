@@ -79,6 +79,6 @@ public static class MenuScenarioPicker
 	{
 		if (label == null) return;
 		label.BbcodeEnabled = true;
-		label.Text = $"[color=#bbbbbb]{description}[/color]";
+		label.Text = $"[color=#d8cfb8]{description}[/color]";
 	}
 }

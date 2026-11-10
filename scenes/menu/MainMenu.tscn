@@ -1,12 +1,19 @@
-[gd_scene format=3 uid="uid://mkqa1n4o3kva"]
+[gd_scene load_steps=8 format=3 uid="uid://mkqa1n4o3kva"]
 
-[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="2_btn"]
-[ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="3_mgsx5"]
 [ext_resource type="Script" uid="uid://bwx4k7nap2qnr" path="res://scripts/C#/Menu/MainMenu.cs" id="3_script"]
-[ext_resource type="StyleBox" uid="uid://di1jtwe77usf2" path="res://MenuPanelBackground.tres" id="4_e1dod"]
-[ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_y6vun"]
-[ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_e1dod"]
 [ext_resource type="PackedScene" uid="uid://c7l5nndh4p5c4" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="4_theme"]
+[ext_resource type="PackedScene" uid="uid://b8qgcmdbtn01" path="res://scenes/menu/MenuCommandButton.tscn" id="5_cmd"]
+
+[sub_resource type="Gradient" id="Gradient_scrim"]
+offsets = PackedFloat32Array(0, 0.4, 0.68, 1)
+colors = PackedColorArray(0.02, 0.024, 0.018, 0, 0.02, 0.024, 0.018, 0.2, 0.02, 0.024, 0.018, 0.72, 0.02, 0.024, 0.018, 0.9)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_scrim"]
+gradient = SubResource("Gradient_scrim")
+width = 256
+height = 4
+fill_to = Vector2(1, 0)
 
 [node name="Control" type="Control" unique_id=533686469]
 layout_mode = 3
@@ -20,77 +27,130 @@ script = ExtResource("3_script")
 [node name="Backdrop" parent="." unique_id=325802814 instance=ExtResource("9_bdrop")]
 layout_mode = 1
 
-[node name="MenuPanel" type="Container" parent="." unique_id=438408597]
-custom_minimum_size = Vector2(158, 100)
-layout_mode = 0
-offset_left = 1437.0
-offset_top = 199.0
-offset_right = 1837.0
-offset_bottom = 899.0
-script = ExtResource("3_mgsx5")
+[node name="Scrim" type="TextureRect" parent="." unique_id=1402117001]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_scrim")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="MenuPanel" unique_id=1629054955]
-layout_mode = 2
-
-[node name="BackgroundContainer" type="MarginContainer" parent="MenuPanel" unique_id=1096535963]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
-
-[node name="Panel" type="Panel" parent="MenuPanel/BackgroundContainer" unique_id=1707724424]
-layout_mode = 2
-theme_override_styles/panel = ExtResource("4_e1dod")
-
-[node name="NinePatchRect" type="NinePatchRect" parent="MenuPanel" unique_id=779728291]
-layout_mode = 2
-texture = ExtResource("4_y6vun")
-patch_margin_left = 530
-patch_margin_top = 376
-patch_margin_right = 489
-patch_margin_bottom = 416
-axis_stretch_horizontal = 1
-axis_stretch_vertical = 1
-script = ExtResource("5_e1dod")
-TileScale = 0.2
-
-[node name="ContentContainer" type="MarginContainer" parent="MenuPanel" unique_id=672142930]
-layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_top = 50
-theme_override_constants/margin_right = 50
-theme_override_constants/margin_bottom = 50
-
-[node name="ButtonContainer" type="VBoxContainer" parent="MenuPanel/ContentContainer" unique_id=586174224]
-layout_mode = 2
-theme_override_constants/separation = 24
+[node name="Column" type="VBoxContainer" parent="." unique_id=438408597]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -690.0
+offset_right = -140.0
+grow_horizontal = 0
+grow_vertical = 2
+theme = ExtResource("4_theme")
+theme_override_constants/separation = 6
 alignment = 1
 
-[node name="SkirmishButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=409954901 instance=ExtResource("2_btn")]
+[node name="Kicker" type="Label" parent="Column" unique_id=1402117002]
+layout_mode = 2
+theme_type_variation = &"MenuKicker"
+text = "WORLD WAR II  ·  1939 – 1945"
+
+[node name="TitleBlock" type="VBoxContainer" parent="Column" unique_id=1402117003]
+layout_mode = 2
+theme_override_constants/separation = -30
+
+[node name="TitleTop" type="Label" parent="Column/TitleBlock" unique_id=1402117004]
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+theme_override_font_sizes/font_size = 96
+text = "QUARTERMASTER"
+
+[node name="TitleBottom" type="Label" parent="Column/TitleBlock" unique_id=1402117005]
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+theme_override_colors/font_color = Color(0.851, 0.678, 0.361, 1)
+theme_override_font_sizes/font_size = 96
+text = "GENERAL"
+
+[node name="Rule" type="HBoxContainer" parent="Column" unique_id=1402117006]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RuleLead" type="ColorRect" parent="Column/Rule" unique_id=1402117007]
+custom_minimum_size = Vector2(72, 2)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.851, 0.678, 0.361, 0.85)
+
+[node name="Star" type="Label" parent="Column/Rule" unique_id=1402117008]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.851, 0.678, 0.361, 1)
+theme_override_font_sizes/font_size = 18
+text = "★"
+
+[node name="RuleTail" type="ColorRect" parent="Column/Rule" unique_id=1402117009]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.851, 0.678, 0.361, 0.25)
+
+[node name="GapTitle" type="Control" parent="Column" unique_id=1402117010]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PlayHeader" type="Label" parent="Column" unique_id=1402117011]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "PLAY"
+
+[node name="SkirmishButton" parent="Column" unique_id=409954901 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="LoadGameButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1704412900 instance=ExtResource("2_btn")]
+[node name="LoadGameButton" parent="Column" unique_id=1704412900 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="MultiplayerHostButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1302279736 instance=ExtResource("2_btn")]
+[node name="GapPlay" type="Control" parent="Column" unique_id=1402117012]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MultiplayerHeader" type="Label" parent="Column" unique_id=1402117013]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "MULTIPLAYER"
+
+[node name="MultiplayerHostButton" parent="Column" unique_id=1302279736 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="MultiplayerJoinButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=2125586497 instance=ExtResource("2_btn")]
+[node name="MultiplayerJoinButton" parent="Column" unique_id=2125586497 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="LeaderboardButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=771203344 instance=ExtResource("2_btn")]
+[node name="LeaderboardButton" parent="Column" unique_id=771203344 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="SettingsButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1815641807 instance=ExtResource("2_btn")]
+[node name="GapMulti" type="Control" parent="Column" unique_id=1402117014]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SystemSeparator" type="HSeparator" parent="Column" unique_id=1402117015]
+layout_mode = 2
+
+[node name="SettingsButton" parent="Column" unique_id=1815641807 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="QuitButton" parent="MenuPanel/ContentContainer/ButtonContainer" unique_id=1588731681 instance=ExtResource("2_btn")]
+[node name="QuitButton" parent="Column" unique_id=1588731681 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
