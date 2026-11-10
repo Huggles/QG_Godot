@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://bjpmsri3am6gm"]
 
 [ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
-[ext_resource type="LabelSettings" uid="uid://bymnxius4fktx" path="res://scenes/userinterface/FactionInfo/ClearLabelSettings.tres" id="3_gac4n"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/HandCardsIcon.svg" id="3_hand"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/DeckStackIcon.svg" id="4_deck"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/TableCardsIcon.svg" id="5_table"]
@@ -10,6 +9,12 @@
 [ext_resource type="LabelSettings" uid="uid://cy7n8wr0krac1" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsLarge.tres" id="8_48ey3"]
 [ext_resource type="Texture2D" uid="uid://sfhhmtjxiwqx" path="res://assets/textures/Units/QGArmyDetailed.png" id="9_army"]
 [ext_resource type="Texture2D" uid="uid://1gl1q0exfxm2" path="res://assets/textures/Units/QGNavyDetailed.png" id="10_navy"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_score"]
+resource_local_to_scene = true
+font_size = 32
+outline_size = 7
+outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_osvc4"]
 
@@ -26,11 +31,11 @@ outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
 [node name="FactionInfoRow" type="Control" unique_id=1940069184]
-custom_minimum_size = Vector2(220, 56)
+custom_minimum_size = Vector2(220, 52)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 220.0
-offset_bottom = 56.0
+offset_bottom = 52.0
 mouse_filter = 2
 script = ExtResource("1_osvc4")
 
@@ -38,14 +43,14 @@ script = ExtResource("1_osvc4")
 unique_name_in_owner = true
 layout_mode = 0
 offset_right = 220.0
-offset_bottom = 56.0
+offset_bottom = 52.0
 mouse_filter = 2
 
 [node name="FactionInfoButton" type="Button" parent="." unique_id=1138684773]
 unique_name_in_owner = true
 layout_mode = 0
 offset_right = 220.0
-offset_bottom = 56.0
+offset_bottom = 52.0
 focus_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_osvc4")
@@ -57,9 +62,10 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_osvc4")
 unique_name_in_owner = true
 layout_mode = 0
 offset_right = 80.0
-offset_bottom = 56.0
+offset_bottom = 52.0
+grow_vertical = 2
 text = "9"
-label_settings = ExtResource("3_gac4n")
+label_settings = SubResource("LabelSettings_score")
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -67,9 +73,9 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 90.0
-offset_top = 5.0
+offset_top = 3.0
 offset_right = 200.0
-offset_bottom = 51.0
+offset_bottom = 49.0
 mouse_filter = 2
 theme_override_constants/separation = 2
 alignment = 1
@@ -184,7 +190,7 @@ anchors_preset = 0
 offset_left = 230.0
 offset_top = -7.0
 offset_right = 280.0
-offset_bottom = 63.0
+offset_bottom = 59.0
 script = ExtResource("7_0r4er")
 
 [node name="CardsAnimationControlTextureRect" type="TextureRect" parent="CardsAnimationControl" unique_id=1152488689]

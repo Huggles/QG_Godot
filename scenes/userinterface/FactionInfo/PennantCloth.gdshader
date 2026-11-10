@@ -4,7 +4,6 @@
 shader_type canvas_item;
 
 uniform sampler2D flag : source_color, filter_linear_mipmap;
-uniform float flag_aspect = 2.0;          // texture width / height; the head shows its hoist side
 uniform vec4 tail_color : source_color = vec4(0.5, 0.1, 0.1, 1.0);
 uniform vec4 brass : source_color = vec4(0.851, 0.678, 0.361, 1.0);
 uniform vec2 size = vec2(260.0, 56.0);    // the cloth's rect in px, set by the row
@@ -30,7 +29,7 @@ void fragment() {
 
 	vec3 c;
 	if (p.x < head) {
-		c = texture(flag, vec2(p.x / (size.y * flag_aspect), clamp(p.y / size.y, 0.0, 1.0))).rgb;
+		c = texture(flag, vec2(clamp(p.x / head, 0.0, 1.0), clamp(p.y / size.y, 0.0, 1.0))).rgb;
 	} else {
 		float weave = 0.96 + 0.04 * sin(p.x * 1.7) * sin(p.y * 1.7);
 		c = tail_color.rgb * weave;

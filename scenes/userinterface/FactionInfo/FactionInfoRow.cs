@@ -32,8 +32,8 @@ public partial class FactionInfoRow : Control
 
 	// ── Pennant geometry ─────────────────────────────────────────────────────
 
-	/// <summary>Width of the flag at the hoist; the score sits on it.</summary>
-	private const float Head = 80f;
+	/// <summary>Width of the flag at the hoist: the pennant's height at the flag's own aspect, so the whole flag shows.</summary>
+	private float Head = 104f;
 	/// <summary>Tail at zero points; it is never shorter than the counts printed on it need.</summary>
 	private const float MinTail = 130f;
 	/// <summary>Extra tail per point, and the most it adds, so a runaway leader never spans the map.</summary>
@@ -103,9 +103,12 @@ public partial class FactionInfoRow : Control
 
 		// One material per row: every pennant has its own flag, length and sway.
 		Texture2D flag = data.FlagTexture;
+		float aspect = (float)flag.GetWidth() / flag.GetHeight();
+		Head = Mathf.Round(Cloth.Size.Y * aspect);
+		ScoreLabel.Size = new Vector2(Head, Cloth.Size.Y);
+		Stats.Position = Stats.Position with { X = Head + 10f };
 		_cloth = new ShaderMaterial { Shader = ClothShader };
 		_cloth.SetShaderParameter("flag", flag);
-		_cloth.SetShaderParameter("flag_aspect", (float)flag.GetWidth() / flag.GetHeight());
 		_cloth.SetShaderParameter("tail_color", factionColor);
 		_cloth.SetShaderParameter("head", Head);
 		_cloth.SetShaderParameter("notch", Notch);
@@ -113,7 +116,6 @@ public partial class FactionInfoRow : Control
 		Cloth.Material = _cloth;
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
-		ScoreLabel.LabelSettings.FontSize = 32;
 
 		FactionInfoButton.TooltipText = $"{data.FactionAdjactiveLabel} score history";
 		FactionInfoButton.MouseEntered += () => _cloth.SetShaderParameter("hover", 1f);

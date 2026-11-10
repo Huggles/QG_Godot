@@ -92,7 +92,7 @@ public partial class FactionsContainer : Control
         }
 
         // The pole runs from the finial to just past the last pennant.
-        float rowHeight = playerFactions.Count * 56f + (playerFactions.Count - 1) * Column.GetThemeConstant("separation");
+        float rowHeight = playerFactions.Count * 52f + (playerFactions.Count - 1) * Column.GetThemeConstant("separation");
         Pole.Size = Pole.Size with { Y = rowHeight + 16f };
     }
 
