@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://bqmodalshelf" path="res://scenes/menu/MenuModalShell.tscn" id="1_shell"]
 [ext_resource type="Script" uid="uid://wacc2o5tf26y" path="res://scripts/C#/Menu/JoinOptionsDialog.cs" id="2_script"]
-[ext_resource type="PackedScene" uid="uid://dxq3kwan4wpb5" path="res://scenes/menu/MenuPanelButton.tscn" id="3_btn"]
+[ext_resource type="PackedScene" uid="uid://b8qgactbtn02" path="res://scenes/menu/MenuActionButton.tscn" id="3_btn"]
 
 [node name="JoinOptionsDialog" instance=ExtResource("1_shell")]
 script = ExtResource("2_script")

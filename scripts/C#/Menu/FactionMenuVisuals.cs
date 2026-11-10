@@ -67,6 +67,18 @@ public static class FactionMenuVisuals
 	public static readonly Color MenuText  = new(0.929f, 0.898f, 0.82f);
 	public static readonly Color MenuMuted = new(0.69f, 0.66f, 0.58f);
 
+	/// <summary>The background of one list row (a save, a friend's lobby) inside a frosted card.</summary>
+	public static StyleBoxFlat MenuRowStyle() => new()
+	{
+		BgColor = new Color(1, 1, 1, 0.035f),
+		BorderColor = new Color(1, 1, 1, 0.1f),
+		BorderWidthLeft = 3,
+		CornerRadiusTopLeft = 3, CornerRadiusTopRight = 3,
+		CornerRadiusBottomLeft = 3, CornerRadiusBottomRight = 3,
+		ContentMarginLeft = 18, ContentMarginRight = 12,
+		ContentMarginTop = 10, ContentMarginBottom = 10,
+	};
+
 	// ── Visual colours for button states ──────────────────────────────────────
 	public static readonly Color ColClaimed     = Colors.White;                    // full colour + brass frame – claimed by this row's player
 	public static readonly Color ColAvailable   = new(0.80f, 0.80f, 0.80f, 0.95f); // slightly dimmed – available & team-compatible

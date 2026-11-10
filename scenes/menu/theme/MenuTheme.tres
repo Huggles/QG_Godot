@@ -3,10 +3,103 @@
 [ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontBody.tres" id="1_body"]
 [ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="2_display"]
 [ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontCaps.tres" id="3_caps"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontBodyBold.tres" id="14_bold"]
 [ext_resource type="Texture2D" path="res://scenes/menu/theme/CheckOn.svg" id="4_on"]
 [ext_resource type="Texture2D" path="res://scenes/menu/theme/CheckOff.svg" id="5_off"]
 [ext_resource type="Texture2D" path="res://scenes/menu/theme/CheckOnDisabled.svg" id="6_ond"]
 [ext_resource type="Texture2D" path="res://scenes/menu/theme/CheckOffDisabled.svg" id="7_offd"]
+[ext_resource type="Texture2D" path="res://scenes/menu/theme/SliderKnob.svg" id="8_knob"]
+[ext_resource type="Texture2D" path="res://scenes/menu/theme/SliderKnobHover.svg" id="9_knobh"]
+[ext_resource type="Texture2D" path="res://scenes/menu/theme/ToggleOn.svg" id="10_ton"]
+[ext_resource type="Texture2D" path="res://scenes/menu/theme/ToggleOff.svg" id="11_toff"]
+[ext_resource type="Texture2D" path="res://scenes/menu/theme/ToggleOnDisabled.svg" id="12_tond"]
+[ext_resource type="Texture2D" path="res://scenes/menu/theme/ToggleOffDisabled.svg" id="13_toffd"]
+
+[sub_resource type="StyleBoxFlat" id="Primary_normal"]
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 8.0
+bg_color = Color(0.82, 0.643, 0.333, 1)
+border_width_bottom = 2
+border_color = Color(1, 0.9, 0.66, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Primary_hover"]
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 8.0
+bg_color = Color(0.93, 0.76, 0.43, 1)
+border_width_bottom = 2
+border_color = Color(1, 0.95, 0.78, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Primary_disabled"]
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 8.0
+bg_color = Color(0.4, 0.36, 0.28, 0.45)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Tab_selected"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+bg_color = Color(0.851, 0.678, 0.361, 0.1)
+border_width_bottom = 2
+border_color = Color(0.851, 0.678, 0.361, 1)
+
+[sub_resource type="StyleBoxFlat" id="Tab_unselected"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 0)
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.1)
+
+[sub_resource type="StyleBoxFlat" id="Tab_hovered"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+bg_color = Color(0.851, 0.678, 0.361, 0.06)
+border_width_bottom = 2
+border_color = Color(0.851, 0.678, 0.361, 0.45)
+
+[sub_resource type="StyleBoxFlat" id="Tab_panel"]
+content_margin_top = 18.0
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="Slider_track"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(1, 1, 1, 0.14)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Slider_fill"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.851, 0.678, 0.361, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="Btn_normal"]
 content_margin_left = 18.0
@@ -279,6 +372,26 @@ CheckBox/styles/hover = SubResource("Check_normal")
 CheckBox/styles/hover_pressed = SubResource("Check_normal")
 CheckBox/styles/normal = SubResource("Check_normal")
 CheckBox/styles/pressed = SubResource("Check_normal")
+CheckButton/colors/font_color = Color(0.929, 0.898, 0.82, 1)
+CheckButton/colors/font_hover_color = Color(0.96, 0.82, 0.55, 1)
+CheckButton/colors/font_hover_pressed_color = Color(0.96, 0.82, 0.55, 1)
+CheckButton/colors/font_pressed_color = Color(0.929, 0.898, 0.82, 1)
+CheckButton/colors/font_disabled_color = Color(0.69, 0.66, 0.58, 0.5)
+CheckButton/icons/checked = ExtResource("10_ton")
+CheckButton/icons/checked_disabled = ExtResource("12_tond")
+CheckButton/icons/unchecked = ExtResource("11_toff")
+CheckButton/icons/unchecked_disabled = ExtResource("13_toffd")
+CheckButton/styles/disabled = SubResource("Check_normal")
+CheckButton/styles/focus = SubResource("Empty")
+CheckButton/styles/hover = SubResource("Check_normal")
+CheckButton/styles/hover_pressed = SubResource("Check_normal")
+CheckButton/styles/normal = SubResource("Check_normal")
+CheckButton/styles/pressed = SubResource("Check_normal")
+HSlider/icons/grabber = ExtResource("8_knob")
+HSlider/icons/grabber_highlight = ExtResource("9_knobh")
+HSlider/styles/grabber_area = SubResource("Slider_fill")
+HSlider/styles/grabber_area_highlight = SubResource("Slider_fill")
+HSlider/styles/slider = SubResource("Slider_track")
 HSeparator/constants/separation = 2
 HSeparator/styles/separator = SubResource("Sep_h")
 Label/colors/font_color = Color(0.929, 0.898, 0.82, 1)
@@ -299,6 +412,18 @@ MenuKicker/fonts/font = ExtResource("3_caps")
 MenuMuted/base_type = &"Label"
 MenuMuted/colors/font_color = Color(0.69, 0.66, 0.58, 1)
 MenuMuted/font_sizes/font_size = 19
+MenuPrimaryButton/base_type = &"Button"
+MenuPrimaryButton/colors/font_color = Color(0.106, 0.09, 0.055, 1)
+MenuPrimaryButton/colors/font_disabled_color = Color(0.93, 0.9, 0.82, 0.4)
+MenuPrimaryButton/colors/font_focus_color = Color(0.106, 0.09, 0.055, 1)
+MenuPrimaryButton/colors/font_hover_color = Color(0.106, 0.09, 0.055, 1)
+MenuPrimaryButton/colors/font_hover_pressed_color = Color(0.106, 0.09, 0.055, 1)
+MenuPrimaryButton/colors/font_pressed_color = Color(0.106, 0.09, 0.055, 1)
+MenuPrimaryButton/styles/disabled = SubResource("Primary_disabled")
+MenuPrimaryButton/styles/hover = SubResource("Primary_hover")
+MenuPrimaryButton/styles/hover_pressed = SubResource("Primary_hover")
+MenuPrimaryButton/styles/normal = SubResource("Primary_normal")
+MenuPrimaryButton/styles/pressed = SubResource("Primary_hover")
 MenuSection/base_type = &"Label"
 MenuSection/colors/font_color = Color(0.69, 0.66, 0.58, 1)
 MenuSection/font_sizes/font_size = 15
@@ -330,6 +455,16 @@ PopupMenu/font_sizes/font_size = 21
 PopupMenu/styles/hover = SubResource("Popup_hover")
 PopupMenu/styles/panel = SubResource("Popup_panel")
 RichTextLabel/colors/default_color = Color(0.929, 0.898, 0.82, 1)
+RichTextLabel/fonts/bold_font = ExtResource("14_bold")
+TabContainer/colors/font_hovered_color = Color(0.96, 0.82, 0.55, 1)
+TabContainer/colors/font_selected_color = Color(0.96, 0.82, 0.55, 1)
+TabContainer/colors/font_unselected_color = Color(0.69, 0.66, 0.58, 1)
+TabContainer/font_sizes/font_size = 21
+TabContainer/styles/panel = SubResource("Tab_panel")
+TabContainer/styles/tab_hovered = SubResource("Tab_hovered")
+TabContainer/styles/tab_selected = SubResource("Tab_selected")
+TabContainer/styles/tab_unselected = SubResource("Tab_unselected")
+TabContainer/styles/tabbar_background = SubResource("Empty")
 TooltipLabel/colors/font_color = Color(0.929, 0.898, 0.82, 1)
 TooltipLabel/font_sizes/font_size = 18
 TooltipPanel/styles/panel = SubResource("Tooltip_panel")

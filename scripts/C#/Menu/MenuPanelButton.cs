@@ -109,6 +109,9 @@ public partial class MenuPanelButton : Button
 		// be reached yet.
 		ApplyLabelText();
 
+		// The child label is the caption; a stray Button.text would draw underneath it.
+		if (_label != null) Text = "";
+
 		MouseDefaultCursorShape = CursorShape.PointingHand;
 
 		ApplyState(ResolveState(), force: true);

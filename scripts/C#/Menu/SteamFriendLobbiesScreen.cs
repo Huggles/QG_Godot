@@ -17,7 +17,7 @@ public partial class SteamFriendLobbiesScreen : Control
 	/// <summary>Safety net for a peer that never reports success or failure.</summary>
 	private const double ConnectTimeoutSeconds = 15.0;
 
-	private const string ColorInfo  = "#bbbbbb";
+	private const string ColorInfo  = "#b0a894";
 	private const string ColorError = "#d98a8a";
 
 	private VBoxContainer   _lobbyList;
@@ -139,15 +139,7 @@ public partial class SteamFriendLobbiesScreen : Control
 	private PanelContainer BuildRow(FriendLobby lobby)
 	{
 		var panel = new PanelContainer();
-		var style = new StyleBoxFlat
-		{
-			BgColor            = new Color(0.15f, 0.15f, 0.15f, 0.55f),
-			CornerRadiusTopLeft = 4, CornerRadiusTopRight = 4,
-			CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4,
-			ContentMarginLeft = 10, ContentMarginRight = 10,
-			ContentMarginTop  = 8,  ContentMarginBottom = 8,
-		};
-		panel.AddThemeStyleboxOverride("panel", style);
+		panel.AddThemeStyleboxOverride("panel", FactionMenuVisuals.MenuRowStyle());
 
 		var row = new HBoxContainer();
 		row.AddThemeConstantOverride("separation", 10);
@@ -330,6 +322,6 @@ public partial class SteamFriendLobbiesScreen : Control
 
 	private void SetStatus(string message, string colorHex)
 	{
-		_statusLabel.Text = $"[color={colorHex}][font_size=22]{message}[/font_size][/color]";
+		_statusLabel.Text = $"[color={colorHex}]{message}[/color]";
 	}
 }

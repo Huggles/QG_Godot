@@ -28,7 +28,7 @@ public partial class LoadGameScreen : Control
     /// </summary>
     private const string MenuScenePath = "res://scenes/menu/Menu.tscn";
 
-    private const string ColorInfo  = "#bbbbbb";
+    private const string ColorInfo  = "#b0a894";
     private const string ColorError = "#d98a8a";
 
     private VBoxContainer   _saveList;
@@ -80,15 +80,7 @@ public partial class LoadGameScreen : Control
     private PanelContainer BuildRow(SaveGameMeta save)
     {
         PanelContainer panel = new();
-        StyleBoxFlat style = new()
-        {
-            BgColor                = new Color(0.15f, 0.15f, 0.15f, 0.55f),
-            CornerRadiusTopLeft    = 4, CornerRadiusTopRight = 4,
-            CornerRadiusBottomLeft = 4, CornerRadiusBottomRight = 4,
-            ContentMarginLeft      = 10, ContentMarginRight = 10,
-            ContentMarginTop       = 8,  ContentMarginBottom = 8,
-        };
-        panel.AddThemeStyleboxOverride("panel", style);
+        panel.AddThemeStyleboxOverride("panel", FactionMenuVisuals.MenuRowStyle());
 
         HBoxContainer row = new();
         row.AddThemeConstantOverride("separation", 10);
@@ -268,5 +260,5 @@ public partial class LoadGameScreen : Control
     }
 
     private void SetStatus(string message, string colorHex)
-        => _statusLabel.Text = $"[color={colorHex}][font_size=22]{message}[/font_size][/color]";
+        => _statusLabel.Text = $"[color={colorHex}]{message}[/color]";
 }

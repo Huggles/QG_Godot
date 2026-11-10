@@ -15,7 +15,7 @@ public partial class JoinGameScreen : Control
 	/// otherwise leave the screen stuck on "Connecting...".</summary>
 	private const double ConnectTimeoutSeconds = 10.0;
 
-	private const string ColorInfo  = "#bbbbbb";
+	private const string ColorInfo  = "#b0a894";
 	private const string ColorError = "#d98a8a";
 
 	private LineEdit        _ipInput;
@@ -218,6 +218,6 @@ public partial class JoinGameScreen : Control
 
 	private void SetStatus(string message, string colorHex)
 	{
-		_statusLabel.Text = $"[color={colorHex}][font_size=22]{message}[/font_size][/color]";
+		_statusLabel.Text = $"[color={colorHex}]{message}[/color]";
 	}
 }
