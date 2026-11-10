@@ -49,10 +49,10 @@ public partial class SkirmishScreen : Control
 	/// The factions the human will play. Everything not in here is a bot, so this one set is the whole
 	/// model — no dictionaries keyed by peer, because there is only ever one human on this screen.
 	///
-	/// Starts holding every faction, which makes "Skirmish then Start" identical to the single-player
-	/// game this screen used to start. Deselect to hand seats to bots.
+	/// Starts holding the Allies only, so the Axis are bots by default. Click a seat to take it back.
 	/// </summary>
-	private readonly HashSet<Faction> _humanFactions = new(StaticGameData.PlayableFactions);
+	private readonly HashSet<Faction> _humanFactions =
+		new(StaticGameData.PlayableFactions.Where(faction => !AxisSet.Contains(faction)));
 
 	private readonly Dictionary<Faction, Seat> _seats = new();
 	private Faction? _hovered;
