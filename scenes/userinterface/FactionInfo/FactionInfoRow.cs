@@ -12,14 +12,14 @@ public partial class FactionInfoRow : Control
 	private Panel BackgroundPanel => GetNode<Panel>("%BackgroundPanel");
 	private Panel BackgroundPanel2 => GetNode<Panel>("%BackgroundPanel2");
 	private Panel FactionFlagPanel => GetNode<Panel>("%FlagPanel");    
-	private Label ScoreLabel => FactionFlagPanel.GetNode<Label>("ScoreLabel");
-	private Panel DetailPanel => GetNode<Panel>("DetailPanel");    
-	private Button FactionInfoButton => GetNode<Button>("FactionInfoButton");
-	private Button DiscardDeckButton => BackgroundPanel.GetNode<Button>("DiscardDeckButton");
-	private Label DeckCardNumber => DiscardDeckButton.GetNode<Label>("DeckCardNumber");
-	private Button PlayedCardsButton => BackgroundPanel.GetNode<Button>("PlayedCardsButton");
-	private Label PlayedCardNumber => PlayedCardsButton.GetNode<Label>("PlayedCardsNumber");
-	private RichTextLabel TurnSummariesRichText => DetailPanel.GetNode<RichTextLabel>("MarginContainer/TurnSummariesRichText");
+	private Label ScoreLabel => GetNode<Label>("%ScoreLabel");
+	private Label DeltaBadge => GetNode<Label>("%DeltaBadge");
+	private VPSparkline Sparkline => GetNode<VPSparkline>("%Sparkline");
+	private BrassFrame ActiveFrame => GetNode<BrassFrame>("%ActiveFrame");
+	private Button FactionInfoButton => GetNode<Button>("%FactionInfoButton");
+	private Button HandButton => GetNode<Button>("%HandButton");
+	private Button DeckButton => GetNode<Button>("%DeckButton");
+	private Button TableButton => GetNode<Button>("%TableButton");
 	private CardsAnimationControl CardsAnimationControl => GetNode<CardsAnimationControl>("CardsAnimationControl");
 	private TextureRect ArmyIcon => GetNode<TextureRect>("%ArmyIcon");
 	private TextureRect NavyIcon => GetNode<TextureRect>("%NavyIcon");
@@ -45,13 +45,14 @@ public partial class FactionInfoRow : Control
 			EventBus.Instance.UnitRemoved -= OnUnitRemoved;
 			EventBus.Instance.GameStateRecalculated -= SetUnitCounts;
 			EventBus.Instance.GameStateRecalculated -= SetCardCounts;
+			EventBus.Instance.GameStateRecalculated -= RefreshScoreHistory;
 			EventBus.Instance.CardsDrawn -= OnCardsChanged;
 			EventBus.Instance.CardsDiscarded -= OnCardsChanged;
 			EventBus.Instance.NextStepStarted -= OnNextStepStarted;
 			EventBus.Instance.GameChangeEventAfter -= OnGameChangeEventAfter;
-			PlayedCardsButton.Pressed -= OnPlayedCardsButtonPressed;
+			TableButton.Pressed -= OnPlayedCardsButtonPressed;
 			FactionInfoButton.Pressed -= OnFactionInfoButtonPressed;
-			DiscardDeckButton.Pressed -= OnDiscardDeckButtonPressed;
+			DeckButton.Pressed -= OnDiscardDeckButtonPressed;
 		}
 	}
 
@@ -92,9 +93,11 @@ public partial class FactionInfoRow : Control
 		BackgroundPanel.AddThemeStyleboxOverride("panel", styleBox);
 		BackgroundPanel2.AddThemeStyleboxOverride("panel", styleBox);
 
-		StyleBoxFlat styleBoxDetails = (StyleBoxFlat)DetailPanel.GetThemeStylebox("panel").Duplicate();
-		styleBoxDetails.BgColor = factionColor;
-		DetailPanel.AddThemeStyleboxOverride("panel", styleBoxDetails);
+		Sparkline.Faction = Faction;
+		FactionInfoButton.TooltipText = $"{FactionState.FactionData.FactionAdjactiveLabel} score history";
+		HandButton.TooltipText = "Cards in hand";
+		DeckButton.TooltipText = "Cards left in the draw deck\nClick to see the discard pile";
+		TableButton.TooltipText = "Status and response cards on the table\nClick to see them";
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 
@@ -122,6 +125,8 @@ public partial class FactionInfoRow : Control
 		EventBus.Instance.UnitRemoved += OnUnitRemoved;
 		EventBus.Instance.GameStateRecalculated += SetUnitCounts;
 		EventBus.Instance.GameStateRecalculated += SetCardCounts;
+		// A snapshot or save restore replaces the VP summaries without a FactionScoredPoints.
+		EventBus.Instance.GameStateRecalculated += RefreshScoreHistory;
 		EventBus.Instance.CardsDrawn += OnCardsChanged;
 		EventBus.Instance.CardsDiscarded += OnCardsChanged;
 		// NextStepStarted, not NewTurnStarted: the latter is emitted inside GameFlow.StartNewTurn, which
@@ -129,9 +134,9 @@ public partial class FactionInfoRow : Control
 		// peer, so it is the one turn-boundary signal a client can rely on.
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
 		EventBus.Instance.GameChangeEventAfter += OnGameChangeEventAfter;
-		PlayedCardsButton.Pressed += OnPlayedCardsButtonPressed;
+		TableButton.Pressed += OnPlayedCardsButtonPressed;
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
-		DiscardDeckButton.Pressed += OnDiscardDeckButtonPressed;
+		DeckButton.Pressed += OnDiscardDeckButtonPressed;
 		SetModulation();
 	}
 
@@ -141,10 +146,11 @@ public partial class FactionInfoRow : Control
 
 	private void OnFactionScoredPoints(Faction faction, int newScore)
 	{
+		// The sparklines share one scale, so another row's score can resize this one's bars.
 		if (IsShownHere(faction))
-		{
 			SetScore(CombinedScore);
-		}
+		else
+			Sparkline.Refresh();
 	}
 
 	private void OnUnitDeployed(int unitId, int countryId)
@@ -182,11 +188,13 @@ public partial class FactionInfoRow : Control
 	private void OnNextStepStarted(int turnStep)
 	{
 		SetModulation();
+		// A new round clears the delta badge and adds a bar to the sparkline.
+		RefreshScoreHistory();
 	}
 
 	private void OnFactionInfoButtonPressed()
 	{
-		ToggleDetails();
+		ScoreHistoryDialog.Open(GetTree().CurrentScene, Faction);
 	}
 
 	private void OnPlayedCardsButtonPressed()
@@ -228,15 +236,28 @@ public partial class FactionInfoRow : Control
 		{
 			Modulate = new Color(Modulate.R - 0.2f, Modulate.G - 0.2f, Modulate.B - 0.2f,  Modulate.A); // Further dim the row if it's not the current faction's turn
 		}
+		ActiveFrame.Visible = GameFlow.Instance != null && GameFlow.Instance.IsStarted && GameFlow.Instance.CurrentFaction == Faction;
 	}
 
 	private void SetScore(int score)
 	{
 		ScoreLabel.Text = score.ToString();
 		var tween = GetTree().CreateTween();
-		tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 72, GameSettings.DurationShortSeconds);
-		tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 36, GameSettings.DurationShortSeconds);
-		LoadVPDetails();
+		tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 60, GameSettings.DurationShortSeconds);
+		tween.TweenProperty(ScoreLabel.LabelSettings, "font_size", 40, GameSettings.DurationShortSeconds);
+		RefreshScoreHistory();
+	}
+
+	/// <summary>The gold "+N" badge (points gained this round, hidden at zero) and the per-round sparkline.</summary>
+	private void RefreshScoreHistory()
+	{
+		int round = VPHistory.CurrentRound;
+		int[] perRound = VPHistory.PointsPerRound(Faction, round);
+		int gained = round >= 1 ? perRound[round - 1] : 0;
+		DeltaBadge.Visible = gained != 0;
+		DeltaBadge.Text = gained > 0 ? $"+{gained}" : gained.ToString();
+		DeltaBadge.TooltipText = $"Points scored in round {round}";
+		Sparkline.Refresh();
 	}
 
 	/// <summary>
@@ -261,11 +282,12 @@ public partial class FactionInfoRow : Control
 	{
 		// FactionState.ForEnum returns null before the game state exists — same guard as UnitPool.AvailableUnitCount.
 		DeckState deckState = FactionState?.DeckState;
-		DeckCardNumber.Text = (deckState?.DeckCardIds.Count ?? 0).ToString();
+		HandButton.Text = (deckState?.HandCardIds.Count ?? 0).ToString();
+		DeckButton.Text = (deckState?.DeckCardIds.Count ?? 0).ToString();
 		// Active cards are the status and response cards still lying on the table — the same two piles
 		// the Active Cards modal lists, so the counter can never disagree with what the button opens.
 		int activeCardCount = (deckState?.StatusCardIds.Count ?? 0) + (deckState?.ResponseCardIds.Count ?? 0);
-		PlayedCardNumber.Text = activeCardCount.ToString();
+		TableButton.Text = activeCardCount.ToString();
 	}
 
 	private void SetUnitCount(Label label, int count)
@@ -279,42 +301,6 @@ public partial class FactionInfoRow : Control
 			1 => Colors.Orange,
 			_ => Colors.White
 		};
-	}
-
-	private void ToggleDetails()
-	{
-		DetailPanel.Visible = !DetailPanel.Visible;
-		if (DetailPanel.Visible)
-		{            
-			LoadVPDetails();            
-		}
-	}
-
-	private void LoadVPDetails()
-	{
-		TurnSummariesRichText.Text = string.Empty;
-		var textRows = new List<string>();
-		// This faction's summaries, then those of the minor factions it acts for, whose points the row's
-		// score includes. Within a round they keep that order, so the patron's own lines come first.
-		var vpSummaries = _minors.Prepend(Faction)
-			.SelectMany(faction => GameFlow.Instance.VictoryPointSummaries.GetValueOrDefault(faction, new List<VPTurnSummary>()));
-
-		// Grouped by round, not by turn: a faction can pick up points outside its own turn (a card
-		// scoring on a reaction, or the empty-deck discard penalty during the attacker's turn), so
-		// one round can hold several summaries. Rounds are what the end-of-game screen reports too.
-		foreach (IGrouping<int, VPTurnSummary> round in vpSummaries.GroupBy(s => s.Round).OrderBy(g => g.Key))
-		{
-			textRows.Add($"Round {round.Key} — {round.Sum(s => s.TotalScore)} VP");
-			foreach (VPTurnSummary summary in round)
-			{
-				// "(France)" on a minor faction's lines, so the row says whose points they are.
-				string whose = summary.Faction == Faction ? string.Empty : $" ({summary.Faction.Label()})";
-				foreach (VPEntry victoryPointEntry in summary.victoryPointEntries)
-					textRows.Add(victoryPointEntry.Description + whose);
-			}
-		}
-
-		TurnSummariesRichText.Text = string.Join("\n", textRows);
 	}
 
 	/// <summary>Counters built in code rather than in the scene: the Air Force one and the minor-faction tabs'.</summary>
@@ -361,7 +347,7 @@ public partial class FactionInfoRow : Control
 	private bool IsShownHere(Faction faction) => faction == Faction || _minors.Contains(faction);
 
 	/// <summary>The row's headline score: this faction's points plus those of the minor factions it acts for.</summary>
-	private int CombinedScore => FactionState.Score + _minors.Sum(minor => FactionState.ForEnum(minor)?.Score ?? 0);
+	private int CombinedScore => VPHistory.CombinedScore(Faction);
 
 	/// <summary>
 	/// One tab per minor faction, hung under the row: its army (and navy and air, if it has any) pieces in reserve,
@@ -398,10 +384,8 @@ public partial class FactionInfoRow : Control
 				AddCounter(cells, minor, UnitType.AIR_FORCE, data.FactionColor);
 		}
 
-		// What hangs below the row moves down with it, so the VP popup and the card-delta animation do
-		// not cover the tabs.
+		// The card-delta animation hangs below the row, so it moves down past the tabs.
 		float tabsHeight = _minors.Count * MinorTabHeight;
-		DetailPanel.OffsetTop += tabsHeight;
 		CardsAnimationControl.Position += new Vector2(0, tabsHeight);
 	}
 
@@ -433,5 +417,5 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>Where the Active Cards button sits on screen, for a card shown going onto the table.</summary>
-	public Rect2 ActiveCardsButtonRect => PlayedCardsButton.GetGlobalRect();
+	public Rect2 ActiveCardsButtonRect => TableButton.GetGlobalRect();
 }
