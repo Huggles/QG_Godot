@@ -37,9 +37,9 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_ff84v")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 350)
 layout_mode = 0
-offset_left = 110.0
+offset_left = 290.0
 offset_top = 190.0
-offset_right = 360.0
+offset_right = 540.0
 offset_bottom = 540.0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_xs7nf")
 
