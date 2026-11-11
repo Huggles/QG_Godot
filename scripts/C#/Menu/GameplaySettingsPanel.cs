@@ -22,6 +22,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
     private CheckButton  _autoDismiss;
     private CheckButton  _activeCards;
     private CheckButton  _reactionPrompts;
+    private CheckButton  _pennantsOpen;
     private OptionButton _chatHide;
     private OptionButton _modalCardSize;
 
@@ -34,6 +35,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _autoDismiss = GetNode<CheckButton>("%AutoDismissToggle");
         _activeCards = GetNode<CheckButton>("%ActiveCardsToggle");
         _reactionPrompts = GetNode<CheckButton>("%ReactionPromptsToggle");
+        _pennantsOpen = GetNode<CheckButton>("%PennantsOpenToggle");
         _chatHide    = GetNode<OptionButton>("%ChatHideOption");
         _modalCardSize = GetNode<OptionButton>("%ModalCardSizeOption");
 
@@ -50,6 +52,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _autoDismiss.ButtonPressed = settings.AutoDismissModal;
         _activeCards.ButtonPressed = settings.ShowActiveCardsInFan;
         _reactionPrompts.ButtonPressed = settings.AskOnlyWhenICanReact;
+        _pennantsOpen.ButtonPressed = settings.FactionPennantsOpen;
         // Ids are the seconds themselves (0, 5, 10), so this one is looked up by id, not by row.
         _chatHide.Selected         = _chatHide.GetItemIndex(settings.ChatHideSeconds);
         // Ids are the percentages themselves, looked up by id like the chat timer.
@@ -70,6 +73,12 @@ public partial class GameplaySettingsPanel : VBoxContainer
         // The starting point of every faction's reaction toggle; a choice already made in a game stands.
         _reactionPrompts.Toggled += value =>
             GameSettings.Instance.SetAskOnlyWhenICanReact(value);
+        // Changed mid-game, it opens or closes every banner at once; a click still flips any one.
+        _pennantsOpen.Toggled += value =>
+        {
+            GameSettings.Instance.SetFactionPennantsOpen(value);
+            FactionsContainer.Current?.SetAllOpen(value);
+        };
         _activeCards.Toggled += value =>
         {
             GameSettings.Instance.SetShowActiveCardsInFan(value);

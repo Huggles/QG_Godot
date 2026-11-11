@@ -96,6 +96,13 @@ public partial class FactionsContainer : Control
         Pole.Size = Pole.Size with { Y = rowHeight + 16f };
     }
 
+    /// <summary>Opens or closes every pennant at once, when the Open Faction Banners setting changes mid-game.</summary>
+    public void SetAllOpen(bool open)
+    {
+        foreach (FactionInfoRow row in FactionInfoNodes.Values)
+            if (IsInstanceValid(row)) row.SetOpen(open);
+    }
+
     public FactionInfoRow GetFactionInfoNodeForFaction(Faction faction)
     {
         return FactionInfoNodes[faction];

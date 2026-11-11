@@ -200,7 +200,9 @@ public partial class FactionInfoRow : Control
 		ApplyInk();
 		// A row whose minor factions print more than the base tail holds slides out further.
 		_fullTail = Mathf.Max(MinTail, StatsInset + Stats.GetCombinedMinimumSize().X + Notch + 10f);
-		Tail = Stub;
+		// Starts where the Open Faction Banners setting says, without sliding there on load.
+		_pinned = GameSettings.Instance.FactionPennantsOpen;
+		Tail = _pinned ? _fullTail : Stub;
 
 		RefreshScore();
 		SetUnitCounts();
@@ -274,6 +276,9 @@ public partial class FactionInfoRow : Control
 
 	/// <summary>A click anywhere on the pennant toggles whether its tail stays slid out.</summary>
 	private void OnFactionInfoButtonPressed() => _pinned = !_pinned;
+
+	/// <summary>Slides the tail open or closed, as the Open Faction Banners setting does to every pennant.</summary>
+	public void SetOpen(bool open) => _pinned = open;
 
 	private void OnPlayedCardsButtonPressed()
 	{

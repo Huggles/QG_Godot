@@ -48,6 +48,9 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// </summary>
     public bool AskOnlyWhenICanReact { get; private set; } = true;
 
+    /// <summary>Whether the faction pennants start slid open, showing their cards and pieces. Each still opens and closes on a click.</summary>
+    public bool FactionPennantsOpen { get; private set; } = false;
+
     /// <summary>Seconds the chat stays up after a player message or the mouse leaving; 0 never hides it.</summary>
     public int ChatHideSeconds { get; private set; } = 5;
 
@@ -187,6 +190,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void SetAutoDismissModal(bool value)        { AutoDismissModal  = value; Save(); }
     public void SetShowActiveCardsInFan(bool value)    { ShowActiveCardsInFan = value; Save(); }
     public void SetAskOnlyWhenICanReact(bool value)    { AskOnlyWhenICanReact = value; Save(); }
+    public void SetFactionPennantsOpen(bool value)     { FactionPennantsOpen = value; Save(); }
     public void SetChatHideSeconds(int seconds)        { ChatHideSeconds = ValidChatHide(seconds); Save(); }
 
     /// <summary>A hand-edited settings.cfg must not leave the chat with a timer the picker cannot show.</summary>
@@ -284,6 +288,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             AutoDismissModal  = config.GetValue(Section, "auto_dismiss_modal", true).As<bool>();
             ShowActiveCardsInFan = config.GetValue(Section, "show_active_cards_in_fan", true).As<bool>();
             AskOnlyWhenICanReact = config.GetValue(Section, "ask_only_when_i_can_react", true).As<bool>();
+            FactionPennantsOpen  = config.GetValue(Section, "faction_pennants_open", false).As<bool>();
             ChatHideSeconds   = ValidChatHide(config.GetValue(Section, "chat_hide_seconds", 5).As<int>());
             ModalCardPercent  = ValidModalCardPercent(config.GetValue(Section, "modal_card_percent", 100).As<int>());
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
@@ -354,6 +359,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "auto_dismiss_modal",    AutoDismissModal);
         config.SetValue(Section, "show_active_cards_in_fan", ShowActiveCardsInFan);
         config.SetValue(Section, "ask_only_when_i_can_react", AskOnlyWhenICanReact);
+        config.SetValue(Section, "faction_pennants_open", FactionPennantsOpen);
         config.SetValue(Section, "chat_hide_seconds",     ChatHideSeconds);
         config.SetValue(Section, "modal_card_percent",    ModalCardPercent);
         config.SetValue(Section, "last_join_ip",          LastJoinIp);
