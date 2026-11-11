@@ -11,6 +11,7 @@ public partial class MiniMenu : Control
 	public MarginTextureButton VisibilityButton => GetNode<MarginTextureButton>("%VisibilityButton");
 	public MarginTextureButton ActiveInputRequestButton => GetNode<MarginTextureButton>("%ActiveInputRequestButton");
 	public MarginTextureButton DeckCompositionButton => GetNode<MarginTextureButton>("%DeckCompositionButton");
+	public MarginTextureButton ScoreHistoryButton => GetNode<MarginTextureButton>("%ScoreHistoryButton");
 	public DeckCompositionPanel DeckCompositionPanel => GetNode<DeckCompositionPanel>("%DeckCompositionPanel");
 	public PanelContainer MiniMenuModal => GetNode<PanelContainer>("%MiniMenuModal");
 
@@ -49,6 +50,8 @@ public partial class MiniMenu : Control
 		// On the inner button: it stops the mouse, so a tooltip on the margin around it would never show.
 		DeckCompositionButton.TextureButton.TooltipText = "Cards in each deck at the start of the game";
 		DeckCompositionButton.TextureButton.Pressed += DeckCompositionPanel.Toggle;
+		ScoreHistoryButton.TextureButton.TooltipText = "Score history";
+		ScoreHistoryButton.TextureButton.Pressed += OnScoreHistoryButtonPressed;
 
 		ToggleCountryLabelsButton.ButtonPressed = GameSettings.ShowCountryLabels;
 		ToggleCountryLabelsButton.Pressed += () => {
@@ -242,6 +245,14 @@ public partial class MiniMenu : Control
 
 		FactionHandDisplay.Current.Hide();
 		ModalStack.Current?.Recall();
+	}
+
+	/// <summary>Opens the score history on the local player's first faction, or whoever is on turn.</summary>
+	private void OnScoreHistoryButtonPressed()
+	{
+		Faction faction = PlayerFactionRegistry.GetLocalPlayerFactions().FirstOrDefault(Faction.NONE);
+		if (faction == Faction.NONE) faction = GameFlow.Instance?.CurrentFaction ?? StaticGameData.PlayableFactions.FirstOrDefault();
+		ScoreHistoryDialog.Open(GetTree().CurrentScene, faction);
 	}
 
 	private void OnActiveInputRequestButtonPressed()

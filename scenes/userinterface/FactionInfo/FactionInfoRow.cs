@@ -5,9 +5,9 @@ using System.Linq;
 /// <summary>
 /// One faction in the flagpole column on the left: a pennant with the flag at the hoist and the score
 /// on it, and a tail in the faction's colour tucked behind the flag. Hovering slides the tail out to
-/// show cards in hand, deck and on the table, and pieces in reserve; clicking the tail keeps it out
-/// until the next click, and clicking the flag opens the score history. The faction whose turn it is
-/// flies hardest.
+/// show cards in hand, deck and on the table, and pieces in reserve; clicking the pennant keeps it out
+/// until the next click. The score history lives on the top-left toolbar. The faction whose turn it
+/// is flies hardest.
 /// </summary>
 public partial class FactionInfoRow : Control
 {
@@ -173,7 +173,7 @@ public partial class FactionInfoRow : Control
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 
-		FactionInfoButton.TooltipText = $"Flag: {data.FactionAdjactiveLabel} score history\nBanner: click to keep it open";
+		FactionInfoButton.TooltipText = $"{data.Label}\nClick to keep it open";
 		HandButton.TooltipText = "Cards in hand";
 		DeckButton.TooltipText = "Cards left in the draw deck\nClick to see the discard pile";
 		TableButton.TooltipText = "Status and response cards on the table\nClick to see them";
@@ -271,14 +271,8 @@ public partial class FactionInfoRow : Control
 	/// <summary>The one turn-boundary signal that reaches a client after a save restore.</summary>
 	private void OnNextStepStarted(int turnStep) => SetModulation();
 
-	/// <summary>The flag opens the score history; the tail toggles whether it stays slid out.</summary>
-	private void OnFactionInfoButtonPressed()
-	{
-		if (FactionInfoButton.GetLocalMousePosition().X < Head)
-			ScoreHistoryDialog.Open(GetTree().CurrentScene, Faction);
-		else
-			_pinned = !_pinned;
-	}
+	/// <summary>A click anywhere on the pennant toggles whether its tail stays slid out.</summary>
+	private void OnFactionInfoButtonPressed() => _pinned = !_pinned;
 
 	private void OnPlayedCardsButtonPressed()
 	{

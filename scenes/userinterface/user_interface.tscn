@@ -31,6 +31,7 @@
 [ext_resource type="Script" path="res://scenes/userinterface/Connection/PauseInputBlocker.cs" id="34_blocker"]
 [ext_resource type="Texture2D" uid="uid://deodddhcuupnq" path="res://assets/textures/Other/Icons/DeckIcon.png" id="35_deckicon"]
 [ext_resource type="PackedScene" path="res://scenes/userinterface/DeckComposition/DeckCompositionPanel.tscn" id="36_deckcomp"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/ScoreHistoryIcon.svg" id="37_scorehist"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_skipbtn"]
 font_size = 13
@@ -390,6 +391,12 @@ unique_name_in_owner = true
 layout_mode = 2
 TextureNormal = ExtResource("35_deckicon")
 TexturePressed = ExtResource("35_deckicon")
+
+[node name="ScoreHistoryButton" parent="MiniMenu/MiniMenuContainer/MiniMenuHBox" unique_id=628711105 instance=ExtResource("22_x2nnb")]
+unique_name_in_owner = true
+layout_mode = 2
+TextureNormal = ExtResource("37_scorehist")
+TexturePressed = ExtResource("37_scorehist")
 
 [node name="GameMenuTrigger" type="Node" parent="." unique_id=804170072]
 script = ExtResource("27_gamemenu")
