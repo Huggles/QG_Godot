@@ -310,7 +310,7 @@ public partial class FactionInfoRow : Control
 
 	/// <summary>
 	/// Local factions at full strength, others a little dimmed, more so off their turn. The active
-	/// faction's pennant flies hard and its trim glints; the rest barely stir.
+	/// faction's pennant flies hard; the rest barely stir.
 	/// </summary>
 	private void SetModulation()
 	{
@@ -323,7 +323,6 @@ public partial class FactionInfoRow : Control
 		Modulate = new Color(level, level, level, 1f);
 
 		bool active = IsActive;
-		_cloth.SetShaderParameter("active", active ? 1f : 0f);
 		_cloth.SetShaderParameter("sway", active ? 4f : 1.2f);
 		_cloth.SetShaderParameter("speed", active ? 2.6f : 1.2f);
 	}
