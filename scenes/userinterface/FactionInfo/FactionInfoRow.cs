@@ -4,10 +4,10 @@ using System.Linq;
 
 /// <summary>
 /// One faction in the flagpole column on the left: a pennant with the flag at the hoist and the score
-/// on it, and a tail in the faction's colour tucked behind the flag. Hovering slides the tail out to
-/// show cards in hand, deck and on the table, and pieces in reserve; clicking the pennant keeps it out
-/// until the next click. The score history lives on the top-left toolbar. The faction whose turn it
-/// is flies hardest.
+/// on it, and a tail in the faction's colour tucked behind the flag. Clicking the pennant slides the
+/// tail out to show cards in hand, deck and on the table, and pieces in reserve, and the next click
+/// tucks it away. The score history lives on the top-left toolbar. The faction whose turn it is flies
+/// hardest.
 /// </summary>
 public partial class FactionInfoRow : Control
 {
@@ -39,7 +39,7 @@ public partial class FactionInfoRow : Control
 	/// <summary>The tail slid out; it is never shorter than the counts printed on it need.</summary>
 	private const float MinTail = 130f;
 	/// <summary>How much tail shows past the flag while it is tucked away.</summary>
-	private const float Stub = 10f;
+	private const float Stub = 20f;
 	/// <summary>How quickly the tail slides toward its target; higher is snappier.</summary>
 	private const float SlideRate = 14f;
 	private const float Notch = 18f;
@@ -98,8 +98,9 @@ public partial class FactionInfoRow : Control
 	private const float StatsInset = 10f;
 
 	/// <summary>
-	/// Slides the tail toward out (hovered or pinned) or tucked. Hover is tested against the pennant's
-	/// own rect, not the button's enter/exit: the counts are buttons on top of it and would read as leaving.
+	/// Slides the tail out while pinned open, tucked otherwise; hover only brightens the cloth to show it
+	/// is clickable. Hover is tested against the pennant's own rect, not the button's enter/exit: the
+	/// counts are buttons on top of it and would read as leaving.
 	/// </summary>
 	public override void _Process(double delta)
 	{
@@ -111,7 +112,7 @@ public partial class FactionInfoRow : Control
 			_cloth.SetShaderParameter("hover", hovered ? 1f : 0f);
 		}
 
-		float target = hovered || _pinned ? _fullTail : Stub;
+		float target = _pinned ? _fullTail : Stub;
 		if (Mathf.IsEqualApprox(_tail, target)) return;
 		float next = Mathf.Lerp(_tail, target, 1f - Mathf.Exp(-SlideRate * (float)delta));
 		Tail = Mathf.Abs(next - target) < 0.5f ? target : next;
@@ -173,7 +174,7 @@ public partial class FactionInfoRow : Control
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 
-		FactionInfoButton.TooltipText = $"{data.Label}\nClick to keep it open";
+		FactionInfoButton.TooltipText = $"{data.Label}\nClick to show or hide cards and pieces";
 		HandButton.TooltipText = "Cards in hand";
 		DeckButton.TooltipText = "Cards left in the draw deck\nClick to see the discard pile";
 		TableButton.TooltipText = "Status and response cards on the table\nClick to see them";
