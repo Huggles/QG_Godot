@@ -69,7 +69,16 @@ label_settings = SubResource("LabelSettings_score")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Stats" type="VBoxContainer" parent="." unique_id=1366202006]
+[node name="TailClip" type="Control" parent="." unique_id=1366204001]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 0
+offset_left = 104.0
+offset_right = 114.0
+offset_bottom = 52.0
+mouse_filter = 2
+
+[node name="Stats" type="VBoxContainer" parent="TailClip" unique_id=1366202006]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 90.0
@@ -80,12 +89,12 @@ mouse_filter = 2
 theme_override_constants/separation = 2
 alignment = 1
 
-[node name="Cards" type="HBoxContainer" parent="Stats" unique_id=1366202009]
+[node name="Cards" type="HBoxContainer" parent="TailClip/Stats" unique_id=1366202009]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 9
 
-[node name="HandButton" type="Button" parent="Stats/Cards" unique_id=1366201004]
+[node name="HandButton" type="Button" parent="TailClip/Stats/Cards" unique_id=1366201004]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 21)
 layout_mode = 2
@@ -101,7 +110,7 @@ theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
 text = "7"
 icon = ExtResource("3_hand")
 
-[node name="DeckButton" type="Button" parent="Stats/Cards" unique_id=1698971982]
+[node name="DeckButton" type="Button" parent="TailClip/Stats/Cards" unique_id=1698971982]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 21)
 layout_mode = 2
@@ -118,7 +127,7 @@ theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
 text = "33"
 icon = ExtResource("4_deck")
 
-[node name="TableButton" type="Button" parent="Stats/Cards" unique_id=1709253810]
+[node name="TableButton" type="Button" parent="TailClip/Stats/Cards" unique_id=1709253810]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 21)
 layout_mode = 2
@@ -135,19 +144,19 @@ theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
 text = "0"
 icon = ExtResource("5_table")
 
-[node name="Pieces" type="HBoxContainer" parent="Stats" unique_id=1366202010]
+[node name="Pieces" type="HBoxContainer" parent="TailClip/Stats" unique_id=1366202010]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 9
 
-[node name="ArmyCell" type="HBoxContainer" parent="Stats/Pieces" unique_id=1151390211]
+[node name="ArmyCell" type="HBoxContainer" parent="TailClip/Stats/Pieces" unique_id=1151390211]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 1
 theme_override_constants/separation = 2
 
-[node name="ArmyIcon" type="TextureRect" parent="Stats/Pieces/ArmyCell" unique_id=1898280267]
+[node name="ArmyIcon" type="TextureRect" parent="TailClip/Stats/Pieces/ArmyCell" unique_id=1898280267]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(24, 19)
 layout_mode = 2
@@ -156,20 +165,20 @@ texture = ExtResource("9_army")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ArmyCountLabel" type="Label" parent="Stats/Pieces/ArmyCell" unique_id=1033955341]
+[node name="ArmyCountLabel" type="Label" parent="TailClip/Stats/Pieces/ArmyCell" unique_id=1033955341]
 unique_name_in_owner = true
 layout_mode = 2
 text = "10"
 label_settings = SubResource("LabelSettings_stat")
 vertical_alignment = 1
 
-[node name="NavyCell" type="HBoxContainer" parent="Stats/Pieces" unique_id=1041305104]
+[node name="NavyCell" type="HBoxContainer" parent="TailClip/Stats/Pieces" unique_id=1041305104]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 1
 theme_override_constants/separation = 2
 
-[node name="NavyIcon" type="TextureRect" parent="Stats/Pieces/NavyCell" unique_id=1397946510]
+[node name="NavyIcon" type="TextureRect" parent="TailClip/Stats/Pieces/NavyCell" unique_id=1397946510]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(24, 19)
 layout_mode = 2
@@ -178,7 +187,7 @@ texture = ExtResource("10_navy")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NavyCountLabel" type="Label" parent="Stats/Pieces/NavyCell" unique_id=633649371]
+[node name="NavyCountLabel" type="Label" parent="TailClip/Stats/Pieces/NavyCell" unique_id=633649371]
 unique_name_in_owner = true
 layout_mode = 2
 text = "10"

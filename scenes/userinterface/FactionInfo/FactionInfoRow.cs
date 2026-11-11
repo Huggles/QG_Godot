@@ -4,9 +4,10 @@ using System.Linq;
 
 /// <summary>
 /// One faction in the flagpole column on the left: a pennant with the flag at the hoist and the score
-/// on it, and a tail in the faction's colour that flies further out the more points the faction has,
-/// so the column itself is the score race. Cards in hand, deck and on the table, and pieces in reserve,
-/// are printed along the tail. The faction whose turn it is flies hardest. Click for score history.
+/// on it, and a tail in the faction's colour tucked behind the flag. Hovering slides the tail out to
+/// show cards in hand, deck and on the table, and pieces in reserve; clicking the tail keeps it out
+/// until the next click, and clicking the flag opens the score history. The faction whose turn it is
+/// flies hardest.
 /// </summary>
 public partial class FactionInfoRow : Control
 {
@@ -18,6 +19,7 @@ public partial class FactionInfoRow : Control
 	private ColorRect Cloth => GetNode<ColorRect>("%Cloth");
 	private Label ScoreLabel => GetNode<Label>("%ScoreLabel");
 	private Button FactionInfoButton => GetNode<Button>("%FactionInfoButton");
+	private Control TailClip => GetNode<Control>("%TailClip");
 	private VBoxContainer Stats => GetNode<VBoxContainer>("%Stats");
 	private HBoxContainer Pieces => GetNode<HBoxContainer>("%Pieces");
 	private Button HandButton => GetNode<Button>("%HandButton");
@@ -34,24 +36,30 @@ public partial class FactionInfoRow : Control
 
 	/// <summary>Width of the flag at the hoist: the pennant's height at the flag's own aspect, so the whole flag shows.</summary>
 	private float Head = 104f;
-	/// <summary>Tail at zero points; it is never shorter than the counts printed on it need.</summary>
+	/// <summary>The tail slid out; it is never shorter than the counts printed on it need.</summary>
 	private const float MinTail = 130f;
-	/// <summary>Extra tail per point, and the most it adds, so a runaway leader never spans the map.</summary>
-	private const float TailPerPoint = 3f;
-	private const float MaxExtra = 150f;
+	/// <summary>How much tail shows past the flag while it is tucked away.</summary>
+	private const float Stub = 10f;
+	/// <summary>How quickly the tail slides toward its target; higher is snappier.</summary>
+	private const float SlideRate = 14f;
 	private const float Notch = 18f;
 	/// <summary>The pennant's height at rest, and the headroom its cloth gets for the ripple.</summary>
 	private const float Height = 52f;
 	private const float RippleMargin = 8f;
 
 	private ShaderMaterial _cloth;
-	private float _minTail = MinTail;
-	private float _tail = MinTail;
-	private Tween _tailTween;
+	private float _fullTail = MinTail;
+	private float _tail = Stub;
+	/// <summary>Clicked open: the tail stays out until the next click on it.</summary>
+	private bool _pinned;
+	private bool _hovered;
 	private int _shownScore = int.MinValue;
-	private Color _ink = Colors.White;
+	private static readonly Color Ink = Colors.White;
 
-	/// <summary>Length of the tail after the flag; setting it re-lays the cloth and the click area.</summary>
+	/// <summary>
+	/// How much of the tail shows past the flag. The rest is slid behind the flag: the counts move with
+	/// the cloth and are clipped at the seam, and the swallowtail stays at the visible end.
+	/// </summary>
 	public float Tail
 	{
 		get => _tail;
@@ -63,8 +71,50 @@ public partial class FactionInfoRow : Control
 			Cloth.Position = new Vector2(0, -RippleMargin);
 			Cloth.Size = size + new Vector2(RippleMargin, 2 * RippleMargin);
 			_cloth.SetShaderParameter("size", size);
+			// A stub shorter than the swallowtail would cut into the flag.
+			_cloth.SetShaderParameter("notch", Mathf.Min(Notch, _tail));
 			FactionInfoButton.Size = size;
+			TailClip.Size = new Vector2(_tail, Height);
+			Stats.Position = Stats.Position with { X = StatsInset - (_fullTail - _tail) };
+			SetStatsInteractive(_tail >= _fullTail - 1f);
 		}
+	}
+
+	private bool _statsInteractive = true;
+
+	/// <summary>
+	/// The counts take the mouse only once the tail is fully out. Half slid, they sit under the stub
+	/// and the flag's edge, and would swallow a click meant to pin the tail.
+	/// </summary>
+	private void SetStatsInteractive(bool interactive)
+	{
+		if (interactive == _statsInteractive) return;
+		_statsInteractive = interactive;
+		foreach (Control count in Stats.GetChildren().OfType<Container>().SelectMany(line => line.GetChildren().OfType<Control>()))
+			count.MouseFilter = !interactive ? MouseFilterEnum.Ignore : count is Button ? MouseFilterEnum.Stop : MouseFilterEnum.Pass;
+	}
+
+	/// <summary>Where the counts sit on the tail when it is fully out.</summary>
+	private const float StatsInset = 10f;
+
+	/// <summary>
+	/// Slides the tail toward out (hovered or pinned) or tucked. Hover is tested against the pennant's
+	/// own rect, not the button's enter/exit: the counts are buttons on top of it and would read as leaving.
+	/// </summary>
+	public override void _Process(double delta)
+	{
+		Vector2 mouse = GetLocalMousePosition();
+		bool hovered = new Rect2(0, 0, Head + _tail, Height).HasPoint(mouse);
+		if (hovered != _hovered)
+		{
+			_hovered = hovered;
+			_cloth.SetShaderParameter("hover", hovered ? 1f : 0f);
+		}
+
+		float target = hovered || _pinned ? _fullTail : Stub;
+		if (Mathf.IsEqualApprox(_tail, target)) return;
+		float next = Mathf.Lerp(_tail, target, 1f - Mathf.Exp(-SlideRate * (float)delta));
+		Tail = Mathf.Abs(next - target) < 0.5f ? target : next;
 	}
 
 	public override void _Ready()
@@ -111,7 +161,7 @@ public partial class FactionInfoRow : Control
 		float aspect = (float)flag.GetWidth() / flag.GetHeight();
 		Head = Mathf.Round(Height * aspect);
 		ScoreLabel.Size = new Vector2(Head, Height);
-		Stats.Position = Stats.Position with { X = Head + 10f };
+		TailClip.Position = new Vector2(Head, 0);
 		_cloth = new ShaderMaterial { Shader = ClothShader };
 		_cloth.SetShaderParameter("flag", flag);
 		_cloth.SetShaderParameter("tail_color", factionColor);
@@ -123,9 +173,7 @@ public partial class FactionInfoRow : Control
 
 		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
 
-		FactionInfoButton.TooltipText = $"{data.FactionAdjactiveLabel} score history";
-		FactionInfoButton.MouseEntered += () => _cloth.SetShaderParameter("hover", 1f);
-		FactionInfoButton.MouseExited += () => _cloth.SetShaderParameter("hover", 0f);
+		FactionInfoButton.TooltipText = $"Flag: {data.FactionAdjactiveLabel} score history\nBanner: click to keep it open";
 		HandButton.TooltipText = "Cards in hand";
 		DeckButton.TooltipText = "Cards left in the draw deck\nClick to see the discard pile";
 		TableButton.TooltipText = "Status and response cards on the table\nClick to see them";
@@ -148,10 +196,10 @@ public partial class FactionInfoRow : Control
 			if (minorData.NumberOfAirUnits > 0) AddCounter(minor, UnitType.AIR_FORCE, minorData.FactionColor);
 		}
 
-		ApplyInk(factionColor);
-		// A row whose minor factions print more than the base tail holds gets a longer baseline.
-		_minTail = Mathf.Max(MinTail, Stats.Position.X - Head + Stats.GetCombinedMinimumSize().X + Notch + 10f);
-		Tail = _minTail;
+		ApplyInk();
+		// A row whose minor factions print more than the base tail holds slides out further.
+		_fullTail = Mathf.Max(MinTail, StatsInset + Stats.GetCombinedMinimumSize().X + Notch + 10f);
+		Tail = Stub;
 
 		RefreshScore();
 		SetUnitCounts();
@@ -177,35 +225,24 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>
-	/// Counts are printed straight onto the tail: white with a black edge on a dark tail, near-black on a
-	/// pale one (Japan's), so they read without a plate behind them. Unit icons take the same ink.
+	/// Counts are printed straight onto the tail in white with a black edge, on every faction's colour
+	/// alike, so they read without a plate behind them. Clickable counts turn brass under the mouse.
 	/// </summary>
-	private void ApplyInk(Color tail)
+	private void ApplyInk()
 	{
-		bool pale = tail.Luminance > 0.55f;
-		_ink = pale ? new Color(0.1f, 0.09f, 0.08f) : Colors.White;
-		Color edge = pale ? new Color(1, 1, 1, 0.6f) : Colors.Black;
-		Color hover = pale ? new Color(0.45f, 0.3f, 0.05f) : new Color(0.961f, 0.851f, 0.541f);
-
+		Color hover = new(0.961f, 0.851f, 0.541f);
 		foreach (Button button in new[] { HandButton, DeckButton, TableButton })
 		{
-			button.AddThemeColorOverride("font_color", _ink);
-			button.AddThemeColorOverride("font_pressed_color", _ink);
-			button.AddThemeColorOverride("font_hover_color", button == HandButton ? _ink : hover);
-			button.AddThemeColorOverride("icon_normal_color", _ink == Colors.White ? Colors.White : _ink);
-			button.AddThemeColorOverride("icon_hover_color", button == HandButton ? _ink : hover);
+			button.AddThemeColorOverride("font_color", Ink);
+			button.AddThemeColorOverride("font_pressed_color", Ink);
+			button.AddThemeColorOverride("font_hover_color", button == HandButton ? Ink : hover);
+			button.AddThemeColorOverride("icon_normal_color", Ink);
+			button.AddThemeColorOverride("icon_hover_color", button == HandButton ? Ink : hover);
 			button.AddThemeColorOverride("icon_pressed_color", hover);
-			button.AddThemeColorOverride("font_outline_color", edge);
 		}
-		ArmyIcon.SelfModulate = _ink;
-		NavyIcon.SelfModulate = _ink;
-		foreach ((TextureRect icon, Label label, Faction faction, UnitType type) in _untinted)
-		{
-			icon.SelfModulate = _ink;
-			_builtCountLabels[(faction, type)] = (label, _ink);
-		}
-		foreach (Label label in _builtCountLabels.Values.Select(v => v.Item1).Append(ArmyCountLabel).Append(NavyCountLabel))
-			label.LabelSettings.OutlineColor = edge;
+		ArmyIcon.SelfModulate = Ink;
+		NavyIcon.SelfModulate = Ink;
+		foreach (TextureRect icon in _untinted) icon.SelfModulate = Ink;
 	}
 
 	// ── Event handlers ───────────────────────────────────────────────────────
@@ -234,7 +271,14 @@ public partial class FactionInfoRow : Control
 	/// <summary>The one turn-boundary signal that reaches a client after a save restore.</summary>
 	private void OnNextStepStarted(int turnStep) => SetModulation();
 
-	private void OnFactionInfoButtonPressed() => ScoreHistoryDialog.Open(GetTree().CurrentScene, Faction);
+	/// <summary>The flag opens the score history; the tail toggles whether it stays slid out.</summary>
+	private void OnFactionInfoButtonPressed()
+	{
+		if (FactionInfoButton.GetLocalMousePosition().X < Head)
+			ScoreHistoryDialog.Open(GetTree().CurrentScene, Faction);
+		else
+			_pinned = !_pinned;
+	}
 
 	private void OnPlayedCardsButtonPressed()
 	{
@@ -284,10 +328,7 @@ public partial class FactionInfoRow : Control
 		_cloth.SetShaderParameter("speed", active ? 2.6f : 1.2f);
 	}
 
-	/// <summary>
-	/// The score on the flag and the pennant's length. A change lets the tail fly out to its new length
-	/// with a little overshoot, punches the number, and floats the gain off the fly end.
-	/// </summary>
+	/// <summary>The score on the flag. A change punches the number and floats the gain off the pennant's end.</summary>
 	private void RefreshScore()
 	{
 		int score = CombinedScore;
@@ -295,24 +336,13 @@ public partial class FactionInfoRow : Control
 		int gained = _shownScore == int.MinValue ? 0 : score - _shownScore;
 		_shownScore = score;
 		ScoreLabel.Text = score.ToString();
-
-		float target = _minTail + Mathf.Clamp(score * TailPerPoint, 0f, MaxExtra);
-		_tailTween?.Kill();
-		if (gained == 0 || !IsInsideTree())
-		{
-			Tail = target;
-			return;
-		}
-
-		_tailTween = CreateTween();
-		_tailTween.TweenProperty(this, PropertyName.Tail.ToString(), target, 0.9f)
-			.SetTrans(Tween.TransitionType.Elastic).SetEase(Tween.EaseType.Out);
+		if (gained == 0 || !IsInsideTree()) return;
 
 		Tween punch = CreateTween();
 		punch.TweenProperty(ScoreLabel.LabelSettings, "font_size", 46, GameSettings.DurationShortSeconds);
 		punch.TweenProperty(ScoreLabel.LabelSettings, "font_size", 32, GameSettings.DurationShortSeconds);
 
-		FloatGain(gained, Head + target);
+		FloatGain(gained, Head + _tail);
 	}
 
 	/// <summary>A gold "+N" that drifts off the fly end and fades.</summary>
@@ -337,8 +367,8 @@ public partial class FactionInfoRow : Control
 	/// <summary>Repaints the pool counters: how many pieces of each type the faction has left to play.</summary>
 	private void SetUnitCounts()
 	{
-		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY), _ink);
-		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY), _ink);
+		SetUnitCount(ArmyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.ARMY), Ink);
+		SetUnitCount(NavyCountLabel, UnitPool.AvailableUnitCount(Faction, UnitType.NAVY), Ink);
 		foreach (((Faction faction, UnitType type), (Label label, Color ink)) in _builtCountLabels)
 			SetUnitCount(label, UnitPool.AvailableUnitCount(faction, type), ink);
 	}
@@ -412,14 +442,13 @@ public partial class FactionInfoRow : Control
 		Label label = cell.GetNode<Label>("ArmyCountLabel");
 		label.UniqueNameInOwner = false;
 		label.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
-		// An untinted counter takes the pennant's ink, which ApplyInk fills in once it is known.
-		_builtCountLabels[(faction, type)] = (label, tint ?? Colors.White);
+		_builtCountLabels[(faction, type)] = (label, tint ?? Ink);
 		if (tint.HasValue) icon.SelfModulate = tint.Value;
-		else _untinted.Add((icon, label, faction, type));
+		else _untinted.Add(icon);
 	}
 
-	/// <summary>Built counters that take the pennant's ink rather than a minor faction's tint.</summary>
-	private readonly List<(TextureRect, Label, Faction, UnitType)> _untinted = new();
+	/// <summary>Built counter icons that take the pennant's ink rather than a minor faction's tint.</summary>
+	private readonly List<TextureRect> _untinted = new();
 
 	public void ShowCardDelta(int delta)
 	{
