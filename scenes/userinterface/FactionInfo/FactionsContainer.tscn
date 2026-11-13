@@ -153,9 +153,9 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -55.0
-offset_top = 28.0
+offset_top = 32.0
 offset_right = 55.0
-offset_bottom = 52.0
+offset_bottom = 56.0
 grow_horizontal = 2
 
 [node name="FactionsPole" type="Control" parent="." unique_id=1366203001]

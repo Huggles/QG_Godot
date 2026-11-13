@@ -62,7 +62,7 @@
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
-      "arrow": { "x": 0.5, "y": 0.048, "rotation": 270 },
+      "arrow": { "x": 0.5, "y": 0.054, "rotation": 270 },
       "text": "The score is only judged at the [b]end of a round[/b] — after the [b]United States[/b] has finished its turn, the last of the six. Never in the middle.\n\nIf a team is [b]30 or more points ahead[/b] at that moment, the war stops there and then and that team has won. Otherwise the next round begins.\n\nThis lesson is a single round. Nobody wins today."
     },
 

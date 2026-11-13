@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-/// A small "Round N of M" plate under the turn-step strip. On the last round it reads "Last round N"
+/// A "Round N of M" pill under the turn-step strip, styled like its pills. On the last round it reads "Last round N"
 /// in amber, and the plate border turns amber too.
 ///
 /// Refreshed off the same pair as TurnFactionTint, for the same reason: both fire on every peer and
@@ -9,25 +9,20 @@ using Godot;
 /// </summary>
 public partial class RoundTrack : PanelContainer
 {
-	private RichTextLabel Heading => GetNode<RichTextLabel>("%Heading");
+	private Label Heading => GetNode<Label>("%Heading");
 
-	private const int NumberFontSize = 15;
-
-	private static readonly Color CaptionColor = new(0.74f, 0.74f, 0.74f);
-	private static readonly Color LimitColor = new(0.56f, 0.56f, 0.56f);
 	private static readonly Color AmberColor = new("#fac775");
 	private static readonly Color AmberBorderColor = new("#ef9f27");
 
 	private StyleBoxFlat _plate;
-	private Color _borderColor;
 	private (int Round, int Max)? _painted;
 
 	public override void _Ready()
 	{
-		// One HUD per PlayerScene, so the plate is duplicated before the last round tints its border.
+		// One HUD per PlayerScene, so the plate and label settings are duplicated before the last round tints them.
 		_plate = (StyleBoxFlat)GetThemeStylebox("panel").Duplicate();
 		AddThemeStyleboxOverride("panel", _plate);
-		_borderColor = _plate.BorderColor;
+		Heading.LabelSettings = (LabelSettings)Heading.LabelSettings.Duplicate();
 
 		Refresh();
 
@@ -66,11 +61,11 @@ public partial class RoundTrack : PanelContainer
 
 	private void Paint(int round, int max)
 	{
+		// Styled like a turn-step pill; the last round borrows the current step's 2px border, in amber.
 		bool last = round >= max;
-		_plate.BorderColor = last ? AmberBorderColor : _borderColor;
-		string number = $"[font_size={NumberFontSize}]{round}[/font_size]";
-		Heading.Text = last
-			? $"[center][color=#{AmberColor.ToHtml(false)}]Last round {number}[/color][/center]"
-			: $"[center][color=#{CaptionColor.ToHtml(false)}]Round[/color] {number} [color=#{LimitColor.ToHtml(false)}]of {max}[/color][/center]";
+		_plate.BorderColor = AmberBorderColor;
+		_plate.SetBorderWidthAll(last ? 2 : 0);
+		Heading.LabelSettings.FontColor = last ? AmberColor : Colors.White;
+		Heading.Text = last ? $"Last round {round}" : $"Round {round} of {max}";
 	}
 }
