@@ -322,16 +322,23 @@ Small grey `SimpleModalStyle`-type box under the toolbar, tiny white labels, tog
 
 ![View options dropdown under the toolbar](docs/style/modal-view-options.jpg)
 
+The **history detail popup** (`HistoryDetailPopup`, shown while hovering a badge in the history
+strip) uses the same grey box, scaled up: a wide dark-grey translucent panel with a thin light
+border, the event's cards laid out in a row, and the entry as one line of text underneath —
+a muted grey number, then white text (*"18. United States drew 7 card(s) from the deck"*). No
+title or close button; it disappears when the mouse leaves the badge.
+
+![History detail popup: seven drawn cards in a grey translucent panel, caption underneath](docs/style/modal-history-popup.webp)
+
 **4. Score History — already the menu style.** `ScoreHistoryDialog` is built on
 `MenuModalShell`, so it's olive glass with brass trim over a blurred map. So are the in-game
 menu (Esc) and the Connection Lost dialog. These three are the model the others could move to.
 
 ![Score history dialog in the menu style](docs/style/modal-score-history.jpg)
 
-**Not captured:** the history detail popup (hover on a history badge), the trigger-context card
-display, chat, the players panel (multiplayer only) and the commander message (tutorial). The
-history popup, players panel, chat and trigger context all use the grey `SimpleModalStyle` box; the
-*Bulletin!* card itself is a bare card face.
+**Not captured:** the trigger-context card display, chat, the players panel (multiplayer only)
+and the commander message (tutorial). The players panel, chat and trigger context use the same
+grey `SimpleModalStyle` box as the history popup; the *Bulletin!* card itself is a bare card face.
 
 **What's inconsistent today:** four frame treatments (riveted metal, flat dark, grey translucent,
 olive glass); titles above the content in some and below it in others; three different
