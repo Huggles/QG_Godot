@@ -87,7 +87,7 @@
     {
       "type": "message",
       "at": { "turn": 2, "step": "PLAY_CARD" },
-      "arrow": { "x": 0.50, "y": 0.755, "rotation": 90 },
+      "arrow": { "x": 0.55, "y": 0.755, "rotation": 90 },
       "text": "This is your [b]Play[/b] step — one card per turn, no more.\n\nYou cannot march into Western Europe from an island. Before you can touch that army, you have to reach it.\n\nPlay [b]Build Navy[/b]. The rest of your hand is greyed out for now."
     },
     {
