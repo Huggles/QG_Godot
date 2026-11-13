@@ -4,6 +4,7 @@ The visual rules every UI component should follow. Each section records a style 
 actually built, with the file that owns it, so new work can reuse it instead of re-deriving it.
 
 - [Menu style ("brass on olive")](#menu-style-brass-on-olive) — main menu, screens, dialogs
+- [In-game HUD style (current, due for a rework)](#in-game-hud-style-current-due-for-a-rework)
 
 ---
 
@@ -244,3 +245,49 @@ command list. Card inner margin 24×12 on top of the panel's 32×28 padding.
   button scenes above.
 - Root-level `MenuPanelBackground.tres`, `MenuTab*.tres` and `SimpleModalStyle.tres` predate the
   theme and are only used by the in-game UI.
+
+---
+
+## In-game HUD style (current, due for a rework)
+
+A snapshot of the HUD as of November 2026, kept brief on purpose: it's expected to change, so this
+records the starting point rather than a spec to follow.
+
+![The in-game HUD, round 1 of a skirmish](docs/style/hud-2026-11.jpg)
+
+**Overall look:** a "war room table". The map sits in a riveted, weathered olive-metal frame
+(`Board9Patch*.png`, plus the procedural `WarPanelMaterial` — dark olive base, stains, scratches,
+grain). Paper and print props sit on top: fanned cards, the *Bulletin!* card, cloth faction
+pennants, flag stamps.
+
+**What's on screen:**
+
+| Area | Element | Look today |
+|---|---|---|
+| Top left | Toolbar (eye, cards, deck, score history, faction flags) | Small white icons on a dark translucent strip |
+| Left edge | Faction pennants | Cloth flags on a pole, big white score numerals, tails tucked behind |
+| Top centre | Turn steps (1 Play · 2 Supply · 3 Victory · 4 Discard · 5 Draw) | Plain text; current step in a pill tinted with the active faction's colour |
+| Top centre | Round tracker | Small dark plate, "Round 1 of 20" |
+| Top right | Team scores | Axis/Allies flag tiles with large white numerals |
+| Top right | Input timer | "Your input" over a countdown, white on dark |
+| Right edge | Card/round strip | Column of small flag thumbnails |
+| Bottom centre | Hand | Fanned full-art cards |
+| Bottom centre | Prompt bar | Wide bar tinted in the active faction's colour, dark text: *"United Kingdom: Choose a card…"* |
+| Bottom left of prompt | Pass/skip | Small dark button, "Skip (discard 1 card)" |
+| Overlays | Modals, history popup, chat, players panel, trigger context | Grey translucent box with a grey border (`SimpleModalStyle.tres`), or the old nine-patch art frame |
+
+**Type:** no theme is set on the HUD, so text uses Godot's default sans in white or light grey,
+usually with a dark outline or shadow for legibility over the map. Map labels are a separate
+condensed face with a light outline.
+
+**Colour:** mostly neutral — dark translucent greys (`#1A1A1A` at 60–88%), white/light-grey text,
+white borders at ~25%. The strongest accent is the **active faction's colour** (`TurnFactionTint`,
+80% alpha) on the current turn step and the prompt bar. A few one-off golds and browns appear in
+single widgets.
+
+**Buttons:** the legacy `MenuPanelButton` (nine-patch art frame) and plain default-theme Buttons.
+
+**How it differs from the menu style:**
+- No shared theme, so fonts, sizes and panel styles are set widget by widget.
+- Neutral grey panels instead of olive glass; no brass accent or BrassFrame.
+- The frame and props are textured and skeuomorphic, while the menu is flat glass with a thin trim.
