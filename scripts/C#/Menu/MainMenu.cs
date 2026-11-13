@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 public partial class MainMenu : Control
 {
+	private const string TutorialScenePath     = "res://scenes/menu/TutorialScreen.tscn";
 	private const string SkirmishScenePath     = "res://scenes/menu/SkirmishScreen.tscn";
 	private const string LoadGameScenePath = "res://scenes/menu/LoadGameScreen.tscn";
 	private const string LobbyScenePath        = "res://scenes/menu/MultiplayerLobby.tscn";
@@ -107,6 +108,7 @@ public partial class MainMenu : Control
 		// teardown: standing on the main menu, there is no host to have told us who we are.
 		SessionIdentity.Reset();
 
+		var tutorial         = GetNode<MenuPanelButton>("%TutorialButton");
 		var skirmish         = GetNode<MenuPanelButton>("%SkirmishButton");
 		var loadGame         = GetNode<MenuPanelButton>("%LoadGameButton");
 		var multiplayerHost  = GetNode<MenuPanelButton>("%MultiplayerHostButton");
@@ -115,6 +117,7 @@ public partial class MainMenu : Control
 		var settings         = GetNode<MenuPanelButton>("%SettingsButton");
 		var quit             = GetNode<MenuPanelButton>("%QuitButton");
 
+		tutorial.ButtonText        = "Tutorial";
 		skirmish.ButtonText        = "Skirmish";
 		loadGame.ButtonText        = "Load Game";
 		multiplayerHost.ButtonText = "Host Game";
@@ -123,6 +126,7 @@ public partial class MainMenu : Control
 		settings.ButtonText        = "Settings";
 		quit.ButtonText            = "Quit";
 
+		tutorial.Pressed        += OnTutorialPressed;
 		skirmish.Pressed        += OnSkirmishPressed;
 		loadGame.Pressed        += OnLoadGamePressed;
 		multiplayerHost.Pressed += OnMultiplayerHostPressed;
@@ -276,6 +280,11 @@ public partial class MainMenu : Control
 		{
 			if (IsInstanceValid(this)) _invitePromptOpen = false;
 		}
+	}
+
+	private void OnTutorialPressed()
+	{
+		SceneFlow.ChangeScene(this, TutorialScenePath);
 	}
 
 	private void OnSkirmishPressed()
