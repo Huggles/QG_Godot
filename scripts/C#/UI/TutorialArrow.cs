@@ -43,6 +43,12 @@ public partial class TutorialArrow : Sprite2D
 
     private const float FadeSeconds = 0.25f;
 
+    /// <summary>Where the drop shadow falls, in screen pixels, whatever the heading; and how dark it is.</summary>
+    private static readonly Vector2 ShadowOffset = new(4f, 6f);
+    private const float ShadowAlpha = 0.4f;
+
+    private Sprite2D _shadow;
+
     private TutorialArrowData _spec;
     private Tween _fadeTween;
     private float _bobPhase;
@@ -51,6 +57,7 @@ public partial class TutorialArrow : Sprite2D
     {
         Current = this;
         ApplyGeometry();
+        CreateShadow();
 
         Visible = false;
         Modulate = new Color(Modulate, 0f);
@@ -79,6 +86,23 @@ public partial class TutorialArrow : Sprite2D
         Centered = false;
         Offset = new Vector2(-textureSize.X * (1f - TipInset), -textureSize.Y / 2f);
         Scale = Vector2.One * (ArrowLength / textureSize.X);
+    }
+
+    /// <summary>
+    /// A black copy of the arrow drawn behind it. A child, so it inherits the fade and the sizing;
+    /// UpdatePlacement keeps its offset fixed on screen as the arrow turns.
+    /// </summary>
+    private void CreateShadow()
+    {
+        _shadow = new Sprite2D
+        {
+            Texture = Texture,
+            Centered = false,
+            Offset = Offset,
+            ShowBehindParent = true,
+            Modulate = new Color(0f, 0f, 0f, ShadowAlpha),
+        };
+        AddChild(_shadow);
     }
 
     /// <summary>
@@ -142,5 +166,7 @@ public partial class TutorialArrow : Sprite2D
 
         Rotation = radians;
         GlobalPosition = tip - heading * bob;
+        // Local space is rotated and scaled, so undo both to keep the shadow falling down-right.
+        _shadow.Position = ShadowOffset.Rotated(-radians) / Scale.X;
     }
 }
