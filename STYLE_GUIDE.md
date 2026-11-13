@@ -304,7 +304,7 @@ There are three tiers, from biggest to smallest:
 | Tier | Used by | Panel | Trim | Text |
 |---|---|---|---|---|
 | **Dialog** | Score History, in-game menu, Connection Lost | `MenuModalShell`: frosted olive glass 82%, Brass border 40%, whole screen blurred behind | Full BrassFrame (brackets, sweep, glow) | `MenuTheme` |
-| **Board modal** | Presentation modal, Card Distribution | Frosted olive glass 84%, Brass border 40%, radius 4, soft shadow; the map stays sharp around it | Quieter BrassFrame: brackets and a faint glow, **no sweep** (`Inset 12`, `BracketLength 26`, `GlowAlpha 0.16`) | `MenuTheme` on the header and footer only |
+| **Board modal** | Presentation modal, Card Distribution | Frosted olive glass 84%, Brass border 40%, radius 4, no shadow; the map stays sharp around it | Quieter BrassFrame: brackets and a faint glow, **no sweep** (`Inset 12`, `BracketLength 26`, `GlowAlpha 0.16`) | `MenuTheme` on the header and footer only |
 | **Popup** | History detail, trigger context, players panel, chat, view dropdown | [`GlassPopupPanel.tres`](scenes/menu/theme/GlassPopupPanel.tres): olive glass 88%, Brass border 38%, no content margins | None | [`InGameTheme.tres`](scenes/menu/theme/InGameTheme.tres) |
 
 **Board modal layout:** header row of title on the left (Display, 32, uppercase, Cream with a
@@ -312,6 +312,8 @@ soft shadow) and the window buttons on the right; a Brass `HSeparator`; the cont
 footer. Window buttons are 44 × 44 `MenuSecondaryButton`s showing **−** (hide) and **×** (close),
 with the × in the Body font at 30 because the Display face draws it too small. The Apply button is
 a `MenuPrimaryButton` (220 × 44), and its label is uppercased in code like the title.
+
+**Never give a frosted panel a shadow.** `FrostedPanel` blurs the screen everywhere its StyleBox draws, shadow included, so a shadow turns into a blurry halo round the panel.
 
 **Keep the theme off card faces.** Card scenes have no font overrides, so a theme set on a
 container above them restyles the card text. That's why the presentation modal, history popup and

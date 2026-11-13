@@ -21,8 +21,6 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 16
 
 [node name="DeckCompositionPanel" type="CenterContainer"]
 visible = false
