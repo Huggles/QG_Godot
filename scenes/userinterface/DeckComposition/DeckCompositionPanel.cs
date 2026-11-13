@@ -25,14 +25,14 @@ public partial class DeckCompositionPanel : CenterContainer
 		Faction.GERMANY, Faction.ITALY, Faction.JAPAN, Faction.UNITED_KINGDOM, Faction.SOVIET, Faction.UNITED_STATES,
 	};
 
-	private const int FontSize = 14;
-	private const float FactionColumnWidth = 84f;
+	private const int FontSize = 17;
+	private const float FactionColumnWidth = 92f;
 
-	/// <summary>Must match the Plate stylebox. Cells are blended onto it rather than drawn translucent, so the map never shows through.</summary>
-	private static readonly Color PlateColor = new(0.1f, 0.1f, 0.1f);
-	private static readonly Color RowLabelColor = PlateColor.Lerp(Colors.White, 0.07f);
-	private static readonly Color NumberColor = new(0.94f, 0.94f, 0.94f);
-	private static readonly Color ZeroColor = new(1f, 1f, 1f, 0.35f);
+	/// <summary>The Plate's olive glass, opaque. Cells are blended onto it rather than drawn translucent, so the map never shows through.</summary>
+	private static readonly Color PlateColor = new(0.047f, 0.051f, 0.039f);
+	private static readonly Color RowLabelColor = PlateColor.Lerp(Colors.White, 0.06f);
+	private static readonly Color NumberColor = new(0.929f, 0.898f, 0.82f);
+	private static readonly Color ZeroColor = new(0.929f, 0.898f, 0.82f, 0.35f);
 
 	private GridContainer Table => GetNode<GridContainer>("%Table");
 	private Button CloseButton => GetNode<Button>("%CloseButton");
@@ -109,7 +109,7 @@ public partial class DeckCompositionPanel : CenterContainer
 				Table.AddChild(NumberCell(counts.GetValueOrDefault((faction, types[row])), faction, tint));
 		}
 
-		Table.AddChild(Cell("Total", RowLabelColor, Colors.White, HorizontalAlignment.Left));
+		Table.AddChild(Cell("Total", RowLabelColor, NumberColor, HorizontalAlignment.Left));
 		foreach (Faction faction in factions)
 			Table.AddChild(NumberCell(types.Sum(type => counts.GetValueOrDefault((faction, type))), faction, 0.5f));
 	}

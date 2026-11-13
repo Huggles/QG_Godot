@@ -1,24 +1,28 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/userinterface/DeckComposition/DeckCompositionPanel.cs" id="1_deckcomp"]
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="2_theme"]
+[ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanel.tres" id="3_frost"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="4_brass"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontBody.tres" id="x_body"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plate"]
-content_margin_left = 14.0
-content_margin_top = 10.0
-content_margin_right = 14.0
-content_margin_bottom = 14.0
-bg_color = Color(0.1, 0.1, 0.1, 1)
+content_margin_left = 26.0
+content_margin_top = 20.0
+content_margin_right = 26.0
+content_margin_bottom = 26.0
+bg_color = Color(0.047, 0.051, 0.039, 0.84)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.25)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+border_color = Color(0.851, 0.678, 0.361, 0.4)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 12
+shadow_size = 16
 
 [node name="DeckCompositionPanel" type="CenterContainer"]
 visible = false
@@ -31,45 +35,53 @@ mouse_filter = 2
 script = ExtResource("1_deckcomp")
 
 [node name="Plate" type="PanelContainer" parent="."]
+material = ExtResource("3_frost")
 layout_mode = 2
 mouse_force_pass_scroll_events = false
+theme = ExtResource("2_theme")
 theme_override_styles/panel = SubResource("StyleBoxFlat_plate")
 
 [node name="Rows" type="VBoxContainer" parent="Plate"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 14
 
 [node name="Header" type="HBoxContainer" parent="Plate/Rows"]
 layout_mode = 2
 mouse_filter = 2
+theme_override_constants/separation = 24
 
 [node name="Titles" type="VBoxContainer" parent="Plate/Rows/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
-theme_override_constants/separation = 0
+theme_override_constants/separation = -2
 
 [node name="Title" type="Label" parent="Plate/Rows/Header/Titles"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Card Distribution"
+theme_type_variation = &"MenuTitle"
+theme_override_font_sizes/font_size = 32
+text = "CARD DISTRIBUTION"
 
 [node name="Caption" type="Label" parent="Plate/Rows/Header/Titles"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.74, 0.74, 0.74, 1)
-theme_override_font_sizes/font_size = 13
+theme_type_variation = &"MenuMuted"
+theme_override_font_sizes/font_size = 17
 text = "Cards in each faction's deck at the start of the game"
 
 [node name="CloseButton" type="Button" parent="Plate/Rows/Header"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 size_flags_vertical = 0
 tooltip_text = "Close"
-theme_override_font_sizes/font_size = 16
-text = "✕"
-flat = true
+theme_type_variation = &"MenuSecondaryButton"
+theme_override_fonts/font = ExtResource("x_body")
+theme_override_font_sizes/font_size = 30
+text = "×"
+
+[node name="HeaderRule" type="HSeparator" parent="Plate/Rows"]
+layout_mode = 2
 
 [node name="Table" type="GridContainer" parent="Plate/Rows"]
 unique_name_in_owner = true
@@ -77,3 +89,12 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/h_separation = 2
 theme_override_constants/v_separation = 2
+
+[node name="BrassFrame" type="ColorRect" parent="Plate"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("4_brass")
+Inset = 12.0
+BracketLength = 26.0
+SweepAlpha = 0.0
+GlowAlpha = 0.16

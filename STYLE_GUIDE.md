@@ -4,7 +4,7 @@ The visual rules every UI component should follow. Each section records a style 
 actually built, with the file that owns it, so new work can reuse it instead of re-deriving it.
 
 - [Menu style ("brass on olive")](#menu-style-brass-on-olive) — main menu, screens, dialogs
-- [In-game HUD style (current, due for a rework)](#in-game-hud-style-current-due-for-a-rework)
+- [In-game HUD style (current, due for a rework)](#in-game-hud-style-current-due-for-a-rework), including [in-game modals](#in-game-modals) (now menu style)
 
 ---
 
@@ -274,7 +274,7 @@ pennants, flag stamps.
 | Bottom centre | Hand | Fanned full-art cards |
 | Bottom centre | Prompt bar | Wide bar tinted in the active faction's colour, dark text: *"United Kingdom: Choose a card…"* |
 | Bottom left of prompt | Pass/skip | Small dark button, "Skip (discard 1 card)" |
-| Overlays | Modals and popups | See [In-game modals](#in-game-modals) below |
+| Overlays | Modals and popups | Menu style since Nov 2026 — see [In-game modals](#in-game-modals) |
 
 **Type:** no theme is set on the HUD, so text uses Godot's default sans in white or light grey,
 usually with a dark outline or shadow for legibility over the map. Map labels are a separate
@@ -294,53 +294,50 @@ single widgets.
 
 ### In-game modals
 
-Also due to be replaced. The in-game overlays currently come in **four different styles**; the
-examples below were captured from a live skirmish (November 2026).
+Since November 2026 every in-game modal uses the menu style: olive glass over the map, a brass
+border, condensed uppercase titles, and the menu buttons. The four older looks (riveted metal,
+flat dark, grey translucent, menu glass) are kept for reference in
+[docs/style/before-2026-11](docs/style/before-2026-11).
 
-**1. Presentation modal — riveted metal frame** (`PresentationModal.tscn`, framed by the old
-`MenuPanel.tscn` nine-patch). The main in-game modal: every card/faction choice, discard, reorder
-and "show these cards" moment goes through it (`ModalStack` → `ModalConfig`). Riveted olive-metal
-frame like the board, flat warm-grey fill, the title as plain white text *under* the items, a
-small grey `Apply (n/m)` button, and a white square **−** (hide) or **×** (close) top right.
-It sizes to its content, so a full hand stretches it edge to edge.
+There are three tiers, from biggest to smallest:
 
-![Card choice: the presentation modal stretched across the map with seven cards](docs/style/modal-card-choice.jpg)
+| Tier | Used by | Panel | Trim | Text |
+|---|---|---|---|---|
+| **Dialog** | Score History, in-game menu, Connection Lost | `MenuModalShell`: frosted olive glass 82%, Brass border 40%, whole screen blurred behind | Full BrassFrame (brackets, sweep, glow) | `MenuTheme` |
+| **Board modal** | Presentation modal, Card Distribution | Frosted olive glass 84%, Brass border 40%, radius 4, soft shadow; the map stays sharp around it | Quieter BrassFrame: brackets and a faint glow, **no sweep** (`Inset 12`, `BracketLength 26`, `GlowAlpha 0.16`) | `MenuTheme` on the header and footer only |
+| **Popup** | History detail, trigger context, players panel, chat, view dropdown | [`GlassPopupPanel.tres`](scenes/menu/theme/GlassPopupPanel.tres): olive glass 88%, Brass border 38%, no content margins | None | [`InGameTheme.tres`](scenes/menu/theme/InGameTheme.tres) |
 
-![Card display: a three-card "British Discard Deck" with the close button](docs/style/modal-card-display.jpg)
+**Board modal layout:** header row of title on the left (Display, 32, uppercase, Cream with a
+soft shadow) and the window buttons on the right; a Brass `HSeparator`; the content; then the
+footer. Window buttons are 44 × 44 `MenuSecondaryButton`s showing **−** (hide) and **×** (close),
+with the × in the Body font at 30 because the Display face draws it too small. The Apply button is
+a `MenuPrimaryButton` (220 × 44), and its label is uppercased in code like the title.
 
-![Faction choice: two flag tiles](docs/style/modal-faction-choice.jpg)
+**Keep the theme off card faces.** Card scenes have no font overrides, so a theme set on a
+container above them restyles the card text. That's why the presentation modal, history popup and
+trigger context put their theme on the header/footer or caption node, never on the panel root.
 
-**2. Card Distribution — flat dark panel** (`DeckCompositionPanel`). Near-black panel, white
-title and grey subtitle top left, thin **×**, and a table whose columns are filled with each
-faction's colour. The only in-game modal built around a data table.
+**`InGameTheme.tres`** is a compact version of `MenuTheme` for small HUD widgets: Body font at
+17 (matches the old default font's apparent size), Cream labels and rich text, and buttons/line
+edits at 10 × 4 padding instead of 18 × 8, in the same colours as `MenuSecondaryButton`.
+Toggle buttons show Brass when on.
 
-![Card distribution table](docs/style/modal-card-distribution.jpg)
+![Card choice: seven cards in the glass board modal, title top left, Apply below](docs/style/modal-card-choice.jpg)
 
-**3. Toolbar dropdown — grey translucent box** (the eye button's view options in `MiniMenu`).
-Small grey `SimpleModalStyle`-type box under the toolbar, tiny white labels, toggle rows
-(Country Labels, Debug Menu, View, Players).
+![Card display with the × close button](docs/style/modal-card-display.jpg)
 
-![View options dropdown under the toolbar](docs/style/modal-view-options.jpg)
+![Faction choice](docs/style/modal-faction-choice.jpg)
 
-The **history detail popup** (`HistoryDetailPopup`, shown while hovering a badge in the history
-strip) uses the same grey box, scaled up: a wide dark-grey translucent panel with a thin light
-border, the event's cards laid out in a row, and the entry as one line of text underneath —
-a muted grey number, then white text (*"18. United States drew 7 card(s) from the deck"*). No
-title or close button; it disappears when the mouse leaves the badge.
+![Card distribution table on olive glass](docs/style/modal-card-distribution.jpg)
 
-![History detail popup: seven drawn cards in a grey translucent panel, caption underneath](docs/style/modal-history-popup.webp)
+![Score history dialog](docs/style/modal-score-history.jpg)
 
-**4. Score History — already the menu style.** `ScoreHistoryDialog` is built on
-`MenuModalShell`, so it's olive glass with brass trim over a blurred map. So are the in-game
-menu (Esc) and the Connection Lost dialog. These three are the model the others could move to.
+![View options dropdown](docs/style/modal-view-options.jpg)
 
-![Score history dialog in the menu style](docs/style/modal-score-history.jpg)
+![Trigger context: the reacting-to caption in a glass popup](docs/style/modal-trigger-context.jpg)
 
-**Not captured:** the trigger-context card display, chat, the players panel (multiplayer only)
-and the commander message (tutorial). The players panel, chat and trigger context use the same
-grey `SimpleModalStyle` box as the history popup; the *Bulletin!* card itself is a bare card face.
+![History detail popup](docs/style/modal-history-popup.jpg)
 
-**What's inconsistent today:** four frame treatments (riveted metal, flat dark, grey translucent,
-olive glass); titles above the content in some and below it in others; three different
-close/hide buttons (white square, thin ×, brass-styled Close); default-font text everywhere except
-the menu-style dialogs.
+**Not yet changed:** the commander message (tutorial) keeps its own art, and the HUD around the
+modals (toolbar strip, prompt bar, turn steps, the `SimpleModalStyle` toolbar background) is still
+the old look.

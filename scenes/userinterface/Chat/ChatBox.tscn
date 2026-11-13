@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://bchatbox0qg01"]
 
+[ext_resource type="Theme" path="res://scenes/menu/theme/InGameTheme.tres" id="ig_theme"]
 [ext_resource type="Script" path="res://scenes/userinterface/Chat/ChatBox.cs" id="1_chatbox"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="2_style"]
+[ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="2_style"]
 
 [node name="ChatBox" type="PanelContainer"]
+theme = ExtResource("ig_theme")
 z_index = 4096
 anchors_preset = 2
 anchor_top = 1.0

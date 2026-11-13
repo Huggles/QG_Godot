@@ -144,7 +144,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		_tcs = new TaskCompletionSource<ModalResult>();
 
 		HandlePresentationItems(config.Items, config.Mode != ModalSelectionMode.Display);
-		TitleText.Text = config.Title;
+		TitleText.Text = config.Title.ToUpperInvariant();
 
 		ConfirmButton.Visible = config.ShowApplyButton;
 		// Through UpdateConfirmButton rather than setting the plain label, so the count is right from the
@@ -338,9 +338,9 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		}
 
 		// The grid never scrolls sideways, so a row of cards above 100% Pop-up Card Size is cut to what
-		// fits across the screen inside the frame (MenuPanel's 50px margins, plus the scrollbar). The card
+		// fits across the screen inside the frame (the 32px content margins, plus the scrollbar). The card
 		// area is at most one and a half full-size cards tall, so bigger cards scroll rather than grow the modal.
-		const float frameWidth = 120f;
+		const float frameWidth = 90f;
 		float maxCardAreaHeight = PresentationItemCard.FullCardSize.Y * 1.5f;
 		Vector2 itemSize = PresentationItemControls[0].Size;
 		Vector2 screen = GetViewportRect().Size;
@@ -423,8 +423,8 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		int count = _activeConfig.Mode == ModalSelectionMode.Reorder ? _orderedItems.Count : _selectedItems.Count;
 		ConfirmButton.Disabled = count < _activeConfig.MinSelections;
 		ConfirmButton.Text = _activeConfig.MinSelections > 0
-			? $"{_activeConfig.ApplyLabel} ({count}/{_activeConfig.MinSelections})"
-			: $"{_activeConfig.ApplyLabel} ({count})";
+			? $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count}/{_activeConfig.MinSelections})"
+			: $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count})";
 	}
 
 	// ── Button handlers ──────────────────────────────────────────────────────

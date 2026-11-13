@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://dqdvhk2rm85fc"]
 
+[ext_resource type="Theme" path="res://scenes/menu/theme/InGameTheme.tres" id="ig_theme"]
+[ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="ig_glass"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
 [ext_resource type="Script" uid="uid://cv2ogjvefody7" path="res://scenes/userinterface/PresentationModal/ModalStack.cs" id="3_oxwje"]
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="4_dvfjj"]
@@ -306,49 +308,49 @@ z_index = 150
 layout_mode = 0
 offset_left = 13.0
 offset_top = 50.0
-offset_right = 113.0
-offset_bottom = 250.0
-theme_override_styles/panel = ExtResource("19_nfi4l")
+offset_right = 203.0
+offset_bottom = 60.0
+theme = ExtResource("ig_theme")
+theme_override_styles/panel = ExtResource("ig_glass")
 
 [node name="MarginContainer" type="MarginContainer" parent="MiniMenu/MiniMenuModal" unique_id=160946699]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MiniMenu/MiniMenuModal/MarginContainer" unique_id=2016041426]
 layout_mode = 2
 
 [node name="CountryLabelsButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=254644009]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 toggle_mode = true
 text = "Country Labels"
 
 [node name="DebugMenuButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541710]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 toggle_mode = true
-text = "Debug Menu
-"
+text = "Debug Menu"
 
 [node name="WorldPresentationButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541711]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 text = "View: Normal"
 
 [node name="PlayersButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541712]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 toggle_mode = true
 text = "Players"
 

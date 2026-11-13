@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://blt1histpop01"]
 
+[ext_resource type="Theme" path="res://scenes/menu/theme/InGameTheme.tres" id="ig_theme"]
 [ext_resource type="Script" uid="uid://no1lswlgrd1o" path="res://scripts/C#/UI/HistoryDetailPopup.cs" id="1_hdpop"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_hdcard"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="3_hdstyle"]
+[ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="3_hdstyle"]
 
 [node name="HistoryDetailPopup" type="Control"]
 layout_mode = 3
@@ -49,6 +50,7 @@ custom_minimum_size = Vector2(188, 263)
 layout_mode = 2
 
 [node name="HistorySummary" type="RichTextLabel" parent="HistoryDetailPanel/Margin/VBox"]
+theme = ExtResource("ig_theme")
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
