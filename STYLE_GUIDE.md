@@ -86,6 +86,7 @@ Set with `theme_type_variation` on the node.
 | `MenuMuted` | Label | Body 19, Muted | Hints, secondary info, empty states |
 | `MenuInset` | PanelContainer | 30% black, 2px Brass bar on the left (60%), 18×14 padding | Read-only description or callout inside a card |
 | `MenuPrimaryButton` | Button | Brass fill, Ink text, Display 22 | The compact primary inside a dialog, notice or toast (see Buttons) |
+| `MenuSecondaryButton` | Button | Olive glass, Cream border and text, Display 22 | Cancel / Close / Refresh in a dialog's button row (see Buttons) |
 
 Kicker + Title sit in a `VBoxContainer` with `separation = -4`, followed by an `HSeparator`
 (the Brass rule).
@@ -158,7 +159,13 @@ brightening and the same light-brass focus ring.
 | BrassFrame | brackets, glow, periodic glint | none (the modal already has one) |
 | Pressed | caption sinks 2px | caption sinks 2px (via content margins) |
 
-A `Button` has no `uppercase` property, so write the dialog primary's text in capitals — in the
+**Secondary comes in the same two sizes.** `MenuActionButton` on screens; on dialogs the
+`MenuSecondaryButton` variation — 160 × 44, Display 22, Olive glass 55% with a Cream 28% border,
+hover Brass 16% fill + Brass border with Cream-hover text, caption sinks 2px when pressed,
+Brass focus ring. No BrassFrame. A dialog's button row is then `[SECONDARY ...] [PRIMARY]`
+in matching caps. Links like *Host over IP instead* stay a flat, mixed-case `Button`.
+
+A `Button` has no `uppercase` property, so write dialog button text in capitals — in the
 scene, and with `ToUpperInvariant()` where code sets it (see `MenuNotice`, `MenuToast`).
 
 ### Form controls
