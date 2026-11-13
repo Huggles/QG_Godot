@@ -270,11 +270,11 @@ pennants, flag stamps.
 | Top centre | Round tracker | Small dark plate, "Round 1 of 20" |
 | Top right | Team scores | Axis/Allies flag tiles with large white numerals |
 | Top right | Input timer | "Your input" over a countdown, white on dark |
-| Right edge | Card/round strip | Column of small flag thumbnails |
+| Right edge | Game history strip | Column of small numbered flag badges, one per event; hover shows the detail popup |
 | Bottom centre | Hand | Fanned full-art cards |
 | Bottom centre | Prompt bar | Wide bar tinted in the active faction's colour, dark text: *"United Kingdom: Choose a card…"* |
 | Bottom left of prompt | Pass/skip | Small dark button, "Skip (discard 1 card)" |
-| Overlays | Modals, history popup, chat, players panel, trigger context | Grey translucent box with a grey border (`SimpleModalStyle.tres`), or the old nine-patch art frame |
+| Overlays | Modals and popups | See [In-game modals](#in-game-modals) below |
 
 **Type:** no theme is set on the HUD, so text uses Godot's default sans in white or light grey,
 usually with a dark outline or shadow for legibility over the map. Map labels are a separate
@@ -291,3 +291,49 @@ single widgets.
 - No shared theme, so fonts, sizes and panel styles are set widget by widget.
 - Neutral grey panels instead of olive glass; no brass accent or BrassFrame.
 - The frame and props are textured and skeuomorphic, while the menu is flat glass with a thin trim.
+
+### In-game modals
+
+Also due to be replaced. The in-game overlays currently come in **four different styles**; the
+examples below were captured from a live skirmish (November 2026).
+
+**1. Presentation modal — riveted metal frame** (`PresentationModal.tscn`, framed by the old
+`MenuPanel.tscn` nine-patch). The main in-game modal: every card/faction choice, discard, reorder
+and "show these cards" moment goes through it (`ModalStack` → `ModalConfig`). Riveted olive-metal
+frame like the board, flat warm-grey fill, the title as plain white text *under* the items, a
+small grey `Apply (n/m)` button, and a white square **−** (hide) or **×** (close) top right.
+It sizes to its content, so a full hand stretches it edge to edge.
+
+![Card choice: the presentation modal stretched across the map with seven cards](docs/style/modal-card-choice.jpg)
+
+![Card display: a three-card "British Discard Deck" with the close button](docs/style/modal-card-display.jpg)
+
+![Faction choice: two flag tiles](docs/style/modal-faction-choice.jpg)
+
+**2. Card Distribution — flat dark panel** (`DeckCompositionPanel`). Near-black panel, white
+title and grey subtitle top left, thin **×**, and a table whose columns are filled with each
+faction's colour. The only in-game modal built around a data table.
+
+![Card distribution table](docs/style/modal-card-distribution.jpg)
+
+**3. Toolbar dropdown — grey translucent box** (the eye button's view options in `MiniMenu`).
+Small grey `SimpleModalStyle`-type box under the toolbar, tiny white labels, toggle rows
+(Country Labels, Debug Menu, View, Players).
+
+![View options dropdown under the toolbar](docs/style/modal-view-options.jpg)
+
+**4. Score History — already the menu style.** `ScoreHistoryDialog` is built on
+`MenuModalShell`, so it's olive glass with brass trim over a blurred map. So are the in-game
+menu (Esc) and the Connection Lost dialog. These three are the model the others could move to.
+
+![Score history dialog in the menu style](docs/style/modal-score-history.jpg)
+
+**Not captured:** the history detail popup (hover on a history badge), the trigger-context card
+display, chat, the players panel (multiplayer only) and the commander message (tutorial). The
+history popup, players panel, chat and trigger context all use the grey `SimpleModalStyle` box; the
+*Bulletin!* card itself is a bare card face.
+
+**What's inconsistent today:** four frame treatments (riveted metal, flat dark, grey translucent,
+olive glass); titles above the content in some and below it in others; three different
+close/hide buttons (white square, thin ×, brass-styled Close); default-font text everywhere except
+the menu-style dialogs.
