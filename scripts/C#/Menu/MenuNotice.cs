@@ -109,7 +109,7 @@ public partial class MenuNotice : MenuModal
 		okButton.Text = "Cancel";
 
 		Button confirmButton = GetNode<Button>("%ConfirmButton");
-		confirmButton.Text    = _confirmText;
+		confirmButton.Text    = _confirmText.ToUpperInvariant();
 		confirmButton.Visible = true;
 		confirmButton.Pressed += () =>
 		{

@@ -126,6 +126,6 @@ theme_type_variation = &"MenuPrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 44)
 layout_mode = 2
-text = "Create Steam Lobby"
+text = "CREATE STEAM LOBBY"
 
 [editable path="Root/Centre/Panel"]

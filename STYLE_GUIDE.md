@@ -85,7 +85,7 @@ Set with `theme_type_variation` on the node.
 | `MenuSection` | Label | Caps 15, Muted | Header over a group of controls: `SCENARIO`, `OPTIONS`, `PLAY` |
 | `MenuMuted` | Label | Body 19, Muted | Hints, secondary info, empty states |
 | `MenuInset` | PanelContainer | 30% black, 2px Brass bar on the left (60%), 18×14 padding | Read-only description or callout inside a card |
-| `MenuPrimaryButton` | Button | Brass fill, Ink text | A plain `Button` that must read as the primary action (see note under Buttons) |
+| `MenuPrimaryButton` | Button | Brass fill, Ink text, Display 22 | The compact primary inside a dialog, notice or toast (see Buttons) |
 
 Kicker + Title sit in a `VBoxContainer` with `separation = -4`, followed by an `HSeparator`
 (the Brass rule).
@@ -146,9 +146,20 @@ border, text Cream-hover → pressed Brass 30% + full Brass border, text shifts 
 white 2%/6%. Focus ring Brass 55%, 2px outside. `OptionButton` arrow margin 14. Typical height
 50–56.
 
-> Note: `MenuPrimaryButton` (theme variation) and `MenuActionButtonPrimary` (scene) describe the
-> same intent with slightly different borders/shadow. Prefer the scene; use the variation only
-> where a plain `Button` can't be swapped.
+**Primary comes in two sizes** that share one look: brass face, 1px light-brass border
+with a 2px bottom edge, soft brass shadow, Ink caption in Display uppercase, the same hover
+brightening and the same light-brass focus ring.
+
+| | Screen primary — `MenuActionButtonPrimary` scene | Dialog primary — `MenuPrimaryButton` variation |
+|---|---|---|
+| Where | The main action of a full screen (Start Game, Host, Join) | Confirm/accept inside a modal, notice or toast |
+| Size | 300 × 60, caption 28 | ~160–260 × 44, caption 22 |
+| Shadow | 14px, 20px on hover | 6px, 10px on hover |
+| BrassFrame | brackets, glow, periodic glint | none (the modal already has one) |
+| Pressed | caption sinks 2px | caption sinks 2px (via content margins) |
+
+A `Button` has no `uppercase` property, so write the dialog primary's text in capitals — in the
+scene, and with `ToUpperInvariant()` where code sets it (see `MenuNotice`, `MenuToast`).
 
 ### Form controls
 

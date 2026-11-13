@@ -59,7 +59,7 @@ public partial class MenuToast : CanvasLayer
 		GetNode<Label>("%MessageLabel").Text = _message;
 
 		Button accept = GetNode<Button>("%AcceptButton");
-		accept.Text     = _acceptText;
+		accept.Text     = _acceptText.ToUpperInvariant();
 		accept.Pressed += Accept;
 
 		GetNode<Button>("%DismissButton").Pressed += Dismiss;
