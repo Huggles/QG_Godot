@@ -152,10 +152,10 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = 495.0
-offset_top = 66.0
-offset_right = 710.0
-offset_bottom = 114.0
+offset_left = 270.0
+offset_top = 7.0
+offset_right = 485.0
+offset_bottom = 55.0
 
 [node name="FactionsPole" type="Control" parent="." unique_id=1366203001]
 layout_mode = 1
