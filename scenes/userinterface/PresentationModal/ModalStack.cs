@@ -39,8 +39,19 @@ public partial class ModalStack : Control, LoadableUI, IRecallablePrompt
 	public override void _Ready()
 	{
 		if (SessionIdentity.IsLocalAuthority(this))
+		{
 			Current = this;
+			// Deferred: the parent is still setting up its children during this _Ready.
+			Callable.From(AddRevealDock).CallDeferred();
+		}
 		LoadUI();
+	}
+
+	/// <summary>The tray timed-out draw and discard modals shrink into; a sibling so it outlives the row.</summary>
+	private void AddRevealDock()
+	{
+		if (!IsInstanceValid(this) || !IsInsideTree()) return;
+		GetParent().AddChild(new RevealDock { Name = "RevealDock" });
 	}
 
 	public void LoadUI()

@@ -20,6 +20,12 @@ public partial class GameHistoryList : VBoxContainer
     /// </summary>
     private const int MaxItems = 20;
 
+    /// <summary>The local strip, for <see cref="RevealDock"/> to sit beside. Null on headless and between games.</summary>
+    public static GameHistoryList Current { get; private set; }
+
+    /// <summary>The newest badge, or null when the strip is empty.</summary>
+    public Control NewestBadge => GetChildCount() > 0 ? GetChild<Control>(GetChildCount() - 1) : null;
+
     private List<int> DisplayedChangeEventIds = new(); // to prevent duplicates when joining mid-game
 
     /// <summary>
@@ -49,6 +55,7 @@ public partial class GameHistoryList : VBoxContainer
 
         isLocalList = SessionIdentity.IsLocalAuthority(this);
         if (!isLocalList) return;
+        Current = this;
 
         AddUnprocessedChangeEvents();
         EventBus.Instance.GameChangeEventAfter += OnGameChangeEventApplied;
@@ -57,6 +64,7 @@ public partial class GameHistoryList : VBoxContainer
     public override void _ExitTree()
     {
         base._ExitTree();
+        if (Current == this) Current = null;
         if (isLocalList && EventBus.Instance != null)
         {
             EventBus.Instance.GameChangeEventAfter -= OnGameChangeEventApplied;

@@ -31,7 +31,8 @@ public interface INotificationSink
     void HideActionText();
 
     /// <summary>Show an info modal and complete when it is dismissed. Never displays on headless.</summary>
-    Task ShowModal(List<PresentationItem> items, string title);
+    /// <paramref name="dock"/>: shrink into the reveal dock beside the history strip when it times out.
+    Task ShowModal(List<PresentationItem> items, string title, bool dock = false);
 
     /// <summary>True when the local player controls <paramref name="faction"/>. Always false headless (server controls no faction).</summary>
     bool LocalPlayerControls(Faction faction);
@@ -72,8 +73,10 @@ public sealed class GodotNotificationSink : INotificationSink
     public void ShowActionText(string text, int duration, Faction faction = (Faction)(-1)) => PlayerActionLabel.ShowText(text, duration, faction);
     public void HideActionText() => PlayerActionLabel.HideText();
 
-    public Task ShowModal(List<PresentationItem> items, string title)
-        => ModalStack.Current.Show(ModalConfig.Display(title, items).WithAutoDismiss());
+    public Task ShowModal(List<PresentationItem> items, string title, bool dock = false)
+        => ModalStack.Current.Show(dock
+            ? ModalConfig.Display(title, items).WithDock()
+            : ModalConfig.Display(title, items).WithAutoDismiss());
 
     public bool LocalPlayerControls(Faction faction)
         => PlayerScene.Current?.ControlledFactions.Contains(faction) ?? false;
@@ -128,7 +131,7 @@ public sealed class NullNotificationSink : INotificationSink
     public void ShowActionText(string text, Faction faction = (Faction)(-1)) { }
     public void ShowActionText(string text, int duration, Faction faction = (Faction)(-1)) { }
     public void HideActionText() { }
-    public Task ShowModal(List<PresentationItem> items, string title) => Task.CompletedTask;
+    public Task ShowModal(List<PresentationItem> items, string title, bool dock = false) => Task.CompletedTask;
     public bool LocalPlayerControls(Faction faction) => false;
 }
 
@@ -161,7 +164,7 @@ public sealed class ReplayNotificationSink : INotificationSink
     public void HideActionText() { }
 
     /// <summary>Never shown, and never awaited — a restore must not stop for a modal per drawn card.</summary>
-    public Task ShowModal(List<PresentationItem> items, string title) => Task.CompletedTask;
+    public Task ShowModal(List<PresentationItem> items, string title, bool dock = false) => Task.CompletedTask;
 
     public bool LocalPlayerControls(Faction faction) => Inner.LocalPlayerControls(faction);
 }

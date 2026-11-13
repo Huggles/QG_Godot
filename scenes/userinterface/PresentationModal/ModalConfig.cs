@@ -135,4 +135,20 @@ public class ModalConfig
         BurnAway = true;
         return this;
     }
+
+    /// <summary>When it times out, fly into <see cref="RevealDock"/> beside the history strip instead of fading.</summary>
+    public bool Dock { get; private set; } = false;
+
+    /// <summary>
+    /// Shrink into the reveal dock on timing out and linger there, so a draw or discard stays readable
+    /// after the game has moved on. Combined with <see cref="WithBurnAway"/>, the burn plays in the dock.
+    /// </summary>
+    public ModalConfig WithDock()
+    {
+        if (Mode != ModalSelectionMode.Display)
+            throw new System.InvalidOperationException($"Only an info modal may dock; this one is {Mode}.");
+        WithAutoDismiss();
+        Dock = true;
+        return this;
+    }
 }
