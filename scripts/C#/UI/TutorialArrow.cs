@@ -43,11 +43,13 @@ public partial class TutorialArrow : Sprite2D
 
     private const float FadeSeconds = 0.25f;
 
-    /// <summary>Where the drop shadow falls, in screen pixels, whatever the heading; and how dark it is.</summary>
-    private static readonly Vector2 ShadowOffset = new(4f, 6f);
-    private const float ShadowAlpha = 0.4f;
-
-    private Sprite2D _shadow;
+    /// <summary>
+    /// The halo behind the arrow: how far it spreads past the outline in screen pixels, how many
+    /// copies make up the ring, and how dark each one is. Overlapping copies darken towards the edge.
+    /// </summary>
+    private const float ShadowRadius = 4f;
+    private const int ShadowCopies = 8;
+    private const float ShadowAlpha = 0.16f;
 
     private TutorialArrowData _spec;
     private Tween _fadeTween;
@@ -89,20 +91,25 @@ public partial class TutorialArrow : Sprite2D
     }
 
     /// <summary>
-    /// A black copy of the arrow drawn behind it. A child, so it inherits the fade and the sizing;
-    /// UpdatePlacement keeps its offset fixed on screen as the arrow turns.
+    /// A ring of faint black copies of the arrow drawn behind it, which reads as a soft halo. Children,
+    /// so they inherit the fade, the sizing and the heading; a ring looks the same at any heading, so
+    /// the only correction is dividing the screen radius by the node's scale.
     /// </summary>
     private void CreateShadow()
     {
-        _shadow = new Sprite2D
+        for (int i = 0; i < ShadowCopies; i++)
         {
-            Texture = Texture,
-            Centered = false,
-            Offset = Offset,
-            ShowBehindParent = true,
-            Modulate = new Color(0f, 0f, 0f, ShadowAlpha),
-        };
-        AddChild(_shadow);
+            float angle = Mathf.Tau * i / ShadowCopies;
+            AddChild(new Sprite2D
+            {
+                Texture = Texture,
+                Centered = false,
+                Offset = Offset,
+                Position = Vector2.Right.Rotated(angle) * ShadowRadius / Scale.X,
+                ShowBehindParent = true,
+                Modulate = new Color(0f, 0f, 0f, ShadowAlpha),
+            });
+        }
     }
 
     /// <summary>
@@ -166,7 +173,5 @@ public partial class TutorialArrow : Sprite2D
 
         Rotation = radians;
         GlobalPosition = tip - heading * bob;
-        // Local space is rotated and scaled, so undo both to keep the shadow falling down-right.
-        _shadow.Position = ShadowOffset.Rotated(-radians) / Scale.X;
     }
 }
