@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bp74tttlq1s05" path="res://scenes/userinterface/PresentationModal/PresentationModal.cs" id="1_jje3m"]
 [ext_resource type="PackedScene" uid="uid://cviw1rdhjifft" path="res://scenes/menu/MenuPanel.tscn" id="2_6yadj"]
 [ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="3_theme"]
-[ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanel.tres" id="4_frost"]
+[ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanelFading.tres" id="4_frost"]
 [ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="5_brass"]
 [ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="6_display"]
 [ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontBody.tres" id="x_body"]

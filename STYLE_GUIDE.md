@@ -315,6 +315,8 @@ a `MenuPrimaryButton` (220 × 44), and its label is uppercased in code like the 
 
 **Never give a frosted panel a shadow.** `FrostedPanel` blurs the screen everywhere its StyleBox draws, shadow included, so a shadow turns into a blurry halo round the panel.
 
+**A frosted panel that fades needs `FrostedPanelFading.tres`.** The plain `FrostedPanel` keeps the blur solid until the panel is almost transparent, so a fade through `modulate` leaves a blurred block behind. The fading material sets `fill_alpha` to the StyleBox's own fill alpha (0.84 for the presentation modal) and the blur then fades with the panel. Change both together.
+
 **Keep the theme off card faces.** Card scenes have no font overrides, so a theme set on a
 container above them restyles the card text. That's why the presentation modal, history popup and
 trigger context put their theme on the header/footer or caption node, never on the panel root.
