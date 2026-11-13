@@ -175,19 +175,28 @@ public partial class RevealDock : Control
 		FoldAway(modal);
 	}
 
+	/// <summary>
+	/// Travel into the newest badge, landing at its height, and only then fade. Fading during the trip
+	/// hid it: the card set seemed to vanish where it sat rather than go anywhere.
+	/// </summary>
 	private void FoldAway(PresentationModal modal)
 	{
-		Vector2 target = modal.Position + modal.Size;
 		Control badge = GameHistoryList.Current is { } strip && IsInstanceValid(strip) ? strip.NewestBadge : null;
-		if (badge != null && IsInstanceValid(badge))
-			target = ToDock(badge.GetGlobalRect().GetCenter());
+		Rect2 landing = badge != null && IsInstanceValid(badge)
+			? new Rect2(ToDock(badge.GetGlobalRect().Position), badge.GetGlobalRect().Size)
+			: new Rect2(modal.Position + modal.Size, Vector2.Zero);
 
-		double seconds = GameSettings.ShowHideSeconds;
+		float scale = Mathf.Max(landing.Size.Y, 8f) / modal.Size.Y;
+		// The pivot is the bottom-right corner, so put that corner where a badge-high copy is centred on the badge.
+		Vector2 corner = landing.GetCenter() + modal.Size * scale / 2f;
+
+		double seconds = GameSettings.ShowHideSeconds * 1.2;
 		Tween tween = modal.CreateTween().SetParallel()
-			.SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.In);
-		tween.TweenProperty(modal, "position", target - modal.Size, seconds);
-		tween.TweenProperty(modal, "scale", Vector2.One * 0.02f, seconds);
-		tween.TweenProperty(modal, "modulate:a", 0f, seconds * 0.5).SetDelay(seconds * 0.5);
+			.SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut);
+		tween.TweenProperty(modal, "position", corner - modal.Size, seconds);
+		tween.TweenProperty(modal, "scale", Vector2.One * scale, seconds);
+		tween.TweenProperty(modal, "modulate:a", 1f, seconds * 0.3);
+		tween.Chain().TweenProperty(modal, "modulate:a", 0f, GameSettings.ShowHideSeconds * 0.4);
 		tween.Chain().TweenCallback(Callable.From(modal.QueueFree));
 	}
 
