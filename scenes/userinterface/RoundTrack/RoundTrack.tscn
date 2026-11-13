@@ -1,23 +1,30 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/userinterface/RoundTrack/RoundTrack.cs" id="1_track"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="2_display"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plate"]
 content_margin_left = 9.0
 content_margin_top = 2.0
 content_margin_right = 9.0
 content_margin_bottom = 3.0
-bg_color = Color(0.1, 0.1, 0.1, 0.6)
-border_color = Color(0, 0, 0, 0)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+bg_color = Color(0.047, 0.051, 0.039, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.851, 0.678, 0.361, 0.28)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="LabelSettings" id="LabelSettings_round"]
-font_size = 15
-outline_size = 6
-outline_color = Color(0, 0, 0, 1)
+font = ExtResource("2_display")
+font_size = 17
+font_color = Color(0.929, 0.898, 0.82, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 0.7)
 
 [node name="RoundTrack" type="PanelContainer"]
 layout_mode = 3

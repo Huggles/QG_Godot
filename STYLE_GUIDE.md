@@ -4,7 +4,7 @@ The visual rules every UI component should follow. Each section records a style 
 actually built, with the file that owns it, so new work can reuse it instead of re-deriving it.
 
 - [Menu style ("brass on olive")](#menu-style-brass-on-olive) — main menu, screens, dialogs
-- [In-game HUD style (current, due for a rework)](#in-game-hud-style-current-due-for-a-rework), including [in-game modals](#in-game-modals) (now menu style)
+- [In-game HUD style](#in-game-hud-style), including [in-game modals](#in-game-modals) — both in the menu style since Nov 2026
 
 ---
 
@@ -239,58 +239,50 @@ command list. Card inner margin 24×12 on top of the panel's 32×28 padding.
 
 ### Known leftovers
 
-- [MenuPanelButton.tscn](scenes/menu/MenuPanelButton.tscn) is the old nine-patch button (art
-  frame, no brass). No menu screen uses it any more, but the in-game UI still does (main HUD,
-  chat, players panel, history popup, trigger context). New menu work should use the three
+- [MenuPanelButton.tscn](scenes/menu/MenuPanelButton.tscn) is the old nine-patch button. Only the
+  HUD's skip buttons still instance it, with the nine-patch hidden and menu styles laid over it.
+  The card modal's text options now use `MenuActionButton.tscn`. New work should use the three
   button scenes above.
-- Root-level `MenuPanelBackground.tres`, `MenuTab*.tres` and `SimpleModalStyle.tres` predate the
-  theme and are only used by the in-game UI.
+- Root-level `MenuTab*.tres` and `SimpleModalStyle.tres` are no longer used by anything;
+  `MenuPanelBackground.tres` is only the default fill inside `MenuPanel.tscn`, which every user
+  overrides.
 
 ---
 
-## In-game HUD style (current, due for a rework)
+## In-game HUD style
 
-A snapshot of the HUD as of November 2026, kept brief on purpose: it's expected to change, so this
-records the starting point rather than a spec to follow.
+Since November 2026 the HUD uses the menu style too. The *art* stays as it was: the map, the
+riveted board frame, the cloth pennants on their brass pole, flags, history badges and cards.
+Everything drawn as UI on top of it (panels, text, buttons, pills) uses the menu palette and fonts.
+The old look is kept in [docs/style/before-2026-11/hud.jpg](docs/style/before-2026-11/hud.jpg).
 
-![The in-game HUD, round 1 of a skirmish](docs/style/hud-2026-11.jpg)
+![The in-game HUD in the menu style, round 1 of a skirmish](docs/style/hud.jpg)
 
-**Overall look:** a "war room table". The map sits in a riveted, weathered olive-metal frame
-(`Board9Patch*.png`, plus the procedural `WarPanelMaterial` — dark olive base, stains, scratches,
-grain). Paper and print props sit on top: fanned cards, the *Bulletin!* card, cloth faction
-pennants, flag stamps.
+![Close-ups: turn steps with a step hint open, the skip button and prompt bar, team scores and the input timer](docs/style/hud-details.jpg)
 
-**What's on screen:**
+**Faction colour is the one accent besides brass.** It marks whose turn it is in exactly two
+places, the current turn step's fill and the prompt bar's border, so it still reads at a glance.
 
-| Area | Element | Look today |
+| Element | Where it's set | Look |
 |---|---|---|
-| Top left | Toolbar (eye, cards, deck, score history, faction flags) | Small white icons on a dark translucent strip |
-| Left edge | Faction pennants | Cloth flags on a pole, big white score numerals, tails tucked behind |
-| Top centre | Turn steps (1 Play · 2 Supply · 3 Victory · 4 Discard · 5 Draw) | Plain text; current step in a pill tinted with the active faction's colour |
-| Top centre | Round tracker | Small dark plate, "Round 1 of 20" |
-| Top right | Team scores | Axis/Allies flag tiles with large white numerals |
-| Top right | Input timer | "Your input" over a countdown, white on dark |
-| Right edge | Game history strip | Column of small numbered flag badges, one per event; hover shows the detail popup |
-| Bottom centre | Hand | Fanned full-art cards |
-| Bottom centre | Prompt bar | Wide bar tinted in the active faction's colour, dark text: *"United Kingdom: Choose a card…"* |
-| Bottom left of prompt | Pass/skip | Small dark button, "Skip (discard 1 card)" |
-| Overlays | Modals and popups | Menu style since Nov 2026 — see [In-game modals](#in-game-modals) |
+| Turn steps | `TurnSequenceStrip.cs` | Olive glass pills (82%), 1px Brass edge at 28%, radius 3; Display 17 uppercase Cream with a black outline (they sit on the frame). Current step: faction colour fill with a 2px bright-brass border. Done steps fade to 40%. |
+| Step hint | `TurnSequenceStrip.tscn` | Olive glass 92%, Brass border 40%; title Display 19 uppercase in Cream-hover, rule in Body 15 Cream. Drawn above the round tracker (`z_index 20`). |
+| Round tracker | `RoundTrack.tscn/.cs` | Same plate as a pill; Display 17 uppercase Cream. Last round: amber text and a 2px amber border, as before. |
+| Input buckets | `InputBucket.cs` | Round olive glass rim with a Brass ring at 50% around the faction flag. |
+| Team scores | `FactionsContainer.tscn` | Display 48 Cream numerals with a black outline on the Axis/Allies flag tiles. |
+| Input timer | `InputTimerDisplay.tscn` | Olive glass with a Brass border; title in Caps 13 Muted, uppercase; countdown in Display 28. |
+| Prompt bar | `PlayerAction.tscn`, `TurnFactionTint.cs` | Olive glass 90% (no nine-patch), radius 4 on top; a 3px top border and 1px sides in the **turn faction's colour** (`TurnFactionTint` now tints the border, not the fill); Body 18 Cream text. |
+| Skip buttons | `user_interface.tscn` | The `MenuPanelButton` instances with the nine-patch hidden and compact secondary styles: olive glass, faint Cream border, Brass on hover; Body 15 Cream. |
+| Toolbar strip | `user_interface.tscn` | `GlassPopupPanel` behind the white icons. |
+| Player info (multiplayer) | `PlayerInfoDisplay.tscn` | Glass panel and `InGameTheme`; role in Brass, factions in Muted. |
+| Connection banner | `ConnectionBanner.cs` | `GlassPopupPanel`. |
+| Card-modal text options | `PresentationItemTextButton.cs` | `MenuActionButton.tscn` with the caption wrapping, instead of the old nine-patch button. |
+| Chat | `ChatBox.tscn` | Glass panel and `InGameTheme` (the HUD no longer overrides it back to grey). |
 
-**Type:** no theme is set on the HUD, so text uses Godot's default sans in white or light grey,
-usually with a dark outline or shadow for legibility over the map. Map labels are a separate
-condensed face with a light outline.
+`SimpleModalStyle.tres` is no longer used by anything.
 
-**Colour:** mostly neutral — dark translucent greys (`#1A1A1A` at 60–88%), white/light-grey text,
-white borders at ~25%. The strongest accent is the **active faction's colour** (`TurnFactionTint`,
-80% alpha) on the current turn step and the prompt bar. A few one-off golds and browns appear in
-single widgets.
-
-**Buttons:** the legacy `MenuPanelButton` (nine-patch art frame) and plain default-theme Buttons.
-
-**How it differs from the menu style:**
-- No shared theme, so fonts, sizes and panel styles are set widget by widget.
-- Neutral grey panels instead of olive glass; no brass accent or BrassFrame.
-- The frame and props are textured and skeuomorphic, while the menu is flat glass with a thin trim.
+**Not restyled:** the commander message (tutorial art), the turn badge (art), and the debug
+overlays.
 
 ### In-game modals
 

@@ -15,8 +15,12 @@ public partial class TurnSequenceStrip : Control
 	private Label HintTitle => GetNode<Label>("%HintTitle");
 	private Label HintRule => GetNode<Label>("%HintRule");
 
-	private static readonly Color PillColor = new(0.1f, 0.1f, 0.1f, 0.6f);
-	private static readonly Color CurrentBorderColor = new(1f, 1f, 1f, 0.9f);
+	// The menu palette (STYLE_GUIDE.md): olive glass pills on a faint brass edge, the current one bright brass.
+	private static readonly Color PillColor = new(0.047f, 0.051f, 0.039f, 0.82f);
+	private static readonly Color PillBorderColor = new(0.851f, 0.678f, 0.361f, 0.28f);
+	private static readonly Color CurrentBorderColor = new(0.96f, 0.82f, 0.55f, 1f);
+	private static readonly Color CreamColor = new(0.929f, 0.898f, 0.82f);
+	private static readonly Font PillFont = GD.Load<Font>("res://scenes/menu/theme/MenuFontDisplay.tres");
 	private const float DoneAlpha = 0.4f;
 	private const float HintGap = 4f;
 	private const float HintMaxWidth = 320f;
@@ -104,9 +108,9 @@ public partial class TurnSequenceStrip : Control
 			pill.MouseExited += () => HideHint(index);
 			pill.AddChild(new Label
 			{
-				Text = $"{i + 1}  {TurnStepText.For(_order[i]).Name}",
+				Text = $"{i + 1}  {TurnStepText.For(_order[i]).Name}".ToUpperInvariant(),
 				MouseFilter = MouseFilterEnum.Ignore,
-				LabelSettings = new LabelSettings { FontSize = 15, OutlineSize = 6, OutlineColor = Colors.Black },
+				LabelSettings = new LabelSettings { Font = PillFont, FontSize = 17, FontColor = CreamColor, OutlineSize = 5, OutlineColor = Colors.Black },
 			});
 			Steps.AddChild(pill);
 			_pills.Add(pill);
@@ -123,7 +127,7 @@ public partial class TurnSequenceStrip : Control
 		for (int i = 0; i < _order.Count; i++)
 		{
 			StyleBoxFlat pill = i == current ? PillStyle(factionColor, CurrentBorderColor, 2)
-				: PillStyle(PillColor, Colors.Transparent, 0);
+				: PillStyle(PillColor, PillBorderColor, 1);
 			_pills[i].AddThemeStyleboxOverride("panel", pill);
 			_pills[i].Modulate = new Color(1, 1, 1, i < current ? DoneAlpha : 1);
 		}
@@ -141,7 +145,7 @@ public partial class TurnSequenceStrip : Control
 			BorderColor = border,
 			ContentMarginLeft = 9, ContentMarginRight = 9, ContentMarginTop = 2, ContentMarginBottom = 3,
 		};
-		style.SetCornerRadiusAll(5);
+		style.SetCornerRadiusAll(3);
 		style.SetBorderWidthAll(borderWidth);
 		return style;
 	}
@@ -149,7 +153,7 @@ public partial class TurnSequenceStrip : Control
 	private void ShowHint(int index)
 	{
 		TurnStepText text = TurnStepText.For(_order[index]);
-		HintTitle.Text = text.Optional ? $"{text.Name} Step (optional)" : $"{text.Name} Step";
+		HintTitle.Text = (text.Optional ? $"{text.Name} Step (optional)" : $"{text.Name} Step").ToUpperInvariant();
 		HintRule.Text = WrapToWidth(text.Rule, HintRule.GetThemeFont("font"), HintRule.LabelSettings.FontSize, HintMaxWidth);
 
 		_hinted = index;

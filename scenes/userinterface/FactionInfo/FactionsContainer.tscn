@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dq2mrgd1e7e6" path="res://assets/factions/AlliesFlag.png" id="4_allies"]
 [ext_resource type="PackedScene" path="res://scenes/userinterface/TurnSequence/TurnSequenceStrip.tscn" id="5_strip"]
 [ext_resource type="PackedScene" path="res://scenes/userinterface/RoundTrack/RoundTrack.tscn" id="6_round"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="7_display"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pole"]
 bg_color = Color(0.851, 0.678, 0.361, 1)
@@ -38,14 +39,18 @@ content_margin_right = 0.0
 content_margin_bottom = 0.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_axis"]
+font = ExtResource("7_display")
 resource_local_to_scene = true
 font_size = 48
+font_color = Color(0.929, 0.898, 0.82, 1)
 outline_size = 8
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_allies"]
+font = ExtResource("7_display")
 resource_local_to_scene = true
 font_size = 48
+font_color = Color(0.929, 0.898, 0.82, 1)
 outline_size = 8
 outline_color = Color(0, 0, 0, 1)
 

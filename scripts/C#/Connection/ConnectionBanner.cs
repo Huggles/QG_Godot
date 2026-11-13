@@ -27,7 +27,7 @@ public partial class ConnectionBanner : CanvasLayer
         AddChild(centre);
 
         PanelContainer panel = new() { CustomMinimumSize = new Vector2(520, 0) };
-        panel.AddThemeStyleboxOverride("panel", GD.Load<StyleBox>("res://SimpleModalStyle.tres"));
+        panel.AddThemeStyleboxOverride("panel", GD.Load<StyleBox>("res://scenes/menu/theme/GlassPopupPanel.tres"));
         centre.AddChild(panel);
 
         MarginContainer margin = new();

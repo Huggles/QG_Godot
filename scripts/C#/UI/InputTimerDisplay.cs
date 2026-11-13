@@ -108,7 +108,7 @@ public partial class InputTimerDisplay : Control, LoadableUI
 		}
 
 		_remaining = seconds;
-		TitleLabel.Text = title;
+		TitleLabel.Text = title.ToUpperInvariant();
 		Render();
 		Panel.Visible = true;
 		SetProcess(true);

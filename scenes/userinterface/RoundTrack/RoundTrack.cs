@@ -13,6 +13,8 @@ public partial class RoundTrack : PanelContainer
 
 	private static readonly Color AmberColor = new("#fac775");
 	private static readonly Color AmberBorderColor = new("#ef9f27");
+	private static readonly Color BrassEdgeColor = new(0.851f, 0.678f, 0.361f, 0.28f);
+	private static readonly Color CreamColor = new(0.929f, 0.898f, 0.82f);
 
 	private StyleBoxFlat _plate;
 	private (int Round, int Max)? _painted;
@@ -63,9 +65,9 @@ public partial class RoundTrack : PanelContainer
 	{
 		// Styled like a turn-step pill; the last round borrows the current step's 2px border, in amber.
 		bool last = round >= max;
-		_plate.BorderColor = AmberBorderColor;
-		_plate.SetBorderWidthAll(last ? 2 : 0);
-		Heading.LabelSettings.FontColor = last ? AmberColor : Colors.White;
-		Heading.Text = last ? $"Last round {round}" : $"Round {round} of {max}";
+		_plate.BorderColor = last ? AmberBorderColor : BrassEdgeColor;
+		_plate.SetBorderWidthAll(last ? 2 : 1);
+		Heading.LabelSettings.FontColor = last ? AmberColor : CreamColor;
+		Heading.Text = (last ? $"Last round {round}" : $"Round {round} of {max}").ToUpperInvariant();
 	}
 }

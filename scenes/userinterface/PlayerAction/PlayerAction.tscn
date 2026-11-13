@@ -2,12 +2,24 @@
 
 [ext_resource type="Script" uid="uid://dee08ewurrpis" path="res://scripts/C#/UI/PlayerActionLabel.cs" id="1_gvner"]
 [ext_resource type="Script" uid="uid://ha61ixra4smf" path="res://scripts/C#/Menu/MenuPanel.cs" id="1_pjedk"]
-[ext_resource type="LabelSettings" uid="uid://3d1gcyuerlkv" path="res://scenes/userinterface/FactionInfo/ClearLabelSettingsSmall.tres" id="2_pjedk"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontBody.tres" id="2_body"]
 [ext_resource type="Texture2D" uid="uid://c5gyxnv5rt3a2" path="res://assets/textures/Other/Menu/Menu9PatchImage2.png" id="4_fchd6"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_n3k1v"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.1, 0.1, 0.1, 0.6)
+bg_color = Color(0.047, 0.051, 0.039, 0.9)
+border_width_left = 1
+border_width_top = 3
+border_width_right = 1
+border_color = Color(0.851, 0.678, 0.361, 0.6)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+
+[sub_resource type="LabelSettings" id="LabelSettings_prompt"]
+resource_local_to_scene = true
+font = ExtResource("2_body")
+font_size = 18
+font_color = Color(0.929, 0.898, 0.82, 1)
 
 [node name="PlayerAction" type="Control" unique_id=2012666353]
 z_index = 100
@@ -38,10 +50,10 @@ script = ExtResource("1_pjedk")
 
 [node name="BackgroundContainer" type="MarginContainer" parent="MenuPanel" unique_id=836205175]
 layout_mode = 2
-theme_override_constants/margin_left = 1
-theme_override_constants/margin_top = 1
-theme_override_constants/margin_right = 1
-theme_override_constants/margin_bottom = 1
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="Panel" type="Panel" parent="MenuPanel/BackgroundContainer" unique_id=1617866188]
 layout_mode = 2
@@ -52,13 +64,14 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 1
 text = "ABC"
-label_settings = ExtResource("2_pjedk")
+label_settings = SubResource("LabelSettings_prompt")
 horizontal_alignment = 1
 vertical_alignment = 1
 text_overrun_behavior = 3
 script = ExtResource("1_gvner")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="MenuPanel" unique_id=779728291]
+visible = false
 clip_contents = true
 layout_mode = 2
 texture = ExtResource("4_fchd6")
