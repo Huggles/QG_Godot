@@ -32,18 +32,6 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6_root")
 
-[node name="CommanderHead" type="TextureRect" parent="." unique_id=205884557]
-layout_mode = 1
-anchors_preset = -1
-offset_left = 40.0
-offset_top = 40.0
-offset_right = 460.0
-offset_bottom = 600.0
-mouse_filter = 2
-texture = ExtResource("1_head")
-expand_mode = 1
-stretch_mode = 5
-
 [node name="TextModal" type="Container" parent="." unique_id=1007079384]
 layout_mode = 1
 offset_left = 400.0
@@ -128,3 +116,15 @@ axis_stretch_vertical = 1
 script = ExtResource("3_frame_script")
 TileScale = 0.16
 metadata/_custom_type_script = "uid://c6xo03jw6k6gc"
+
+[node name="CommanderHead" type="TextureRect" parent="." unique_id=205884557]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 0.0
+offset_top = 40.0
+offset_right = 420.0
+offset_bottom = 600.0
+mouse_filter = 2
+texture = ExtResource("1_head")
+expand_mode = 1
+stretch_mode = 5
