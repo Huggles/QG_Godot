@@ -12,6 +12,8 @@ public partial class FactionIntro : CanvasLayer
 {
     private const float ZoomFactor = 2.5f;          // relative to the framed board
     private static readonly Vector2 CapitalAt = new(0.30f, 0.54f); // where the capital lands on screen
+    // Capitals near the right edge of the board, where the text goes on the left instead.
+    private static readonly HashSet<Faction> TextOnLeft = new() { Faction.JAPAN };
     private const double FlightSeconds = 1.5;
     private const double HoldSeconds = 3.4;
     private const double FadeSeconds = 0.35;
@@ -38,6 +40,8 @@ public partial class FactionIntro : CanvasLayer
     private ColorRect _factionBar;
     private Control _ornament, _who;
     private CountryScene _focus;
+    private bool _left;
+    private Control _star, _hair;
     private Control _pulse;
     private float _pulsePhase;
 
@@ -84,8 +88,11 @@ public partial class FactionIntro : CanvasLayer
         Fill(faction, data);
         Vector2 view = GetViewport().GetVisibleRect().Size;
         Vector2 zoom = _homeZoom * ZoomFactor;
+        bool left = TextOnLeft.Contains(faction);
+        if (left != _left) SwitchSide(left);
+        Vector2 capitalAt = left ? new Vector2(1 - CapitalAt.X, CapitalAt.Y) : CapitalAt;
         Vector2 star = StarPoint(capital);
-        Vector2 target = ClampToMap(star + (new Vector2(0.5f, 0.5f) - CapitalAt) * view / zoom, view / (2 * zoom));
+        Vector2 target = ClampToMap(star + (new Vector2(0.5f, 0.5f) - capitalAt) * view / zoom, view / (2 * zoom));
         _cameraTween = MoveCamera(target, zoom, FlightSeconds);
         if (!await Wait(FlightSeconds)) return false;
 
@@ -278,6 +285,8 @@ public partial class FactionIntro : CanvasLayer
         ornament.AddChild(_factionBar);
         ornament.AddChild(star);
         ornament.AddChild(hair);
+        _star = star;
+        _hair = hair;
         _ornament = ornament;
         _card.AddChild(ornament);
 
@@ -292,6 +301,27 @@ public partial class FactionIntro : CanvasLayer
         _card.AddChild(who);
     }
 
+    /// <summary>Mirrors the card and the shade; the shade swaps sides while faded out mid-flight.</summary>
+    private void SwitchSide(bool left)
+    {
+        _left = left;
+        HorizontalAlignment align = left ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+        _kicker.HorizontalAlignment = align;
+        _faction.HorizontalAlignment = align;
+        BoxContainer.AlignmentMode box = left ? BoxContainer.AlignmentMode.End : BoxContainer.AlignmentMode.Begin;
+        ((HBoxContainer)_ornament).Alignment = box;
+        ((HBoxContainer)_who).Alignment = box;
+        _ornament.MoveChild(_factionBar, left ? 2 : 0);
+        _ornament.MoveChild(_hair, left ? 0 : 2);
+        _ornament.MoveChild(_star, 1);
+        _who.MoveChild(_aiTag, left ? 0 : 1);
+
+        Tween t = CreateTween();
+        t.TweenProperty(_shade, "modulate:a", 0.0, 0.5);
+        t.TweenCallback(Callable.From(_shade.QueueRedraw));
+        t.TweenProperty(_shade, "modulate:a", 1.0, 0.7);
+    }
+
     private void Fill(Faction faction, FactionData data)
     {
         _kicker.Text = data.Team ?? "";
@@ -303,7 +333,7 @@ public partial class FactionIntro : CanvasLayer
         _aiTag.Visible = ai;
     }
 
-    /// <summary>The card sits to the right of the capital at <paramref name="at"/>, kept on screen.</summary>
+    /// <summary>The card sits beside the capital at <paramref name="at"/>, on its side, kept on screen.</summary>
     private void Place(Vector2 at, Vector2 view)
     {
         _pulse.Position = at - _pulse.Size / 2 - new Vector2(0, 3); // optical centre of the star art
@@ -311,7 +341,7 @@ public partial class FactionIntro : CanvasLayer
 
         _card.ResetSize();
         Vector2 size = _card.GetCombinedMinimumSize();
-        float x = Mathf.Min(at.X + gap, view.X - size.X - 48);
+        float x = _left ? Mathf.Max(48, at.X - gap - size.X) : Mathf.Min(at.X + gap, view.X - size.X - 48);
         float y = Mathf.Clamp(at.Y - size.Y / 2, BarHeight + 16, view.Y - BarHeight - 16 - size.Y);
         _card.Position = new Vector2(x, y);
     }
@@ -343,7 +373,7 @@ public partial class FactionIntro : CanvasLayer
         _pulse.DrawArc(_pulse.Size / 2, 42f + 28f * _pulsePhase, 0, Mathf.Tau, 64, Spark with { A = 0.7f * (1f - _pulsePhase) }, 2, true);
     }
 
-    // Horizontal bands from clear to near-black scrim; vertex colours do the gradient.
+    // Bands from clear to near-black scrim towards the text side; vertex colours do the gradient.
     private void DrawShade()
     {
         float[] at = { 0f, 0.22f, 0.46f, 0.78f, 1f };
@@ -352,8 +382,9 @@ public partial class FactionIntro : CanvasLayer
         for (int i = 0; i < at.Length - 1; i++)
         {
             Color a = Scrim with { A = alpha[i] }, b = Scrim with { A = alpha[i + 1] };
+            float x0 = _left ? (1 - at[i]) * size.X : at[i] * size.X, x1 = _left ? (1 - at[i + 1]) * size.X : at[i + 1] * size.X;
             _shade.DrawPolygon(
-                new[] { new Vector2(at[i] * size.X, 0), new Vector2(at[i + 1] * size.X, 0), new Vector2(at[i + 1] * size.X, size.Y), new Vector2(at[i] * size.X, size.Y) },
+                new[] { new Vector2(x0, 0), new Vector2(x1, 0), new Vector2(x1, size.Y), new Vector2(x0, size.Y) },
                 new[] { a, b, b, a });
         }
     }
