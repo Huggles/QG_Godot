@@ -18,7 +18,6 @@ public partial class FactionIntro : CanvasLayer
     private const float BarHeight = 96f;
 
     private static readonly Color Brass = new(0.851f, 0.678f, 0.361f);
-    private static readonly Color Spark = new(1f, 0.93f, 0.74f);
     private static readonly Color Cream = new(0.929f, 0.898f, 0.82f);
     private static readonly Color CreamHover = new(0.96f, 0.82f, 0.55f);
     private static readonly Color Muted = new(0.69f, 0.66f, 0.58f);
@@ -33,12 +32,10 @@ public partial class FactionIntro : CanvasLayer
 
     private ColorRect _barTop, _barBottom;
     private Control _shade;
-    private Control _marker, _leader;
     private VBoxContainer _card;
     private Label _kicker, _faction, _player, _aiTag;
     private ColorRect _factionBar;
     private Control _ornament, _who;
-    private float _ringScale = 1f, _ringAlpha, _pulse;
     private CountryScene _focus;
 
     /// <summary>Plays the intro on this peer and returns when it is over; a no-op without a screen.</summary>
@@ -97,7 +94,7 @@ public partial class FactionIntro : CanvasLayer
 
         _beatTween?.Kill();
         Tween fade = CreateTween().SetParallel();
-        foreach (CanvasItem item in new CanvasItem[] { _card, _marker, _leader })
+        foreach (CanvasItem item in new CanvasItem[] { _card })
             fade.TweenProperty(item, "modulate:a", 0.0, FadeSeconds);
         return await Wait(FadeSeconds);
     }
@@ -108,7 +105,7 @@ public partial class FactionIntro : CanvasLayer
         _beatTween?.Kill();
         _cameraTween?.Kill();
         Tween fade = CreateTween().SetParallel();
-        foreach (CanvasItem item in new CanvasItem[] { _card, _marker, _leader, _shade })
+        foreach (CanvasItem item in new CanvasItem[] { _card, _shade })
             fade.TweenProperty(item, "modulate:a", 0.0, FadeSeconds);
         fade.TweenProperty(_barTop, "position:y", -BarHeight, 0.8).SetTrans(Godot.Tween.TransitionType.Cubic);
         fade.TweenProperty(_barBottom, "position:y", GetViewport().GetVisibleRect().Size.Y, 0.8).SetTrans(Godot.Tween.TransitionType.Cubic);
@@ -139,8 +136,6 @@ public partial class FactionIntro : CanvasLayer
 
     public override void _Process(double delta)
     {
-        _pulse = (_pulse + (float)delta / 2.4f) % 1f;
-        _marker?.QueueRedraw();
         if (_focus != null && IsInstanceValid(_focus)) Place(StarOnScreen(_focus), GetViewport().GetVisibleRect().Size);
     }
 
@@ -233,12 +228,6 @@ public partial class FactionIntro : CanvasLayer
         _shade.Draw += DrawShade;
         AddChild(_shade);
 
-        _marker = new Control { Size = new Vector2(124, 124), PivotOffset = new Vector2(62, 62), MouseFilter = Control.MouseFilterEnum.Ignore };
-        _marker.Draw += DrawMarker;
-        AddChild(_marker);
-
-        _leader = new ColorRect { Color = Brass with { A = 0.75f }, Size = new Vector2(10, 2), MouseFilter = Control.MouseFilterEnum.Ignore };
-        AddChild(_leader);
 
         BuildCard();
 
@@ -250,7 +239,7 @@ public partial class FactionIntro : CanvasLayer
         skip.HorizontalAlignment = HorizontalAlignment.Right;
         _barBottom.AddChild(skip);
 
-        foreach (CanvasItem item in new CanvasItem[] { _card, _marker, _leader }) item.Modulate = Colors.White with { A = 0 };
+        _card.Modulate = Colors.White with { A = 0 };
     }
 
     private ColorRect Bar(Vector2 position, float width)
@@ -305,13 +294,10 @@ public partial class FactionIntro : CanvasLayer
         _aiTag.Visible = ai;
     }
 
-    /// <summary>Capital marker at <paramref name="at"/>; the card sits to its right, kept on screen.</summary>
+    /// <summary>The card sits to the right of the capital at <paramref name="at"/>, kept on screen.</summary>
     private void Place(Vector2 at, Vector2 view)
     {
-        _marker.Position = at - _marker.Size / 2;
         float gap = view.X * 0.075f;
-        _leader.Position = new Vector2(at.X + 70, at.Y - 1);
-        _leader.Size = new Vector2(Mathf.Max(0, gap - 86), 2);
 
         _card.ResetSize();
         Vector2 size = _card.GetCombinedMinimumSize();
@@ -325,18 +311,12 @@ public partial class FactionIntro : CanvasLayer
         _beatTween?.Kill();
         foreach (CanvasItem item in new CanvasItem[] { _kicker, _faction, _ornament, _who }) item.Modulate = Colors.White with { A = 0 };
         _card.Modulate = Colors.White;
-        _marker.Modulate = Colors.White;
-        _leader.Modulate = Colors.White;
-        _leader.Scale = new Vector2(0, 1);
 
         Tween t = CreateTween().SetParallel();
-        t.TweenMethod(Callable.From<float>(v => { _ringScale = v; _ringAlpha = Mathf.InverseLerp(2.4f, 1f, v); }), 2.4f, 1f, 0.7)
-         .SetTrans(Godot.Tween.TransitionType.Cubic).SetEase(Godot.Tween.EaseType.Out);
-        t.TweenProperty(_leader, "scale:x", 1.0, 0.5).SetDelay(0.3).SetTrans(Godot.Tween.TransitionType.Cubic).SetEase(Godot.Tween.EaseType.Out);
-        Step(t, _kicker, 0.35);
-        Step(t, _faction, 0.5);
-        Step(t, _ornament, 0.8);
-        Step(t, _who, 1.05);
+        Step(t, _kicker, 0.1);
+        Step(t, _faction, 0.25);
+        Step(t, _ornament, 0.55);
+        Step(t, _who, 0.8);
         _beatTween = t;
     }
 
@@ -358,16 +338,6 @@ public partial class FactionIntro : CanvasLayer
                 new[] { new Vector2(at[i] * size.X, 0), new Vector2(at[i + 1] * size.X, 0), new Vector2(at[i + 1] * size.X, size.Y), new Vector2(at[i] * size.X, size.Y) },
                 new[] { a, b, b, a });
         }
-    }
-
-    private void DrawMarker()
-    {
-        Vector2 c = _marker.Size / 2;
-        float r = 34f * _ringScale;
-        _marker.DrawArc(c, r + 6, 0, Mathf.Tau, 64, Brass with { A = 0.18f * _ringAlpha }, 8, true);
-        _marker.DrawArc(c, r, 0, Mathf.Tau, 64, Brass with { A = _ringAlpha }, 3, true);
-        if (_ringAlpha >= 1f)
-            _marker.DrawArc(c, 34f * (1f + 0.8f * _pulse), 0, Mathf.Tau, 64, Spark with { A = 0.7f * (1f - _pulse) }, 2, true);
     }
 
     // ── Type ──────────────────────────────────────────────────────────────
