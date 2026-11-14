@@ -144,7 +144,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		_tcs = new TaskCompletionSource<ModalResult>();
 
 		HandlePresentationItems(config.Items, config.Mode != ModalSelectionMode.Display);
-		TitleText.Text = config.Title;
+		TitleText.Text = config.Title.ToUpperInvariant();
 
 		ConfirmButton.Visible = config.ShowApplyButton;
 		// Through UpdateConfirmButton rather than setting the plain label, so the count is right from the
@@ -181,7 +181,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		// A burn already under way owns the closing — it ends when the cards are gone, not on a clock.
 		// The timer still runs for a burn-away modal, because one that never got room on screen never
 		// starts its burn, and something is awaiting it.
-		if (!_closed && !_burning) Close(ModalResult.Cancelled);
+		if (!_closed && !_burning) Close(ModalResult.Cancelled, dock: true);
 	}
 
 	private void ShowExitButton()
@@ -201,6 +201,8 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 	{
 		if (_burning || _closed || _activeConfig?.BurnAway != true) return;
 		if (!GameSettings.IsAutoDismissModal) return;
+		// A docking modal burns in the dock at the end of its linger, not here; the timer closes it.
+		if (_activeConfig.Dock && RevealDock.CanAccept) return;
 
 		_burning = true;
 
@@ -213,17 +215,25 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 			return;
 		}
 
+		Tween burn = BurnItems(seconds);
+		if (burn == null) Close(ModalResult.Cancelled);
+		else burn.Finished += () => { if (!_closed) Close(ModalResult.Cancelled); };
+	}
+
+	/// <summary>Burn every item. Returns the last burn's tween (they all run the same length), or null.</summary>
+	internal Tween BurnItems(float seconds)
+	{
 		Tween burn = null;
 		foreach (Control control in PresentationItemControls)
 		{
 			if (!IsInstanceValid(control)) continue;
 			burn = BurnEffect.Attach(control).Play(seconds);
 		}
-
-		// They all run the same length, so whichever came last ends with the rest of them.
-		if (burn == null) Close(ModalResult.Cancelled);
-		else burn.Finished += () => { if (!_closed) Close(ModalResult.Cancelled); };
+		return burn;
 	}
+
+	/// <summary>Whether the dock should burn this one's items before it leaves.</summary>
+	internal bool BurnsInDock => _activeConfig?.BurnAway == true;
 
 	// ── Placement, parking and recall ────────────────────────────────────────
 
@@ -338,9 +348,9 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		}
 
 		// The grid never scrolls sideways, so a row of cards above 100% Pop-up Card Size is cut to what
-		// fits across the screen inside the frame (MenuPanel's 50px margins, plus the scrollbar). The card
+		// fits across the screen inside the frame (the 32px content margins, plus the scrollbar). The card
 		// area is at most one and a half full-size cards tall, so bigger cards scroll rather than grow the modal.
-		const float frameWidth = 120f;
+		const float frameWidth = 90f;
 		float maxCardAreaHeight = PresentationItemCard.FullCardSize.Y * 1.5f;
 		Vector2 itemSize = PresentationItemControls[0].Size;
 		Vector2 screen = GetViewportRect().Size;
@@ -422,9 +432,11 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		if (ConfirmButton == null || _activeConfig == null) return;
 		int count = _activeConfig.Mode == ModalSelectionMode.Reorder ? _orderedItems.Count : _selectedItems.Count;
 		ConfirmButton.Disabled = count < _activeConfig.MinSelections;
-		ConfirmButton.Text = _activeConfig.MinSelections > 0
-			? $"{_activeConfig.ApplyLabel} ({count}/{_activeConfig.MinSelections})"
-			: $"{_activeConfig.ApplyLabel} ({count})";
+		ConfirmButton.Text = count == 0 && _activeConfig.EmptyApplyLabel != null
+			? _activeConfig.EmptyApplyLabel.ToUpperInvariant()
+			: _activeConfig.MinSelections > 0
+			? $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count}/{_activeConfig.MinSelections})"
+			: $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count})";
 	}
 
 	// ── Button handlers ──────────────────────────────────────────────────────
@@ -471,7 +483,8 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		Dismiss();
 	}
 
-	private void Close(ModalResult result)
+	/// <param name="dock">Timed out on its own: hand it to <see cref="RevealDock"/> if it asked to dock.</param>
+	private void Close(ModalResult result, bool dock = false)
 	{
 		if (_closed) return;
 		_closed = true;
@@ -484,6 +497,15 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		Host?.OnModalResolved(this);
 
 		_tcs?.TrySetResult(result);
+
+		// Docked rather than faded: the dock reparents it out of the row, which frees the slot at once.
+		if (dock && _activeConfig?.Dock == true && Visible && IsInsideTree() && RevealDock.CanAccept)
+		{
+			_activeTween?.Kill();
+			IsFadingOut = false;
+			RevealDock.Current.Accept(this);
+			return;
+		}
 
 		// Freed on the way out rather than at once, so an answered modal still fades like it always did.
 		// Only a modal that is actually on screen holds a slot worth waiting for; one closed while hidden

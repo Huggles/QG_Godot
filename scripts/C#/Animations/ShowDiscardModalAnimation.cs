@@ -42,6 +42,6 @@ public class ShowDiscardModalAnimation : ShowCardsModalAnimation
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(_cardIds, false);
         // Burns rather than only auto-dismissing: the cards are gone from the hand, so they leave the
         // screen the same way. The burn is also what times the modal now - it closes when nothing is left.
-        await ModalStack.Current.Show(ModalConfig.Display(_title, presentationItems).WithBurnAway());
+        await ModalStack.Current.Show(ModalConfig.Display(_title, presentationItems).WithBurnAway().WithDock());
     }
 }

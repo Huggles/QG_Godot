@@ -176,8 +176,15 @@ public sealed partial class BoardState
 
         int topCardId = piles.Deck[0];
         piles.Deck.RemoveAt(0);
-        piles.Hand.Add(topCardId);
+        AddToHand(piles, topCardId);
         return topCardId;
+    }
+
+    /// <summary>Into the hand, stamped with the turn so the hand display can mark it as recently drawn.</summary>
+    public void AddToHand(FactionRecord piles, int cardId)
+    {
+        piles.Hand.Add(cardId);
+        ForCard(cardId).EnteredHandInTurn = GameTurn;
     }
 
     public List<int> DrawCards(Faction faction, int number)
@@ -223,7 +230,7 @@ public sealed partial class BoardState
 
         int cardId = piles.Deck[index];
         piles.Deck.RemoveAt(index);
-        piles.Hand.Add(cardId);
+        AddToHand(piles, cardId);
         return cardId;
     }
 

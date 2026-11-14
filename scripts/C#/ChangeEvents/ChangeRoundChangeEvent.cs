@@ -82,7 +82,8 @@ public partial class ChangeRoundChangeEvent : ChangeEvent
         new ShowTurnBadgeAnimation(GameFlow.Instance.CurrentFaction)
     };
 
-    public override bool ToHistoryItem => true;
+    // The turn badge already announces it; a history row saying only the number adds nothing.
+    public override bool ToHistoryItem => false;
 
     public override string SummaryText() => $"Game turn advanced to {NewTurn}";
 }

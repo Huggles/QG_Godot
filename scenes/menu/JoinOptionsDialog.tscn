@@ -49,9 +49,10 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="CancelButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0"]
+theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "Cancel"
+text = "CANCEL"
 
 [editable path="Root/Centre/Panel"]

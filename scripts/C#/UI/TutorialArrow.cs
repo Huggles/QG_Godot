@@ -43,6 +43,14 @@ public partial class TutorialArrow : Sprite2D
 
     private const float FadeSeconds = 0.25f;
 
+    /// <summary>
+    /// The halo behind the arrow: how far it spreads past the outline in screen pixels, how many
+    /// copies make up the ring, and how dark each one is. Overlapping copies darken towards the edge.
+    /// </summary>
+    private const float ShadowRadius = 4f;
+    private const int ShadowCopies = 8;
+    private const float ShadowAlpha = 0.16f;
+
     private TutorialArrowData _spec;
     private Tween _fadeTween;
     private float _bobPhase;
@@ -51,6 +59,7 @@ public partial class TutorialArrow : Sprite2D
     {
         Current = this;
         ApplyGeometry();
+        CreateShadow();
 
         Visible = false;
         Modulate = new Color(Modulate, 0f);
@@ -79,6 +88,28 @@ public partial class TutorialArrow : Sprite2D
         Centered = false;
         Offset = new Vector2(-textureSize.X * (1f - TipInset), -textureSize.Y / 2f);
         Scale = Vector2.One * (ArrowLength / textureSize.X);
+    }
+
+    /// <summary>
+    /// A ring of faint black copies of the arrow drawn behind it, which reads as a soft halo. Children,
+    /// so they inherit the fade, the sizing and the heading; a ring looks the same at any heading, so
+    /// the only correction is dividing the screen radius by the node's scale.
+    /// </summary>
+    private void CreateShadow()
+    {
+        for (int i = 0; i < ShadowCopies; i++)
+        {
+            float angle = Mathf.Tau * i / ShadowCopies;
+            AddChild(new Sprite2D
+            {
+                Texture = Texture,
+                Centered = false,
+                Offset = Offset,
+                Position = Vector2.Right.Rotated(angle) * ShadowRadius / Scale.X,
+                ShowBehindParent = true,
+                Modulate = new Color(0f, 0f, 0f, ShadowAlpha),
+            });
+        }
     }
 
     /// <summary>

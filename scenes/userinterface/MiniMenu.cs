@@ -289,6 +289,8 @@ public partial class MiniMenu : Control
 	{
 		VisibilityModalOpen = !VisibilityModalOpen;
 		MiniMenuModal.Visible = VisibilityModalOpen;
+		// The popup opens upward over the chat; clicks follow tree order, so z_index alone is not enough.
+		if (VisibilityModalOpen) MoveToFront();
 	}
 
 	/// <summary>

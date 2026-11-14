@@ -58,22 +58,6 @@ public partial class SkirmishScreen : Control
 	private Faction? _hovered;
 
 	/// <summary>
-	/// True while the picked scenario runs a tutorial script, which plays every faction itself.
-	///
-	/// A lock rather than a filter: this screen's picker is the only way to start the tutorial in the
-	/// whole GUI, so hiding tutorials here would fix the bot problem by deleting the feature. Instead
-	/// the seats go read-only and every faction is the human's — which is exactly what this screen did
-	/// before it had a grid, so the tutorial path is unchanged.
-	///
-	/// It also keeps AiSeatRuntime away from its own refusal branch: with no AI seats to install it
-	/// never reaches the "a tutorial is armed" error, which is a message a player cannot act on.
-	///
-	/// Lives in the EFFECTIVE view rather than in <see cref="_humanFactions"/>, so a player's picks
-	/// survive selecting a tutorial and switching back.
-	/// </summary>
-	private bool _scriptedScenario;
-
-	/// <summary>
 	/// Set once a scene change is on its way, and never cleared — this node is leaving.
 	///
 	/// Needed because MenuPanelButton emits Pressed even while Disabled (its _GuiInput blocks the mouse
@@ -130,8 +114,7 @@ public partial class SkirmishScreen : Control
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 
-		// Tutorials are included: this is the only route to one in the GUI. A scripted scenario locks the
-		// seat grid instead — see _scriptedScenario.
+		// Tutorials are left out: they have their own menu, which needs no setup screen.
 		MenuScenarioPicker.Populate(_scenarioPicker, gameManager.AvailableScenarios);
 
 		if (gameManager.SelectedScenario != null)
@@ -150,7 +133,6 @@ public partial class SkirmishScreen : Control
 			}
 
 			UpdateDescription(gameManager.SelectedScenario.Description);
-			_scriptedScenario = gameManager.SelectedScenario.IsTutorial;
 			_openingDiscardCheckBox.ButtonPressed = gameManager.SelectedScenario.OpeningDiscard;
 			_expansionToggles.Set(gameManager.SelectedScenario.Expansions);
 		}
@@ -258,19 +240,11 @@ public partial class SkirmishScreen : Control
 		_seats[faction] = new Seat { Flag = flag, Name = name, Controller = controller, Click = click, Style = style };
 	}
 
-	/// <summary>
-	/// Who plays this faction, once the scripted-scenario lock is taken into account.
-	///
-	/// The seam the lock lives on: <see cref="_humanFactions"/> keeps the player's real picks untouched
-	/// while a tutorial is selected, so switching back to an ordinary scenario restores them.
-	/// </summary>
-	private bool EffectiveHuman(Faction faction)
-		=> _scriptedScenario || _humanFactions.Contains(faction);
+	/// <summary>Whether the player, rather than the AI, plays this faction.</summary>
+	private bool EffectiveHuman(Faction faction) => _humanFactions.Contains(faction);
 
 	private void OnSeatPressed(Faction faction)
 	{
-		if (_scriptedScenario) return;
-
 		if (!_humanFactions.Remove(faction)) _humanFactions.Add(faction);
 		RenderSeat(faction);
 		RenderSummary();
@@ -283,9 +257,7 @@ public partial class SkirmishScreen : Control
 		if (_seatsLabel != null)
 			_seatsLabel.Text = "YOUR FACTIONS";
 		if (_seatsHint != null)
-			_seatsHint.Text = _scriptedScenario
-				? "This scenario is scripted and plays every faction."
-				: "Click a faction to hand it to the AI, or take it back.";
+			_seatsHint.Text = "Click a faction to hand it to the AI, or take it back.";
 		RenderSummary();
 	}
 
@@ -316,7 +288,7 @@ public partial class SkirmishScreen : Control
 
 		bool mine = EffectiveHuman(faction);
 
-		bool hovered = _hovered == faction && !_scriptedScenario;
+		bool hovered = _hovered == faction;
 
 		seat.Controller.Text = mine ? "YOU" : "AI";
 		seat.Controller.AddThemeColorOverride("font_color", mine ? MenuBrass : MenuMuted);
@@ -326,10 +298,6 @@ public partial class SkirmishScreen : Control
 		seat.Style.BorderColor = mine
 			? new Color(MenuBrass, hovered ? 1f : 0.75f)
 			: new Color(1, 1, 1, hovered ? 0.35f : 0.08f);
-
-		// Read-only while a tutorial is selected. Disabled rather than merely ignored in OnSeatPressed
-		// so the row stops taking focus and its hover tint stops implying a choice that is not there.
-		seat.Click.Disabled = _scriptedScenario;
 	}
 
 	// ── Scenario, seed, start ─────────────────────────────────────────────────
@@ -337,8 +305,8 @@ public partial class SkirmishScreen : Control
 	private void OnScenarioSelected(long selectedIndex)
 	{
 		var gameManager = GetNode<GameManager>("/root/GameManager");
-		// The item's id, not its position — see MenuScenarioPicker. This picker keeps tutorials but
-		// still drops debug scenarios in a release build, so the two genuinely differ there.
+		// The item's id, not its position — see MenuScenarioPicker. This picker drops tutorials, and
+		// debug scenarios in a release build, so the two genuinely differ.
 		int index = MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, (int)selectedIndex);
 		if (index < 0 || index >= gameManager.AvailableScenarios.Count)
 			return;
@@ -353,7 +321,6 @@ public partial class SkirmishScreen : Control
 		_openingDiscardCheckBox.ButtonPressed = gameManager.AvailableScenarios[index].OpeningDiscard;
 		_expansionToggles.Set(gameManager.AvailableScenarios[index].Expansions);
 
-		_scriptedScenario = gameManager.AvailableScenarios[index].IsTutorial;
 		RenderAllSeats();
 	}
 
@@ -442,7 +409,9 @@ public partial class SkirmishScreen : Control
 
 		List<PlayerFactionAssignment> assignments = new()
 		{
-			new PlayerFactionAssignment(1, humanFactions),
+			// Named, so the human's factions read as theirs beside the bots' "AI" (pennant plates, history).
+			new PlayerFactionAssignment(1, humanFactions,
+				SteamworksApi.IsAvailable ? SteamworksApi.Instance.LocalPersonaName : "You"),
 		};
 
 		for (int i = 0; i < aiFactions.Count; i++)

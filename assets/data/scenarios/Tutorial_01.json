@@ -1,5 +1,5 @@
 {
-  "title": "Tutorial 1 — Your First Turn",
+  "title": "Tutorial 1: Your First Turn",
   "description": "Three guided rounds. Fixed hands, no surprises, and the commander tells you what to do.",
   "tutorial": "res://assets/data/tutorials/Tutorial_01.json",
   "startingFaction": "GERMANY",

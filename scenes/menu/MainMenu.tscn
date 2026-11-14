@@ -109,6 +109,10 @@ layout_mode = 2
 theme_type_variation = &"MenuSection"
 text = "PLAY"
 
+[node name="TutorialButton" parent="Column" instance=ExtResource("5_cmd")]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="SkirmishButton" parent="Column" unique_id=409954901 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
@@ -154,3 +158,19 @@ layout_mode = 2
 [node name="QuitButton" parent="Column" unique_id=1588731681 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="VersionLabel" type="Label" parent="." unique_id=1402117016]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -44.0
+offset_right = 324.0
+offset_bottom = -20.0
+grow_vertical = 0
+mouse_filter = 2
+theme = ExtResource("4_theme")
+theme_type_variation = &"MenuSection"
+vertical_alignment = 2

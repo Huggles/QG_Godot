@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dq2mrgd1e7e6" path="res://assets/factions/AlliesFlag.png" id="4_allies"]
 [ext_resource type="PackedScene" path="res://scenes/userinterface/TurnSequence/TurnSequenceStrip.tscn" id="5_strip"]
 [ext_resource type="PackedScene" path="res://scenes/userinterface/RoundTrack/RoundTrack.tscn" id="6_round"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="7_display"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pole"]
 bg_color = Color(0.851, 0.678, 0.361, 1)
@@ -38,14 +39,18 @@ content_margin_right = 0.0
 content_margin_bottom = 0.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_axis"]
+font = ExtResource("7_display")
 resource_local_to_scene = true
 font_size = 48
+font_color = Color(0.929, 0.898, 0.82, 1)
 outline_size = 8
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_allies"]
+font = ExtResource("7_display")
 resource_local_to_scene = true
 font_size = 48
+font_color = Color(0.929, 0.898, 0.82, 1)
 outline_size = 8
 outline_color = Color(0, 0, 0, 1)
 
@@ -64,7 +69,7 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -335.0
-offset_top = -1.0
+offset_top = 0.0
 offset_right = 335.0
 offset_bottom = 89.0
 grow_horizontal = 2
@@ -73,7 +78,7 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_plate")
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=841353709]
 layout_mode = 2
 theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 0
+theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
@@ -89,14 +94,11 @@ layout_mode = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 60)
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = 595.0
-offset_top = 1.0
-offset_right = 495.0
-offset_bottom = 61.0
-grow_horizontal = 2
+anchors_preset = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 106.0
+offset_bottom = 66.0
 mouse_filter = 2
 texture = ExtResource("3_axis")
 expand_mode = 1
@@ -120,14 +122,11 @@ vertical_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 60)
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = 735.0
-offset_top = 1.0
-offset_right = 585.0
-offset_bottom = 61.0
-grow_horizontal = 2
+anchors_preset = 0
+offset_left = 112.0
+offset_top = 6.0
+offset_right = 212.0
+offset_bottom = 66.0
 mouse_filter = 2
 texture = ExtResource("4_allies")
 expand_mode = 1
@@ -152,18 +151,19 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = 495.0
-offset_top = 66.0
-offset_right = 710.0
-offset_bottom = 114.0
+offset_left = -55.0
+offset_top = 32.0
+offset_right = 55.0
+offset_bottom = 56.0
+grow_horizontal = 2
 
 [node name="FactionsPole" type="Control" parent="." unique_id=1366203001]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 6.0
-offset_top = 66.0
+offset_top = 90.0
 offset_right = 14.0
-offset_bottom = 466.0
+offset_bottom = 490.0
 mouse_filter = 2
 
 [node name="Pole" type="Panel" parent="FactionsPole" unique_id=1366203002]

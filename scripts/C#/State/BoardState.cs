@@ -213,7 +213,7 @@ public sealed partial class BoardState
         foreach (CardState card in live.CardStates.OrderBy(c => c.Id))
         {
             CardRecord r = Of(card);
-            lines.Add($"K{card.Id} p{Ids(r.PlayedInTurn)} a{Ids(r.ActivatedInTurns)} {r.IsRevealed} {r.IsBlocked} [{Tags(r)}]");
+            lines.Add($"K{card.Id} p{Ids(r.PlayedInTurn)} a{Ids(r.ActivatedInTurns)} h{r.EnteredHandInTurn} {r.IsRevealed} {r.IsBlocked} [{Tags(r)}]");
         }
         foreach (CardStep step in live.CardSteps)
             lines.Add($"S{step.Id} [{Tags(Of(step))}]");
@@ -294,6 +294,8 @@ public sealed class CardRecord : BoardRecord
 {
     public List<int> PlayedInTurn = new();
     public List<int> ActivatedInTurns = new();
+    /// <summary>The turn this card last entered a hand; 0 for a starting hand.</summary>
+    public int EnteredHandInTurn;
     public bool IsRevealed;
     public bool IsBlocked;
 
@@ -301,6 +303,7 @@ public sealed class CardRecord : BoardRecord
     {
         PlayedInTurn = new List<int>(PlayedInTurn),
         ActivatedInTurns = new List<int>(ActivatedInTurns),
+        EnteredHandInTurn = EnteredHandInTurn,
         IsRevealed = IsRevealed,
         IsBlocked = IsBlocked,
     });

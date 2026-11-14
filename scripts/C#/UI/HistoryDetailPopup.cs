@@ -25,8 +25,10 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     /// </summary>
     private const float TextWidthAlone = 170f;
 
-    /// <summary>Must match CardRow's h_separation/v_separation in the scene.</summary>
+    /// <summary>Must match CardRow's separation and TargetGrid's h/v_separation in the scene.</summary>
     private const float CardGap = 6f;
+    /// <summary>Must match HistoryArrow's custom_minimum_size.x in the scene.</summary>
+    private const float ArrowWidth = 28f;
     /// <summary>Height kept free under the card grid for the summary text.</summary>
     private const float SummaryReserve = 120f;
     /// <summary>Panel margins around the grid, on top of the stylebox's own; see the Margin node.</summary>
@@ -36,7 +38,8 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     private Vector2 fullCardSize;
 
     private PanelContainer DetailPanel => GetNode<PanelContainer>("%HistoryDetailPanel");
-    private GridContainer  CardRow => GetNode<GridContainer>("%CardRow");
+    private GridContainer  TargetGrid => GetNode<GridContainer>("%TargetGrid");
+    private HistoryArrow   Arrow => GetNode<HistoryArrow>("%HistoryArrow");
     private CardScene      CardSceneNode => GetNode<CardScene>("%HistoryCard");
     private RichTextLabel  SummaryLabel => GetNode<RichTextLabel>("%HistorySummary");
 
@@ -103,8 +106,14 @@ public partial class HistoryDetailPopup : Control, LoadableUI
         bool hasSource = card != null || entry.BulletinLabel != null;
         List<int> targetIds = ResolvableCards(entry.TargetCardIds);
 
+        // The arrow reads "source acted on these"; with only one side there is nothing to point at.
+        // Hidden children are skipped by the HBox, separation included.
+        bool hasArrow = hasSource && targetIds.Count > 0;
+        Arrow.Visible = hasArrow;
+        TargetGrid.Visible = targetIds.Count > 0;
+
         // Sized before anything is shown: ShowCard scales the card's fonts off its current Size.
-        Vector2 cardSize = LayoutGrid((hasSource ? 1 : 0) + targetIds.Count, badge);
+        Vector2 cardSize = LayoutGrid(targetIds.Count, hasSource, badge);
         SetCardSize(CardSceneNode, cardSize);
 
         if (card != null)
@@ -128,9 +137,9 @@ public partial class HistoryDetailPopup : Control, LoadableUI
         // Drives both the wrap width and, through it, the whole panel's width — the PanelContainer has
         // no minimum of its own, so a text-only entry collapses to just this column plus the margins.
         int cardsShown = (CardSceneNode.Visible ? 1 : 0) + targetsShown;
-        float gridWidth = CardRow.Columns * cardSize.X + CardGap * (CardRow.Columns - 1);
+        float rowWidth = CardRowWidth(targetsShown > 0 ? TargetGrid.Columns : 0, CardSceneNode.Visible, cardSize.X);
         SummaryLabel.CustomMinimumSize = new Vector2(
-            cardsShown > 0 ? Mathf.Max(TextWidthAlone, gridWidth) : TextWidthAlone, 0);
+            cardsShown > 0 ? Mathf.Max(TextWidthAlone, rowWidth) : TextWidthAlone, 0);
 
         // The sequence number is the same one on the badge, so a player can tie the popup back to the
         // entry they are pointing at. The stream id is debug-only: it is not what the badge shows.
@@ -170,14 +179,15 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     }
 
     /// <summary>
-    /// Pick CardRow's column count and the card size for <paramref name="count"/> cards so the grid
-    /// fits between the screen edge and the badge. Tries every column count and keeps the one with
-    /// the largest cards; a single full-size row wins whenever it fits.
+    /// Pick TargetGrid's column count and the one card size for the source card, the arrow and
+    /// <paramref name="targets"/> target cards so the row fits between the screen edge and the badge.
+    /// Tries every column count and keeps the one with the largest cards; a single full-size row wins
+    /// whenever it fits.
     /// </summary>
-    private Vector2 LayoutGrid(int count, Control badge)
+    private Vector2 LayoutGrid(int targets, bool hasSource, Control badge)
     {
-        CardRow.Columns = Mathf.Max(count, 1);
-        if (count <= 1) return fullCardSize;
+        TargetGrid.Columns = Mathf.Max(targets, 1);
+        if (targets + (hasSource ? 1 : 0) <= 1) return fullCardSize;
 
         float chrome = MarginChrome + (DetailPanel.GetThemeStylebox("panel")?.GetMinimumSize().X ?? 0f);
         Rect2 bounds = GetGlobalRect();
@@ -185,19 +195,31 @@ public partial class HistoryDetailPopup : Control, LoadableUI
         float height = bounds.Size.Y - 2 * ScreenMargin - chrome - SummaryReserve;
 
         float bestScale = 0f;
-        for (int cols = count; cols >= 1; cols--)
+        for (int cols = targets; cols >= 1; cols--)
         {
-            int rows = Mathf.CeilToInt(count / (float)cols);
+            int rows = Mathf.CeilToInt(targets / (float)cols);
+            // Gaps and arrow are fixed pixels: the row width at card width 0 is exactly them.
+            float fixedWidth = CardRowWidth(cols, hasSource, 0f);
+            int across = cols + (hasSource ? 1 : 0);
             float scale = Mathf.Min(1f, Mathf.Min(
-                (width  - CardGap * (cols - 1)) / (cols * fullCardSize.X),
+                (width  - fixedWidth) / (across * fullCardSize.X),
                 (height - CardGap * (rows - 1)) / (rows * fullCardSize.Y)));
             if (scale > bestScale)
             {
                 bestScale = scale;
-                CardRow.Columns = cols;
+                TargetGrid.Columns = cols;
             }
         }
         return (fullCardSize * Mathf.Max(bestScale, 0.1f)).Floor();
+    }
+
+    /// <summary>Width of the card row: the source card, then the arrow, then <paramref name="cols"/> target columns.</summary>
+    private static float CardRowWidth(int cols, bool hasSource, float cardWidth)
+    {
+        float grid = cols > 0 ? cols * cardWidth + CardGap * (cols - 1) : 0f;
+        if (!hasSource) return grid;
+        if (cols == 0) return cardWidth;
+        return cardWidth + CardGap + ArrowWidth + CardGap + grid;
     }
 
     /// <summary>
@@ -216,7 +238,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
         if (index < targetCards.Count) return targetCards[index];
 
         CardScene card = CardScene.CardScenePackedPath.Instantiate<CardScene>();
-        CardRow.AddChild(card);
+        TargetGrid.AddChild(card);
         AsHistoryCard(card);
         targetCards.Add(card);
         return card;

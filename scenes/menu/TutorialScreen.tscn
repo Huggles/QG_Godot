@@ -1,0 +1,127 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/C#/Menu/TutorialScreen.cs" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c7l5nndh4p5c4" path="res://scenes/menu/ParallaxBackdrop.tscn" id="2_bdrop"]
+[ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="3_theme"]
+[ext_resource type="PackedScene" uid="uid://b8qgcmdbtn01" path="res://scenes/menu/MenuCommandButton.tscn" id="4_cmd"]
+
+[sub_resource type="Gradient" id="Gradient_scrim"]
+offsets = PackedFloat32Array(0, 0.4, 0.68, 1)
+colors = PackedColorArray(0.02, 0.024, 0.018, 0, 0.02, 0.024, 0.018, 0.2, 0.02, 0.024, 0.018, 0.72, 0.02, 0.024, 0.018, 0.9)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_scrim"]
+gradient = SubResource("Gradient_scrim")
+width = 256
+height = 4
+fill_to = Vector2(1, 0)
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Backdrop" parent="." instance=ExtResource("2_bdrop")]
+layout_mode = 1
+
+[node name="Scrim" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_scrim")
+expand_mode = 1
+
+[node name="Column" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -690.0
+offset_right = -140.0
+grow_horizontal = 0
+grow_vertical = 2
+theme = ExtResource("3_theme")
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Kicker" type="Label" parent="Column"]
+layout_mode = 2
+theme_type_variation = &"MenuKicker"
+text = "WORLD WAR II  ·  1939 – 1945"
+
+[node name="TitleBlock" type="VBoxContainer" parent="Column"]
+layout_mode = 2
+theme_override_constants/separation = -30
+
+[node name="TitleTop" type="Label" parent="Column/TitleBlock"]
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+theme_override_font_sizes/font_size = 96
+text = "QUARTERMASTER"
+
+[node name="TitleBottom" type="Label" parent="Column/TitleBlock"]
+layout_mode = 2
+theme_type_variation = &"MenuTitle"
+theme_override_colors/font_color = Color(0.851, 0.678, 0.361, 1)
+theme_override_font_sizes/font_size = 96
+text = "GENERAL"
+
+[node name="Rule" type="HBoxContainer" parent="Column"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RuleLead" type="ColorRect" parent="Column/Rule"]
+custom_minimum_size = Vector2(72, 2)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.851, 0.678, 0.361, 0.85)
+
+[node name="Star" type="Label" parent="Column/Rule"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.851, 0.678, 0.361, 1)
+theme_override_font_sizes/font_size = 18
+text = "★"
+
+[node name="RuleTail" type="ColorRect" parent="Column/Rule"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.851, 0.678, 0.361, 0.25)
+
+[node name="GapTitle" type="Control" parent="Column"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TutorialsHeader" type="Label" parent="Column"]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "TUTORIALS"
+
+[node name="TutorialList" type="VBoxContainer" parent="Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="GapList" type="Control" parent="Column"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SystemSeparator" type="HSeparator" parent="Column"]
+layout_mode = 2
+
+[node name="BackButton" parent="Column" instance=ExtResource("4_cmd")]
+unique_name_in_owner = true
+layout_mode = 2

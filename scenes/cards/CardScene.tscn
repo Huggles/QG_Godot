@@ -6,6 +6,7 @@
 [ext_resource type="StyleBox" uid="uid://iry13465ja03" path="res://scenes/cards/CardButtonStyleHovered.tres" id="4_cjw5f"]
 [ext_resource type="StyleBox" uid="uid://cnup2rgfcnbqk" path="res://scenes/cards/CardButtonStyleNormal.tres" id="5_mqccx"]
 [ext_resource type="Material" path="res://assets/materials/CardReflectionMaterial.tres" id="6_xb2aa"]
+[ext_resource type="Script" path="res://scripts/C#/UI/CornerFold.cs" id="7_fold"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pe5wv"]
 corner_radius_top_left = 25
@@ -128,6 +129,18 @@ theme_override_styles/normal = ExtResource("5_mqccx")
 theme_override_styles/hover = ExtResource("4_cjw5f")
 theme_override_styles/disabled = ExtResource("5_mqccx")
 theme_override_styles/focus = ExtResource("5_mqccx")
+
+[node name="RecentlyDrawnFold" type="Control" parent="AspectRatioContainer/Panel" unique_id=1448210377]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_fold")
 
 [node name="ActivatableColorOverlay" type="ColorRect" parent="." unique_id=87323033]
 layout_mode = 1

@@ -25,6 +25,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="OkButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="0"]
+theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
@@ -36,6 +37,6 @@ unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "Confirm"
+text = "CONFIRM"
 
 [editable path="Root/Centre/Panel"]

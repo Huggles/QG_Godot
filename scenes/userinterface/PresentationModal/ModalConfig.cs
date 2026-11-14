@@ -104,7 +104,13 @@ public class ModalConfig
         return this;
     }
 
+    /// <summary>The whole confirm-button text while nothing is selected, or null to use the usual label.</summary>
+    public string EmptyApplyLabel { get; private set; }
+
     public ModalConfig WithApplyLabel(string label) { ApplyLabel = label; return this; }
+
+    /// <summary>Name what confirming with nothing selected costs, e.g. the Total War discard-nothing VP.</summary>
+    public ModalConfig WithEmptyApplyLabel(string label) { EmptyApplyLabel = label; return this; }
     public ModalConfig WithCancelLabel(string label) { CancelLabel = label; return this; }
     public ModalConfig WithAutoDismiss()
     {
@@ -133,6 +139,22 @@ public class ModalConfig
                 $"Only an info modal may burn its items away; this one is {Mode}.");
         WithAutoDismiss();
         BurnAway = true;
+        return this;
+    }
+
+    /// <summary>When it times out, fly into <see cref="RevealDock"/> beside the history strip instead of fading.</summary>
+    public bool Dock { get; private set; } = false;
+
+    /// <summary>
+    /// Shrink into the reveal dock on timing out and linger there, so a draw or discard stays readable
+    /// after the game has moved on. Combined with <see cref="WithBurnAway"/>, the burn plays in the dock.
+    /// </summary>
+    public ModalConfig WithDock()
+    {
+        if (Mode != ModalSelectionMode.Display)
+            throw new System.InvalidOperationException($"Only an info modal may dock; this one is {Mode}.");
+        WithAutoDismiss();
+        Dock = true;
         return this;
     }
 }

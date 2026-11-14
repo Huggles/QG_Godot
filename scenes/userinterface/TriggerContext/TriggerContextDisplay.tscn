@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://blt1trgctx001"]
 
+[ext_resource type="Theme" path="res://scenes/menu/theme/InGameTheme.tres" id="ig_theme"]
 [ext_resource type="Script" uid="uid://xyxrkj14cjx" path="res://scripts/C#/UI/TriggerContextDisplay.cs" id="1_tctx"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_tccard"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="3_t1u62"]
+[ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="3_t1u62"]
 [ext_resource type="Script" uid="uid://cdop1cruia11k" path="res://scripts/C#/UI/WorldMirrorViewport.cs" id="4_wmvpt"]
 [ext_resource type="Texture2D" uid="uid://dsycvfroltf5e" path="res://assets/textures/Other/Menu/Modal9Patch_1.png" id="5_71eah"]
 [ext_resource type="Script" uid="uid://c6xo03jw6k6gc" path="res://scripts/C#/UI/ParentSizedNinePatchRect.cs" id="5_mq2j7"]
@@ -136,6 +137,7 @@ offset_right = 0.0
 offset_bottom = 350.0
 
 [node name="TriggerLabelPanel" type="PanelContainer" parent="Control/TriggerContextColumn" unique_id=1520113763]
+theme = ExtResource("ig_theme")
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = ExtResource("3_t1u62")

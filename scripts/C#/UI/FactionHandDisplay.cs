@@ -498,6 +498,8 @@ public partial class FactionHandDisplay : Control
 
 			CardState cardState = CardState.ForId(cardId);
 			cardSceneInstance.ShowCard(cardId);
+			cardSceneInstance.SetRecentlyDrawn(cardState.IsRecentlyDrawn
+				&& BoardState.Live.ForFaction(cardState.Faction).Hand.Contains(cardId));
 
 			// The caller's list wins when it gave one. Tag.IsActivatable is the right default for the
 			// plain hand display, but it is the wrong answer inside a prompt: block-eligible cards

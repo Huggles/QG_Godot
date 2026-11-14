@@ -103,10 +103,11 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="CancelButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0"]
+theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "Cancel"
+text = "CANCEL"
 
 [node name="Spacer" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="1"]
 layout_mode = 2
@@ -126,6 +127,6 @@ theme_type_variation = &"MenuPrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 44)
 layout_mode = 2
-text = "Create Steam Lobby"
+text = "CREATE STEAM LOBBY"
 
 [editable path="Root/Centre/Panel"]

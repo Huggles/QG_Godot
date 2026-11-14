@@ -1,13 +1,21 @@
 [gd_scene format=3 uid="uid://blt1inptmr001"]
 
 [ext_resource type="Script" uid="uid://dnwigqplmxlor" path="res://scripts/C#/UI/InputTimerDisplay.cs" id="1_itmr"]
+[ext_resource type="Theme" path="res://scenes/menu/theme/InGameTheme.tres" id="2_theme"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontCaps.tres" id="3_caps"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontDisplay.tres" id="4_display"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_itmr"]
-bg_color = Color(0, 0, 0, 0.470588)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+bg_color = Color(0.047, 0.051, 0.039, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.851, 0.678, 0.361, 0.35)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="InputTimerDisplay" type="Control" unique_id=383526407]
 top_level = true
@@ -32,6 +40,7 @@ offset_right = -10.0
 offset_bottom = 80.0
 grow_horizontal = 0
 mouse_filter = 2
+theme = ExtResource("2_theme")
 theme_override_styles/panel = SubResource("StyleBoxFlat_itmr")
 
 [node name="InputTimerTitle" type="Label" parent="InputTimerPanel" unique_id=122252667]
@@ -43,7 +52,9 @@ offset_left = 10.0
 offset_top = 6.0
 offset_right = -10.0
 offset_bottom = 28.0
-theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.69, 0.66, 0.58, 1)
+theme_override_fonts/font = ExtResource("3_caps")
+theme_override_font_sizes/font_size = 13
 text = "Waiting for input"
 horizontal_alignment = 1
 
@@ -76,6 +87,7 @@ offset_left = 10.0
 offset_top = 28.0
 offset_right = -10.0
 offset_bottom = 58.0
-theme_override_font_sizes/font_size = 24
+theme_override_fonts/font = ExtResource("4_display")
+theme_override_font_sizes/font_size = 28
 text = "0:00"
 horizontal_alignment = 1

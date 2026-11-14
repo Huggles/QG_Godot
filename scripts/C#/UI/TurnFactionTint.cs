@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-/// Paints one HUD surface with the colour of the faction whose turn it is, so the player can tell at
+/// Paints one HUD surface's border with the colour of the faction whose turn it is, so the player can tell at
 /// a glance who the game is on without reading anything.
 ///
 /// The turn faction, deliberately, and not the faction this peer is being prompted for: those are
@@ -18,9 +18,8 @@ using Godot;
 /// </summary>
 public class TurnFactionTint
 {
-    /// <summary>How much of the faction colour the surface takes. Below full so whatever sits in front
-    /// of it stays the brightest thing in the frame, and its own faction colours still read apart.</summary>
-    private const float FocusTintAlpha = 0.8f;
+    /// <summary>The border takes the faction colour at full strength; the glass behind the text stays olive.</summary>
+    private const float FocusTintAlpha = 1f;
 
     private readonly Control _panel;
 
@@ -104,7 +103,7 @@ public class TurnFactionTint
         if (_styleBox == null) return;
 
         Color? tint = TintFor(TurnFaction());
-        if (tint is not Color target || _styleBox.BgColor == target) return;
+        if (tint is not Color target || _styleBox.BorderColor == target) return;
 
         // Killed rather than left to finish: two turns in quick succession (a bot turn answered in the
         // frame it started) would otherwise race, and the older tween would win the last frame.
@@ -113,12 +112,12 @@ public class TurnFactionTint
 
         if (!animate || !_panel.IsInsideTree())
         {
-            _styleBox.BgColor = target;
+            _styleBox.BorderColor = target;
             return;
         }
 
         _tween = _panel.CreateTween();
-        _tween.TweenProperty(_styleBox, "bg_color", target, GameSettings.DurationShortSeconds);
+        _tween.TweenProperty(_styleBox, "border_color", target, GameSettings.DurationShortSeconds);
     }
 
     /// <summary>

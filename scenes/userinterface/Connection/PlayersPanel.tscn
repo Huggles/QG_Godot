@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://bplayerspanel1"]
 
+[ext_resource type="Theme" path="res://scenes/menu/theme/InGameTheme.tres" id="ig_theme"]
 [ext_resource type="Script" path="res://scenes/userinterface/Connection/PlayersPanel.cs" id="1_script"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="2_style"]
+[ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="2_style"]
 
 [node name="PlayersPanel" type="PanelContainer"]
+theme = ExtResource("ig_theme")
 z_index = 150
 custom_minimum_size = Vector2(200, 0)
 offset_left = 8.0

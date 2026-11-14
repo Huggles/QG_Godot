@@ -25,8 +25,8 @@ public static class MenuScenarioPicker
 	/// <summary>
 	/// Fill the picker, carrying each entry's AvailableScenarios index as the item's id.
 	///
-	/// Debug scenarios are dropped in a release export: a test fixture is not something a player
-	/// chooses. <see cref="GameContext.IsProductionBuild"/> rather than GameSettings.ShowDebugMenu —
+	/// Tutorials are always dropped: they start from their own menu. Debug scenarios are dropped in a
+	/// release export: a test fixture is not something a player chooses. <see cref="GameContext.IsProductionBuild"/> rather than GameSettings.ShowDebugMenu —
 	/// the export decides this, not a setting a player can flip.
 	///
 	/// THIS IS A VIEW FILTER AND NOTHING MORE. AvailableScenarios still holds every scenario on every
@@ -39,6 +39,7 @@ public static class MenuScenarioPicker
 
 		for (int i = 0; i < scenarios.Count; i++)
 		{
+			if (scenarios[i].IsTutorial) continue;
 			if (GameContext.IsProductionBuild && scenarios[i].IsDebug) continue;
 			picker.AddItem(scenarios[i].Title, i);
 		}

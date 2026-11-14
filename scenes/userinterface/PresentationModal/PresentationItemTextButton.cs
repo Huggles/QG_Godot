@@ -1,8 +1,8 @@
 using Godot;
 
 /// <summary>
-/// A <see cref="PresentationItem"/> that renders a text-label button using the standard
-/// styled <see cref="MenuPanelButton"/> look. Parallels <see cref="PresentationItemImageButton"/>
+/// A <see cref="PresentationItem"/> that renders a text-label button in the menu's action-button
+/// style (MenuActionButton.tscn, a <see cref="MenuPanelButton"/>). Parallels <see cref="PresentationItemImageButton"/>
 /// (image variant) for the text-option case, e.g. the "Choose an action" modal.
 /// </summary>
 public partial class PresentationItemTextButton : PresentationItem
@@ -11,7 +11,7 @@ public partial class PresentationItemTextButton : PresentationItem
     private static readonly Vector2 ButtonSize = new Vector2(400, 150);
 
     public static readonly PackedScene MenuPanelButtonPackedScene =
-        GD.Load<PackedScene>("res://scenes/menu/MenuPanelButton.tscn");
+        GD.Load<PackedScene>("res://scenes/menu/MenuActionButton.tscn");
 
     private MenuPanelButton MenuPanelButton => Control as MenuPanelButton;
 
@@ -24,6 +24,9 @@ public partial class PresentationItemTextButton : PresentationItem
     {
         Control = MenuPanelButtonPackedScene.Instantiate<MenuPanelButton>();
         Control.CustomMinimumSize = ButtonSize;
+        // Option texts can run long; the action button's caption is sized for one short word.
+        if (Control.GetNodeOrNull<Label>("ContentContainer/Label") is Label caption)
+            caption.AutowrapMode = TextServer.AutowrapMode.WordSmart;
 
         _orderBadge = new Label();
         _orderBadge.Visible = false;

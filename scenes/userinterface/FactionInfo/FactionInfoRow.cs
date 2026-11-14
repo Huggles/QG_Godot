@@ -197,6 +197,7 @@ public partial class FactionInfoRow : Control
 			if (minorData.NumberOfAirUnits > 0) AddCounter(minor, UnitType.AIR_FORCE, minorData.FactionColor);
 		}
 
+		AddPlayerName(FactionDisplay.PlayerNameFor(Faction));
 		ApplyInk();
 		// A row whose minor factions print more than the base tail holds slides out further.
 		_fullTail = Mathf.Max(MinTail, StatsInset + Stats.GetCombinedMinimumSize().X + Notch + 10f);
@@ -246,6 +247,40 @@ public partial class FactionInfoRow : Control
 		ArmyIcon.SelfModulate = Ink;
 		NavyIcon.SelfModulate = Ink;
 		foreach (TextureRect icon in _untinted) icon.SelfModulate = Ink;
+	}
+
+	// ── Player name ──────────────────────────────────────────────────────────
+
+	private static readonly FontVariation NameFont = GD.Load<FontVariation>("res://scenes/menu/theme/MenuFontBodyBold.tres");
+	/// <summary>The strip along the flag's foot the name takes; the score rides up above it.</summary>
+	private const float NameBand = 17f;
+	private const int NameFontSize = 12;
+
+	/// <summary>
+	/// Prints who plays this faction along the foot of the flag, in the same white-on-black ink as the
+	/// score, which moves up to make room. Nothing when <see cref="FactionDisplay.PlayerNameFor"/> has no
+	/// name (solo play). A name wider than the flag is cut with an ellipsis; the tooltip has it whole.
+	/// </summary>
+	private void AddPlayerName(string name)
+	{
+		if (string.IsNullOrEmpty(name)) return;
+
+		ScoreLabel.Size = new Vector2(Head, Height - NameBand + 1f);
+		const float padX = 4f;
+		AddChild(new Label
+		{
+			Name = "PlayerName",
+			Text = name,
+			Position = new Vector2(padX, Height - NameBand + 1f),
+			Size = new Vector2(Head - 2 * padX, NameBand),
+			HorizontalAlignment = HorizontalAlignment.Center,
+			VerticalAlignment = VerticalAlignment.Center,
+			TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis,
+			ClipText = true,
+			MouseFilter = MouseFilterEnum.Ignore,
+			LabelSettings = new LabelSettings { Font = NameFont, FontSize = NameFontSize, FontColor = Ink, OutlineSize = 4, OutlineColor = Colors.Black },
+		});
+		FactionInfoButton.TooltipText = $"{FactionState.FactionData.Label} — {name}\nClick to show or hide cards and pieces";
 	}
 
 	// ── Event handlers ───────────────────────────────────────────────────────

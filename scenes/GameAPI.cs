@@ -143,7 +143,7 @@ public partial class GameAPI : Node
                 List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(drawnCardIds, false);
                 // Label(), not WithPlayer(): this branch is gated on LocalPlayerControls, so the modal is
                 // only ever shown to the faction's own controller — naming them back at themselves is noise.
-                await PresentationServices.Notification.ShowModal(presentationItems, $"{faction.Label()} drew cards");
+                await PresentationServices.Notification.ShowModal(presentationItems, $"{faction.Label()} drew cards", dock: true);
             }
         }
         EventBus.Emit(EventBus.SignalName.CardsDrawn, (int)faction, numberOfCards);

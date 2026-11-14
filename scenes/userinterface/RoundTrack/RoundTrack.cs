@@ -1,37 +1,30 @@
 using Godot;
 
 /// <summary>
-/// "Round N of M" over a track of one segment per round, under the Axis / Allies totals: the round
-/// limit beside the 30-point lead, the two things the game ends on. On the last round the plate
-/// turns amber.
+/// A "Round N of M" pill under the turn-step strip, styled like its pills. On the last round it reads "Last round N"
+/// in amber, and the plate border turns amber too.
 ///
 /// Refreshed off the same pair as TurnFactionTint, for the same reason: both fire on every peer and
 /// during a save replay, where the host-only NewTurnStarted would leave a client on round 1.
 /// </summary>
 public partial class RoundTrack : PanelContainer
 {
-	private RichTextLabel Heading => GetNode<RichTextLabel>("%Heading");
-	private HBoxContainer Segments => GetNode<HBoxContainer>("%Segments");
+	private Label Heading => GetNode<Label>("%Heading");
 
-	private const int NumberFontSize = 20;
-
-	private static readonly Color CaptionColor = new(0.74f, 0.74f, 0.74f);
-	private static readonly Color LimitColor = new(0.56f, 0.56f, 0.56f);
-	private static readonly Color DoneColor = new(0.86f, 0.86f, 0.86f, 0.55f);
-	private static readonly Color FutureColor = new(1f, 1f, 1f, 0.14f);
 	private static readonly Color AmberColor = new("#fac775");
 	private static readonly Color AmberBorderColor = new("#ef9f27");
+	private static readonly Color BrassEdgeColor = new(0.851f, 0.678f, 0.361f, 0.28f);
+	private static readonly Color CreamColor = new(0.929f, 0.898f, 0.82f);
 
 	private StyleBoxFlat _plate;
-	private Color _borderColor;
 	private (int Round, int Max)? _painted;
 
 	public override void _Ready()
 	{
-		// One HUD per PlayerScene, so the plate is duplicated before the last round tints its border.
+		// One HUD per PlayerScene, so the plate and label settings are duplicated before the last round tints them.
 		_plate = (StyleBoxFlat)GetThemeStylebox("panel").Duplicate();
 		AddThemeStyleboxOverride("panel", _plate);
-		_borderColor = _plate.BorderColor;
+		Heading.LabelSettings = (LabelSettings)Heading.LabelSettings.Duplicate();
 
 		Refresh();
 
@@ -70,35 +63,11 @@ public partial class RoundTrack : PanelContainer
 
 	private void Paint(int round, int max)
 	{
+		// Styled like a turn-step pill; the last round borrows the current step's 2px border, in amber.
 		bool last = round >= max;
-		_plate.BorderColor = last ? AmberBorderColor : _borderColor;
-		string number = $"[font_size={NumberFontSize}]{round}[/font_size]";
-		Heading.Text = last
-			? $"[center][color=#{AmberColor.ToHtml(false)}]Last round {number}[/color][/center]"
-			: $"[center][color=#{CaptionColor.ToHtml(false)}]Round[/color] {number} [color=#{LimitColor.ToHtml(false)}]of {max}[/color][/center]";
-
-		if (Segments.GetChildCount() != max) BuildSegments(max);
-		for (int r = 1; r <= max; r++)
-			Segments.GetChild<ColorRect>(r - 1).Color = r < round ? DoneColor : r == round ? Colors.White : FutureColor;
-	}
-
-	private void BuildSegments(int count)
-	{
-		// RemoveChild before QueueFree: a queued child still counts in GetChildCount this frame.
-		foreach (Node child in Segments.GetChildren())
-		{
-			Segments.RemoveChild(child);
-			child.QueueFree();
-		}
-
-		for (int i = 0; i < count; i++)
-		{
-			Segments.AddChild(new ColorRect
-			{
-				CustomMinimumSize = new Vector2(0, 5),
-				SizeFlagsHorizontal = SizeFlags.ExpandFill,
-				MouseFilter = MouseFilterEnum.Ignore,
-			});
-		}
+		_plate.BorderColor = last ? AmberBorderColor : BrassEdgeColor;
+		_plate.SetBorderWidthAll(last ? 2 : 1);
+		Heading.LabelSettings.FontColor = last ? AmberColor : CreamColor;
+		Heading.Text = (last ? $"Last round {round}" : $"Round {round} of {max}").ToUpperInvariant();
 	}
 }

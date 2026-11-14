@@ -76,8 +76,9 @@ layout_mode = 2
 size_flags_vertical = 4
 
 [node name="DismissButton" type="Button" parent="Root/Panel/Margin/Box"]
+theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 40)
 layout_mode = 2
 size_flags_vertical = 4
-text = "Ignore"
+text = "IGNORE"

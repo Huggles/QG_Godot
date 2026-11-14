@@ -33,19 +33,21 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="RefreshButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="0"]
+theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "Refresh"
+text = "REFRESH"
 
 [node name="Spacer" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="1"]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="CloseButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="2"]
+theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "Close"
+text = "CLOSE"
 
 [editable path="Root/Centre/Panel"]

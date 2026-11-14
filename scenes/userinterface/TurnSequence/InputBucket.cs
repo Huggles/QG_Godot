@@ -121,8 +121,8 @@ public partial class InputBucket : Control
 	{
 		StyleBoxFlat style = new()
 		{
-			BgColor = new Color(0.1f, 0.1f, 0.1f, 0.6f),
-			BorderColor = new Color(1f, 1f, 1f, 0.35f),
+			BgColor = new Color(0.047f, 0.051f, 0.039f, 0.82f),
+			BorderColor = new Color(0.851f, 0.678f, 0.361f, 0.5f),
 			CornerDetail = 16,
 		};
 		style.SetBorderWidthAll(2);

@@ -1,5 +1,8 @@
 [gd_scene format=3 uid="uid://dqdvhk2rm85fc"]
 
+[ext_resource type="Theme" path="res://scenes/menu/theme/InGameTheme.tres" id="ig_theme"]
+[ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="ig_glass"]
+[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontBody.tres" id="ig_body"]
 [ext_resource type="PackedScene" uid="uid://bsfwdbone0b1r" path="res://scenes/cards/FactionHandDisplay.tscn" id="2_ntnkv"]
 [ext_resource type="Script" uid="uid://cv2ogjvefody7" path="res://scenes/userinterface/PresentationModal/ModalStack.cs" id="3_oxwje"]
 [ext_resource type="PackedScene" uid="uid://b6hfp06nmb2ux" path="res://scenes/userinterface/PlayerAction/PlayerAction.tscn" id="4_dvfjj"]
@@ -14,7 +17,6 @@
 [ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
 [ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
 [ext_resource type="Script" uid="uid://by4r72f7bleb0" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
-[ext_resource type="StyleBox" uid="uid://5vpnsoh4un73" path="res://SimpleModalStyle.tres" id="19_nfi4l"]
 [ext_resource type="Script" uid="uid://5xe5ni5ixdvo" path="res://scenes/userinterface/MiniMenu.cs" id="19_x2nnb"]
 [ext_resource type="PackedScene" uid="uid://b2aymnt6sg5po" path="res://scenes/userinterface/MarginTextureButton.tscn" id="22_x2nnb"]
 [ext_resource type="Texture2D" uid="uid://b5evjrup5daot" path="res://assets/textures/Other/eye_icon.png" id="23_eyeicon"]
@@ -24,7 +26,7 @@
 [ext_resource type="PackedScene" uid="uid://blt1histpop01" path="res://scenes/userinterface/History/HistoryDetailPopup.tscn" id="26_histpop"]
 [ext_resource type="Script" uid="uid://uq8tqtb6j8iq" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
 [ext_resource type="Script" uid="uid://bhyk2pph2c0qf" path="res://scripts/C#/UI/TutorialArrow.cs" id="28_tutarrow"]
-[ext_resource type="Texture2D" uid="uid://s1w8qwl20na2" path="res://assets/textures/Other/Icons/Arrow.png" id="29_tutarrowtex"]
+[ext_resource type="Texture2D" uid="uid://dvdv2r5hltf66" path="res://assets/textures/Other/Icons/Arrow_1.png" id="29_tutarrowtex"]
 [ext_resource type="PackedScene" uid="uid://cb05yfgtalgy8" path="res://scenes/userinterface/PlayerAction/TurnBadge.tscn" id="31_turnbadge"]
 [ext_resource type="PackedScene" uid="uid://bchatbox0qg01" path="res://scenes/userinterface/Chat/ChatBox.tscn" id="32_chatbox"]
 [ext_resource type="PackedScene" uid="uid://bplayerspanel1" path="res://scenes/userinterface/Connection/PlayersPanel.tscn" id="33_players"]
@@ -34,26 +36,45 @@
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/ScoreHistoryIcon.svg" id="37_scorehist"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_skipbtn"]
-font_size = 13
+font = ExtResource("ig_body")
+font_size = 15
+font_color = Color(0.929, 0.898, 0.82, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fpk7i"]
-resource_local_to_scene = true
-content_margin_left = 0.0
-content_margin_top = 0.0
-content_margin_right = 0.0
-content_margin_bottom = 0.0
-bg_color = Color(0.13333334, 0.13333334, 0.13333334, 0.7294118)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.5, 0.5, 0.5, 0.8)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_color = Color(0, 0, 0, 0.14509805)
-shadow_size = 10
+[sub_resource type="StyleBoxFlat" id="Skip_normal"]
+bg_color = Color(0.047, 0.051, 0.039, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.929, 0.898, 0.82, 0.25)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Skip_hover"]
+bg_color = Color(0.2, 0.17, 0.1, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.851, 0.678, 0.361, 0.95)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Skip_disabled"]
+bg_color = Color(0.047, 0.051, 0.039, 0.5)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.08)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="Interface" type="CanvasLayer" unique_id=1482898597]
 
@@ -96,8 +117,14 @@ custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 script = ExtResource("15_skip")
 HeldContentOffset = 2
+HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
+theme_override_styles/normal = SubResource("Skip_normal")
+theme_override_styles/hover = SubResource("Skip_hover")
+theme_override_styles/pressed = SubResource("Skip_hover")
+theme_override_styles/disabled = SubResource("Skip_disabled")
 
 [node name="NinePatchRect" parent="Control/VBoxContainer/SelectionSkipButton" index="1" unique_id=171759037]
+visible = false
 offset_right = 3600.0
 offset_bottom = 600.0
 scale = Vector2(0.05, 0.05)
@@ -120,8 +147,14 @@ layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 1
 HeldContentOffset = 2
+HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
+theme_override_styles/normal = SubResource("Skip_normal")
+theme_override_styles/hover = SubResource("Skip_hover")
+theme_override_styles/pressed = SubResource("Skip_hover")
+theme_override_styles/disabled = SubResource("Skip_disabled")
 
 [node name="NinePatchRect" parent="Control/VBoxContainer/SkipTurnStepButton" index="1" unique_id=171759037]
+visible = false
 offset_right = 3600.0
 offset_bottom = 600.0
 scale = Vector2(0.05, 0.05)
@@ -144,8 +177,14 @@ layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 2
 HeldContentOffset = 2
+HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
+theme_override_styles/normal = SubResource("Skip_normal")
+theme_override_styles/hover = SubResource("Skip_hover")
+theme_override_styles/pressed = SubResource("Skip_hover")
+theme_override_styles/disabled = SubResource("Skip_disabled")
 
 [node name="NinePatchRect" parent="Control/VBoxContainer/SkipRoundButton" index="1" unique_id=171759037]
+visible = false
 offset_right = 3600.0
 offset_bottom = 600.0
 scale = Vector2(0.05, 0.05)
@@ -168,8 +207,14 @@ layout_mode = 2
 script = ExtResource("18_rskip")
 Scope = 3
 HeldContentOffset = 2
+HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
+theme_override_styles/normal = SubResource("Skip_normal")
+theme_override_styles/hover = SubResource("Skip_hover")
+theme_override_styles/pressed = SubResource("Skip_hover")
+theme_override_styles/disabled = SubResource("Skip_disabled")
 
 [node name="NinePatchRect" parent="Control/VBoxContainer/SkipUntilActivatableButton" index="1" unique_id=171759037]
+visible = false
 offset_right = 3600.0
 offset_bottom = 600.0
 scale = Vector2(0.05, 0.05)
@@ -291,64 +336,78 @@ grow_vertical = 2
 script = ExtResource("34_blocker")
 
 [node name="PlayersPanel" parent="." unique_id=1730245520 instance=ExtResource("33_players")]
+anchors_preset = -1
+anchor_left = 0.25
+anchor_right = 0.25
+offset_left = -100.0
+offset_top = 6.0
+offset_right = 100.0
+offset_bottom = 46.0
+grow_horizontal = 2
 
 [node name="MiniMenu" type="Control" parent="." unique_id=1063376234]
 z_index = 150
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = -8.0
+grow_vertical = 0
 script = ExtResource("19_x2nnb")
 
 [node name="MiniMenuModal" type="PanelContainer" parent="MiniMenu" unique_id=54608066]
 unique_name_in_owner = true
-z_index = 150
+z_index = 4096
+z_as_relative = false
 layout_mode = 0
-offset_left = 13.0
-offset_top = 50.0
-offset_right = 113.0
-offset_bottom = 250.0
-theme_override_styles/panel = ExtResource("19_nfi4l")
+offset_top = -18.0
+offset_right = 190.0
+offset_bottom = -8.0
+grow_vertical = 0
+theme = ExtResource("ig_theme")
+theme_override_styles/panel = ExtResource("ig_glass")
 
 [node name="MarginContainer" type="MarginContainer" parent="MiniMenu/MiniMenuModal" unique_id=160946699]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MiniMenu/MiniMenuModal/MarginContainer" unique_id=2016041426]
 layout_mode = 2
 
 [node name="CountryLabelsButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=254644009]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 toggle_mode = true
 text = "Country Labels"
 
 [node name="DebugMenuButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541710]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 toggle_mode = true
-text = "Debug Menu
-"
+text = "Debug Menu"
 
 [node name="WorldPresentationButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541711]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 text = "View: Normal"
 
 [node name="PlayersButton" type="Button" parent="MiniMenu/MiniMenuModal/MarginContainer/VBoxContainer" unique_id=1615541712]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 20)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 15
 toggle_mode = true
 text = "Players"
 
@@ -365,7 +424,7 @@ offset_right = 40.0
 grow_vertical = 0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = ExtResource("19_nfi4l")
+theme_override_styles/panel = ExtResource("ig_glass")
 
 [node name="MiniMenuHBox" type="HBoxContainer" parent="MiniMenu/MiniMenuContainer" unique_id=342587826]
 unique_name_in_owner = true
@@ -409,6 +468,7 @@ texture = ExtResource("29_tutarrowtex")
 centered = false
 offset = Vector2(-1235.19, -627)
 script = ExtResource("28_tutarrow")
+TipInset = 0.026
 
 [node name="TurnBadge" parent="." unique_id=215012341 instance=ExtResource("31_turnbadge")]
 offset_top = -740.0
@@ -416,8 +476,10 @@ offset_bottom = 321.0
 scale = Vector2(0.4, 0.4)
 
 [node name="ChatBox" parent="." unique_id=1730245519 instance=ExtResource("32_chatbox")]
+z_index = 4095
+offset_top = -306.0
 offset_right = 513.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_fpk7i")
+offset_bottom = -56.0
 
 [node name="DeckCompositionPanel" parent="." unique_id=1730245522 instance=ExtResource("36_deckcomp")]
 unique_name_in_owner = true
