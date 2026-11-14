@@ -271,7 +271,7 @@ places, the current turn step's fill and the prompt bar's border, so it still re
 | Input buckets | `InputBucket.cs` | Round olive glass rim with a Brass ring at 50% around the faction flag. |
 | Team scores | `FactionsContainer.tscn` | Display 48 Cream numerals with a black outline on the Axis/Allies flag tiles. |
 | Input timer | `InputTimerDisplay.tscn` | Olive glass with a Brass border; title in Caps 13 Muted, uppercase; countdown in Display 28. |
-| Prompt bar | `PlayerAction.tscn`, `TurnFactionTint.cs` | Olive glass 90% (no nine-patch), radius 4 on top; a 3px top border and 1px sides in the **turn faction's colour** (`TurnFactionTint` now tints the border, not the fill); Body 18 Cream text. |
+| Prompt bar | `PlayerAction.tscn`, `TurnFactionTint.cs` | Olive glass 90% (no nine-patch), radius 4 on top; a 1px border on the top and sides in the **turn faction's colour** (`TurnFactionTint` now tints the border, not the fill); Body 18 Cream text. |
 | Skip buttons | `user_interface.tscn` | The `MenuPanelButton` instances with the nine-patch hidden and compact secondary styles: olive glass, faint Cream border, Brass on hover; Body 15 Cream. |
 | Toolbar strip | `user_interface.tscn` | `GlassPopupPanel` behind the white icons. |
 | Player info (multiplayer) | `PlayerInfoDisplay.tscn` | Glass panel and `InGameTheme`; role in Brass, factions in Muted. |
