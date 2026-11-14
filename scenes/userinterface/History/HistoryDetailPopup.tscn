@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://no1lswlgrd1o" path="res://scripts/C#/UI/HistoryDetailPopup.cs" id="1_hdpop"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_hdcard"]
 [ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="3_hdstyle"]
+[ext_resource type="Texture2D" uid="uid://s1w8qwl20na2" path="res://assets/textures/Other/Icons/Arrow.png" id="4_hdarrow"]
 
 [node name="HistoryDetailPopup" type="Control"]
 layout_mode = 3
@@ -37,17 +38,35 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="CardRow" type="GridContainer" parent="HistoryDetailPanel/Margin/VBox"]
+[node name="CardRow" type="HBoxContainer" parent="HistoryDetailPanel/Margin/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/h_separation = 6
-theme_override_constants/v_separation = 6
+theme_override_constants/separation = 6
 
 [node name="HistoryCard" parent="HistoryDetailPanel/Margin/VBox/CardRow" instance=ExtResource("2_hdcard")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(188, 263)
 layout_mode = 2
+size_flags_vertical = 4
+
+[node name="HistoryArrow" type="TextureRect" parent="HistoryDetailPanel/Margin/VBox/CardRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 28)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_hdarrow")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TargetGrid" type="GridContainer" parent="HistoryDetailPanel/Margin/VBox/CardRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
 
 [node name="HistorySummary" type="RichTextLabel" parent="HistoryDetailPanel/Margin/VBox"]
 theme = ExtResource("ig_theme")
