@@ -336,23 +336,35 @@ grow_vertical = 2
 script = ExtResource("34_blocker")
 
 [node name="PlayersPanel" parent="." unique_id=1730245520 instance=ExtResource("33_players")]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -354.0
+offset_bottom = -314.0
+grow_vertical = 0
 
 [node name="MiniMenu" type="Control" parent="." unique_id=1063376234]
 z_index = 150
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = -8.0
+grow_vertical = 0
 script = ExtResource("19_x2nnb")
 
 [node name="MiniMenuModal" type="PanelContainer" parent="MiniMenu" unique_id=54608066]
 unique_name_in_owner = true
-z_index = 150
+z_index = 4096
+z_as_relative = false
 layout_mode = 0
-offset_left = 13.0
-offset_top = 50.0
-offset_right = 203.0
-offset_bottom = 60.0
+offset_top = -18.0
+offset_right = 190.0
+offset_bottom = -8.0
+grow_vertical = 0
 theme = ExtResource("ig_theme")
 theme_override_styles/panel = ExtResource("ig_glass")
 
@@ -462,7 +474,10 @@ offset_bottom = 321.0
 scale = Vector2(0.4, 0.4)
 
 [node name="ChatBox" parent="." unique_id=1730245519 instance=ExtResource("32_chatbox")]
+z_index = 4095
+offset_top = -306.0
 offset_right = 513.0
+offset_bottom = -56.0
 
 [node name="DeckCompositionPanel" parent="." unique_id=1730245522 instance=ExtResource("36_deckcomp")]
 unique_name_in_owner = true
