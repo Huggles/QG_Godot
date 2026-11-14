@@ -306,7 +306,7 @@ public partial class FactionIntro : CanvasLayer
     /// <summary>The card sits to the right of the capital at <paramref name="at"/>, kept on screen.</summary>
     private void Place(Vector2 at, Vector2 view)
     {
-        _pulse.Position = at - _pulse.Size / 2 - new Vector2(3, 3); // optical centre of the star art
+        _pulse.Position = at - _pulse.Size / 2 - new Vector2(0, 3); // optical centre of the star art
         float gap = view.X * 0.075f;
 
         _card.ResetSize();
