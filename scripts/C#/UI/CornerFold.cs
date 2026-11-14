@@ -3,7 +3,7 @@ using Godot;
 /// <summary>The amber folded corner that marks a recently drawn hand card. Top-left, because the fan covers each card's right side.</summary>
 public partial class CornerFold : Control
 {
-	private const float LegFraction = 0.24f;
+	private const float LegFraction = 0.1f;
 	private static readonly Color FoldColor = new("#fac775");
 	private static readonly Color CreaseColor = new("#ef9f27");
 
