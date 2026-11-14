@@ -20,6 +20,11 @@ public partial class CardState : StateObject
 
     public List<int> PlayedInTurn { get => Record.PlayedInTurn; set => Record.PlayedInTurn = value; }
     public List<int> ActivatedInTurns { get => Record.ActivatedInTurns; set => Record.ActivatedInTurns = value; }
+    public int EnteredHandInTurn { get => Record.EnteredHandInTurn; set => Record.EnteredHandInTurn = value; }
+
+    /// <summary>Drawn this round or last; a starting-hand card never is.</summary>
+    [JsonIgnore] public bool IsRecentlyDrawn => EnteredHandInTurn > 0 && GameFlow.Instance != null
+        && StaticGameData.RoundForTurn(GameFlow.Instance.GameTurn) - StaticGameData.RoundForTurn(EnteredHandInTurn) <= 1;
 
     /// <summary>
     /// True once this card's face has been shown to every player, and false again as soon as it

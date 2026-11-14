@@ -105,7 +105,7 @@ public partial class RecycleCardChangeEvent : ChangeEvent
                 if (ShuffledOrder != null) board.ShuffleDeck(TargetFaction, ShuffledOrder);
                 break;
             case RecycleDestination.Hand:
-                piles.Hand.Add(CardId);
+                board.AddToHand(piles, CardId);
                 break;
             case RecycleDestination.BottomOfDeck:
                 piles.Deck.Add(CardId);

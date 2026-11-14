@@ -203,6 +203,9 @@ public partial class CardScene : Control
 		this.triggersEmphasis = triggersEmphasis;
 	}
 
+	/// <summary>The folded corner for a card drawn this round or last. Only the hand fan sets it.</summary>
+	public void SetRecentlyDrawn(bool recentlyDrawn) => GetNode<Control>("%RecentlyDrawnFold").Visible = recentlyDrawn;
+
 	public bool IsEmphasized => emphasized;
 
 	/// <summary>
