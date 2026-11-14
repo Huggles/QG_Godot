@@ -28,7 +28,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     /// <summary>Must match CardRow's separation and TargetGrid's h/v_separation in the scene.</summary>
     private const float CardGap = 6f;
     /// <summary>Must match HistoryArrow's custom_minimum_size.x in the scene.</summary>
-    private const float ArrowWidth = 36f;
+    private const float ArrowWidth = 28f;
     /// <summary>Height kept free under the card grid for the summary text.</summary>
     private const float SummaryReserve = 120f;
     /// <summary>Panel margins around the grid, on top of the stylebox's own; see the Margin node.</summary>
@@ -39,7 +39,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
 
     private PanelContainer DetailPanel => GetNode<PanelContainer>("%HistoryDetailPanel");
     private GridContainer  TargetGrid => GetNode<GridContainer>("%TargetGrid");
-    private TextureRect    Arrow => GetNode<TextureRect>("%HistoryArrow");
+    private HistoryArrow   Arrow => GetNode<HistoryArrow>("%HistoryArrow");
     private CardScene      CardSceneNode => GetNode<CardScene>("%HistoryCard");
     private RichTextLabel  SummaryLabel => GetNode<RichTextLabel>("%HistorySummary");
 

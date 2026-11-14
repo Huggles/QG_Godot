@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://no1lswlgrd1o" path="res://scripts/C#/UI/HistoryDetailPopup.cs" id="1_hdpop"]
 [ext_resource type="PackedScene" uid="uid://c5j7tqqs2m4kt" path="res://scenes/cards/CardScene.tscn" id="2_hdcard"]
 [ext_resource type="StyleBox" path="res://scenes/menu/theme/GlassPopupPanel.tres" id="3_hdstyle"]
-[ext_resource type="Texture2D" uid="uid://s1w8qwl20na2" path="res://assets/textures/Other/Icons/Arrow.png" id="4_hdarrow"]
+[ext_resource type="Script" uid="uid://bh1starr0wq7x" path="res://scripts/C#/UI/HistoryArrow.cs" id="4_hdarrow"]
 
 [node name="HistoryDetailPopup" type="Control"]
 layout_mode = 3
@@ -50,15 +50,13 @@ custom_minimum_size = Vector2(188, 263)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="HistoryArrow" type="TextureRect" parent="HistoryDetailPanel/Margin/VBox/CardRow"]
+[node name="HistoryArrow" type="Control" parent="HistoryDetailPanel/Margin/VBox/CardRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(36, 28)
+custom_minimum_size = Vector2(28, 20)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
-texture = ExtResource("4_hdarrow")
-expand_mode = 1
-stretch_mode = 5
+script = ExtResource("4_hdarrow")
 
 [node name="TargetGrid" type="GridContainer" parent="HistoryDetailPanel/Margin/VBox/CardRow"]
 unique_name_in_owner = true
