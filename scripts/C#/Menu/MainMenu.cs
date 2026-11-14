@@ -108,6 +108,8 @@ public partial class MainMenu : Control
 		// teardown: standing on the main menu, there is no host to have told us who we are.
 		SessionIdentity.Reset();
 
+		GetNode<Label>("%VersionLabel").Text = $"v{BuildInfo.Version}";
+
 		var tutorial         = GetNode<MenuPanelButton>("%TutorialButton");
 		var skirmish         = GetNode<MenuPanelButton>("%SkirmishButton");
 		var loadGame         = GetNode<MenuPanelButton>("%LoadGameButton");
