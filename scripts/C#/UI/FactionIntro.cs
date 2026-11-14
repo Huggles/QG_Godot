@@ -18,6 +18,7 @@ public partial class FactionIntro : CanvasLayer
     private const float BarHeight = 96f;
 
     private static readonly Color Brass = new(0.851f, 0.678f, 0.361f);
+    private static readonly Color Spark = new(1f, 0.93f, 0.74f);
     private static readonly Color Cream = new(0.929f, 0.898f, 0.82f);
     private static readonly Color CreamHover = new(0.96f, 0.82f, 0.55f);
     private static readonly Color Muted = new(0.69f, 0.66f, 0.58f);
@@ -37,6 +38,8 @@ public partial class FactionIntro : CanvasLayer
     private ColorRect _factionBar;
     private Control _ornament, _who;
     private CountryScene _focus;
+    private Control _pulse;
+    private float _pulsePhase;
 
     /// <summary>Plays the intro on this peer and returns when it is over; a no-op without a screen.</summary>
     public static async Task PlayAsync()
@@ -94,7 +97,7 @@ public partial class FactionIntro : CanvasLayer
 
         _beatTween?.Kill();
         Tween fade = CreateTween().SetParallel();
-        foreach (CanvasItem item in new CanvasItem[] { _card })
+        foreach (CanvasItem item in new CanvasItem[] { _card, _pulse })
             fade.TweenProperty(item, "modulate:a", 0.0, FadeSeconds);
         return await Wait(FadeSeconds);
     }
@@ -105,7 +108,7 @@ public partial class FactionIntro : CanvasLayer
         _beatTween?.Kill();
         _cameraTween?.Kill();
         Tween fade = CreateTween().SetParallel();
-        foreach (CanvasItem item in new CanvasItem[] { _card, _shade })
+        foreach (CanvasItem item in new CanvasItem[] { _card, _pulse, _shade })
             fade.TweenProperty(item, "modulate:a", 0.0, FadeSeconds);
         fade.TweenProperty(_barTop, "position:y", -BarHeight, 0.8).SetTrans(Godot.Tween.TransitionType.Cubic);
         fade.TweenProperty(_barBottom, "position:y", GetViewport().GetVisibleRect().Size.Y, 0.8).SetTrans(Godot.Tween.TransitionType.Cubic);
@@ -136,6 +139,8 @@ public partial class FactionIntro : CanvasLayer
 
     public override void _Process(double delta)
     {
+        _pulsePhase = (_pulsePhase + (float)delta / 2.4f) % 1f;
+        _pulse?.QueueRedraw();
         if (_focus != null && IsInstanceValid(_focus)) Place(StarOnScreen(_focus), GetViewport().GetVisibleRect().Size);
     }
 
@@ -228,6 +233,10 @@ public partial class FactionIntro : CanvasLayer
         _shade.Draw += DrawShade;
         AddChild(_shade);
 
+        _pulse = new Control { Size = new Vector2(140, 140), MouseFilter = Control.MouseFilterEnum.Ignore, Modulate = Colors.White with { A = 0 } };
+        _pulse.Draw += DrawPulse;
+        AddChild(_pulse);
+
 
         BuildCard();
 
@@ -297,6 +306,7 @@ public partial class FactionIntro : CanvasLayer
     /// <summary>The card sits to the right of the capital at <paramref name="at"/>, kept on screen.</summary>
     private void Place(Vector2 at, Vector2 view)
     {
+        _pulse.Position = at - _pulse.Size / 2;
         float gap = view.X * 0.075f;
 
         _card.ResetSize();
@@ -311,6 +321,8 @@ public partial class FactionIntro : CanvasLayer
         _beatTween?.Kill();
         foreach (CanvasItem item in new CanvasItem[] { _kicker, _faction, _ornament, _who }) item.Modulate = Colors.White with { A = 0 };
         _card.Modulate = Colors.White;
+        _pulse.Modulate = Colors.White;
+        _pulsePhase = 0;
 
         Tween t = CreateTween().SetParallel();
         Step(t, _kicker, 0.1);
@@ -323,6 +335,12 @@ public partial class FactionIntro : CanvasLayer
     private static void Step(Tween t, Control item, double delay)
     {
         t.TweenProperty(item, "modulate:a", 1.0, 0.45).SetDelay(delay);
+    }
+
+    // A white ring that keeps swelling out from the capital's star and fading.
+    private void DrawPulse()
+    {
+        _pulse.DrawArc(_pulse.Size / 2, 34f * (1f + 0.8f * _pulsePhase), 0, Mathf.Tau, 64, Spark with { A = 0.7f * (1f - _pulsePhase) }, 2, true);
     }
 
     // Horizontal bands from clear to near-black scrim; vertex colours do the gradient.
