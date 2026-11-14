@@ -169,6 +169,12 @@ tooltip_text = "On: deal 10 cards and every player immediately discards 3. Off: 
 button_pressed = true
 text = "Discard 3 cards at start"
 
+[node name="FactionIntroCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer" unique_id=1873405521]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "On: after loading, the camera visits each capital and names the faction and its player."
+text = "Faction intro at start"
+
 [node name="BottomSpacer" type="Control" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1602117009]
 layout_mode = 2
 size_flags_vertical = 3

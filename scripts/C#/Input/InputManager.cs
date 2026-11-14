@@ -391,9 +391,12 @@ public partial class InputManager : Node2D
 		zoom = DEFAULT_ZOOM.X;
 	}
 
+	/// <summary>True while something else drives the camera (the faction intro): no pan or zoom input.</summary>
+	public bool CameraLocked { get; set; }
+
 	public override void _Process(double delta)
 	{
-		KeyboardMovement();
+		if (!CameraLocked) KeyboardMovement();
 		ApplyCameraBounds();
 	}
 
@@ -531,7 +534,7 @@ public partial class InputManager : Node2D
 
 	private void HandleMouseInput(InputEventMouse e)
 	{
-		if (e is InputEventMouseButton)
+		if (e is InputEventMouseButton && !CameraLocked)
 		{
 			if (Input.IsActionPressed("game_zoom_in"))
 				ZoomIn();

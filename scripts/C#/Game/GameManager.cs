@@ -56,6 +56,12 @@ public partial class GameManager : Node
     public static bool? PendingOpeningDiscard { get; set; } = null;
 
     /// <summary>
+    /// The menus' "faction intro" box for the next game. Host-only, and consumed by
+    /// MultiplayerSession.StartSession, so it never carries over into a later game that did not set it.
+    /// </summary>
+    public static bool PendingFactionIntro { get; set; } = false;
+
+    /// <summary>
     /// The expansions the menus chose for the next game, or null to use whatever the scenario asks for
     /// (<see cref="ScenarioExpansions"/>). Read by the host only (MultiplayerSession.StartNew), which sends
     /// the resolved list to every peer. Cleared with PendingOpeningDiscard when the scenario changes, for

@@ -93,6 +93,13 @@ public partial class GameFlow : SingletonNode<GameFlow>
     /// </summary>
     public bool OpeningDiscardEnabled { get; set; } = true;
 
+    /// <summary>
+    /// Whether every peer plays the faction intro before the first prompt (see <see cref="FactionIntro"/>).
+    /// Host-only, set by MultiplayerSession.StartSession for a fresh game; StartGame holds the opening
+    /// discard until <see cref="FactionIntroBarrier"/> says every peer has finished watching.
+    /// </summary>
+    public bool FactionIntroEnabled { get; set; } = false;
+
     public int Round => StaticGameData.RoundForTurn(GameTurn);
     public Faction CurrentFaction => StaticGameData.FactionForTurn(GameTurn);
     private MultiplayerGameState gameState => GameSession.Current.GameState;
@@ -305,6 +312,10 @@ public partial class GameFlow : SingletonNode<GameFlow>
             }
             GameStateCalculator.Enabled = true;
             GameStateCalculator.CalculateAll();
+
+            // The intro flies over a dealt board; no prompt may open on top of it.
+            if (FactionIntroEnabled)
+                await FactionIntroBarrier.WaitAsync(this, stepEpoch);
 
             // Everyone cuts down to HandSize before the first turn starts. After the recalculation
             // above so the discard modal shows correctly-tagged cards, and before StartNewTurn so it
