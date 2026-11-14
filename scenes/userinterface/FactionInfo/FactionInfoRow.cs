@@ -197,7 +197,7 @@ public partial class FactionInfoRow : Control
 			if (minorData.NumberOfAirUnits > 0) AddCounter(minor, UnitType.AIR_FORCE, minorData.FactionColor);
 		}
 
-		AddNamePlate(FactionDisplay.PlayerNameFor(Faction));
+		AddPlayerName(FactionDisplay.PlayerNameFor(Faction));
 		ApplyInk();
 		// A row whose minor factions print more than the base tail holds slides out further.
 		_fullTail = Mathf.Max(MinTail, StatsInset + Stats.GetCombinedMinimumSize().X + Notch + 10f);
@@ -249,59 +249,38 @@ public partial class FactionInfoRow : Control
 		foreach (TextureRect icon in _untinted) icon.SelfModulate = Ink;
 	}
 
-	// ── Name plate ───────────────────────────────────────────────────────────
+	// ── Player name ──────────────────────────────────────────────────────────
 
-	private static readonly FontVariation PlateFont = GD.Load<FontVariation>("res://scenes/menu/theme/MenuFontBodyBold.tres");
-	private const float PlateGap = 3f;
-	private const float PlateHeight = 18f;
-	private const float PlateMaxWidth = 160f;
-	private const int PlateFontSize = 13;
+	private static readonly FontVariation NameFont = GD.Load<FontVariation>("res://scenes/menu/theme/MenuFontBodyBold.tres");
+	/// <summary>The strip along the flag's foot the name takes; the score rides up above it.</summary>
+	private const float NameBand = 17f;
+	private const int NameFontSize = 12;
 
 	/// <summary>
-	/// A small dark plate under the flag, hung off the pole, naming who plays this faction. None when
-	/// <see cref="FactionDisplay.PlayerNameFor"/> has no name to give (solo play); the row then keeps its
-	/// bare height. A long name is cut with an ellipsis and shown whole on hover.
+	/// Prints who plays this faction along the foot of the flag, in the same white-on-black ink as the
+	/// score, which moves up to make room. Nothing when <see cref="FactionDisplay.PlayerNameFor"/> has no
+	/// name (solo play). A name wider than the flag is cut with an ellipsis; the tooltip has it whole.
 	/// </summary>
-	private void AddNamePlate(string name)
+	private void AddPlayerName(string name)
 	{
 		if (string.IsNullOrEmpty(name)) return;
 
-		const float padX = 6f;
-		float textWidth = PlateFont.GetStringSize(name, HorizontalAlignment.Left, -1, PlateFontSize).X;
-		float width = Mathf.Min(Mathf.Ceil(textWidth) + 2 * padX + 2, PlateMaxWidth);
-
-		Panel plate = new()
+		ScoreLabel.Size = new Vector2(Head, Height - NameBand + 1f);
+		const float padX = 4f;
+		AddChild(new Label
 		{
-			Name = "NamePlate",
-			Position = new Vector2(0, Height + PlateGap),
-			Size = new Vector2(width, PlateHeight),
-			TooltipText = name,
-			MouseFilter = MouseFilterEnum.Pass,
-		};
-		plate.AddThemeStyleboxOverride("panel", new StyleBoxFlat
-		{
-			BgColor = new Color(0.08f, 0.07f, 0.05f, 0.82f),
-			BorderColor = new Color(0.851f, 0.678f, 0.361f),
-			BorderWidthLeft = 2,
-			BorderWidthBottom = 1,
-			CornerRadiusTopRight = 3,
-			CornerRadiusBottomRight = 3,
-		});
-		Label label = new()
-		{
+			Name = "PlayerName",
 			Text = name,
-			Position = new Vector2(padX, 0),
-			Size = new Vector2(width - 2 * padX, PlateHeight),
+			Position = new Vector2(padX, Height - NameBand + 1f),
+			Size = new Vector2(Head - 2 * padX, NameBand),
+			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
 			TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis,
 			ClipText = true,
 			MouseFilter = MouseFilterEnum.Ignore,
-			LabelSettings = new LabelSettings { Font = PlateFont, FontSize = PlateFontSize, FontColor = new Color(0.929f, 0.898f, 0.82f) },
-		};
-		plate.AddChild(label);
-		AddChild(plate);
-
-		CustomMinimumSize = CustomMinimumSize with { Y = Height + PlateGap + PlateHeight };
+			LabelSettings = new LabelSettings { Font = NameFont, FontSize = NameFontSize, FontColor = Ink, OutlineSize = 4, OutlineColor = Colors.Black },
+		});
+		FactionInfoButton.TooltipText = $"{FactionState.FactionData.Label} — {name}\nClick to show or hide cards and pieces";
 	}
 
 	// ── Event handlers ───────────────────────────────────────────────────────
