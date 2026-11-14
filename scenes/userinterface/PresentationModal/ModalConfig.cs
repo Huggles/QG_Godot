@@ -104,7 +104,13 @@ public class ModalConfig
         return this;
     }
 
+    /// <summary>The whole confirm-button text while nothing is selected, or null to use the usual label.</summary>
+    public string EmptyApplyLabel { get; private set; }
+
     public ModalConfig WithApplyLabel(string label) { ApplyLabel = label; return this; }
+
+    /// <summary>Name what confirming with nothing selected costs, e.g. the Total War discard-nothing VP.</summary>
+    public ModalConfig WithEmptyApplyLabel(string label) { EmptyApplyLabel = label; return this; }
     public ModalConfig WithCancelLabel(string label) { CancelLabel = label; return this; }
     public ModalConfig WithAutoDismiss()
     {

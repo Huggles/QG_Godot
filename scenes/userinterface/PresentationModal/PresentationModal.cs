@@ -432,7 +432,9 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		if (ConfirmButton == null || _activeConfig == null) return;
 		int count = _activeConfig.Mode == ModalSelectionMode.Reorder ? _orderedItems.Count : _selectedItems.Count;
 		ConfirmButton.Disabled = count < _activeConfig.MinSelections;
-		ConfirmButton.Text = _activeConfig.MinSelections > 0
+		ConfirmButton.Text = count == 0 && _activeConfig.EmptyApplyLabel != null
+			? _activeConfig.EmptyApplyLabel.ToUpperInvariant()
+			: _activeConfig.MinSelections > 0
 			? $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count}/{_activeConfig.MinSelections})"
 			: $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count})";
 	}
