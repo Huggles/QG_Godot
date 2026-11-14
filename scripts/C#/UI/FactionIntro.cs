@@ -306,7 +306,7 @@ public partial class FactionIntro : CanvasLayer
     /// <summary>The card sits to the right of the capital at <paramref name="at"/>, kept on screen.</summary>
     private void Place(Vector2 at, Vector2 view)
     {
-        _pulse.Position = at - _pulse.Size / 2;
+        _pulse.Position = at - _pulse.Size / 2 - new Vector2(3, 3); // optical centre of the star art
         float gap = view.X * 0.075f;
 
         _card.ResetSize();
@@ -340,7 +340,7 @@ public partial class FactionIntro : CanvasLayer
     // A white ring that keeps swelling out from the capital's star and fading.
     private void DrawPulse()
     {
-        _pulse.DrawArc(_pulse.Size / 2, 34f * (1f + 0.8f * _pulsePhase), 0, Mathf.Tau, 64, Spark with { A = 0.7f * (1f - _pulsePhase) }, 2, true);
+        _pulse.DrawArc(_pulse.Size / 2, 42f + 28f * _pulsePhase, 0, Mathf.Tau, 64, Spark with { A = 0.7f * (1f - _pulsePhase) }, 2, true);
     }
 
     // Horizontal bands from clear to near-black scrim; vertex colours do the gradient.
