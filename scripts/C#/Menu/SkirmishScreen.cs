@@ -409,7 +409,9 @@ public partial class SkirmishScreen : Control
 
 		List<PlayerFactionAssignment> assignments = new()
 		{
-			new PlayerFactionAssignment(1, humanFactions),
+			// Named, so the human's factions read as theirs beside the bots' "AI" (pennant plates, history).
+			new PlayerFactionAssignment(1, humanFactions,
+				SteamworksApi.IsAvailable ? SteamworksApi.Instance.LocalPersonaName : "You"),
 		};
 
 		for (int i = 0; i < aiFactions.Count; i++)

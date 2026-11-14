@@ -91,8 +91,9 @@ public partial class FactionsContainer : Control
             FactionInfoNodes[faction] = rowInstance;
         }
 
-        // The pole runs from the finial to just past the last pennant.
-        float rowHeight = playerFactions.Count * 52f + (playerFactions.Count - 1) * Column.GetThemeConstant("separation");
+        // The pole runs from the finial to just past the last pennant. Rows with a name plate stand taller.
+        float rowHeight = FactionInfoNodes.Values.Sum(row => row.CustomMinimumSize.Y)
+            + (playerFactions.Count - 1) * Column.GetThemeConstant("separation");
         Pole.Size = Pole.Size with { Y = rowHeight + 16f };
     }
 
