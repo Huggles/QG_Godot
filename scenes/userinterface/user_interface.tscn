@@ -336,12 +336,14 @@ grow_vertical = 2
 script = ExtResource("34_blocker")
 
 [node name="PlayersPanel" parent="." unique_id=1730245520 instance=ExtResource("33_players")]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -354.0
-offset_bottom = -314.0
-grow_vertical = 0
+anchors_preset = -1
+anchor_left = 0.25
+anchor_right = 0.25
+offset_left = -100.0
+offset_top = 6.0
+offset_right = 100.0
+offset_bottom = 46.0
+grow_horizontal = 2
 
 [node name="MiniMenu" type="Control" parent="." unique_id=1063376234]
 z_index = 150
