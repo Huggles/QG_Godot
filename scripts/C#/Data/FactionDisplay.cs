@@ -41,8 +41,6 @@ public static class FactionDisplay
     /// </summary>
     public static string WithPlayer(this Faction faction)
     {
-        // "Germany (AI, Hard)": the bot's name already has brackets, and nested ones read badly.
-        if (PlayerFactionRegistry.IsFactionAi(faction)) return $"{faction.Label()} (AI, {AiSeatRuntime.SessionDifficulty})";
         string player = PlayerNameFor(faction);
         return player == null ? faction.Label() : $"{faction.Label()} ({player})";
     }
@@ -70,8 +68,8 @@ public static class FactionDisplay
         return PlayerFactionRegistry.GetDisplayNameForFaction(faction);
     }
 
-    /// <summary>What every AI-controlled faction is called: "AI (Hard)" or "AI (Normal)".</summary>
-    public static string AiName => $"AI ({AiSeatRuntime.SessionDifficulty})";
+    /// <summary>What every AI-controlled faction is called: "AI - Hard" or "AI - Normal".</summary>
+    public static string AiName => $"AI - {AiSeatRuntime.SessionDifficulty}";
 
     /// <summary>UNITED_STATES → "United States". Only used when there is no FactionData row.</summary>
     private static string PrettyEnumName(Faction faction)
