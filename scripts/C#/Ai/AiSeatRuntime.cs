@@ -48,6 +48,12 @@ public static class AiSeatRuntime
     private static List<Faction> FactionsOf(PlayerScene seat) =>
         StaticGameData.PlayableFactions.Where(f => PlayerFactionRegistry.GetPlayerSceneForFaction(f) == seat).ToList();
 
+    /// <summary>
+    /// The host's difficulty, copied to every peer by StartSession (and on rejoin) so all of them can
+    /// name the bots by it (<see cref="FactionDisplay.PlayerNameFor"/>). Every seat in a session plays at it.
+    /// </summary>
+    public static AiDifficulty SessionDifficulty { get; set; } = AiDifficulty.Hard;
+
     /// <summary>The live installation, or null when this session has no bots on this peer.</summary>
     public static AiSeatInstallation Current { get; private set; }
 

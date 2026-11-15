@@ -107,6 +107,7 @@ public partial class SkirmishScreen : Control
 		_aiDifficultyPicker.AddItem("Normal AI", (int)AiDifficulty.Normal);
 		_aiDifficultyPicker.AddItem("Hard AI", (int)AiDifficulty.Hard);
 		_aiDifficultyPicker.Select(_aiDifficultyPicker.GetItemIndex((int)GameManager.PendingAiDifficulty));
+		_aiDifficultyPicker.ItemSelected += _ => RenderAllSeats(); // the seats name the difficulty
 
 		_seedInput           = GetNode<LineEdit>("%SeedInput");
 		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
@@ -281,9 +282,8 @@ public partial class SkirmishScreen : Control
 	/// Yours is a brass-framed row in full colour; a bot's is dimmed, and lights up on hover to say it
 	/// can be taken back.
 	///
-	/// "AI" is the string FactionDisplay.PlayerNameFor already returns for a bot faction, and so what
-	/// puts "Germany (AI)" on the history rows and banners in game. This screen matching it exactly is
-	/// deliberate; it must not say "Bot" or "Computer".
+	/// "AI (HARD)" matches FactionDisplay.AiName, what the game calls a bot faction everywhere. This
+	/// screen matching it is deliberate; it must not say "Bot" or "Computer".
 	/// </summary>
 	private void RenderSeat(Faction faction)
 	{
@@ -293,7 +293,7 @@ public partial class SkirmishScreen : Control
 
 		bool hovered = _hovered == faction;
 
-		seat.Controller.Text = mine ? "YOU" : "AI";
+		seat.Controller.Text = mine ? "YOU" : $"AI ({(AiDifficulty)_aiDifficultyPicker.GetSelectedId()})".ToUpperInvariant();
 		seat.Controller.AddThemeColorOverride("font_color", mine ? MenuBrass : MenuMuted);
 		seat.Name.AddThemeColorOverride("font_color", mine || hovered ? MenuText : MenuMuted);
 		seat.Flag.Modulate = mine || hovered ? Colors.White : new Color(0.5f, 0.5f, 0.5f, 0.75f);

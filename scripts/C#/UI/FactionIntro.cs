@@ -37,7 +37,6 @@ public partial class FactionIntro : CanvasLayer
     private Control _shade;
     private VBoxContainer _card;
     private Label _kicker, _faction, _player;
-    private AiDifficulty _aiDifficulty;
     private ColorRect _factionBar;
     private Control _ornament, _who;
     private CountryScene _focus;
@@ -47,13 +46,13 @@ public partial class FactionIntro : CanvasLayer
     private float _pulsePhase;
 
     /// <summary>Plays the intro on this peer and returns when it is over; a no-op without a screen.</summary>
-    public static async Task PlayAsync(AiDifficulty aiDifficulty)
+    public static async Task PlayAsync()
     {
         InputManager input = InputManager.Current;
         PlayerScene player = PlayerScene.Current;
         if (GameContext.IsHeadless || input?.Camera == null || player == null) return;
 
-        FactionIntro intro = new() { Layer = 60, Name = "FactionIntro", _aiDifficulty = aiDifficulty };
+        FactionIntro intro = new() { Layer = 60, Name = "FactionIntro" };
         player.AddChild(intro);
         try { await intro.Run(input); }
         finally { if (IsInstanceValid(intro)) intro.Finish(input); }
@@ -326,7 +325,7 @@ public partial class FactionIntro : CanvasLayer
         _factionBar.Color = data.FactionColor;
 
         bool ai = PlayerFactionRegistry.IsFactionAi(faction);
-        _player.Text = ai ? $"AI ({_aiDifficulty})" : PlayerFactionRegistry.GetDisplayNameForFaction(faction) ?? "You";
+        _player.Text = ai ? FactionDisplay.AiName : PlayerFactionRegistry.GetDisplayNameForFaction(faction) ?? "You";
     }
 
     /// <summary>The card sits beside the capital at <paramref name="at"/>, on its side, kept on screen.</summary>
