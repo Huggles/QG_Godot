@@ -184,7 +184,8 @@ public partial class MultiplayerSession : Node
                 {
                     List<int> expected = new(Multiplayer.GetPeers()) { 1 };
                     FactionIntroBarrier.Begin(expected);
-                    Rpc(nameof(PlayFactionIntro));
+                    // The difficulty rides along: only the host knows it, and the intro names AI seats by it.
+                    Rpc(nameof(PlayFactionIntro), (int)GameManager.PendingAiDifficulty);
                 }
 
                 // Only once every client has applied the restore log, so the prompt the save was taken
@@ -251,12 +252,12 @@ public partial class MultiplayerSession : Node
     /// no screen must still release the opening prompt.
     /// </summary>
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void PlayFactionIntro()
+    public async void PlayFactionIntro(int aiDifficulty)
     {
         try
         {
             await ChangeEventQueue.Instance.WhenDrained();
-            await FactionIntro.PlayAsync();
+            await FactionIntro.PlayAsync((AiDifficulty)aiDifficulty);
         }
         catch (Exception e)
         {

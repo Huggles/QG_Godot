@@ -36,7 +36,8 @@ public partial class FactionIntro : CanvasLayer
     private ColorRect _barTop, _barBottom;
     private Control _shade;
     private VBoxContainer _card;
-    private Label _kicker, _faction, _player, _aiTag;
+    private Label _kicker, _faction, _player;
+    private AiDifficulty _aiDifficulty;
     private ColorRect _factionBar;
     private Control _ornament, _who;
     private CountryScene _focus;
@@ -46,13 +47,13 @@ public partial class FactionIntro : CanvasLayer
     private float _pulsePhase;
 
     /// <summary>Plays the intro on this peer and returns when it is over; a no-op without a screen.</summary>
-    public static async Task PlayAsync()
+    public static async Task PlayAsync(AiDifficulty aiDifficulty)
     {
         InputManager input = InputManager.Current;
         PlayerScene player = PlayerScene.Current;
         if (GameContext.IsHeadless || input?.Camera == null || player == null) return;
 
-        FactionIntro intro = new() { Layer = 60, Name = "FactionIntro" };
+        FactionIntro intro = new() { Layer = 60, Name = "FactionIntro", _aiDifficulty = aiDifficulty };
         player.AddChild(intro);
         try { await intro.Run(input); }
         finally { if (IsInstanceValid(intro)) intro.Finish(input); }
@@ -293,10 +294,7 @@ public partial class FactionIntro : CanvasLayer
         HBoxContainer who = new() { MouseFilter = Control.MouseFilterEnum.Ignore };
         who.AddThemeConstantOverride("separation", 18);
         _player = Display("", 78, CreamHover);
-        _aiTag = Caps("AI", 17, Muted);
-        _aiTag.SizeFlagsVertical = Control.SizeFlags.ShrinkCenter;
         who.AddChild(_player);
-        who.AddChild(_aiTag);
         _who = who;
         _card.AddChild(who);
     }
@@ -314,7 +312,6 @@ public partial class FactionIntro : CanvasLayer
         _ornament.MoveChild(_factionBar, left ? 2 : 0);
         _ornament.MoveChild(_hair, left ? 0 : 2);
         _ornament.MoveChild(_star, 1);
-        _who.MoveChild(_aiTag, left ? 0 : 1);
 
         Tween t = CreateTween();
         t.TweenProperty(_shade, "modulate:a", 0.0, 0.5);
@@ -329,8 +326,7 @@ public partial class FactionIntro : CanvasLayer
         _factionBar.Color = data.FactionColor;
 
         bool ai = PlayerFactionRegistry.IsFactionAi(faction);
-        _player.Text = ai ? "Computer" : PlayerFactionRegistry.GetDisplayNameForFaction(faction) ?? "You";
-        _aiTag.Visible = ai;
+        _player.Text = ai ? $"AI ({_aiDifficulty})" : PlayerFactionRegistry.GetDisplayNameForFaction(faction) ?? "You";
     }
 
     /// <summary>The card sits beside the capital at <paramref name="at"/>, on its side, kept on screen.</summary>
