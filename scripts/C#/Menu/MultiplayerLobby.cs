@@ -188,7 +188,9 @@ public partial class MultiplayerLobby : Control
 		_openingDiscardCheckBox.Disabled = true;
 		_openingDiscardCheckBox.Toggled += OnOpeningDiscardToggled;
 
-		// Host-only like the discard, off by default, and never offered for a restored save.
+		// Host-only like the discard, and never offered for a restored save. Only a dev build offers it at
+		// all: a release build always plays the intro.
+		_factionIntroCheckBox.Visible = !GameContext.IsProductionBuild;
 		_factionIntroCheckBox.Disabled = true;
 		_factionIntroCheckBox.Toggled += OnFactionIntroToggled;
 
@@ -728,7 +730,7 @@ public partial class MultiplayerLobby : Control
 			// so a client's own box never affects its game.
 			MenuSeedField.Commit(_seedInput);
 			CommitOpeningDiscard();
-			GameManager.PendingFactionIntro = _factionIntroCheckBox.ButtonPressed;
+			GameManager.PendingFactionIntro = GameContext.IsProductionBuild || _factionIntroCheckBox.ButtonPressed;
 			GameManager.PendingExpansions = _sessionExpansions;
 		}
 

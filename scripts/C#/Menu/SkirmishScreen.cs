@@ -99,6 +99,7 @@ public partial class SkirmishScreen : Control
 		_seatsSummary     = GetNode<Label>("%SeatsSummary");
 		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
 		_factionIntroCheckBox   = GetNode<CheckBox>("%FactionIntroCheckBox");
+		_factionIntroCheckBox.Visible = !GameContext.IsProductionBuild; // a release build always plays it
 		_expansionToggles = new ExpansionToggles(_openingDiscardCheckBox);
 
 		// Item ids are the enum values, so the pick reads straight back as an AiDifficulty.
@@ -362,7 +363,7 @@ public partial class SkirmishScreen : Control
 		// box's value unconditionally is also what stops an override left over from a lobby session
 		// earlier in the same process from leaking into this game.
 		GameManager.PendingOpeningDiscard = _openingDiscardCheckBox.ButtonPressed;
-		GameManager.PendingFactionIntro = _factionIntroCheckBox.ButtonPressed;
+		GameManager.PendingFactionIntro = GameContext.IsProductionBuild || _factionIntroCheckBox.ButtonPressed;
 		// A definite list for the same reason: never let a lobby's choice leak into a skirmish.
 		GameManager.PendingExpansions = _expansionToggles.Checked;
 		GameManager.PendingAiDifficulty = (AiDifficulty)_aiDifficultyPicker.GetSelectedId();
