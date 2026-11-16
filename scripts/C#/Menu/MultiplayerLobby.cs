@@ -27,6 +27,7 @@ public partial class MultiplayerLobby : Control
 	private LineEdit      _seedInput;
 	private Button        _randomizeSeedButton;
 	private CheckBox      _openingDiscardCheckBox;
+	private CheckBox      _factionIntroCheckBox;
 
 	// ── Runtime state ─────────────────────────────────────────────────────────
 	private bool _isHost        = false;
@@ -139,6 +140,7 @@ public partial class MultiplayerLobby : Control
 		_seedInput           = GetNode<LineEdit>("%SeedInput");
 		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
 		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
+		_factionIntroCheckBox   = GetNode<CheckBox>("%FactionIntroCheckBox");
 		_restoreLabel        = GetNode<Label>("%RestoreLabel");
 
 		// Read before anything else touches MainMenu.ClearLobbyIntent — which this method calls on itself
@@ -185,6 +187,12 @@ public partial class MultiplayerLobby : Control
 			?? gameManager.SelectedScenario?.OpeningDiscard ?? true;
 		_openingDiscardCheckBox.Disabled = true;
 		_openingDiscardCheckBox.Toggled += OnOpeningDiscardToggled;
+
+		// Host-only like the discard, and never offered for a restored save. Only a dev build offers it at
+		// all: a release build always plays the intro.
+		_factionIntroCheckBox.Visible = !GameContext.IsProductionBuild;
+		_factionIntroCheckBox.Disabled = true;
+		_factionIntroCheckBox.Toggled += OnFactionIntroToggled;
 
 		// Expansions are never editable here. Read before ClearLobbyIntent below drops the dialog's choice.
 		_sessionExpansions = ExpansionIds.Normalize(_restoreSave?.Expansions
@@ -511,6 +519,7 @@ public partial class MultiplayerLobby : Control
 		bool restoring = _restoreSave != null;
 		SetSeedFieldEnabled(!restoring);
 		_openingDiscardCheckBox.Disabled = restoring;
+		_factionIntroCheckBox.Disabled = restoring;
 
 		// From here on a peer that cannot play these is turned away at its Hello.
 		RejoinService.Instance?.SetLobbyExpansions(_sessionExpansions);
@@ -721,6 +730,7 @@ public partial class MultiplayerLobby : Control
 			// so a client's own box never affects its game.
 			MenuSeedField.Commit(_seedInput);
 			CommitOpeningDiscard();
+			GameManager.PendingFactionIntro = GameContext.IsProductionBuild || _factionIntroCheckBox.ButtonPressed;
 			GameManager.PendingExpansions = _sessionExpansions;
 		}
 
@@ -1203,6 +1213,7 @@ public partial class MultiplayerLobby : Control
 				RpcId((int)peerId, nameof(SyncRestoreBanner), RestoreBannerText());
 
 			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
+			RpcId((int)peerId, nameof(SyncFactionIntro), _factionIntroCheckBox.ButtonPressed);
 			RpcId((int)peerId, nameof(SyncExpansions), ExpansionIds.ToWire(_sessionExpansions));
 
 			// Cannot match by name yet — the peer has not reported one, so _playerNames holds nothing for
@@ -1539,6 +1550,7 @@ public partial class MultiplayerLobby : Control
 			RpcId(requester, nameof(SyncRestoreBanner), RestoreBannerText());
 
 		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
+		RpcId(requester, nameof(SyncFactionIntro), _factionIntroCheckBox.ButtonPressed);
 		RpcId(requester, nameof(SyncExpansions), ExpansionIds.ToWire(_sessionExpansions));
 	}
 
@@ -1604,6 +1616,15 @@ public partial class MultiplayerLobby : Control
 
 	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
 	private void SyncOpeningDiscard(bool enabled) => SetOpeningDiscard(enabled);
+
+	/// <summary>Host toggled the faction intro; shown to the clients, read only from the host's box.</summary>
+	private void OnFactionIntroToggled(bool pressed)
+	{
+		if (_isHost) Rpc(nameof(SyncFactionIntro), pressed);
+	}
+
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false)]
+	private void SyncFactionIntro(bool enabled) => _factionIntroCheckBox.SetPressedNoSignal(enabled);
 
 	// ══════════════════════════════════════════════════════════════════════════
 	// Expansions

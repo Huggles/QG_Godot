@@ -62,11 +62,14 @@ public static class FactionDisplay
         //    multiplayer game "Germany (Alice)". This class is the single source of user-facing
         //    faction text, so this one line covers history rows, action banners, modal titles and the
         //    "Waiting on…" label at once.
-        if (PlayerFactionRegistry.IsFactionAi(faction)) return "AI";
+        if (PlayerFactionRegistry.IsFactionAi(faction)) return AiName;
 
         if (PlayerFactionRegistry.IsSinglePlayer) return null;
         return PlayerFactionRegistry.GetDisplayNameForFaction(faction);
     }
+
+    /// <summary>What every AI-controlled faction is called: "AI - Hard" or "AI - Normal".</summary>
+    public static string AiName => $"AI - {AiSeatRuntime.SessionDifficulty}";
 
     /// <summary>UNITED_STATES → "United States". Only used when there is no FactionData row.</summary>
     private static string PrettyEnumName(Faction faction)

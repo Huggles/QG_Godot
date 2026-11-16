@@ -69,11 +69,11 @@ public partial class MultiplayerSession : Node
             ?? GameManager.PendingExpansions
             ?? GameManager.ScenarioExpansions();
 
-        Rpc(nameof(StartSession), configuration, seed, ExpansionIds.ToWire(expansions));
+        Rpc(nameof(StartSession), configuration, seed, ExpansionIds.ToWire(expansions), (int)GameManager.PendingAiDifficulty);
     }
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public async void StartSession(string configuration, int seed, string expansions)
+    public async void StartSession(string configuration, int seed, string expansions, int aiDifficulty)
     {
         // async void: an uncaught throw here goes to the synchronization context and kills the
         // process. A failure during session init is not recoverable (the readiness barrier will
@@ -90,6 +90,7 @@ public partial class MultiplayerSession : Node
             // Before any state is built: expansions change what the game mode builds on every peer.
             // Throws, and so stops this peer's session, if this install cannot play one of them.
             GameOptions.SetForSession(ExpansionIds.FromWire(expansions));
+            AiSeatRuntime.SessionDifficulty = (AiDifficulty)aiDifficulty; // only the host's menus know it
 
             // Seed before any state is built. Here rather than at boot because a second game in the
             // same process must not inherit the first game's stream. An unseeded run still records
@@ -129,8 +130,13 @@ public partial class MultiplayerSession : Node
             // Null on a dedicated/headless server (it controls no faction, so has no local PlayerScene).
             PlayerScene.Current?.EnsureUiLoaded();
 
+            // Host-only, and consumed here so a later game that never ticked the box does not inherit it.
+            bool playIntro = false;
             if(Multiplayer.IsServer())
             {
+                playIntro = restore == null && GameManager.PendingFactionIntro;
+                GameManager.PendingFactionIntro = false;
+
                 // Above the restore branch, not inside its else like the tutorial below: a loaded save
                 // has AI seats exactly as a fresh game does, so installing there would leave a restored
                 // game with its bots silently absent. A no-op unless this session has AI seats.
@@ -153,6 +159,9 @@ public partial class MultiplayerSession : Node
                     // before the loop starts. A no-op unless the scenario armed a tutorial.
                     TutorialRuntime.InstallIfRequested();
 
+                    // Reset before StartGame: its first await can reach the intro gate before Begin below.
+                    FactionIntroBarrier.Reset();
+                    GameFlow.Instance.FactionIntroEnabled = playIntro;
                     GameFlow.Instance.StartGame();
                 }
             }
@@ -170,6 +179,14 @@ public partial class MultiplayerSession : Node
             if (Multiplayer.IsServer())
             {
                 Rpc(nameof(HideLoadingScreenWhenReady), restore != null);
+
+                // Every peer, host included, plays it and reports back; the opening prompt waits for all.
+                if (playIntro)
+                {
+                    List<int> expected = new(Multiplayer.GetPeers()) { 1 };
+                    FactionIntroBarrier.Begin(expected);
+                    Rpc(nameof(PlayFactionIntro));
+                }
 
                 // Only once every client has applied the restore log, so the prompt the save was taken
                 // on never opens over a client still replaying. Last, because it restarts the turn loop.
@@ -227,6 +244,36 @@ public partial class MultiplayerSession : Node
             // From here on the game is live, so from here on a lost player pauses it.
             ConnectionMonitor.Instance?.Arm();
         }
+    }
+
+    /// <summary>
+    /// Plays the faction intro on this peer once its setup events are applied (the same drain the
+    /// loading cover waits for), then tells the host. Reported in finally: a peer that failed or has
+    /// no screen must still release the opening prompt.
+    /// </summary>
+    [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    public async void PlayFactionIntro()
+    {
+        try
+        {
+            await ChangeEventQueue.Instance.WhenDrained();
+            await FactionIntro.PlayAsync();
+        }
+        catch (Exception e)
+        {
+            ErrorReporter.Report(e, "MultiplayerSession.PlayFactionIntro");
+        }
+        finally
+        {
+            if (Multiplayer.IsServer()) FactionIntroBarrier.MarkDone(1);
+            else if (IsInsideTree()) RpcId(1, nameof(ReportFactionIntroDone));
+        }
+    }
+
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+    private void ReportFactionIntroDone()
+    {
+        if (Multiplayer.IsServer()) FactionIntroBarrier.MarkDone(Multiplayer.GetRemoteSenderId());
     }
 
     /// <summary>

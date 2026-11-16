@@ -162,6 +162,12 @@ layout_mode = 2
 button_pressed = true
 text = "Discard 3 cards at start"
 
+[node name="FactionIntroCheckBox" type="CheckBox" parent="Card/Margin/Layout/Columns/Left" unique_id=1873405522]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "On: after loading, the camera visits each capital and names the faction and its player."
+text = "Faction intro at start"
+
 [node name="Right" type="VBoxContainer" parent="Card/Margin/Layout/Columns" unique_id=1502117013]
 layout_mode = 2
 size_flags_horizontal = 3

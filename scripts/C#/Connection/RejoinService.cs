@@ -227,7 +227,7 @@ public partial class RejoinService : Node
 
         ConnectionMonitor.Instance.BeginRejoin(seat);
         RpcId(transport, MethodName.BeginRejoin, seat, JsonSerializer.Serialize(CurrentAssignments()), GameRandom.Seed,
-              ExpansionIds.ToWire(GameOptions.EnabledExpansions));
+              ExpansionIds.ToWire(GameOptions.EnabledExpansions), (int)AiSeatRuntime.SessionDifficulty);
     }
 
     /// <summary>The seating as it is now, bots included, in the shape LoadPlayers reads.</summary>
@@ -303,14 +303,14 @@ public partial class RejoinService : Node
     // ── Client: rejoin ───────────────────────────────────────────────────────
 
     [Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void BeginRejoin(int seatId, string configuration, int seed, string expansions)
+    public void BeginRejoin(int seatId, string configuration, int seed, string expansions, int aiDifficulty)
     {
         _hello?.TrySetResult((HelloResult.Rejoin, ""));
-        Guard.FireAndForget(() => RejoinAsync(seatId, configuration, seed, expansions), "RejoinService.Rejoin");
+        Guard.FireAndForget(() => RejoinAsync(seatId, configuration, seed, expansions, aiDifficulty), "RejoinService.Rejoin");
     }
 
     /// <summary>The client half of game start, run locally: scene, session, players, blank board, HUD.</summary>
-    private async Task RejoinAsync(int seatId, string configuration, int seed, string expansions)
+    private async Task RejoinAsync(int seatId, string configuration, int seed, string expansions, int aiDifficulty)
     {
         SessionIdentity.AdoptSeatId(seatId);
         IsCatchingUp = true;
@@ -326,7 +326,7 @@ public partial class RejoinService : Node
         NetworkApi.Instance.LoadPlayers(configuration);
 
         SignalAwaiter started = ToSignal(EventBus.Instance, EventBus.SignalName.GameSessionStarted);
-        MultiplayerSession.Instance.StartSession(configuration, seed, expansions);
+        MultiplayerSession.Instance.StartSession(configuration, seed, expansions, aiDifficulty);
         await started;
 
         RpcId(1, MethodName.RejoinReady);

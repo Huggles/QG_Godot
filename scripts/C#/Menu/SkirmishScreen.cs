@@ -42,6 +42,7 @@ public partial class SkirmishScreen : Control
 	private Label _seatsHint;
 	private Label _seatsSummary;
 	private CheckBox _openingDiscardCheckBox;
+	private CheckBox _factionIntroCheckBox;
 	private ExpansionToggles _expansionToggles;
 	private OptionButton _aiDifficultyPicker;
 
@@ -97,6 +98,8 @@ public partial class SkirmishScreen : Control
 		_seatsHint        = GetNode<Label>("%SeatsHint");
 		_seatsSummary     = GetNode<Label>("%SeatsSummary");
 		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
+		_factionIntroCheckBox   = GetNode<CheckBox>("%FactionIntroCheckBox");
+		_factionIntroCheckBox.Visible = !GameContext.IsProductionBuild; // a release build always plays it
 		_expansionToggles = new ExpansionToggles(_openingDiscardCheckBox);
 
 		// Item ids are the enum values, so the pick reads straight back as an AiDifficulty.
@@ -104,6 +107,7 @@ public partial class SkirmishScreen : Control
 		_aiDifficultyPicker.AddItem("Normal AI", (int)AiDifficulty.Normal);
 		_aiDifficultyPicker.AddItem("Hard AI", (int)AiDifficulty.Hard);
 		_aiDifficultyPicker.Select(_aiDifficultyPicker.GetItemIndex((int)GameManager.PendingAiDifficulty));
+		_aiDifficultyPicker.ItemSelected += _ => RenderAllSeats(); // the seats name the difficulty
 
 		_seedInput           = GetNode<LineEdit>("%SeedInput");
 		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
@@ -278,9 +282,8 @@ public partial class SkirmishScreen : Control
 	/// Yours is a brass-framed row in full colour; a bot's is dimmed, and lights up on hover to say it
 	/// can be taken back.
 	///
-	/// "AI" is the string FactionDisplay.PlayerNameFor already returns for a bot faction, and so what
-	/// puts "Germany (AI)" on the history rows and banners in game. This screen matching it exactly is
-	/// deliberate; it must not say "Bot" or "Computer".
+	/// "AI - HARD" matches FactionDisplay.AiName, what the game calls a bot faction everywhere. This
+	/// screen matching it is deliberate; it must not say "Bot" or "Computer".
 	/// </summary>
 	private void RenderSeat(Faction faction)
 	{
@@ -290,7 +293,7 @@ public partial class SkirmishScreen : Control
 
 		bool hovered = _hovered == faction;
 
-		seat.Controller.Text = mine ? "YOU" : "AI";
+		seat.Controller.Text = mine ? "YOU" : $"AI - {(AiDifficulty)_aiDifficultyPicker.GetSelectedId()}".ToUpperInvariant();
 		seat.Controller.AddThemeColorOverride("font_color", mine ? MenuBrass : MenuMuted);
 		seat.Name.AddThemeColorOverride("font_color", mine || hovered ? MenuText : MenuMuted);
 		seat.Flag.Modulate = mine || hovered ? Colors.White : new Color(0.5f, 0.5f, 0.5f, 0.75f);
@@ -360,6 +363,7 @@ public partial class SkirmishScreen : Control
 		// box's value unconditionally is also what stops an override left over from a lobby session
 		// earlier in the same process from leaking into this game.
 		GameManager.PendingOpeningDiscard = _openingDiscardCheckBox.ButtonPressed;
+		GameManager.PendingFactionIntro = GameContext.IsProductionBuild || _factionIntroCheckBox.ButtonPressed;
 		// A definite list for the same reason: never let a lobby's choice leak into a skirmish.
 		GameManager.PendingExpansions = _expansionToggles.Checked;
 		GameManager.PendingAiDifficulty = (AiDifficulty)_aiDifficultyPicker.GetSelectedId();
