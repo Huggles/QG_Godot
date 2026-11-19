@@ -67,6 +67,11 @@ public partial class FactionHandDisplay : Control
 	private static readonly Vector2 PickButtonSize = new(240f, 36f);
 	private CardPick activePick;
 	private MenuPanelButton pickButton;
+	private Label pickHint;
+	// The wave that runs once over the fan when a pick opens: each card swells and settles in turn.
+	private const float WaveStart = 0.45f;
+	private const float WaveStagger = 0.07f;
+	private const float WaveSwell = 1.12f;
 	/// <summary>Each card's resting pose in the fan, which a picked card rises from.</summary>
 	private readonly Dictionary<CardScene, Vector2> restPositions = new();
 	private float fanTopY;
@@ -322,11 +327,30 @@ public partial class FactionHandDisplay : Control
 		CardPick pick = null)
 	{
 		showingFaction = faction;
+		bool pickOpened = pick != null && pick != activePick;
 		activePick = pick;
 		pick?.KeepOnly(cardIds);
 		ResetVisibility();
 		InitCards(cardIds, selectableCardIds, separateNonHandCards, isReactionWindow, answeringFactions, optionCards);
 		UpdatePickButton();
+		if (pickOpened) WaveCards();
+	}
+
+	/// <summary>
+	/// Swells each card in turn once the fan has settled, so a new pick reads as "click these". Scale
+	/// rather than position, so it cannot fight the pick tweens that move a card up or down.
+	/// </summary>
+	private void WaveCards()
+	{
+		foreach (var (card, index) in CardScenes.Select((card, index) => (card, index)))
+		{
+			if (!card.IsInsideTree()) continue;
+			Vector2 rest = card.Scale;
+			Tween wave = card.CreateTween().SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Sine);
+			wave.TweenInterval(WaveStart + index * WaveStagger);
+			wave.TweenProperty(card, "scale", rest * WaveSwell, 0.14f);
+			wave.TweenProperty(card, "scale", rest, 0.22f).SetEase(Tween.EaseType.InOut);
+		}
 	}
 
 	private void ResetVisibility()
@@ -681,6 +705,23 @@ public partial class FactionHandDisplay : Control
 				FontColor = new Color(0.929f, 0.898f, 0.82f),
 			};
 		pickButton.Pressed += () => { if (activePick?.CanConfirm == true) EmitSignal(SignalName.PickConfirmed); };
+
+		// The fan looks the same as the passive hand, so say in words that it is waiting on a click.
+		pickHint = new Label
+		{
+			Name = "PickHint",
+			HorizontalAlignment = HorizontalAlignment.Center,
+			MouseFilter = MouseFilterEnum.Ignore,
+			LabelSettings = new LabelSettings
+			{
+				Font = GD.Load<Font>("res://scenes/menu/theme/MenuFontBody.tres"),
+				FontSize = 15,
+				FontColor = new Color(0.98f, 0.86f, 0.55f),
+				OutlineSize = 6,
+				OutlineColor = new Color(0f, 0f, 0f, 0.85f),
+			},
+		};
+		pickButton.AddChild(pickHint);
 	}
 
 	private static StyleBoxFlat PickButtonStyle(Color background, Color border)
@@ -699,6 +740,11 @@ public partial class FactionHandDisplay : Control
 		if (activePick == null) return;
 
 		pickButton.ButtonText = activePick.ConfirmLabel;
+		pickHint.Text = activePick.Selected.Count == 0
+			? "Click cards in your hand to select them"
+			: "Click a selected card to put it back";
+		pickHint.Size = new Vector2(pickButton.Size.X + 200f, 24f);
+		pickHint.Position = new Vector2(-100f, -30f);
 		pickButton.Disabled = !activePick.CanConfirm;
 		pickButton.Position = new Vector2(fanCentreX - PickButtonSize.X * 0.5f,
 			fanTopY - PickRise - PickButtonGap - PickButtonSize.Y);
