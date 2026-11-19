@@ -27,6 +27,7 @@ public partial class SeaBattle : CardLogic
                     .Concat(AttackableNavies(c.Board).Select(id => new BattleTarget(id, TargetType.UNIT))).ToList(),
                 (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
             .WithCondition(()=>Condition.Build(new Condition.HasSeaBattleTarget(Faction), this))
+            .WithAdvisoryCondition(()=> Condition.Build(new Condition.HasAttackableNavy(Faction), this))
             .WithGuidance("Select a navy or empty sea country to attack")
         }; 
     }

@@ -68,6 +68,9 @@ public sealed class NoHollowRule : IBotRule
             // seat controls into a single prompt, so this option set can span three of them. Asking
             // about the wrong faction returns false and the veto silently stops firing.
             CardState card = CardState.ForId(option.Id);
+            // Battle cards are AvoidDeadBattleCardRule's: it only scores one down, not vetoes it, when a
+            // table card could still trigger off the battle.
+            if (card != null && BotBattleFacts.IsBattleCard(card.CardData.CardType)) continue;
             if (card?.HasTag(Tag.NeedsAttention, card.Faction) == true)
                 sink.Veto(i, "hollow");
         }

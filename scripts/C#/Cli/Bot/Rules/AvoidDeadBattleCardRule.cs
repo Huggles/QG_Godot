@@ -25,8 +25,9 @@ using System.Collections.Generic;
 ///
 /// Scoped by <see cref="CardData.CardType"/>, which is data-driven and already shipped, so this covers
 /// every LAND_BATTLE / SEA_BATTLE card in the game without touching a card file and without keying on
-/// a card name. That is also why it is not redundant with no_hollow: Tag.NeedsAttention needs the card
-/// to DECLARE advisory conditions, and no battle card declares any.
+/// a card name. LandBattle/SeaBattle now declare the same "enemy unit to attack" as an advisory
+/// condition, so the hand draws them with the caution overlay — but no_hollow skips battle cards and
+/// leaves them to this rule, which alone knows to only score one down when a trigger is possible.
 ///
 /// KNOWN GAP: an EVENT card that happens to contain a battle step is invisible here, because its
 /// CardType is EVENT. EventGunsandButter is the clearest case — its own gate is

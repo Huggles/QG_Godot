@@ -661,6 +661,24 @@ public abstract class Condition
             situation.Board.AttackableNavies(Faction).Any() || situation.Board.AttackableSea(Faction).Any();
     }
 
+    /// <summary>
+    /// An enemy army the faction can attack. Intended as a <see cref="CardStep.WithAdvisoryCondition"/>
+    /// beside <see cref="HasLandBattleTarget"/>: battling an empty space is legal but changes nothing
+    /// on the board (it can only fire triggers), so a Land Battle with no army to hit is hollow.
+    /// </summary>
+    public class HasAttackableArmy : Condition
+    {
+        public HasAttackableArmy(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition(GameSituation situation) => situation.Board.AttackableArmies(Faction).Any();
+    }
+
+    /// <inheritdoc cref="HasAttackableArmy"/>
+    public class HasAttackableNavy : Condition
+    {
+        public HasAttackableNavy(Faction faction) { this.Faction = faction; }
+        public override bool MeetCondition(GameSituation situation) => situation.Board.AttackableNavies(Faction).Any();
+    }
+
     public class HasDeployedArmy : EventCondition
     {
         public HasDeployedArmy(Faction faction) { this.Faction = faction; }
