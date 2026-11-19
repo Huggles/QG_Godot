@@ -28,6 +28,27 @@ public partial class FactionHandDisplay : Control
 	private List<CardScene> CardScenes = new List<CardScene>();
 	private Faction showingFaction;
 
+	// Swap animation: a card leaving the fan fades and sinks, a card joining it rises from below and
+	// fades in (staggered), and a card in both the old and new fan slides from where it was.
+	private const float LeaveSeconds = 0.18f;
+	private const float LeaveDrop = 40f;
+	private const float EnterSeconds = 0.32f;
+	private const float EnterRise = 90f;
+	private const float EnterStagger = 0.035f;
+	private const float SlideSeconds = 0.2f;
+
+	private readonly record struct CardPose(Vector2 Position, float Rotation, Vector2 Scale, float Alpha);
+
+	/// <summary>Which fan entry each live CardScene stands for, so the next draw can tell kept cards from new ones.</summary>
+	private readonly Dictionary<CardScene, string> cardKeys = new();
+	private readonly Dictionary<CardScene, Tween> cardTweens = new();
+	/// <summary>Where each kept card was when the fan was torn down; consumed by LayoutFan.</summary>
+	private readonly Dictionary<string, CardPose> previousPoses = new();
+	private int enterOrder;
+	private bool anyLeaving;
+	// Bumped by every Show, so a fade-out started by Hide cannot hide a display that was re-shown meanwhile.
+	private int visibilityGeneration;
+
 	/// <summary>
 	/// The faction the display is following on its own — see <see cref="OnTurnStepStarted"/>. Distinct
 	/// from <see cref="showingFaction"/>, which every prompt and every browse overwrites: this one only
@@ -289,23 +310,39 @@ public partial class FactionHandDisplay : Control
 
 	private void ResetVisibility()
 	{
+		visibilityGeneration++;
 		Visible = true;
 		HideCardEmphasis();
 	}
 
+	/// <summary>
+	/// Fades the cards out, then hides the display — unless a Show arrives first. The cards stop taking
+	/// clicks at once; only their fade-out outlives this call.
+	/// </summary>
 	public new void Hide()
 	{
-		Visible = false;
 		// The trigger context is no longer a child of this node and is deliberately NOT cleared here:
 		// a mutator's Bulletin has to outlive the hand display, which every step transition hides.
 		// InputManager.HandleItemSelected clears it for card prompts, InputRequest.Execute for the rest.
+		HideCardEmphasis();
 
 		// Only access CardsContainer if it's been initialized (in LoadUI)
 		if (CardsContainer != null)
 		{
 			CardsContainer.MouseFilter = MouseFilterEnum.Ignore;
-			DeleteCurrentCards();
+			DeleteCurrentCards(new HashSet<string>());
 		}
+
+		if (!anyLeaving || !IsInsideTree())
+		{
+			Visible = false;
+			return;
+		}
+		int generation = visibilityGeneration;
+		GetTree().CreateTimer(LeaveSeconds).Timeout += () =>
+		{
+			if (IsInstanceValid(this) && generation == visibilityGeneration) Visible = false;
+		};
 	}
 
 	private void InitCards(List<int> cardIds, List<int> selectableCardIds = null,
@@ -318,8 +355,6 @@ public partial class FactionHandDisplay : Control
 		{
 			return;
 		}
-
-		DeleteCurrentCards();
 
 		// Copies, not the caller's list: the sort below used to reorder DeckState.HandCardIds itself,
 		// since Show(Faction) hands over the backing list.
@@ -348,6 +383,9 @@ public partial class FactionHandDisplay : Control
 		List<FanEntry> sideFan = sideIds.Select(FanEntry.ForCard).ToList();
 		// An option is never a hand card, so a split prompt draws it in the side fan.
 		(separateNonHandCards ? sideFan : handFan).AddRange((optionCards ?? new()).Select(FanEntry.ForOption));
+
+		DeleteCurrentCards(handFan.Concat(sideFan).Select(entry => entry.Key).ToHashSet());
+		enterOrder = 0;
 
 		float containerWidth = ContainerWidth();
 		float containerCentreX = containerWidth * 0.5f;
@@ -378,6 +416,8 @@ public partial class FactionHandDisplay : Control
 	{
 		public static FanEntry ForCard(int cardId) => new(cardId, null);
 		public static FanEntry ForOption(InputRequest.OptionCard option) => new(-1, option);
+		/// <summary>Identity across redraws: the same card or option keeps its key from one prompt to the next.</summary>
+		public string Key => Option != null ? $"o{Option.OptionId}" : $"c{CardId}";
 	}
 
 	/// <summary>
@@ -484,6 +524,8 @@ public partial class FactionHandDisplay : Control
 
 			cardSceneInstance.Selected += OnCardSelected;
 			CardScenes.Add(cardSceneInstance);
+			cardKeys[cardSceneInstance] = entry.Key;
+			AnimateIn(cardSceneInstance, entry.Key);
 
 			// An option has no CardState, so no tag can grey it out: the option itself says whether it is offered.
 			if (entry.Option != null)
@@ -555,23 +597,82 @@ public partial class FactionHandDisplay : Control
 		EmitSignal(SignalName.CardSelected, cardId);
 	}
 
-	private void DeleteCurrentCards()
+	/// <summary>
+	/// Tears the fan down. A card whose key is in <paramref name="keptKeys"/> is freed at once and its
+	/// pose remembered, so its replacement can slide from there; every other card fades out and sinks.
+	/// </summary>
+	private void DeleteCurrentCards(HashSet<string> keptKeys)
 	{
 		// The nodes about to be freed are the only things that could ever fire the MouseExited that
 		// clears a hover preview, so a glow raised from one of them would otherwise be permanent.
 		CardTargetPreviewDisplay.ClearAll();
+		previousPoses.Clear();
+		anyLeaving = false;
 
 		foreach (CardScene cardScene in CardScenes)
 		{
-			// Only remove from CardsContainer if it's been initialized
-			if (CardsContainer != null)
-			{
-				CardsContainer.RemoveChild(cardScene);
-			}
 			cardScene.Selected -= OnCardSelected;
-			cardScene.QueueFree(); // Ensure memory is cleaned up
+			if (cardTweens.Remove(cardScene, out Tween running)) running.Kill();
+			cardKeys.Remove(cardScene, out string key);
+
+			bool kept = key != null && keptKeys.Contains(key);
+			if (kept)
+				previousPoses[key] = new CardPose(cardScene.Position, cardScene.Rotation, cardScene.Scale, cardScene.Modulate.A);
+
+			if (kept || CardsContainer == null || !cardScene.IsInsideTree())
+			{
+				cardScene.GetParent()?.RemoveChild(cardScene);
+				cardScene.QueueFree();
+				continue;
+			}
+
+			// Leaving: dead to the mouse straight away, drawn under the incoming fan until it is gone.
+			anyLeaving = true;
+			cardScene.SetMousePassthrough(true);
+			cardScene.SetClickable(false);
+			cardScene.ZIndex -= 100;
+			Tween leave = cardScene.CreateTween().SetParallel().SetEase(Tween.EaseType.In).SetTrans(Tween.TransitionType.Cubic);
+			leave.TweenProperty(cardScene, "modulate:a", 0f, LeaveSeconds);
+			leave.TweenProperty(cardScene, "position:y", cardScene.Position.Y + LeaveDrop, LeaveSeconds);
+			leave.Chain().TweenCallback(Callable.From(cardScene.QueueFree));
 		}
 		CardScenes.Clear();
+	}
+
+	/// <summary>
+	/// Animates a freshly laid-out card into its final pose: from its old pose if it was already on
+	/// show, otherwise rising from below and fading in, after the leaving cards have begun to clear.
+	/// </summary>
+	private void AnimateIn(CardScene card, string key)
+	{
+		if (!card.IsInsideTree()) return;
+		Vector2 position = card.Position;
+		float rotation = card.Rotation;
+		Vector2 scale = card.Scale;
+		Tween tween = card.CreateTween().SetParallel().SetEase(Tween.EaseType.Out);
+		cardTweens[card] = tween;
+
+		if (previousPoses.Remove(key, out CardPose from))
+		{
+			card.Position = from.Position;
+			card.Rotation = from.Rotation;
+			card.Scale = from.Scale;
+			card.Modulate = card.Modulate with { A = from.Alpha };
+			tween.SetTrans(Tween.TransitionType.Cubic);
+			tween.TweenProperty(card, "position", position, SlideSeconds);
+			tween.TweenProperty(card, "rotation", rotation, SlideSeconds);
+			tween.TweenProperty(card, "scale", scale, SlideSeconds);
+			tween.TweenProperty(card, "modulate:a", 1f, SlideSeconds);
+		}
+		else
+		{
+			float delay = (anyLeaving ? LeaveSeconds * 0.5f : 0f) + enterOrder++ * EnterStagger;
+			card.Position = position + new Vector2(0, EnterRise);
+			card.Modulate = card.Modulate with { A = 0f };
+			tween.TweenProperty(card, "position", position, EnterSeconds).SetDelay(delay).SetTrans(Tween.TransitionType.Back);
+			tween.TweenProperty(card, "modulate:a", 1f, EnterSeconds * 0.6f).SetDelay(delay).SetTrans(Tween.TransitionType.Cubic);
+		}
+		tween.Finished += () => cardTweens.Remove(card);
 	}
 
 	public void ShowCardEmphasis(int cardId)
