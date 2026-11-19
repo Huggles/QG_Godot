@@ -128,6 +128,9 @@ public partial class MultiplayerLobby : Control
 	private int   _countdown = -1;
 	private Timer _countdownTimer;
 
+	/// <summary>On every peer: the faction rows are frozen while the start countdown runs.</summary>
+	private bool _factionsLocked;
+
 	// ══════════════════════════════════════════════════════════════════════════
 	// Godot lifecycle
 	// ══════════════════════════════════════════════════════════════════════════
@@ -594,7 +597,7 @@ public partial class MultiplayerLobby : Control
 	/// </summary>
 	private void ClaimSavedSeats()
 	{
-		if (_restoreSave == null || !Multiplayer.IsServer() || _gameStarting) return;
+		if (_restoreSave == null || !Multiplayer.IsServer() || _gameStarting || _factionsLocked) return;
 
 		List<int> peers = _playerLabels.Keys.OrderBy(peerId => peerId).ToList();
 		List<SavedSeat> seats = _restoreSave.Seats;
@@ -684,7 +687,7 @@ public partial class MultiplayerLobby : Control
 	/// </summary>
 	private void ReseatForRestore()
 	{
-		if (_restoreSave == null || !Multiplayer.IsServer() || _gameStarting) return;
+		if (_restoreSave == null || !Multiplayer.IsServer() || _gameStarting || _factionsLocked) return;
 		ClaimSavedSeats();
 		BroadcastFactionState();
 	}
@@ -735,6 +738,7 @@ public partial class MultiplayerLobby : Control
 		}
 
 		_countdown = CountdownSeconds;
+		Rpc(nameof(SetFactionsLocked), true);
 		((MenuPanelButton)_startGameButton).ButtonText = "Cancel";
 		Rpc(nameof(PostHostLine), $"Game starts in {_countdown}");
 		_countdownTimer.Start();
@@ -765,8 +769,17 @@ public partial class MultiplayerLobby : Control
 		_countdown = -1;
 		_countdownTimer.Stop();
 		((MenuPanelButton)_startGameButton).ButtonText = "Start Game";
+		Rpc(nameof(SetFactionsLocked), false);
 		Rpc(nameof(PostHostLine), reason);
 		UpdateStartGameButton();
+	}
+
+	/// <summary>Host → everyone: freeze or free the faction rows. The host also refuses changes while locked.</summary>
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void SetFactionsLocked(bool locked)
+	{
+		_factionsLocked = locked;
+		RefreshAllButtons();
 	}
 
 	/// <summary>Host → everyone: a chat line shown as coming from the host.</summary>
@@ -867,7 +880,7 @@ public partial class MultiplayerLobby : Control
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
 	private void RequestFactionToggle(int targetPeerId, int factionInt)
 	{
-		if (!Multiplayer.IsServer() || _gameStarting) return;
+		if (!Multiplayer.IsServer() || _gameStarting || _factionsLocked) return;
 
 		int requester = (int)Multiplayer.GetRemoteSenderId();
 		if (requester == 0) requester = 1; // direct (local) call by host
@@ -915,7 +928,7 @@ public partial class MultiplayerLobby : Control
 	[Rpc(MultiplayerApi.RpcMode.AnyPeer)]
 	private void RequestRandomToggle(int targetPeerId)
 	{
-		if (!Multiplayer.IsServer() || _gameStarting) return;
+		if (!Multiplayer.IsServer() || _gameStarting || _factionsLocked) return;
 
 		int requester = (int)Multiplayer.GetRemoteSenderId();
 		if (requester == 0) requester = 1; // direct (local) call by host
@@ -974,6 +987,11 @@ public partial class MultiplayerLobby : Control
 
 		foreach (var (peerId, btn) in _randomButtons)
 			RefreshRandomButton(peerId, btn);
+
+		// Colours stay as they are, so everyone can still read who has what; nothing is clickable.
+		if (!_factionsLocked) return;
+		foreach (var btn in _factionButtons.Values.SelectMany(b => b.Values).Concat(_randomButtons.Values))
+			btn.Disabled = true;
 	}
 
 	private void RefreshButton(int rowPeerId, Faction faction, TextureButton btn)
@@ -1301,6 +1319,7 @@ public partial class MultiplayerLobby : Control
 			RpcId((int)peerId, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 			RpcId((int)peerId, nameof(SyncFactionIntro), _factionIntroCheckBox.ButtonPressed);
 			RpcId((int)peerId, nameof(SyncExpansions), ExpansionIds.ToWire(_sessionExpansions));
+			RpcId((int)peerId, nameof(SetFactionsLocked), _factionsLocked);
 
 			// Cannot match by name yet — the peer has not reported one, so _playerNames holds nothing for
 			// it and only the "Player N" placeholder is on the label. Worth doing anyway: passes B and C
@@ -1581,6 +1600,7 @@ public partial class MultiplayerLobby : Control
 		foreach (var (f, b) in _factionButtons[peerId])
 			RefreshButton(peerId, f, b);
 		RefreshRandomButton(peerId, randomBtn);
+		if (_factionsLocked) RefreshAllButtons(); // a row added mid-countdown is frozen like the rest
 
 		DebugUtilities.PrintPeer($"Added player row: {playerName} (Peer {peerId})");
 	}
@@ -1642,6 +1662,7 @@ public partial class MultiplayerLobby : Control
 		RpcId(requester, nameof(SyncOpeningDiscard), _openingDiscardCheckBox.ButtonPressed);
 		RpcId(requester, nameof(SyncFactionIntro), _factionIntroCheckBox.ButtonPressed);
 		RpcId(requester, nameof(SyncExpansions), ExpansionIds.ToWire(_sessionExpansions));
+		RpcId(requester, nameof(SetFactionsLocked), _factionsLocked);
 	}
 
 	/// <summary>
