@@ -57,6 +57,20 @@ public partial class FactionHandDisplay : Control
 	private Faction followedFaction = Faction.NONE;
 
 	[Signal] public delegate void CardSelectedEventHandler(int cardId);
+	[Signal] public delegate void PickConfirmedEventHandler();
+
+	// A pick prompt (a discard): clicks toggle cards, which rise out of the fan along their own tilt,
+	// and a confirm button floats above the fan.
+	private const float PickRise = 45f;
+	private const float PickSeconds = 0.14f;
+	private const float PickButtonGap = 14f;
+	private static readonly Vector2 PickButtonSize = new(240f, 36f);
+	private CardPick activePick;
+	private MenuPanelButton pickButton;
+	/// <summary>Each card's resting pose in the fan, which a picked card rises from.</summary>
+	private readonly Dictionary<CardScene, Vector2> restPositions = new();
+	private float fanTopY;
+	private float fanCentreX;
 
 	// Event handlers for cleanup
 	private Action onTestButtonPressed;
@@ -101,6 +115,7 @@ public partial class FactionHandDisplay : Control
 		EventBus.Instance.CardsDiscarded += OnCardsDiscarded;
 		EventBus.Instance.NextStepStarted += OnTurnStepStarted;
 		_subscribed = true;
+		CreatePickButton();
 
 		onTestButtonPressed = () =>
 		{
@@ -254,6 +269,7 @@ public partial class FactionHandDisplay : Control
 	public void Show(Faction faction)
 	{
 		showingFaction = faction;
+		activePick = null;
 		ResetVisibility();
 		if (faction != Faction.NONE && faction != Faction.ALL)
 		{
@@ -299,13 +315,18 @@ public partial class FactionHandDisplay : Control
 	/// overflow the screen anyway. Null (every prompt but a merged window) keeps the plain id sort.
 	/// </param>
 	/// <param name="optionCards">Options drawn as cards after the card ids, in the side fan when the prompt splits one off.</param>
+	/// <param name="pick">A multi-card pick: clicks toggle cards instead of answering, and the confirm button shows.</param>
 	public void Show(List<int> cardIds, Faction faction, List<int> selectableCardIds = null,
 		bool separateNonHandCards = false, bool isReactionWindow = false,
-		IReadOnlyList<Faction> answeringFactions = null, List<InputRequest.OptionCard> optionCards = null)
+		IReadOnlyList<Faction> answeringFactions = null, List<InputRequest.OptionCard> optionCards = null,
+		CardPick pick = null)
 	{
 		showingFaction = faction;
+		activePick = pick;
+		pick?.KeepOnly(cardIds);
 		ResetVisibility();
 		InitCards(cardIds, selectableCardIds, separateNonHandCards, isReactionWindow, answeringFactions, optionCards);
+		UpdatePickButton();
 	}
 
 	private void ResetVisibility()
@@ -325,6 +346,8 @@ public partial class FactionHandDisplay : Control
 		// a mutator's Bulletin has to outlive the hand display, which every step transition hides.
 		// InputManager.HandleItemSelected clears it for card prompts, InputRequest.Execute for the rest.
 		HideCardEmphasis();
+		activePick = null;
+		UpdatePickButton();
 
 		// Only access CardsContainer if it's been initialized (in LoadUI)
 		if (CardsContainer != null)
@@ -404,6 +427,8 @@ public partial class FactionHandDisplay : Control
 		// The side fan hangs from the hand's vertical centre (plus MiniFanDropY), not its top edge.
 		// -Size.Y/3 + halfHeight is literally the hand's centre today.
 		float fanCentreY = -CardScene.DEFAULT_SIZE.Y / 3f + CardScene.DEFAULT_SIZE.Y * 0.5f;
+		fanCentreX = containerCentreX;
+		fanTopY = fanCentreY - CardScene.DEFAULT_SIZE.Y * 0.5f * HandCardScale;
 
 		LayoutFan(handFan, selectableCardIds, containerCentreX, fanCentreY, HandCardStepSize, HandCardScale, 0,
 			isReactionWindow);
@@ -522,6 +547,10 @@ public partial class FactionHandDisplay : Control
 			cardSceneInstance.ZIndex = zIndexOffset + index;
 			cardSceneInstance.RotationDegrees = index * RotationStepSize - (totalRotationSize / 2f);
 
+			restPositions[cardSceneInstance] = basePosition;
+			if (entry.Option == null && activePick?.Selected.Contains(cardId) == true)
+				cardSceneInstance.Position = PickedPosition(cardSceneInstance);
+
 			cardSceneInstance.Selected += OnCardSelected;
 			CardScenes.Add(cardSceneInstance);
 			cardKeys[cardSceneInstance] = entry.Key;
@@ -594,7 +623,85 @@ public partial class FactionHandDisplay : Control
 	private void OnCardSelected(int cardId)
 	{
 		DebugUtilities.PrintPeer($"Card selected with ID: {cardId}");
+		if (activePick != null)
+		{
+			TogglePick(cardId);
+			return;
+		}
 		EmitSignal(SignalName.CardSelected, cardId);
+	}
+
+	/// <summary>Picks or unpicks a card in the open pick prompt and moves every card that changed.</summary>
+	private void TogglePick(int cardId)
+	{
+		foreach (int changedId in activePick.Toggle(cardId))
+		{
+			CardScene card = CardScenes.FirstOrDefault(scene => scene.CardId == changedId);
+			if (card == null || !restPositions.ContainsKey(card)) continue;
+
+			if (cardTweens.Remove(card, out Tween running)) running.Kill();
+			Vector2 target = activePick.Selected.Contains(changedId) ? PickedPosition(card) : restPositions[card];
+			Tween tween = card.CreateTween().SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Cubic);
+			tween.TweenProperty(card, "position", target, PickSeconds);
+			cardTweens[card] = tween;
+			tween.Finished += () => cardTweens.Remove(card);
+		}
+		UpdatePickButton();
+	}
+
+	/// <summary>A picked card's pose: its resting place, pushed out along the card's own up direction.</summary>
+	private Vector2 PickedPosition(CardScene card)
+		=> restPositions[card] + new Vector2(Mathf.Sin(card.Rotation), -Mathf.Cos(card.Rotation)) * PickRise;
+
+	/// <summary>The pick prompt's confirm button, built in code so both UI scenes that host the hand get it.</summary>
+	private void CreatePickButton()
+	{
+		if (pickButton != null || CardsContainer == null) return;
+
+		pickButton = GD.Load<PackedScene>("res://scenes/menu/MenuPanelButton.tscn").Instantiate<MenuPanelButton>();
+		pickButton.Name = "PickConfirmButton";
+		pickButton.CustomMinimumSize = PickButtonSize;
+		pickButton.Size = PickButtonSize;
+		pickButton.ZIndex = 50;
+		pickButton.HeldContentOffset = 2;
+		pickButton.HoveredContentTint = new Color(1.03f, 0.91f, 0.67f);
+		pickButton.AddThemeStyleboxOverride("normal", PickButtonStyle(new Color(0.047f, 0.051f, 0.039f, 0.88f), new Color(0.851f, 0.678f, 0.361f, 0.6f)));
+		pickButton.AddThemeStyleboxOverride("hover", PickButtonStyle(new Color(0.2f, 0.17f, 0.1f, 0.92f), new Color(0.851f, 0.678f, 0.361f, 0.95f)));
+		pickButton.AddThemeStyleboxOverride("pressed", PickButtonStyle(new Color(0.2f, 0.17f, 0.1f, 0.92f), new Color(0.851f, 0.678f, 0.361f, 0.95f)));
+		pickButton.AddThemeStyleboxOverride("disabled", PickButtonStyle(new Color(0.047f, 0.051f, 0.039f, 0.6f), new Color(1f, 1f, 1f, 0.1f)));
+		pickButton.Visible = false;
+		CardsContainer.AddChild(pickButton);
+
+		pickButton.GetNodeOrNull<NinePatchRect>("NinePatchRect")?.Hide();
+		if (pickButton.GetNodeOrNull<Label>("ContentContainer/Label") is Label label)
+			label.LabelSettings = new LabelSettings
+			{
+				Font = GD.Load<Font>("res://scenes/menu/theme/MenuFontBody.tres"),
+				FontSize = 16,
+				FontColor = new Color(0.929f, 0.898f, 0.82f),
+			};
+		pickButton.Pressed += () => { if (activePick?.CanConfirm == true) EmitSignal(SignalName.PickConfirmed); };
+	}
+
+	private static StyleBoxFlat PickButtonStyle(Color background, Color border)
+	{
+		StyleBoxFlat style = new() { BgColor = background, BorderColor = border };
+		style.SetBorderWidthAll(1);
+		style.SetCornerRadiusAll(3);
+		return style;
+	}
+
+	/// <summary>Shows, labels and places the confirm button for the open pick, or hides it when there is none.</summary>
+	private void UpdatePickButton()
+	{
+		if (pickButton == null) return;
+		pickButton.Visible = activePick != null;
+		if (activePick == null) return;
+
+		pickButton.ButtonText = activePick.ConfirmLabel;
+		pickButton.Disabled = !activePick.CanConfirm;
+		pickButton.Position = new Vector2(fanCentreX - PickButtonSize.X * 0.5f,
+			fanTopY - PickRise - PickButtonGap - PickButtonSize.Y);
 	}
 
 	/// <summary>
@@ -614,6 +721,7 @@ public partial class FactionHandDisplay : Control
 			cardScene.Selected -= OnCardSelected;
 			if (cardTweens.Remove(cardScene, out Tween running)) running.Kill();
 			cardKeys.Remove(cardScene, out string key);
+			restPositions.Remove(cardScene);
 
 			bool kept = key != null && keptKeys.Contains(key);
 			if (kept)

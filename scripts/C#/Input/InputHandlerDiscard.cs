@@ -23,23 +23,32 @@ public partial class InputHandlerDiscard
 
     public async Task<List<int>> GetSelectedCards()
     {
-        string title = required
-            ? $"Select {minimumDiscards} card(s) to discard"
-            : "Select card(s) to discard (or skip)";
+        // A required discard is always from hand, so it is picked in the hand fan. The optional path
+        // offers cards from elsewhere (the discard pile) and keeps the modal.
+        if (required)
+            return await PickFromHand(faction, cardIds, CardPick.Exactly(minimumDiscards),
+                $"Select {minimumDiscards} {(minimumDiscards == 1 ? "card" : "cards")} to discard");
 
+        string title = "Select card(s) to discard (or skip)";
         PlayerActionLabel.ShowText($"{faction.Label()}: {title}", faction);
-
-        // Create presentation items for each card in hand
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(cardIds, true);
-
-        // A required discard is for exactly this many cards — SelectMany leaves MaxSelections
-        // unlimited, which let a player discard more than they were asked for. The optional
-        // end-of-turn path keeps SelectMany: there the count really is open-ended.
-        ModalConfig config = required
-            ? ModalConfig.SelectExactly(title, presentationItems, minimumDiscards)
-            : ModalConfig.SelectMany(title, presentationItems, minimumDiscards);
-
-        ModalResult result = await ModalStack.Current.Show(config);
+        ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectMany(title, presentationItems, minimumDiscards));
         return result.WasCancelled ? new List<int>() : result.SelectedItems;
+    }
+
+    /// <summary>
+    /// Picks cards straight in the hand fan: they rise when clicked and the button above the fan
+    /// confirms. Released as an empty pick when the host abandons the request, like any card prompt.
+    /// </summary>
+    public static async Task<List<int>> PickFromHand(Faction faction, List<int> cardIds, CardPick pick, string title)
+    {
+        InputManager input = InputManager.Current;
+        if (input == null || FactionHandDisplay.Current == null) return new List<int>();
+
+        Task<List<int>> picked = input.SetCardPickActive(faction, cardIds, pick, title);
+        using (PendingLocalInput.Register(() => InputManager.Current?.CancelCardSelection()))
+        {
+            return await picked;
+        }
     }
 }

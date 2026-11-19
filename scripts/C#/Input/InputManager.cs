@@ -172,6 +172,38 @@ public partial class InputManager : Node2D
 	}
 
 	/// <summary>
+	/// Opens a multi-card pick (a discard) in the hand fan: clicks toggle cards and the fan's confirm
+	/// button answers. Resolves with the picked ids, or empty when the host releases the prompt.
+	/// </summary>
+	public System.Threading.Tasks.Task<List<int>> SetCardPickActive(Faction faction, List<int> cardIds, CardPick pick, string title)
+	{
+		CardTargetPreviewDisplay.ClearAll();
+		_pickCompletion?.TrySetResult(new List<int>());
+		_pickCompletion = new System.Threading.Tasks.TaskCompletionSource<List<int>>();
+
+		CurrentCardPrompt = new ActiveCardPrompt(faction, cardIds, cardIds, Pick: pick);
+		PlayerActionLabel.ShowText($"{faction.Label()}: {title}", faction);
+		ShowCurrentCardPrompt();
+		FactionHandDisplay.Current.PickConfirmed -= OnPickConfirmed;
+		FactionHandDisplay.Current.PickConfirmed += OnPickConfirmed;
+		EventBus.Emit(EventBus.SignalName.CardPromptOpened, (int)faction);
+		RecallablePrompts.Set(CardPromptRecall.Instance);
+		return _pickCompletion.Task;
+	}
+
+	private System.Threading.Tasks.TaskCompletionSource<List<int>> _pickCompletion;
+
+	private void OnPickConfirmed() => FinishPick(CurrentCardPrompt?.Pick?.Selected.ToList() ?? new List<int>());
+
+	private void FinishPick(List<int> picked)
+	{
+		var completion = _pickCompletion;
+		_pickCompletion = null;
+		ClosePrompt();
+		completion?.TrySetResult(picked);
+	}
+
+	/// <summary>
 	/// What the banner over the hand says. Names the window the player is in, because "Choose a card"
 	/// and "No reaction available" read the same whether the prompt is the one chance to stop an event
 	/// or the chance to answer one that already happened — and an empty always-ask window is exactly
@@ -274,7 +306,11 @@ public partial class InputManager : Node2D
 	/// the same path as the Skip button — including emitting CardSelected, which is what releases the
 	/// awaiting handler. Without it those three prompts stayed live and clickable on a dead request.
 	/// </summary>
-	public void CancelCardSelection() => HandleItemSelected(-1);
+	public void CancelCardSelection()
+	{
+		if (_pickCompletion != null) FinishPick(new List<int>());
+		else HandleItemSelected(-1);
+	}
 
 	/// <summary>
 	/// Re-draw the open card prompt over whatever is on the hand display now — the way back from
@@ -292,7 +328,7 @@ public partial class InputManager : Node2D
 		FactionHandDisplay.Current.Show(
 			DrawnCardIds(CurrentCardPrompt), CurrentCardPrompt.Faction, CurrentCardPrompt.SelectableCardIds,
 			CurrentCardPrompt.SeparateNonHandCards, CurrentCardPrompt.IsReactionWindow,
-			CurrentCardPrompt.Answering, CurrentCardPrompt.OptionCards);
+			CurrentCardPrompt.Answering, CurrentCardPrompt.OptionCards, CurrentCardPrompt.Pick);
 		return true;
 	}
 
@@ -328,11 +364,19 @@ public partial class InputManager : Node2D
 
 	private void HandleItemSelected(int cardId)
 	{
+		ClosePrompt();
+		EventBus.Emit("CardSelected", cardId);
+	}
+
+	/// <summary>Tears down whichever card prompt is open, one-click or pick, without answering it.</summary>
+	private void ClosePrompt()
+	{
 		// The prompt is answered, so its hover glow must go: nothing else clears it on this path, and a
 		// country left lit would stay lit through the country-selection prompt that follows and beyond.
 		CardTargetPreviewDisplay.ClearAll();
 		CurrentCardPrompt = null;
 		FactionHandDisplay.Current.CardSelected -= HandleItemSelected;
+		FactionHandDisplay.Current.PickConfirmed -= OnPickConfirmed;
 		EventBus.Instance.SelectionSkipped -= OnPlayCardSkipped;
 		// Unconditional: the host's abort path (CancelCardSelection on timeout or error recovery)
 		// comes through here too, and an unsubscribe/hide that never ran would leave the scoped
@@ -350,7 +394,6 @@ public partial class InputManager : Node2D
 		TriggerContextDisplay.Current?.Hide();
 		EventBus.Emit(EventBus.SignalName.CardPromptClosed);
 		RecallablePrompts.Clear(CardPromptRecall.Instance);
-		EventBus.Emit("CardSelected", cardId);
 	}
 
 	public override void _Ready()
