@@ -27,10 +27,16 @@ public sealed class CardPick
     public bool CanConfirm => Selected.Count >= Min && (Max < 0 || Selected.Count <= Max);
 
     /// <summary>The line above the confirm button, naming how many cards the pick wants.</summary>
-    public string HintText => Min == Max
-        ? $"Click {Min} {(Min == 1 ? "card" : "cards")} to discard"
-        : Max == 1 ? "Click a card to discard"
-        : $"Click {System.Math.Max(Min, 1)} or more cards to discard";
+    public string HintText => $"Click {(Min, Max) switch
+    {
+        _ when Min == Max => Cards(Min),
+        (0, < 0) => "any cards",
+        (0, _) => $"up to {Cards(Max)}",
+        (_, < 0) => $"{Min} or more cards",
+        _ => $"{Min} to {Max} cards",
+    }} to discard";
+
+    private static string Cards(int count) => $"{count} {(count == 1 ? "card" : "cards")}";
 
     public string ConfirmLabel => Selected.Count < Min
         ? $"Select {Min - Selected.Count} more"
