@@ -610,6 +610,7 @@ public partial class FactionHandDisplay : Control
 
 			cardSceneInstance.SetClickable(selectable);
 			cardSceneInstance.SetAvailability(
+				activePick != null ? PickLook(cardId) :
 				!selectable    ? CardScene.CardAvailability.Unavailable :
 				needsAttention ? CardScene.CardAvailability.Caution
 							   : CardScene.CardAvailability.Available);
@@ -663,6 +664,7 @@ public partial class FactionHandDisplay : Control
 			CardScene card = CardScenes.FirstOrDefault(scene => scene.CardId == changedId);
 			if (card == null || !restPositions.ContainsKey(card)) continue;
 
+			card.SetAvailability(PickLook(changedId));
 			if (cardTweens.Remove(card, out Tween running)) running.Kill();
 			Vector2 target = activePick.Selected.Contains(changedId) ? PickedPosition(card) : restPositions[card];
 			Tween tween = card.CreateTween().SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Cubic);
@@ -672,6 +674,13 @@ public partial class FactionHandDisplay : Control
 		}
 		UpdatePickButton();
 	}
+
+	/// <summary>
+	/// A picked card wears the red "unavailable" glow — it is on its way out. Only the overlay: the card
+	/// stays clickable so it can be put back.
+	/// </summary>
+	private CardScene.CardAvailability PickLook(int cardId)
+		=> activePick?.Selected.Contains(cardId) == true ? CardScene.CardAvailability.Unavailable : CardScene.CardAvailability.Available;
 
 	/// <summary>A picked card's pose: its resting place, pushed out along the card's own up direction.</summary>
 	private Vector2 PickedPosition(CardScene card)
