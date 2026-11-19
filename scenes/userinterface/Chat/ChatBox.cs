@@ -144,7 +144,7 @@ public partial class ChatBox : PanelContainer
     private void OnMessageReceived(ChatMessage message)
     {
         if (!IsShown(message)) return;
-        Append(message);
+        AppendLine(Messages, message);
         // Game lines stream in all turn; only someone talking is worth popping the chat open for.
         if (message.Kind == ChatMessageKind.Player) Reveal();
     }
@@ -158,7 +158,7 @@ public partial class ChatBox : PanelContainer
     {
         Messages.Clear();
         foreach (ChatMessage message in ChatService.Instance?.History ?? [])
-            if (IsShown(message)) Append(message);
+            if (IsShown(message)) AppendLine(Messages, message);
     }
 
     private void ToggleChannel()
@@ -175,34 +175,34 @@ public partial class ChatBox : PanelContainer
         MessageInput.PlaceholderText = team ? "Message your team (Tab: all)" : "Message everyone (Tab: team)";
     }
 
-    /// <summary>AddText rather than BBCode, so nothing a player types is ever parsed as markup.</summary>
-    private void Append(ChatMessage message)
+    /// <summary>One formatted line; the lobby chat shares it. AddText rather than BBCode, so nothing typed is parsed as markup.</summary>
+    public static void AppendLine(RichTextLabel messages, ChatMessage message)
     {
-        if (Messages.GetParagraphCount() >= MaxLines) Messages.RemoveParagraph(0);
-        if (Messages.GetParsedText().Length > 0) Messages.Newline();
+        if (messages.GetParagraphCount() >= MaxLines) messages.RemoveParagraph(0);
+        if (messages.GetParsedText().Length > 0) messages.Newline();
 
-        Messages.PushColor(TimeColor);
-        Messages.AddText($"[{message.Time:HH:mm}] ");
-        Messages.Pop();
+        messages.PushColor(TimeColor);
+        messages.AddText($"[{message.Time:HH:mm}] ");
+        messages.Pop();
 
         if (message.Kind == ChatMessageKind.Game)
         {
-            Messages.PushColor(message.Color ?? GameColor);
-            Messages.AddText(message.Text);
-            Messages.Pop();
+            messages.PushColor(message.Color ?? GameColor);
+            messages.AddText(message.Text);
+            messages.Pop();
             return;
         }
 
         if (message.Channel == ChatChannel.Team)
         {
-            Messages.PushColor(TeamColor);
-            Messages.AddText("[Team] ");
-            Messages.Pop();
+            messages.PushColor(TeamColor);
+            messages.AddText("[Team] ");
+            messages.Pop();
         }
-        Messages.PushColor(message.IsOwn ? OwnNameColor : OtherNameColor);
-        Messages.AddText($"{message.SenderName}: ");
-        Messages.Pop();
-        Messages.AddText(message.Text);
+        messages.PushColor(message.IsOwn ? OwnNameColor : OtherNameColor);
+        messages.AddText($"{message.SenderName}: ");
+        messages.Pop();
+        messages.AddText(message.Text);
     }
 
     private void Reveal()

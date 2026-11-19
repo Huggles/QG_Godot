@@ -120,6 +120,9 @@ public partial class MultiplayerLobby : Control
 	/// </summary>
 	private readonly HashSet<int> _randomClaims = new();
 
+	/// <summary>The game's chat roster, put back when the lobby closes.</summary>
+	private IChatRoster _gameChatRoster;
+
 	// ══════════════════════════════════════════════════════════════════════════
 	// Godot lifecycle
 	// ══════════════════════════════════════════════════════════════════════════
@@ -142,6 +145,10 @@ public partial class MultiplayerLobby : Control
 		_openingDiscardCheckBox = GetNode<CheckBox>("%OpeningDiscardCheckBox");
 		_factionIntroCheckBox   = GetNode<CheckBox>("%FactionIntroCheckBox");
 		_restoreLabel        = GetNode<Label>("%RestoreLabel");
+
+		// Only the host's roster names senders; until the game installs its own, it reads the lobby rows.
+		_gameChatRoster    = ChatService.Roster;
+		ChatService.Roster = new LobbyChatRoster(ChatNameOf);
 
 		// Read before anything else touches MainMenu.ClearLobbyIntent — which this method calls on itself
 		// further down, and which must therefore never be the thing that clears PendingSave.
@@ -335,10 +342,12 @@ public partial class MultiplayerLobby : Control
 		if (!_playerLabels.TryGetValue(sender, out Label label)) return;
 
 		string clean = MakeNameUnique(SanitisePlayerName(displayName, sender), sender);
+		bool firstReport      = !_playerNames.ContainsKey(sender);
 		label.Text            = clean;
 		_playerNames[sender]  = clean;
 		DebugUtilities.PrintPeer($"Peer {sender} reported \"{displayName}\", listed as \"{clean}\"");
 		Rpc(nameof(SyncPlayerList), GetPlayerListData());
+		if (firstReport) Rpc(nameof(PostLobbyNotice), $"{clean} joined");
 
 		// The load-bearing seating hook: this is the first moment the host knows who a peer actually is,
 		// and therefore the first moment a saved seat can be matched to them by name.
@@ -444,6 +453,7 @@ public partial class MultiplayerLobby : Control
 		Multiplayer.ConnectedToServer  -= OnConnectedToServer;
 		Multiplayer.ConnectionFailed   -= OnConnectionFailed;
 		Multiplayer.ServerDisconnected -= OnServerDisconnected;
+		if (ChatService.Roster is LobbyChatRoster) ChatService.Roster = _gameChatRoster;
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -629,6 +639,15 @@ public partial class MultiplayerLobby : Control
 
 	private string PlayerNameFor(int peerId)
 		=> _playerNames.TryGetValue(peerId, out string name) ? name : null;
+
+	/// <summary>A chat sender's name: the one they reported, else whatever their row shows.</summary>
+	private string ChatNameOf(int peerId)
+		=> PlayerNameFor(peerId)
+		   ?? (_playerLabels.TryGetValue(peerId, out Label label) ? label.Text : $"Player {peerId}");
+
+	/// <summary>Host → everyone: a "joined" / "left" line in the lobby chat.</summary>
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void PostLobbyNotice(string text) => ChatService.Instance?.PostGameMessage(text);
 
 	/// <summary>
 	/// Compares two lobby names ignoring the " #2" / " #3" suffix MakeNameUnique appends, since which
@@ -1183,6 +1202,8 @@ public partial class MultiplayerLobby : Control
 
 		GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(playerFactionAssignments);
 		if (Multiplayer.IsServer()) RejoinService.Instance?.RecordSeatTokens(byPeer.Keys);
+		// The lobby's conversation stays in the lobby.
+		ChatService.Instance?.Clear();
 		SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
 	}
 
@@ -1306,6 +1327,9 @@ public partial class MultiplayerLobby : Control
 	private void OnPeerDisconnected(long peerId)
 	{
 		DebugUtilities.PrintPeer($"Peer disconnected: {peerId}");
+		// Only peers that got as far as naming themselves were ever announced as joining.
+		if (_isHost && !_gameStarting && PlayerNameFor((int)peerId) is { } leaver)
+			Rpc(nameof(PostLobbyNotice), $"{leaver} left");
 		RemovePlayerRow((int)peerId);
 
 		// Everyone is mid-transition into the game, so a released-factions broadcast would arrive at

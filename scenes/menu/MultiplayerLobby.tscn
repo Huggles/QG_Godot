@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://djinib8j6dupy"]
 
 [ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="bf_script"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/LobbyChat.cs" id="lc_script"]
 [ext_resource type="Script" uid="uid://c5fpt5gbmo0lv" path="res://scripts/C#/Menu/MultiplayerLobby.cs" id="1_lobby"]
 [ext_resource type="PackedScene" path="res://scenes/menu/ParallaxBackdrop.tscn" id="9_bdrop"]
 [ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="4_theme"]
@@ -122,58 +123,98 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="ScenarioPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body" unique_id=22457610]
+[node name="SideColumn" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="ScenarioPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn" unique_id=22457610]
 material = ExtResource("5_frost")
-custom_minimum_size = Vector2(440, 0)
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel" unique_id=461188769]
+[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel" unique_id=461188769]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="ScenarioLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer" unique_id=2132674987]
+[node name="ScenarioLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=2132674987]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
 text = "GAME OPTIONS"
 
-[node name="SeedLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer" unique_id=188894307]
+[node name="SeedLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=188894307]
 layout_mode = 2
 text = "Seed"
 
-[node name="SeedRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer" unique_id=65703041]
+[node name="SeedRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=65703041]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="SeedInput" type="LineEdit" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer/SeedRow" unique_id=1221837146]
+[node name="SeedInput" type="LineEdit" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer/SeedRow" unique_id=1221837146]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "random"
 
-[node name="RandomizeSeedButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer/SeedRow" unique_id=1900950696]
+[node name="RandomizeSeedButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer/SeedRow" unique_id=1900950696]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 text = "Randomize"
 
-[node name="OptionsGap" type="Control" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer" unique_id=1602117007]
+[node name="OptionsGap" type="Control" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=1602117007]
 custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="OpeningDiscardCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer" unique_id=344424219]
+[node name="OpeningDiscardCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=344424219]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "On: deal 10 cards and every player immediately discards 3. Off: deal 7 and start."
 button_pressed = true
 text = "Discard 3 cards at start"
 
-[node name="FactionIntroCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel/VBoxContainer" unique_id=1873405521]
+[node name="FactionIntroCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=1873405521]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "On: after loading, the camera visits each capital and names the faction and its player."
 text = "Faction intro at start"
+
+[node name="ChatPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn"]
+material = ExtResource("5_frost")
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("lc_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ChatLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel/VBoxContainer"]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "CHAT"
+
+[node name="MessagesInset" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"MenuInset"
+
+[node name="ChatMessages" type="RichTextLabel" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel/VBoxContainer/MessagesInset"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_font_sizes/normal_font_size = 19
+scroll_following = true
+selection_enabled = true
+
+[node name="ChatInput" type="LineEdit" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+placeholder_text = "Message the lobby"
 
 [node name="BottomSpacer" type="Control" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1602117009]
 layout_mode = 2
@@ -214,7 +255,14 @@ script = ExtResource("bf_script")
 Inset = 12.0
 BracketLength = 30.0
 
-[node name="BrassFrame2" type="ColorRect" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/ScenarioPanel"]
+[node name="BrassFrame2" type="ColorRect" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel"]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("bf_script")
+Inset = 12.0
+BracketLength = 30.0
+
+[node name="BrassFrame3" type="ColorRect" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel"]
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("bf_script")
