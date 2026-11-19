@@ -1,0 +1,230 @@
+{
+  "id": "tutorial_02_status_and_response",
+  "title": "Tutorial 2: Status and Response Cards",
+  "learnerFaction": "GERMANY",
+  "onUnexpectedPrompt": "pass",
+  "steps": [
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "Welcome back, [b]General[/b]. This time you command [b]Germany[/b].\n\nLast lesson you watched Status and Response cards from across the table. Today you play them, and you watch the enemy play theirs."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "Germany is not starting from nothing. Two [b]Status[/b] cards are already face up on your table, played on earlier turns:\n\n[b]Bias for Action[/b]: [i]Use once per turn when you build an Army. Discard the top 1 card of your draw deck to battle a land space adjacent to the Army just built.[/i]\n\n[b]Blitzkrieg[/b]: [i]Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to build an Army in the space battled.[/i]"
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "START" },
+      "text": "Each of them cost a whole Play step once. They have been working for free ever since, and they will keep working every turn for the rest of the war.\n\nNow read them together. One builds, and the build makes the other battle. The battle makes the first one build again.\n\nThat is a [b]chain[/b], General. One card from your hand can set off all of it."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD" },
+      "text": "Your [b]Play[/b] step. Play [b]Build Army[/b]. Everything else in your hand is greyed out for now."
+    },
+    {
+      "type": "constrain",
+      "prompt": "HandCardPlay",
+      "faction": "GERMANY",
+      "at": { "turn": 1 },
+      "cards": ["Build Army"]
+    },
+    {
+      "type": "message",
+      "onPrompt": "SelectCountry",
+      "faction": "GERMANY",
+      "at": { "turn": 1 },
+      "text": "Build in [b]Eastern Europe[/b].\n\nIt carries no supply star and will never pay you a point. But it touches [b]Ukraine[/b], and a Soviet army is standing on Ukraine's supply star."
+    },
+    {
+      "type": "constrain",
+      "prompt": "SelectCountry",
+      "faction": "GERMANY",
+      "at": { "turn": 1 },
+      "countries": ["EASTERN_EUROPE"]
+    },
+    {
+      "type": "message",
+      "onPrompt": "ActivateCard",
+      "faction": "GERMANY",
+      "at": { "turn": 1 },
+      "card": "Bias for Action",
+      "text": "There. You built an Army, and [b]Bias for Action[/b] is offering itself.\n\nThe game asks you every time a Status or Response card on your table could be used. You are never forced to say yes. This time, say yes: [b]use Bias for Action[/b].\n\nThe price is printed on the card. The top card of your draw deck goes to the discard pile, sight unseen."
+    },
+    {
+      "type": "message",
+      "onPrompt": "SelectBattleTarget",
+      "faction": "GERMANY",
+      "at": { "turn": 1 },
+      "text": "Bias for Action lets you battle a land space next to the Army you just built.\n\nBattle the Soviet army in [b]Ukraine[/b]."
+    },
+    {
+      "type": "constrain",
+      "prompt": "SelectBattleTarget",
+      "faction": "GERMANY",
+      "at": { "turn": 1 },
+      "option": "SOVIET ARMY in Ukraine"
+    },
+    {
+      "type": "message",
+      "onPrompt": "ActivateCard",
+      "faction": "GERMANY",
+      "at": { "turn": 1 },
+      "card": "Blitzkrieg",
+      "text": "And the chain carries on. You battled a land space, so [b]Blitzkrieg[/b] is offering itself.\n\nUse it. One more card off the top of your draw deck, and an Army of yours moves into the space you just battled."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Count what that one card bought, General.\n\nAn army in Eastern Europe. A Soviet army destroyed. A German army standing on Ukraine's supply star.\n\nThe price was two cards off the top of your draw deck. That is cheap, but it is not free. Remember that the deck is finite, and that a status card which drains it every turn shortens your war."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Notice also the words [b]once per turn[/b].\n\nBlitzkrieg's army in Ukraine was a [i]build[/i] too, so it would have triggered Bias for Action again, but Bias for Action had already been used this turn. Without that limit, those two cards would march to Vladivostok on a single play."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD" },
+      "text": "[b]The United Kingdom[/b]. Watch where their army appears."
+    },
+    { "type": "answer", "prompt": "HandCardPlay",  "faction": "UNITED_KINGDOM", "at": { "turn": 2 }, "card": "Increased Commonwealth Support" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "UNITED_KINGDOM", "at": { "turn": 2 }, "country": "AUSTRALIA" },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "A British army in [b]Australia[/b], on the far side of the world from the nearest British unit.\n\nThe Event card [b]Increased Commonwealth Support[/b] did not [i]build[/i] that army. It [b]recruited[/b] it, and the difference matters."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "To [b]build[/b], you need one of your own supplied units adjacent to the space, unless it is your home space. That is why you built in Eastern Europe, next to Germany.\n\nTo [b]recruit[/b], you place the unit exactly where the card says. Nothing needs to be adjacent. Recruiting is how a faction appears in a place it could never have walked to."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 2, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Two catches.\n\nA recruited unit still has to be in [b]supply[/b] at the Supply step. Australia holds a supply star, so that army feeds itself.\n\nAnd a recruit is [b]not a build[/b]. Cards that trigger \"when you build\", like your Bias for Action, never fire on a recruit."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 3, "step": "PLAY_CARD" },
+      "text": "[b]Japan[/b]. Your ally has a Response card face down on its table, played on an earlier turn. Watch what sets it off."
+    },
+    { "type": "answer", "prompt": "HandCardPlay",  "faction": "JAPAN", "at": { "turn": 3 }, "card": "Build Navy" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "JAPAN", "at": { "turn": 3 }, "country": "SEA_OF_JAPAN" },
+    {
+      "type": "message",
+      "onPrompt": "ActivateCard",
+      "faction": "JAPAN",
+      "at": { "turn": 3 },
+      "card": "Special Naval Landing Forces",
+      "text": "Japan has built a navy in the [b]Sea of Japan[/b], and its face-down Response is ready to go.\n\n[b]Special Naval Landing Forces[/b]: [i]Use when you build a Navy. Build two Armies adjacent to the space where you built the Navy.[/i]"
+    },
+    { "type": "answer", "prompt": "ActivateCard", "faction": "JAPAN", "at": { "turn": 3 }, "card": "Special Naval Landing Forces" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "JAPAN", "at": { "turn": 3 }, "country": "VLADIVOSTOK" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "JAPAN", "at": { "turn": 3 }, "country": "IWO_JIMA" },
+    {
+      "type": "message",
+      "at": { "turn": 3, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "One Build Navy card, and Japan has three new units: a navy, and armies in [b]Vladivostok[/b] and [b]Iwo Jima[/b].\n\nNo enemy did anything. Japan set off its [b]own[/b] Response, with its own Play step. A Response waits for its trigger, and nothing says the trigger has to come from the enemy."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 3, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "That is the difference from your Status cards. Special Naval Landing Forces is now flipped and discarded. One use, then gone.\n\nYour Blitzkrieg and Bias for Action stay on the table and fire again next turn."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 4, "step": "PLAY_CARD" },
+      "text": "[b]The Soviet Union[/b]. You took Ukraine from them. They are not going to let that stand."
+    },
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "SOVIET", "at": { "turn": 4 }, "card": "EventGeneralWinter" },
+    { "type": "answer", "prompt": "SelectUnit", "faction": "SOVIET", "at": { "turn": 4 }, "option": "GERMANY ARMY in Ukraine" },
+    {
+      "type": "message",
+      "at": { "turn": 4, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "[b]General Winter[/b]: [i]Eliminate 1 or 2 Axis Armies in or adjacent to Moscow.[/i]\n\nYour army in Ukraine is gone. No battle, no dice, just an Event card from the Soviet hand. An Event does its work the moment it is played and goes to the discard pile."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 4, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Winter could take two armies, but only ones in or next to [b]Moscow[/b]. Eastern Europe is two spaces away, so that army is still standing.\n\nAnd remember that your Status cards are face up. The Soviets could read Blitzkrieg and Bias for Action, and they knew exactly where your armies would end up. They had the answer waiting in their hand."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD" },
+      "text": "[b]Italy[/b], your other ally. They already hold the [b]Mediterranean Sea[/b]."
+    },
+    { "type": "answer", "prompt": "HandCardPlay",  "faction": "ITALY", "at": { "turn": 5 }, "card": "Build Army" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "ITALY", "at": { "turn": 5 }, "country": "NORTH_AFRICA" },
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Italy has built an army in [b]North Africa[/b]. No supply star there. So why bother?\n\nBecause North Africa is a [b]strait[/b]."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "A [b]strait[/b] is a land space that controls the narrow water beside it. North Africa sits between the [b]North Sea[/b] and the [b]Mediterranean[/b].\n\nNormally those two seas are adjacent. For the team that does [i]not[/i] hold the strait, they are not. The Allies can no longer build, battle or trace supply from one of those seas into the other."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 5, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "Mind one detail: an [b]empty[/b] strait belongs to the [b]Allies[/b]. Until this turn the door stood open for the British. The Axis has to put an army on a strait to shut it.\n\nThe map has five: [b]North Africa[/b], the [b]Middle East[/b], [b]Scandinavia[/b], [b]South East Asia[/b] and [b]Latin America[/b]. One army, no points, and the Royal Navy's road into the Mediterranean is closed."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "PLAY_CARD" },
+      "text": "[b]The United States[/b]. They hold US East and want [b]US West[/b], a supply star right next door.\n\nThe trouble is their hand: not one Build Army card in it."
+    },
+    { "type": "answer", "prompt": "HandCardPlay", "faction": "UNITED_STATES", "at": { "turn": 6 }, "card": "Reallocate Resources" },
+    {
+      "type": "message",
+      "onPrompt": "ForceDiscardHandCards",
+      "faction": "UNITED_STATES",
+      "at": { "turn": 6 },
+      "text": "[b]Reallocate Resources[/b]. Every faction has this action, every turn, beside its hand.\n\nInstead of playing a card, discard [b]4 cards[/b] from your hand. Then take any Build or Battle card straight out of your draw deck and play it at once."
+    },
+    { "type": "answer", "prompt": "ForceDiscardHandCards", "faction": "UNITED_STATES", "at": { "turn": 6 }, "cards": ["Sea Battle", "B-24 Liberator", "B-26 Marauder", "B-29 Superfortress"] },
+    { "type": "answer", "prompt": "SelectCard", "faction": "UNITED_STATES", "at": { "turn": 6 }, "card": "Build Army" },
+    { "type": "answer", "prompt": "SelectCountry", "faction": "UNITED_STATES", "at": { "turn": 6 }, "country": "US_WEST" },
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "PLAY_CARD", "timing": "AFTER" },
+      "text": "An American army in [b]US West[/b], out of a hand that could not build one.\n\nIt is expensive. An ordinary play costs one card. This one cost five: four from the hand, and the Build Army taken from the deck. The Draw step then refills the hand from a deck that never comes back.\n\nUse it when the one card you need is the one you do not hold."
+    },
+    {
+      "type": "message",
+      "onPrompt": "SelectCards",
+      "faction": "UNITED_STATES",
+      "at": { "turn": 6 },
+      "text": "And here the Americans cushion the blow. [b]Rosie the Riveter[/b] has been on their table since an earlier turn:\n\n[i]Use once per turn at the beginning of your Discard step. Take 1 or 2 cards from your hand and place them on the bottom of your draw deck.[/i]"
+    },
+    { "type": "answer", "prompt": "SelectCards", "faction": "UNITED_STATES", "at": { "turn": 6 }, "cards": ["Theater Shift"] },
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "DISCARD", "timing": "AFTER" },
+      "text": "A card they could not use goes [b]under[/b] the draw deck instead of into the discard pile. It is not lost. It comes back late in the war, when a dry deck would otherwise have cost them points.\n\nThat is what a good Status card does, General. Not one big blow, but a small edge, every turn, forever."
+    },
+
+    {
+      "type": "message",
+      "at": { "turn": 6, "step": "DRAW", "timing": "AFTER" },
+      "text": "One round, and you have seen the lot: Status cards that chain, a Response that its own side set off, an Event, a recruit, a strait, and Reallocate Resources.\n\nOne round left. Your hand is your own. There is a [b]Land Battle[/b] in it, and Blitzkrieg is still on your table."
+    },
+    {
+      "type": "message",
+      "at": { "turn": 12, "step": "DRAW", "timing": "AFTER" },
+      "text": "That is the lesson, General. The card you play is only half of your turn. The other half is already lying on the table, yours face up, theirs face down.\n\n[b]Dismissed.[/b]"
+    },
+    { "type": "end" }
+  ]
+}

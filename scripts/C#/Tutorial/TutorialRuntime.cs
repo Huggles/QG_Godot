@@ -277,7 +277,7 @@ public sealed class TutorialRuntime : ITurnProgram
         for (int i = 0; i < _remaining.Count; i++)
         {
             TutorialStep candidate = _remaining[i];
-            if (!candidate.IsPromptAnchored) continue;
+            if (!candidate.IsClaim) continue;
             if (!Claims(candidate, spec)) continue;
 
             _remaining.RemoveAt(i);
@@ -287,8 +287,33 @@ public sealed class TutorialRuntime : ITurnProgram
         return null;
     }
 
-    private static bool Claims(TutorialStep step, InputRequestSpec spec)
-        => (step.Prompt == "*" || step.Prompt.Equals(spec.Kind, StringComparison.OrdinalIgnoreCase))
+    /// <summary>
+    /// Show every onPrompt message this prompt matches, in script order, before it is answered.
+    /// Messages naming cards fire only when the prompt offers one of them, so an empty reaction window
+    /// cannot spend a message meant for the window that actually carries the card.
+    /// </summary>
+    internal async Task ShowPromptMessages(InputRequestSpec spec)
+    {
+        for (int i = 0; i < _remaining.Count && !_finished; )
+        {
+            TutorialStep candidate = _remaining[i];
+            if (!candidate.IsPromptMessage || !Claims(candidate, spec)
+                || (candidate.Cards.Count > 0
+                    && !candidate.Cards.Any(card => CliOptionMatcher.ResolveAll(spec, card, out _) != null)))
+            {
+                i++;
+                continue;
+            }
+
+            _remaining.RemoveAt(i);
+            await Run(candidate, _flow?.CurrentFaction ?? spec.Faction);
+        }
+    }
+
+    /// <summary>Kind and faction match, and "at.turn" when the step gives one, so a claim left unused cannot leak into a later turn.</summary>
+    private bool Claims(TutorialStep step, InputRequestSpec spec)
+        => (step.Turn == null || step.Turn == _flow?.GameTurn)
+        && (step.Prompt == "*" || step.Prompt.Equals(spec.Kind, StringComparison.OrdinalIgnoreCase))
         && (step.PromptFaction == Faction.NONE || step.PromptFaction == spec.Faction);
 
     /// <summary>
@@ -313,6 +338,24 @@ public sealed class TutorialRuntime : ITurnProgram
 
         if (claim.Cards.Count > 0) NarrowCards(request, spec, claim);
         if (claim.Countries.Count > 0) NarrowCountries(request, spec, claim);
+        if (claim.Option != null) NarrowToOption(request, spec, claim);
+    }
+
+    /// <summary>
+    /// Narrow a board prompt to the options matching the claim's "option" label — the only selector
+    /// that reaches a UNIT target, e.g. a battle target's "SOVIET ARMY in Ukraine".
+    /// </summary>
+    private void NarrowToOption(InputRequest request, InputRequestSpec spec, TutorialStep claim)
+    {
+        List<CliOption> matched = CliOptionMatcher.ResolveAll(spec, claim.Option, out string error)
+            ?? throw new TutorialScriptException($"constraining {spec.Kind} for {spec.Faction}: {error}");
+
+        request.TargetCountryIds = (request.TargetCountryIds ?? new List<int>())
+            .Intersect(matched.Where(o => o.Kind == CliOptionKind.Country).Select(o => o.Id)).ToList();
+        request.TargetUnitIds = (request.TargetUnitIds ?? new List<int>())
+            .Intersect(matched.Where(o => o.Kind == CliOptionKind.Unit).Select(o => o.Id)).ToList();
+
+        DebugUtilities.PrintPeer($"[tutorial] constrained {spec.Kind} {spec.Faction} to '{claim.Option}'");
     }
 
     /// <summary>

@@ -1,0 +1,50 @@
+{
+  "title": "Tutorial 2: Status and Response Cards",
+  "description": "Command Germany with two Status cards already on the table. Chain them, then watch five rivals answer with Responses, Events, recruits, straits and Reallocate Resources.",
+  "tutorial": "res://assets/data/tutorials/Tutorial_02.json",
+  "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 2,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [{ "countryName": "GERMANY" }],
+      "initialCards": [{ "name": "StatusBlitzkrieg" }, { "name": "StatusBiasForAction" }],
+      "initialHandCards": [
+        { "name": "BuildArmy" }, { "name": "LandBattle" }, { "name": "BuildArmy" }, { "name": "LandBattle" },
+        { "name": "BuildNavy" }, { "name": "SeaBattle" }, { "name": "LandBattle" }
+      ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [{ "countryName": "UNITED_KINGDOM" }],
+      "initialHandCards": [{ "name": "EventIncreasedCommonwealthSupport" }, { "name": "BuildNavy" }],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [{ "countryName": "JAPAN" }, { "countryName": "CHINA" }, { "countryName": "PHILIPPINES" }],
+      "initialCards": [{ "name": "ResponseSpecialNavalLandingForces" }],
+      "initialHandCards": [{ "name": "BuildNavy" }, { "name": "BuildArmy" }],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [{ "countryName": "MOSCOW" }, { "countryName": "UKRAINE" }],
+      "initialHandCards": [{ "name": "EventGeneralWinter" }, { "name": "BuildArmy" }],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [{ "countryName": "ITALY" }, { "countryName": "MEDITERRANEAN_SEA" }],
+      "initialHandCards": [{ "name": "BuildArmy" }, { "name": "BuildNavy" }],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [{ "countryName": "US_EAST" }],
+      "initialCards": [{ "name": "StatusRosietheRiveter" }],
+      "initialHandCards": [
+        { "name": "SeaBattle" }, { "name": "EWB24Liberator" }, { "name": "EWB26Marauder" }, { "name": "EWB29Superfortress" },
+        { "name": "EventOperationMagic" }, { "name": "EventTheaterShift" }, { "name": "BuildNavy" }
+      ],
+      "startingVP": 0
+    }
+  }
+}

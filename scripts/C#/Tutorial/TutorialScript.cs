@@ -99,8 +99,14 @@ public sealed class TutorialStep
     public List<string> Countries { get; private set; } = new();
     public string Option { get; private set; }
 
-    /// <summary>True for the two types the input seam consumes rather than the GameFlow hooks.</summary>
-    public bool IsPromptAnchored => Type is TutorialStepType.Constrain or TutorialStepType.Answer;
+    /// <summary>A message shown just before a matching prompt rather than at a step boundary.</summary>
+    public bool IsPromptMessage { get; private set; }
+
+    /// <summary>True for the steps the input seam consumes rather than the GameFlow hooks.</summary>
+    public bool IsPromptAnchored => Type is TutorialStepType.Constrain or TutorialStepType.Answer || IsPromptMessage;
+
+    /// <summary>True for the two types that decide a prompt's answer or offer.</summary>
+    public bool IsClaim => Type is TutorialStepType.Constrain or TutorialStepType.Answer;
 
     public static TutorialStep From(TutorialStepData data)
     {
@@ -146,6 +152,17 @@ public sealed class TutorialStep
         if (step.Type is TutorialStepType.Message && string.IsNullOrEmpty(step.Text))
             throw new Exception("Tutorial script has a message step with no text.");
 
+        // A prompt-anchored message reuses Prompt as its kind; its "at" may only narrow it by turn.
+        if (!string.IsNullOrWhiteSpace(data.OnPrompt))
+        {
+            if (step.Type is not TutorialStepType.Message)
+                throw new Exception($"Tutorial script puts onPrompt on a '{data.Type}' step; only messages take it.");
+            if (step.Step != null)
+                throw new Exception("Tutorial script gives an onPrompt message an at.step; it fires on its prompt instead.");
+            step.IsPromptMessage = true;
+            step.Prompt = data.OnPrompt;
+        }
+
         return step;
     }
 
@@ -185,7 +202,8 @@ public sealed class TutorialStep
             && (step == null || Timing == timing));
 
     public override string ToString()
-        => IsPromptAnchored
+        => IsPromptMessage ? $"Message on {Prompt}/{PromptFaction}"
+        : IsPromptAnchored
             ? $"{Type} {Prompt}/{PromptFaction}"
             : $"{Type} at turn={Turn?.ToString() ?? "*"} step={Step?.ToString() ?? "*"} {Timing}";
 }

@@ -59,6 +59,14 @@ public class TutorialStepData
     /// </summary>
     [JsonPropertyName("arrow")] public TutorialArrowData Arrow { get; set; }
 
+    /// <summary>
+    /// Optional, messages only. A prompt kind (as <see cref="Prompt"/>) that shows this message just
+    /// before that prompt is answered, instead of at an "at" anchor — the only way to narrate a
+    /// reaction mid-chain. Narrowed by <see cref="Faction"/> and, when given, <see cref="Card"/>/<see cref="Cards"/>
+    /// (the prompt must offer one of them), plus "at.turn" if set.
+    /// </summary>
+    [JsonPropertyName("onPrompt")] public string OnPrompt { get; set; }
+
     // ── prompt-anchored ──────────────────────────────────────────────────────
     /// <summary>
     /// Exactly <c>InputRequestSpec.Kind</c> — the request class name with "RequestHandler" stripped:

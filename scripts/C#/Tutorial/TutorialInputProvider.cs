@@ -31,7 +31,20 @@ public sealed class TutorialInputProvider : IInputProvider
     public async Task Resolve(InputRequest request)
     {
         InputRequestSpec spec = InputRequestSpec.For(request);
-        TutorialStep claim = _runtime.TakeClaimFor(spec);
+        bool emptyWindow = request.IsReactionWindow && spec.Options.Count == 0;
+
+        // The always-ask reaction rule opens empty windows constantly — a faction holding a face-down
+        // Response is prompted on every qualifying event, even when nothing applies. A scripted faction
+        // passes those before any claim is taken, or an `answer ActivateCard` would be spent on an
+        // empty window turns before the one carrying its card.
+        if (emptyWindow && request.TargetFaction != _script.LearnerFaction)
+        {
+            spec.ApplyPass(request);
+            return;
+        }
+
+        if (!emptyWindow) await _runtime.ShowPromptMessages(spec);
+        TutorialStep claim = emptyWindow ? null : _runtime.TakeClaimFor(spec);
 
         // The learner answers for themself. A `constrain` claim has already narrowed the offer in
         // NetworkApi.SendInputRequest, so by here the prompt simply is what they are allowed to do.
@@ -43,16 +56,6 @@ public sealed class TutorialInputProvider : IInputProvider
 
         if (claim == null)
         {
-            // The always-ask reaction rule opens empty windows constantly — a faction holding a
-            // face-down Response is prompted on every qualifying event, and the window must open even
-            // when nothing applies. Passing those silently is what a human would do, and without this
-            // carve-out the unexpected-prompt policy below would fire dozens of times a turn.
-            if (request.IsReactionWindow && spec.Options.Count == 0)
-            {
-                spec.ApplyPass(request);
-                return;
-            }
-
             await HandleUnexpected(spec, request);
             return;
         }
