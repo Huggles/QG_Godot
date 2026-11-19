@@ -27,7 +27,7 @@
     {
       "type": "message",
       "at": { "turn": 1, "step": "START" },
-      "text": "Read them together. A build sets off a battle, and the battle sets off another build.\n\nThat is a [b]chain[/b], General. One card from your hand can set off all of it."
+      "text": "Read them together. Your build sets off Bias for Action's battle, and that battle sets off Blitzkrieg's build.\n\nThat is a [b]chain[/b], General: one card from your hand, and both cards fire. Each only once per turn, so the chain runs once."
     },
 
     {
@@ -102,7 +102,7 @@
     {
       "type": "message",
       "at": { "turn": 1, "step": "PLAY_CARD", "timing": "AFTER" },
-      "text": "Mind the words [b]once per turn[/b].\n\nBlitzkrieg's army was a [i]build[/i] too, so it could have set off Bias for Action again. But Bias for Action was already spent this turn."
+      "text": "That is where the chain stops. Blitzkrieg's army was a [i]build[/i] too, but Bias for Action is [b]once per turn[/b] and already spent.\n\nNext turn both are ready again."
     },
 
     {
