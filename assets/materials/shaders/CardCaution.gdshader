@@ -1,7 +1,8 @@
 shader_type canvas_item;
 
-// The "you can play this, but it would do nothing useful" look, for a card
-// tagged NeedsAttention. Meant for a ColorRect laid over a card with
+// A card status overlay. Its defaults are the "you can play this, but it would do
+// nothing useful" look (Tag.NeedsAttention); CardUnavailableMaterial reuses it in red,
+// steady and still, for a card that cannot be played. Meant for a ColorRect over a card with
 // mouse_filter Ignore, like CardReflection. Three layers, back to front:
 //   - a faint warm veil over the whole face, so the card reads a touch muted,
 //   - a band of slowly drifting caution hatching just inside the border,
@@ -10,13 +11,13 @@ shader_type canvas_item;
 
 // A flat, dark-amber veil over the whole face. Alpha 0 turns it off.
 uniform vec4 wash_color : source_color = vec4(0.22, 0.13, 0.0, 1.0);
-uniform float wash_alpha : hint_range(0.0, 1.0) = 0.10;
+uniform float wash_alpha : hint_range(0.0, 1.0) = 0.06;
 
 // The edge glow. Width is how far it reaches in from the edge, in units of the
 // card's height; it fades with a squared falloff so the edge itself is brightest.
 uniform vec4 glow_color : source_color = vec4(1.0, 0.66, 0.1, 1.0);
-uniform float glow_width : hint_range(0.0, 0.5) = 0.10;
-uniform float glow_intensity : hint_range(0.0, 1.0) = 0.8;
+uniform float glow_width : hint_range(0.0, 0.5) = 0.08;
+uniform float glow_intensity : hint_range(0.0, 1.0) = 0.5;
 
 // The breathing: one full in-and-out every pulse_seconds, never dimmer than pulse_min.
 uniform float pulse_seconds : hint_range(0.2, 10.0) = 2.6;
@@ -27,7 +28,7 @@ uniform float pulse_min : hint_range(0.0, 1.0) = 0.45;
 uniform vec4 stripe_color : source_color = vec4(1.0, 0.8, 0.25, 1.0);
 uniform float stripe_band : hint_range(0.0, 0.5) = 0.055;
 uniform float stripe_spacing : hint_range(0.005, 0.2) = 0.04;
-uniform float stripe_intensity : hint_range(0.0, 1.0) = 0.38;
+uniform float stripe_intensity : hint_range(0.0, 1.0) = 0.2;
 uniform float stripe_speed : hint_range(-1.0, 1.0) = 0.03;
 
 // Rounds the effect off at the corners, as a fraction of the node's short side.

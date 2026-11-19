@@ -16,10 +16,10 @@ public partial class CardScene : Control
 	private bool triggersEmphasis = true;
 
 	/// <summary>
-	/// How the card is drawn. <c>Unavailable</c> is the long-standing red "cannot use this" scrim;
-	/// <c>Caution</c> is its milder sibling — the card CAN be used, but every effect it offers is hollow
-	/// on the current board (see <see cref="Tag.NeedsAttention"/>), so it stays clickable and gets the
-	/// CardCaution shader (breathing amber edge, drifting hatch) instead of the red scrim.
+	/// How the card is drawn. Both non-Available states use the CardCaution shader: <c>Unavailable</c>
+	/// in steady red with a darker veil ("cannot use this"); <c>Caution</c> in breathing amber — the card
+	/// CAN be used, but every effect it offers is hollow on the current board (see
+	/// <see cref="Tag.NeedsAttention"/>), so it stays clickable.
 	/// </summary>
 	public enum CardAvailability { Available, Caution, Unavailable }
 
