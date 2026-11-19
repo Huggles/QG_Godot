@@ -71,6 +71,13 @@ public partial class ChatService : Node
         }).CallDeferred();
     }
 
+    /// <summary>A local-only line shown under <paramref name="senderName"/>, for what nobody typed (the lobby countdown).</summary>
+    public void PostAs(string senderName, string text)
+    {
+        text = Sanitize(text);
+        if (text.Length > 0) Deliver(new ChatMessage(0, senderName, ChatChannel.Global, text, false));
+    }
+
     /// <summary>Forgets the conversation. Called when a session ends so it does not follow into the next.</summary>
     public void Clear() => _history.Clear();
 

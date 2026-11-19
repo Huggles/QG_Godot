@@ -123,6 +123,11 @@ public partial class MultiplayerLobby : Control
 	/// <summary>The game's chat roster, put back when the lobby closes.</summary>
 	private IChatRoster _gameChatRoster;
 
+	/// <summary>Host-only: seconds left before the game starts, or -1 when no countdown is running.</summary>
+	private const int CountdownSeconds = 5;
+	private int   _countdown = -1;
+	private Timer _countdownTimer;
+
 	// ══════════════════════════════════════════════════════════════════════════
 	// Godot lifecycle
 	// ══════════════════════════════════════════════════════════════════════════
@@ -149,6 +154,10 @@ public partial class MultiplayerLobby : Control
 		// Only the host's roster names senders; until the game installs its own, it reads the lobby rows.
 		_gameChatRoster    = ChatService.Roster;
 		ChatService.Roster = new LobbyChatRoster(ChatNameOf);
+
+		_countdownTimer = new Timer { WaitTime = 1.0 };
+		_countdownTimer.Timeout += OnCountdownTick;
+		AddChild(_countdownTimer);
 
 		// Read before anything else touches MainMenu.ClearLobbyIntent — which this method calls on itself
 		// further down, and which must therefore never be the thing that clears PendingSave.
@@ -710,7 +719,62 @@ public partial class MultiplayerLobby : Control
 		UpdateStatusLabel($"Connecting to {ip}:{DEFAULT_PORT}...");
 	}
 
+	/// <summary>Start counts down in the chat first; pressing it again during the count cancels.</summary>
 	private void OnStartGameButtonPressed()
+	{
+		if (!_isHost) return;
+		if (_countdown >= 0)
+		{
+			StopCountdown("Start cancelled");
+			return;
+		}
+		if (!CanCoverAllFactions(out string problem) || !EveryoneHasExpansions(out problem))
+		{
+			DebugUtilities.PrintPeerError($"Cannot start: {problem}");
+			return;
+		}
+
+		_countdown = CountdownSeconds;
+		((MenuPanelButton)_startGameButton).ButtonText = "Cancel";
+		Rpc(nameof(PostHostLine), $"Game starts in {_countdown}");
+		_countdownTimer.Start();
+	}
+
+	private void OnCountdownTick()
+	{
+		if (--_countdown > 0)
+		{
+			Rpc(nameof(PostHostLine), $"Game starts in {_countdown}");
+			return;
+		}
+
+		// Factions could change during the count, so check again before going.
+		if (!CanCoverAllFactions(out string problem) || !EveryoneHasExpansions(out problem))
+		{
+			StopCountdown($"Start cancelled: {problem}");
+			return;
+		}
+		_countdownTimer.Stop();
+		StartNow();
+	}
+
+	/// <summary>Host: abandons a running countdown and says why in the chat.</summary>
+	private void StopCountdown(string reason)
+	{
+		if (_countdown < 0) return;
+		_countdown = -1;
+		_countdownTimer.Stop();
+		((MenuPanelButton)_startGameButton).ButtonText = "Start Game";
+		Rpc(nameof(PostHostLine), reason);
+		UpdateStartGameButton();
+	}
+
+	/// <summary>Host → everyone: a chat line shown as coming from the host.</summary>
+	[Rpc(MultiplayerApi.RpcMode.Authority, CallLocal = true, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
+	private void PostHostLine(string text) => ChatService.Instance?.PostAs("[Host]", text);
+
+	/// <summary>The launch itself, with no countdown; the auto-starts call it directly.</summary>
+	private void StartNow()
 	{
 		if (!_isHost)
 		{
@@ -1030,7 +1094,8 @@ public partial class MultiplayerLobby : Control
 	{
 		if (!_isHost) return;
 		bool canStart = CanCoverAllFactions(out string problem) && EveryoneHasExpansions(out problem);
-		_startGameButton.Disabled    = !canStart;
+		// Never disabled mid-countdown: the button is how the host cancels it.
+		_startGameButton.Disabled    = !canStart && _countdown < 0;
 		_startGameButton.TooltipText = canStart
 			? "All factions accounted for – ready to start!"
 			: problem;
@@ -1272,7 +1337,7 @@ public partial class MultiplayerLobby : Control
 	private void AutoStart()
 	{
 		_autoStartPending = !EveryoneHasExpansions(out _);
-		if (!_autoStartPending) OnStartGameButtonPressed();
+		if (!_autoStartPending) StartNow();
 	}
 
 	/// <summary>
@@ -1330,6 +1395,7 @@ public partial class MultiplayerLobby : Control
 		// Only peers that got as far as naming themselves were ever announced as joining.
 		if (_isHost && !_gameStarting && PlayerNameFor((int)peerId) is { } leaver)
 			Rpc(nameof(PostLobbyNotice), $"{leaver} left");
+		if (_isHost && !_gameStarting) StopCountdown("Start cancelled: a player left");
 		RemovePlayerRow((int)peerId);
 
 		// Everyone is mid-transition into the game, so a released-factions broadcast would arrive at
