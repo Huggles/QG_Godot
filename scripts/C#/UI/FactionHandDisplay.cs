@@ -64,7 +64,7 @@ public partial class FactionHandDisplay : Control
 	private const float PickRise = 45f;
 	private const float PickSeconds = 0.14f;
 	private const float PickButtonGap = 14f;
-	private static readonly Vector2 PickButtonSize = new(240f, 36f);
+	private static readonly Vector2 PickButtonSize = new(200f, 32f);
 	private CardPick activePick;
 	private MenuPanelButton pickButton;
 	private Label pickHint;
@@ -694,9 +694,18 @@ public partial class FactionHandDisplay : Control
 		pickButton.AddThemeStyleboxOverride("pressed", PickButtonStyle(new Color(0.2f, 0.17f, 0.1f, 0.92f), new Color(0.851f, 0.678f, 0.361f, 0.95f)));
 		pickButton.AddThemeStyleboxOverride("disabled", PickButtonStyle(new Color(0.047f, 0.051f, 0.039f, 0.6f), new Color(1f, 1f, 1f, 0.1f)));
 		pickButton.Visible = false;
+		// Before entering the tree: MenuPanelButton raises its minimum size to its frame art every
+		// frame, which would make this a 150x80 block over the raised cards.
+		if (pickButton.GetNodeOrNull("NinePatchRect") is Node frame)
+		{
+			pickButton.RemoveChild(frame);
+			frame.QueueFree();
+		}
+		if (pickButton.GetNodeOrNull<MarginContainer>("ContentContainer") is MarginContainer content)
+			foreach (string side in new[] { "left", "top", "right", "bottom" })
+				content.AddThemeConstantOverride($"margin_{side}", 4);
 		CardsContainer.AddChild(pickButton);
 
-		pickButton.GetNodeOrNull<NinePatchRect>("NinePatchRect")?.Hide();
 		if (pickButton.GetNodeOrNull<Label>("ContentContainer/Label") is Label label)
 			label.LabelSettings = new LabelSettings
 			{
@@ -746,8 +755,10 @@ public partial class FactionHandDisplay : Control
 		pickHint.Size = new Vector2(pickButton.Size.X + 200f, 24f);
 		pickHint.Position = new Vector2(-100f, -30f);
 		pickButton.Disabled = !activePick.CanConfirm;
-		pickButton.Position = new Vector2(fanCentreX - PickButtonSize.X * 0.5f,
-			fanTopY - PickRise - PickButtonGap - PickButtonSize.Y);
+		// Placed from the real size, so whatever the label needs the button still ends above the raised cards.
+		pickButton.Size = pickButton.GetCombinedMinimumSize();
+		Vector2 size = pickButton.Size;
+		pickButton.Position = new Vector2(fanCentreX - size.X * 0.5f, fanTopY - PickRise - PickButtonGap - size.Y);
 	}
 
 	/// <summary>
