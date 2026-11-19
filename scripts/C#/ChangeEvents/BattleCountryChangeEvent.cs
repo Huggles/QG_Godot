@@ -49,6 +49,13 @@ public partial class BattleCountryChangeEvent : ChangeEvent
 
     public override void Mutate(BoardState board) { }
 
+    // RemoveUnitChangeEvent overrides this without calling base, so only empty-space battles get it.
+    protected override Task OnLiveMutatedAsync()
+    {
+        _ = PresentationServices.Animation.Enqueue(new BattleCountryAnimation(CountryId));
+        return Task.CompletedTask;
+    }
+
     /// <summary>
     /// Must never throw: CardPlayRound puts SummaryText() on the wire as
     /// InputRequest.TriggerSummaryText, so a lookup that threw here would take down a turn rather

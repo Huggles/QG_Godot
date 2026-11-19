@@ -25,6 +25,15 @@ public class RemoveUnitAnimation : ChangeEventAnimation
 
         if (unitScene == null) return;
 
+        await Destroy(unitScene);
+        countryScene.RemoveUnit(unitScene);
+    }
+
+    /// <summary>Plays the piece off the board; it must leave the scene in its pooled, unaltered state.</summary>
+    protected virtual Task Destroy(UnitScene unitScene) => Burn(unitScene, GameSettings.DurationMediumSeconds);
+
+    protected static async Task Burn(UnitScene unitScene, double seconds)
+    {
         // The sprite is a lone Sprite2D, so the shader goes straight on it; BurnEffect's subtree
         // handling is only needed for Controls. Its shadow child fades out alongside instead.
         Sprite2D sprite = unitScene.UnitSpriteNode;
@@ -36,7 +45,6 @@ public class RemoveUnitAnimation : ChangeEventAnimation
         burn.SetShaderParameter("noise_offset", new Vector2(GD.Randf(), GD.Randf()) * 1000.0f);
         sprite.Material = burn;
 
-        double seconds = GameSettings.DurationMediumSeconds;
         Tween tween = unitScene.CreateTween().SetParallel();
         tween.TweenMethod(Callable.From<float>(value => burn.SetShaderParameter("burn", value)), 0.0f, 1.0f, seconds);
         tween.TweenProperty(shadow, "modulate:a", 0.0f, seconds);
@@ -46,7 +54,5 @@ public class RemoveUnitAnimation : ChangeEventAnimation
         // The scene is pooled and comes back on the next deploy, so it has to come back unburnt.
         sprite.Material = previousMaterial;
         shadow.Modulate = new Color(shadow.Modulate, 1.0f);
-
-        countryScene.RemoveUnit(unitScene);
     }
 }

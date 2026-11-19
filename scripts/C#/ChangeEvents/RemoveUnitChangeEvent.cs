@@ -73,7 +73,7 @@ public partial class RemoveUnitChangeEvent : BattleCountryChangeEvent
 
     protected override Task OnLiveMutatedAsync()
     {
-        GameAPI.PresentRemove(UnitId, CountryId);
+        GameAPI.PresentRemove(UnitId, CountryId, battle: Reason == UnitRemovalReason.BATTLE);
         return Task.CompletedTask;
     }
 

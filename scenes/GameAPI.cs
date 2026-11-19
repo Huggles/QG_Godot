@@ -115,9 +115,11 @@ public partial class GameAPI : Node
         _ = PresentationServices.Animation.Enqueue(new DeployUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
     }
 
-    public static void PresentRemove(int unitId, int countryId, bool awaitAnimation = true)
+    public static void PresentRemove(int unitId, int countryId, bool awaitAnimation = true, bool battle = false)
     {
-        _ = PresentationServices.Animation.Enqueue(new RemoveUnitAnimation(unitId, countryId){ BlockQueue = awaitAnimation });
+        RemoveUnitAnimation animation = battle ? new BattleUnitAnimation(unitId, countryId) : new RemoveUnitAnimation(unitId, countryId);
+        animation.BlockQueue = awaitAnimation;
+        _ = PresentationServices.Animation.Enqueue(animation);
         EventBus.Emit(EventBus.SignalName.UnitRemoved, unitId, countryId);
     }
 
