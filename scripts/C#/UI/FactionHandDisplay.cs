@@ -758,9 +758,7 @@ public partial class FactionHandDisplay : Control
 		if (activePick == null) return;
 
 		pickButton.ButtonText = activePick.ConfirmLabel;
-		pickHint.Text = activePick.Selected.Count == 0
-			? "Click cards in your hand to select them"
-			: "Click a selected card to put it back";
+		pickHint.Text = activePick.HintText;
 		pickHint.Size = new Vector2(pickButton.Size.X + 200f, 24f);
 		pickHint.Position = new Vector2(-100f, -30f);
 		pickButton.Disabled = !activePick.CanConfirm;
