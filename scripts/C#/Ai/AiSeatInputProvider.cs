@@ -104,13 +104,22 @@ public sealed class AiSeatInputProvider : IInputProvider
     ///    decision the human already watched a pause for. Charging full price again makes one card
     ///    play feel like four.
     ///  - Choosing what to PLAY is the decision worth watching, and it is also the one the turn badge
-    ///    is fading over — so it gets the longest pause, which is what makes a bot's turn legible.
+    ///    is fading over — so it gets the longest pause (a random 2-4s), which is what makes a bot's
+    ///    turn legible.
     /// </summary>
     private static int ThinkTimeMs(InputRequest request)
     {
         if (request.IsEmptyReactionWindow) return 0;
-        if (request is InputRequest.HandCardPlayRequestHandler) return GameSettings.DurationLong;
+        if (request is InputRequest.HandCardPlayRequestHandler) return TurnThinkTimeMs();
         if (request.OriginCardId >= 0) return GameSettings.DurationShort;
         return GameSettings.DurationMedium;
     }
+
+    /// <summary>
+    /// A random 2-4s before a bot picks its play, whatever the speed setting: anything shorter read as
+    /// instant. System.Random, not GameRandom, so the pause can never perturb a seeded deal.
+    /// </summary>
+    private static readonly System.Random TurnPauseRandom = new();
+    private static int TurnThinkTimeMs() =>
+        (int)(GameSettings.GetFixedDurationSeconds(TurnPauseRandom.Next(2000, 4001)) * 1000);
 }
