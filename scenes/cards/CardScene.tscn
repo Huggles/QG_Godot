@@ -7,6 +7,7 @@
 [ext_resource type="StyleBox" uid="uid://cnup2rgfcnbqk" path="res://scenes/cards/CardButtonStyleNormal.tres" id="5_mqccx"]
 [ext_resource type="Material" path="res://assets/materials/CardReflectionMaterial.tres" id="6_xb2aa"]
 [ext_resource type="Script" path="res://scripts/C#/UI/CornerFold.cs" id="7_fold"]
+[ext_resource type="Material" path="res://assets/materials/CardCautionMaterial.tres" id="8_caution"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pe5wv"]
 corner_radius_top_left = 25
@@ -152,6 +153,18 @@ grow_vertical = 2
 mouse_filter = 2
 mouse_default_cursor_shape = 3
 color = Color(0.8509804, 0, 0.13725491, 0.29411766)
+
+[node name="CautionOverlay" type="ColorRect" parent="." unique_id=1903361245]
+visible = false
+material = ExtResource("8_caution")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+mouse_default_cursor_shape = 3
 
 [node name="EmphasizeOverlay" type="ColorRect" parent="." unique_id=772916106]
 material = ExtResource("6_xb2aa")

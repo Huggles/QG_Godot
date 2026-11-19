@@ -18,15 +18,10 @@ public partial class CardScene : Control
 	/// <summary>
 	/// How the card is drawn. <c>Unavailable</c> is the long-standing red "cannot use this" scrim;
 	/// <c>Caution</c> is its milder sibling — the card CAN be used, but every effect it offers is hollow
-	/// on the current board (see <see cref="Tag.NeedsAttention"/>), so it stays clickable and only the
-	/// scrim colour differs.
+	/// on the current board (see <see cref="Tag.NeedsAttention"/>), so it stays clickable and gets the
+	/// CardCaution shader (breathing amber edge, drifting hatch) instead of the red scrim.
 	/// </summary>
 	public enum CardAvailability { Available, Caution, Unavailable }
-
-	// UnavailableTint mirrors ActivatableColorOverlay's colour in CardScene.tscn; that scene value is
-	// now only the editor preview, since SetAvailability always writes the colour.
-	private static readonly Color UnavailableTint = new Color(0.8509804f, 0f, 0.13725491f, 0.29411766f);
-	private static readonly Color CautionTint = new Color(0.98f, 0.76f, 0f, 0.15411766f);
 
 	// Held rather than read back off the node: callers may set it before the ColorRect is in the tree,
 	// and _Ready re-applies whatever was last asked for.
@@ -51,6 +46,7 @@ public partial class CardScene : Control
 	private Button cardButton => GetNode<Button>("%CardButton");
 	private ColorRect activatableColorOverlay => GetNode<ColorRect>("ActivatableColorOverlay");
 	private ColorRect emphasizeOverlay => GetNode<ColorRect>("EmphasizeOverlay");
+	private ColorRect cautionOverlay => GetNode<ColorRect>("CautionOverlay");
 
 	[Signal] public delegate void SelectedEventHandler(int cardId);
 
@@ -179,11 +175,8 @@ public partial class CardScene : Control
 	public void SetAvailability(CardAvailability cardAvailability)
 	{
 		availability = cardAvailability;
-		if(activatableColorOverlay != null)
-		{
-			activatableColorOverlay.Visible = cardAvailability != CardAvailability.Available;
-			activatableColorOverlay.Color = cardAvailability == CardAvailability.Caution ? CautionTint : UnavailableTint;
-		}
+		if (activatableColorOverlay != null) activatableColorOverlay.Visible = cardAvailability == CardAvailability.Unavailable;
+		if (cautionOverlay != null) cautionOverlay.Visible = cardAvailability == CardAvailability.Caution;
 	}
 
 	/// <summary>

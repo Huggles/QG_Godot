@@ -1,0 +1,6 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://assets/materials/shaders/CardCaution.gdshader" id="1_cardcaution"]
+
+[resource]
+shader = ExtResource("1_cardcaution")
