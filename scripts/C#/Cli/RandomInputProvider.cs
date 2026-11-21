@@ -273,6 +273,11 @@ public sealed class RandomInputProvider : IInputProvider
             .Set("hollow", advice.VetoesBy("no_hollow"))
             .Set("vetoed", vetoed)
             .Set("chosen", chosen?.Select(c => c.Label).ToList());
+        if (spec.Kind == "HandCardPlay")
+        {
+            FactionRecord piles = BoardState.Live.ForFaction(spec.Faction);
+            e.Set("round", GameFlow.Instance?.Round ?? 0).Set("hand", piles.Hand.Count).Set("deck", piles.Deck.Count);
+        }
 
         // Conditional, so an ordinary line stays readable: on most prompts the rules have nothing to
         // say, and a run is hundreds of prompts long.

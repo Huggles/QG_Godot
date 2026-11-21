@@ -187,7 +187,7 @@ public static class AiSeatRuntime
     /// </summary>
     private const string SeatRules = "no_hollow,avoid_empty_battle,avoid_dead_battle_card,prefer_vacant_deploy," +
                                      "prefer_supply_star_deploy,prefer_valuable_card,prefer_valuable_target," +
-                                     "prefer_cheap_recall,prefer_agenda_target";
+                                     "prefer_cheap_recall,prefer_agenda_target,keep_cards_to_end";
 
     /// <summary>
     /// The bot for one seat.

@@ -291,6 +291,33 @@ public static class ProjectionValuer
 
     /// <summary>How deep one card playing another may nest before the valuer stops following it.</summary>
     /// <summary>
+    /// How many of its owner's hand and deck cards playing or activating this card uses up (a hand card counts
+    /// itself; Reallocate counts its discards and the card it takes), or null when it cannot be projected.
+    /// </summary>
+    public static int? CardsConsumed(int cardId)
+    {
+        CardState state = CardState.ForId(cardId);
+        if (state?.CardLogic == null) return null;
+
+        FactionRecord live = BoardState.Live.ForFaction(state.Faction);
+        bool handPlay = live.Hand.Contains(cardId);
+        List<StepOption> built = new();
+        try
+        {
+            GameSituation after = ProjectCard(cardId, Start(), state.Faction, false, built);
+            if (after == null) return null;
+            FactionRecord piles = after.Board.ForFaction(state.Faction);
+            int used = live.Hand.Count + live.Deck.Count - piles.Hand.Count - piles.Deck.Count;
+            // A non-Status hand card is projected by its steps alone, without leaving the hand.
+            return handPlay && !state.CardLogic.IsStatus ? used + 1 : used;
+        }
+        finally
+        {
+            StepChoice.Release(built);
+        }
+    }
+
+    /// <summary>
     /// Apply an event to <paramref name="tried"/>, a fork of <paramref name="parent"/>. A build with an empty pool
     /// first recalls the unit whose loss costs the deployer least, as UnitPoolShortfall asks live; without it
     /// the projection throws and every new-country build reads as impossible.
