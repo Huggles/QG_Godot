@@ -17,6 +17,7 @@ public sealed class BotAdvice : IBotVerdictSink
     private readonly IReadOnlyList<CliOption> _options;
     private readonly bool[] _vetoed;
     private readonly double[] _scores;
+    private readonly bool[] _unvalued;
 
     /// <summary>Vetoes and scores written, per rule name. The denominators for the telemetry.</summary>
     private readonly Dictionary<string, int> _vetoesByRule = new();
@@ -51,6 +52,7 @@ public sealed class BotAdvice : IBotVerdictSink
         _options = options;
         _vetoed = new bool[options.Count];
         _scores = new double[options.Count];
+        _unvalued = new bool[options.Count];
     }
 
     // ── Engine-facing ────────────────────────────────────────────────────────
@@ -84,6 +86,9 @@ public sealed class BotAdvice : IBotVerdictSink
             if (_scores[i] != 0) result[_options[i].Label] = _scores[i];
         return result;
     }
+
+    public List<string> UnvaluedLabels()
+        => Enumerable.Range(0, _options.Count).Where(i => _unvalued[i] && !_vetoed[i]).Select(i => _options[i].Label).ToList();
 
     // ── Rule-facing (IBotVerdictSink) ────────────────────────────────────────
 
@@ -127,6 +132,11 @@ public sealed class BotAdvice : IBotVerdictSink
     /// debug build's terms: the engine's try/catch turns this into a reported, disabled rule rather
     /// than a corrupted decision.
     /// </summary>
+    public void Unvalued(int optionIndex)
+    {
+        if (Writable(optionIndex)) _unvalued[optionIndex] = true;
+    }
+
     private bool Writable(int index)
     {
         if (index < 0 || index >= _options.Count)

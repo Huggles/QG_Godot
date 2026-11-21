@@ -199,6 +199,36 @@ public static class VpMath
     /// contribution and nothing else. Silently returning a slightly low rate is a bad answer; aborting
     /// the prompt over a display-detail exception is a worse one.
     /// </summary>
+    /// <summary>
+    /// Supply-star VP the team collects over <paramref name="horizon"/> rounds, less <paramref name="threatRounds"/>
+    /// rounds of a star's income where an enemy can attack it: what losing it and winning it back would cost.
+    /// </summary>
+    public static double SupplyStarVpHeld(FactionTeam team, BoardState board, int horizon, double threatRounds)
+    {
+        List<CountryState> countries = CountryState.AllCountryStates;
+        if (countries == null) return 0;
+
+        List<Faction> enemies = StaticGameData.FactionsForTeam(StaticGameData.OpponentTeam(team))
+            .Where(f => FactionState.ForEnum(f) != null).ToList();
+        double total = 0;
+        Dictionary<Faction, int> supplied = new();
+        foreach (CountryState country in countries)
+        {
+            if (country == null || !country.IsSupply) continue;
+
+            supplied.Clear();
+            foreach (KeyValuePair<Faction, int> occupant in board.UnitsIn(country))
+                if (UnitState.ForId(occupant.Value) is { } unit && board.InSupply(unit))
+                    supplied[occupant.Key] = occupant.Value;
+            int vp = TeamStarVpAt(country, supplied, team);
+            if (vp == 0) continue;
+
+            bool threatened = enemies.Any(enemy => board.CanAttack(enemy, country));
+            total += vp * (horizon - (threatened ? Math.Min(threatRounds, horizon) : 0));
+        }
+        return total;
+    }
+
     public static int StatusCardVpRate(FactionTeam team) => StatusCardVpRate(team, BoardState.Live);
 
     /// <summary>The status-card half of the rate on <paramref name="board"/>.</summary>

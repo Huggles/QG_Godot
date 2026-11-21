@@ -30,7 +30,8 @@ public sealed class PreferValuableTargetRule : IBotRule
         CliOptionKind.Country, CliOptionKind.Unit, CliOptionKind.Faction, CliOptionKind.Card,
     };
 
-    public bool AppliesTo(BotDecision decision) => decision.Request.OriginStepId >= 0;
+    public bool AppliesTo(BotDecision decision)
+        => decision.Request.OriginStepId >= 0 && decision.Request is not InputRequest.SelectUnitRequestHandler { IsRecall: true };
 
     /// <summary>
     /// A play step asking which card to take (Reallocate Resources): each candidate is worth what playing
@@ -50,7 +51,8 @@ public sealed class PreferValuableTargetRule : IBotRule
             if (option.Kind != CliOptionKind.Card || !candidates.Contains(option.Id)) continue;
 
             double? value = ProjectionValuer.ValuePlay(option.Id, decision.Faction);
-            if (value is double v && v != 0) sink.Score(i, v);
+            if (value == null) sink.Unvalued(i);
+            else if (value.Value != 0) sink.Score(i, value.Value);
         }
     }
 
@@ -61,7 +63,11 @@ public sealed class PreferValuableTargetRule : IBotRule
         if (step.Kind == StepKind.PlayCard) { ScorePlays(decision, step, sink); return; }
 
         IReadOnlyList<StepOption> outcomes = step.PossibleOutcomes();
-        if (outcomes == null) return;
+        if (outcomes == null)
+        {
+            for (int i = 0; i < decision.Options.Count; i++) sink.Unvalued(i);
+            return;
+        }
         try
         {
             Dictionary<TargetRef, ChangeEvent> byTarget = outcomes
@@ -79,10 +85,12 @@ public sealed class PreferValuableTargetRule : IBotRule
                     CliOptionKind.Faction => TargetKind.Faction,
                     _ => null,
                 };
-                if (kind == null || !byTarget.TryGetValue(new TargetRef(kind.Value, option.Id), out ChangeEvent outcome)) continue;
+                if (kind == null) continue;
+                if (!byTarget.TryGetValue(new TargetRef(kind.Value, option.Id), out ChangeEvent outcome)) { sink.Unvalued(i); continue; }
 
                 double? value = ProjectionValuer.ValueOf(outcome, decision.Faction);
-                if (value is double v && v != 0) sink.Score(i, v);
+                if (value == null) sink.Unvalued(i);
+                else if (value.Value != 0) sink.Score(i, value.Value);
             }
         }
         finally

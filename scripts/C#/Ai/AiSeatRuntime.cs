@@ -33,15 +33,20 @@ public static class AiSeatRuntime
     /// again the thinking time. The multi-turn lookahead is left out: three to six times the time per
     /// move, and no gain yet measured on top of these.
     /// </summary>
-    public static readonly string[] HardSwitches = { "bot_material", "bot_reach", "bot_card_value", "bot_scarcity" };
+    public static readonly string[] HardSwitches = { "bot_material", "bot_reach", "bot_card_value", "bot_scarcity", "bot_threat" };
+
+    /// <summary>On at every difficulty: they price choices that were otherwise random (pool recalls, equal targets), not play strength.</summary>
+    public static readonly string[] SeatSwitches = { "bot_fund_builds", "bot_tiebreak_nudges" };
 
     /// <summary>Set the forced valuation switches for <paramref name="factions"/> to the session's difficulty.</summary>
     private static void ApplyDifficulty(IEnumerable<Faction> factions)
     {
         bool hard = GameManager.PendingAiDifficulty == AiDifficulty.Hard;
         foreach (Faction faction in factions)
-            foreach (string name in HardSwitches)
-                BotSides.Force(name, faction, hard);
+        {
+            foreach (string name in HardSwitches) BotSides.Force(name, faction, hard);
+            foreach (string name in SeatSwitches) BotSides.Force(name, faction, true);
+        }
     }
 
     /// <summary>The factions <paramref name="seat"/> plays.</summary>
@@ -181,7 +186,8 @@ public static class AiSeatRuntime
     /// <see cref="BotRuleRegistry.Parse"/>.
     /// </summary>
     private const string SeatRules = "no_hollow,avoid_empty_battle,avoid_dead_battle_card,prefer_vacant_deploy," +
-                                     "prefer_supply_star_deploy,prefer_valuable_card,prefer_valuable_target";
+                                     "prefer_supply_star_deploy,prefer_valuable_card,prefer_valuable_target," +
+                                     "prefer_cheap_recall,prefer_agenda_target";
 
     /// <summary>
     /// The bot for one seat.

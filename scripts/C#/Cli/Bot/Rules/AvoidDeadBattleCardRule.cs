@@ -87,7 +87,7 @@ public sealed class AvoidDeadBattleCardRule : IBotRule
 
             bool couldFireATrigger = BotBattleFacts.HasTriggerableTableCards(card.Faction);
 
-            if (couldFireATrigger) sink.Score(i, FallbackPenalty);
+            if (couldFireATrigger) sink.Score(i, BotNudge.Of(FallbackPenalty, decision.Faction));
             else                   sink.Veto(i, "no unit to attack, nothing to trigger");
         }
     }

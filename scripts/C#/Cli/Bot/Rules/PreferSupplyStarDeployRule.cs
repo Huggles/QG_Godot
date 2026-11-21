@@ -93,7 +93,7 @@ public sealed class PreferSupplyStarDeployRule : IBotRule
             // the sort of number that makes a rules_stats column lie.
             if (vpPerTurn <= 0) continue;
 
-            sink.Score(i, vpPerTurn);
+            sink.Score(i, BotNudge.Of(vpPerTurn, decision.Faction));
         }
     }
 }

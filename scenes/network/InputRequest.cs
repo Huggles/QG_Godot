@@ -966,6 +966,9 @@ public abstract partial class InputRequest
         /// </summary>
         public bool AllowSkip { get; set; } = true;
 
+        /// <summary>The unit-pool shortfall recall, so a bot can price the units it would give up. Serialized: the answer goes through a copy.</summary>
+        public bool IsRecall { get; set; }
+
         public SelectUnitRequestHandler(Faction targetFaction, List<int> targetUnitIds, bool allowSkip = true) : base(targetFaction)
         {
             TargetUnitIds = targetUnitIds;

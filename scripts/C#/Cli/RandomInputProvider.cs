@@ -152,6 +152,9 @@ public sealed class RandomInputProvider : IInputProvider
     /// <summary>Whether an agent is configured at all. False restores the pre-agent code path exactly.</summary>
     public bool HasAgent => _profileFor != null;
 
+    /// <summary>Switches named by <c>bot_compare</c>: each decision is also scored with them off, and a changed pick is traced.</summary>
+    private readonly string[] _compare = CliArgs.Get("bot_compare", "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
     public RandomInputProvider(int decisionSeed, double passChance, double discardChance,
                                List<IBotRule> rules, Dictionary<string, BotRuleConfig> ruleConfig,
                                double tierWidth, int yieldEvery, CliRenderer trace,
@@ -208,6 +211,7 @@ public sealed class RandomInputProvider : IInputProvider
         BotAgenda agenda = BuildAgenda(spec.Faction);
         BotDecision decision = BotDecision.Build(spec, request, agenda);
         BotRuleEngine engine = EngineFor(spec.Faction);
+        List<ScoredOption> without = _compare.Length > 0 && _trace != null ? ScoreWithoutCompared(spec, request, engine) : null;
         BotAdvice advice = engine.Consult(decision);
 
         // Narrowing happens BEFORE the pass decision, not after: whether anything worth doing is on
@@ -233,6 +237,7 @@ public sealed class RandomInputProvider : IInputProvider
             List<CliOption> chosen = Choose(engine, spec, scored, advice);
             spec.Apply(request, chosen);
             Trace(spec, chosen, advice, agenda);
+            if (without != null) TraceDifference(spec, chosen, advice, without, engine);
         }
 
         if (_yieldEvery > 0 && Answered % _yieldEvery == 0)
@@ -292,6 +297,7 @@ public sealed class RandomInputProvider : IInputProvider
 
         if (vetoed > 0) e.Set("by", advice.RulesThatVetoed.ToList());
         if (advice.AnyScores) e.Set("scored", advice.NonZeroScores());
+        if (advice.UnvaluedLabels() is { Count: > 0 } unvalued) e.Set("unvalued", unvalued);
         if (advice.Floored) e.Set("floor", true);
         if (advice.PassBy != null) e.Set("pass_by", advice.PassBy);
 
@@ -312,6 +318,43 @@ public sealed class RandomInputProvider : IInputProvider
             .Set("faction", spec.Faction.ToString())
             .Set("goals", agenda.Goals.Count)
             .Text($"    AGENDA {agenda.Headline}"));
+    }
+
+    /// <summary>The same prompt scored with the <c>bot_compare</c> switches forced off. Never draws from the decision stream.</summary>
+    private List<ScoredOption> ScoreWithoutCompared(InputRequestSpec spec, InputRequest request, BotRuleEngine engine)
+    {
+        bool?[] was = _compare.Select(name => BotSides.ForcedValue(name, spec.Faction)).ToArray();
+        foreach (string name in _compare) BotSides.Force(name, spec.Faction, false);
+        ProjectionValuer.ForgetCaches();
+        try
+        {
+            BotDecision shadow = BotDecision.Build(spec, request);
+            return engine.Survivors(shadow, engine.Consult(shadow));
+        }
+        finally
+        {
+            for (int i = 0; i < _compare.Length; i++) BotSides.Restore(_compare[i], spec.Faction, was[i]);
+            ProjectionValuer.ForgetCaches();
+        }
+    }
+
+    /// <summary>Trace a pick that the switches changed: what was chosen, what would have been, and both score sets.</summary>
+    private void TraceDifference(InputRequestSpec spec, List<CliOption> chosen, BotAdvice advice, List<ScoredOption> without,
+                                 BotRuleEngine engine)
+    {
+        List<CliOption> wouldHave = engine.Tiers(without).FirstOrDefault() ?? new List<CliOption>();
+        if (chosen.All(c => wouldHave.Any(w => w.Kind == c.Kind && w.Id == c.Id))) return;
+
+        Dictionary<string, double> before = without.Where(s => s.Score != 0).ToDictionary(s => s.Option.Label, s => Math.Round(s.Score, 2));
+        Dictionary<string, double> after = advice.NonZeroScores().ToDictionary(p => p.Key, p => Math.Round(p.Value, 2));
+        string origin = spec.OriginCardId >= 0 ? CardState.ForId(spec.OriginCardId)?.CardName ?? "?" : "-";
+        _trace.Emit(new CliEvent("bot_diff")
+            .Set("kind", spec.Kind).Set("faction", spec.Faction.ToString()).Set("round", GameFlow.Instance?.Round ?? 0)
+            .Set("origin_card", origin)
+            .Set("chosen", chosen.Select(c => c.Label).ToList()).Set("would_have", wouldHave.Select(c => c.Label).ToList())
+            .Set("scores_now", after).Set("scores_before", before)
+            .Text($"DIFF {spec.Kind} {spec.Faction} [{origin}] now={string.Join(", ", chosen.Select(c => c.Label))} " +
+                  $"before={string.Join(" | ", wouldHave.Select(c => c.Label))}"));
     }
 
     /// <summary>

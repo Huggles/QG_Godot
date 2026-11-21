@@ -27,6 +27,16 @@ public static class BotSides
     /// <summary>Drop every forced switch.</summary>
     public static void ClearForced() => Forced.Clear();
 
+    public static bool? ForcedValue(string argName, Faction faction)
+        => Forced.TryGetValue((argName, faction), out bool on) ? on : null;
+
+    /// <summary>Put one switch back to what <see cref="ForcedValue"/> reported, forced or not.</summary>
+    public static void Restore(string argName, Faction faction, bool? was)
+    {
+        if (was is bool on) Forced[(argName, faction)] = on;
+        else Forced.TryRemove((argName, faction), out _);
+    }
+
     public static bool Includes(string argName, string defaultWho, Faction valuer)
     {
         if (Forced.TryGetValue((argName, valuer), out bool forced)) return forced;

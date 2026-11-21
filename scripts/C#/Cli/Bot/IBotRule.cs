@@ -126,6 +126,9 @@ public interface IBotVerdictSink
     /// one is a bad play that shows up in the statistics.
     /// </summary>
     void RefusePass(string why = null);
+
+    /// <summary>Record that the valuer could not price this option, so the trace can tell it from a 0.</summary>
+    void Unvalued(int optionIndex) { }
 }
 
 /// <summary>One rule's resolved settings for this run, after <c>bot_rules</c> has been parsed.</summary>

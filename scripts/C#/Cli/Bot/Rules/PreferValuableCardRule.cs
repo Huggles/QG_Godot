@@ -36,7 +36,8 @@ public sealed class PreferValuableCardRule : IBotRule
 
             int cardId = decision.Options[i].Id;
             double? value = line ? TurnLookahead.ValueLine(cardId, decision.Faction) : ProjectionValuer.ValueCard(cardId, decision.Faction);
-            if (value is double v && v != 0) sink.Score(i, v);
+            if (value == null) sink.Unvalued(i);
+            else if (value.Value != 0) sink.Score(i, value.Value);
         }
     }
 }

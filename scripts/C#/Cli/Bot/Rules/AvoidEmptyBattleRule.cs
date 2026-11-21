@@ -79,7 +79,7 @@ public sealed class AvoidEmptyBattleRule : IBotRule
         {
             if (decision.Options[i].Kind != CliOptionKind.Country) continue;
 
-            if (couldFireATrigger) sink.Score(i, FallbackPenalty);
+            if (couldFireATrigger) sink.Score(i, BotNudge.Of(FallbackPenalty, decision.Faction));
             else                   sink.Veto(i, "empty space, nothing to trigger");
         }
     }

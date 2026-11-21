@@ -34,6 +34,8 @@ public static class BotRuleRegistry
         new PreferSupplyStarDeployRule(),
         new PreferValuableCardRule(),
         new PreferValuableTargetRule(),
+        new PreferCheapRecallRule(),
+        new PreferAgendaTargetRule(),
         new ReallocateForBuildsRule(),
     };
 

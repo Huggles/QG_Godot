@@ -62,7 +62,7 @@ public static class UnitPoolShortfall
         // the awaiter); that abandons the deploy, leaving the event registered but unapplied, which is
         // the same state a blocked event leaves behind. CardStep.Execute and StepMutatorRunner already
         // catch it.
-        int unitId = (await new InputRequest.SelectUnitRequestHandler(faction, candidates, allowSkip: false)
+        int unitId = (await new InputRequest.SelectUnitRequestHandler(faction, candidates, allowSkip: false) { IsRecall = true }
             .BroadCast()).ResponseUnitIds[0];
 
         // No SourceCardId: the recall is not the card's doing and nothing may tie it back to one.
@@ -100,7 +100,7 @@ public static class UnitPoolShortfall
         await new ShowActionLabelPresentationEvent(
             faction, $"{faction.WithPlayer()} has no Air Force left in the pool and must first remove one of its Air Forces").Apply();
 
-        int unitId = (await new InputRequest.SelectUnitRequestHandler(faction, candidates, allowSkip: false)
+        int unitId = (await new InputRequest.SelectUnitRequestHandler(faction, candidates, allowSkip: false) { IsRecall = true }
             .BroadCast()).ResponseUnitIds[0];
 
         // A recall, like a ground one: bookkeeping, outside the reaction pipeline.

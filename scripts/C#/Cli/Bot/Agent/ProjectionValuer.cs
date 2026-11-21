@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 /// <summary>
 /// Prices a forked board for one faction, in victory points relative to the live board — and through
@@ -69,6 +70,9 @@ public static class ProjectionValuer
     private static bool _pricing;
     private static readonly Dictionary<Faction, ((int, string, int) Stamp, double Worth)> Worth = new();
 
+    /// <summary>Drop cached card worths, which depend on the valuation switches.</summary>
+    public static void ForgetCaches() => Worth.Clear();
+
     /// <summary>Rounds still to score, floored at 1 so a last-round income change still counts.</summary>
     public static int Horizon
     {
@@ -93,12 +97,16 @@ public static class ProjectionValuer
         Terms terms = new(CardWorth(faction), BotSides.Includes("bot_value_status", "all", faction),
                           BotSides.Includes("bot_material", "none", faction) ? MaterialVp : 0,
                           BotSides.Includes("bot_reach", "none", faction) ? ReachWeight : 0,
-                          BotSides.Includes("bot_scarcity", "none", faction));
+                          BotSides.Includes("bot_scarcity", "none", faction),
+                          BotSides.Includes("bot_threat", "none", faction) ? ThreatRounds : 0);
         return TeamDelta(board, team, horizon, terms) - TeamDelta(board, enemy, horizon, terms);
     }
 
     /// <summary>Which optional terms a valuation counts, and at what weight; 0 leaves a term out.</summary>
-    private readonly record struct Terms(double Card, bool Status, double Material, double Reach, bool Scarcity);
+    private readonly record struct Terms(double Card, bool Status, double Material, double Reach, bool Scarcity, double Threat);
+
+    /// <summary>Rounds of income a star an enemy can attack is expected to lose (<c>bot_threat_rounds</c>).</summary>
+    public static double ThreatRounds => CliArgs.GetDouble("bot_threat_rounds", 2.0);
 
     /// <summary>
     /// How many of <paramref name="faction"/>'s remaining turns its cards cannot cover on
@@ -173,8 +181,12 @@ public static class ProjectionValuer
             if (terms.Scarcity) shortfall += Shortfall(board, member, horizon) - Shortfall(live, member, horizon);
         }
 
-        int rate = VpMath.SupplyStarVpRate(team, board) - VpMath.SupplyStarVpRate(team, live);
-        if (terms.Status) rate += VpMath.StatusCardVpRateOn(team, board) - VpMath.StatusCardVpRateOn(team, live);
+        int status = terms.Status ? VpMath.StatusCardVpRateOn(team, board) - VpMath.StatusCardVpRateOn(team, live) : 0;
+        if (terms.Threat > 0)
+            return score + VpMath.SupplyStarVpHeld(team, board, horizon, terms.Threat) - VpMath.SupplyStarVpHeld(team, live, horizon, terms.Threat)
+                   + (status + reach * terms.Reach) * horizon + cards * terms.Card + units * terms.Material - shortfall * (terms.Card + 1);
+
+        int rate = VpMath.SupplyStarVpRate(team, board) - VpMath.SupplyStarVpRate(team, live) + status;
         return score + (rate + reach * terms.Reach) * horizon + cards * terms.Card + units * terms.Material
                - shortfall * (terms.Card + 1);
     }
@@ -186,7 +198,8 @@ public static class ProjectionValuer
         List<StepOption> built = new();
         try
         {
-            BoardState board = ReactionForecast.Apply(changeEvent, Start(), faction, 0, built);
+            GameSituation start = Start();
+            BoardState board = ApplyFunded(changeEvent, start.WithBoard(start.Board.Fork()), start.Board, faction, 0, built);
             return board == null ? null : Value(board, faction);
         }
         finally
@@ -277,6 +290,59 @@ public static class ProjectionValuer
     }
 
     /// <summary>How deep one card playing another may nest before the valuer stops following it.</summary>
+    /// <summary>
+    /// Apply an event to <paramref name="tried"/>, a fork of <paramref name="parent"/>. A build with an empty pool
+    /// first recalls the unit whose loss costs the deployer least, as UnitPoolShortfall asks live; without it
+    /// the projection throws and every new-country build reads as impossible.
+    /// </summary>
+    internal static BoardState ApplyFunded(ChangeEvent changeEvent, GameSituation tried, BoardState parent, Faction faction,
+                                           int depth, List<StepOption> built)
+    {
+        if (changeEvent is not DeployUnitChangeEvent deploy || !NeedsRecall(deploy, parent)
+            || !BotSides.Includes("bot_fund_builds", "none", faction))
+            return ReactionForecast.Apply(changeEvent, tried, faction, depth, built);
+
+        foreach (int unitId in RecallOrder(deploy.TriggeringFaction, deploy.UnitType, parent, tried))
+        {
+            GameSituation funded = tried.WithBoard(tried.Board.Fork());
+            if (!funded.Board.Apply(Recall(deploy.TriggeringFaction, unitId, funded.Board), funded, cardTags: false)) continue;
+            BoardState board = ReactionForecast.Apply(changeEvent, funded, faction, depth, built);
+            if (board != null) return board;
+        }
+        return null;
+    }
+
+    private static bool NeedsRecall(DeployUnitChangeEvent deploy, BoardState board)
+    {
+        CountryState country = CountryState.ForId(deploy.CountryId);
+        return country != null && !board.UnitsIn(country).ContainsKey(deploy.TriggeringFaction)
+               && board.AvailableUnitCount(deploy.TriggeringFaction, deploy.UnitType) == 0;
+    }
+
+    private static RemoveUnitChangeEvent Recall(Faction faction, int unitId, BoardState board)
+        => new(faction, unitId, UnitRemovalReason.RECALL, board) { IsTrigger = false, RegisterInPool = false };
+
+    /// <summary>The faction's units of this type, cheapest to lose first by its own valuation. Cached per board.</summary>
+    internal static List<int> RecallOrder(Faction faction, UnitType unitType, BoardState parent, GameSituation situation)
+    {
+        Dictionary<(Faction, UnitType), List<int>> known = RecallOrders.GetOrCreateValue(parent);
+        if (known.TryGetValue((faction, unitType), out List<int> order)) return order;
+
+        List<(int Id, double Value)> ranked = new();
+        foreach (int unitId in parent.ActiveUnitIds(faction))
+        {
+            if (UnitState.ForId(unitId)?.Type != unitType) continue;
+            GameSituation without = situation.WithBoard(parent.Fork());
+            if (!without.Board.Apply(Recall(faction, unitId, without.Board), without, cardTags: false)) continue;
+            ranked.Add((unitId, Value(without.Board, faction)));
+        }
+        order = ranked.OrderByDescending(r => r.Value).ThenBy(r => r.Id).Select(r => r.Id).ToList();
+        known[(faction, unitType)] = order;
+        return order;
+    }
+
+    private static readonly ConditionalWeakTable<BoardState, Dictionary<(Faction, UnitType), List<int>>> RecallOrders = new();
+
     private const int MaxPlayDepth = 2;
 
     /// <summary>A fork of the live board, in the situation the game is in now.</summary>
@@ -314,7 +380,7 @@ public static class ProjectionValuer
             foreach (StepOption outcome in outcomes)
             {
                 GameSituation tried = situation.WithBoard(situation.Board.Fork());
-                BoardState board = ReactionForecast.Apply(outcome.Event, tried, faction, depth, built);
+                BoardState board = ApplyFunded(outcome.Event, tried, situation.Board, faction, depth, built);
                 if (board == null) continue;
                 double value = Value(board, faction);
                 if (value > bestValue) { bestValue = value; best = tried.WithBoard(board).After(outcome.Event); bestOutcome = outcome; }
