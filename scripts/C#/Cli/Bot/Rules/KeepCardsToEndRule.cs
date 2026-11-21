@@ -47,7 +47,7 @@ public sealed class KeepCardsToEndRule : IBotRule
     }
 
     /// <summary>Cards in hand and deck beyond one play per remaining round and the expected enemy deck discards.</summary>
-    private static int Spare(Faction faction)
+    internal static int Spare(Faction faction)
     {
         GameFlow flow = GameFlow.Instance;
         int roundsLeft = Math.Max(flow.MaxRound - flow.Round + 1, 0);

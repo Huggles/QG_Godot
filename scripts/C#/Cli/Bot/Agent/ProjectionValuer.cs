@@ -71,7 +71,11 @@ public static class ProjectionValuer
     private static readonly Dictionary<Faction, ((int, string, int) Stamp, double Worth)> Worth = new();
 
     /// <summary>Drop cached card worths, which depend on the valuation switches.</summary>
-    public static void ForgetCaches() => Worth.Clear();
+    public static void ForgetCaches()
+    {
+        Worth.Clear();
+        DelayedCardValue.Forget();
+    }
 
     /// <summary>Rounds still to score, floored at 1 so a last-round income change still counts.</summary>
     public static int Horizon
@@ -332,7 +336,9 @@ public static class ProjectionValuer
         foreach (int unitId in RecallOrder(deploy.TriggeringFaction, deploy.UnitType, parent, tried))
         {
             GameSituation funded = tried.WithBoard(tried.Board.Fork());
-            if (!funded.Board.Apply(Recall(deploy.TriggeringFaction, unitId, funded.Board), funded, cardTags: false)) continue;
+            RemoveUnitChangeEvent recall = Recall(deploy.TriggeringFaction, unitId, funded.Board);
+            built.Add(new StepOption(null, recall));
+            if (!funded.Board.Apply(recall, funded, cardTags: false)) continue;
             BoardState board = ReactionForecast.Apply(changeEvent, funded, faction, depth, built);
             if (board != null) return board;
         }
@@ -359,9 +365,17 @@ public static class ProjectionValuer
         foreach (int unitId in parent.ActiveUnitIds(faction))
         {
             if (UnitState.ForId(unitId)?.Type != unitType) continue;
+            // A ChangeEvent is a Godot object the GC never frees, and it holds the fork it was made on.
             GameSituation without = situation.WithBoard(parent.Fork());
-            if (!without.Board.Apply(Recall(faction, unitId, without.Board), without, cardTags: false)) continue;
-            ranked.Add((unitId, Value(without.Board, faction)));
+            RemoveUnitChangeEvent recall = Recall(faction, unitId, without.Board);
+            try
+            {
+                if (without.Board.Apply(recall, without, cardTags: false)) ranked.Add((unitId, Value(without.Board, faction)));
+            }
+            finally
+            {
+                recall.Free();
+            }
         }
         order = ranked.OrderByDescending(r => r.Value).ThenBy(r => r.Id).Select(r => r.Id).ToList();
         known[(faction, unitType)] = order;

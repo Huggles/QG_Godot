@@ -30,12 +30,16 @@ public sealed class PreferValuableCardRule : IBotRule
     {
         bool line = TurnLookahead.Applies(decision.Faction);
         if (line) EnemyTurnValue.NewDecision(decision.Faction);
+        bool delayed = decision.Spec.Kind == "HandCardPlay" && DelayedCardValue.Applies(decision.Faction);
         for (int i = 0; i < decision.Options.Count; i++)
         {
             if (decision.Options[i].Kind != CliOptionKind.Card) continue;
 
             int cardId = decision.Options[i].Id;
             double? value = line ? TurnLookahead.ValueLine(cardId, decision.Faction) : ProjectionValuer.ValueCard(cardId, decision.Faction);
+            // A Status or Response card put down now pays on later turns, which the play alone does not show.
+            if (!line && delayed) DelayedCardValue.NotePlayValue(cardId, value);
+            if (!line && value != null && delayed) value += DelayedCardValue.Of(cardId, decision.Faction);
             if (value == null) sink.Unvalued(i);
             else if (value.Value != 0) sink.Score(i, value.Value);
         }

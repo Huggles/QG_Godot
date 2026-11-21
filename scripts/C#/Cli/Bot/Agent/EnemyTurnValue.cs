@@ -73,6 +73,18 @@ public static class EnemyTurnValue
         _withoutStart = null;
     }
 
+    /// <summary>
+    /// Run <paramref name="measure"/> as a measurement for <paramref name="faction"/>: projections then
+    /// forecast block windows, and see the faction's own hidden Responses (see ReactionForecast.Candidates).
+    /// </summary>
+    internal static T MeasuringAs<T>(Faction faction, Func<T> measure)
+    {
+        Faction was = MeasuringFor;
+        MeasuringFor = faction;
+        try { return measure(); }
+        finally { MeasuringFor = was; }
+    }
+
     /// <summary>The card's worth over the enemy turns in <paramref name="horizon"/> rounds.</summary>
     public static double Of(int cardId, Faction faction, int horizon)
     {

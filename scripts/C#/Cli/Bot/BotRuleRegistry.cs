@@ -37,6 +37,7 @@ public static class BotRuleRegistry
         new PreferCheapRecallRule(),
         new PreferAgendaTargetRule(),
         new KeepCardsToEndRule(),
+        new GiveUpWorstCardsRule(),
         new ReallocateForBuildsRule(),
     };
 

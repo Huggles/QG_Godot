@@ -2,7 +2,11 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class AttackOption : GodotObject
+/// <summary>
+/// Plain data, not a GodotObject: one is made per unit on every tag pass (bot forks included), from parallel
+/// threads, and a Godot object is never collected — they leaked about a million per game.
+/// </summary>
+public sealed class AttackOption
 {
     public int AttackingUnit;
     public Faction Faction;

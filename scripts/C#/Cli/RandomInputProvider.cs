@@ -350,7 +350,8 @@ public sealed class RandomInputProvider : IInputProvider
         List<CliOption> wouldHave = engine.Tiers(without).FirstOrDefault() ?? new List<CliOption>();
         if (chosen.All(c => wouldHave.Any(w => w.Kind == c.Kind && w.Id == c.Id))) return;
 
-        Dictionary<string, double> before = without.Where(s => s.Score != 0).ToDictionary(s => s.Option.Label, s => Math.Round(s.Score, 2));
+        Dictionary<string, double> before = without.Where(s => s.Score != 0).GroupBy(s => s.Option.Label)
+            .ToDictionary(g => g.Key, g => Math.Round(g.Max(s => s.Score), 2));
         Dictionary<string, double> after = advice.NonZeroScores().ToDictionary(p => p.Key, p => Math.Round(p.Value, 2));
         string origin = spec.OriginCardId >= 0 ? CardState.ForId(spec.OriginCardId)?.CardName ?? "?" : "-";
         _trace.Emit(new CliEvent("bot_diff")

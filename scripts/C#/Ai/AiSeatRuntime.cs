@@ -36,7 +36,7 @@ public static class AiSeatRuntime
     public static readonly string[] HardSwitches = { "bot_material", "bot_reach", "bot_card_value", "bot_scarcity", "bot_threat" };
 
     /// <summary>On at every difficulty: they price choices that were otherwise random (pool recalls, equal targets), not play strength.</summary>
-    public static readonly string[] SeatSwitches = { "bot_fund_builds", "bot_tiebreak_nudges" };
+    public static readonly string[] SeatSwitches = { "bot_fund_builds", "bot_tiebreak_nudges", "bot_delayed_cards" };
 
     /// <summary>Set the forced valuation switches for <paramref name="factions"/> to the session's difficulty.</summary>
     private static void ApplyDifficulty(IEnumerable<Faction> factions)
@@ -187,7 +187,7 @@ public static class AiSeatRuntime
     /// </summary>
     private const string SeatRules = "no_hollow,avoid_empty_battle,avoid_dead_battle_card,prefer_vacant_deploy," +
                                      "prefer_supply_star_deploy,prefer_valuable_card,prefer_valuable_target," +
-                                     "prefer_cheap_recall,prefer_agenda_target,keep_cards_to_end";
+                                     "prefer_cheap_recall,prefer_agenda_target,keep_cards_to_end,give_up_worst_cards";
 
     /// <summary>
     /// The bot for one seat.
