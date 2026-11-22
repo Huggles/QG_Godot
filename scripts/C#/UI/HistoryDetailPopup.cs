@@ -36,7 +36,7 @@ public partial class HistoryDetailPopup : Control, LoadableUI
 
     /// <summary>
     /// The card size the scene was designed at; a big entry shrinks below it, never above. CardScene
-    /// derives its fonts from height (20px body at 700), so 420 is what keeps the rules text ~12px.
+    /// derives its fonts from height, so this matches the hand's CardPreview (250x350), the size known to read.
     /// </summary>
     private Vector2 fullCardSize;
 
