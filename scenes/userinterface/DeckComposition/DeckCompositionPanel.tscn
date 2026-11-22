@@ -4,7 +4,7 @@
 [ext_resource type="Theme" path="res://scenes/menu/theme/MenuTheme.tres" id="2_theme"]
 [ext_resource type="Material" path="res://scenes/menu/theme/FrostedPanel.tres" id="3_frost"]
 [ext_resource type="Script" path="res://scripts/C#/Menu/BrassFrame.cs" id="4_brass"]
-[ext_resource type="FontVariation" path="res://scenes/menu/theme/MenuFontBody.tres" id="x_body"]
+[ext_resource type="Texture2D" path="res://scenes/menu/theme/CloseX.svg" id="x_close"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plate"]
 content_margin_left = 26.0
@@ -74,9 +74,8 @@ layout_mode = 2
 size_flags_vertical = 0
 tooltip_text = "Close"
 theme_type_variation = &"MenuSecondaryButton"
-theme_override_fonts/font = ExtResource("x_body")
-theme_override_font_sizes/font_size = 30
-text = "×"
+icon = ExtResource("x_close")
+icon_alignment = 1
 
 [node name="HeaderRule" type="HSeparator" parent="Plate/Rows"]
 layout_mode = 2
