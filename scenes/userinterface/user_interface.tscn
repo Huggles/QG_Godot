@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" uid="uid://bqyf0w6t7iv32" path="res://assets/textures/Other/eye_icon_pressed.png" id="24_eyeiconp"]
 [ext_resource type="Texture2D" uid="uid://b81m75p4xp4nu" path="res://assets/textures/Other/Icons/PlayedCardsIcon.png" id="25_playedcards"]
 [ext_resource type="PackedScene" uid="uid://blt1histpop01" path="res://scenes/userinterface/History/HistoryDetailPopup.tscn" id="26_histpop"]
+[ext_resource type="PackedScene" path="res://scenes/userinterface/FactionInfo/PileDetailPopup.tscn" id="40_pilepop"]
 [ext_resource type="Script" uid="uid://uq8tqtb6j8iq" path="res://scripts/C#/UI/GameMenuTrigger.cs" id="27_gamemenu"]
 [ext_resource type="Script" uid="uid://bhyk2pph2c0qf" path="res://scripts/C#/UI/TutorialArrow.cs" id="28_tutarrow"]
 [ext_resource type="Texture2D" uid="uid://dvdv2r5hltf66" path="res://assets/textures/Other/Icons/Arrow_1.png" id="29_tutarrowtex"]
@@ -286,6 +287,9 @@ mouse_filter = 2
 script = ExtResource("12_gamestatedetail")
 
 [node name="HistoryDetailPopup" parent="." unique_id=617734349 instance=ExtResource("26_histpop")]
+z_index = 99
+
+[node name="PileDetailPopup" parent="." unique_id=617734350 instance=ExtResource("40_pilepop")]
 z_index = 99
 
 [node name="PlayerInfoDisplay" parent="." unique_id=44115547 instance=ExtResource("6_x05kf")]
