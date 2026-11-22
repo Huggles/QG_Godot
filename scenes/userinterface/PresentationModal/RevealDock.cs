@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 /// <summary>
 /// The tray beside the history strip where a timed-out draw or discard modal lingers, shrunk, before it
-/// folds into the newest history badge. One row along the bottom of the strip: the oldest entry sits
-/// against it and later ones line up to its left, so an arrival never shoves the others around.
+/// folds into the newest history badge. One row just under the strip: the oldest entry sits at the right,
+/// flush with the badges, and later ones line up to its left, so an arrival never shoves the others around.
 /// Created by <see cref="ModalStack"/> as its sibling.
 ///
 /// Takes the modal node itself rather than a copy: the modal has already resolved, so the game moves on
@@ -19,6 +19,8 @@ public partial class RevealDock : Control
 	private const float MaxWidth = 300f;
 	private const float MaxHeight = 170f;
 	private const float StripGap = 8f;
+	/// <summary>The 40px badges sit centred in the 48px strip; the row's right edge lines up with theirs.</summary>
+	private const float BadgeInset = 4f;
 	private const float EntryGap = 6f;
 	private const float HoverZoom = 2.2f;
 	private const float OlderAlpha = 0.75f;
@@ -33,7 +35,7 @@ public partial class RevealDock : Control
 		public Tween Tween;
 	}
 
-	/// <summary>Newest first; laid out the other way round, so the oldest sits against the strip.</summary>
+	/// <summary>Newest first; laid out the other way round, so the oldest sits rightmost.</summary>
 	private readonly List<Entry> _entries = new();
 
 	/// <summary>Only with pacing on and a strip to sit beside — otherwise the modal just fades as before.</summary>
@@ -123,14 +125,15 @@ public partial class RevealDock : Control
 		if (changed) Arrange(HoverSeconds);
 	}
 
-	/// <summary>Line the entries up leftwards from the strip's bottom-left corner, bottoms aligned, oldest first.</summary>
+	/// <summary>Line the entries up leftwards from just under the strip, tops aligned, oldest rightmost.</summary>
 	private void Arrange(double seconds)
 	{
-		Vector2 corner = Anchor();
+		Vector2 topRight = Anchor();
 		for (int i = _entries.Count - 1; i >= 0; i--)
 		{
 			Entry entry = _entries[i];
 			PresentationModal modal = entry.Modal;
+			Vector2 corner = topRight + new Vector2(0f, modal.Size.Y * entry.Scale);
 			float scale = entry.Hovered ? Mathf.Min(1f, entry.Scale * HoverZoom) : entry.Scale;
 			float alpha = i == 0 || entry.Hovered ? 1f : OlderAlpha;
 
@@ -143,18 +146,18 @@ public partial class RevealDock : Control
 			entry.Tween.TweenProperty(modal, "modulate:a", alpha, seconds);
 
 			// Spaced by the resting size, so a hovered entry zooms over its neighbours rather than shoving them.
-			corner.X -= modal.Size.X * entry.Scale + EntryGap;
+			topRight.X -= modal.Size.X * entry.Scale + EntryGap;
 		}
 	}
 
-	/// <summary>The bottom-right corner of the entry against the strip, in this node's coordinates.</summary>
+	/// <summary>The top-right corner of the row, just under the strip and flush with its badges, in this node's coordinates.</summary>
 	private Vector2 Anchor()
 	{
 		GameHistoryList strip = GameHistoryList.Current;
 		if (strip == null || !IsInstanceValid(strip))
-			return new Vector2(Size.X - 56f, Size.Y - 250f);
+			return new Vector2(Size.X - BadgeInset, Size.Y - 250f + StripGap);
 		Rect2 rect = strip.GetGlobalRect();
-		return ToDock(new Vector2(rect.Position.X - StripGap, rect.End.Y));
+		return ToDock(new Vector2(rect.End.X - BadgeInset, rect.End.Y + StripGap));
 	}
 
 	/// <summary>A discard burns where it lingered; then either one folds into the newest badge.</summary>
