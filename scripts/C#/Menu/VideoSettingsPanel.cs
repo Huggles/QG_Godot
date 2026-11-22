@@ -60,11 +60,24 @@ public partial class VideoSettingsPanel : VBoxContainer
         RefreshState();
     }
 
+    /// <summary>
+    /// Windowed lists the sizes to pick from. Fullscreen shows only the screen's own size as a
+    /// read-only label (empty backing list), leaving the remembered windowed size untouched.
+    /// </summary>
     private void BuildResolutionOptions()
     {
-        _resolutions = DisplaySettings.AvailableResolutions(_pendingResolution);
-
         _resolution.Clear();
+
+        if (_pendingMode != WindowDisplayMode.Windowed)
+        {
+            _resolutions = new List<Vector2I>();
+            Vector2I screen = DisplaySettings.ScreenResolution();
+            _resolution.AddItem($"{screen.X} x {screen.Y}");
+            _resolution.Selected = 0;
+            return;
+        }
+
+        _resolutions = DisplaySettings.AvailableResolutions(_pendingResolution);
         for (int i = 0; i < _resolutions.Count; i++)
         {
             Vector2I size = _resolutions[i];
@@ -79,6 +92,7 @@ public partial class VideoSettingsPanel : VBoxContainer
     private void OnDisplayModeSelected(long index)
     {
         _pendingMode = (WindowDisplayMode)_displayMode.GetItemId((int)index);
+        BuildResolutionOptions();
         RefreshState();
     }
 
@@ -102,8 +116,8 @@ public partial class VideoSettingsPanel : VBoxContainer
 
     /// <summary>
     /// Keeps Apply and the resolution picker honest about the staged state: Apply is only live when
-    /// there is something to commit, and the resolution is unavailable in both fullscreen modes,
-    /// which run at the desktop resolution — offering a choice there would be a lie.
+    /// there is something to commit, and the resolution is locked in both fullscreen modes, which
+    /// run at the desktop resolution the picker then shows.
     /// </summary>
     private void RefreshState()
     {

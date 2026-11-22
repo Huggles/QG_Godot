@@ -59,6 +59,15 @@ public static class DisplaySettings
     }
 
     /// <summary>
+    /// The full size of the screen the window is on — what both fullscreen modes run at.
+    /// </summary>
+    public static Vector2I ScreenResolution()
+    {
+        if (GameContext.IsHeadless) return DisplayServer.WindowGetSize();
+        return DisplayServer.ScreenGetSize(DisplayServer.WindowGetCurrentScreen());
+    }
+
+    /// <summary>
     /// The largest <see cref="Ladder"/> entry that fits the usable area of the current screen, so
     /// the window and its title bar clear the taskbar. Falls back to the boot window's size.
     /// </summary>
