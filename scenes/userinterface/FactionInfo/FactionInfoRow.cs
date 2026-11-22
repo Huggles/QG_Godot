@@ -112,6 +112,7 @@ public partial class FactionInfoRow : Control
 			_hovered = hovered;
 			_cloth.SetShaderParameter("hover", hovered ? 1f : 0f);
 		}
+		UpdatePeek((float)delta);
 
 		float target = _pinned ? _fullTail : Stub;
 		if (Mathf.IsEqualApprox(_tail, target)) return;
@@ -126,6 +127,8 @@ public partial class FactionInfoRow : Control
 
 	public override void _ExitTree()
 	{
+		// The row is rebuilt when players join or leave; a peek left open would never close on leaving.
+		if (_peek != null && IsInstanceValid(_peek)) _peek.Dismiss();
 		if (EventBus.Instance != null)
 		{
 			EventBus.Instance.FactionScoredPoints -= OnFactionScoredPoints;
@@ -176,9 +179,9 @@ public partial class FactionInfoRow : Control
 		FactionInfoButton.TooltipText = $"{data.Label}\n{ToggleHint}";
 		HandButton.TooltipText = "Cards in hand";
 		GetNode<Control>("%ScoreCell").TooltipText = "Victory points";
-		DeckButton.TooltipText = "Cards left in the draw deck\nClick to see the discard pile";
-		StatusButton.TooltipText = "Status cards in play\nClick to see them";
-		ResponseButton.TooltipText = "Response cards in play\nClick to see them";
+		DeckButton.TooltipText = "Cards left in the draw deck\nHover to see the discard pile";
+		StatusButton.TooltipText = "Status cards in play\nHover to see them";
+		ResponseButton.TooltipText = "Response cards in play\nHover to see them";
 		ArmyCell.TooltipText = "Armies in reserve";
 		GetNode<Control>("%NavyCell").TooltipText = "Navies in reserve";
 
@@ -223,10 +226,9 @@ public partial class FactionInfoRow : Control
 		// emits this on every peer, so it is the one turn-boundary signal a client can rely on.
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
 		EventBus.Instance.GameChangeEventAfter += OnGameChangeEventAfter;
-		StatusButton.Pressed += () => ShowTableCards("Status", FactionState.DeckState.StatusCardIds);
-		ResponseButton.Pressed += () => ShowTableCards("Response", FactionState.DeckState.ResponseCardIds);
+		// A click still opens a pile, and keeps it open: only a hover-opened peek closes on leaving.
+		foreach (Button pile in PileButtons) pile.Pressed += () => OpenPile(pile);
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
-		DeckButton.Pressed += OnDiscardDeckButtonPressed;
 		SetModulation();
 	}
 
@@ -319,28 +321,83 @@ public partial class FactionInfoRow : Control
 	/// <summary>Slides the tail open or closed, as the Open Faction Banners setting does to every pennant.</summary>
 	public void SetOpen(bool open) => _pinned = open;
 
-	/// <summary>Lists one pile on the table, the status or the response cards, dimming any a card in play ignores.</summary>
-	private void ShowTableCards(string kind, IEnumerable<int> cardIds)
+	// ── Pile peeks ───────────────────────────────────────────────────────────
+
+	/// <summary>How long the mouse rests on a pill before its pile opens, so sweeping past opens nothing.</summary>
+	private const float PeekDelay = 0.25f;
+	/// <summary>How long the mouse may be off both the pill and the pile before it closes: time to reach the pile.</summary>
+	private const float PeekGrace = 0.5f;
+
+	private Button[] PileButtons => [DeckButton, StatusButton, ResponseButton];
+	private Button _peekButton;
+	private float _peekTimer;
+	private PresentationModal _peek;
+	/// <summary>The pill whose peek just closed under the mouse; it opens again only once the mouse has left it.</summary>
+	private Button _spent;
+
+	/// <summary>
+	/// Opens a pill's pile after a short rest on it and closes it once the mouse has left both. Tested
+	/// against rects rather than mouse enter/exit: the pile's full-screen backdrop takes the hover off the pill.
+	/// </summary>
+	private void UpdatePeek(float delta)
 	{
-		List<PresentationItem> presentationItems = cardIds
+		Vector2 mouse = GetGlobalMousePosition();
+		Button over = PileButtons.FirstOrDefault(pile => pile.GetGlobalRect().HasPoint(mouse));
+		if (over != _spent) _spent = null;
+
+		if (_peek != null)
+		{
+			// Freed: the player closed it with × or Escape. Not again until the mouse leaves the pill.
+			if (!IsInstanceValid(_peek)) { _peek = null; _spent = over; return; }
+			// Straight onto another pill: close now, so that pill's own peek can follow.
+			bool switched = over != null && over != _peekButton;
+			bool kept = over == _peekButton || _peek.GetGlobalRect().HasPoint(mouse);
+			_peekTimer = kept ? 0f : _peekTimer + delta;
+			if (!switched && _peekTimer < PeekGrace) return;
+			_peek.Dismiss();
+			_peek = null;
+			_peekButton = null;
+			return;
+		}
+
+		// Not while any modal is up, its backdrop over the pill. A null hover is stale, left by a backdrop
+		// that just hid: Godot only re-picks the hovered control on the next mouse motion.
+		Control hovered = GetViewport().GuiGetHoveredControl();
+		bool reachable = (hovered == over || hovered == null) && !ModalStack.Current.Visible;
+		if (over == null || over == _spent || !reachable)
+		{
+			_peekButton = null;
+			return;
+		}
+		if (over != _peekButton) { _peekButton = over; _peekTimer = 0f; }
+		_peekTimer += delta;
+		if (_peekTimer < PeekDelay) return;
+		_peek = OpenPile(over);
+		_peekTimer = 0f;
+	}
+
+	/// <summary>The discard pile for the deck pill, else the status or response cards on the table.</summary>
+	private PresentationModal OpenPile(Button pile)
+	{
+		DeckState deckState = FactionState.DeckState;
+		string adjective = FactionState.FactionData.FactionAdjactiveLabel;
+		if (pile == DeckButton)
+			return ModalStack.Current.Open(
+				ModalConfig.Display($"{adjective} Discard Deck", PresentationItemCard.FromCardIds(deckState.DiscardedCardIds, false))
+					.WithDedupeKey($"discard-deck:{Faction}"));
+
+		string kind = pile == StatusButton ? "Status" : "Response";
+		IEnumerable<int> cardIds = pile == StatusButton ? deckState.StatusCardIds : deckState.ResponseCardIds;
+		List<PresentationItem> items = cardIds
 			.Select(cardId => (PresentationItem)new PresentationItemCard(cardId, false) { DimCaption = IgnoredCaption(cardId) })
 			.ToList();
-		_ = ModalStack.Current.Show(
-			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} {kind} Cards", presentationItems)
-				.WithDedupeKey($"{kind.ToLowerInvariant()}-cards:{Faction}"));
+		return ModalStack.Current.Open(
+			ModalConfig.Display($"{adjective} {kind} Cards", items).WithDedupeKey($"{kind.ToLowerInvariant()}-cards:{Faction}"));
 	}
 
 	/// <summary>"Ignored (Hobart's Funnies)" while a card in play ignores this one, else null: the table dims it.</summary>
 	private static string IgnoredCaption(int cardId) =>
 		BoardState.Live.IgnoredBy(CardState.ForId(cardId).CardLogic) is { } by ? $"Ignored ({by.CardData.Label})" : null;
-
-	private void OnDiscardDeckButtonPressed()
-	{
-		List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(DeckState.ForFaction(Faction).DiscardedCardIds, false);
-		_ = ModalStack.Current.Show(
-			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Discard Deck", presentationItems)
-				.WithDedupeKey($"discard-deck:{Faction}"));
-	}
 
 	// ── Painting ─────────────────────────────────────────────────────────────
 
