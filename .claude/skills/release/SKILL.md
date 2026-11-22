@@ -61,4 +61,4 @@ If they abort: run `git checkout -- export_presets.cfg project.godot` and delete
 To attach an image the user gave, copy it to `releases/vX.Y.Z.png` and pass that path as a second argument. Stage it in step 8.
 
 ## 8. Commit and tag
-Stage `export_presets.cfg`, `project.godot` and `releases/vX.Y.Z.md`. Commit as `Release vX.Y.Z`, then `git tag vX.Y.Z`. **Do not push.** Finish with a short summary: the version, the Steam BuildID with the Steamworks builds link for setting it live, and the Discord post. Also tell the user that `git push --follow-tags` is left to do.
+Stage `export_presets.cfg`, `project.godot` and `releases/vX.Y.Z.md`. Commit as `Release vX.Y.Z`, then `git tag -a vX.Y.Z -m "Release vX.Y.Z"`. The tag must be annotated: `git push --follow-tags` skips lightweight tags. **Do not push.** Finish with a short summary: the version, the Steam BuildID with the Steamworks builds link for setting it live, and the Discord post. Also tell the user that `git push --follow-tags` is left to do.
