@@ -906,6 +906,13 @@ public abstract partial class InputRequest
         public int MinSelections { get; set; }
         public int MaxSelections { get; set; }
 
+        /// <summary>
+        /// Set for a pick from the faction's own hand to draw it in the hand fan instead of a modal: the
+        /// confirm verb ("Place 2 cards") and what the hint says the cards are clicked for. Null keeps the modal.
+        /// </summary>
+        public string FanVerb { get; set; }
+        public string FanPurpose { get; set; }
+
         public SelectCardsRequestHandler(Faction targetFaction, List<int> targetCardIds, string title,
             int minSelections, int maxSelections) : base(targetFaction)
         {
@@ -917,6 +924,14 @@ public abstract partial class InputRequest
 
         public override async Task Handle()
         {
+            if (FanVerb != null)
+            {
+                CardPick pick = new(MinSelections, MaxSelections, verb: FanVerb, purpose: FanPurpose ?? FanVerb.ToLowerInvariant());
+                ResponseCardIds = await InputHandlerDiscard.PickFromHand(
+                    TargetFaction, TargetCardIds.OrderBy(id => id).ToList(), pick, Title);
+                return;
+            }
+
             PlayerActionLabel.ShowText($"{TargetFaction.Label()}: {Title}", TargetFaction);
             ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectMany(
                 Title, PresentationItemCard.FromCardIds(TargetCardIds, true), MinSelections, MaxSelections));

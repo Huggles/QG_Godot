@@ -59,7 +59,11 @@ public partial class StatusRosietheRiveter : StatusCardLogic, IStepMutator
             handIds,
             "Place 1 or 2 cards from your hand on the bottom of your draw deck",
             minSelections: 0,
-            maxSelections: MaxCards).BroadCast();
+            maxSelections: MaxCards)
+        {
+            FanVerb = "Place",
+            FanPurpose = "place on the bottom of your draw deck",
+        }.BroadCast();
 
         // Re-checked against the hand on the host rather than trusted: the answer comes off the wire,
         // and a recycle of a card this faction does not hold would be refused by
