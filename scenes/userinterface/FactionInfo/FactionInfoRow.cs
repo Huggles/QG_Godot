@@ -254,27 +254,28 @@ public partial class FactionInfoRow : Control
 	// ── Player name ──────────────────────────────────────────────────────────
 
 	private static readonly FontVariation NameFont = GD.Load<FontVariation>("res://scenes/menu/theme/MenuFontBodyBold.tres");
-	/// <summary>The strip along the flag's foot the name takes; the counts ride up above it.</summary>
+	/// <summary>The strip along the flag's top the name takes; the counts drop below it.</summary>
 	private const float NameBand = 17f;
 	private const int NameFontSize = 12;
 	private const string ToggleHint = "Click to show or hide the hand, score and pieces";
 
 	/// <summary>
-	/// Prints who plays this faction along the foot of the flag, in the same white-on-black ink as the
-	/// counts, which move up to make room. Nothing in solo play. A name wider than the flag is cut with
+	/// Prints who plays this faction along the top of the flag, in the same white-on-black ink as the
+	/// counts, which move down to make room. Nothing in solo play. A name wider than the flag is cut with
 	/// an ellipsis; the tooltip has it whole.
 	/// </summary>
 	private void AddPlayerName(string name)
 	{
 		if (string.IsNullOrEmpty(name)) return;
 
-		HeadCounts.Size = new Vector2(Head, Height - NameBand + 1f);
+		HeadCounts.Position = new Vector2(0, NameBand - 2f);
+		HeadCounts.Size = new Vector2(Head, Height - NameBand + 2f);
 		const float padX = 4f;
 		AddChild(new Label
 		{
 			Name = "PlayerName",
 			Text = name,
-			Position = new Vector2(padX, Height - NameBand + 1f),
+			Position = new Vector2(padX, 1f),
 			Size = new Vector2(Head - 2 * padX, NameBand),
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
