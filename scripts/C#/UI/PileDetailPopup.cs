@@ -11,6 +11,7 @@ public partial class PileDetailPopup : Control, LoadableUI
 {
 	public static PileDetailPopup Current;
 
+	private const float GapFromFlag = 6f;
 	private const float ScreenMargin = 10f;
 	/// <summary>Must match PileGrid's h/v_separation in the scene.</summary>
 	private const float CardGap = 6f;
@@ -33,7 +34,7 @@ public partial class PileDetailPopup : Control, LoadableUI
 
 	/// <summary>The pill the popup belongs to; <see cref="HideFor"/> from any other pill is a no-op.</summary>
 	private Control owner;
-	/// <summary>The flag the pill sits on: the popup's left edge lines up with its right side.</summary>
+	/// <summary>The flag the pill sits on: the popup opens just past its right side.</summary>
 	private Control flag;
 
 	public override void _Ready()
@@ -98,7 +99,7 @@ public partial class PileDetailPopup : Control, LoadableUI
 
 		Rect2 bounds = GetGlobalRect();
 		float chrome = MarginChrome + (DetailPanel.GetThemeStylebox("panel")?.GetMinimumSize().X ?? 0f);
-		float width = bounds.End.X - ScreenMargin - flag.GetGlobalRect().End.X - chrome;
+		float width = bounds.End.X - ScreenMargin - (flag.GetGlobalRect().End.X + GapFromFlag) - chrome;
 		float height = bounds.Size.Y - 2 * ScreenMargin - chrome - TextReserve;
 
 		float bestScale = 0f;
@@ -156,7 +157,7 @@ public partial class PileDetailPopup : Control, LoadableUI
 		if (DetailPanel != null) DetailPanel.Visible = false;
 	}
 
-	/// <summary>Left edge on the flag's right side, centred on the flag and clamped on screen.</summary>
+	/// <summary>Just past the flag's right side, centred on the flag and clamped on screen.</summary>
 	private void Reposition(Control flag)
 	{
 		Vector2 size = DetailPanel.GetCombinedMinimumSize();
@@ -164,7 +165,7 @@ public partial class PileDetailPopup : Control, LoadableUI
 
 		Rect2 anchor = flag.GetGlobalRect();
 		Rect2 bounds = GetGlobalRect();
-		float x = Mathf.Min(anchor.End.X, bounds.End.X - size.X - ScreenMargin);
+		float x = Mathf.Min(anchor.End.X + GapFromFlag, bounds.End.X - size.X - ScreenMargin);
 		float y = Mathf.Clamp(
 			anchor.Position.Y + anchor.Size.Y * 0.5f - size.Y * 0.5f,
 			bounds.Position.Y + ScreenMargin,
