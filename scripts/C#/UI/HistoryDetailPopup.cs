@@ -34,7 +34,10 @@ public partial class HistoryDetailPopup : Control, LoadableUI
     /// <summary>Panel margins around the grid, on top of the stylebox's own; see the Margin node.</summary>
     private const float MarginChrome = 16f;
 
-    /// <summary>The card size the scene was designed at; a big entry shrinks below it, never above.</summary>
+    /// <summary>
+    /// The card size the scene was designed at; a big entry shrinks below it, never above. CardScene
+    /// derives its fonts from height (20px body at 700), so 420 is what keeps the rules text ~12px.
+    /// </summary>
     private Vector2 fullCardSize;
 
     private PanelContainer DetailPanel => GetNode<PanelContainer>("%HistoryDetailPanel");
