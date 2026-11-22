@@ -33,6 +33,8 @@ public partial class RevealDock : Control
 		public double Remaining;
 		public bool Hovered;
 		public Tween Tween;
+		/// <summary>Where it sits unhovered. Still counts as hovered there, since a zoom can slide it away from the cursor.</summary>
+		public Rect2 RestRect;
 	}
 
 	/// <summary>Newest first; laid out the other way round, so the oldest sits rightmost.</summary>
@@ -104,7 +106,7 @@ public partial class RevealDock : Control
 				continue;
 			}
 
-			bool hovered = !blocked && VisualRect(entry.Modal).HasPoint(mouse);
+			bool hovered = !blocked && (VisualRect(entry.Modal).HasPoint(mouse) || entry.RestRect.HasPoint(mouse));
 			if (hovered != entry.Hovered)
 			{
 				entry.Hovered = hovered;
@@ -125,15 +127,22 @@ public partial class RevealDock : Control
 		if (changed) Arrange(HoverSeconds);
 	}
 
-	/// <summary>Line the entries up leftwards from just under the strip, tops aligned, oldest rightmost.</summary>
+	/// <summary>
+	/// Line the entries up leftwards from just under the strip, tops aligned, oldest rightmost. A hovered
+	/// entry zooms upwards, so it first slides left of the strip rather than cover the badges.
+	/// </summary>
 	private void Arrange(double seconds)
 	{
 		Vector2 topRight = Anchor();
+		float clearOfStrip = StripLeft();
 		for (int i = _entries.Count - 1; i >= 0; i--)
 		{
 			Entry entry = _entries[i];
 			PresentationModal modal = entry.Modal;
-			Vector2 corner = topRight + new Vector2(0f, modal.Size.Y * entry.Scale);
+			Vector2 rested = modal.Size * entry.Scale;
+			Vector2 corner = topRight + new Vector2(0f, rested.Y);
+			entry.RestRect = new Rect2(corner - rested, rested);
+			if (entry.Hovered) corner.X = Mathf.Min(corner.X, clearOfStrip);
 			float scale = entry.Hovered ? Mathf.Min(1f, entry.Scale * HoverZoom) : entry.Scale;
 			float alpha = i == 0 || entry.Hovered ? 1f : OlderAlpha;
 
@@ -146,8 +155,16 @@ public partial class RevealDock : Control
 			entry.Tween.TweenProperty(modal, "modulate:a", alpha, seconds);
 
 			// Spaced by the resting size, so a hovered entry zooms over its neighbours rather than shoving them.
-			topRight.X -= modal.Size.X * entry.Scale + EntryGap;
+			topRight.X -= rested.X + EntryGap;
 		}
+	}
+
+	/// <summary>The furthest right a zoomed entry may reach without covering the badges.</summary>
+	private float StripLeft()
+	{
+		GameHistoryList strip = GameHistoryList.Current;
+		if (strip == null || !IsInstanceValid(strip)) return float.MaxValue;
+		return ToDock(strip.GetGlobalRect().Position).X - StripGap;
 	}
 
 	/// <summary>The top-right corner of the row, just under the strip and flush with its badges, in this node's coordinates.</summary>
