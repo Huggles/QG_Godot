@@ -36,7 +36,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	[Export] private float PopInRightMargin = 70f;
 
 	/// <summary>How opaque the slot goes while hovered, so the country or unit under it can be seen and clicked.</summary>
-	[Export] private float HoverAlpha = 0.2f;
+	[Export] private float HoverAlpha = 0.4f;
 	private const float HoverFadeSeconds = 0.15f;
 
 	// The announced card outlives a prompt that borrows the slot; _showingAnnouncement is whether it is on screen now.
