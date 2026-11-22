@@ -183,7 +183,8 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     /// <summary>On until the player turns it off; a first launch has no config file for Load to default from.</summary>
     public static bool ShowCountryLabels = true;
-    public static bool ShowPlayersPanel;
+    /// <summary>On by default, for the same first-launch reason as <see cref="ShowCountryLabels"/>.</summary>
+    public static bool ShowPlayersPanel = true;
     /// <summary>Always false in a release export; the saved preference is kept for debug builds.</summary>
     public static bool ShowDebugMenu => _showDebugMenu && !GameContext.IsProductionBuild;
     private static bool _showDebugMenu;
