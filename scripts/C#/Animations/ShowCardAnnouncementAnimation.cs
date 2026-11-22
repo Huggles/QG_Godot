@@ -5,13 +5,16 @@ public class ShowCardAnnouncementAnimation : ChangeEventAnimation
 {
     private readonly int _cardId;
     private readonly string _title;
+    private readonly bool _intoHistory;
 
-    public ShowCardAnnouncementAnimation(int cardId, string title)
+    /// <param name="intoHistory">Zoom on into the history strip instead of resting in the trigger slot.</param>
+    public ShowCardAnnouncementAnimation(int cardId, string title, bool intoHistory = false)
     {
         _cardId = cardId;
         _title = title;
+        _intoHistory = intoHistory;
     }
 
     protected override Task AnimateForTargetFaction()
-        => TriggerContextDisplay.Current?.AnnounceCard(_cardId, _title) ?? Task.CompletedTask;
+        => TriggerContextDisplay.Current?.AnnounceCard(_cardId, _title, _intoHistory) ?? Task.CompletedTask;
 }

@@ -262,10 +262,12 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// <summary>
 	/// A played, activated or used card slides out from behind the history strip, holds a moment, then shrinks into the
 	/// slot and rests there until a prompt about another card or a step change clears it. Completes once it has landed.
+	/// <paramref name="intoHistory"/>: zoom into the history strip instead and leave the slot alone.
 	/// </summary>
-	public Task AnnounceCard(int cardId, string title)
+	public Task AnnounceCard(int cardId, string title, bool intoHistory = false)
 	{
 		if (Panel == null) return Task.CompletedTask;
+		if (intoHistory) return ZoomIntoHistory(cardId);
 
 		_announcedCardId = cardId;
 		_announcedTitle = title;
@@ -278,6 +280,22 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 
 		// The slot is laid out now but kept transparent, so its rect has settled by the time the card lands.
 		Column.Modulate = Colors.Transparent;
+		return PopIn(cardId, ShrinkIntoSlot);
+	}
+
+	/// <summary>A card that goes straight on into history: it pops in, holds, then folds into the newest badge.</summary>
+	private Task ZoomIntoHistory(int cardId)
+	{
+		// The card before it leaves the slot as it would for any newly announced card.
+		ClearAnnouncement();
+		if (GameSettings.ShowHideSeconds <= 0) return Task.CompletedTask;
+		return PopIn(cardId, FoldIntoBadge);
+	}
+
+	/// <summary>Slide the flight copy out from behind the history strip, hold it, then hand it to <paramref name="then"/>.</summary>
+	private Task PopIn(int cardId, System.Action then)
+	{
+		double slide = GameSettings.ShowHideSeconds;
 		FlightCard.ShowCard(cardId);
 		float screenRight = GetViewportRect().Size.X;
 		Flight.Scale = Vector2.One;
@@ -289,7 +307,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_flight.TweenProperty(Flight, "global_position:x", screenRight - PopInRightMargin - Flight.Size.X, slide)
 			.SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
 		_flight.TweenInterval(GameSettings.DurationMediumSeconds);
-		_flight.TweenCallback(Callable.From(ShrinkIntoSlot));
+		_flight.TweenCallback(Callable.From(then));
 		return _flightDone.Task;
 	}
 
@@ -393,6 +411,29 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_flight.Chain().TweenCallback(Callable.From(EndFlight));
 	}
 
+	/// <summary>
+	/// Travel over the strip into the newest badge, badge-high, and only then fade, the way a timed-out
+	/// reveal folds away in <see cref="RevealDock"/>. With no strip it just goes off the right edge.
+	/// </summary>
+	private void FoldIntoBadge()
+	{
+		Control badge = GameHistoryList.Current is { } strip && IsInstanceValid(strip) ? strip.NewestBadge : null;
+		Vector2 screen = GetViewportRect().Size;
+		Rect2 landing = badge != null && IsInstanceValid(badge)
+			? badge.GetGlobalRect()
+			: new Rect2(new Vector2(screen.X, Flight.GlobalPosition.Y + Flight.Size.Y / 2), Vector2.Zero);
+
+		float scale = Mathf.Max(landing.Size.Y, 8f) / Flight.Size.Y;
+		double seconds = GameSettings.ShowHideSeconds * 1.2;
+		// Drawn above the strip for this leg, so it is seen arriving at the badge rather than ducking under it.
+		Flight.ZIndex = 1;
+		_flight = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut);
+		_flight.TweenProperty(Flight, "global_position", landing.GetCenter() - Flight.Size * scale / 2, seconds);
+		_flight.TweenProperty(Flight, "scale", Vector2.One * scale, seconds);
+		_flight.Chain().TweenProperty(Flight, "modulate:a", 0f, GameSettings.ShowHideSeconds * 0.4);
+		_flight.Chain().TweenCallback(Callable.From(EndFlight));
+	}
+
 	private void EndAnnouncement()
 	{
 		_showingAnnouncement = false;
@@ -406,6 +447,8 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_flight?.Kill();
 		_flight = null;
 		Flight.Visible = false;
+		Flight.Modulate = Colors.White;
+		Flight.ZIndex = 0;
 		Column.Modulate = Colors.White;
 		_flightDone?.TrySetResult();
 		_flightDone = null;
