@@ -181,7 +181,8 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>Every show and hide animation: 500ms whatever the speed setting, still skipped with it.</summary>
     public static double ShowHideSeconds => GetFixedDurationSeconds(500);
 
-    public static bool ShowCountryLabels;
+    /// <summary>On until the player turns it off; a first launch has no config file for Load to default from.</summary>
+    public static bool ShowCountryLabels = true;
     public static bool ShowPlayersPanel;
     /// <summary>Always false in a release export; the saved preference is kept for debug builds.</summary>
     public static bool ShowDebugMenu => _showDebugMenu && !GameContext.IsProductionBuild;

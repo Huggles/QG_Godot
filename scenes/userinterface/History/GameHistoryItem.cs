@@ -44,12 +44,9 @@ public partial class GameHistoryItem : Control
 		// FactionDisplay.Label.
 		FactionData data = StaticGameData.FactionDataMap.GetValueOrDefault(entry.Faction);
 
+		// Always white on the scene's black outline, not FactionColorText: Japan's text colour is black,
+		// which on a black outline read as a blob.
 		Number.Text = entry.Sequence.ToString();
-		// Duplicated per item: a LabelSettings sub-resource is shared across every instance of the
-		// PackedScene, so recolouring the shared one would recolour every badge in the strip. Same
-		// reason FactionInfoRow duplicates ClearLabelSettings.tres before touching it.
-		Number.LabelSettings = (LabelSettings)Number.LabelSettings.Duplicate();
-		Number.LabelSettings.FontColor = data?.FactionColorText ?? Colors.White;
 
 		// Faction.NONE and Faction.ALL have no row in FactionData.FactionFlags, so FlagTexture (a raw
 		// indexer) would throw KeyNotFoundException. Not a corner case: ChangeRoundChangeEvent is
