@@ -11,24 +11,24 @@ shader_type canvas_item;
 
 // A flat, dark-amber veil over the whole face. Alpha 0 turns it off.
 uniform vec4 wash_color : source_color = vec4(0.22, 0.13, 0.0, 1.0);
-uniform float wash_alpha : hint_range(0.0, 1.0) = 0.045;
+uniform float wash_alpha : hint_range(0.0, 1.0) = 0.07;
 
 // The edge glow. Width is how far it reaches in from the edge, in units of the
 // card's height; it fades with a squared falloff so the edge itself is brightest.
 uniform vec4 glow_color : source_color = vec4(1.0, 0.66, 0.1, 1.0);
-uniform float glow_width : hint_range(0.0, 0.5) = 0.07;
-uniform float glow_intensity : hint_range(0.0, 1.0) = 0.42;
+uniform float glow_width : hint_range(0.0, 0.5) = 0.08;
+uniform float glow_intensity : hint_range(0.0, 1.0) = 0.62;
 
 // The breathing: one full in-and-out every pulse_seconds, never dimmer than pulse_min.
 uniform float pulse_seconds : hint_range(0.2, 10.0) = 2.6;
-uniform float pulse_min : hint_range(0.0, 1.0) = 0.45;
+uniform float pulse_min : hint_range(0.0, 1.0) = 0.6;
 
 // The hatched border. band is how deep it reaches in (card-height units),
 // spacing the distance between stripes, speed how fast they drift along.
 uniform vec4 stripe_color : source_color = vec4(1.0, 0.8, 0.25, 1.0);
 uniform float stripe_band : hint_range(0.0, 0.5) = 0.055;
 uniform float stripe_spacing : hint_range(0.005, 0.2) = 0.04;
-uniform float stripe_intensity : hint_range(0.0, 1.0) = 0.15;
+uniform float stripe_intensity : hint_range(0.0, 1.0) = 0.24;
 uniform float stripe_speed : hint_range(-1.0, 1.0) = 0.03;
 
 // Rounds the effect off at the corners, as a fraction of the node's short side.
