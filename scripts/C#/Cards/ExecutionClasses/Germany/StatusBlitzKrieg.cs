@@ -34,15 +34,13 @@ public partial class StatusBlitzkrieg : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithGuidance("Deploy an army in the country where it just battled"),
-
             new ResultStep(this, Choose.Fixed(c => {
                 var trigger = TriggerContextAs<BattleCountryChangeEvent>(c.Situation);
                 if (trigger == null) return null;
                 return new DeployUnitChangeEvent(Faction, trigger.CountryId, DeployType.BUILD);
             }))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
+            .WithGuidance("Deploy an army in the country where it just battled")
         };
     }
 }

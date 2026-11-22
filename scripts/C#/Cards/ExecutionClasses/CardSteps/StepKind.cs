@@ -12,7 +12,10 @@ public enum StepKind
     /// <summary>One ChangeEvent, <c>IsTrigger = true</c>, through the full block + after-reaction pipeline.</summary>
     Result,
 
-    /// <summary>One ChangeEvent, <c>IsTrigger = false</c>, applied directly. A cost, or the first half of one action.</summary>
+    /// <summary>
+    /// One ChangeEvent, <c>IsTrigger = false</c>, applied directly: the first half of one action. Also the kind a
+    /// step's price prompts are stamped with (PromptOrigin.EnterPrice), since a price is a cost.
+    /// </summary>
     Requirement,
 
     /// <summary>No ChangeEvent: marks the event this activation was offered to block.</summary>

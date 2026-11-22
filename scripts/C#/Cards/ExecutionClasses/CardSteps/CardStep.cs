@@ -34,8 +34,7 @@ public abstract partial class CardStep : ITaggable
     /// single action from happening on its own.
     ///
     /// It means "the body ran and its result was dispatched", NOT "the effect landed": a blocked
-    /// event still leaves this true, so the effect half of a cost+effect card still runs after a
-    /// blocked cost — which is what the fused single step did before the two were split.
+    /// event still leaves this true.
     ///
     /// **When it flips is load-bearing**, and not only for the prerequisite check. It is set only
     /// after dispatch and every window that dispatch opened have fully returned, so while step N's
@@ -75,6 +74,10 @@ public abstract partial class CardStep : ITaggable
     [JsonIgnore] internal Func<List<Condition>> GetAdvisoryConditionsMethod;
     [JsonIgnore] internal bool RequiresPreviousStep;
 
+    /// <summary>What this step charges for its effect, paid in order — see <see cref="CardStepBuilders.WithPrice{T}(T, StepPrice)"/>.</summary>
+    [JsonIgnore] internal List<StepPrice> Prices;
+    [JsonIgnore] public IReadOnlyList<StepPrice> StepPrices => (IReadOnlyList<StepPrice>)Prices ?? Array.Empty<StepPrice>();
+
     [JsonIgnore] protected Faction TriggeringFaction => CardLogic.Faction;
 
     /// <summary>
@@ -108,7 +111,8 @@ public abstract partial class CardStep : ITaggable
         // every evaluation built the list twice and threw one copy away.
         List<Condition> conditions = Conditions;
         return (conditions == null || conditions.All(condition => condition.MeetCondition(situation)))
-               && PreviousStepRequirementMet;
+               && PreviousStepRequirementMet
+               && (Prices == null || Prices.All(price => price.CanPay?.Invoke(situation) ?? true));
     }
 
     [JsonIgnore] protected List<Condition> AdvisoryConditions => GetAdvisoryConditionsMethod?.Invoke();
@@ -187,6 +191,50 @@ public abstract partial class CardStep : ITaggable
     /// </summary>
     protected abstract Task DispatchAsync(CardStepResult result);
 
+    /// <summary>When this kind pays its <see cref="Prices"/>: first, except a ResultStep, which a card cancel can reach first.</summary>
+    protected internal virtual PriceTiming PriceTiming => PriceTiming.BeforeBody;
+
+    /// <summary>
+    /// Pay every price, in order, each applied directly with no window. Prompts it raises are stamped as a
+    /// cost with no step id, so nothing reads this step's effect outcomes for them. A skip throws, abandoning the step.
+    /// </summary>
+    protected async Task PayPricesAsync()
+    {
+        if (Prices == null) return;
+        using PromptOrigin.Scope origin = PromptOrigin.EnterPrice(this);
+        foreach (StepPrice price in Prices)
+        {
+            CardStepResult result = await price.Produce(TriggeringFaction);
+            if (result.Outcome == StepOutcome.Nothing) continue;
+            if (result.Outcome != StepOutcome.Event) { ReportWrongArm(result); continue; }
+            StampProvenance(result.ChangeEvent, isTrigger: false);
+            await RequirementStep.ApplyWithoutWindow(result.ChangeEvent);
+        }
+    }
+
+    /// <summary>The events <paramref name="price"/> could be paid with, stamped as paying stamps them; null when free-form. The caller frees them.</summary>
+    public IReadOnlyList<StepOption> PriceOutcomes(StepPrice price, StepContext context)
+    {
+        IReadOnlyList<StepOption> outcomes = price.Outcomes(context);
+        if (outcomes != null)
+            foreach (StepOption outcome in outcomes)
+                if (outcome.Event != null) StampProvenance(outcome.Event, isTrigger: false);
+        return outcomes;
+    }
+
+    /// <summary>
+    /// Where SourceCardId and IsTrigger come from, for every event a step or its price emits — see
+    /// EventCardStep for the bugs a per-card stamp caused. Only FILLS an unset triggering faction: a card
+    /// acting on another faction says so through TargetFaction, and must not be rewritten here.
+    /// </summary>
+    protected void StampProvenance(ChangeEvent changeEvent, bool isTrigger)
+    {
+        changeEvent.SourceCardId = CardLogic.CardState.Id;
+        changeEvent.IsTrigger = isTrigger;
+        if (changeEvent.TriggeringFaction == Faction.NONE)
+            changeEvent.TriggeringFaction = CardLogic.Faction;
+    }
+
     /// <summary>
     /// A result arm this step kind cannot dispatch. Reported and ignored rather than thrown: the
     /// price of the uniform <see cref="CardStepResult"/> is that this is a runtime question, and
@@ -247,6 +295,7 @@ public abstract partial class CardStep : ITaggable
                 if (!string.IsNullOrEmpty(ActionGuidance))
                     await new ShowActionLabelPresentationEvent(TriggeringFaction, GuidanceSentence("may")).Apply();
                 ErrorInjection.MaybeThrow(ErrorInjection.Site.CardStep, CardLogic?.CardState?.CardName);
+                if (PriceTiming == PriceTiming.BeforeBody) await PayPricesAsync();
                 await DispatchAsync(await RunCoreAsync());
                 StepSucceeded = true;
             }

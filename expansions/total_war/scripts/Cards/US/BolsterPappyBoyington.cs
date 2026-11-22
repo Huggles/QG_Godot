@@ -15,7 +15,7 @@ public partial class BolsterPappyBoyington : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.DeckDiscardStep(this, 1, "Discard the top card of your draw deck to deploy an Air Force at the Central Pacific", s => CanDeploy(s.Board)),
-        TotalWarCards.AirDeployStep(this, Faction, "Deploy an Air Force in or next to the Central Pacific", CentralPacificArea).RequiringPreviousStep()
+        TotalWarCards.AirDeployStep(this, Faction, "Discard the top card of your draw deck to deploy an Air Force in or next to the Central Pacific", CentralPacificArea)
+            .WithPrice(TotalWarCards.DeckDiscardPrice(this, 1))
     };
 }

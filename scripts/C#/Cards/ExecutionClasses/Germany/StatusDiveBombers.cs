@@ -63,15 +63,13 @@ public partial class StatusDiveBombers : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            new ResultStep(this, Choose.BattleTargetFrom(c => battleTargets(c.Situation),
+                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
             .WithGuidance("Battle the same or an adjacent country where it battled this turn")
             .WithCondition(()=>{
                 return Condition.Build(new Condition.CustomCondition(s =>
-                    new Condition.CountryIsAttackable(battleTargetCountryIds(s), Faction).MeetCondition(s)), this); }),
-
-            new ResultStep(this, Choose.BattleTargetFrom(c => battleTargets(c.Situation),
-                (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
-            .RequiringPreviousStep()
+                    new Condition.CountryIsAttackable(battleTargetCountryIds(s), Faction).MeetCondition(s)), this); })
         };
     }
 }

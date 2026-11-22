@@ -18,11 +18,10 @@ public partial class BolsterSpecialAirServiceRaidsAirfields : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.HandDiscardStep(this, 2, "Discard 2 cards to eliminate an Axis Air Force next to your Air Force",
-            s => AxisAirForces(s.Board).Count > 0),
         new ResultStep(this, Choose.UnitFrom(c => AxisAirForces(c.Board),
                 (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
-            .RequiringPreviousStep()
-            .WithGuidance("Eliminate an Axis Air Force next to your Air Force")
+            .WithPrice(TotalWarCards.HandDiscardPrice(this, 2))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AxisAirForces(s.Board).Count > 0), this))
+            .WithGuidance("Discard 2 cards to eliminate an Axis Air Force next to your Air Force")
     };
 }

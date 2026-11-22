@@ -399,6 +399,10 @@ public static class ProjectionValuer
         StepOption? previous = null;
         foreach (CardStep step in steps)
         {
+            // Paid first, whatever the kind: the board the step's own options are listed on has paid it.
+            situation = PayPrices(step, situation, faction, depth, built);
+            if (situation == null) return null;
+
             // No ChangeEvent to project: a registered modifier, or a block of someone else's event.
             if (step.Kind == StepKind.Effect || step.Kind == StepKind.Block) { previous = null; continue; }
 
@@ -430,6 +434,27 @@ public static class ProjectionValuer
             if (best == null) return null;
             situation = best;
             previous = bestOutcome;
+        }
+        return situation;
+    }
+
+    /// <summary>
+    /// <paramref name="step"/>'s prices applied in order on a fork, each by its one outcome. Null when one is
+    /// free-form or cannot be paid, as a free-form step makes the whole projection unknown.
+    /// </summary>
+    private static GameSituation PayPrices(CardStep step, GameSituation situation, Faction faction, int depth, List<StepOption> built)
+    {
+        foreach (StepPrice price in step.StepPrices)
+        {
+            IReadOnlyList<StepOption> outcomes = step.PriceOutcomes(price, new StepContext(situation, null));
+            if (outcomes == null) return null;
+            built.AddRange(outcomes);
+            if (outcomes.Count == 0 || outcomes[0].Event == null) continue;
+
+            GameSituation tried = situation.WithBoard(situation.Board.Fork());
+            BoardState board = ApplyFunded(outcomes[0].Event, tried, situation.Board, faction, depth, built);
+            if (board == null) return null;
+            situation = tried.WithBoard(board).After(outcomes[0].Event);
         }
         return situation;
     }

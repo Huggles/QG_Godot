@@ -11,18 +11,6 @@ public partial class EWFuGoBalloonBombs : EWCardLogic
         new ResultStep(this, Choose.Fixed(_ => new ScorePointsChangeEvent(new VPEntry(1, "Fu-Go Balloon Bombs"), Faction)))
             .WithGuidance("Gain 1 Victory Point"),
 
-        // The played card already sits in the discard pile, so every card in hand is one of the "3 other cards".
-        new RequirementStep(this, async () => {
-            var choice = await new InputRequest.SelectOptionRequestHandler(Faction,
-                new List<string> { "Discard 3 cards to take Fu-Go Balloon Bombs back", "Leave it in the discard pile" },
-                new List<int> { CHOICE_RETURN, CHOICE_LEAVE },
-                "Fu-Go Balloon Bombs").BroadCast();
-            if (choice.ResponseCardIds[0] != CHOICE_RETURN) throw new StepSkippedException();
-            return new ForceDiscardHandCardsChangeEvent(Faction, Faction, 3);
-        })
-        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => s.Board.ForFaction(Faction).Hand.Count >= 3), this))
-        .WithGuidance("Discard 3 other cards to return this card to its hand"),
-
         // Deferred to the end of the step, as StatusWomenConscripts does: a card moved mid-play is re-armed, and DoCard would run it again.
         new EffectStep(this, async () => {
             ModifierRegistry.Register(new MutatorRecycleAfterStep(
@@ -36,6 +24,16 @@ public partial class EWFuGoBalloonBombs : EWCardLogic
             await Task.CompletedTask;
             return CardStepResult.Nothing;
         })
-        .RequiringPreviousStep()
+        // Optional: "Leave it" skips the step. The played card is already in the discard pile, so every
+        // card in hand is one of the "3 other cards".
+        .WithPrice(new StepPrice(async () => {
+            var choice = await new InputRequest.SelectOptionRequestHandler(Faction,
+                new List<string> { "Discard 3 cards to take Fu-Go Balloon Bombs back", "Leave it in the discard pile" },
+                new List<int> { CHOICE_RETURN, CHOICE_LEAVE },
+                "Fu-Go Balloon Bombs").BroadCast();
+            if (choice.ResponseCardIds[0] != CHOICE_RETURN) throw new StepSkippedException();
+            return new ForceDiscardHandCardsChangeEvent(Faction, Faction, 3);
+        }, s => s.Board.ForFaction(Faction).Hand.Count >= 3))
+        .WithGuidance("Discard 3 other cards to return this card to its hand")
     };
 }

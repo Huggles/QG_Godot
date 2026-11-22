@@ -10,9 +10,6 @@ public partial class BolsterFortressRebuilt : BolsterCardLogic
         s => CanPlace(s.Board) && TotalWarCards.InHand(s.Board, Faction, CardType.BUILD_ARMY).Count > 0);
 
     public override List<CardStep> OnActivate() =>
-        new List<CardStep> { TotalWarCards.TypedDiscardStep(this, CardType.BUILD_ARMY, "Discard a Build Army card to place a Response card from your discard pile",
-                s => CanPlace(s.Board)) }
-            .Concat(TotalWarCards.ResponseFromDiscardSteps(this, Faction, "Place a Response card from your discard pile face down on the table")
-                .Select(step => step.RequiringPreviousStep()))
-            .ToList();
+        TotalWarCards.ResponseFromDiscardSteps(this, Faction, "Discard a Build Army card to place a Response card from your discard pile",
+            s => CanPlace(s.Board), TotalWarCards.TypedDiscardPrice(this, CardType.BUILD_ARMY, "Discard a Build Army card"));
 }

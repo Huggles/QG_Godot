@@ -16,8 +16,7 @@ public partial class BolsterFallschirmjager : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.DeckDiscardStep(this, 1, "Discard the top card of your draw deck to battle a land space next to your Air Force",
-            s => BattleTargets(s).Count > 0),
-        TotalWarCards.BattleStep(this, BattleTargets, "Battle a land space next to your Air Force").RequiringPreviousStep()
+        TotalWarCards.BattleStep(this, BattleTargets, "Discard the top card of your draw deck to battle a land space next to your Air Force")
+            .WithPrice(TotalWarCards.DeckDiscardPrice(this, 1))
     };
 }

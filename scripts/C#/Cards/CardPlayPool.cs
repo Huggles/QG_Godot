@@ -60,17 +60,21 @@ public static class CardPlayPool
     /// <summary>
     /// Process a change event through the full pipeline.
     /// When no round is active (e.g. draw/discard steps with IsTrigger=false), applies the event directly.
+    /// <paramref name="payPrice"/> is the producing step's price — see CardPlayRound.DoChangeEvent.
     /// </summary>
-    public static async Task DoChangeEvent(ChangeEvent changeEvent)
+    public static async Task DoChangeEvent(ChangeEvent changeEvent, Func<Task> payPrice = null)
     {
         // Before the block window and the shortfall recall, whose own events would otherwise take lower ids.
         changeEvent.EnsureId();
 
         if (CardPlayRound.Current != null)
         {
-            await CardPlayRound.Current.DoChangeEvent(changeEvent);
+            await CardPlayRound.Current.DoChangeEvent(changeEvent, payPrice);
             return;
         }
+
+        // No window outside a round, so nothing can cancel the card first.
+        if (payPrice != null) await payPrice();
 
         // No active round — apply directly without reaction chain. The pool guard still belongs here:
         // a mutator deploying at a turn-step boundary can land outside a round, and the player is just

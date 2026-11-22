@@ -2,17 +2,13 @@ using System;
 using System.Threading.Tasks;
 
 /// <summary>
-/// A cost, or the first half of one indivisible action: discard to play this, spend the play action,
-/// eliminate the unit you are about to rebuild. Applied directly, so NO block window and NO
-/// after-reaction window open on it.
+/// One ChangeEvent applied directly, so NO block window and NO after-reaction window open on it: the
+/// first half of one action (eliminate the unit you are about to rebuild, take back the card you are
+/// about to play), or an effect that must open no window (shuffle, grant supply).
 ///
-/// Because nothing can be interposed between this step and the one it pays for — see the trace in
-/// the plan, and <see cref="CardStep.StepSucceeded"/> for the gate that keeps the order — a cost and
-/// its effect stay atomic with respect to reactions even though they are now two steps.
-///
-/// Pair it with <c>.RequiringPreviousStep()</c> on the step it pays for, and leave the card's gating
-/// condition on THIS step: a condition on the later half would be evaluated after this event applied
-/// and after CalculateAll ran, which is how you get "cost paid, effect skipped".
+/// **Never a price.** A price goes on the step it pays for with <c>.WithPrice</c> (StepPrice), so a card
+/// cancelled before its effect never pays it. Pair a first half with <c>.RequiringPreviousStep()</c> on
+/// the second, and leave the card's gating condition on THIS step.
 /// </summary>
 public sealed partial class RequirementStep : EventCardStep
 {
@@ -37,7 +33,10 @@ public sealed partial class RequirementStep : EventCardStep
     /// The one thing DoChangeEvent does that Apply() does not, and that therefore has to be done
     /// here explicitly: a faction with an empty unit pool must free a unit before a deploy lands.
     /// </summary>
-    protected override async Task DispatchEventAsync(ChangeEvent changeEvent)
+    protected override Task DispatchEventAsync(ChangeEvent changeEvent) => ApplyWithoutWindow(changeEvent);
+
+    /// <summary>Apply with no window, freeing a unit first for a deploy into an empty pool. Prices go this way too.</summary>
+    internal static async Task ApplyWithoutWindow(ChangeEvent changeEvent)
     {
         if (changeEvent is DeployUnitChangeEvent deployEvent)
             await UnitPoolShortfall.ResolveBeforeDeploy(deployEvent);

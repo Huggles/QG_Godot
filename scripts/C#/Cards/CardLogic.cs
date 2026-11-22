@@ -40,14 +40,11 @@ public abstract partial class CardLogic : GodotObject, ITargetSetProvider
     /// the Motherland — which carry Condition.IsPlayCardStep purely for its timing and leave the hand
     /// card still playable (CardPlayRound.Start keeps asking until the play is actually spent).
     /// False for the ones that really are played INSTEAD of a hand card (Conscription, Bravado,
-    /// Guards, …), each of which emits SpendPlayActionChangeEvent as its first step.
+    /// Guards, …), each of which charges StepPrice.SpendPlay.
     ///
     /// Declared rather than inferred, and therefore a SECOND statement of a fact the card's steps
-    /// already make: what actually spends the play is the three-line SpendPlayActionChangeEvent
-    /// prologue at the top of a play-spending card's first step. The two must agree, and nothing
-    /// enforces it — a step body is a Func<Task>, so the only way to read the cost off the card is to
-    /// run it, which is far too late for a prompt-time cue. Set this to match the prologue: true when
-    /// there is none, false when there is. Getting it wrong is cosmetic (a card gleams that should
+    /// already make: what actually spends the play is that price. The two must agree, and nothing
+    /// enforces it. Set this to match: true when there is no SpendPlay price, false when there is. Getting it wrong is cosmetic (a card gleams that should
     /// not, or does not that should), never a rules bug — the prologue remains the mechanism.
     ///
     /// Drives the emphasis cue in the play prompt — see FactionHandDisplay.LayoutFan. A free

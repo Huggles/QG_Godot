@@ -16,7 +16,7 @@ public partial class BolsterImperialJapaneseNavy : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.RESPONSE, "Discard a Response card to build an additional Navy", s => NavyTargets(s).Count > 0),
-        TotalWarCards.DeployStep(this, DeployType.BUILD, UnitType.NAVY, null, "Build an additional Navy").RequiringPreviousStep()
+        TotalWarCards.DeployStep(this, DeployType.BUILD, UnitType.NAVY, null, "Discard a Response card to build an additional Navy")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.RESPONSE, "Discard a Response card"))
     };
 }

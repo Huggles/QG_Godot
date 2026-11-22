@@ -8,7 +8,7 @@ using System.Collections.Generic;
 /// </summary>
 public partial class StatusWarBonds : StatusCardLogic
 {
-    /// <summary>The discard-pile card picked by the second step, recycled and played by the last two.</summary>
+    /// <summary>The discard-pile card picked by the first step, recycled and played by the other two.</summary>
     private int _taken = -1;
 
     private int Cost(BoardState board) => MutatorReallocateResources.DiscardCostFor(Faction, board);
@@ -29,21 +29,17 @@ public partial class StatusWarBonds : StatusCardLogic
     /// <summary>The card is picked before the cost is paid, so the cards discarded to pay it are not among the choices.</summary>
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithGuidance("Discard cards from its hand to take a Build or Battle card from its discard pile and play it"),
-
         new RequirementStep(this, async () => {
             var pick = await new InputRequest.SelectCardRequestHandler(Faction, TakeOptions(GameSituation.Live), "Take a card from your discard pile and play it").BroadCast();
             if (pick.ResponseCardIds.Count == 0) throw new StepSkippedException();
             _taken = pick.ResponseCardIds[0];
             return CardStepResult.Nothing;
         })
-        .RequiringPreviousStep(),
-
-        new RequirementStep(this, Choose.Fixed(c => new ForceDiscardHandCardsChangeEvent(Faction, Faction, Cost(c.Board))))
-            .RequiringPreviousStep(),
+        .WithGuidance("Discard cards from its hand to take a Build or Battle card from its discard pile and play it"),
 
         new RequirementStep(this, Choose.Fixed(_ => new RecycleCardChangeEvent(Faction, Faction, _taken, RecycleDestination.Hand)))
+            .WithPrice(StepPrice.SpendPlay(this))
+            .WithPrice(new StepPrice(Choose.Fixed(c => new ForceDiscardHandCardsChangeEvent(Faction, Faction, Cost(c.Board)))))
             .RequiringPreviousStep(),
 
         new PlayCardStep(this, PlayChoice.Fixed(_ => _taken))

@@ -23,38 +23,18 @@ public partial class StatusRadar : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            // The cost.
-            //
-            // Deliberately carries NO step condition. The obvious one — "only if the trigger is a
-            // removal", which is what the fused step's `if (ActivationTrigger is not
-            // RemoveUnitChangeEvent) return;` guard said — is a trap here, and an expensive one:
-            // step conditions are evaluated by GameStateCalculator.EvaluateExecutableSteps BEFORE
-            // the card is activated, and ActivationTrigger is bound by CardPlayRound.DoCard only
-            // once it HAS been. Pre-activation it is null, so such a condition is always false, the
-            // step is never IsExecutable, HasExecutableCardSteps is false, and CanBeActivated stops
-            // offering the card entirely. Measured: Radar silently disappeared from every game.
-            //
-            // A step condition that must consult the trigger has to read CardLogic.BlockContext
-            // (or TriggerContext), which fall back to the live window. Here none is needed at all:
-            // Condition.UnitAboutToBeRemoved in CardTriggers already guarantees the event type, and
-            // the BlockStep below re-checks it anyway.
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
-                .WithGuidance("Discard top 2 deck cards"),
-
-            // The block. RequiringPreviousStep is what keeps the Navy from being saved for free when
-            // the discard does not happen — and BlockStep's own cast replaces the ActivationTrigger
-            // guard above. Note the removal is re-read from ActivationTrigger AFTER the discard has
-            // applied, which is safe precisely because it is not a pool read: the discard's Apply()
-            // registers itself into ChangeEventsPool and would have moved LastNoneNewCardChangeEvent
-            // off the removal this card exists to block.
+            // No step condition, deliberately: one reading ActivationTrigger is always false before
+            // activation, and Radar would never be offered (it vanished from every game that way).
+            // UnitAboutToBeRemoved in CardTriggers scopes it, and BlockStep re-checks the type. The
+            // removal is read from ActivationTrigger, not the pool, which the price's Apply() moves.
             new BlockStep<RemoveUnitChangeEvent>(this, async removeEvent => {
                 await new ProtectUnitsChangeEvent(Faction, new List<int> { removeEvent.UnitState.Id }).Apply();
                 await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} plays Radar: the US Navy will not be removed this turn").Apply();
                 await Task.Delay(GameSettings.DurationMedium);
                 return CardStepResult.Block();
             })
-            .RequiringPreviousStep()
-            .WithGuidance("Protect its Navy from removal")
+            .WithPrice(StepPrice.DeckDiscard(this, 2))
+            .WithGuidance("Discard top 2 deck cards to protect its Navy from removal")
         };
     }
 }

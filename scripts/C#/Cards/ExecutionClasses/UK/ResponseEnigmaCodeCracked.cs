@@ -16,10 +16,9 @@ using System.Threading.Tasks;
 /// introduction event; that window is gone, and it had in any case been unreachable since the window
 /// was narrowed to PlayCardChangeEvent — CardActivated only ever matched ActivateReactionChangeEvent.
 ///
-/// Consequence to know: every activatable Germany Status card pays its cost with an IsTrigger = false
-/// event first and emits its blockable payload second, so by the time this can fire Germany has
-/// already spent the discard. A Status card whose steps produce no blockable event at all opens no
-/// window, and this card is simply not offered against it.
+/// A Status card's price is paid after this window (StepPrice), and still paid, since this does not
+/// cancel the card. A Status card whose steps produce no blockable event opens no window, and this card
+/// is simply not offered against it.
 /// </summary>
 public partial class ResponseEnigmaCodeCracked : ResponseCardLogic
 {

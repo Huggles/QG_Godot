@@ -34,18 +34,13 @@ public partial class StatusGuards : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            // The card's gate lives on the FIRST step, which is also the one that spends the play.
-            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
-            .WithGuidance("Discard 2 cards from hand to play a Build Army card from its discard pile"),
-
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
-            .RequiringPreviousStep(),
-
             // Recycled to hand first, then PLAYED from there, so the play emits a real
             // PlayCardChangeEvent — which is what lets reaction cards (Women Conscripts) trigger on it.
             new RequirementStep(this, Choose.Fixed(c => new RecycleCardChangeEvent(Faction, Faction, DiscardedBuildArmyCardId(c.Board), RecycleDestination.Hand)))
-            .RequiringPreviousStep(),
+            .WithPrice(StepPrice.SpendPlay(this))
+            .WithPrice(StepPrice.HandDiscard(this, 2))
+            .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
+            .WithGuidance("Discard 2 cards from hand to play a Build Army card from its discard pile"),
 
             // Plays exactly the card the recycle step moved to hand, read off that step's outcome.
             new PlayCardStep(this, PlayChoice.Fixed(c => ((RecycleCardChangeEvent)c.Previous.Value.Event).CardId))

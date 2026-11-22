@@ -132,27 +132,16 @@ public partial class MutatorReallocateResources : ActivatableMutator
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            // Spent up front: the play must already read as gone while the prompts below are open,
-            // and a host timeout can end the sequence with no card played at all. The taken card's own
-            // PlayCardChangeEvent increments the same counter again, which is harmless —
-            // CardsPlayedThisTurnStep is only ever tested > 0 and is cleared each round.
-            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            // No count in the label: the steps are built once, and the cost can change during the game.
-            .WithGuidance("Discard cards from its hand to take a Build or Battle card from its deck and play it"),
-
-            // Raises its own required selection and round-trips the picks to clients.
-            new RequirementStep(this, Choose.Fixed(c => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost(c.Board))))
-            .RequiringPreviousStep(),
-
             // The full pipeline, deliberately: this play triggers responses like any other.
-            // DeckState.PlayCard takes the card out of DeckCardIds, so the card goes from deck to
-            // table without ever passing through hand.
-            //
-            // DrawOptions is read here rather than captured before the discard: the discard only
-            // moves hand cards so the answer is the same, but the deck is live state and the read
-            // belongs next to its use.
+            // DeckState.PlayCard takes the card out of DeckCardIds, so it goes from deck to table.
             new PlayCardStep(this, PlayChoice.From(c => DrawOptions(c.Situation), "Take a card from your draw deck and play it"))
-            .RequiringPreviousStep()
+            // Paid before the pick, so the play reads as gone while it is open. The taken card's own
+            // PlayCardChangeEvent increments the counter again, harmlessly: it is only tested > 0.
+            .WithPrice(StepPrice.SpendPlay(this))
+            // Raises its own required selection and round-trips the picks to clients.
+            .WithPrice(new StepPrice(Choose.Fixed(c => new ForceDiscardHandCardsChangeEvent(Faction, Faction, DiscardCost(c.Board)))))
+            // No count in the label: the steps are built once, and the cost can change during the game.
+            .WithGuidance("Discard cards from its hand to take a Build or Battle card from its deck and play it")
         };
     }
 }

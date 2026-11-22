@@ -28,12 +28,11 @@ public partial class BolsterItalyCompletesCarriers : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.HandDiscardStep(this, 1, "Discard 1 card to deploy or marshal an Air Force to a space with your Navy",
-            s => Targets(s.Board).Count > 0),
         new ResultStep(this, Choose.CountryFrom(c => Targets(c.Board), (countryId, c) => AirForceOnBoard(c.Board) is var airForce && airForce >= 0
                 ? new MoveAirForceChangeEvent(Faction, airForce, countryId, AirForceMoveReason.MARSHAL, c.Board)
                 : new DeployAirForceChangeEvent(Faction, countryId)))
-            .RequiringPreviousStep()
-            .WithGuidance("Deploy or marshal an Air Force to a space with your Navy")
+            .WithPrice(TotalWarCards.HandDiscardPrice(this, 1))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => Targets(s.Board).Count > 0), this))
+            .WithGuidance("Discard 1 card to deploy or marshal an Air Force to a space with your Navy")
     };
 }

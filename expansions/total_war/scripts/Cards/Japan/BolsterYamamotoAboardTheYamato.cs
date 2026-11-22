@@ -21,10 +21,9 @@ public partial class BolsterYamamotoAboardTheYamato : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.RESPONSE, "Discard a Response card to deploy an Air Force with your supplied Navy",
-            s => DeployTargets(s.Board).Count > 0),
         new ResultStep(this, Choose.CountryFrom(c => DeployTargets(c.Board), (countryId, _) => new DeployAirForceChangeEvent(Faction, countryId)))
-            .RequiringPreviousStep()
-            .WithGuidance("Deploy an Air Force with your supplied Navy")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.RESPONSE, "Discard a Response card"))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => DeployTargets(s.Board).Count > 0), this))
+            .WithGuidance("Discard a Response card to deploy an Air Force with your supplied Navy")
     };
 }

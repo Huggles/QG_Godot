@@ -29,8 +29,7 @@ public partial class BolsterTorai : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.RESPONSE, "Discard a Response card to battle the space the enemy Air Force was removed from",
-            s => BattleTargets(s).Count > 0),
-        TotalWarCards.BattleStep(this, BattleTargets, "Battle the space the enemy Air Force was removed from").RequiringPreviousStep()
+        TotalWarCards.BattleStep(this, BattleTargets, "Discard a Response card to battle the space the enemy Air Force was removed from")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.RESPONSE, "Discard a Response card"))
     };
 }

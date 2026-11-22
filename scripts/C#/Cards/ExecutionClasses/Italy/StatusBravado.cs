@@ -30,15 +30,11 @@ public partial class StatusBravado : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithGuidance("Discard the top 2 cards of its draw deck to battle a land space"),
-
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
-            .RequiringPreviousStep(),
-
             new ResultStep(this, Choose.BattleTargetFrom(c => LandBattleTargets(c.Board),
                 (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.SpendPlay(this))
+            .WithPrice(StepPrice.DeckDiscard(this, 2))
+            .WithGuidance("Discard the top 2 cards of its draw deck to battle a land space")
         };
     }
 }

@@ -15,7 +15,7 @@ public partial class BolsterWarsawUprising : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.HandDiscardStep(this, 2, "Discard 2 cards to recruit an Army in Eastern Europe", s => CanRecruit(s.Board)),
-        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, EasternEurope, "Recruit an Army in Eastern Europe").RequiringPreviousStep()
+        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, EasternEurope, "Discard 2 cards to recruit an Army in Eastern Europe", CanRecruit)
+            .WithPrice(TotalWarCards.HandDiscardPrice(this, 2))
     };
 }

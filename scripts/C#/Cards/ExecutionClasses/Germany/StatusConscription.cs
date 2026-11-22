@@ -26,17 +26,13 @@ public partial class StatusConscription : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(s =>
-                new Condition.CountryIsBuildable(BuildableLandCountries(s.Board), Faction).MeetCondition(s)),this))
-            .WithGuidance("Build an army"),
-
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
-            .RequiringPreviousStep(),
-
             new ResultStep(this, Choose.CountryFrom(c => BuildableLandCountries(c.Board),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.SpendPlay(this))
+            .WithPrice(StepPrice.DeckDiscard(this, 2))
+            .WithCondition(()=> Condition.Build(new Condition.CustomCondition(s =>
+                new Condition.CountryIsBuildable(BuildableLandCountries(s.Board), Faction).MeetCondition(s)),this))
+            .WithGuidance("Build an army")
         };
     }
 }

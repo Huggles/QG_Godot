@@ -23,11 +23,8 @@ public partial class StatusPeoplesLiberationArmy : StatusCardLogic, IUnitSupplyM
     /// <summary>Instead of the hand play: spend the play, then recruit the Chinese Army. The Soviet player picks the space.</summary>
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => CanRecruit(s.Board)), this))
-            .WithGuidance("Recruit a Chinese Army in Szechuan, China, or Mongolia instead of playing a card"),
-
-        TotalWarCards.DeployStepFor(this, Faction.CHINA, DeployType.RECRUIT, UnitType.ARMY, recruitSpaces, "Recruit a Chinese Army")
-            .RequiringPreviousStep()
+        TotalWarCards.DeployStepFor(this, Faction.CHINA, DeployType.RECRUIT, UnitType.ARMY, recruitSpaces,
+                "Recruit a Chinese Army in Szechuan, China, or Mongolia instead of playing a card", CanRecruit)
+            .WithPrice(StepPrice.SpendPlay(this))
     };
 }

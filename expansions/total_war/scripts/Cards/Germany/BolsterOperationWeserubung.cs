@@ -14,7 +14,8 @@ public partial class BolsterOperationWeserubung : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.DeckDiscardStep(this, 1, "Discard the top card of your draw deck to recruit an Army in Scandinavia", s => CanRecruit(s.Board)),
-        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, Scandinavia, "Recruit an Army in Scandinavia").RequiringPreviousStep()
+        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, Scandinavia,
+                "Discard the top card of your draw deck to recruit an Army in Scandinavia", CanRecruit)
+            .WithPrice(TotalWarCards.DeckDiscardPrice(this, 1))
     };
 }

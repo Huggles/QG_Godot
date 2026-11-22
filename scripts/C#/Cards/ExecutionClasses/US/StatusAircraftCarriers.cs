@@ -32,15 +32,13 @@ public partial class StatusAircraftCarriers : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            new ResultStep(this, Choose.Fixed(c => new DeployUnitChangeEvent(Faction, LastSeaBattle(c.Situation).CountryId, DeployType.BUILD)))
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
             .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => {
                 var battle = LastSeaBattle(s);
                 return battle != null && s.Board.Of(CountryState.ForId(battle.CountryId)).Tags.Has(Tag.Buildable, Faction);
             }), this))
-            .WithGuidance("Discard top 1 deck card to build a Navy in the sea space just battled"),
-
-            new ResultStep(this, Choose.Fixed(c => new DeployUnitChangeEvent(Faction, LastSeaBattle(c.Situation).CountryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
+            .WithGuidance("Discard top 1 deck card to build a Navy in the sea space just battled")
         };
     }
 }

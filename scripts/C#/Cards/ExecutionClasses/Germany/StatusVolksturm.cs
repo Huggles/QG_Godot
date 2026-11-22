@@ -31,19 +31,14 @@ public partial class StatusVolksturm : StatusCardLogic
     public override List<CardStep> OnActivate() 
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ =>
-                // No ShowModal here: ForceDiscardCardsChangeEvent.AfterAnimations already queues a
-                // ShowDiscardModalAnimation for the same cards, and Apply awaits the animation
-                // queue — so showing it again here displayed the discard modal twice.
-                new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
+            new ResultStep(this, Choose.CountryFrom(_ => recruitCountryIds,
+                (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
+            // No ShowModal: ForceDiscardCardsChangeEvent.AfterAnimations already shows the discard.
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
             .WithGuidance("Recruit an army in Germany (in addition to its play step)")
             // Hollow when Germany already holds a German unit: the recruit redeploys the piece
             // standing there and the board is unchanged (see CountryState.CanBuild).
-            .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit(recruitCountryIds[0], Faction)), this)),
-
-            new ResultStep(this, Choose.CountryFrom(_ => recruitCountryIds,
-                (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
-            .RequiringPreviousStep()
+            .WithAdvisoryCondition(() => Condition.Build(new Condition.Not(new Condition.CountryHasFactionUnit(recruitCountryIds[0], Faction)), this))
         };
     }
 }

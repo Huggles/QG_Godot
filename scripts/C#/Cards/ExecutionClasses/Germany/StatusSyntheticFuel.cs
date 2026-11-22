@@ -38,12 +38,10 @@ public partial class StatusSyntheticFuel : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 2)))
-            .WithGuidance("Deploy an army adjacent to where it deployed an army this turn"),
-
             new ResultStep(this, Choose.CountryFrom(c => DeployTargets(c.Situation).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.DeckDiscard(this, 2))
+            .WithGuidance("Deploy an army adjacent to where it deployed an army this turn")
         };
     }
 }

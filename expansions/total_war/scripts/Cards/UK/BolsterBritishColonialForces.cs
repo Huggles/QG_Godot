@@ -15,8 +15,8 @@ public partial class BolsterBritishColonialForces : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.HandDiscardStep(this, 2, "Discard 2 cards to recruit an Army in the colonies", s => CanRecruit(s.Board)),
-        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, Colonies, "Recruit an Army in North Africa, the Middle East, South East Asia, or Indonesia")
-            .RequiringPreviousStep()
+        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, Colonies,
+                "Discard 2 cards to recruit an Army in North Africa, the Middle East, South East Asia, or Indonesia", CanRecruit)
+            .WithPrice(TotalWarCards.HandDiscardPrice(this, 2))
     };
 }

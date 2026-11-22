@@ -15,8 +15,8 @@ public partial class BolsterIslandFortresses : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.RESPONSE, "Discard a Response card to recruit an Army on an island", s => CanRecruit(s.Board)),
-        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, Islands, "Recruit an Army in Indonesia, New Guinea, Iwo Jima, or the Philippines")
-            .RequiringPreviousStep()
+        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, Islands,
+                "Discard a Response card to recruit an Army in Indonesia, New Guinea, Iwo Jima, or the Philippines", CanRecruit)
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.RESPONSE, "Discard a Response card"))
     };
 }

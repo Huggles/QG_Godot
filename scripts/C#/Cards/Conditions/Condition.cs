@@ -433,6 +433,25 @@ public abstract class Condition
     }
 
     /// <summary>
+    /// Block-reaction condition for "use when [team] declares its intention to use a [type] card, before any
+    /// text is resolved": the offered event comes from a card of that type owned by that team, and is that
+    /// activation's first effect — no step of the card has resolved yet. Pair with CardStepResult.BlockCard(),
+    /// which also skips the step's price (CardPlayRound.DoChangeEvent). Derives from IsBlockRequest — see above.
+    /// </summary>
+    public class IsBlockRequestFromTeam : IsBlockRequest
+    {
+        private readonly FactionTeam _team;
+
+        public IsBlockRequestFromTeam(FactionTeam team, CardType cardType) : base(cardType) { _team = team; }
+
+        public override bool MeetCondition(GameSituation situation)
+            => base.MeetCondition(situation)
+               && situation.BlockTrigger?.SourceCardState is { } source
+               && StaticGameData.FactionTeamForFaction(source.Faction) == _team
+               && source.CardLogic?.CardSteps.All(step => !step.StepSucceeded) == true;
+    }
+
+    /// <summary>
     /// Block-reaction condition: the change event being offered for block is a RemoveUnitChangeEvent
     /// matching optional faction, unit type, supply, and country filters.
     ///
@@ -746,8 +765,7 @@ public abstract class Condition
     /// activated instead of, or ahead of, playing a card from hand.
     ///
     /// Not every card carrying this spends the play. Most do (Conscription, Bravado, Guards, … each
-    /// emit SpendPlayActionChangeEvent as their first step, which is the literal "instead of playing
-    /// a card from hand"). The four that read "at the beginning of your turn" — Volksturm, Superior
+    /// charge StepPrice.SpendPlay, which is the literal "instead of playing a card from hand"). The four that read "at the beginning of your turn" — Volksturm, Superior
     /// Planning, Mobile Force, Defense of the Motherland — carry it purely for its TIMING and leave
     /// the play intact; CardPlayRound.Start keeps re-asking until the play is actually spent. They
     /// used to live in a TurnStep.START window of their own, which announced that the faction held a

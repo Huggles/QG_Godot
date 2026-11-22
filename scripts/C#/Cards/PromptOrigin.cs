@@ -66,6 +66,17 @@ public static class PromptOrigin
     }
 
     /// <summary>
+    /// Enter the payment of a step's price (StepPrice): a cost, with no step id, so a reader of the step's
+    /// own outcomes (BotDecision) does not take them for this prompt's options.
+    /// </summary>
+    public static Scope EnterPrice(CardStep step)
+    {
+        Frame? displaced = Current;
+        Current = new Frame(step?.CardLogic?.CardState?.Id ?? -1, -1, StepKind.Requirement);
+        return new Scope(displaced);
+    }
+
+    /// <summary>
     /// Restores the frame its creator displaced. Carries the previous value rather than clearing to
     /// null — see the reentrancy note on <see cref="PromptOrigin"/>; clearing is the bug this exists to
     /// prevent.

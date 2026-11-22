@@ -27,11 +27,10 @@ public partial class BolsterAGreatSleepingGiant : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.DeckDiscardStep(this, 1, "Discard the top card of your draw deck to build an Army or Navy next to the Navy just built",
-            s => BuildTargets(s).Count > 0),
         new ResultStep(this, Choose.CountryFrom(c => BuildTargets(c.Situation).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
-            .WithGuidance("Build an Army or Navy next to the Navy just built")
+            .WithPrice(TotalWarCards.DeckDiscardPrice(this, 1))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BuildTargets(s).Count > 0), this))
+            .WithGuidance("Discard the top card of your draw deck to build an Army or Navy next to the Navy just built")
     };
 }

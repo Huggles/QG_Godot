@@ -20,6 +20,9 @@ public sealed partial class ResultStep : EventCardStep
 
     protected override bool EventIsTrigger => true;
 
+    /// <summary>The price is paid inside DoChangeEvent, after the block window, so a cancelled card never pays it.</summary>
+    protected internal override PriceTiming PriceTiming => PriceTiming.InDispatch;
+
     protected override Task DispatchEventAsync(ChangeEvent changeEvent)
-        => CardPlayPool.DoChangeEvent(changeEvent);
+        => CardPlayPool.DoChangeEvent(changeEvent, Prices == null ? null : PayPricesAsync);
 }

@@ -21,11 +21,7 @@ public partial class BolsterAdmiralGrafSpee : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BattleTargets(s).Count > 0), this))
-            .WithGuidance("Discard the top card of your draw deck to battle the North Sea, North Atlantic or South Atlantic"),
-
-        TotalWarCards.BattleStep(this, BattleTargets, "Battle the North Sea, North Atlantic or South Atlantic")
-            .RequiringPreviousStep()
+        TotalWarCards.BattleStep(this, BattleTargets, "Discard the top card of your draw deck to battle the North Sea, North Atlantic or South Atlantic")
+            .WithPrice(TotalWarCards.DeckDiscardPrice(this, 1))
     };
 }

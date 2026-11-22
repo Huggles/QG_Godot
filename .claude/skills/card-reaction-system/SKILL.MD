@@ -21,7 +21,7 @@ step's TYPE decides how:
 | Type | Body returns | `IsTrigger` | Dispatch |
 |---|---|---|---|
 | `ResultStep` | a `ChangeEvent` | `true` | `CardPlayPool.DoChangeEvent` — block + after-reaction windows |
-| `RequirementStep` | a `ChangeEvent` | `false` | `Apply()` — no window. Costs, and the first half of one action |
+| `RequirementStep` | a `ChangeEvent` | `false` | `Apply()` — no window. The first half of one action, or an effect that must open no window — **never a price** |
 | `BlockStep<TTrigger>` | `CardStepResult.Block()` / `.BlockCard()` | — | marks the event this activation was offered |
 | `EffectStep` | `CardStepResult.Nothing` | — | registers a modifier; no ChangeEvent |
 | `PlayCardStep` | `CardStepResult.PlayCard(id)` | — | a nested `CardPlayPool.DoCard` |
@@ -31,8 +31,8 @@ A `ChangeEvent` converts to a `CardStepResult` implicitly, so the common case ju
 `StepSucceeded` **true**; to abandon a step and everything gated behind it, throw
 `StepSkippedException`.
 
-**One step, one ChangeEvent.** This is the rule the types exist to enforce. A step that both charges
-a cost and delivers an effect is two steps — see *Costs* below.
+**One step, one effect.** This is the rule the types exist to enforce. A price the effect costs is
+not a step of its own: it rides on the step it pays for with `.WithPrice(...)` — see *Prices* below.
 
 Steps execute sequentially, and each `ResultStep` can trigger reactions from other players.
 
@@ -412,34 +412,40 @@ centralisation is not tidiness — eleven events used to be built without the wr
 `SourceCardId = -1`, which kept their card out of `CardPool` (so `ContinueWithNextSteps` could not
 resume it) and made `ResponseASWTactics` unofferable against them.
 
-### Costs: `RequirementStep`
+### Prices: `.WithPrice`
 
-A card that charges something and then does something is **two steps**, not one body with a prologue:
+A card that charges something and then does something is **one step with a price** (`StepPrice`):
 
 ```csharp
-public override List<CardStep> OnActivate()
-{
-    return new List<CardStep> {
-        new RequirementStep(this, () => Task.FromResult<CardStepResult>(
-            new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-        .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
-        .WithGuidance("Discard top 1 deck card to build an additional Army"),
-
-        new ResultStep(this, async() => {
-            int countryId = (await new InputRequest.SelectCountryRequestHandler(Faction, DeployableCountryIds).BroadCast()).ResponseCountryIds[0];
-            return new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD);
-        })
-        .RequiringPreviousStep()
-    };
-}
+new ResultStep(this, Choose.CountryFrom(c => DeployableCountryIds(c.Board),
+        (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
+    .WithPrice(StepPrice.DeckDiscard(this, 1))      // StepPrice.HandDiscard / SpendPlay; TotalWarCards.*Price
+    .WithCondition(() => Condition.Build(new Condition.HasBuildableLand(Faction), this))
+    .WithGuidance("Discard top 1 deck card to build an additional Army")
 ```
 
-Three rules, each of which has already bitten:
+A price is one `ChangeEvent`, stamped `IsTrigger = false` and applied directly — no window opens on
+it. Call `.WithPrice` again for a price in several parts (spend the play, then discard 2); they are
+paid in order. A price's `canPay` gates the step like a condition.
 
-- **The card's gating condition goes on the FIRST step.** A condition on the later half is evaluated
-  after the cost applied and after `CalculateAll` ran, which is how you get "cost paid, effect
-  skipped". `Not(HasPlayedCardThisTurnStep)` after a `SpendPlayActionChangeEvent` cost is the
-  sharpest case — it is false by then.
+**When it is paid** (`CardStep.PriceTiming`):
+
+- **ResultStep:** order is *choose the target → block window → pay → apply*. The price is paid in
+  `CardPlayRound.DoChangeEvent` right after the effect event's block window, **unless that window
+  cancelled the whole card** (`IsCardBlocked`, set by `CardStepResult.BlockCard()`): a cancelled card
+  resolves none of its text, its price included. An ordinary block of the event — a removal blocker,
+  air defense, a protected unit — still costs the price. A body that returns `Nothing` charges nothing.
+- **Every other kind:** before the step does anything, exactly as the separate cost step used to.
+  Nothing can cancel those steps in between.
+
+A price's prompts are stamped as a cost with no step id (`PromptOrigin.EnterPrice`), and a price part
+that throws `StepSkippedException` abandons the step. The bot projection pays a step's prices on its
+fork first (`ProjectionValuer.PayPrices`); a free-form price makes it unknown, as a free-form step does.
+
+Rules, each of which has already bitten:
+
+- **The card's gating condition goes on the step that does the work.** With the price on the same
+  step, it is evaluated before anything is paid — the old "cost paid, effect skipped" split is gone.
 - **Never read `ActivationTrigger` from a step condition.** Step conditions are evaluated by
   `GameStateCalculator.EvaluateExecutableSteps` *before* the card is activated, and
   `CardPlayRound.DoCard` binds `ActivationTrigger` only once it has been. Pre-activation it is null,
@@ -451,15 +457,13 @@ Three rules, each of which has already bitten:
   it gates.** On a card with one event-producing step, a failing condition makes
   `HasExecutableCardSteps` false and the card **unplayable** — where before it was playable and
   simply did nothing. Three EW cards lost their no-op play that way. Guard inside the step and
-  return `CardStepResult.Nothing` instead; promote only when the guard exists to stop a COST being
+  return `CardStepResult.Nothing` instead; promote only when the guard exists to stop a PRICE being
   paid (`StatusBiasForAction`).
-- **Later steps carry `.RequiringPreviousStep()`.** It keeps the effect from happening without the
-  cost — and it preserves event ORDER: while step N's after-reaction window is open, step N+1 gated
-  on it is not executable, so `ContinueWithNextSteps` cannot hoist it into that window and emit an
-  extra `ActivateReactionChangeEvent` into the replicated stream.
-
-Nothing can be interposed between the two: a `RequirementStep`'s `IsTrigger = false` event opens no
-block and no after-reaction window, and `DoCard`'s loop runs the steps back to back.
+- **The second half of an action carries `.RequiringPreviousStep()`.** `RequirementStep` is for a
+  first half (eliminate the unit you are about to rebuild, take back the card you are about to play);
+  the gate keeps the second half from happening alone — and preserves event ORDER: while step N's
+  after-reaction window is open, step N+1 gated on it is not executable, so `ContinueWithNextSteps`
+  cannot hoist it into that window and emit an extra `ActivateReactionChangeEvent`.
 
 ### Multi-Step Action Card
 
@@ -622,12 +626,13 @@ protected override List<Condition> CardTriggers() => new List<Condition> {
   `while (!changeEvent.IsBlocked)` and does not clear its `passed` set on a play, so the window takes one
   more turn after such a card resolves. Harmless — the spent card is gone from the options — but expect
   the extra prompt.
-- **The cost is already paid by then, and the card still resolves.** Every activatable Germany Status
-  card emits its discard/spend cost with `IsTrigger = false` first and its blockable payload second, so
-  Kind A cannot fire before the cost. Nor does discarding un-resolve the card: `DeckState.DiscardCard`
-  has never halted an activation in flight — `DoCard`'s step loop reads only `StepFinished` and
-  `CardLogic.IsBlocked`, and only `IsCardBlocked` bridges an event's block onto the card
-  (`ResponseASWTactics` is the sole user).
+- **It fires before the price.** A ResultStep pays its price after its block window (*Prices* above), so
+  Kind A lands before anything is paid. Discarding the card does not un-resolve it, though:
+  `DeckState.DiscardCard` has never halted an activation in flight — `DoCard`'s step loop reads only
+  `StepFinished` and `CardLogic.IsBlocked`. To cancel the card, return `CardStepResult.BlockCard()`:
+  `IsCardBlocked` stops the remaining steps and skips the price (ASW Tactics, Bletchley Park, Keep Calm
+  and Carry On). "Before any text is resolved" is `Condition.IsBlockRequestFromTeam`, which also requires
+  that no step of the source card has resolved yet.
 - **Accepted gap:** a card whose steps produce no blockable event opens no block window, and Kind A is
   simply not offered against it.
 
@@ -766,23 +771,20 @@ Skip button reads `Skip (discard 1 card)` and the hand banner says what passing 
 host-side, from the authoritative hand. `InputManager.HandleItemSelected` resets the label — one shared
 `SelectionSkipButton` also serves the country/unit/battle-target selections.
 
-### Costs and prerequisites: use a `RequirementStep`
+### Prices and first halves
 
-A card step must produce at most one ChangeEvent, so a mandatory side-effect (discard cards, pay a
-cost) is **its own step** rather than a prologue inside the body — see *Costs* under "Implementing
-Cards" above for the shape and the three rules that go with it.
+A price goes on the step it pays for (`.WithPrice`) — see *Prices* under "Implementing Cards" above.
+A `RequirementStep` is only for the first half of one action, or an effect that must open no window.
 
 > `Apply()` always registers the event into the round's `ChangeEventsPool`
 > (`ChangeEvent.ApplyMutation`). `IsTrigger = false` suppresses the block/reaction chain, *not* the
-> registration. So after a cost step, `CardPlayPool.LastNoneNewCardChangeEvent` and `LastChangeEvent`
-> point at the cost. This is exactly why step logic reads `ActivationTrigger` and never re-reads the
+> registration. So after a price is paid, `CardPlayPool.LastNoneNewCardChangeEvent` and `LastChangeEvent`
+> point at it. This is exactly why step logic reads `ActivationTrigger` and never re-reads the
 > pool: `StatusRadar` used to discard its 2 cards and then fail to block the Navy removal.
 
-`RequirementStep` dispatches through `Apply()` rather than `CardPlayPool.DoChangeEvent`. Both are
-equivalent for an `IsTrigger = false` event as far as the windows go, but `DoChangeEvent` registers
-the event and then `Apply()` registers it again, so costs routed that way sat in `ChangeEventsPool`
-twice. The one thing `DoChangeEvent` does that `Apply()` does not — freeing a unit for a faction with
-an empty pool before a deploy lands — `RequirementStep` does explicitly.
+Prices and `RequirementStep` both go through `RequirementStep.ApplyWithoutWindow` — `Apply()`, plus the
+one thing `DoChangeEvent` does that `Apply()` does not: freeing a unit for a faction with an empty pool
+before a deploy lands. Not `DoChangeEvent` itself, which would register the event in the pool twice.
 
 
 ## Key Design Principles

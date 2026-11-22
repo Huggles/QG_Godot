@@ -18,8 +18,7 @@ public partial class BolsterCarpetBombing : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.ECONOMIC_WARFARE, "Discard an Economic Warfare card to battle the same space again",
-            s => BattleTargets(s).Count > 0),
-        TotalWarCards.BattleStep(this, BattleTargets, "Battle the same space again").RequiringPreviousStep()
+        TotalWarCards.BattleStep(this, BattleTargets, "Discard an Economic Warfare card to battle the same space again")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.ECONOMIC_WARFARE, "Discard an Economic Warfare card"))
     };
 }

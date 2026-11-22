@@ -52,14 +52,12 @@ public partial class StatusFrontalAssault : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
-            .WithGuidance("Discard 2 cards from hand to battle the same or adjacent land space")
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
-                new Condition.CountryIsAttackable(SameOrAdjacentCountryIds(s), Faction).MeetCondition(s)), this)),
-
             new ResultStep(this, Choose.BattleTargetFrom(c => SameOrAdjacentTargets(c.Situation),
                 (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.HandDiscard(this, 2))
+            .WithGuidance("Discard 2 cards from hand to battle the same or adjacent land space")
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
+                new Condition.CountryIsAttackable(SameOrAdjacentCountryIds(s), Faction).MeetCondition(s)), this))
         };
     }
 }

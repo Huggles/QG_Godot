@@ -22,12 +22,10 @@ public partial class StatusArtificialHarbors : StatusCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BuildTargets(s).Count > 0), this))
-            .WithGuidance("Discard the top card of your draw deck to build an Army adjacent to the Navy just built"),
-
         new ResultStep(this, Choose.CountryFrom(c => BuildTargets(c.Situation).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BuildTargets(s).Count > 0), this))
+            .WithGuidance("Discard the top card of your draw deck to build an Army adjacent to the Navy just built")
     };
 }

@@ -20,12 +20,12 @@ public partial class BolsterVitebskGate : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.BUILD_ARMY, "Discard a Build Army card and 2 other cards to eliminate an Axis Army in Moscow or Russia",
-            s => CanPay(s.Board) && AxisArmies(s.Board).Count > 0),
-        TotalWarCards.HandDiscardStep(this, 2, "Discard 2 more cards").RequiringPreviousStep(),
         new ResultStep(this, Choose.UnitFrom(c => AxisArmies(c.Board),
                 (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
-            .RequiringPreviousStep()
-            .WithGuidance("Eliminate an Axis Army in Moscow or Russia")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.BUILD_ARMY, "Discard a Build Army card"))
+            .WithPrice(StepPrice.HandDiscard(this, 2))
+            // CanPay counts the whole price at once: the Build Army card and the 2 others.
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => CanPay(s.Board) && AxisArmies(s.Board).Count > 0), this))
+            .WithGuidance("Discard a Build Army card and 2 other cards to eliminate an Axis Army in Moscow or Russia")
     };
 }

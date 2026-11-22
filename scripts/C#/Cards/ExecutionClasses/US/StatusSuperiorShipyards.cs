@@ -23,12 +23,10 @@ public partial class StatusSuperiorShipyards : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithGuidance("Discard top 1 deck card to build an additional Navy"),
-
             new ResultStep(this, Choose.CountryFrom(c => DeployableCountryIds(c.Board),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
+            .WithGuidance("Discard top 1 deck card to build an additional Navy")
         };
     }
 }

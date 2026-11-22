@@ -27,12 +27,10 @@ public partial class StatusTheRoyalNavy : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(Faction, Faction, 2)))
-            .WithGuidance("Discard 2 cards from hand to battle a sea space"),
-
             new ResultStep(this, Choose.BattleTargetFrom(c => SeaBattleTargets(c.Board),
                 (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.HandDiscard(this, 2))
+            .WithGuidance("Discard 2 cards from hand to battle a sea space")
         };
     }
 }

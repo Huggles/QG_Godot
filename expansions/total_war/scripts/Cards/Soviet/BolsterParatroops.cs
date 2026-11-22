@@ -20,11 +20,10 @@ public partial class BolsterParatroops : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.BUILD_ARMY, "Discard a Build Army card to build an Army next to the Air Force",
-            s => BuildTargets(s).Count > 0),
         new ResultStep(this, Choose.CountryFrom(c => BuildTargets(c.Situation).ToCountryIds(),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
-            .WithGuidance("Build an Army next to the Air Force")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.BUILD_ARMY, "Discard a Build Army card"))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BuildTargets(s).Count > 0), this))
+            .WithGuidance("Discard a Build Army card to build an Army next to the Air Force")
     };
 }

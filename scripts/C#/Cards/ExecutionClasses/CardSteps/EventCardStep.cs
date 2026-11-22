@@ -101,18 +101,5 @@ public abstract partial class EventCardStep : CardStep
     /// With stamping central there is no per-card call site left to forget, so the bug class is gone
     /// structurally rather than fixed eleven times.
     /// </summary>
-    private void StampProvenance(ChangeEvent changeEvent)
-    {
-        changeEvent.SourceCardId = CardLogic.CardState.Id;
-        changeEvent.IsTrigger = EventIsTrigger;
-
-        // Every ChangeEvent constructor takes its triggering faction (ChangeEvent(Faction) ->
-        // GameMessage) and every card passes its own, so this is a backstop rather than the normal
-        // path. Deliberately only FILLS an unset value and never overwrites a set one: a card acting
-        // ON another faction says so through TargetFaction (ForceDiscardCardsChangeEvent(Faction,
-        // Faction.UNITED_KINGDOM, n) is still triggered BY the card's owner), so a disagreement here
-        // would mean something deliberate that this must not silently rewrite.
-        if (changeEvent.TriggeringFaction == Faction.NONE)
-            changeEvent.TriggeringFaction = CardLogic.Faction;
-    }
+    private void StampProvenance(ChangeEvent changeEvent) => StampProvenance(changeEvent, EventIsTrigger);
 }

@@ -15,13 +15,11 @@ public partial class StatusQuantityHasAQualityAllItsOwn : StatusCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(c => new DiscardHandCardsChangeEvent(Faction, Faction,
-                new List<int> { TotalWarCards.FirstInHand(c.Board, Faction, CardType.BUILD_ARMY) })))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => CanUse(s.Board)), this))
-            .WithGuidance("Discard a Build Army card to build an additional Army"),
-
         new ResultStep(this, Choose.CountryFrom(c => c.Board.BuildableLandIds(Faction),
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.BUILD)))
-            .RequiringPreviousStep()
+            .WithPrice(new StepPrice(Choose.Fixed(c => new DiscardHandCardsChangeEvent(Faction, Faction,
+                new List<int> { TotalWarCards.FirstInHand(c.Board, Faction, CardType.BUILD_ARMY) }))))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => CanUse(s.Board)), this))
+            .WithGuidance("Discard a Build Army card to build an additional Army")
     };
 }

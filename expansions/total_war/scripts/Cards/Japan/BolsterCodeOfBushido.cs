@@ -18,13 +18,12 @@ public partial class BolsterCodeOfBushido : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.RESPONSE, "Discard a Response card so the Army is not removed by that battle"),
         new BlockStep<RemoveUnitChangeEvent>(this, async _ => {
             await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} uses Code of Bushido: the Army is not removed by that battle").Apply();
             await Task.Delay(GameSettings.DurationMedium);
             return CardStepResult.Block();
         })
-        .RequiringPreviousStep()
-        .WithGuidance("Keep the Army from being removed by that battle")
+        .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.RESPONSE, "Discard a Response card"))
+        .WithGuidance("Discard a Response card so the Army is not removed by that battle")
     };
 }

@@ -26,15 +26,13 @@ public partial class BolsterRegiaAeronautica : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(c => new RemoveUnitChangeEvent(Faction, ItalianAirForce(c.Board), UnitRemovalReason.ELIMINATE, c.Board)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => ItalianAirForce(s.Board) >= 0), this))
-            .WithGuidance("Remove the Italian Air Force instead of discarding cards"),
         new BlockStep<ChangeEvent>(this, async _ => {
             await new ShowActionLabelPresentationEvent(Faction, $"{Faction.WithPlayer()} uses Regia Aeronautica: its Air Force is removed instead of the cards").Apply();
             await Task.Delay(GameSettings.DurationMedium);
             return CardStepResult.Block();
         })
-        .RequiringPreviousStep()
-        .WithGuidance("Discard nothing")
+        .WithPrice(new StepPrice(Choose.Fixed(c => new RemoveUnitChangeEvent(Faction, ItalianAirForce(c.Board), UnitRemovalReason.ELIMINATE, c.Board)),
+            s => ItalianAirForce(s.Board) >= 0))
+        .WithGuidance("Remove the Italian Air Force instead of discarding cards")
     };
 }

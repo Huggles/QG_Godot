@@ -69,18 +69,8 @@ public partial class StatusBiasForAction : StatusCardLogic
     public override List<CardStep> OnActivate()
     {
         return new List<CardStep> {
-            // The cost, gated on there being something to spend it on. That gate used to be an
-            // `if (battleTargets.Count == 0) return;` at the top of the fused step, resolved before
-            // the discard so the cost was not paid for a prompt with nothing in it. As a step
-            // condition it says the same thing and is visible to Tag.IsExecutable as well.
-            //
-            // It stays a condition of its OWN, rather than leaning on the card trigger: the trigger
-            // gate reads tags while this reads BattleTargets, so the two can disagree at the margin
-            // (ImmuneForTurn, supply).
-            new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BattleTargets(s).Count > 0), this))
-            .WithGuidance("Battle a land space adjacent to the Army just built"),
-
+            // Gated on BattleTargets itself, not only the card trigger: the trigger reads tags, so the
+            // two can disagree at the margin (ImmuneForTurn, supply). An empty answer charges nothing.
             new ResultStep(this, async () => {
                 var resp = await new InputRequest.SelectBattleTargetRequestHandler(Faction, BattleTargets(GameSituation.Live)).BroadCast();
                 if (resp.ResponseCountryIds.Count == 0 && resp.ResponseUnitIds.Count == 0) return CardStepResult.Nothing;
@@ -91,7 +81,9 @@ public partial class StatusBiasForAction : StatusCardLogic
                 BattleCountryChangeEvent battleCountryChange = battleTarget.ToAttackChangeEvent(Faction);
                 return battleCountryChange;
             })
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BattleTargets(s).Count > 0), this))
+            .WithGuidance("Battle a land space adjacent to the Army just built")
         };
     }
 }

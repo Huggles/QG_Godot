@@ -185,10 +185,12 @@ public static class TotalWarCards
     /// <summary>
     /// "Place a Response card from [owner]'s discard pile face down on the table": back to hand, then placed as a play
     /// that spends no play (PlayCardChangeEvent only takes a card from hand or deck). Both halves open no window.
+    /// <paramref name="price"/> is what the card charges for it, paid first.
     /// </summary>
-    public static List<CardStep> ResponseFromDiscardSteps(CardLogic card, Faction owner, string guidance, Func<GameSituation, bool> canUse = null) => new()
+    public static List<CardStep> ResponseFromDiscardSteps(CardLogic card, Faction owner, string guidance, Func<GameSituation, bool> canUse = null,
+        StepPrice price = null)
     {
-        new RequirementStep(card, async () => {
+        CardStep takeBack = new RequirementStep(card, async () => {
             List<int> options = DiscardedResponses(BoardState.Live, owner, card);
             int chosen = options.Count == 1 ? options[0]
                 : (await new InputRequest.SelectCardsRequestHandler(card.Faction, options, guidance, 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
@@ -197,9 +199,13 @@ public static class TotalWarCards
         })
         .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
             DiscardedResponses(s.Board, owner, card).Count > 0 && (canUse == null || canUse(s))), card))
-        .WithGuidance(guidance),
+        .WithGuidance(guidance);
+        if (price != null) takeBack.WithPrice(price);
+        return new() { takeBack, PlaceRecycledStep(card, guidance) };
+    }
 
-        // The card the first half took back, read from the round's pool; a free-form step, as bot previews may run a fixed one early.
+    /// <summary>The card the first half took back, read from the round's pool; a free-form step, as bot previews may run a fixed one early.</summary>
+    private static CardStep PlaceRecycledStep(CardLogic card, string guidance) =>
         new RequirementStep(card, async () => {
             await Task.CompletedTask;
             int recycled = CardPlayPool.ChangeEventsPool.OfType<RecycleCardChangeEvent>()
@@ -208,8 +214,7 @@ public static class TotalWarCards
             return new PlayCardChangeEvent(recycled) { CountsAsPlay = false };
         })
         .RequiringPreviousStep()
-        .WithGuidance(guidance)
-    };
+        .WithGuidance(guidance);
 
     // ── Bolster costs and triggers ──────────────────────────────────────────
 
@@ -222,35 +227,26 @@ public static class TotalWarCards
         board.ForFaction(card.Faction).Hand.Count(cardId => cardId != card.CardState.Id);
 
     /// <summary>
-    /// "Discard a [type] card from your hand", a cost that shows other players only the type
+    /// "Discard a [type] card from your hand", a price that shows other players only the type
     /// (DiscardHandCardsChangeEvent.RevealedType). Copies of one name are interchangeable, so the player picks
-    /// only when the cards differ (Responses, EW cards). The card's "To use" test goes here, on its first step.
+    /// only when the cards differ (Responses, EW cards). Payable while the hand holds one.
     /// </summary>
-    public static CardStep TypedDiscardStep(CardLogic card, CardType type, string guidance, Func<GameSituation, bool> canUse = null) =>
-        new RequirementStep(card, async () => {
+    public static StepPrice TypedDiscardPrice(CardLogic card, CardType type, string prompt) =>
+        new(async () => {
             List<int> options = InHand(BoardState.Live, card.Faction, type);
             int chosen = options.Select(id => CardState.ForId(id).CardData.UniqueName).Distinct().Count() <= 1
                 ? options.FirstOrDefault(-1)
-                : (await new InputRequest.SelectCardsRequestHandler(card.Faction, options, guidance, 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
+                : (await new InputRequest.SelectCardsRequestHandler(card.Faction, options, prompt, 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
             if (chosen < 0) throw new StepSkippedException();
             return new DiscardHandCardsChangeEvent(card.Faction, card.Faction, new List<int> { chosen }) { RevealedType = type };
-        })
-        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
-            InHand(s.Board, card.Faction, type).Count > 0 && (canUse == null || canUse(s))), card))
-        .WithGuidance(guidance);
+        }, s => InHand(s.Board, card.Faction, type).Count > 0);
 
     /// <summary>"Discard [count] cards from your hand", the player's choice; counted without the Bolster paying it.</summary>
-    public static CardStep HandDiscardStep(CardLogic card, int count, string guidance, Func<GameSituation, bool> canUse = null) =>
-        new RequirementStep(card, Choose.Fixed(_ => new ForceDiscardHandCardsChangeEvent(card.Faction, card.Faction, count)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s =>
-                OtherHandCards(s.Board, card) >= count && (canUse == null || canUse(s))), card))
-            .WithGuidance(guidance);
+    public static StepPrice HandDiscardPrice(CardLogic card, int count) =>
+        StepPrice.HandDiscard(card, count, s => OtherHandCards(s.Board, card) >= count);
 
-    /// <summary>"Discard the top [count] cards of your draw deck" as a cost, with the card's "To use" test.</summary>
-    public static CardStep DeckDiscardStep(CardLogic card, int count, string guidance, Func<GameSituation, bool> canUse = null) =>
-        new RequirementStep(card, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(card.Faction, card.Faction, count)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => canUse == null || canUse(s)), card))
-            .WithGuidance(guidance);
+    /// <summary>"Discard the top [count] cards of your draw deck."</summary>
+    public static StepPrice DeckDiscardPrice(CardLogic card, int count) => StepPrice.DeckDiscard(card, count);
 
     /// <summary>
     /// Where <paramref name="faction"/>'s Air Force went in <paramref name="trigger"/>, a deploy or a marshal (not a

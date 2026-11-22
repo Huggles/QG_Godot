@@ -23,11 +23,9 @@ public partial class StatusAmericanVolunteerGroupExpands_TotalWar : StatusCardLo
     /// <summary>Instead of the hand play: spend the play, then recruit the Chinese Army. No cost beyond the play.</summary>
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(szechuan, Faction.CHINA), this))
-            .WithGuidance("Recruit a Chinese Army in Szechuan instead of playing a card"),
-
         new ResultStep(this, Choose.CountryFrom(_ => szechuan, (countryId, _) => new DeployUnitChangeEvent(Faction.CHINA, countryId, DeployType.RECRUIT)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.SpendPlay(this))
+            .WithCondition(() => Condition.Build(new Condition.CountryIsRecruitable(szechuan, Faction.CHINA), this))
+            .WithGuidance("Recruit a Chinese Army in Szechuan instead of playing a card")
     };
 }

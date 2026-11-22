@@ -26,11 +26,8 @@ public partial class StatusSenegaleseTirailleurs : StatusCardLogic, IUnitSupplyM
     /// <summary>Instead of the hand play: spend the play, then recruit the French Army.</summary>
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(_ => new SpendPlayActionChangeEvent(Faction)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => CanRecruit(s.Board)), this))
-            .WithGuidance("Recruit a French Army in Africa instead of playing a card"),
-
-        TotalWarCards.DeployStepFor(this, Faction.FRANCE, DeployType.RECRUIT, UnitType.ARMY, africa, "Recruit a French Army in Africa")
-            .RequiringPreviousStep()
+        TotalWarCards.DeployStepFor(this, Faction.FRANCE, DeployType.RECRUIT, UnitType.ARMY, africa,
+                "Recruit a French Army in Africa instead of playing a card", CanRecruit)
+            .WithPrice(StepPrice.SpendPlay(this))
     };
 }

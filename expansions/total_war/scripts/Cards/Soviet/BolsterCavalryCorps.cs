@@ -17,12 +17,12 @@ public partial class BolsterCavalryCorps : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.BUILD_ARMY, "Discard a Build Army card and eliminate a Soviet Army, then build an Army",
-            s => SovietArmies(s.Board).Count > 0),
+        // The elimination is the first half of the build, not a price: the build needs the freed Army.
         new RequirementStep(this, Choose.UnitFrom(c => SovietArmies(c.Board),
                 (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board), allowSkip: false))
-            .RequiringPreviousStep()
-            .WithGuidance("Eliminate one of your Armies"),
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.BUILD_ARMY, "Discard a Build Army card"))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => SovietArmies(s.Board).Count > 0), this))
+            .WithGuidance("Discard a Build Army card and eliminate a Soviet Army, then build an Army"),
         TotalWarCards.DeployStep(this, DeployType.BUILD, UnitType.ARMY, null, "Build an Army").RequiringPreviousStep()
     };
 }

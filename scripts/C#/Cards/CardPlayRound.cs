@@ -328,9 +328,13 @@ public partial class CardPlayRound : GodotObject
 
     /// <summary>
     /// Process a standard (non-introduction) change event through the full pipeline:
-    /// add to pool → request blocks → apply if not blocked → request after reactions → continue multi-step cards.
+    /// add to pool → request blocks → pay the step's price → apply if not blocked → request after reactions → continue multi-step cards.
     /// </summary>
-    public async Task DoChangeEvent(ChangeEvent changeEvent)
+    /// <param name="payPrice">
+    /// The producing step's price (StepPrice), paid after the block window. Skipped only when that window
+    /// cancelled the whole card; an ordinary block of the event still costs the price.
+    /// </param>
+    public async Task DoChangeEvent(ChangeEvent changeEvent, Func<Task> payPrice = null)
     {
         ThrowIfAborted();
 
@@ -346,6 +350,7 @@ public partial class CardPlayRound : GodotObject
             && BoardState.Live.ImmuneForTurn(removal.UnitState))
         {
             changeEvent.IsBlocked = true;
+            await PayPriceUnlessCancelled(changeEvent, payPrice);
             await new ShowActionLabelPresentationEvent(removal.UnitState.Faction,
                 $"{removal.UnitState.Faction.WithPlayer()}'s {removal.UnitState.Type.ToString().ToLower()} is protected this turn and is not removed").Apply();
             return;
@@ -357,6 +362,9 @@ public partial class CardPlayRound : GodotObject
         // opponent team in every case, so there is nothing for the caller to decide.
         if (changeEvent.IsTrigger)
             await RequestBlockReactions(changeEvent);
+
+        // Before air defense: an Air Force taking the hit is an ordinary block, which still costs the price.
+        await PayPriceUnlessCancelled(changeEvent, payPrice);
 
         // After the card block window, so a card that saves the unit outright is offered first; an Air
         // Force taking the hit blocks the battle the same way. See AirForces.
@@ -388,7 +396,17 @@ public partial class CardPlayRound : GodotObject
         DebugUtilities.PrintPeer($"Finished processing change event {changeEvent.ScriptName} from {FactionState.ForEnum(changeEvent.TriggeringFaction).FactionLabel}");
     }
 
-    // ── Reaction chain helpers ─────────────────────────────────────────────────   
+    /// <summary>
+    /// Pay the step's price unless the block window cancelled its whole card (Bletchley Park, Keep Calm and
+    /// Carry On, ASW Tactics): that card's text is never resolved, its price included.
+    /// </summary>
+    private static async Task PayPriceUnlessCancelled(ChangeEvent changeEvent, Func<Task> payPrice)
+    {
+        if (payPrice == null || changeEvent.IsCardBlocked) return;
+        await payPrice();
+    }
+
+    // ── Reaction chain helpers ─────────────────────────────────────────────────
 
     public void RegisterChangeEvent(ChangeEvent changeEvent)
     {

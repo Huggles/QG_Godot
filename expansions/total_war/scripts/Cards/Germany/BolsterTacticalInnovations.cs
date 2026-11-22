@@ -20,21 +20,18 @@ public partial class BolsterTacticalInnovations : BolsterCardLogic
     public override List<CardStep> OnActivate() => new()
     {
         new RequirementStep(this, async () => {
-            int chosen = (await new InputRequest.SelectCardsRequestHandler(Faction, OnTable(BoardState.Live),
-                "Discard one of your Status cards from the table", 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
-            if (chosen < 0) throw new StepSkippedException();
-            return new DiscardHandCardsChangeEvent(Faction, Faction, new List<int> { chosen });
-        })
-        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => OnTable(s.Board).Count > 0 && InHand(s.Board).Count > 0), this))
-        .WithGuidance("Discard one of your Status cards from the table"),
-
-        new RequirementStep(this, async () => {
             int chosen = (await new InputRequest.SelectCardsRequestHandler(Faction, InHand(BoardState.Live),
                 "Place a Status card from your hand on the table", 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
             if (chosen < 0) throw new StepSkippedException();
             return new PlayCardChangeEvent(chosen) { CountsAsPlay = false };
         })
-        .RequiringPreviousStep()
-        .WithGuidance("Place a Status card from your hand on the table")
+        .WithPrice(new StepPrice(async () => {
+            int chosen = (await new InputRequest.SelectCardsRequestHandler(Faction, OnTable(BoardState.Live),
+                "Discard one of your Status cards from the table", 1, 1).BroadCast()).ResponseCardIds.FirstOrDefault(-1);
+            if (chosen < 0) throw new StepSkippedException();
+            return new DiscardHandCardsChangeEvent(Faction, Faction, new List<int> { chosen });
+        }, s => OnTable(s.Board).Count > 0))
+        .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => InHand(s.Board).Count > 0), this))
+        .WithGuidance("Discard one of your Status cards from the table to place a Status card from your hand")
     };
 }

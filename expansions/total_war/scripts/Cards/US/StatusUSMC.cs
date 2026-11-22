@@ -26,11 +26,9 @@ public partial class StatusUSMC : StatusCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        new RequirementStep(this, Choose.Fixed(_ => new ForceDiscardCardsChangeEvent(Faction, Faction, 1)))
-            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BattleTargets(s).Count > 0), this))
-            .WithGuidance("Discard the top card of your draw deck to battle a land space adjacent to the Navy just built"),
-
         new ResultStep(this, Choose.BattleTargetFrom(c => BattleTargets(c.Situation), (target, c) => target.ToAttackChangeEvent(Faction, c.Board)))
-            .RequiringPreviousStep()
+            .WithPrice(StepPrice.DeckDiscard(this, 1))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => BattleTargets(s).Count > 0), this))
+            .WithGuidance("Discard the top card of your draw deck to battle a land space adjacent to the Navy just built")
     };
 }

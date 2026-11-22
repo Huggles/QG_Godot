@@ -60,6 +60,17 @@ public static class CardStepBuilders
     }
 
     /// <summary>
+    /// A price this step charges for its effect; call again for a price in several parts, paid in order.
+    /// Its CanPay gates the step. A ResultStep pays after its target is chosen and its event's block window
+    /// has run, and not at all if that window cancelled the card; every other kind pays before it does anything.
+    /// </summary>
+    public static T WithPrice<T>(this T step, StepPrice price) where T : CardStep
+    {
+        (step.Prices ??= new List<StepPrice>()).Add(price);
+        return step;
+    }
+
+    /// <summary>
     /// This step is one half of a single action and must not happen on its own: if the step before it
     /// in the card was skipped — its conditions not met, or the player cancelling its selection — this
     /// step is skipped too, quietly, which for a two-step card ends the card.

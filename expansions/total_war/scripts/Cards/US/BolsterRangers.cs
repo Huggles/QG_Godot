@@ -27,11 +27,10 @@ public partial class BolsterRangers : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.DeckDiscardStep(this, 1, "Discard the top card of your draw deck to eliminate an Army next to the Air Force",
-            s => EnemyArmies(s).Count > 0),
         new ResultStep(this, Choose.UnitFrom(c => EnemyArmies(c.Situation),
                 (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
-            .RequiringPreviousStep()
-            .WithGuidance("Eliminate an Army next to the Air Force")
+            .WithPrice(TotalWarCards.DeckDiscardPrice(this, 1))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => EnemyArmies(s).Count > 0), this))
+            .WithGuidance("Discard the top card of your draw deck to eliminate an Army next to the Air Force")
     };
 }

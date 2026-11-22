@@ -22,8 +22,7 @@ public partial class BolsterNagumoCommandsTheFirstAirFleet : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.RESPONSE, "Discard a Response card to battle a space next to the Air Force",
-            s => BattleTargets(s).Count > 0),
-        TotalWarCards.BattleStep(this, BattleTargets, "Battle a space next to the Air Force").RequiringPreviousStep()
+        TotalWarCards.BattleStep(this, BattleTargets, "Discard a Response card to battle a space next to the Air Force")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.RESPONSE, "Discard a Response card"))
     };
 }

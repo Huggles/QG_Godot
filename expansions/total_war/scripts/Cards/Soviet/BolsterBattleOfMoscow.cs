@@ -32,11 +32,10 @@ public partial class BolsterBattleOfMoscow : BolsterCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.TypedDiscardStep(this, CardType.BUILD_ARMY, "Discard a Build Army card to eliminate an Axis Army in or next to Moscow",
-            s => AxisArmies(s).Count > 0),
         new ResultStep(this, Choose.UnitFrom(c => AxisArmies(c.Situation),
                 (unitId, c) => new RemoveUnitChangeEvent(Faction, unitId, UnitRemovalReason.ELIMINATE, c.Board)))
-            .RequiringPreviousStep()
-            .WithGuidance("Eliminate an Axis Army in or next to Moscow")
+            .WithPrice(TotalWarCards.TypedDiscardPrice(this, CardType.BUILD_ARMY, "Discard a Build Army card"))
+            .WithCondition(() => Condition.Build(new Condition.CustomCondition(s => AxisArmies(s).Count > 0), this))
+            .WithGuidance("Discard a Build Army card to eliminate an Axis Army in or next to Moscow")
     };
 }
