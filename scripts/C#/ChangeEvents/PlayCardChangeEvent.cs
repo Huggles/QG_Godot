@@ -39,8 +39,7 @@ public partial class PlayCardChangeEvent : ChangeEvent
             SourceCardId,
             SourceCardState.IsFaceVisibleToLocalPlayer
                 ? $"{TriggeringFaction.WithPlayer()} plays {SourceCardState.CardName}"
-                : $"{TriggeringFaction.WithPlayer()} plays a Response card",
-            toTable: SourceCardState.CardData.CardType is CardType.STATUS or CardType.RESPONSE)
+                : $"{TriggeringFaction.WithPlayer()} plays a Response card")
     };
 
     public override void Mutate(BoardState board)

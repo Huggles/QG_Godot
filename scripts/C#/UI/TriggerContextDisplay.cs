@@ -42,7 +42,6 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	// The announced card outlives a prompt that borrows the slot; _showingAnnouncement is whether it is on screen now.
 	private int _announcedCardId = -1;
 	private string _announcedTitle;
-	private bool _announcedToTable;
 	private bool _showingAnnouncement;
 	private Tween _flight;
 	private TaskCompletionSource _flightDone;
@@ -264,14 +263,12 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// A played, activated or used card slides out from behind the history strip, holds a moment, then shrinks into the
 	/// slot and rests there until a prompt about another card or a step change clears it. Completes once it has landed.
 	/// </summary>
-	public Task AnnounceCard(int cardId, string title, bool toTable = false)
+	public Task AnnounceCard(int cardId, string title)
 	{
 		if (Panel == null) return Task.CompletedTask;
 
-		SendShownCardToTable();
 		_announcedCardId = cardId;
 		_announcedTitle = title;
-		_announcedToTable = toTable;
 		ShowAnnouncement();
 
 		double slide = GameSettings.ShowHideSeconds;
@@ -309,38 +306,9 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	public void ClearAnnouncement()
 	{
 		if (_announcedCardId < 0) return;
-		if (_showingAnnouncement && !SendShownCardToTable()) SlideShownCardOff();
+		if (_showingAnnouncement) SlideShownCardOff();
 		_announcedCardId = -1;
 		if (_showingAnnouncement) Hide();
-	}
-
-	/// <summary>
-	/// A card announced as going onto the table leaves the slot by shrinking into its faction's Active Cards
-	/// button. Fire-and-forget: the slot is free for whatever replaces it at once. False when it did not go.
-	/// </summary>
-	private bool SendShownCardToTable()
-	{
-		if (!_showingAnnouncement || !_announcedToTable || _announcedCardId < 0) return false;
-		// Still checked against the table: a play that was blocked has gone to the discard pile instead.
-		int cardId = _announcedCardId;
-		CardState card = CardState.ForId(cardId);
-		DeckState deck = card == null ? null : DeckState.ForFaction(card.Faction);
-		if (deck == null || !(deck.StatusCardIds.Contains(cardId) || deck.ResponseCardIds.Contains(cardId))) return false;
-		if (FactionsContainer.Current?.FactionInfoNodes.GetValueOrDefault(card.Faction) is not { } row
-			|| !row.IsVisibleInTree()) return false;
-		double seconds = GameSettings.ShowHideSeconds;
-		if (seconds <= 0) return false;
-
-		Rect2 slot = CardSceneNode.GetGlobalRect();
-		CardScene copy = DepartingCopy(cardId, slot);
-		Rect2 button = row.ActiveCardsButtonRect;
-		float scale = button.Size.Y / slot.Size.Y;
-		Tween tween = copy.CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.In);
-		tween.TweenProperty(copy, "global_position", button.GetCenter() - slot.Size * scale / 2, seconds);
-		tween.TweenProperty(copy, "scale", Vector2.One * scale, seconds);
-		tween.TweenProperty(copy, "modulate:a", 0f, seconds * 0.4).SetDelay(seconds * 0.6);
-		tween.Chain().TweenCallback(Callable.From(copy.QueueFree));
-		return true;
 	}
 
 	/// <summary>The way back out for a card leaving an empty slot: off to the right, behind the history strip.</summary>
