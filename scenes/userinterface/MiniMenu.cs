@@ -8,7 +8,8 @@ public partial class MiniMenu : Control
 
 
 	public Control MiniMenuContainer => GetNode<Control>("%MiniMenuHBox");
-	public MarginTextureButton VisibilityButton => GetNode<MarginTextureButton>("%VisibilityButton");
+	public MarginTextureButton GameMenuButton => GetNode<MarginTextureButton>("%GameMenuButton");
+	public MarginTextureButton VisibilityButton =>GetNode<MarginTextureButton>("%VisibilityButton");
 	public MarginTextureButton ActiveInputRequestButton => GetNode<MarginTextureButton>("%ActiveInputRequestButton");
 	public MarginTextureButton DeckCompositionButton => GetNode<MarginTextureButton>("%DeckCompositionButton");
 	public MarginTextureButton ScoreHistoryButton => GetNode<MarginTextureButton>("%ScoreHistoryButton");
@@ -44,6 +45,9 @@ public partial class MiniMenu : Control
 	public override void _Ready()
 	{
 		MiniMenuModal.Visible = false;
+		GameMenuButton.TextureButton.TooltipText = "Menu (Esc)";
+		// Unlike Escape, a click opens the menu even over a prompt: it is an explicit ask, and Resume hands the prompt back.
+		GameMenuButton.TextureButton.Pressed += () => GameMenuModal.Open(GetTree().CurrentScene);
 		VisibilityButton.TextureButton.Pressed += OnVisibilityButtonPressed;
 		ActiveInputRequestButton.TextureButton.Pressed += OnActiveInputRequestButtonPressed;
 
