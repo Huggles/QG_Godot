@@ -34,6 +34,8 @@
     { "CardName": "EventFranceCombattante", "Number": 1 },
     { "CardName": "StatusPolishSovereignty", "Number": 1 },
     { "CardName": "BolsterMaginotLine", "Number": 1 },
+    { "CardName": "BolsterBletchleyPark", "Number": 1 },
+    { "CardName": "BolsterKeepCalmandCarryOn", "Number": 1 },
     { "CardName": "EventLesForcesNavalesFrancaisesLibres", "Number": 1 },
     { "CardName": "StatusHobartsFunnies", "Number": 1 },
     { "CardName": "EventFreeForcesoftheLowCountries", "Number": 1 },

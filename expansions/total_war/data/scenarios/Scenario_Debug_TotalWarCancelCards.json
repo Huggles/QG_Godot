@@ -1,0 +1,39 @@
+{
+  "title": "Debug: card cancels and prices",
+  "description": "Total War test setup for Bletchley Park and Keep Calm and Carry On: Germany moves first, holding Scandinavia, the Baltic Sea and Germany.\nIts hand holds Admiral Graf Spee, a Build Navy and a Land Battle, with Blitzkrieg on the table. The United Kingdom holds Bletchley Park and Keep Calm and Carry On.\nCancelling Graf Spee or Blitzkrieg must leave Germany's draw deck untouched: a cancelled card pays no price.",
+  "debug": true,
+  "expansions": [ "total_war" ],
+  "startingFaction": "GERMANY",
+  "startingRound": 1,
+  "maxRounds": 20,
+  "openingDiscard": false,
+  "factions": {
+    "GERMANY": {
+      "unitDeployments": [ { "countryName": "GERMANY" }, { "countryName": "SCANDINAVIA" }, { "countryName": "BALTIC_SEA" } ],
+      "initialCards": [ { "name": "StatusBlitzkrieg" } ],
+      "initialHandCards": [ { "name": "BolsterAdmiralGrafSpee" }, { "name": "BuildNavy" }, { "name": "LandBattle" }, { "name": "BuildArmy" } ],
+      "startingVP": 0
+    },
+    "UNITED_KINGDOM": {
+      "unitDeployments": [ { "countryName": "UNITED_KINGDOM" } ],
+      "initialHandCards": [ { "name": "BolsterBletchleyPark" }, { "name": "BolsterKeepCalmandCarryOn" }, { "name": "BuildArmy" } ],
+      "startingVP": 0
+    },
+    "JAPAN": {
+      "unitDeployments": [ { "countryName": "JAPAN" } ],
+      "startingVP": 0
+    },
+    "SOVIET": {
+      "unitDeployments": [ { "countryName": "MOSCOW" } ],
+      "startingVP": 0
+    },
+    "ITALY": {
+      "unitDeployments": [ { "countryName": "ITALY" } ],
+      "startingVP": 0
+    },
+    "UNITED_STATES": {
+      "unitDeployments": [ { "countryName": "US_EAST" } ],
+      "startingVP": 0
+    }
+  }
+}
