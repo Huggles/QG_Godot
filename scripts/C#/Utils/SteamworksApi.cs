@@ -129,6 +129,9 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 	public long CurrentLobbyId { get; private set; }
 	public bool IsLobbyOwner   { get; private set; }
 
+	/// <summary>The lobby Steam launched this process to join, until <see cref="TakeLaunchLobby"/> claims it.</summary>
+	private long _launchLobbyId;
+
 	/// <summary>
 	/// The player has already decided to join: they pressed "Join game" in the Steam overlay, or accepted
 	/// an invite from outside the running game. Carries the lobby to join, and needs no further asking.
@@ -208,6 +211,7 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		LocalSteamId     = steamId;
 		LocalPersonaName = _steam.GetPersonaName();
 		AppId            = _steam.GetAppId();
+		_launchLobbyId   = ReadLaunchLobby();
 		SetProcess(true);
 
 		// Steam would drop a silent connection after about 10 s; ConnectionMonitor wants 30 s of its own
@@ -361,6 +365,36 @@ public partial class SteamworksApi : SingletonNode<SteamworksApi>
 		}
 
 		return (false, DescribeEnterResponse(response));
+	}
+
+	/// <summary>
+	/// The lobby to join on launch, or 0. Accepting an invite (or "Join game") while the game is closed
+	/// does not fire <see cref="JoinRequested"/>: Steam starts the game with the lobby on its command line.
+	/// Clears on read, so only the first menu visit acts on it.
+	/// </summary>
+	public long TakeLaunchLobby()
+	{
+		long lobbyId = _launchLobbyId;
+		_launchLobbyId = 0;
+		return lobbyId;
+	}
+
+	/// <summary>Finds Steam's <c>+connect_lobby &lt;id&gt;</c>, on the process arguments or Steam's own launch line.</summary>
+	private long ReadLaunchLobby()
+	{
+		long lobbyId = FindConnectLobby(OS.GetCmdlineArgs());
+		if (lobbyId == 0)
+			lobbyId = FindConnectLobby((_steam.GetLaunchCommandLine() ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries));
+		if (lobbyId != 0) DebugUtilities.PrintPeer($"Steam: launched to join lobby {lobbyId}");
+		return lobbyId;
+	}
+
+	private static long FindConnectLobby(string[] args)
+	{
+		for (int i = 0; i < args.Length - 1; i++)
+			if (args[i] == "+connect_lobby" && long.TryParse(args[i + 1], out long lobbyId) && lobbyId != 0)
+				return lobbyId;
+		return 0;
 	}
 
 	public void LeaveCurrentLobby()

@@ -147,6 +147,11 @@ public partial class MainMenu : Control
 		{
 			SteamworksApi.Instance.JoinRequested  += OnSteamJoinRequested;
 			SteamworksApi.Instance.InviteReceived += OnSteamInviteReceived;
+
+			// Steam launched us from an accepted invite: join it now instead of leaving the player on the menu.
+			long launchLobby = SteamworksApi.Instance.TakeLaunchLobby();
+			if (launchLobby != 0)
+				Callable.From(() => OnSteamJoinRequested(launchLobby)).CallDeferred();
 		}
 
 		ShowExpansionBanners();
