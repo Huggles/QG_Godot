@@ -50,7 +50,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// </summary>
     public bool AskOnlyWhenICanReact { get; private set; } = true;
 
-    /// <summary>Whether the faction pennants start slid open, showing their cards and pieces. Each still opens and closes on a click.</summary>
+    /// <summary>Whether the faction pennants start slid open, showing their hand, score and pieces. Each still opens and closes on a click.</summary>
     public bool FactionPennantsOpen { get; private set; } = false;
 
     /// <summary>Seconds the chat stays up after a player message or the mouse leaving; 0 never hides it.</summary>

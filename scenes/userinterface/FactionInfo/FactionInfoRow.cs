@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// One faction in the flagpole column on the left: a pennant with the flag at the hoist and the score
-/// on it, and a tail in the faction's colour tucked behind the flag. Clicking the pennant slides the
-/// tail out to show cards in hand, deck and on the table, and pieces in reserve, and the next click
-/// tucks it away. The score history lives on the top-left toolbar. The faction whose turn it is flies
-/// hardest.
+/// One faction in the flagpole column on the left: a pennant with the flag at the hoist, carrying the
+/// draw-deck, status and response counts, and a tail in the faction's colour tucked behind the flag.
+/// Clicking the pennant slides the tail out to show the hand, the score and pieces in reserve, and the
+/// next click tucks it away. The faction whose turn it is flies hardest.
 /// </summary>
 public partial class FactionInfoRow : Control
 {
@@ -19,12 +18,14 @@ public partial class FactionInfoRow : Control
 	private ColorRect Cloth => GetNode<ColorRect>("%Cloth");
 	private Label ScoreLabel => GetNode<Label>("%ScoreLabel");
 	private Button FactionInfoButton => GetNode<Button>("%FactionInfoButton");
+	private HBoxContainer HeadCounts => GetNode<HBoxContainer>("%HeadCounts");
 	private Control TailClip => GetNode<Control>("%TailClip");
 	private VBoxContainer Stats => GetNode<VBoxContainer>("%Stats");
 	private HBoxContainer Pieces => GetNode<HBoxContainer>("%Pieces");
 	private Button HandButton => GetNode<Button>("%HandButton");
 	private Button DeckButton => GetNode<Button>("%DeckButton");
-	private Button TableButton => GetNode<Button>("%TableButton");
+	private Button StatusButton => GetNode<Button>("%StatusButton");
+	private Button ResponseButton => GetNode<Button>("%ResponseButton");
 	private HBoxContainer ArmyCell => GetNode<HBoxContainer>("%ArmyCell");
 	private TextureRect ArmyIcon => GetNode<TextureRect>("%ArmyIcon");
 	private TextureRect NavyIcon => GetNode<TextureRect>("%NavyIcon");
@@ -161,7 +162,7 @@ public partial class FactionInfoRow : Control
 		Texture2D flag = data.FlagTexture;
 		float aspect = (float)flag.GetWidth() / flag.GetHeight();
 		Head = Mathf.Round(Height * aspect);
-		ScoreLabel.Size = new Vector2(Head, Height);
+		HeadCounts.Size = new Vector2(Head, Height);
 		TailClip.Position = new Vector2(Head, 0);
 		_cloth = new ShaderMaterial { Shader = ClothShader };
 		_cloth.SetShaderParameter("flag", flag);
@@ -172,12 +173,12 @@ public partial class FactionInfoRow : Control
 		_cloth.SetShaderParameter("phase", GD.Randf() * 10f);
 		Cloth.Material = _cloth;
 
-		ScoreLabel.LabelSettings = (LabelSettings)ScoreLabel.LabelSettings.Duplicate();
-
-		FactionInfoButton.TooltipText = $"{data.Label}\nClick to show or hide cards and pieces";
+		FactionInfoButton.TooltipText = $"{data.Label}\n{ToggleHint}";
 		HandButton.TooltipText = "Cards in hand";
+		GetNode<Control>("%ScoreCell").TooltipText = "Victory points";
 		DeckButton.TooltipText = "Cards left in the draw deck\nClick to see the discard pile";
-		TableButton.TooltipText = "Status and response cards on the table\nClick to see them";
+		StatusButton.TooltipText = "Status cards in play\nClick to see them";
+		ResponseButton.TooltipText = "Response cards in play\nClick to see them";
 		ArmyCell.TooltipText = "Armies in reserve";
 		GetNode<Control>("%NavyCell").TooltipText = "Navies in reserve";
 
@@ -222,7 +223,8 @@ public partial class FactionInfoRow : Control
 		// emits this on every peer, so it is the one turn-boundary signal a client can rely on.
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
 		EventBus.Instance.GameChangeEventAfter += OnGameChangeEventAfter;
-		TableButton.Pressed += OnPlayedCardsButtonPressed;
+		StatusButton.Pressed += () => ShowTableCards("Status", FactionState.DeckState.StatusCardIds);
+		ResponseButton.Pressed += () => ShowTableCards("Response", FactionState.DeckState.ResponseCardIds);
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		DeckButton.Pressed += OnDiscardDeckButtonPressed;
 		SetModulation();
@@ -235,7 +237,7 @@ public partial class FactionInfoRow : Control
 	private void ApplyInk()
 	{
 		Color hover = new(0.961f, 0.851f, 0.541f);
-		foreach (Button button in new[] { HandButton, DeckButton, TableButton })
+		foreach (Button button in new[] { HandButton, DeckButton, StatusButton, ResponseButton })
 		{
 			button.AddThemeColorOverride("font_color", Ink);
 			button.AddThemeColorOverride("font_pressed_color", Ink);
@@ -252,20 +254,21 @@ public partial class FactionInfoRow : Control
 	// ── Player name ──────────────────────────────────────────────────────────
 
 	private static readonly FontVariation NameFont = GD.Load<FontVariation>("res://scenes/menu/theme/MenuFontBodyBold.tres");
-	/// <summary>The strip along the flag's foot the name takes; the score rides up above it.</summary>
+	/// <summary>The strip along the flag's foot the name takes; the counts ride up above it.</summary>
 	private const float NameBand = 17f;
 	private const int NameFontSize = 12;
+	private const string ToggleHint = "Click to show or hide the hand, score and pieces";
 
 	/// <summary>
 	/// Prints who plays this faction along the foot of the flag, in the same white-on-black ink as the
-	/// score, which moves up to make room. Nothing when <see cref="FactionDisplay.PlayerNameFor"/> has no
-	/// name (solo play). A name wider than the flag is cut with an ellipsis; the tooltip has it whole.
+	/// counts, which move up to make room. Nothing in solo play. A name wider than the flag is cut with
+	/// an ellipsis; the tooltip has it whole.
 	/// </summary>
 	private void AddPlayerName(string name)
 	{
 		if (string.IsNullOrEmpty(name)) return;
 
-		ScoreLabel.Size = new Vector2(Head, Height - NameBand + 1f);
+		HeadCounts.Size = new Vector2(Head, Height - NameBand + 1f);
 		const float padX = 4f;
 		AddChild(new Label
 		{
@@ -280,7 +283,7 @@ public partial class FactionInfoRow : Control
 			MouseFilter = MouseFilterEnum.Ignore,
 			LabelSettings = new LabelSettings { Font = NameFont, FontSize = NameFontSize, FontColor = Ink, OutlineSize = 4, OutlineColor = Colors.Black },
 		});
-		FactionInfoButton.TooltipText = $"{FactionState.FactionData.Label} — {name}\nClick to show or hide cards and pieces";
+		FactionInfoButton.TooltipText = $"{FactionState.FactionData.Label} — {name}\n{ToggleHint}";
 	}
 
 	// ── Event handlers ───────────────────────────────────────────────────────
@@ -315,16 +318,15 @@ public partial class FactionInfoRow : Control
 	/// <summary>Slides the tail open or closed, as the Open Faction Banners setting does to every pennant.</summary>
 	public void SetOpen(bool open) => _pinned = open;
 
-	private void OnPlayedCardsButtonPressed()
+	/// <summary>Lists one pile on the table, the status or the response cards, dimming any a card in play ignores.</summary>
+	private void ShowTableCards(string kind, IEnumerable<int> cardIds)
 	{
-		DeckState deckState = DeckState.ForFaction(Faction);
-		List<int> playedCardIds = [.. deckState.StatusCardIds, .. deckState.ResponseCardIds];
-		List<PresentationItem> presentationItems = playedCardIds
+		List<PresentationItem> presentationItems = cardIds
 			.Select(cardId => (PresentationItem)new PresentationItemCard(cardId, false) { DimCaption = IgnoredCaption(cardId) })
 			.ToList();
 		_ = ModalStack.Current.Show(
-			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} Active Cards", presentationItems)
-				.WithDedupeKey($"played-cards:{Faction}"));
+			ModalConfig.Display($"{FactionState.FactionData.FactionAdjactiveLabel} {kind} Cards", presentationItems)
+				.WithDedupeKey($"{kind.ToLowerInvariant()}-cards:{Faction}"));
 	}
 
 	/// <summary>"Ignored (Hobart's Funnies)" while a card in play ignores this one, else null: the table dims it.</summary>
@@ -362,7 +364,10 @@ public partial class FactionInfoRow : Control
 		_cloth.SetShaderParameter("speed", active ? 2.6f : 1.2f);
 	}
 
-	/// <summary>The score on the flag. A change punches the number and floats the gain off the pennant's end.</summary>
+	/// <summary>
+	/// The score on the tail. A change punches the number and floats the gain off the pennant's end,
+	/// so a gain still shows while the tail is tucked away.
+	/// </summary>
 	private void RefreshScore()
 	{
 		int score = CombinedScore;
@@ -372,9 +377,11 @@ public partial class FactionInfoRow : Control
 		ScoreLabel.Text = score.ToString();
 		if (gained == 0 || !IsInsideTree()) return;
 
+		// Scale, not font size: the label sits in a row, and growing its font would shove the hand count.
+		ScoreLabel.PivotOffset = ScoreLabel.Size / 2;
 		Tween punch = CreateTween();
-		punch.TweenProperty(ScoreLabel.LabelSettings, "font_size", 46, GameSettings.DurationShortSeconds);
-		punch.TweenProperty(ScoreLabel.LabelSettings, "font_size", 32, GameSettings.DurationShortSeconds);
+		punch.TweenProperty(ScoreLabel, "scale", new Vector2(1.5f, 1.5f), GameSettings.DurationShortSeconds);
+		punch.TweenProperty(ScoreLabel, "scale", Vector2.One, GameSettings.DurationShortSeconds);
 
 		FloatGain(gained, Head + _tail);
 	}
@@ -408,8 +415,8 @@ public partial class FactionInfoRow : Control
 	}
 
 	/// <summary>
-	/// Repaints the hand, draw-deck and table counters. Reads state directly rather than tracking
-	/// deltas: several paths change the piles without emitting CardsDrawn/CardsDiscarded.
+	/// Repaints the hand, draw-deck, status and response counters. Reads state directly rather than
+	/// tracking deltas: several paths change the piles without emitting CardsDrawn/CardsDiscarded.
 	/// </summary>
 	private void SetCardCounts()
 	{
@@ -417,9 +424,8 @@ public partial class FactionInfoRow : Control
 		DeckState deckState = FactionState?.DeckState;
 		HandButton.Text = (deckState?.HandCardIds.Count ?? 0).ToString();
 		DeckButton.Text = (deckState?.DeckCardIds.Count ?? 0).ToString();
-		// The same two piles the Active Cards modal lists, so the counter can never disagree with it.
-		int activeCardCount = (deckState?.StatusCardIds.Count ?? 0) + (deckState?.ResponseCardIds.Count ?? 0);
-		TableButton.Text = activeCardCount.ToString();
+		StatusButton.Text = (deckState?.StatusCardIds.Count ?? 0).ToString();
+		ResponseButton.Text = (deckState?.ResponseCardIds.Count ?? 0).ToString();
 	}
 
 	/// <summary>Red when the pool is empty, amber at one, else the counter's own ink.</summary>

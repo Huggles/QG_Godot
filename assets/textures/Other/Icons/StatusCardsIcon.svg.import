@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cyquqgspgeoli"
-path="res://.godot/imported/TableCardsIcon.svg-616fa6a3371b44f5cce5e9ff7c31bd33.ctex"
+uid="uid://cirt0mg74or6n"
+path="res://.godot/imported/StatusCardsIcon.svg-f58ce45f732f1bbde03fd4a8ec7b0df8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/Other/Icons/TableCardsIcon.svg"
-dest_files=["res://.godot/imported/TableCardsIcon.svg-616fa6a3371b44f5cce5e9ff7c31bd33.ctex"]
+source_file="res://assets/textures/Other/Icons/StatusCardsIcon.svg"
+dest_files=["res://.godot/imported/StatusCardsIcon.svg-f58ce45f732f1bbde03fd4a8ec7b0df8.ctex"]
 
 [params]
 

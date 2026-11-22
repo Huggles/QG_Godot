@@ -384,7 +384,7 @@ size_flags_vertical = 4
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "The faction banners down the left start slid open, showing each faction's cards and pieces in reserve. Click a banner to open or close it either way."
+text = "The faction banners down the left start slid open, showing each faction's hand, score and pieces in reserve. Click a banner to open or close it either way."
 autowrap_mode = 3
 
 [node name="ChatGap" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
