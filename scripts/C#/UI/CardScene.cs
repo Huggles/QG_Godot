@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 public partial class CardScene : Control
@@ -232,11 +233,28 @@ public partial class CardScene : Control
 	public void SetMousePassthrough(bool passthrough)
 	{
 		mousePassthrough = passthrough;
-		MouseFilterEnum filter = passthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
-		MouseFilter = filter;
-		if (cardButton != null)
+		MouseFilter = passthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
+		// Every descendant, not just the button: the inner Panel and the text labels stop clicks too.
+		SetDescendantPassthrough(this, passthrough);
+	}
+
+	private readonly Dictionary<Control, MouseFilterEnum> filtersBeforePassthrough = new();
+
+	private void SetDescendantPassthrough(Node parent, bool passthrough)
+	{
+		foreach (Node child in parent.GetChildren())
 		{
-			cardButton.MouseFilter = filter;
+			if (child is Control control)
+			{
+				if (passthrough)
+				{
+					filtersBeforePassthrough.TryAdd(control, control.MouseFilter);
+					control.MouseFilter = MouseFilterEnum.Ignore;
+				}
+				else if (filtersBeforePassthrough.Remove(control, out MouseFilterEnum original))
+					control.MouseFilter = original;
+			}
+			SetDescendantPassthrough(child, passthrough);
 		}
 	}
 }

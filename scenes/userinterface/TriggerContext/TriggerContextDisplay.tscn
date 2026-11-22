@@ -140,10 +140,12 @@ offset_bottom = 350.0
 theme = ExtResource("ig_theme")
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = ExtResource("3_t1u62")
 
 [node name="TriggerLabelContainer" type="MarginContainer" parent="Control/TriggerContextColumn/TriggerLabelPanel" unique_id=1912041232]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
@@ -152,6 +154,7 @@ theme_override_constants/margin_bottom = 5
 [node name="TriggerLabel" type="RichTextLabel" parent="Control/TriggerContextColumn/TriggerLabelPanel/TriggerLabelContainer" unique_id=309435135]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
