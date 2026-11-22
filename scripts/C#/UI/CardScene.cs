@@ -165,8 +165,8 @@ public partial class CardScene : Control
 	{
 		textInnerContainerNode.CustomMinimumSize = new Vector2(Size.X, DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale);
 		textBoxTexture.CustomMinimumSize = new Vector2(Size.X, DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale);
-		titleNode.AddThemeFontSizeOverride("normal_font_size", (int)(26f * CalculatedScale));
-		textNode.AddThemeFontSizeOverride("normal_font_size", (int)(18f * CalculatedScale));
+		titleNode.AddThemeFontSizeOverride("normal_font_size", (int)(30f * CalculatedScale));
+		textNode.AddThemeFontSizeOverride("normal_font_size", (int)(20f * CalculatedScale));
 		// Inset the text from the card edges, scaled like the fonts; the boxes are reused across resizes.
 		titlePadding ??= new StyleBoxEmpty();
 		textPadding ??= new StyleBoxEmpty();
@@ -176,8 +176,8 @@ public partial class CardScene : Control
 		textNode.AddThemeStyleboxOverride("normal", textPadding);
 	}
 
-	private const float TEXT_PADDING_SIDE = 28f;
-	private const float TEXT_PADDING_EDGE = 14f;
+	private const float TEXT_PADDING_SIDE = 16f;
+	private const float TEXT_PADDING_EDGE = 8f;
 	private StyleBoxEmpty titlePadding;
 	private StyleBoxEmpty textPadding;
 
