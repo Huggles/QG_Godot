@@ -10,7 +10,8 @@ using System.Runtime.CompilerServices;
 ///
 /// The value is the change in the team's lead: score gained now, plus per-turn income gained times the
 /// rounds left (<see cref="Horizon"/>), minus the same for the enemy team, plus <see cref="CardValue"/>
-/// for every card the enemy loses and minus it for every card this team loses. Income is supply stars
+/// for every card the enemy loses and minus it for every card this team loses (with <c>bot_scarcity</c>,
+/// deck cards lost count only through the shortfall). Income is supply stars
 /// plus Status-card VP; <c>bot_value_status=none|AXIS|ALLIES</c> drops the Status half for an A/B
 /// (it measured +17pp Axis / +6pp Allies on 2026-10-04). Events are applied to the
 /// fork by their own Mutate and the board's tags — supply included — are re-derived after each one.
@@ -165,7 +166,7 @@ public static class ProjectionValuer
     /// <summary>
     /// How much of the income a faction's best next build would add counts as income already, for
     /// <c>bot_reach=all|none|AXIS|ALLIES</c>, set by <c>bot_reach_weight</c> (0.5 by default) — see
-    /// <see cref="VpMath.BestBuildVp"/>. Pieces near income they could take are worth that much more
+    /// <see cref="VpMath.TeamBestBuildVp"/>. Pieces near income they could take are worth that much more
     /// than the same pieces out of reach.
     /// </summary>
     public static double ReachWeight => CliArgs.GetDouble("bot_reach_weight", 0.5);
@@ -173,19 +174,22 @@ public static class ProjectionValuer
     private static double TeamDelta(BoardState board, FactionTeam team, int horizon, Terms terms)
     {
         BoardState live = BoardState.Live;
-        double score = 0, cards = 0, units = 0, reach = 0, shortfall = 0;
+        double score = 0, cards = 0, units = 0, shortfall = 0;
         foreach (Faction member in StaticGameData.FactionsForTeam(team))
         {
             if (FactionState.ForEnum(member) == null) continue;
             FactionRecord mine = board.ForFaction(member), now = live.ForFaction(member);
             score += mine.Score - now.Score - (mine.ProjectedCharge - now.ProjectedCharge);
-            cards += mine.Hand.Count - now.Hand.Count + mine.Deck.Count - now.Deck.Count;
+            // With scarcity on, a deck card lost costs only what Shortfall says: while the deck outlasts the game, losing
+            // its top cards changes no play. Hand cards lost still cost a play each; drawn ones gain nothing, as before.
+            cards += terms.Scarcity ? Math.Min(mine.Hand.Count - now.Hand.Count, 0)
+                                    : mine.Hand.Count - now.Hand.Count + mine.Deck.Count - now.Deck.Count;
             if (terms.Material != 0) units += Material(board, member) - Material(live, member);
-            if (terms.Reach != 0) reach += VpMath.BestBuildVp(member, board) - VpMath.BestBuildVp(member, live);
             if (terms.Scarcity) shortfall += Shortfall(board, member, horizon) - Shortfall(live, member, horizon);
         }
 
         int status = terms.Status ? VpMath.StatusCardVpRateOn(team, board) - VpMath.StatusCardVpRateOn(team, live) : 0;
+        double reach = terms.Reach != 0 ? VpMath.TeamBestBuildVp(team, board) - VpMath.TeamBestBuildVp(team, live) : 0;
         if (terms.Threat > 0)
             return score + VpMath.SupplyStarVpHeld(team, board, horizon, terms.Threat) - VpMath.SupplyStarVpHeld(team, live, horizon, terms.Threat)
                    + (status + reach * terms.Reach) * horizon + cards * terms.Card + units * terms.Material - shortfall * (terms.Card + 1);
