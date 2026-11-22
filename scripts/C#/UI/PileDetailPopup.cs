@@ -20,8 +20,8 @@ public partial class PileDetailPopup : Control, LoadableUI
 	/// <summary>Height kept free for the title, the footer and the gaps between them.</summary>
 	private const float TextReserve = 80f;
 	private const float TextWidthAlone = 170f;
-	/// <summary>The hand's CardPreview size, as the history popup uses; a big pile shrinks its cards to fit.</summary>
-	private static readonly Vector2 FullCardSize = new(250, 350);
+	/// <summary>The size cards are drawn in the hand; a big pile shrinks them further to fit.</summary>
+	private static readonly Vector2 FullCardSize = (CardScene.DEFAULT_SIZE * FactionHandDisplay.HandCardScale).Round();
 
 	private PanelContainer DetailPanel => GetNode<PanelContainer>("%PileDetailPanel");
 	private Label TitleLabel => GetNode<Label>("%PileTitle");

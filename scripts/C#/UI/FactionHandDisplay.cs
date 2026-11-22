@@ -11,7 +11,7 @@ public partial class FactionHandDisplay : Control
 	// Hand fan geometry, unchanged from when it was inline in InitCards.
 	private const float HandCardStepSize = 60f;
 	private const float RotationStepSize = 10f;
-	private const float HandCardScale = 0.3f;
+	internal const float HandCardScale = 0.3f;
 
 	// The side fan: the same fan, scaled down, for the cards a prompt offers that are not in hand.
 	// The step scales with the cards so the overlap looks the same at both sizes.
