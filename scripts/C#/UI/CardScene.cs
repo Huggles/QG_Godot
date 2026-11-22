@@ -167,6 +167,25 @@ public partial class CardScene : Control
 		textBoxTexture.CustomMinimumSize = new Vector2(Size.X, DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale);
 		titleNode.AddThemeFontSizeOverride("normal_font_size", (int)(30f * CalculatedScale));
 		textNode.AddThemeFontSizeOverride("normal_font_size", (int)(20f * CalculatedScale));
+		// Inset the text from the card edges, scaled like the fonts; the boxes are reused across resizes.
+		titlePadding ??= new StyleBoxEmpty();
+		textPadding ??= new StyleBoxEmpty();
+		SetPadding(titlePadding, TEXT_PADDING_SIDE, TEXT_PADDING_EDGE, 0);
+		SetPadding(textPadding, TEXT_PADDING_SIDE, 0, TEXT_PADDING_EDGE);
+		titleNode.AddThemeStyleboxOverride("normal", titlePadding);
+		textNode.AddThemeStyleboxOverride("normal", textPadding);
+	}
+
+	private const float TEXT_PADDING_SIDE = 28f;
+	private const float TEXT_PADDING_EDGE = 14f;
+	private StyleBoxEmpty titlePadding;
+	private StyleBoxEmpty textPadding;
+
+	private void SetPadding(StyleBoxEmpty box, float side, float top, float bottom)
+	{
+		box.ContentMarginLeft = box.ContentMarginRight = side * CalculatedScale;
+		box.ContentMarginTop = top * CalculatedScale;
+		box.ContentMarginBottom = bottom * CalculatedScale;
 	}
 
 	public void SetClickable(bool clickable)
