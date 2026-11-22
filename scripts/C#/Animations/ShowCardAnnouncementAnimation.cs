@@ -5,16 +5,16 @@ public class ShowCardAnnouncementAnimation : ChangeEventAnimation
 {
     private readonly int _cardId;
     private readonly string _title;
-    private readonly bool _toTable;
+    private readonly bool _intoHistory;
 
-    /// <param name="toTable">The card is going onto the table, so it leaves the slot into its faction's Active Cards button.</param>
-    public ShowCardAnnouncementAnimation(int cardId, string title, bool toTable = false)
+    /// <param name="intoHistory">Zoom on into the history strip instead of resting in the trigger slot.</param>
+    public ShowCardAnnouncementAnimation(int cardId, string title, bool intoHistory = false)
     {
         _cardId = cardId;
         _title = title;
-        _toTable = toTable;
+        _intoHistory = intoHistory;
     }
 
     protected override Task AnimateForTargetFaction()
-        => TriggerContextDisplay.Current?.AnnounceCard(_cardId, _title, _toTable) ?? Task.CompletedTask;
+        => TriggerContextDisplay.Current?.AnnounceCard(_cardId, _title, _intoHistory) ?? Task.CompletedTask;
 }

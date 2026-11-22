@@ -137,7 +137,7 @@ layout_mode = 2
 size_flags_vertical = 4
 max_value = 1.0
 step = 0.01
-value = 0.8
+value = 0.6
 custom_minimum_size = Vector2(380, 36)
 
 [node name="SfxVolumeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]

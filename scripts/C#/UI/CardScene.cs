@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 public partial class CardScene : Control
@@ -166,6 +167,25 @@ public partial class CardScene : Control
 		textBoxTexture.CustomMinimumSize = new Vector2(Size.X, DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale);
 		titleNode.AddThemeFontSizeOverride("normal_font_size", (int)(30f * CalculatedScale));
 		textNode.AddThemeFontSizeOverride("normal_font_size", (int)(20f * CalculatedScale));
+		// Inset the text from the card edges, scaled like the fonts; the boxes are reused across resizes.
+		titlePadding ??= new StyleBoxEmpty();
+		textPadding ??= new StyleBoxEmpty();
+		SetPadding(titlePadding, TEXT_PADDING_SIDE, TEXT_PADDING_EDGE, 0);
+		SetPadding(textPadding, TEXT_PADDING_SIDE, 0, TEXT_PADDING_EDGE);
+		titleNode.AddThemeStyleboxOverride("normal", titlePadding);
+		textNode.AddThemeStyleboxOverride("normal", textPadding);
+	}
+
+	private const float TEXT_PADDING_SIDE = 28f;
+	private const float TEXT_PADDING_EDGE = 14f;
+	private StyleBoxEmpty titlePadding;
+	private StyleBoxEmpty textPadding;
+
+	private void SetPadding(StyleBoxEmpty box, float side, float top, float bottom)
+	{
+		box.ContentMarginLeft = box.ContentMarginRight = side * CalculatedScale;
+		box.ContentMarginTop = top * CalculatedScale;
+		box.ContentMarginBottom = bottom * CalculatedScale;
 	}
 
 	public void SetClickable(bool clickable)
@@ -232,11 +252,28 @@ public partial class CardScene : Control
 	public void SetMousePassthrough(bool passthrough)
 	{
 		mousePassthrough = passthrough;
-		MouseFilterEnum filter = passthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
-		MouseFilter = filter;
-		if (cardButton != null)
+		MouseFilter = passthrough ? MouseFilterEnum.Ignore : MouseFilterEnum.Stop;
+		// Every descendant, not just the button: the inner Panel and the text labels stop clicks too.
+		SetDescendantPassthrough(this, passthrough);
+	}
+
+	private readonly Dictionary<Control, MouseFilterEnum> filtersBeforePassthrough = new();
+
+	private void SetDescendantPassthrough(Node parent, bool passthrough)
+	{
+		foreach (Node child in parent.GetChildren())
 		{
-			cardButton.MouseFilter = filter;
+			if (child is Control control)
+			{
+				if (passthrough)
+				{
+					filtersBeforePassthrough.TryAdd(control, control.MouseFilter);
+					control.MouseFilter = MouseFilterEnum.Ignore;
+				}
+				else if (filtersBeforePassthrough.Remove(control, out MouseFilterEnum original))
+					control.MouseFilter = original;
+			}
+			SetDescendantPassthrough(child, passthrough);
 		}
 	}
 }

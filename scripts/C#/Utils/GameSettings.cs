@@ -12,6 +12,8 @@ using System.Linq;
 public partial class GameSettings : SingletonNode<GameSettings> 
 {    
     private const string ConfigPath = "user://settings.cfg";
+    /// <summary>Marks saved volumes as slider positions on <see cref="AudioManager.SliderToGain"/>'s curve.</summary>
+    private const string VolumeCurveKey = "volume_curve";
     private const string Section    = "gameplay";
 
     /// <summary>
@@ -91,7 +93,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public float MasterVolume { get; private set; } = 1.0f;
 
     /// <summary>Music level, 0..1, applied to the Music audio bus.</summary>
-    public float MusicVolume { get; private set; } = 0.8f;
+    public float MusicVolume { get; private set; } = 0.6f;
 
     /// <summary>Sound effect level, 0..1, applied to the SFX audio bus.</summary>
     public float SfxVolume { get; private set; } = 0.8f;
@@ -179,8 +181,10 @@ public partial class GameSettings : SingletonNode<GameSettings>
     /// <summary>Every show and hide animation: 500ms whatever the speed setting, still skipped with it.</summary>
     public static double ShowHideSeconds => GetFixedDurationSeconds(500);
 
-    public static bool ShowCountryLabels;
-    public static bool ShowPlayersPanel;
+    /// <summary>On until the player turns it off; a first launch has no config file for Load to default from.</summary>
+    public static bool ShowCountryLabels = true;
+    /// <summary>On by default, for the same first-launch reason as <see cref="ShowCountryLabels"/>.</summary>
+    public static bool ShowPlayersPanel = true;
     /// <summary>Always false in a release export; the saved preference is kept for debug builds.</summary>
     public static bool ShowDebugMenu => _showDebugMenu && !GameContext.IsProductionBuild;
     private static bool _showDebugMenu;
@@ -300,9 +304,17 @@ public partial class GameSettings : SingletonNode<GameSettings>
             ShowPlayersPanel = config.GetValue(Section, "show_players_panel", true).As<bool>();
             _showDebugMenu = config.GetValue(Section, "show_debug_menu", false).As<bool>();
 
-            MasterVolume = Mathf.Clamp(config.GetValue(Section, "master_volume", 0.5f).As<float>(), 0f, 1f);
-            MusicVolume  = Mathf.Clamp(config.GetValue(Section, "music_volume",  0.8f).As<float>(), 0f, 1f);
-            SfxVolume    = Mathf.Clamp(config.GetValue(Section, "sfx_volume",    0.8f).As<float>(), 0f, 1f);
+            MasterVolume = Mathf.Clamp(config.GetValue(Section, "master_volume", MasterVolume).As<float>(), 0f, 1f);
+            MusicVolume  = Mathf.Clamp(config.GetValue(Section, "music_volume",  MusicVolume).As<float>(), 0f, 1f);
+            SfxVolume    = Mathf.Clamp(config.GetValue(Section, "sfx_volume",    SfxVolume).As<float>(), 0f, 1f);
+            // Volumes saved before the curve were raw amplitudes: move each slider to the position
+            // that still plays at the loudness the player picked.
+            if (config.HasSectionKey(Section, "master_volume") && !config.HasSectionKey(Section, VolumeCurveKey))
+            {
+                MasterVolume = Mathf.Pow(MasterVolume, 1f / 3f);
+                MusicVolume  = Mathf.Pow(MusicVolume,  1f / 3f);
+                SfxVolume    = Mathf.Pow(SfxVolume,    1f / 3f);
+            }
 
             DisplayMode = (WindowDisplayMode)Math.Clamp(
                 config.GetValue(Section, "display_mode", (int)DefaultDisplayMode).As<int>(),
@@ -371,6 +383,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "master_volume",         MasterVolume);
         config.SetValue(Section, "music_volume",          MusicVolume);
         config.SetValue(Section, "sfx_volume",            SfxVolume);
+        config.SetValue(Section, VolumeCurveKey,          "cubic");
         config.SetValue(Section, "display_mode",          (int)DisplayMode);
         config.SetValue(Section, "window_width",          WindowResolution.X);
         config.SetValue(Section, "window_height",         WindowResolution.Y);

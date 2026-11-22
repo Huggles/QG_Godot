@@ -103,6 +103,34 @@ public static class VpMath
         return best;
     }
 
+    /// <summary>
+    /// The per-turn VP <paramref name="team"/> could add with one build per member, each space counted once:
+    /// the best builds matched greedily, a member and a space used at most once. Summing each member's
+    /// <see cref="BestBuildVp"/> counted a star two teammates both reach twice, so taking it cost more reach than it gained.
+    /// </summary>
+    public static int TeamBestBuildVp(FactionTeam team, BoardState board)
+    {
+        List<(Faction Member, int CountryId, int Vp)> builds = new();
+        foreach (Faction member in StaticGameData.FactionsForTeam(team))
+        {
+            if (FactionState.ForEnum(member) == null) continue;
+            foreach (CountryState country in board.BuildableLand(member).Concat(board.BuildableSea(member)))
+                if (VpDeltaOfDeploy(country, member, board) is > 0 and int vp) builds.Add((member, country.Id, vp));
+        }
+
+        HashSet<Faction> built = new();
+        HashSet<int> taken = new();
+        int total = 0;
+        foreach (var build in builds.OrderByDescending(b => b.Vp).ThenBy(b => b.Member).ThenBy(b => b.CountryId))
+            if (!built.Contains(build.Member) && !taken.Contains(build.CountryId))
+            {
+                built.Add(build.Member);
+                taken.Add(build.CountryId);
+                total += build.Vp;
+            }
+        return total;
+    }
+
     /// <inheritdoc cref="VpDeltaOfDeploy(CountryState, Faction, BoardState)"/>
     /// <remarks>On the live board.</remarks>
     public static int VpDeltaOfDeploy(CountryState country, Faction faction)

@@ -664,8 +664,14 @@ public partial class AudioManager : SingletonNode<AudioManager>
         float clamped = Mathf.Clamp(linear, 0f, 1f);
         // Mute rather than lean on LinearToDb(0), which is negative infinity.
         AudioServer.SetBusMute(index, clamped <= 0.001f);
-        AudioServer.SetBusVolumeDb(index, Mathf.LinearToDb(Mathf.Max(clamped, 0.001f)));
+        AudioServer.SetBusVolumeDb(index, Mathf.LinearToDb(Mathf.Max(SliderToGain(clamped), 0.000001f)));
     }
+
+    /// <summary>
+    /// Maps a 0..1 slider position to an amplitude gain. Cubed because hearing is logarithmic: a raw
+    /// amplitude slider at 50% is only -6 dB, while cubed it is -18 dB and the slider feels even.
+    /// </summary>
+    public static float SliderToGain(float slider) => slider * slider * slider;
 
     private static string DescribeKnown(IEnumerable<string> clipNames)
     {

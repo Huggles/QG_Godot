@@ -35,10 +35,13 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// <summary>Where the popped-in card stops, from the screen's right edge: clear of the 48px history strip.</summary>
 	[Export] private float PopInRightMargin = 70f;
 
+	/// <summary>How opaque the slot goes while hovered, so the country or unit under it can be seen and clicked.</summary>
+	[Export] private float HoverAlpha = 0.4f;
+	private const float HoverFadeSeconds = 0.15f;
+
 	// The announced card outlives a prompt that borrows the slot; _showingAnnouncement is whether it is on screen now.
 	private int _announcedCardId = -1;
 	private string _announcedTitle;
-	private bool _announcedToTable;
 	private bool _showingAnnouncement;
 	private Tween _flight;
 	private TaskCompletionSource _flightDone;
@@ -100,6 +103,8 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	{
 		CardSceneNode.TriggersEmphasis(false);
 		CardSceneNode.SetClickable(false);
+		// Hovering the slot card does nothing, so clicks go through it to the country or unit it covers.
+		CardSceneNode.SetMousePassthrough(true);
 		Panel.Visible = false;
 
 		FlightCard.TriggersEmphasis(false);
@@ -254,15 +259,15 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// <summary>
 	/// A played, activated or used card slides out from behind the history strip, holds a moment, then shrinks into the
 	/// slot and rests there until a prompt about another card or a step change clears it. Completes once it has landed.
+	/// <paramref name="intoHistory"/>: zoom into the history strip instead and leave the slot alone.
 	/// </summary>
-	public Task AnnounceCard(int cardId, string title, bool toTable = false)
+	public Task AnnounceCard(int cardId, string title, bool intoHistory = false)
 	{
 		if (Panel == null) return Task.CompletedTask;
+		if (intoHistory) return ZoomIntoHistory(cardId);
 
-		SendShownCardToTable();
 		_announcedCardId = cardId;
 		_announcedTitle = title;
-		_announcedToTable = toTable;
 		ShowAnnouncement();
 
 		double slide = GameSettings.ShowHideSeconds;
@@ -270,6 +275,22 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 
 		// The slot is laid out now but kept transparent, so its rect has settled by the time the card lands.
 		Column.Modulate = Colors.Transparent;
+		return PopIn(cardId, ShrinkIntoSlot);
+	}
+
+	/// <summary>A card that goes straight on into history: it pops in, holds, then folds into the newest badge.</summary>
+	private Task ZoomIntoHistory(int cardId)
+	{
+		// The card before it leaves the slot as it would for any newly announced card.
+		ClearAnnouncement();
+		if (GameSettings.ShowHideSeconds <= 0) return Task.CompletedTask;
+		return PopIn(cardId, FoldIntoBadge);
+	}
+
+	/// <summary>Slide the flight copy out from behind the history strip, hold it, then hand it to <paramref name="then"/>.</summary>
+	private Task PopIn(int cardId, System.Action then)
+	{
+		double slide = GameSettings.ShowHideSeconds;
 		FlightCard.ShowCard(cardId);
 		float screenRight = GetViewportRect().Size.X;
 		Flight.Scale = Vector2.One;
@@ -281,7 +302,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_flight.TweenProperty(Flight, "global_position:x", screenRight - PopInRightMargin - Flight.Size.X, slide)
 			.SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
 		_flight.TweenInterval(GameSettings.DurationMediumSeconds);
-		_flight.TweenCallback(Callable.From(ShrinkIntoSlot));
+		_flight.TweenCallback(Callable.From(then));
 		return _flightDone.Task;
 	}
 
@@ -298,38 +319,9 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	public void ClearAnnouncement()
 	{
 		if (_announcedCardId < 0) return;
-		if (_showingAnnouncement && !SendShownCardToTable()) SlideShownCardOff();
+		if (_showingAnnouncement) SlideShownCardOff();
 		_announcedCardId = -1;
 		if (_showingAnnouncement) Hide();
-	}
-
-	/// <summary>
-	/// A card announced as going onto the table leaves the slot by shrinking into its faction's Active Cards
-	/// button. Fire-and-forget: the slot is free for whatever replaces it at once. False when it did not go.
-	/// </summary>
-	private bool SendShownCardToTable()
-	{
-		if (!_showingAnnouncement || !_announcedToTable || _announcedCardId < 0) return false;
-		// Still checked against the table: a play that was blocked has gone to the discard pile instead.
-		int cardId = _announcedCardId;
-		CardState card = CardState.ForId(cardId);
-		DeckState deck = card == null ? null : DeckState.ForFaction(card.Faction);
-		if (deck == null || !(deck.StatusCardIds.Contains(cardId) || deck.ResponseCardIds.Contains(cardId))) return false;
-		if (FactionsContainer.Current?.FactionInfoNodes.GetValueOrDefault(card.Faction) is not { } row
-			|| !row.IsVisibleInTree()) return false;
-		double seconds = GameSettings.ShowHideSeconds;
-		if (seconds <= 0) return false;
-
-		Rect2 slot = CardSceneNode.GetGlobalRect();
-		CardScene copy = DepartingCopy(cardId, slot);
-		Rect2 button = row.ActiveCardsButtonRect;
-		float scale = button.Size.Y / slot.Size.Y;
-		Tween tween = copy.CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.In);
-		tween.TweenProperty(copy, "global_position", button.GetCenter() - slot.Size * scale / 2, seconds);
-		tween.TweenProperty(copy, "scale", Vector2.One * scale, seconds);
-		tween.TweenProperty(copy, "modulate:a", 0f, seconds * 0.4).SetDelay(seconds * 0.6);
-		tween.Chain().TweenCallback(Callable.From(copy.QueueFree));
-		return true;
 	}
 
 	/// <summary>The way back out for a card leaving an empty slot: off to the right, behind the history strip.</summary>
@@ -365,6 +357,8 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		copy.Size = slot.Size;
 		copy.GlobalPosition = slot.Position;
 		copy.ShowCard(cardId);
+		// Leaves at the slot's faded strength rather than flashing back to full.
+		copy.Modulate = new Color(1, 1, 1, Panel.Modulate.A);
 		return copy;
 	}
 
@@ -376,6 +370,18 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_showingAnnouncement = true;
 	}
 
+	// Polled rather than signalled: the slot is click-through, so it never gets mouse_entered.
+	public override void _Process(double delta)
+	{
+		if (Panel == null) return;
+		Vector2 mouse = GetGlobalMousePosition();
+		bool hovered = Panel.IsVisibleInTree() && (Panel.GetGlobalRect().HasPoint(mouse)
+			|| (TriggerLabelPanel.IsVisibleInTree() && TriggerLabelPanel.GetGlobalRect().HasPoint(mouse)));
+		float alpha = Mathf.MoveToward(Panel.Modulate.A, hovered ? HoverAlpha : 1f, (float)delta / HoverFadeSeconds);
+		Panel.Modulate = new Color(1, 1, 1, alpha);
+		TriggerLabelPanel.Modulate = new Color(1, 1, 1, alpha);
+	}
+
 	private void ShrinkIntoSlot()
 	{
 		Rect2 slot = CardSceneNode.GetGlobalRect();
@@ -383,6 +389,29 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_flight = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut);
 		_flight.TweenProperty(Flight, "global_position", slot.Position, shrink);
 		_flight.TweenProperty(Flight, "scale", Vector2.One * (slot.Size.X / Flight.Size.X), shrink);
+		_flight.Chain().TweenCallback(Callable.From(EndFlight));
+	}
+
+	/// <summary>
+	/// Travel over the strip into the newest badge, badge-high, and only then fade, the way a timed-out
+	/// reveal folds away in <see cref="RevealDock"/>. With no strip it just goes off the right edge.
+	/// </summary>
+	private void FoldIntoBadge()
+	{
+		Control badge = GameHistoryList.Current is { } strip && IsInstanceValid(strip) ? strip.NewestBadge : null;
+		Vector2 screen = GetViewportRect().Size;
+		Rect2 landing = badge != null && IsInstanceValid(badge)
+			? badge.GetGlobalRect()
+			: new Rect2(new Vector2(screen.X, Flight.GlobalPosition.Y + Flight.Size.Y / 2), Vector2.Zero);
+
+		float scale = Mathf.Max(landing.Size.Y, 8f) / Flight.Size.Y;
+		double seconds = GameSettings.ShowHideSeconds * 1.2;
+		// Drawn above the strip for this leg, so it is seen arriving at the badge rather than ducking under it.
+		Flight.ZIndex = 1;
+		_flight = CreateTween().SetParallel().SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.InOut);
+		_flight.TweenProperty(Flight, "global_position", landing.GetCenter() - Flight.Size * scale / 2, seconds);
+		_flight.TweenProperty(Flight, "scale", Vector2.One * scale, seconds);
+		_flight.Chain().TweenProperty(Flight, "modulate:a", 0f, GameSettings.ShowHideSeconds * 0.4);
 		_flight.Chain().TweenCallback(Callable.From(EndFlight));
 	}
 
@@ -398,6 +427,8 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		_flight?.Kill();
 		_flight = null;
 		Flight.Visible = false;
+		Flight.Modulate = Colors.White;
+		Flight.ZIndex = 0;
 		Column.Modulate = Colors.White;
 		_flightDone?.TrySetResult();
 		_flightDone = null;
