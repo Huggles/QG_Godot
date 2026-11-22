@@ -20,8 +20,8 @@ public partial class PileDetailPopup : Control, LoadableUI
 	/// <summary>Height kept free for the title, the footer and the gaps between them.</summary>
 	private const float TextReserve = 80f;
 	private const float TextWidthAlone = 170f;
-	/// <summary>The largest a card is drawn; a big pile shrinks its cards to fit the screen.</summary>
-	private static readonly Vector2 FullCardSize = new(200, 280);
+	/// <summary>The hand's CardPreview size, as the history popup uses; a big pile shrinks its cards to fit.</summary>
+	private static readonly Vector2 FullCardSize = new(250, 350);
 
 	private PanelContainer DetailPanel => GetNode<PanelContainer>("%PileDetailPanel");
 	private Label TitleLabel => GetNode<Label>("%PileTitle");
