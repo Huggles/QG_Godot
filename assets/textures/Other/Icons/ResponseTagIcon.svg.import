@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c57f587ddrif3"
-path="res://.godot/imported/DeckStackIcon.svg-b78f90e334b7eecb673202a2826816c7.ctex"
+uid="uid://duggxqhdf1mqj"
+path="res://.godot/imported/ResponseTagIcon.svg-81a7354ac719c7cfa99850fc5fd13300.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/Other/Icons/DeckStackIcon.svg"
-dest_files=["res://.godot/imported/DeckStackIcon.svg-b78f90e334b7eecb673202a2826816c7.ctex"]
+source_file="res://assets/textures/Other/Icons/ResponseTagIcon.svg"
+dest_files=["res://.godot/imported/ResponseTagIcon.svg-81a7354ac719c7cfa99850fc5fd13300.ctex"]
 
 [params]
 

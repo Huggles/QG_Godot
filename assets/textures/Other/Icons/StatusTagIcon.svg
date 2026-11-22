@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Status tag for the dark-pill flag counts. -->
+  <rect x="4" y="4" width="56" height="56" rx="10" fill="#f5d98a"/>
+  <path d="M43 19 C40 14 36 13 32 13 C25 13 21 17 21 22.5 C21 34 43 28.5 43 40.5 C43 47 38 51 32 51 C26.5 51 22 48.5 20 44" fill="none" stroke="#412402" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

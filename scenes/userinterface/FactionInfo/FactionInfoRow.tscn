@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/HandCardsIcon.svg" id="3_hand"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/DeckStackIcon.svg" id="4_deck"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/StatusCardsIcon.svg" id="5_status"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/ResponseCardsIcon.svg" id="6_response"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/DeckTagIcon.svg" id="4_deck"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/StatusTagIcon.svg" id="5_status"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/ResponseTagIcon.svg" id="6_response"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/VictoryPointsIcon.svg" id="6_vp"]
 [ext_resource type="Script" uid="uid://nwhfij0f43sv" path="res://scenes/userinterface/FactionInfo/CardsAnimationControl.cs" id="7_0r4er"]
 [ext_resource type="Texture2D" uid="uid://cpfklff0i6sut" path="res://assets/factions/germany/cards/Germany_CardBack.png" id="7_48ey3"]
@@ -25,6 +25,17 @@ content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_chip"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 0.65)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="LabelSettings" id="LabelSettings_stat"]
 resource_local_to_scene = true
@@ -60,66 +71,68 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_osvc4")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_osvc4")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_osvc4")
 
-[node name="HeadCounts" type="HBoxContainer" parent="." unique_id=1942955123]
+[node name="HeadArea" type="CenterContainer" parent="." unique_id=1942955124]
 unique_name_in_owner = true
 layout_mode = 0
 offset_right = 104.0
 offset_bottom = 52.0
 mouse_filter = 2
-theme_override_constants/separation = 4
+
+[node name="HeadCounts" type="HBoxContainer" parent="HeadArea" unique_id=1942955123]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 3
 alignment = 1
 
-[node name="DeckButton" type="Button" parent="HeadCounts" unique_id=1698971982]
+[node name="DeckButton" type="Button" parent="HeadArea/HeadCounts" unique_id=1698971982]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 21)
+custom_minimum_size = Vector2(0, 17)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_constants/h_separation = 1
-theme_override_constants/icon_max_width = 15
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxEmpty_stat")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_stat")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
+theme_override_constants/outline_size = 0
+theme_override_constants/h_separation = 2
+theme_override_constants/icon_max_width = 12
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_chip")
+theme_override_styles/hover = SubResource("StyleBoxFlat_chip")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_chip")
 text = "33"
 icon = ExtResource("4_deck")
 
-[node name="StatusButton" type="Button" parent="HeadCounts" unique_id=1709253810]
+[node name="StatusButton" type="Button" parent="HeadArea/HeadCounts" unique_id=1709253810]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 21)
+custom_minimum_size = Vector2(0, 17)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_constants/h_separation = 1
-theme_override_constants/icon_max_width = 15
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxEmpty_stat")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_stat")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
+theme_override_constants/outline_size = 0
+theme_override_constants/h_separation = 2
+theme_override_constants/icon_max_width = 12
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_chip")
+theme_override_styles/hover = SubResource("StyleBoxFlat_chip")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_chip")
 text = "0"
 icon = ExtResource("5_status")
 
-[node name="ResponseButton" type="Button" parent="HeadCounts" unique_id=1709253811]
+[node name="ResponseButton" type="Button" parent="HeadArea/HeadCounts" unique_id=1709253811]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 21)
+custom_minimum_size = Vector2(0, 17)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 5
-theme_override_constants/h_separation = 1
-theme_override_constants/icon_max_width = 15
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxEmpty_stat")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_stat")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_stat")
+theme_override_constants/outline_size = 0
+theme_override_constants/h_separation = 2
+theme_override_constants/icon_max_width = 12
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_chip")
+theme_override_styles/hover = SubResource("StyleBoxFlat_chip")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_chip")
 text = "0"
 icon = ExtResource("6_response")
 

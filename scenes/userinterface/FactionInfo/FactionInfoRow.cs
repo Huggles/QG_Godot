@@ -18,7 +18,7 @@ public partial class FactionInfoRow : Control
 	private ColorRect Cloth => GetNode<ColorRect>("%Cloth");
 	private Label ScoreLabel => GetNode<Label>("%ScoreLabel");
 	private Button FactionInfoButton => GetNode<Button>("%FactionInfoButton");
-	private HBoxContainer HeadCounts => GetNode<HBoxContainer>("%HeadCounts");
+	private CenterContainer HeadArea => GetNode<CenterContainer>("%HeadArea");
 	private Control TailClip => GetNode<Control>("%TailClip");
 	private VBoxContainer Stats => GetNode<VBoxContainer>("%Stats");
 	private HBoxContainer Pieces => GetNode<HBoxContainer>("%Pieces");
@@ -162,7 +162,7 @@ public partial class FactionInfoRow : Control
 		Texture2D flag = data.FlagTexture;
 		float aspect = (float)flag.GetWidth() / flag.GetHeight();
 		Head = Mathf.Round(Height * aspect);
-		HeadCounts.Size = new Vector2(Head, Height);
+		HeadArea.Size = new Vector2(Head, Height);
 		TailClip.Position = new Vector2(Head, 0);
 		_cloth = new ShaderMaterial { Shader = ClothShader };
 		_cloth.SetShaderParameter("flag", flag);
@@ -268,8 +268,8 @@ public partial class FactionInfoRow : Control
 	{
 		if (string.IsNullOrEmpty(name)) return;
 
-		HeadCounts.Position = new Vector2(0, NameBand - 2f);
-		HeadCounts.Size = new Vector2(Head, Height - NameBand + 2f);
+		HeadArea.Position = new Vector2(0, NameBand - 2f);
+		HeadArea.Size = new Vector2(Head, Height - NameBand + 2f);
 		const float padX = 4f;
 		AddChild(new Label
 		{
