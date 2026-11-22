@@ -56,6 +56,7 @@ public partial class CardScene : Control
 		cardButton.Pressed += CardButton_Pressed;
 		cardButton.MouseEntered += CardButton_MouseEntered;
 		cardButton.MouseExited += CardButton_MouseExited;
+		textInnerContainerNode.Resized += MatchTextBoxToText;
 
 		SetAvailability(availability);
 		SetEmphasized(emphasized);
@@ -164,7 +165,7 @@ public partial class CardScene : Control
 	public void RecalculateSizes()
 	{
 		textInnerContainerNode.CustomMinimumSize = new Vector2(Size.X, DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale);
-		textBoxTexture.CustomMinimumSize = new Vector2(Size.X, DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale);
+		MatchTextBoxToText();
 		titleNode.AddThemeFontSizeOverride("normal_font_size", (int)(30f * CalculatedScale));
 		textNode.AddThemeFontSizeOverride("normal_font_size", (int)(20f * CalculatedScale));
 		// Inset the text from the card edges, scaled like the fonts; the boxes are reused across resizes.
@@ -180,6 +181,13 @@ public partial class CardScene : Control
 	private const float TEXT_PADDING_EDGE = 14f;
 	private StyleBoxEmpty titlePadding;
 	private StyleBoxEmpty textPadding;
+
+	/// <summary>Long texts grow the text block upward past its default height; stretch the parchment with it so the title never lands on the art.</summary>
+	private void MatchTextBoxToText()
+	{
+		float height = Mathf.Max(DEFAULT_TEXT_BLOCK_SIZE.Y * CalculatedScale, textInnerContainerNode.Size.Y);
+		textBoxTexture.CustomMinimumSize = new Vector2(Size.X, height);
+	}
 
 	private void SetPadding(StyleBoxEmpty box, float side, float top, float bottom)
 	{
