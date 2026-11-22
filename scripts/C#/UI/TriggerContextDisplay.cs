@@ -35,9 +35,9 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// <summary>Where the popped-in card stops, from the screen's right edge: clear of the 48px history strip.</summary>
 	[Export] private float PopInRightMargin = 70f;
 
-	/// <summary>How opaque the announced card rests in the slot once landed, so the board under it stays readable.</summary>
-	[Export] private float RestingAlpha = 0.2f;
-	private Tween _fade;
+	/// <summary>How opaque the slot goes while hovered, so the country or unit under it can be seen and clicked.</summary>
+	[Export] private float HoverAlpha = 0.2f;
+	private const float HoverFadeSeconds = 0.15f;
 
 	// The announced card outlives a prompt that borrows the slot; _showingAnnouncement is whether it is on screen now.
 	private int _announcedCardId = -1;
@@ -140,7 +140,6 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	{
 		if (Panel == null) return;
 		EndAnnouncement();
-		SetOpaque();
 
 		if (cardId > -1)
 		{
@@ -162,7 +161,6 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	{
 		if (Panel == null) return;
 		EndAnnouncement();
-		SetOpaque();
 
 		CardSceneNode.Visible = true;
 		CardSceneNode.ShowCard(cardId);
@@ -177,7 +175,6 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	{
 		if (Panel == null) return;
 		EndAnnouncement();
-		SetOpaque();
 
 		CardSceneNode.Visible = true;
 		CardSceneNode.ShowFace(face);
@@ -273,8 +270,6 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 
 		double slide = GameSettings.ShowHideSeconds;
 		if (slide <= 0) return Task.CompletedTask;
-		// Full strength while it flies in; EndFlight fades it once it has landed.
-		SetOpaque();
 
 		// The slot is laid out now but kept transparent, so its rect has settled by the time the card lands.
 		Column.Modulate = Colors.Transparent;
@@ -355,30 +350,16 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 		Label.Text = _announcedTitle;
 		TriggerLabelPanel.Visible = true;
 		_showingAnnouncement = true;
-		FadeToRest();
 	}
 
-	/// <summary>Fade the slot down to <see cref="RestingAlpha"/>; only an announced card rests there faded.</summary>
-	private void FadeToRest()
+	// Polled rather than signalled: the slot is click-through, so it never gets mouse_entered.
+	public override void _Process(double delta)
 	{
-		SetOpaque();
-		double seconds = GameSettings.ShowHideSeconds;
-		if (seconds <= 0) { SetSlotAlpha(RestingAlpha); return; }
-		_fade = CreateTween().SetParallel();
-		_fade.TweenProperty(Panel, "modulate:a", RestingAlpha, seconds);
-		_fade.TweenProperty(TriggerLabelPanel, "modulate:a", RestingAlpha, seconds);
-	}
-
-	/// <summary>Back to full strength at once: a prompt's context has to be read.</summary>
-	private void SetOpaque()
-	{
-		_fade?.Kill();
-		_fade = null;
-		SetSlotAlpha(1f);
-	}
-
-	private void SetSlotAlpha(float alpha)
-	{
+		if (Panel == null) return;
+		Vector2 mouse = GetGlobalMousePosition();
+		bool hovered = Panel.IsVisibleInTree() && (Panel.GetGlobalRect().HasPoint(mouse)
+			|| (TriggerLabelPanel.IsVisibleInTree() && TriggerLabelPanel.GetGlobalRect().HasPoint(mouse)));
+		float alpha = Mathf.MoveToward(Panel.Modulate.A, hovered ? HoverAlpha : 1f, (float)delta / HoverFadeSeconds);
 		Panel.Modulate = new Color(1, 1, 1, alpha);
 		TriggerLabelPanel.Modulate = new Color(1, 1, 1, alpha);
 	}
@@ -402,14 +383,12 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// <summary>Land at once: drop the flying copy, reveal the slot and release the animation awaiting it.</summary>
 	private void EndFlight()
 	{
-		bool landed = _flight != null && _showingAnnouncement;
 		_flight?.Kill();
 		_flight = null;
 		Flight.Visible = false;
 		Column.Modulate = Colors.White;
 		_flightDone?.TrySetResult();
 		_flightDone = null;
-		if (landed) FadeToRest();
 	}
 
 	// ── Focus viewport ───────────────────────────────
