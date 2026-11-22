@@ -11,7 +11,6 @@ public partial class PileDetailPopup : Control, LoadableUI
 {
 	public static PileDetailPopup Current;
 
-	private const float GapFromPill = 10f;
 	private const float ScreenMargin = 10f;
 	/// <summary>Must match PileGrid's h/v_separation in the scene.</summary>
 	private const float CardGap = 6f;
@@ -34,6 +33,8 @@ public partial class PileDetailPopup : Control, LoadableUI
 
 	/// <summary>The pill the popup belongs to; <see cref="HideFor"/> from any other pill is a no-op.</summary>
 	private Control owner;
+	/// <summary>The flag the pill sits on: the popup's left edge lines up with its right side.</summary>
+	private Control flag;
 
 	public override void _Ready()
 	{
@@ -56,10 +57,11 @@ public partial class PileDetailPopup : Control, LoadableUI
 		if (Current == this) Current = null;
 	}
 
-	/// <summary>Open the popup beside <paramref name="pill"/> showing <paramref name="cardIds"/>.</summary>
-	public void ShowFor(Control pill, string title, IEnumerable<int> cardIds, string footer = null)
+	/// <summary>Open the popup for <paramref name="pill"/>, against the right side of <paramref name="flag"/>.</summary>
+	public void ShowFor(Control pill, Control flag, string title, IEnumerable<int> cardIds, string footer = null)
 	{
 		owner = pill;
+		this.flag = flag;
 		// CardFace.ForCard NREs on an id that is not in game state. ShowCard draws a face-down
 		// Response as its card back, so an opponent's responses stay hidden.
 		List<int> ids = cardIds.Where(id => CardState.ForId(id) != null).ToList();
@@ -68,7 +70,7 @@ public partial class PileDetailPopup : Control, LoadableUI
 		EmptyLabel.Visible = ids.Count == 0;
 		Grid.Visible = ids.Count > 0;
 
-		Vector2 cardSize = LayoutGrid(ids.Count, pill);
+		Vector2 cardSize = LayoutGrid(ids.Count, flag);
 		for (int i = 0; i < ids.Count; i++)
 		{
 			CardScene slot = CardAt(i);
@@ -84,19 +86,19 @@ public partial class PileDetailPopup : Control, LoadableUI
 		FooterLabel.CustomMinimumSize = new Vector2(Mathf.Max(TextWidthAlone, gridWidth), 0);
 
 		DetailPanel.Visible = true;
-		Reposition(pill);
+		Reposition(flag);
 		SetProcess(true);
 	}
 
-	/// <summary>Picks the column count that draws <paramref name="count"/> cards largest in the room right of the pill.</summary>
-	private Vector2 LayoutGrid(int count, Control pill)
+	/// <summary>Picks the column count that draws <paramref name="count"/> cards largest in the room right of the flag.</summary>
+	private Vector2 LayoutGrid(int count, Control flag)
 	{
 		Grid.Columns = Mathf.Max(count, 1);
 		if (count <= 1) return FullCardSize;
 
 		Rect2 bounds = GetGlobalRect();
 		float chrome = MarginChrome + (DetailPanel.GetThemeStylebox("panel")?.GetMinimumSize().X ?? 0f);
-		float width = bounds.End.X - ScreenMargin - (pill.GetGlobalRect().End.X + GapFromPill) - chrome;
+		float width = bounds.End.X - ScreenMargin - flag.GetGlobalRect().End.X - chrome;
 		float height = bounds.Size.Y - 2 * ScreenMargin - chrome - TextReserve;
 
 		float bestScale = 0f;
@@ -139,12 +141,12 @@ public partial class PileDetailPopup : Control, LoadableUI
 	public override void _Process(double delta)
 	{
 		if (owner == null || !IsInstanceValid(owner) || !owner.IsVisibleInTree()
-			|| !owner.GetGlobalRect().HasPoint(owner.GetGlobalMousePosition()))
+			|| !owner.GetGlobalRect().HasPoint(owner.GetGlobalMousePosition()) || !IsInstanceValid(flag))
 		{
 			Release();
 			return;
 		}
-		Reposition(owner);
+		Reposition(flag);
 	}
 
 	private void Release()
@@ -154,15 +156,15 @@ public partial class PileDetailPopup : Control, LoadableUI
 		if (DetailPanel != null) DetailPanel.Visible = false;
 	}
 
-	/// <summary>Right of the pill — the flags hug the left edge — centred on it and clamped on screen.</summary>
-	private void Reposition(Control pill)
+	/// <summary>Left edge on the flag's right side, centred on the flag and clamped on screen.</summary>
+	private void Reposition(Control flag)
 	{
 		Vector2 size = DetailPanel.GetCombinedMinimumSize();
 		DetailPanel.Size = size;
 
-		Rect2 anchor = pill.GetGlobalRect();
+		Rect2 anchor = flag.GetGlobalRect();
 		Rect2 bounds = GetGlobalRect();
-		float x = Mathf.Min(anchor.End.X + GapFromPill, bounds.End.X - size.X - ScreenMargin);
+		float x = Mathf.Min(anchor.End.X, bounds.End.X - size.X - ScreenMargin);
 		float y = Mathf.Clamp(
 			anchor.Position.Y + anchor.Size.Y * 0.5f - size.Y * 0.5f,
 			bounds.Position.Y + ScreenMargin,

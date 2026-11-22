@@ -333,11 +333,11 @@ public partial class FactionInfoRow : Control
 		if (!HasPilePopup || FactionState?.DeckState is not { } deckState) return;
 		string adjective = FactionState.FactionData.FactionAdjactiveLabel;
 		if (pile == DeckButton)
-			PileDetailPopup.Current.ShowFor(pile, $"{adjective} Discard Pile", deckState.DiscardedCardIds);
+			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Discard Pile", deckState.DiscardedCardIds);
 		else if (pile == StatusButton)
-			PileDetailPopup.Current.ShowFor(pile, $"{adjective} Status Cards", deckState.StatusCardIds, IgnoredFooter(deckState.StatusCardIds));
+			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Status Cards", deckState.StatusCardIds, IgnoredFooter(deckState.StatusCardIds));
 		else
-			PileDetailPopup.Current.ShowFor(pile, $"{adjective} Response Cards", deckState.ResponseCardIds);
+			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Response Cards", deckState.ResponseCardIds);
 	}
 
 	/// <summary>One line per status card that a card in play ignores, e.g. "Blitzkrieg: ignored by Hobart's Funnies".</summary>
