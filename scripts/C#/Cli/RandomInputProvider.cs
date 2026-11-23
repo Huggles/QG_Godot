@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -205,6 +207,126 @@ public sealed class RandomInputProvider : IInputProvider
 
     public async Task Resolve(InputRequest request)
     {
+        Decision decision = OffThread ? await DecideAsync(request, preferInline: request.IsEmptyReactionWindow) : Decide(request);
+        if (decision != null) Apply(request, decision);
+
+        if (_yieldEvery > 0 && Answered % _yieldEvery == 0)
+        await Task.Yield();
+    }
+
+    /// <summary>
+    /// <c>bot_off_thread=true</c>: the sim decides every non-trivial prompt on a worker thread, the way
+    /// an AI seat does (<see cref="AiSeatInputProvider"/>). Off by default, because it costs a frame
+    /// per prompt; it exists so the threaded path can be checked against the inline one — the same
+    /// seed pair must play the same game either way.
+    /// </summary>
+    private static readonly bool OffThread = CliArgs.GetBool("bot_off_thread");
+
+    /// <summary>
+    /// What the bot chose for one prompt, decided by <see cref="Decide"/> and not yet written into the
+    /// request. Opaque outside this class: the only thing to do with one is hand it to
+    /// <see cref="Apply"/>.
+    /// </summary>
+    public sealed class Decision
+    {
+        internal InputRequestSpec Spec;
+        internal BotAgenda Agenda;
+        internal BotAdvice Advice;
+        internal BotRuleEngine Engine;
+        internal List<ScoredOption> Without;
+
+        /// <summary>The options to take, or null to pass.</summary>
+        internal List<CliOption> Chosen;
+    }
+
+    /// <summary>
+    /// Admits one decision at a time, process-wide. Deciding reads the live board and writes the
+    /// valuer's static caches (<see cref="ProjectionValuer"/>, <see cref="DelayedCardValue"/>), none of
+    /// which is thread-safe; on the main thread that was free, because nothing else runs while a
+    /// synchronous decision does. Off it, two seats prompted at once (CardPlayRound asks every group in
+    /// parallel) would otherwise share those caches from two threads.
+    ///
+    /// Released by whoever ran the decision — the worker itself when off-thread, never a continuation —
+    /// so nothing waiting on the gate depends on the main thread being free.
+    /// </summary>
+    private static readonly SemaphoreSlim ThinkGate = new(1, 1);
+
+    /// <summary>Whether a decision is running (or holds the gate) right now, on any thread.</summary>
+    public static bool IsThinking => ThinkGate.CurrentCount == 0;
+
+    /// <summary>
+    /// <see cref="Decide"/> on a thread-pool thread, so a slow valuation (about a second on a big board)
+    /// does not freeze the frame. The returned task resumes on the caller's context — the main thread
+    /// under Godot — so <see cref="Apply"/>, which writes the request, never runs on the worker.
+    ///
+    /// <paramref name="preferInline"/>: decide on the calling thread when no other decision is running.
+    /// For prompts with one obvious answer (an empty reaction window, dozens a turn) a hop to the pool
+    /// and back would cost a frame each and buy nothing.
+    ///
+    /// The live board must not change until the task completes. While the host is waiting on this
+    /// answer it does not; when the host stops waiting without it (a parallel prompt withdrawn because a
+    /// team member played first), NetworkApi calls <see cref="Settle"/> before carrying on.
+    ///
+    /// Null when the host stopped waiting for this answer before the decision could start (see
+    /// <see cref="Settle"/>); there is then nothing to apply.
+    /// </summary>
+    public async Task<Decision> DecideAsync(InputRequest request, bool preferInline)
+    {
+        if (preferInline && ThinkGate.Wait(0))
+        {
+            try { return Decide(request); }
+            finally { ThinkGate.Release(); }
+        }
+
+        // Resumes on the main thread, which is what makes the check below and Settle's lookup agree:
+        // both run there, so a decision either starts before the host clears the request (and is
+        // found in InFlight) or sees it cleared and does not start.
+        await ThinkGate.WaitAsync();
+        if (NetworkApi.Instance is { } network && !network.IsAwaitingInput(request.Id))
+        {
+            ThinkGate.Release();
+            return null;
+        }
+
+        Task<Decision> running = Task.Run(() =>
+        {
+            try { return Decide(request); }
+            finally { ThinkGate.Release(); }
+        });
+
+        string id = request.Id;
+        if (id != null) InFlight[id] = running;
+        try { return await running; }
+        finally { if (id != null) InFlight.TryRemove(id, out _); }
+    }
+
+    /// <summary>Off-thread decisions running now, by the <see cref="InputRequest.Id"/> they answer.</summary>
+    private static readonly ConcurrentDictionary<string, Task> InFlight = new();
+
+    /// <summary>
+    /// Wait for the off-thread decision answering <paramref name="requestId"/>, if one is running. Called
+    /// by the host when it stops waiting for that answer without receiving it: a parallel prompt
+    /// withdrawn because another team member played first, a seat changing hands, a timeout. The game
+    /// is about to move the board on, and must not while a worker is still reading it.
+    ///
+    /// Waits at most one decision (about a second on a big board); its answer is then sent and dropped
+    /// as stale, exactly as a withdrawn human prompt's is. A decision that has not started yet never
+    /// will: <see cref="DecideAsync"/> checks the request is still awaited first.
+    /// </summary>
+    public static async Task Settle(string requestId)
+    {
+        if (requestId == null || !InFlight.TryGetValue(requestId, out Task running)) return;
+        try { await running; }
+        catch { /* reported by the decision's own caller */ }
+    }
+
+    /// <summary>
+    /// Choose an answer to <paramref name="request"/> without answering it. Reads the game and forks of
+    /// it; writes nothing the game can see, and touches no node — which is what lets
+    /// <see cref="DecideAsync"/> run it off the main thread.
+    /// </summary>
+    public Decision Decide(InputRequest request)
+    {
         InputRequestSpec spec = InputRequestSpec.For(request);
         Answered++;
 
@@ -226,22 +348,26 @@ public sealed class RandomInputProvider : IInputProvider
             foreach (ScoredOption option in scored) spec.Options.Add(option.Option);
         }
 
-        if (ShouldPass(spec, request, advice))
+        List<CliOption> chosen = ShouldPass(spec, request, advice) ? null : Choose(engine, spec, scored, advice);
+        return new Decision { Spec = spec, Agenda = agenda, Advice = advice, Engine = engine, Without = without, Chosen = chosen };
+    }
+
+    /// <summary>Write a <see cref="Decide"/>d answer into <paramref name="request"/>. Main thread only.</summary>
+    public void Apply(InputRequest request, Decision decision)
+    {
+        InputRequestSpec spec = decision.Spec;
+        if (decision.Chosen == null)
         {
             spec.ApplyPass(request);
             Passed++;
-            Trace(spec, null, advice, agenda);
+            Trace(spec, null, decision.Advice, decision.Agenda);
         }
         else
         {
-            List<CliOption> chosen = Choose(engine, spec, scored, advice);
-            spec.Apply(request, chosen);
-            Trace(spec, chosen, advice, agenda);
-            if (without != null) TraceDifference(spec, chosen, advice, without, engine);
+            spec.Apply(request, decision.Chosen);
+            Trace(spec, decision.Chosen, decision.Advice, decision.Agenda);
+            if (decision.Without != null) TraceDifference(spec, decision.Chosen, decision.Advice, decision.Without, decision.Engine);
         }
-
-        if (_yieldEvery > 0 && Answered % _yieldEvery == 0)
-        await Task.Yield();
     }
 
     /// <summary>

@@ -510,6 +510,7 @@ public partial class NetworkApi : Node
                 // connection is gone, so there is no prompt of its to tear down.
                 DebugUtilities.PrintPeer($"Re-sending {inputRequest.GetType().Name} — its seat changed hands");
                 ClearPendingInput(pendingId, pending);
+                await RandomInputProvider.Settle(pendingId);
                 AnnounceInputClosed(inputRequest);
                 continue;
             }
@@ -528,6 +529,7 @@ public partial class NetworkApi : Node
                 // for. The `Peer != 0` guard keeps it that way; the no-session case falls through to
                 // AbortRemoteInput's own local-release branch.
                 ClearPendingInput(pendingId, pending);
+                await RandomInputProvider.Settle(pendingId);
                 if (pending.Peer != 0 || Multiplayer?.MultiplayerPeer == null)
                     AbortRemoteInput(pending.Peer);
                 AnnounceInputClosed(inputRequest);
@@ -543,6 +545,7 @@ public partial class NetworkApi : Node
             if (!wasForced && ConnectionMonitor.Instance?.IsSeatAbsent(pending.Peer) == true)
             {
                 ClearPendingInput(pendingId, pending);
+                await RandomInputProvider.Settle(pendingId);
                 continue;
             }
 
@@ -560,6 +563,7 @@ public partial class NetworkApi : Node
             // (the opening discard) a blanket abort would tear down the modal of every player still
             // deciding, not just the one that timed out.
             ClearPendingInput(pendingId, pending);
+            await RandomInputProvider.Settle(pendingId);
             AbortRemoteInput(pending.Peer);
             AnnounceInputClosed(inputRequest);
             GameFlow.Instance?.ClearCurrentInputRequest();
@@ -644,6 +648,14 @@ public partial class NetworkApi : Node
         ClearPendingInput(id, pending);
         GameFlow.Instance?.ClearCurrentInputRequest();
     }
+
+    /// <summary>
+    /// Whether the host is still waiting on an answer to this attempt (<paramref name="id"/> is the
+    /// attempt's <see cref="InputRequest.Id"/>). A bot deciding off the main thread asks this before
+    /// it starts: once an attempt is cleared — answered elsewhere, withdrawn, handed to another seat —
+    /// the game may move the board on, and a decision started then would read it mid-change.
+    /// </summary>
+    public bool IsAwaitingInput(string id) => id != null && _pendingInputs.ContainsKey(id);
 
     /// <summary>
     /// Drop the entry only if it is still the one <paramref name="pending"/> opened. The reference

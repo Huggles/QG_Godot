@@ -136,7 +136,10 @@ public partial class CliSession : Node
 
         SubscribeOnce();
         AnnounceStartOnce();
-        _quietFrames++;
+        // A bot deciding on a worker thread (bot_off_thread=true) is work in progress, not a stall:
+        // inline, the same decision would have held the frame and no frames would have passed.
+        if (RandomInputProvider.IsThinking) _quietFrames = 0;
+        else _quietFrames++;
 
         // Before the stdin drain: a sim run has no script, so stdin is at EOF from the first frame
         // and the rule at the bottom of this method would quit before the game ever started. The
