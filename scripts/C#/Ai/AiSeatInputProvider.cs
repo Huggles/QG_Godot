@@ -48,32 +48,40 @@ public sealed class AiSeatInputProvider : IInputProvider
         }
 
         int think = ThinkTimeMs(request);
-        if (think > 0)
-        {
-            int generation = ErrorReporter.SessionGeneration;
-
-            // Borrow the watcher treatment for the pause. From the human's point of view "Waiting on
-            // Germany input…" is exactly true, even though the prompt is being answered inside their
-            // own process. Only while actually pausing, or it would flicker on every empty reaction
-            // window; MarkInputClosed is idempotent, so the AnnounceInputClosed broadcast that follows
-            // is harmless.
-            InputRequest.MarkInputOpen(request.Answering);
-            try
-            {
-                await Task.Delay(think);
-            }
-            finally
-            {
-                InputRequest.MarkInputClosed(request.Answering);
-            }
-
-            // Quitting mid-pause frees the session under us, and the bot would then read cards off a
-            // null GameSession. Unwind benignly instead, as NetworkApi does after its own awaits.
-            ErrorReporter.ThrowIfSessionAbandoned(generation);
-        }
+        int generation = ErrorReporter.SessionGeneration;
 
         try
         {
+            if (seat.Bot is RandomInputProvider bot)
+            {
+                // The bot starts deciding as the pause starts, off the main thread, so its thinking
+                // (about a second on a big board) is spent inside the pause instead of freezing the
+                // frame after it. Prompts with no pause are the trivial ones, decided inline when
+                // nothing else is thinking. Applied on the main thread: the await resumes there.
+                Task<RandomInputProvider.Decision> thinking = bot.DecideAsync(request, preferInline: think == 0);
+                RandomInputProvider.Decision decision;
+                try
+                {
+                    decision = await Paced(request, think, thinking);
+                }
+                catch (System.Exception) when (generation != ErrorReporter.SessionGeneration)
+                {
+                    // The session was torn down while the bot was reading it, and the read failed on
+                    // what was freed. Not a bot bug: unwind as an abandoned session.
+                    ErrorReporter.ThrowIfSessionAbandoned(generation);
+                    throw;
+                }
+
+                // Quitting mid-pause frees the session under us. Unwind benignly instead of answering
+                // into a game that is gone, as NetworkApi does after its own awaits.
+                if (generation != ErrorReporter.SessionGeneration) ErrorReporter.ThrowIfSessionAbandoned(generation);
+                // Null: the host stopped waiting before the bot could start, so the answer is not wanted.
+                if (decision != null) bot.Apply(request, decision);
+                return;
+            }
+
+            await Paced(request, think, Task.FromResult(0));
+            if (think > 0) ErrorReporter.ThrowIfSessionAbandoned(generation);
             await seat.Bot.Resolve(request);
         }
         catch (System.Exception e)
@@ -85,6 +93,33 @@ public sealed class AiSeatInputProvider : IInputProvider
             ErrorReporter.Report(e, $"AI seat answering {request.GetType().Name}", request.TargetFaction);
             ErrorReporter.MarkReported(e);
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Wait out the think pause and <paramref name="thinking"/>, whichever is longer, and return what
+    /// <paramref name="thinking"/> produced.
+    ///
+    /// Borrows the watcher treatment while pausing. From the human's point of view "Waiting on Germany
+    /// input…" is exactly true, even though the prompt is being answered inside their own process. Only
+    /// when there is a pause, or it would flicker on every empty reaction window; MarkInputClosed is
+    /// idempotent, so the AnnounceInputClosed broadcast that follows is harmless.
+    /// </summary>
+    private static async Task<T> Paced<T>(InputRequest request, int think, Task<T> thinking)
+    {
+        if (think <= 0) return await thinking;
+
+        InputRequest.MarkInputOpen(request.Answering);
+        try
+        {
+            // Both are awaited even if the delay were to throw, so a failed decision is never left
+            // unobserved on the pool.
+            await Task.WhenAll(Task.Delay(think), thinking);
+            return await thinking;
+        }
+        finally
+        {
+            InputRequest.MarkInputClosed(request.Answering);
         }
     }
 

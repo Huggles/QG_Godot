@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://duggxqhdf1mqj"
-path="res://.godot/imported/ResponseTagIcon.svg-81a7354ac719c7cfa99850fc5fd13300.ctex"
+uid="uid://cfmxapk60pv7y"
+path="res://.godot/imported/Japan_CardBackMini.svg-a91f739f4e85801103f791e7241b4925.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/Other/Icons/ResponseTagIcon.svg"
-dest_files=["res://.godot/imported/ResponseTagIcon.svg-81a7354ac719c7cfa99850fc5fd13300.ctex"]
+source_file="res://assets/factions/japan/cards/Japan_CardBackMini.svg"
+dest_files=["res://.godot/imported/Japan_CardBackMini.svg-a91f739f4e85801103f791e7241b4925.ctex"]
 
 [params]
 

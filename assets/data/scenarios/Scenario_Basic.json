@@ -4,7 +4,7 @@
   "startingFaction": "GERMANY",
   "startingRound": 1,
   "maxRounds": 20,
-  "openingDiscard": false,
+  "openingDiscard": true,
   "factions": {
     "GERMANY": {
       "unitDeployments": [

@@ -191,4 +191,4 @@ offset_top = 8.0
 offset_right = 247.0
 offset_bottom = 400.0
 mouse_filter = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 26

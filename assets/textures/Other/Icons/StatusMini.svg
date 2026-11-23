@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="45" height="63" viewBox="0 0 45 63">
+  <!-- A played status card, face up, for the mini fan on the faction flags; the same for every faction.
+       Red under a white "Status!" title bar, with a strip of the beige text box at the bottom. The flag
+       covers the bottom third of a fanned card, so only the top of the beige shows. -->
+  <defs><clipPath id="card"><rect x="1.5" y="1.5" width="42" height="60" rx="5"/></clipPath></defs>
+  <g clip-path="url(#card)">
+    <rect width="45" height="63" fill="#efe2c0"/>
+    <rect width="45" height="38" fill="#b3201c"/>
+    <path d="M0 38 H45" stroke="#1a120c" stroke-width="2.5"/>
+    <rect x="11" y="44" width="23" height="3.5" rx="1.5" fill="#7a6650"/>
+    <rect x="11" y="51" width="16" height="3.5" rx="1.5" fill="#7a6650"/>
+  </g>
+  <rect x="6" y="6" width="33" height="9" rx="2.5" fill="#f2f2ee" stroke="#1a120c" stroke-width="2"/>
+  <rect x="1.5" y="1.5" width="42" height="60" rx="5" fill="none" stroke="#1a120c" stroke-width="3"/>
+</svg>

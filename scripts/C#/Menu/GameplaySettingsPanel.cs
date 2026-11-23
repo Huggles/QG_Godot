@@ -2,7 +2,8 @@ using Godot;
 
 /// <summary>
 /// The Gameplay tab of <see cref="SettingsDialog"/>: presentation speed, debug verbosity, whether
-/// display-only modals dismiss themselves, how big card modals draw their cards, whether the hand-play
+/// display-only modals dismiss themselves, how big card modals draw their cards, how big the faction
+/// banners are drawn, whether the hand-play
 /// fan shows the active table cards, and whether empty reaction windows are answered for you (the
 /// default of each faction's reaction toggle).
 ///
@@ -25,6 +26,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
     private CheckButton  _pennantsOpen;
     private OptionButton _chatHide;
     private OptionButton _modalCardSize;
+    private OptionButton _bannerSize;
 
     public override void _Ready() => Guard.Try(ReadyInternal, "GameplaySettingsPanel._Ready");
 
@@ -38,6 +40,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _pennantsOpen = GetNode<CheckButton>("%PennantsOpenToggle");
         _chatHide    = GetNode<OptionButton>("%ChatHideOption");
         _modalCardSize = GetNode<OptionButton>("%ModalCardSizeOption");
+        _bannerSize  = GetNode<OptionButton>("%BannerSizeOption");
 
         // The picker entries are authored in the scene, and their *ids* — not their row order — are
         // the enum values the handlers below read back. Same guard as VideoSettingsPanel applies to
@@ -57,6 +60,7 @@ public partial class GameplaySettingsPanel : VBoxContainer
         _chatHide.Selected         = _chatHide.GetItemIndex(settings.ChatHideSeconds);
         // Ids are the percentages themselves, looked up by id like the chat timer.
         _modalCardSize.Selected    = _modalCardSize.GetItemIndex(settings.ModalCardPercent);
+        _bannerSize.Selected       = _bannerSize.GetItemIndex(settings.BannerPercent);
 
         // Wired after seeding: assigning Selected/ButtonPressed would otherwise write the value
         // straight back out again on open.
@@ -68,6 +72,12 @@ public partial class GameplaySettingsPanel : VBoxContainer
             GameSettings.Instance.SetChatHideSeconds(_chatHide.GetItemId((int)index));
         _modalCardSize.ItemSelected += index =>
             GameSettings.Instance.SetModalCardPercent(_modalCardSize.GetItemId((int)index));
+        // Resizes the flagpole straight away when changed mid-game.
+        _bannerSize.ItemSelected += index =>
+        {
+            GameSettings.Instance.SetBannerPercent(_bannerSize.GetItemId((int)index));
+            FactionsContainer.Current?.ApplyBannerScale();
+        };
         _autoDismiss.Toggled += value =>
             GameSettings.Instance.SetAutoDismissModal(value);
         // The starting point of every faction's reaction toggle; a choice already made in a game stands.

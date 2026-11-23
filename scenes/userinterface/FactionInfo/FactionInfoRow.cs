@@ -4,7 +4,7 @@ using System.Linq;
 
 /// <summary>
 /// One faction in the flagpole column on the left: a pennant with the flag at the hoist, carrying the
-/// draw-deck, status and response counts, and a tail in the faction's colour tucked behind the flag.
+/// draw-deck count and fans of the status and response cards in play, and a tail in the faction's colour tucked behind the flag.
 /// Clicking the pennant slides the tail out to show the hand, the score and pieces in reserve, and the
 /// next click tucks it away. The faction whose turn it is flies hardest.
 /// </summary>
@@ -24,8 +24,6 @@ public partial class FactionInfoRow : Control
 	private HBoxContainer Pieces => GetNode<HBoxContainer>("%Pieces");
 	private Button HandButton => GetNode<Button>("%HandButton");
 	private Button DeckButton => GetNode<Button>("%DeckButton");
-	private Button StatusButton => GetNode<Button>("%StatusButton");
-	private Button ResponseButton => GetNode<Button>("%ResponseButton");
 	private HBoxContainer ArmyCell => GetNode<HBoxContainer>("%ArmyCell");
 	private TextureRect ArmyIcon => GetNode<TextureRect>("%ArmyIcon");
 	private TextureRect NavyIcon => GetNode<TextureRect>("%NavyIcon");
@@ -127,7 +125,7 @@ public partial class FactionInfoRow : Control
 	public override void _ExitTree()
 	{
 		// The row is rebuilt when players join or leave: drop the popup if one of these pills owns it.
-		if (HasPilePopup) foreach (Button pile in PileButtons) PileDetailPopup.Current.HideFor(pile);
+		if (HasPilePopup) foreach (Control pile in Piles) PileDetailPopup.Current.HideFor(pile);
 		if (EventBus.Instance != null)
 		{
 			EventBus.Instance.FactionScoredPoints -= OnFactionScoredPoints;
@@ -223,11 +221,7 @@ public partial class FactionInfoRow : Control
 		EventBus.Instance.NextStepStarted += OnNextStepStarted;
 		EventBus.Instance.GameChangeEventAfter += OnGameChangeEventAfter;
 		// Hover only, like the history badges: the popup never takes the mouse, so enter and exit drive it.
-		foreach (Button pile in PileButtons)
-		{
-			pile.MouseEntered += () => ShowPile(pile);
-			pile.MouseExited += () => { if (HasPilePopup) PileDetailPopup.Current.HideFor(pile); };
-		}
+		WirePileHover(DeckButton);
 		FactionInfoButton.Pressed += OnFactionInfoButtonPressed;
 		SetModulation();
 	}
@@ -239,7 +233,7 @@ public partial class FactionInfoRow : Control
 	private void ApplyInk()
 	{
 		Color hover = new(0.961f, 0.851f, 0.541f);
-		foreach (Button button in new[] { HandButton, DeckButton, StatusButton, ResponseButton })
+		foreach (Button button in new[] { HandButton, DeckButton })
 		{
 			button.AddThemeColorOverride("font_color", Ink);
 			button.AddThemeColorOverride("font_pressed_color", Ink);
@@ -323,18 +317,25 @@ public partial class FactionInfoRow : Control
 
 	// ── Pile popups ──────────────────────────────────────────────────────────
 
-	private Button[] PileButtons => [DeckButton, StatusButton, ResponseButton];
+	/// <summary>Everything that opens a pile popup on hover: the deck pill and the two card fans.</summary>
+	private IEnumerable<Control> Piles => new Control[] { DeckButton, _statusFan?.Zone, _responseFan?.Zone }.Where(pile => pile != null);
+
+	private void WirePileHover(Control pile)
+	{
+		pile.MouseEntered += () => ShowPile(pile);
+		pile.MouseExited += () => { if (HasPilePopup) PileDetailPopup.Current.HideFor(pile); };
+	}
 
 	private static bool HasPilePopup => IsInstanceValid(PileDetailPopup.Current);
 
-	/// <summary>Hovering a pill shows its pile in <see cref="PileDetailPopup"/>: the discard pile for the deck pill.</summary>
-	private void ShowPile(Button pile)
+	/// <summary>Hovering the deck pill or a fan shows its pile in <see cref="PileDetailPopup"/>: the discard pile for the deck pill.</summary>
+	private void ShowPile(Control pile)
 	{
 		if (!HasPilePopup || FactionState?.DeckState is not { } deckState) return;
 		string adjective = FactionState.FactionData.FactionAdjactiveLabel;
 		if (pile == DeckButton)
 			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Discard Pile", deckState.DiscardedCardIds);
-		else if (pile == StatusButton)
+		else if (pile == _statusFan?.Zone)
 			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Status Cards", deckState.StatusCardIds, IgnoredFooter(deckState.StatusCardIds));
 		else
 			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Response Cards", deckState.ResponseCardIds);
@@ -433,8 +434,116 @@ public partial class FactionInfoRow : Control
 		DeckState deckState = FactionState?.DeckState;
 		HandButton.Text = (deckState?.HandCardIds.Count ?? 0).ToString();
 		DeckButton.Text = (deckState?.DeckCardIds.Count ?? 0).ToString();
-		StatusButton.Text = (deckState?.StatusCardIds.Count ?? 0).ToString();
-		ResponseButton.Text = (deckState?.ResponseCardIds.Count ?? 0).ToString();
+		_statusFan ??= NewFan("StatusFan", MiniCardTextures.Status, Head / 4);
+		_responseFan ??= NewFan("ResponseFan", MiniCardTextures.Back(Faction), Head * 3 / 4);
+		SetFan(_statusFan, deckState?.StatusCardIds.Count ?? 0);
+		SetFan(_responseFan, deckState?.ResponseCardIds.Count ?? 0);
+	}
+
+	// ── Mini fans of cards in play ───────────────────────────────────────────
+
+	private static readonly Vector2 FanCardSize = new(15f, 21f);
+	/// <summary>How far each card's bottom edge sits below the flag's top edge, tucked behind the cloth.</summary>
+	private const float FanTuck = 6f;
+	/// <summary>How far below a card's bottom edge the cards turn around, which spreads them like a hand.</summary>
+	private const float FanPivotDrop = 10f;
+	/// <summary>The roomy spacing for a small hand; a big one squeezes tighter so the fan never outgrows its half of the flag.</summary>
+	private const float FanStep = 12f;
+	private const float FanTiltStep = 6f;
+	/// <summary>The outermost card never tilts further than this, however many cards are in the fan.</summary>
+	private const float FanMaxTilt = 15f;
+	/// <summary>Clearance kept between a fan and the edges of its half of the flag.</summary>
+	private const float FanEdgeMargin = 2f;
+
+	/// <summary>
+	/// One fan of played cards sticking out of the top of the flag (see <see cref="MiniCardTextures"/>):
+	/// status cards face up over the left half, response cards face down (their card back) over the
+	/// right. <see cref="Zone"/> is the hover target, an unrotated box around the part of the fan that
+	/// shows above the flag.
+	/// </summary>
+	private sealed class CardFan
+	{
+		public Control Zone;
+		public Texture2D Texture;
+		/// <summary>The middle of this fan's half of the flag.</summary>
+		public float CenterX;
+		public readonly List<TextureRect> Cards = new();
+		public int Shown = -1;
+	}
+
+	private CardFan _statusFan;
+	private CardFan _responseFan;
+
+	private CardFan NewFan(string name, Texture2D texture, float centerX)
+	{
+		CardFan fan = new()
+		{
+			Zone = new Control { Name = name, MouseFilter = MouseFilterEnum.Stop, Visible = false },
+			Texture = texture,
+			CenterX = centerX,
+		};
+		AddChild(fan.Zone);
+		// Behind the cloth, so the flag covers the cards' bottom edge and the player name stays clear.
+		MoveChild(fan.Zone, 0);
+		WirePileHover(fan.Zone);
+		return fan;
+	}
+
+	/// <summary>
+	/// Fans <paramref name="count"/> cards out of the top of the flag. No cards, no fan. A fan spreads up
+	/// to half the flag's width; past that, more cards just overlap more.
+	/// </summary>
+	private void SetFan(CardFan fan, int count)
+	{
+		if (fan.Shown == count) return;
+		fan.Shown = count;
+
+		while (fan.Cards.Count < count)
+		{
+			TextureRect card = new()
+			{
+				Texture = fan.Texture,
+				ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+				StretchMode = TextureRect.StretchModeEnum.Scale,
+				Size = FanCardSize,
+				PivotOffset = new Vector2(FanCardSize.X / 2, FanCardSize.Y + FanPivotDrop),
+				MouseFilter = MouseFilterEnum.Ignore,
+			};
+			fan.Zone.AddChild(card);
+			fan.Cards.Add(card);
+		}
+		for (int i = 0; i < fan.Cards.Count; i++) fan.Cards[i].Visible = i < count;
+		fan.Zone.Visible = count > 0;
+		if (count == 0)
+		{
+			if (HasPilePopup) PileDetailPopup.Current.HideFor(fan.Zone);
+			return;
+		}
+
+		// Spacing from the middle card out: half a fan to either side.
+		float half = (count - 1) / 2f;
+		float tilt = half > 0 ? Mathf.Min(FanTiltStep, FanMaxTilt / half) : 0f;
+		float outerTilt = Mathf.DegToRad(tilt * half);
+		// How far the outer card's top corner swings past its own centre once tilted.
+		float swing = (FanCardSize.Y + FanPivotDrop) * Mathf.Sin(outerTilt) + FanCardSize.X / 2 * Mathf.Cos(outerTilt);
+		float room = Head / 4 - FanEdgeMargin - swing;
+		float step = half > 0 ? Mathf.Clamp(room / half, 0f, FanStep) : 0f;
+
+		// The hover box: the fan's width, from the top of the cards down to the flag's top edge. Below
+		// that the pennant's own button takes the mouse.
+		float extent = half * step + swing;
+		float top = FanTuck - FanCardSize.Y - 1f;
+		fan.Zone.Position = new Vector2(fan.CenterX - extent, top);
+		fan.Zone.Size = new Vector2(2 * extent, -top);
+
+		Vector2 pivot = new Vector2(fan.CenterX, FanTuck + FanPivotDrop) - fan.Zone.Position;
+		for (int i = 0; i < count; i++)
+		{
+			TextureRect card = fan.Cards[i];
+			float offset = i - half;
+			card.Position = pivot + new Vector2(offset * step, 0) - card.PivotOffset;
+			card.RotationDegrees = offset * tilt;
+		}
 	}
 
 	/// <summary>Red when the pool is empty, amber at one, else the counter's own ink.</summary>
