@@ -137,7 +137,7 @@ public partial class GameMenuModal : MenuModal
 
             if (!immediate)
                 await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Save queued",
-                    $"'{displayName}' will be saved as soon as the current action finishes.");
+                    $"'{displayName}' will be saved as soon as the current action finishes. Stay in the game until it is saved.");
             else if (path != null)
                 await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Game saved", displayName);
             else
@@ -187,7 +187,46 @@ public partial class GameMenuModal : MenuModal
     /// </summary>
     private void OnQuitToMenuPressed()
     {
-        if (Resolved) return;
+        if (Resolved || _flowBusy) return;
+
+        // A queued save is only written at the next safe point, and leaving the session drops it. That
+        // point can be a prompt away, so waiting for it is not an option — say so instead of losing it.
+        if (GameFlow.Instance?.HasDeferredSave == true)
+        {
+            _flowBusy = true;
+            Guard.FireAndForget(ConfirmQuitWithQueuedSaveAsync, "GameMenuModal.QuitWithQueuedSave");
+            return;
+        }
+
+        QuitToMenu();
+    }
+
+    private async Task ConfirmQuitWithQueuedSaveAsync()
+    {
+        try
+        {
+            Visible = false;
+            bool quit = await MenuNotice.ShowConfirmAsync(GetTree().CurrentScene, "Save not written yet",
+                "Your save is waiting for the current action to finish and has not been written. " +
+                "Quit now and it will be lost.", "Quit anyway");
+
+            if (!IsInstanceValid(this) || Resolved) return;
+            if (quit)
+            {
+                GameFlow.Instance?.CancelDeferredSave();
+                QuitToMenu();
+                return;
+            }
+            Visible = true;
+        }
+        finally
+        {
+            if (IsInstanceValid(this)) _flowBusy = false;
+        }
+    }
+
+    private void QuitToMenu()
+    {
         Resolved = true;
         SceneFlow.ChangeScene(this, "res://scenes/menu/Menu.tscn", leaveSession: true);
     }
