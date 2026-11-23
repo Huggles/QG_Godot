@@ -9,6 +9,7 @@ public partial class FactionsContainer : Control
 
     private VBoxContainer Column => GetNode<VBoxContainer>("%FactionsColumn");
     private Panel Pole => GetNode<Panel>("%Pole");
+    private Control FactionsPole => GetNode<Control>("FactionsPole");
 
     public Dictionary<Faction, FactionInfoRow> FactionInfoNodes = new();
 
@@ -20,6 +21,7 @@ public partial class FactionsContainer : Control
 
     public override void _Ready()
     {
+        ApplyBannerScale();
         if(SessionIdentity.IsLocalAuthority(this))
         {
             DebugUtilities.PrintPeerFinest($"Setting up FactionsContainer for local player: {GetMultiplayerAuthority()}");
@@ -95,6 +97,15 @@ public partial class FactionsContainer : Control
         float rowHeight = FactionInfoNodes.Values.Sum(row => row.CustomMinimumSize.Y)
             + (playerFactions.Count - 1) * Column.GetThemeConstant("separation");
         Pole.Size = Pole.Size with { Y = rowHeight + 16f };
+    }
+
+    /// <summary>
+    /// Draws the flagpole, its banners and their card fans at the Faction Banner Size setting. Scaled
+    /// as one piece from the top of the pole, so the finial stays put and the column grows downward.
+    /// </summary>
+    public void ApplyBannerScale()
+    {
+        FactionsPole.Scale = Vector2.One * GameSettings.BannerScale;
     }
 
     /// <summary>Opens or closes every pennant at once, when the Open Faction Banners setting changes mid-game.</summary>

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://54y0hr0nflhm"
-path="res://.godot/imported/DeckTagIcon.svg-859bbccd93051552442a48249b52a96d.ctex"
+uid="uid://cyku6xyf5rt3a"
+path="res://.godot/imported/Italy_CardBackMini.svg-64399de37bcda32b43b3be84b8c6b237.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/Other/Icons/DeckTagIcon.svg"
-dest_files=["res://.godot/imported/DeckTagIcon.svg-859bbccd93051552442a48249b52a96d.ctex"]
+source_file="res://assets/factions/italy/cards/Italy_CardBackMini.svg"
+dest_files=["res://.godot/imported/Italy_CardBackMini.svg-64399de37bcda32b43b3be84b8c6b237.ctex"]
 
 [params]
 

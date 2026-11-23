@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dsj774jkpg0gk"
-path="res://.godot/imported/StatusTagIcon.svg-ddaa7c80df4e95697fc28e4cb5434d37.ctex"
+uid="uid://cb7d8qgiftmfh"
+path="res://.godot/imported/StatusMini.svg-4468f4bab05d2d6b309e82adddb754ae.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/Other/Icons/StatusTagIcon.svg"
-dest_files=["res://.godot/imported/StatusTagIcon.svg-ddaa7c80df4e95697fc28e4cb5434d37.ctex"]
+source_file="res://assets/textures/Other/Icons/StatusMini.svg"
+dest_files=["res://.godot/imported/StatusMini.svg-4468f4bab05d2d6b309e82adddb754ae.ctex"]
 
 [params]
 

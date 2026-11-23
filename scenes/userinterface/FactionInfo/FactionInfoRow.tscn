@@ -2,9 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cq68c552l1c6f" path="res://scenes/userinterface/FactionInfo/FactionInfoRow.cs" id="1_osvc4"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/HandCardsIcon.svg" id="3_hand"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/DeckTagIcon.svg" id="4_deck"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/StatusTagIcon.svg" id="5_status"]
-[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/ResponseTagIcon.svg" id="6_response"]
+[ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/DeckStackIcon.svg" id="4_deck"]
 [ext_resource type="Texture2D" path="res://assets/textures/Other/Icons/VictoryPointsIcon.svg" id="6_vp"]
 [ext_resource type="Script" uid="uid://nwhfij0f43sv" path="res://scenes/userinterface/FactionInfo/CardsAnimationControl.cs" id="7_0r4er"]
 [ext_resource type="Texture2D" uid="uid://cpfklff0i6sut" path="res://assets/factions/germany/cards/Germany_CardBack.png" id="7_48ey3"]
@@ -100,38 +98,6 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_chip")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_chip")
 text = "33"
 icon = ExtResource("4_deck")
-
-[node name="StatusButton" type="Button" parent="HeadArea/HeadCounts" unique_id=1709253810]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 17)
-layout_mode = 2
-size_flags_vertical = 4
-focus_mode = 0
-theme_override_constants/outline_size = 0
-theme_override_constants/h_separation = 2
-theme_override_constants/icon_max_width = 12
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_chip")
-theme_override_styles/hover = SubResource("StyleBoxFlat_chip")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_chip")
-text = "0"
-icon = ExtResource("5_status")
-
-[node name="ResponseButton" type="Button" parent="HeadArea/HeadCounts" unique_id=1709253811]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 17)
-layout_mode = 2
-size_flags_vertical = 4
-focus_mode = 0
-theme_override_constants/outline_size = 0
-theme_override_constants/h_separation = 2
-theme_override_constants/icon_max_width = 12
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_chip")
-theme_override_styles/hover = SubResource("StyleBoxFlat_chip")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_chip")
-text = "0"
-icon = ExtResource("6_response")
 
 [node name="TailClip" type="Control" parent="." unique_id=1366204001]
 unique_name_in_owner = true

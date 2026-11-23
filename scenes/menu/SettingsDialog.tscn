@@ -387,6 +387,44 @@ theme_override_font_sizes/font_size = 17
 text = "The faction banners down the left start slid open, showing each faction's hand, score and pieces in reserve. Click a banner to open or close it either way."
 autowrap_mode = 3
 
+[node name="BannerSizeSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BannerSizeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/BannerSizeSetting"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BannerSizeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/BannerSizeSetting/BannerSizeRow" unique_id=1904471043]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Faction Banner Size"
+
+[node name="BannerSizeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/BannerSizeSetting/BannerSizeRow" unique_id=1904471044]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+size_flags_vertical = 4
+selected = 2
+item_count = 5
+popup/item_0/text = "80%"
+popup/item_0/id = 80
+popup/item_1/text = "90%"
+popup/item_1/id = 90
+popup/item_2/text = "100%"
+popup/item_2/id = 100
+popup/item_3/text = "110%"
+popup/item_3/id = 110
+popup/item_4/text = "120%"
+popup/item_4/id = 120
+
+[node name="BannerSizeHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/BannerSizeSetting" unique_id=1904471045]
+layout_mode = 2
+theme_type_variation = &"MenuMuted"
+theme_override_font_sizes/font_size = 17
+text = "How big the flagpole and faction banners down the left are drawn, with the cards fanned out of each flag."
+autowrap_mode = 3
+
 [node name="ChatGap" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2

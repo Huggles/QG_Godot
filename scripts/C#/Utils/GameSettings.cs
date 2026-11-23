@@ -63,6 +63,11 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     private static readonly int[] ModalCardChoices = { 70, 80, 90, 100, 110, 120 };
 
+    /// <summary>Size of the flagpole with its faction banners and card fans, as a percentage of the authored size.</summary>
+    public int BannerPercent { get; private set; } = 100;
+
+    private static readonly int[] BannerChoices = { 80, 90, 100, 110, 120 };
+
     /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
     public string LastJoinIp { get; private set; } = "127.0.0.1";
 
@@ -128,6 +133,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public static bool IsShowActiveCardsInFan => Instance.ShowActiveCardsInFan;
     public static bool IsAskOnlyWhenICanReact => Instance.AskOnlyWhenICanReact;
     public static float ModalCardScale => Instance.ModalCardPercent / 100f;
+    public static float BannerScale => Instance.BannerPercent / 100f;
     public static bool IsDebugTeamsSwapped => OS.GetCmdlineUserArgs().Contains("swapped_teams=true");
 
     /// <summary>
@@ -203,6 +209,10 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     /// <summary>Same guard as <see cref="ValidChatHide"/>: only sizes the picker offers.</summary>
     private static int ValidModalCardPercent(int percent) => System.Array.IndexOf(ModalCardChoices, percent) >= 0 ? percent : 100;
+    public void SetBannerPercent(int percent)          { BannerPercent = ValidBannerPercent(percent); Save(); }
+
+    /// <summary>Same guard as <see cref="ValidChatHide"/>: only sizes the picker offers.</summary>
+    private static int ValidBannerPercent(int percent) => System.Array.IndexOf(BannerChoices, percent) >= 0 ? percent : 100;
     public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
 
     /// <summary>
@@ -295,6 +305,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
             FactionPennantsOpen  = config.GetValue(Section, "faction_pennants_open", false).As<bool>();
             ChatHideSeconds   = ValidChatHide(config.GetValue(Section, "chat_hide_seconds", 5).As<int>());
             ModalCardPercent  = ValidModalCardPercent(config.GetValue(Section, "modal_card_percent", 100).As<int>());
+            BannerPercent     = ValidBannerPercent(config.GetValue(Section, "banner_percent", 100).As<int>());
             LastJoinIp        = config.GetValue(Section, "last_join_ip", "127.0.0.1").AsString();
             _playerToken      = config.GetValue(Section, "player_token", "").AsString();
             LastJoinPort      = config.GetValue(Section, "last_join_port", MultiplayerLobby.DEFAULT_PORT).As<int>();
@@ -374,6 +385,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
         config.SetValue(Section, "faction_pennants_open", FactionPennantsOpen);
         config.SetValue(Section, "chat_hide_seconds",     ChatHideSeconds);
         config.SetValue(Section, "modal_card_percent",    ModalCardPercent);
+        config.SetValue(Section, "banner_percent",        BannerPercent);
         config.SetValue(Section, "last_join_ip",          LastJoinIp);
         config.SetValue(Section, "player_token",          _playerToken ?? "");
         config.SetValue(Section, "last_join_port",        LastJoinPort);

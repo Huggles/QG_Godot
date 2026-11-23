@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="45" height="63" viewBox="0 0 45 63">
+  <!-- Any faction without its own: a played response card, face down, for the mini fan on the faction flags. A card back in
+       the player colour (#8a8a86) with an inner frame and a diamond in a lighter shade of it. -->
+  <rect x="1.5" y="1.5" width="42" height="60" rx="5" fill="#8a8a86"/>
+  <rect x="7" y="7" width="31" height="49" rx="3" fill="none" stroke="#cacac9" stroke-width="2.5"/>
+  <path d="M22.5 17 L32 31.5 L22.5 46 L13 31.5 Z" fill="#cacac9" stroke="#1a120c" stroke-width="1.5" stroke-linejoin="round"/>
+  <rect x="1.5" y="1.5" width="42" height="60" rx="5" fill="none" stroke="#1a120c" stroke-width="3"/>
+</svg>
