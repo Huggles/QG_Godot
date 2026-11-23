@@ -97,7 +97,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 			ParkButton.Pressed += OnParkButtonPressed;
 			ParkButton.Visible = false;
 			// Names the action, because the button itself is now just a glyph in the title bar.
-			ParkButton.TooltipText = "Hide — put this aside without answering it, and bring it back from the mini menu.";
+			ParkButton.TooltipText = "Hide — put this aside without answering it, and bring it back with Show my action.";
 		}
 	}
 
@@ -300,7 +300,15 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 	/// Mark this no longer put aside; the host's relayout is what actually places it again. Emits
 	/// nothing — a recall is not an answer.
 	/// </summary>
-	internal void Unpark() => IsParked = false;
+	internal void Unpark()
+	{
+		IsParked = false;
+		// A recall inside the park fade: the fade's callback no longer clears IsFadingOut, and the
+		// host's relayout waits on it, so drop the fade here or the stack never places anything again.
+		if (!IsFadingOut) return;
+		_activeTween?.Kill();
+		IsFadingOut = false;
+	}
 
 	/// <summary>
 	/// Escape, routed here by the host because only it knows which of several modals is on top.

@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://blt1trgctx001" path="res://scenes/userinterface/TriggerContext/TriggerContextDisplay.tscn" id="16_trigctx"]
 [ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
 [ext_resource type="Script" uid="uid://by4r72f7bleb0" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
+[ext_resource type="Script" uid="uid://ditr85wjgbind" path="res://scripts/C#/UI/ShowActionButton.cs" id="18_showaction"]
 [ext_resource type="Script" uid="uid://5xe5ni5ixdvo" path="res://scenes/userinterface/MiniMenu.cs" id="19_x2nnb"]
 [ext_resource type="PackedScene" uid="uid://b2aymnt6sg5po" path="res://scenes/userinterface/MarginTextureButton.tscn" id="22_x2nnb"]
 [ext_resource type="Texture2D" uid="uid://b5evjrup5daot" path="res://assets/textures/Other/eye_icon.png" id="23_eyeicon"]
@@ -229,6 +230,46 @@ theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
 [node name="Label" parent="Control/VBoxContainer/SkipUntilActivatableButton/ContentContainer" index="0" unique_id=1066952590]
+label_settings = SubResource("LabelSettings_skipbtn")
+
+[node name="ShowActionButton" parent="." unique_id=1187079460 instance=ExtResource("14_skipscene")]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(180, 30)
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 259.0
+offset_top = -38.0
+offset_right = 439.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("18_showaction")
+CaptionIcon = ExtResource("25_playedcards")
+HeldContentOffset = 2
+HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
+theme_override_styles/normal = SubResource("Skip_normal")
+theme_override_styles/hover = SubResource("Skip_hover")
+theme_override_styles/pressed = SubResource("Skip_hover")
+theme_override_styles/disabled = SubResource("Skip_disabled")
+
+[node name="NinePatchRect" parent="ShowActionButton" index="1" unique_id=171759037]
+visible = false
+offset_right = 3600.0
+offset_bottom = 600.0
+scale = Vector2(0.05, 0.05)
+TileScale = 0.05
+
+[node name="ContentContainer" parent="ShowActionButton" index="2" unique_id=1659046377]
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Label" parent="ShowActionButton/ContentContainer" index="0" unique_id=1066952590]
 label_settings = SubResource("LabelSettings_skipbtn")
 
 [node name="FactionsContainer" parent="." unique_id=21434147 instance=ExtResource("5_8bdsb")]
@@ -450,12 +491,6 @@ layout_mode = 2
 TextureNormal = ExtResource("23_eyeicon")
 TexturePressed = ExtResource("24_eyeiconp")
 
-[node name="ActiveInputRequestButton" parent="MiniMenu/MiniMenuContainer/MiniMenuHBox" unique_id=628711103 instance=ExtResource("22_x2nnb")]
-unique_name_in_owner = true
-layout_mode = 2
-TextureNormal = ExtResource("25_playedcards")
-TexturePressed = ExtResource("25_playedcards")
-
 [node name="DeckCompositionButton" parent="MiniMenu/MiniMenuContainer/MiniMenuHBox" unique_id=628711104 instance=ExtResource("22_x2nnb")]
 unique_name_in_owner = true
 layout_mode = 2
@@ -500,3 +535,4 @@ z_index = 150
 [editable path="Control/VBoxContainer/SkipTurnStepButton"]
 [editable path="Control/VBoxContainer/SkipRoundButton"]
 [editable path="Control/VBoxContainer/SkipUntilActivatableButton"]
+[editable path="ShowActionButton"]

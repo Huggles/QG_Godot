@@ -11,5 +11,8 @@ public sealed class CardPromptRecall : IRecallablePrompt
 
     public string RecallTooltip => "Show the cards you are being asked to choose from";
 
+    /// <summary>Browsing another hand is the one thing that draws over an open card prompt.</summary>
+    public bool IsOnScreen => !HandBrowsing.IsActive;
+
     public bool Recall() => InputManager.ShowCurrentCardPrompt();
 }

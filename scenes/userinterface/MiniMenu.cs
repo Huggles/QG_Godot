@@ -10,7 +10,7 @@ public partial class MiniMenu : Control
 	public Control MiniMenuContainer => GetNode<Control>("%MiniMenuHBox");
 	public MarginTextureButton GameMenuButton => GetNode<MarginTextureButton>("%GameMenuButton");
 	public MarginTextureButton VisibilityButton =>GetNode<MarginTextureButton>("%VisibilityButton");
-	public MarginTextureButton ActiveInputRequestButton => GetNode<MarginTextureButton>("%ActiveInputRequestButton");
+	public ShowActionButton ShowActionButton => GetNode<ShowActionButton>("%ShowActionButton");
 	public MarginTextureButton DeckCompositionButton => GetNode<MarginTextureButton>("%DeckCompositionButton");
 	public MarginTextureButton ScoreHistoryButton => GetNode<MarginTextureButton>("%ScoreHistoryButton");
 	public DeckCompositionPanel DeckCompositionPanel => GetNode<DeckCompositionPanel>("%DeckCompositionPanel");
@@ -37,6 +37,7 @@ public partial class MiniMenu : Control
 		{
 			_browsingFaction = value;
 			HandBrowsing.Current = value;
+			RefreshShowActionButton();
 		}
 	}
 	private Faction _browsingFaction = Faction.NONE;
@@ -49,7 +50,7 @@ public partial class MiniMenu : Control
 		// Unlike Escape, a click opens the menu even over a prompt: it is an explicit ask, and Resume hands the prompt back.
 		GameMenuButton.TextureButton.Pressed += () => GameMenuModal.Open(GetTree().CurrentScene);
 		VisibilityButton.TextureButton.Pressed += OnVisibilityButtonPressed;
-		ActiveInputRequestButton.TextureButton.Pressed += OnActiveInputRequestButtonPressed;
+		ShowActionButton.Pressed += OnShowActionButtonPressed;
 
 		// On the inner button: it stops the mouse, so a tooltip on the margin around it would never show.
 		DeckCompositionButton.TextureButton.TooltipText = "Cards in each deck at the start of the game";
@@ -87,11 +88,10 @@ public partial class MiniMenu : Control
 		EventBus.Instance.UserInterfaceReady += AddFactionButtons;
 
 		EventBus.Instance.CardPromptOpened += OnCardPromptOpened;
-		EventBus.Instance.CardPromptClosed += OnCardPromptClosed;
-		EventBus.Instance.RecallablePromptChanged += RefreshActiveInputRequestButton;
+		EventBus.Instance.RecallablePromptChanged += RefreshShowActionButton;
 
 		AddFactionButtons();
-		RefreshActiveInputRequestButton();
+		RefreshShowActionButton();
 	}
 
 	public override void _ExitTree()
@@ -106,8 +106,7 @@ public partial class MiniMenu : Control
 			EventBus.Instance.GameSessionStarted -= AddFactionButtons;
 			EventBus.Instance.UserInterfaceReady -= AddFactionButtons;
 			EventBus.Instance.CardPromptOpened -= OnCardPromptOpened;
-			EventBus.Instance.CardPromptClosed -= OnCardPromptClosed;
-			EventBus.Instance.RecallablePromptChanged -= RefreshActiveInputRequestButton;
+			EventBus.Instance.RecallablePromptChanged -= RefreshShowActionButton;
 		}
 	}
 
@@ -259,34 +258,25 @@ public partial class MiniMenu : Control
 		ScoreHistoryDialog.Open(GetTree().CurrentScene, faction);
 	}
 
-	private void OnActiveInputRequestButtonPressed()
+	/// <summary>Through CloseBrowsing while browsing, so the browsed hand is taken down rather than left under the prompt.</summary>
+	private void OnShowActionButtonPressed()
 	{
-		BrowsingFaction = Faction.NONE;
-		RecallablePrompts.Recall();
+		if (BrowsingFaction != Faction.NONE) CloseBrowsing();
+		else RecallablePrompts.Recall();
 	}
 
 	private void OnCardPromptOpened(int faction)
 	{
 		// The prompt drew itself over whatever was being browsed.
 		BrowsingFaction = Faction.NONE;
-		RefreshActiveInputRequestButton();
 	}
 
-	private void OnCardPromptClosed()
-	{
-		RefreshActiveInputRequestButton();
-	}
-
-	/// <summary>
-	/// One button for every kind of prompt that can be brought back — an open card prompt drawn over by
-	/// browsing, or a modal prompt the player put aside. <see cref="RecallablePrompts"/> is the single
-	/// slot both register with, so this does not grow a branch per prompt kind.
-	/// </summary>
-	private void RefreshActiveInputRequestButton()
+	/// <summary>Shown only while the prompt in <see cref="RecallablePrompts"/> is off screen; its tooltip names what comes back.</summary>
+	private void RefreshShowActionButton()
 	{
 		IRecallablePrompt prompt = RecallablePrompts.Current;
-		ActiveInputRequestButton.Disabled = prompt == null;
-		ActiveInputRequestButton.TooltipText = prompt?.RecallTooltip ?? "Nothing to bring back";
+		ShowActionButton.Visible = prompt is { IsOnScreen: false };
+		ShowActionButton.TooltipText = prompt?.RecallTooltip ?? "";
 	}
 
 	public void OnVisibilityButtonPressed()

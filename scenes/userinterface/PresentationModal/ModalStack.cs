@@ -200,6 +200,9 @@ public partial class ModalStack : Control, LoadableUI, IRecallablePrompt
 
 	public string RecallTooltip => "Show the choice you put aside";
 
+	/// <summary>The stack only holds the slot while a modal is parked, which is never on screen.</summary>
+	public bool IsOnScreen => false;
+
 	public bool Recall()
 	{
 		// The last parked entry is the one put away most recently, since parking appends.
