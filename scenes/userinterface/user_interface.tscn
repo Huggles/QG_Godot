@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://blt1inptmr001" path="res://scenes/userinterface/InputTimer/InputTimerDisplay.tscn" id="17_inptmr"]
 [ext_resource type="Script" uid="uid://by4r72f7bleb0" path="res://scripts/C#/UI/ReactionSkipScopeButton.cs" id="18_rskip"]
 [ext_resource type="Script" uid="uid://ditr85wjgbind" path="res://scripts/C#/UI/ShowActionButton.cs" id="18_showaction"]
+[ext_resource type="Material" uid="uid://ct1f7uc5i6gao" path="res://assets/materials/CardReflectionMaterial.tres" id="18_shine"]
 [ext_resource type="Script" uid="uid://5xe5ni5ixdvo" path="res://scenes/userinterface/MiniMenu.cs" id="19_x2nnb"]
 [ext_resource type="PackedScene" uid="uid://b2aymnt6sg5po" path="res://scenes/userinterface/MarginTextureButton.tscn" id="22_x2nnb"]
 [ext_resource type="Texture2D" uid="uid://b5evjrup5daot" path="res://assets/textures/Other/eye_icon.png" id="23_eyeicon"]
@@ -249,6 +250,7 @@ grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("18_showaction")
 CaptionIcon = ExtResource("25_playedcards")
+ShineMaterial = ExtResource("18_shine")
 HeldContentOffset = 2
 HoveredContentTint = Color(1.03, 0.91, 0.67, 1)
 theme_override_styles/normal = SubResource("Skip_normal")
