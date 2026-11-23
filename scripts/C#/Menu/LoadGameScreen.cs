@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,8 +13,10 @@ using System.Threading.Tasks;
 /// a scrollable list of code-built rows each carrying its own action button, a status line, and a back
 /// button.
 ///
-/// Loading does NOT go straight to the game. It hands the save to <see cref="MultiplayerLobby"/> the
-/// same way hosting does, because player-to-faction ownership is runtime-only and deliberately not
+/// What loading does depends on the save's <see cref="SaveGame.GameType"/>. A skirmish goes straight
+/// back into the game: it is offline, one human against bots, so there is nobody to wait for and no
+/// seat to re-claim (<see cref="StartSkirmish"/>). An online or ranked game does NOT go straight to the
+/// game. It hands the save to <see cref="MultiplayerLobby"/> the same way hosting does, because player-to-faction ownership is runtime-only and deliberately not
 /// authoritative in a save: people re-claim factions in the lobby before the board is restored, and
 /// they may pick differently from last time. Nothing about the replay depends on who ends up where —
 /// the host replays alone.
@@ -91,6 +94,7 @@ public partial class LoadGameScreen : Control
         nameLabel.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
         row.AddChild(nameLabel);
 
+        row.AddChild(MakeLabel(save.GameType.ToString(), 20, new Vector2(110, 0)));
         row.AddChild(MakeLabel(FormatSavedAt(save.SavedAtIso), 20, new Vector2(200, 0)));
 
         // Plain Buttons, not MenuPanelButton: a row action wants a compact size, and these two need a
@@ -169,6 +173,12 @@ public partial class LoadGameScreen : Control
                 return;
             }
 
+            if (save.ResolvedGameType == SaveGameType.Skirmish)
+            {
+                StartSkirmish(save);
+                return;
+            }
+
             HostOptionsDialog.Result choice = await HostOptionsDialog.PromptAsync(this, save.Expansions);
             if (!IsInstanceValid(this)) return;
 
@@ -206,6 +216,55 @@ public partial class LoadGameScreen : Control
 
         DebugUtilities.PrintPeer($"LoadGameScreen: restoring '{save.DisplayName}' ({save.Events.Count} event(s))");
         SceneFlow.ChangeScene(this, LobbyScenePath);
+    }
+
+    /// <summary>
+    /// Restore a skirmish without the lobby: the same offline setup <see cref="SkirmishScreen"/> starts
+    /// a fresh one with, seated from the save. The human (peer 1) takes every seat a person held, and
+    /// each bot seat gets its own AI seat again, at the difficulty it was played at.
+    /// </summary>
+    private void StartSkirmish(SaveGame save)
+    {
+        GameManager.ArmRestore(save);
+        GameManager.PendingFactionIntro = false;
+        if (save.AiDifficulty is AiDifficulty difficulty)
+            GameManager.PendingAiDifficulty = difficulty;
+
+        GetNode<GameManager>("/root/GameManager").SetPendingPlayerFactionAssignments(BuildSkirmishAssignments(save));
+
+        // As SkirmishScreen.StartGame: without a peer the readiness barrier hangs; OfflineMultiplayerPeer
+        // is unique id 1 with no peers, so it fires at once. Must precede the scene change.
+        Multiplayer.MultiplayerPeer ??= new OfflineMultiplayerPeer();
+
+        DebugUtilities.PrintPeer($"LoadGameScreen: restoring skirmish '{save.DisplayName}' ({save.Events.Count} event(s))");
+        SceneFlow.ChangeScene(this, SceneFlow.GameScenePath);
+    }
+
+    /// <summary>
+    /// Same shape as SkirmishScreen.BuildAssignments: peer 1 kept even with no factions, one AI seat per
+    /// bot faction, in turn order. A faction no seat names (a save from before seats recorded bots
+    /// cannot be a skirmish, but be safe) goes to the human so all of them stay covered.
+    /// </summary>
+    private static List<PlayerFactionAssignment> BuildSkirmishAssignments(SaveGame save)
+    {
+        HashSet<Faction> aiFactions = save.Seats.Where(seat => seat.IsAi)
+                                                .SelectMany(seat => seat.Factions)
+                                                .ToHashSet();
+
+        List<Faction> human = StaticGameData.PlayableFactions.Where(f => !aiFactions.Contains(f)).ToList();
+        List<Faction> ai    = StaticGameData.PlayableFactions.Where(aiFactions.Contains).ToList();
+
+        List<PlayerFactionAssignment> assignments = new()
+        {
+            new PlayerFactionAssignment(1, human,
+                SteamworksApi.IsAvailable ? SteamworksApi.Instance.LocalPersonaName : "You"),
+        };
+
+        for (int i = 0; i < ai.Count; i++)
+            assignments.Add(new PlayerFactionAssignment(
+                PlayerFactionRegistry.AiSeatIdBase + i, new List<Faction> { ai[i] }, IsAi: true));
+
+        return assignments;
     }
 
     // ══════════════════════════════════════════════════════════════════════════

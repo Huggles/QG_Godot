@@ -86,7 +86,8 @@ public static class SaveGameService
                 ScenarioTitle = save.ScenarioTitle,
                 Version       = save.Version,
                 EventCount    = save.Events.Count,
-                Completed     = save.Completed
+                Completed     = save.Completed,
+                GameType      = save.ResolvedGameType
             });
         }
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// A game in progress on disk: the base scenario, plus every <see cref="ChangeEvent"/> that has been
@@ -72,6 +73,28 @@ public class SaveGame
     public bool Ranked { get; set; }
 
     /// <summary>
+    /// What kind of game this was, which decides where loading it goes: a skirmish straight back into
+    /// the game with its bots, an online or ranked game through the lobby so players can re-claim seats.
+    /// Null in saves written before this existed; read it through <see cref="ResolvedGameType"/>.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public SaveGameType? GameType { get; set; }
+
+    /// <summary>
+    /// The AI seats' difficulty, so a reloaded skirmish plays against the same bots. Null in older saves,
+    /// which then get whatever the menus last held.
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public AiDifficulty? AiDifficulty { get; set; }
+
+    /// <summary>
+    /// <see cref="GameType"/>, or for a save that predates it, the best guess: every such save went
+    /// through the lobby, so it is Online unless it was ranked.
+    /// </summary>
+    [JsonIgnore]
+    public SaveGameType ResolvedGameType => GameType ?? (Ranked ? SaveGameType.Ranked : SaveGameType.Online);
+
+    /// <summary>
     /// GameRandom.DrawCount at save time. Re-seeding and then fast-forwarding this many draws puts the
     /// restored game's randomness where the saved one left it, rather than handing the continuation the
     /// numbers the opening shuffle already used.
@@ -119,6 +142,19 @@ public class SaveGame
 
     /// <summary>Who held which factions, for lobby pre-fill only. Never enforced.</summary>
     public List<SavedSeat> Seats { get; set; } = new();
+}
+
+/// <summary>The kind of game a save came from. Stored by name, so reordering this is safe.</summary>
+public enum SaveGameType
+{
+    /// <summary>Offline, one human against bots. Loads straight into the game, no lobby.</summary>
+    Skirmish,
+
+    /// <summary>An unranked networked game. Loads through the multiplayer lobby.</summary>
+    Online,
+
+    /// <summary>A ranked networked game. Loads through the lobby, and stays ranked only if it still qualifies.</summary>
+    Ranked
 }
 
 /// <summary>Turn-engine state that lives on <see cref="GameFlow"/> and is not derivable from the log.</summary>
@@ -226,6 +262,12 @@ public class SavedSeat
     public string DisplayName { get; set; }
 
     public List<Faction> Factions { get; set; } = new();
+
+    /// <summary>
+    /// Whether a bot held this seat. A skirmish restore rebuilds its AI seats from this; the lobby
+    /// ignores it. False in older saves.
+    /// </summary>
+    public bool IsAi { get; set; }
 }
 
 /// <summary>Header for the load list, so browsing does not mean holding every event log in memory.</summary>
@@ -238,4 +280,5 @@ public class SaveGameMeta
     public int Version { get; set; }
     public int EventCount { get; set; }
     public bool Completed { get; set; }
+    public SaveGameType GameType { get; set; }
 }

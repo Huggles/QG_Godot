@@ -110,6 +110,8 @@ public static class SaveCapture
             RngDraws       = GameRandom.DrawCount,
             GameId         = GameFlow.Instance.GameId,
             Ranked         = GameFlow.Instance.IsRanked,
+            GameType       = CurrentGameType(),
+            AiDifficulty   = AiSeatRuntime.SessionDifficulty,
 
             // OfType, not a cast: the journal also holds PresentationEvents (which mutate nothing) and
             // RecalculateTagsMessages (derived state the host recomputes per event during replay).
@@ -128,6 +130,17 @@ public static class SaveCapture
     }
 
     /// <summary>
+    /// Skirmish is the offline session the skirmish screen starts (an OfflineMultiplayerPeer, no
+    /// socket); anything with a real transport is online, and ranked if the game is being rated.
+    /// </summary>
+    private static SaveGameType CurrentGameType()
+    {
+        if (MultiplayerSession.Instance.Multiplayer.MultiplayerPeer is OfflineMultiplayerPeer)
+            return SaveGameType.Skirmish;
+        return GameFlow.Instance.IsRanked ? SaveGameType.Ranked : SaveGameType.Online;
+    }
+
+    /// <summary>
     /// Who held which factions, for the lobby to pre-fill on load. Never enforced — players re-claim
     /// factions before the board is restored, and may reshuffle freely.
     /// </summary>
@@ -143,7 +156,8 @@ public static class SaveCapture
             .Select(group => new SavedSeat
             {
                 DisplayName = NameForSeat(group),
-                Factions    = group.ToList()
+                Factions    = group.ToList(),
+                IsAi        = PlayerFactionRegistry.IsAiSeatId(group.Key)
             })
             .ToList();
     }
