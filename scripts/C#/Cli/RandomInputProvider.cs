@@ -404,10 +404,8 @@ public sealed class RandomInputProvider : IInputProvider
     /// bot_discard instead of replacing it, and that is the useful half.
     ///
     /// Deliberately NOT <see cref="InputRequest.CardsRequestHandler"/>, which shares this row in
-    /// InputRequestSpec and inherits its "Select cards to discard" title but is not a discard at all:
-    /// EventFlexibleResources uses it to pick a card out of the discard pile to PLAY. Declining that
-    /// is passing up a free card — and, as of this writing, also crashes the card (it indexes
-    /// ResponseCardIds[0] without checking for an empty response).
+    /// InputRequestSpec and inherits its "Select cards to discard" title but is not necessarily a
+    /// discard: it is a generic optional pick from an arbitrary card list.
     ///
     /// The mandatory discards are unaffected — <see cref="InputRequest.ForceDiscardHandCardsRequestHandler"/>
     /// reports <see cref="PassMode.NotAllowed"/> and never reaches here.

@@ -36,12 +36,15 @@ public partial class EventFlexibleResources : EventCardLogic
         return new List<CardStep>
         {
             new RequirementStep(this, async () => {
-                var resp = await new InputRequest.CardsRequestHandler(Faction, PlayableDiscardedCardIds(BoardState.Live)).BroadCast();
+                // A single-card pick under this card's own wording. CardsRequestHandler (used before)
+                // is the discard prompt: it titled the modal "Select card(s) to discard" and allowed
+                // any number of cards, of which only the first was ever played.
+                var resp = await new InputRequest.SelectCardRequestHandler(Faction, PlayableDiscardedCardIds(BoardState.Live),
+                    "Choose a card from your discard pile to play").BroadCast();
 
-                // Declining leaves an EMPTY response rather than setting WasSkipped — that is
-                // CardsRequestHandler's pass idiom (PassMode.EmptyResponse), so BroadCast does not
-                // throw for it and this is the only place the decline can be noticed. Without the
-                // guard the next line indexed [0] on an empty list and took the turn loop down.
+                // Mandatory (the card text has no "may"), so the modal has no Cancel and the CLI/bots
+                // get PassMode.NotAllowed. Kept as a defensive guard: an empty answer must never reach
+                // the [0] index below.
                 if (resp.ResponseCardIds.Count == 0) throw new StepSkippedException();
 
                 _selectedCardId = resp.ResponseCardIds[0];
