@@ -172,7 +172,7 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "On: deal 10 cards and every player immediately discards 3. Off: deal 7 and start."
 button_pressed = true
-text = "Discard 3 cards at start"
+text = "Discard cards at start"
 
 [node name="FactionIntroCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=1873405521]
 unique_name_in_owner = true

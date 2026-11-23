@@ -202,6 +202,9 @@ public partial class MultiplayerLobby : Control
 
 		// Same story again: host-only, and its starting value is whatever the scenario says.
 		// Set before subscribing, so seeding the box does not look like the host toggling it.
+		// Only a dev build shows it: a release build plays whatever the scenario (or save) says. The
+		// hidden box still carries that value, so CommitOpeningDiscard reads it unchanged.
+		_openingDiscardCheckBox.Visible = !GameContext.IsProductionBuild;
 		_openingDiscardCheckBox.ButtonPressed = _restoreSave?.OpeningDiscard
 			?? gameManager.SelectedScenario?.OpeningDiscard ?? true;
 		_openingDiscardCheckBox.Disabled = true;

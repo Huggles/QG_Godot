@@ -160,7 +160,7 @@ tooltip_text = "Normal: the original AI. Hard: values its pieces, the income wit
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
-text = "Discard 3 cards at start"
+text = "Discard cards at start"
 
 [node name="FactionIntroCheckBox" type="CheckBox" parent="Card/Margin/Layout/Columns/Left" unique_id=1873405522]
 unique_name_in_owner = true
