@@ -29,7 +29,7 @@ public partial class ResponseFallOfSingapore : ResponseCardLogic
             new ResultStep(this, Choose.CountryFrom(_ => new List<int>{ CountryState.ForEnum(Country.SouthEastAsia).Id },
                 (countryId, _) => new DeployUnitChangeEvent(Faction, countryId, DeployType.RECRUIT)))
             .WithConditions( ()=>{ return new List<Condition>{new Condition.CountryIsRecruitable([CountryState.ForEnum(Country.SouthEastAsia).Id], Faction)}; } )
-            .WithGuidance("Recruit an army in South East Asia")
+            .WithGuidance("Recruit an Army in Southeast Asia")
 
         };
     }

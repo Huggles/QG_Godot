@@ -644,7 +644,7 @@
     "Type": "EW",
     "ExecutionClass": "EWJapaneseFleetBlockadesVladivostok",
     "Label": "Japanese Fleet Blockades Vladivostok",
-    "Text": "For each Japanese Navy and Air Force in the Sea of Japan, gain a +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck.",
+    "Text": "For each Japanese Navy and Air Force in the Sea of Japan, gain +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck.",
     "MultipleActivationsPerTurn": false
   },
   {
@@ -986,7 +986,7 @@
     "Type": "EVENT",
     "ExecutionClass": "EventSpain",
     "Label": "Spain",
-    "Text": "Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean or North Sea.",
+    "Text": "Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean Sea or North Sea.",
     "MultipleActivationsPerTurn": false
   },
   {
@@ -1048,7 +1048,7 @@
     "Number": "1118",
     "Type": "EVENT",
     "ExecutionClass": "EventRezaShahSupportsAxis",
-    "Label": "Reza Shah supports Axis",
+    "Label": "Reza Shah Supports Axis",
     "Text": "Eliminate an Allied Army in the Middle East.",
     "MultipleActivationsPerTurn": false
   },
@@ -1067,7 +1067,7 @@
     "Type": "STATUS",
     "ExecutionClass": "StatusSpanishTroopsSeizeGibraltar",
     "Label": "Spanish Troops Seize Gibraltar",
-    "Text": "The North Sea and Mediterranean are never adjacent for the Allies, and always adjacent for the Axis.",
+    "Text": "The North Sea and Mediterranean Sea are never adjacent for the Allies, and always adjacent for the Axis.",
     "MultipleActivationsPerTurn": false
   },
   {
@@ -1103,7 +1103,7 @@
     "Type": "EVENT",
     "ExecutionClass": "EventOperationHerkules",
     "Label": "Operation Herkules",
-    "Text": "Recruit an Italian Navy and a German Navy in the Mediterranean.",
+    "Text": "Recruit an Italian Navy and a German Navy in the Mediterranean Sea.",
     "MultipleActivationsPerTurn": false
   },
   {

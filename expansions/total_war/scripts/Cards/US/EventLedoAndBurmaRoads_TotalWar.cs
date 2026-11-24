@@ -7,7 +7,7 @@ public partial class EventLedoAndBurmaRoads_TotalWar : EventCardLogic
     private const int CHOICE_ELIMINATE = 1;
     private static readonly List<Country> chinaSpaces = [Country.China, Country.Szechuan];
 
-    /// <summary>"To use": an Allied Army in South East Asia. A Chinese one counts, since the card names China.</summary>
+    /// <summary>"To use": an Allied Army in Southeast Asia. A Chinese one counts, since the card names China.</summary>
     private static bool CanUse(BoardState board) =>
         TotalWarCards.TeamUnitsIn(board, FactionTeam.ALLIES, UnitType.ARMY, [Country.SouthEastAsia]).Count > 0
         || board.ActiveUnits(Faction.CHINA).Any(unit => unit.IsArmy && board.CountryOf(unit) == (int)Country.SouthEastAsia);

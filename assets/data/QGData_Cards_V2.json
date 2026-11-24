@@ -59,7 +59,7 @@
         "Type":  "STATUS",
         "ExecutionClass":  "StatusWolfPacks",
         "Label":  "Wolf Packs",
-        "Text":  "German EW cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia.",
+        "Text":  "German Economic Warfare cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -130,7 +130,7 @@
         "Number":  "35",
         "Type":  "STATUS",
         "ExecutionClass":  "StatusVolksturm",
-        "Label":  "Volksturm",
+        "Label":  "Volkssturm",
         "Text":  "Use once per turn, at the beginning of your turn. Discard the top 1 card of your draw deck to recruit an Army in Germany. (This is in addition to your Play step.)",
         "MultipleActivationsPerTurn":  false
     },
@@ -158,7 +158,7 @@
         "Type":  "EVENT",
         "ExecutionClass":  "EventGunsAndButter",
         "Label":  "Guns and Butter",
-        "Text":  "This card can be used to: build an Army; build a Navy; land battle; or sea battle.",
+        "Text":  "This card can be used to: build an Army; build a Navy; battle a land space; or battle a sea space.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -230,7 +230,7 @@
         "Type":  "STATUS",
         "ExecutionClass":  "StatusJetFighters",
         "Label":  "Jet Fighters",
-        "Text":  "When you are the target of an EW card, reduce the number of cards you must discard by 3 (minimum 0).",
+        "Text":  "When you are the target of an Economic Warfare card, reduce the number of cards you must discard by 3 (minimum 0).",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -302,7 +302,7 @@
         "Type":  "EW",
         "ExecutionClass":  "EWMaltaSubmarines",
         "Label":  "Malta Submarines",
-        "Text":  "Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean.",
+        "Text":  "Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean Sea.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -329,7 +329,7 @@
         "Type":  "RESPONSE",
         "ExecutionClass":  "ResponseASWTactics",
         "Label":  "ASW Tactics",
-        "Text":  "Use immediately after an Axis player plays an EW card. Ignore the game text of that EW card.",
+        "Text":  "Use immediately after an Axis player plays an Economic Warfare card. Ignore the game text of that Economic Warfare card.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -517,7 +517,7 @@
         "Number":  "78",
         "Type":  "STATUS",
         "ExecutionClass":  "StatusGreaterEastAsiaCoProsperitySphere",
-        "Label":  "Greater East Asia Co Prosperity Sphere",
+        "Label":  "Greater East Asia Co-Prosperity Sphere",
         "Text":  "During your Victory step, gain +1 Victory Point for each Japanese Army in Indonesia, New Guinea, or Southeast Asia.",
         "MultipleActivationsPerTurn":  false
     },
@@ -589,7 +589,7 @@
         "Number":  "86",
         "Type":  "EVENT",
         "ExecutionClass":  "EventGeneralWinter",
-        "Label":  "General Winter ",
+        "Label":  "General Winter",
         "Text":  "Eliminate 1 or 2 Axis Armies in or adjacent to Moscow.",
         "MultipleActivationsPerTurn":  false
     },
@@ -734,7 +734,7 @@
         "Type":  "EW",
         "ExecutionClass":  "EWDecimaFlottigliaMASFrogmen",
         "Label":  "Decima Flottiglia MAS (Frogmen)",
-        "Text":  "The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean. Gain +1 Victory Point.",
+        "Text":  "The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean Sea. Gain +1 Victory Point.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -797,7 +797,7 @@
         "Type":  "RESPONSE",
         "ExecutionClass":  "ResponseGermanReinforcementsCounterattack",
         "Label":  "German Reinforcement Counterattack",
-        "Text":  "Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space.",
+        "Text":  "Use immediately after a supplied Italian Army is removed. Recruit a German Army in that space.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -806,7 +806,7 @@
         "Type":  "RESPONSE",
         "ExecutionClass":  "ResponseSkilledPilots",
         "Label":  "Skilled Pilots",
-        "Text":  "When you are the target of an EW card, reduce the number of cards you must discard by 5 (minimum 0)",
+        "Text":  "When you are the target of an Economic Warfare card, reduce the number of cards you must discard by 5 (minimum 0).",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -824,7 +824,7 @@
         "Type":  "EVENT",
         "ExecutionClass":  "EventAfrikaKorps",
         "Label":  "Afrika Korps",
-        "Text":  "Recruit a German Army in North Africa and then a German Navy in the Mediterranean.",
+        "Text":  "Recruit a German Army in North Africa and then a German Navy in the Mediterranean Sea.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -877,8 +877,8 @@
         "Number":  "119",
         "Type":  "STATUS",
         "ExecutionClass":  "StatusFlyingFortresses",
-        "Label":  "Flying Fortresse",
-        "Text":  "Use when you play an EW card. Add 2 to the number of cards the Axis country must discard.",
+        "Label":  "Flying Fortresses",
+        "Text":  "Use when you play an Economic Warfare card. Add 2 to the number of cards the Axis country must discard.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -896,7 +896,7 @@
         "Type":  "EVENT",
         "ExecutionClass":  "EventGuadalcanal",
         "Label":  "Guadalcanal",
-        "Text":  "Recruit an Army in New Zealand; then. build a Navy adjacent to New Zealand.",
+        "Text":  "Recruit an Army in New Zealand; then build a Navy adjacent to New Zealand.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -995,7 +995,7 @@
         "Type":  "EW",
         "ExecutionClass":  "EWFirestormBombing",
         "Label":  "Firestorm Bombing",
-        "Text":  "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck",
+        "Text":  "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -1058,7 +1058,7 @@
         "Type":  "EVENT",
         "ExecutionClass":  "EventFreeFrenchAllies",
         "Label":  "Free French Allies",
-        "Text":  "The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa",
+        "Text":  "The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -1076,7 +1076,7 @@
         "Type":  "EVENT",
         "ExecutionClass":  "EventVasilevskyTakesCommandInTheFarEast",
         "Label":  "Vasilevsky Takes Command in the Far East",
-        "Text":  "Recruit an Army in Vladivostok; then battle in China",
+        "Text":  "Recruit an Army in Vladivostok; then battle in China.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -1094,7 +1094,7 @@
         "Type":  "EVENT",
         "ExecutionClass":  "EventLedoAndBurmaRoads",
         "Label":  "Ledo and Burma Roads",
-        "Text":  "Build an Army in Southeast Asia; then battle in China or Szechuan",
+        "Text":  "Build an Army in Southeast Asia; then battle in China or Szechuan.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -1102,8 +1102,8 @@
         "Number":  "144",
         "Type":  "STATUS",
         "ExecutionClass":  "StatusOccupationOfCzechoslovakia",
-        "Label":  "Occupation Of Czechoslovakia",
-        "Text":  "During your Victory step, gain +1 Victory Point if you did not perform a land battle or eliminated a unit. ",
+        "Label":  "Occupation of Czechoslovakia",
+        "Text":  "During your Victory step, gain +1 Victory Point if you neither battled a land space nor eliminated a unit.",
         "MultipleActivationsPerTurn":  false
     },
     {
@@ -1112,7 +1112,7 @@
         "Type":  "EVENT",
         "ExecutionClass":  "EventArdennesOffensive",
         "Label":  "Ardennes Offensive",
-        "Text":  "Battle in Western Europe. Then build an army in Western Europe.",
+        "Text":  "Battle in Western Europe. Then build an Army in Western Europe.",
         "MultipleActivationsPerTurn":  false
     },
     {

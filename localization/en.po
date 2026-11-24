@@ -250,13 +250,13 @@ msgid "SCENARIO_ONEROUND_TITLE"
 msgstr "One Round Blitz"
 
 msgid "SCENARIO_ONEROUND_DESCRIPTION"
-msgstr "A single round format with random starting victory points and quick, chaotic action."
+msgstr "A single round format with random starting Victory Points and quick, chaotic action."
 
 msgid "SCENARIO_ALLCARDS_TITLE"
 msgstr "All Cards In Play"
 
 msgid "SCENARIO_ALLCARDS_DESCRIPTION"
-msgstr "Every faction's status and response cards are already played so you can test interactions immediately."
+msgstr "Every faction's Status and Response cards are already played so you can test interactions immediately."
 
 msgid "SCENARIO_TUTORIAL_01_TITLE"
 msgstr "Tutorial 1: Your First Turn"
@@ -1548,7 +1548,7 @@ msgid "COUNTRY_BALTIC_SEA"
 msgstr "Baltic Sea"
 
 msgid "COUNTRY_BAY_OF_BENGAL"
-msgstr "Bay Of Bengal"
+msgstr "Bay of Bengal"
 
 msgid "COUNTRY_BLACK_SEA"
 msgstr "Black Sea"
@@ -1638,7 +1638,7 @@ msgid "COUNTRY_NORTH_SEA"
 msgstr "North Sea"
 
 msgid "COUNTRY_PACIFIC_NORTH_WEST"
-msgstr "Pacific North West"
+msgstr "Pacific Northwest"
 
 msgid "COUNTRY_PHILIPPINES"
 msgstr "Philippines"
@@ -1650,7 +1650,7 @@ msgid "COUNTRY_SCANDINAVIA"
 msgstr "Scandinavia"
 
 msgid "COUNTRY_SEA_OF_JAPAN"
-msgstr "Sea Of Japan"
+msgstr "Sea of Japan"
 
 msgid "COUNTRY_SIBERIA"
 msgstr "Siberia"
@@ -1662,10 +1662,10 @@ msgid "COUNTRY_SOUTH_CHINA_SEA"
 msgstr "South China Sea"
 
 msgid "COUNTRY_SOUTH_EAST_ASIA"
-msgstr "South East Asia"
+msgstr "Southeast Asia"
 
 msgid "COUNTRY_SOUTH_EAST_PACIFIC"
-msgstr "South East Pacific"
+msgstr "Southeast Pacific"
 
 msgid "COUNTRY_SOUTHERN_OCEAN"
 msgstr "Southern Ocean"
@@ -1813,7 +1813,7 @@ msgid "CARD_StatusDiveBombers_TEXT"
 msgstr "Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to battle in the same or adjacent land space to the one battled."
 
 msgid "CARD_StatusWolfPacks_TEXT"
-msgstr "German EW cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia."
+msgstr "German Economic Warfare cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia."
 
 msgid "CARD_StatusBlitzkrieg_TEXT"
 msgstr "Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to build an Army in the space battled."
@@ -1846,7 +1846,7 @@ msgid "CARD_EventBroadFront_TEXT"
 msgstr "Conduct up to 3 battles, each in a space that was occupied by a Soviet Army adjacent to a German Army at the beginning of the turn."
 
 msgid "CARD_EventGunsAndButter_TEXT"
-msgstr "This card can be used to: build an Army; build a Navy; land battle; or sea battle."
+msgstr "This card can be used to: build an Army; build a Navy; battle a land space; or battle a sea space."
 
 msgid "CARD_EWSubmarinesEnforceBlockade_TEXT"
 msgstr "For each German Army adjacent to the North Sea, gain +1 Victory Point and the United Kingdom must discard the top 2 cards of its draw deck."
@@ -1870,7 +1870,7 @@ msgid "CARD_EventForcedConscription_TEXT"
 msgstr "Recruit 1 or 2 Armies in or adjacent to Germany."
 
 msgid "CARD_StatusJetFighters_TEXT"
-msgstr "When you are the target of an EW card, reduce the number of cards you must discard by 3 (minimum 0)."
+msgstr "When you are the target of an Economic Warfare card, reduce the number of cards you must discard by 3 (minimum 0)."
 
 msgid "CARD_EWSubmarinesPreyonUnprotectedShipping_TEXT"
 msgstr "The United Kingdom must discard the top 2 cards of its draw deck; and 3 more if there is no Allied Navy in the North Sea. Gain +1 Victory Point."
@@ -1894,7 +1894,7 @@ msgid "CARD_EventSingaporeFortified_TEXT"
 msgstr "Recruit an Army in Southeast Asia and then a Navy in the South China Sea."
 
 msgid "CARD_EWMaltaSubmarines_TEXT"
-msgstr "Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean."
+msgstr "Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean Sea."
 
 msgid "CARD_EventKingPeterEnthronedinYugoslavia_TEXT"
 msgstr "Eliminate an Axis Army in the Balkans; then recruit an Army in the Balkans."
@@ -1903,7 +1903,7 @@ msgid "CARD_StatusResistance_TEXT"
 msgstr "During your Play step, instead of playing a card from hand, discard 2 cards from your hand to battle in Western Europe or Italy."
 
 msgid "CARD_ResponseASWTactics_TEXT"
-msgstr "Use immediately after an Axis player plays an EW card. Ignore the game text of that EW card."
+msgstr "Use immediately after an Axis player plays an Economic Warfare card. Ignore the game text of that Economic Warfare card."
 
 msgid "CARD_ResponseDefensivePosture_TEXT"
 msgstr "Use when your supplied Army is about to be removed. Do not remove that Army this turn."
@@ -2038,7 +2038,7 @@ msgid "CARD_EventItalyAttacksCommunists_TEXT"
 msgstr "Build an Army in Ukraine and an Army in Russia."
 
 msgid "CARD_EWDecimaFlottigliaMASFrogmen_TEXT"
-msgstr "The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean. Gain +1 Victory Point."
+msgstr "The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean Sea. Gain +1 Victory Point."
 
 msgid "CARD_EventGermanAidinGreece_TEXT"
 msgstr "Eliminate an Allied Army in the Balkans; then recruit a German Army in the Balkans."
@@ -2059,16 +2059,16 @@ msgid "CARD_EventDivisionAzul_TEXT"
 msgstr "Discard a random Soviet Response card from the table. You may not inspect the Response card discarded."
 
 msgid "CARD_ResponseGermanReinforcementsCounterattack_TEXT"
-msgstr "Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space."
+msgstr "Use immediately after a supplied Italian Army is removed. Recruit a German Army in that space."
 
 msgid "CARD_ResponseSkilledPilots_TEXT"
-msgstr "When you are the target of an EW card, reduce the number of cards you must discard by 5 (minimum 0)"
+msgstr "When you are the target of an Economic Warfare card, reduce the number of cards you must discard by 5 (minimum 0)."
 
 msgid "CARD_ResponseRomanianReinforcements_TEXT"
 msgstr "Use immediately after a supplied German Army is removed. Recruit an Italian Army in that space."
 
 msgid "CARD_EventAfrikaKorps_TEXT"
-msgstr "Recruit a German Army in North Africa and then a German Navy in the Mediterranean."
+msgstr "Recruit a German Army in North Africa and then a German Navy in the Mediterranean Sea."
 
 msgid "CARD_EWRegiaMarinaClosesShippingLanes_TEXT"
 msgstr "For each Italian Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 1 card of its draw deck."
@@ -2086,13 +2086,13 @@ msgid "CARD_StatusAmphibiousLandings_TEXT"
 msgstr "Use once per turn when you battle a land space. If the space battled is adjacent to a supplied United States Navy, discard the top 1 card of your draw deck to build an Army in the space battled."
 
 msgid "CARD_StatusFlyingFortresses_TEXT"
-msgstr "Use when you play an EW card. Add 2 to the number of cards the Axis country must discard."
+msgstr "Use when you play an Economic Warfare card. Add 2 to the number of cards the Axis country must discard."
 
 msgid "CARD_EventOperationMagic_TEXT"
 msgstr "Discard a random Japanese Response card from the table. You may not inspect the Response card discarded."
 
 msgid "CARD_EventGuadalcanal_TEXT"
-msgstr "Recruit an Army in New Zealand; then. build a Navy adjacent to New Zealand."
+msgstr "Recruit an Army in New Zealand; then build a Navy adjacent to New Zealand."
 
 msgid "CARD_EWB29Superfortress_TEXT"
 msgstr "If a United States Army is within 3 spaces of Germany, Germany must discard the top 5 cards of its draw deck."
@@ -2125,7 +2125,7 @@ msgid "CARD_EventTheaterShift_TEXT"
 msgstr "One at a time, once per piece, you may eliminate each United States Army and Navy on the board and then build that piece."
 
 msgid "CARD_EWFirestormBombing_TEXT"
-msgstr "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck"
+msgstr "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck."
 
 msgid "CARD_EventMurmanskConvoy_TEXT"
 msgstr "Recruit a Soviet Army in Russia; then the Soviet Union may build an Army."
@@ -2146,25 +2146,25 @@ msgid "CARD_EventPattonAdvances_TEXT"
 msgstr "Build an Army in Western Europe: then battle in Germany or Italy."
 
 msgid "CARD_EventFreeFrenchAllies_TEXT"
-msgstr "The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa"
+msgstr "The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa."
 
 msgid "CARD_StatusAmericanVolunteerGroupExpands_TEXT"
 msgstr "Allied Armies in Szechuan are always in supply. During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to recruit an Army in Szechuan."
 
 msgid "CARD_EventVasilevskyTakesCommandInTheFarEast_TEXT"
-msgstr "Recruit an Army in Vladivostok; then battle in China"
+msgstr "Recruit an Army in Vladivostok; then battle in China."
 
 msgid "CARD_StatusFreeFrance_TEXT"
 msgstr "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army in Western Europe."
 
 msgid "CARD_EventLedoAndBurmaRoads_TEXT"
-msgstr "Build an Army in Southeast Asia; then battle in China or Szechuan"
+msgstr "Build an Army in Southeast Asia; then battle in China or Szechuan."
 
 msgid "CARD_StatusOccupationOfCzechoslovakia_TEXT"
-msgstr "During your Victory step, gain +1 Victory Point if you did not perform a land battle or eliminated a unit. "
+msgstr "During your Victory step, gain +1 Victory Point if you neither battled a land space nor eliminated a unit."
 
 msgid "CARD_EventArdennesOffensive_TEXT"
-msgstr "Battle in Western Europe. Then build an army in Western Europe."
+msgstr "Battle in Western Europe. Then build an Army in Western Europe."
 
 msgid "CARD_EventDutchEastIndies_TEXT"
 msgstr "Recruit an Army in Indonesia and an Army in New Guinea, and then a Navy in the South China Sea."
@@ -2382,7 +2382,7 @@ msgid "CARD_StatusJapaneseMandateForTheSouthSeasIslands_TEXT"
 msgstr "During your Victory step, gain +1 Victory Point if you have a Navy in the Central Pacific."
 
 msgid "CARD_EWJapaneseFleetBlockadesVladivostok_TEXT"
-msgstr "For each Japanese Navy and Air Force in the Sea of Japan, gain a +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck."
+msgstr "For each Japanese Navy and Air Force in the Sea of Japan, gain +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck."
 
 msgid "CARD_ResponseKantaiKessen_TEXT"
 msgstr "Use at the beginning of your Play step. Battle a sea space."
@@ -2496,7 +2496,7 @@ msgid "CARD_StatusTurkeyOpensTheStraits_TEXT"
 msgstr "For the Axis, the Middle East is adjacent to the Balkans, and the Black Sea is adjacent to the Mediterranean Sea."
 
 msgid "CARD_EventSpain_TEXT"
-msgstr "Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean or North Sea."
+msgstr "Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean Sea or North Sea."
 
 msgid "CARD_BolsterSupermarina_TEXT"
 msgstr "Use during your Victory step. Gain +1 Victory Point per Italian Navy on the board."
@@ -2523,7 +2523,7 @@ msgid "CARD_EWOperationPike_TEXT"
 msgstr "If the United Kingdom has an Army within 2 spaces of Ukraine, the Soviet Union must discard the top 2 cards of its draw deck. Gain +1 Victory Point."
 
 msgid "CARD_StatusSpanishTroopsSeizeGibraltar_TEXT"
-msgstr "The North Sea and Mediterranean are never adjacent for the Allies, and always adjacent for the Axis."
+msgstr "The North Sea and Mediterranean Sea are never adjacent for the Allies, and always adjacent for the Axis."
 
 msgid "CARD_BolsterRegiaAeronautica_TEXT"
 msgstr "Use when you are the target of an Economic Warfare card. Remove your Air Force from the board instead of discarding cards."
@@ -2535,7 +2535,7 @@ msgid "CARD_EWOperationLobster_TEXT"
 msgstr "The United Kingdom must discard the top 2 cards of its draw deck."
 
 msgid "CARD_EventOperationHerkules_TEXT"
-msgstr "Recruit an Italian Navy and a German Navy in the Mediterranean."
+msgstr "Recruit an Italian Navy and a German Navy in the Mediterranean Sea."
 
 msgid "CARD_EventGiulianiCappelliniAndTorelli_TEXT"
 msgstr "Germany, Italy, and Japan takes a random card from their discard pile and places it on top of their draw decks. Gain +1 Victory Point."

@@ -200,7 +200,7 @@
     {
       "type": "message",
       "at": { "turn": 5, "step": "PLAY_CARD", "timing": "AFTER" },
-      "text": "The map has five: [b]North Africa[/b], the [b]Middle East[/b], [b]Scandinavia[/b], [b]South East Asia[/b] and [b]Latin America[/b].\n\nOne army, no points, and the Royal Navy's road into the Mediterranean is shut."
+      "text": "The map has five: [b]North Africa[/b], the [b]Middle East[/b], [b]Scandinavia[/b], [b]Southeast Asia[/b] and [b]Latin America[/b].\n\nOne army, no points, and the Royal Navy's road into the Mediterranean is shut."
     },
 
     {

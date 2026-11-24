@@ -11,6 +11,6 @@ public partial class EventForeignLegion : EventCardLogic
     public override List<CardStep> OnActivate() => new()
     {
         TotalWarCards.DeployStepFor(this, Faction.FRANCE, DeployType.RECRUIT, UnitType.ARMY, legionSpaces,
-            "Recruit a French Army in Africa, North Africa, Madagascar, South East Asia, New Guinea, or the Middle East")
+            "Recruit a French Army in Africa, North Africa, Madagascar, Southeast Asia, New Guinea, or the Middle East")
     };
 }

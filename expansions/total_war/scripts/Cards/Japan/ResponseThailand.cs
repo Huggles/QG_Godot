@@ -13,6 +13,6 @@ public partial class ResponseThailand : ResponseCardLogic
 
     public override List<CardStep> OnActivate() => new()
     {
-        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, southEastAsia, "Recruit an Army in South East Asia")
+        TotalWarCards.DeployStep(this, DeployType.RECRUIT, UnitType.ARMY, southEastAsia, "Recruit an Army in Southeast Asia")
     };
 }

@@ -323,7 +323,7 @@ msgstr "Alle facties beginnen in hun thuisgebieden, zonder vooraf gespeelde kaar
 msgid "SCENARIO_ONEROUND_TITLE"
 msgstr "Blitz van één ronde"
 
-#. en: A single round format with random starting victory points and quick, chaotic action.
+#. en: A single round format with random starting Victory Points and quick, chaotic action.
 msgid "SCENARIO_ONEROUND_DESCRIPTION"
 msgstr "Eén ronde met willekeurige start-overwinningspunten en snelle, chaotische actie."
 
@@ -331,7 +331,7 @@ msgstr "Eén ronde met willekeurige start-overwinningspunten en snelle, chaotisc
 msgid "SCENARIO_ALLCARDS_TITLE"
 msgstr "Alle kaarten in het spel"
 
-#. en: Every faction's status and response cards are already played so you can test interactions immediately.
+#. en: Every faction's Status and Response cards are already played so you can test interactions immediately.
 msgid "SCENARIO_ALLCARDS_DESCRIPTION"
 msgstr "De Status- en Reactiekaarten van elke factie liggen al op tafel, zodat je interacties meteen kunt testen."
 
@@ -2025,7 +2025,7 @@ msgstr "Balkan"
 msgid "COUNTRY_BALTIC_SEA"
 msgstr "Oostzee"
 
-#. en: Bay Of Bengal
+#. en: Bay of Bengal
 msgid "COUNTRY_BAY_OF_BENGAL"
 msgstr "Golf van Bengalen"
 
@@ -2145,7 +2145,7 @@ msgstr "Noordelijke Stille Oceaan"
 msgid "COUNTRY_NORTH_SEA"
 msgstr "Noordzee"
 
-#. en: Pacific North West
+#. en: Pacific Northwest
 msgid "COUNTRY_PACIFIC_NORTH_WEST"
 msgstr "Pacifisch Noordwesten"
 
@@ -2161,7 +2161,7 @@ msgstr "Rusland"
 msgid "COUNTRY_SCANDINAVIA"
 msgstr "Scandinavië"
 
-#. en: Sea Of Japan
+#. en: Sea of Japan
 msgid "COUNTRY_SEA_OF_JAPAN"
 msgstr "Japanse Zee"
 
@@ -2177,11 +2177,11 @@ msgstr "Zuid-Atlantische Oceaan"
 msgid "COUNTRY_SOUTH_CHINA_SEA"
 msgstr "Zuid-Chinese Zee"
 
-#. en: South East Asia
+#. en: Southeast Asia
 msgid "COUNTRY_SOUTH_EAST_ASIA"
 msgstr "Zuidoost-Azië"
 
-#. en: South East Pacific
+#. en: Southeast Pacific
 msgid "COUNTRY_SOUTH_EAST_PACIFIC"
 msgstr "Zuidoostelijke Stille Oceaan"
 
@@ -2375,7 +2375,7 @@ msgstr "Rekruteer een Italiaans leger in de Balkan: elimineer daarna een geallie
 msgid "CARD_StatusDiveBombers_TEXT"
 msgstr "Gebruik eenmaal per beurt wanneer je een landgebied aanvalt. Leg de bovenste kaart van je trekstapel af om hetzelfde of een aangrenzend landgebied aan te vallen."
 
-#. en: German EW cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia.
+#. en: German Economic Warfare cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia.
 msgid "CARD_StatusWolfPacks_TEXT"
 msgstr "Duitse kaarten Economische oorlogvoering met het woord \"Submarines\" laten 2 extra geallieerde kaarten afleggen (in totaal); 3 als een Duits leger Scandinavië bezet."
 
@@ -2419,7 +2419,7 @@ msgstr "Het geallieerde land van je keuze moet de bovenste 2 kaarten van zijn tr
 msgid "CARD_EventBroadFront_TEXT"
 msgstr "Voer tot 3 aanvallen uit, elk in een gebied dat aan het begin van de beurt bezet was door een Sovjetleger grenzend aan een Duits leger."
 
-#. en: This card can be used to: build an Army; build a Navy; land battle; or sea battle.
+#. en: This card can be used to: build an Army; build a Navy; battle a land space; or battle a sea space.
 msgid "CARD_EventGunsAndButter_TEXT"
 msgstr "Je kunt deze kaart gebruiken om: een leger te bouwen; een vloot te bouwen; een landgebied aan te vallen; of een zeegebied aan te vallen."
 
@@ -2451,7 +2451,7 @@ msgstr "Krijg +1 overwinningspunt voor elk Duits leger of elke Duitse vloot buit
 msgid "CARD_EventForcedConscription_TEXT"
 msgstr "Rekruteer 1 of 2 legers in of grenzend aan Duitsland."
 
-#. en: When you are the target of an EW card, reduce the number of cards you must discard by 3 (minimum 0).
+#. en: When you are the target of an Economic Warfare card, reduce the number of cards you must discard by 3 (minimum 0).
 msgid "CARD_StatusJetFighters_TEXT"
 msgstr "Wanneer je het doelwit bent van een kaart Economische oorlogvoering, verminder je het aantal kaarten dat je moet afleggen met 3 (minimaal 0)."
 
@@ -2483,7 +2483,7 @@ msgstr "Duitsland of Italië, naar jouw keuze, moet de bovenste 4 kaarten van zi
 msgid "CARD_EventSingaporeFortified_TEXT"
 msgstr "Rekruteer een leger in Zuidoost-Azië en daarna een vloot in de Zuid-Chinese Zee."
 
-#. en: Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean.
+#. en: Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean Sea.
 msgid "CARD_EWMaltaSubmarines_TEXT"
 msgstr "Duitsland en Italië moeten elk kiezen: de bovenste 2 kaarten van de eigen trekstapel afleggen of een vloot in de Middellandse Zee elimineren."
 
@@ -2495,7 +2495,7 @@ msgstr "Elimineer een leger van de As in de Balkan; rekruteer daarna een leger i
 msgid "CARD_StatusResistance_TEXT"
 msgstr "Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, 2 kaarten uit je hand af om in West-Europa of Italië aan te vallen."
 
-#. en: Use immediately after an Axis player plays an EW card. Ignore the game text of that EW card.
+#. en: Use immediately after an Axis player plays an Economic Warfare card. Ignore the game text of that Economic Warfare card.
 msgid "CARD_ResponseASWTactics_TEXT"
 msgstr "Gebruik onmiddellijk nadat een speler van de As een kaart Economische oorlogvoering speelt. Negeer de speltekst van die kaart."
 
@@ -2675,7 +2675,7 @@ msgstr "Krijg +1 overwinningspunt voor elk Italiaans leger of elke Italiaanse vl
 msgid "CARD_EventItalyAttacksCommunists_TEXT"
 msgstr "Bouw een leger in Oekraïne en een leger in Rusland."
 
-#. en: The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean. Gain +1 Victory Point.
+#. en: The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean Sea. Gain +1 Victory Point.
 msgid "CARD_EWDecimaFlottigliaMASFrogmen_TEXT"
 msgstr "Het Verenigd Koninkrijk moet de bovenste kaart van zijn trekstapel afleggen, en nog 1 als er geen geallieerde vloot in de Middellandse Zee is. Krijg +1 overwinningspunt."
 
@@ -2703,19 +2703,19 @@ msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als er een Italiaa
 msgid "CARD_EventDivisionAzul_TEXT"
 msgstr "Leg een willekeurige Sovjet-Reactiekaart van tafel af. Je mag de afgelegde Reactiekaart niet bekijken."
 
-#. en: Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space.
+#. en: Use immediately after a supplied Italian Army is removed. Recruit a German Army in that space.
 msgid "CARD_ResponseGermanReinforcementsCounterattack_TEXT"
 msgstr "Gebruik onmiddellijk nadat een bevoorraad Italiaans leger is verwijderd. Rekruteer een Duits leger in dat gebied."
 
-#. en: When you are the target of an EW card, reduce the number of cards you must discard by 5 (minimum 0)
+#. en: When you are the target of an Economic Warfare card, reduce the number of cards you must discard by 5 (minimum 0).
 msgid "CARD_ResponseSkilledPilots_TEXT"
-msgstr "Wanneer je het doelwit bent van een kaart Economische oorlogvoering, verlaag je het aantal kaarten dat je moet afleggen met 5 (minimaal 0)"
+msgstr "Wanneer je het doelwit bent van een kaart Economische oorlogvoering, verlaag je het aantal kaarten dat je moet afleggen met 5 (minimaal 0)."
 
 #. en: Use immediately after a supplied German Army is removed. Recruit an Italian Army in that space.
 msgid "CARD_ResponseRomanianReinforcements_TEXT"
 msgstr "Gebruik onmiddellijk nadat een bevoorraad Duits leger is verwijderd. Rekruteer een Italiaans leger in dat gebied."
 
-#. en: Recruit a German Army in North Africa and then a German Navy in the Mediterranean.
+#. en: Recruit a German Army in North Africa and then a German Navy in the Mediterranean Sea.
 msgid "CARD_EventAfrikaKorps_TEXT"
 msgstr "Rekruteer een Duits leger in Noord-Afrika en daarna een Duitse vloot in de Middellandse Zee."
 
@@ -2739,7 +2739,7 @@ msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt voor elke Italiaan
 msgid "CARD_StatusAmphibiousLandings_TEXT"
 msgstr "Gebruik eenmaal per beurt wanneer je een landgebied aanvalt. Grenst het aangevallen gebied aan een bevoorrade Amerikaanse vloot, leg dan de bovenste kaart van je trekstapel af om een leger in het aangevallen gebied te bouwen."
 
-#. en: Use when you play an EW card. Add 2 to the number of cards the Axis country must discard.
+#. en: Use when you play an Economic Warfare card. Add 2 to the number of cards the Axis country must discard.
 msgid "CARD_StatusFlyingFortresses_TEXT"
 msgstr "Gebruik wanneer je een kaart Economische oorlogvoering speelt. Het land van de As moet 2 kaarten extra afleggen."
 
@@ -2747,7 +2747,7 @@ msgstr "Gebruik wanneer je een kaart Economische oorlogvoering speelt. Het land 
 msgid "CARD_EventOperationMagic_TEXT"
 msgstr "Leg een willekeurige Japanse Reactiekaart van tafel af. Je mag de afgelegde Reactiekaart niet bekijken."
 
-#. en: Recruit an Army in New Zealand; then. build a Navy adjacent to New Zealand.
+#. en: Recruit an Army in New Zealand; then build a Navy adjacent to New Zealand.
 msgid "CARD_EventGuadalcanal_TEXT"
 msgstr "Rekruteer een leger in Nieuw-Zeeland; bouw daarna een vloot grenzend aan Nieuw-Zeeland."
 
@@ -2791,9 +2791,9 @@ msgstr "Gebruik eenmaal per beurt wanneer je een leger bouwt. Leg de bovenste ka
 msgid "CARD_EventTheaterShift_TEXT"
 msgstr "Eén voor één, eenmaal per stuk, mag je elk Amerikaans leger en elke Amerikaanse vloot op het bord elimineren en dat stuk daarna bouwen."
 
-#. en: If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck
+#. en: If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck.
 msgid "CARD_EWFirestormBombing_TEXT"
-msgstr "Als een Amerikaans leger of een Amerikaanse vloot grenst aan een thuisgebied van de As, moet dat land de bovenste 7 kaarten van zijn trekstapel afleggen"
+msgstr "Als een Amerikaans leger of een Amerikaanse vloot grenst aan een thuisgebied van de As, moet dat land de bovenste 7 kaarten van zijn trekstapel afleggen."
 
 #. en: Recruit a Soviet Army in Russia; then the Soviet Union may build an Army.
 msgid "CARD_EventMurmanskConvoy_TEXT"
@@ -2819,31 +2819,31 @@ msgstr "Als een Amerikaans leger binnen 2 gebieden van Italië is, moet Italië 
 msgid "CARD_EventPattonAdvances_TEXT"
 msgstr "Bouw een leger in West-Europa; val daarna Duitsland of Italië aan."
 
-#. en: The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa
+#. en: The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa.
 msgid "CARD_EventFreeFrenchAllies_TEXT"
-msgstr "Het Verenigd Koninkrijk mag een leger rekruteren in West-Europa, Noord-Afrika of Afrika"
+msgstr "Het Verenigd Koninkrijk mag een leger rekruteren in West-Europa, Noord-Afrika of Afrika."
 
 #. en: Allied Armies in Szechuan are always in supply. During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to recruit an Army in Szechuan.
 msgid "CARD_StatusAmericanVolunteerGroupExpands_TEXT"
 msgstr "Geallieerde legers in Sichuan zijn altijd bevoorraad. Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, de bovenste 2 kaarten van je trekstapel af om een leger in Sichuan te rekruteren."
 
-#. en: Recruit an Army in Vladivostok; then battle in China
+#. en: Recruit an Army in Vladivostok; then battle in China.
 msgid "CARD_EventVasilevskyTakesCommandInTheFarEast_TEXT"
-msgstr "Rekruteer een leger in Vladivostok; val daarna China aan"
+msgstr "Rekruteer een leger in Vladivostok; val daarna China aan."
 
 #. en: During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army in Western Europe.
 msgid "CARD_StatusFreeFrance_TEXT"
 msgstr "Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, de bovenste 2 kaarten van je trekstapel af om een leger in West-Europa te bouwen."
 
-#. en: Build an Army in Southeast Asia; then battle in China or Szechuan
+#. en: Build an Army in Southeast Asia; then battle in China or Szechuan.
 msgid "CARD_EventLedoAndBurmaRoads_TEXT"
-msgstr "Bouw een leger in Zuidoost-Azië; val daarna China of Sichuan aan"
+msgstr "Bouw een leger in Zuidoost-Azië; val daarna China of Sichuan aan."
 
-#. en: During your Victory step, gain +1 Victory Point if you did not perform a land battle or eliminated a unit. 
+#. en: During your Victory step, gain +1 Victory Point if you neither battled a land space nor eliminated a unit.
 msgid "CARD_StatusOccupationOfCzechoslovakia_TEXT"
 msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als je geen landgebied hebt aangevallen en geen eenheid hebt geëlimineerd."
 
-#. en: Battle in Western Europe. Then build an army in Western Europe.
+#. en: Battle in Western Europe. Then build an Army in Western Europe.
 msgid "CARD_EventArdennesOffensive_TEXT"
 msgstr "Val West-Europa aan. Bouw daarna een leger in West-Europa."
 
@@ -3133,7 +3133,7 @@ msgstr "Gebruik wanneer je een vloot bouwt. Val 1 of 2 keer een landgebied aan d
 msgid "CARD_StatusJapaneseMandateForTheSouthSeasIslands_TEXT"
 msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als je een vloot in de Centrale Stille Oceaan hebt."
 
-#. en: For each Japanese Navy and Air Force in the Sea of Japan, gain a +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck.
+#. en: For each Japanese Navy and Air Force in the Sea of Japan, gain +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck.
 msgid "CARD_EWJapaneseFleetBlockadesVladivostok_TEXT"
 msgstr "Krijg voor elke Japanse vloot en luchtmacht in de Japanse Zee +1 overwinningspunt, en de Sovjet-Unie moet de bovenste kaart van haar trekstapel afleggen."
 
@@ -3285,7 +3285,7 @@ msgstr "Bouw een Frans leger."
 msgid "CARD_StatusTurkeyOpensTheStraits_TEXT"
 msgstr "Voor de As grenst het Midden-Oosten aan de Balkan, en grenst de Zwarte Zee aan de Middellandse Zee."
 
-#. en: Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean or North Sea.
+#. en: Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean Sea or North Sea.
 msgid "CARD_EventSpain_TEXT"
 msgstr "Bouw een leger in West-Europa of Noord-Afrika; bouw daarna een vloot in de Middellandse Zee of de Noordzee."
 
@@ -3321,7 +3321,7 @@ msgstr "Elimineer een geallieerd leger in het Midden-Oosten."
 msgid "CARD_EWOperationPike_TEXT"
 msgstr "Als het Verenigd Koninkrijk een leger binnen 2 gebieden van Oekraïne heeft, moet de Sovjet-Unie de bovenste 2 kaarten van haar trekstapel afleggen. Krijg +1 overwinningspunt."
 
-#. en: The North Sea and Mediterranean are never adjacent for the Allies, and always adjacent for the Axis.
+#. en: The North Sea and Mediterranean Sea are never adjacent for the Allies, and always adjacent for the Axis.
 msgid "CARD_StatusSpanishTroopsSeizeGibraltar_TEXT"
 msgstr "De Noordzee en de Middellandse Zee grenzen voor de Geallieerden nooit aan elkaar, en voor de As altijd."
 
@@ -3337,7 +3337,7 @@ msgstr "Elimineer een geallieerd leger in Noord-Afrika."
 msgid "CARD_EWOperationLobster_TEXT"
 msgstr "Het Verenigd Koninkrijk moet de bovenste 2 kaarten van zijn trekstapel afleggen."
 
-#. en: Recruit an Italian Navy and a German Navy in the Mediterranean.
+#. en: Recruit an Italian Navy and a German Navy in the Mediterranean Sea.
 msgid "CARD_EventOperationHerkules_TEXT"
 msgstr "Rekruteer een Italiaanse vloot en een Duitse vloot in de Middellandse Zee."
 

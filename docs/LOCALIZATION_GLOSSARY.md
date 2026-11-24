@@ -73,12 +73,12 @@ Source: `QGData_Countries_V2.json`.
 | NEW_GUINEA | New Guinea | Nieuw-Guinea | |
 | NEW_ZEALAND | New Zealand | Nieuw-Zeeland | |
 | NORTH_AFRICA | North Africa | Noord-Afrika | |
-| PACIFIC_NORTH_WEST | Pacific North West | Pacifisch Noordwesten | the region's usual Dutch description |
+| PACIFIC_NORTH_WEST | Pacific Northwest | Pacifisch Noordwesten | the region's usual Dutch description |
 | PHILIPPINES | Philippines | Filipijnen | |
 | RUSSIA | Russia | Rusland | |
 | SCANDINAVIA | Scandinavia | Scandinavië | |
 | SIBERIA | Siberia | Siberië | |
-| SOUTH_EAST_ASIA | South East Asia | Zuidoost-Azië | |
+| SOUTH_EAST_ASIA | Southeast Asia | Zuidoost-Azië | |
 | SZECHUAN | Szechuan | Sichuan | the current Dutch spelling |
 | UKRAINE | Ukraine | Oekraïne | |
 | UNITED_KINGDOM | United Kingdom | Verenigd Koninkrijk | |
@@ -87,7 +87,7 @@ Source: `QGData_Countries_V2.json`.
 | VLADIVOSTOK | Vladivostok | Vladivostok | |
 | WESTERN_EUROPE | Western Europe | West-Europa | |
 | BALTIC_SEA | Baltic Sea | Oostzee | |
-| BAY_OF_BENGAL | Bay Of Bengal | Golf van Bengalen | |
+| BAY_OF_BENGAL | Bay of Bengal | Golf van Bengalen | |
 | BLACK_SEA | Black Sea | Zwarte Zee | |
 | CASPIAN_SEA | Caspian Sea | Kaspische Zee | |
 | CENTRAL_PACIFIC | Central Pacific | Centrale Stille Oceaan | |
@@ -97,10 +97,10 @@ Source: `QGData_Countries_V2.json`.
 | NORTH_ATLANTIC | North Atlantic | Noord-Atlantische Oceaan | |
 | NORTH_PACIFIC | North Pacific | Noordelijke Stille Oceaan | |
 | NORTH_SEA | North Sea | Noordzee | |
-| SEA_OF_JAPAN | Sea Of Japan | Japanse Zee | |
+| SEA_OF_JAPAN | Sea of Japan | Japanse Zee | |
 | SOUTH_ATLANTIC | South Atlantic | Zuid-Atlantische Oceaan | |
 | SOUTH_CHINA_SEA | South China Sea | Zuid-Chinese Zee | |
-| SOUTH_EAST_PACIFIC | South East Pacific | Zuidoostelijke Stille Oceaan | |
+| SOUTH_EAST_PACIFIC | Southeast Pacific | Zuidoostelijke Stille Oceaan | |
 | SOUTHERN_OCEAN | Southern Ocean | Zuidelijke Oceaan | |
 | SOUTH_PACIFIC | South Pacific | Zuidelijke Stille Oceaan | |
 
@@ -199,7 +199,7 @@ The type-only cards follow the card types in §4: Build Army, Build Navy, Land B
 
 **Base game:**
 - **Events (35):** Afrika Korps; Ardennes Offensive; Arsenal of Democracy; Broad Front; Division Azul; Dutch East Indies; Fleet Deployed to Pearl Harbor; Flexible Resources; Forced Conscription; Free French Allies; General Smuts Strengthens Ties to UK; General Winter; German Aid in Greece; German-Soviet Treaty of Friendship, Cooperation, and Demarcation; Guadalcanal; Guns and Butter; Increased Commonwealth Support; Italian East Africa; Italy Attacks Communists; King Peter Enthroned in Yugoslavia; Ledo and Burma Roads; Lend Lease; Mao Tse-tung; Military Dictatorships in the Balkans; Murmansk Convoy; Operation Magic; Patton Advances; Plunder; Singapore Fortified; The Autobahn; Theater Shift; Tito's Partisans; Trans-Siberian Railroad; Vasilevsky Takes Command in the Far East
-- **Status (42):** Abundant Resources; Aircraft Carriers; American Volunteer Group Expands; Amphibious Landings; Anti-Communist Sentiment; Atlantic Wall; Australia Forms the Directorate of Manpower; Balkan Resources; Bias for Action; Blitzkrieg; Bravado; Conscription; Dive Bombers; Flying Fortresse; Forward Bases; Free France; Frontal Assault; Greater East Asia Co Prosperity Sphere; Guards; Imperial Designs; Impero Italiano; Jet Fighters; Lord Linlithgow Declares India to Be at War; Mackenzie King Drafts the National Resources Mobilization Act; Mare Nostrum; Occupation Of Czechoslovakia; Radar; Resistance; Rosie the Riveter; Scorched Earth; Shvernik's Evacuation Council; Stavka Forms Artillery Corps; Superior Planning; Superior Shipyards; Swedish Iron Ore; Synthetic Fuel; The Royal Navy; Unimpeded Merchant Shipping; Volksturm; Wartime Production; Wolf Packs; Women Conscripts
+- **Status (42):** Abundant Resources; Aircraft Carriers; American Volunteer Group Expands; Amphibious Landings; Anti-Communist Sentiment; Atlantic Wall; Australia Forms the Directorate of Manpower; Balkan Resources; Bias for Action; Blitzkrieg; Bravado; Conscription; Dive Bombers; Flying Fortresses; Forward Bases; Free France; Frontal Assault; Greater East Asia Co-Prosperity Sphere; Guards; Imperial Designs; Impero Italiano; Jet Fighters; Lord Linlithgow Declares India to Be at War; Mackenzie King Drafts the National Resources Mobilization Act; Mare Nostrum; Occupation of Czechoslovakia; Radar; Resistance; Rosie the Riveter; Scorched Earth; Shvernik's Evacuation Council; Stavka Forms Artillery Corps; Superior Planning; Superior Shipyards; Swedish Iron Ore; Synthetic Fuel; The Royal Navy; Unimpeded Merchant Shipping; Volkssturm; Wartime Production; Wolf Packs; Women Conscripts
 - **Economic Warfare (17):** B-24 Liberator; B-26 Marauder; B-29 Superfortress; Bomber Command; Decima Flottiglia MAS (Frogmen); Firestorm Bombing; Indian Ocean Patrols; Malta Submarines; Regia Marina Closes Shipping Lane; SBD Dauntless; Submarines Enforce Blockade; Submarines Lead the Battle of the Atlantic; Submarines Prey on Unprotected Shipping; Submarines Raid Murmansk Convoy; Submarines Support Pacific Islands; Submarines of the Monsoon Group; V-Weapons
 - **Response (27):** ASW Tactics; Banzai Charge; Battleship Repair; China Offensive; Defense of the Motherland; Defensive Posture; Destroyer Transport; Destroyers; Enigma Code Cracked; Fall of Singapore; German Reinforcement Counterattack; Kamikaze; Kwantung Army; Leningrad; Loyal to the Crown; Mobile Force; Monte Cassino; Moscow; RAF; Rasputitsa; Rationing; Romanian Reinforcements; Skilled Pilots; Special Naval Landing Forces; Stalingrad; Surprise Attack; Truk
 
@@ -207,19 +207,35 @@ The type-only cards follow the card types in §4: Build Army, Build Navy, Land B
 - **Bolster (50):** 12.8cm Flakzwilling 40; A Great, Sleeping Giant; Admiral Graf Spee; Armée de l'Air; Asian Reserves; BETASOM; Battle of Moscow; Bletchley Park; British Colonial Forces; Carpet Bombing; Cavalry Corps; Cloud Cover; Code of Bushido; Eagle Squadrons; Fallschirmjäger; Flying Tigers; Fortress Rebuilt; G7e Torpedo; Golden Square Coup; Imperial Japanese Navy; Island Fortresses; Italy Completes Carriers; Ju-52's Airlift Supplies; Ju-87; Keep Calm and Carry On; Maginot Line; Mitsubishi J8M; Nagumo Commands the First Air Fleet; Navajo Code Talkers; Operation Weserübung; Operation Zet; Our Philosophy of Government; P-51 Mustang; Pacific Bases; Pact of Steel; Pappy Boyington; Paratroops; Rangers; Regia Aeronautica; Somaliland; Special Air Service Raids Airfields; Supermarina; Tactical Innovations; The Blitz; The Pacific Empire; Torai; Vitebsk Gate; Warsaw Uprising; Yamamoto aboard the Yamato; Zhukov Drives West
 - **Economic Warfare (11):** Arkhangelsk Falls; Bombing of Chongqing; Doolittle's Bombers; Elektroboot Submarines; Fu-Go Balloon Bombs; Japanese Fleet Blockades Vladivostok; Oil Embargo; Operation Lobster; Operation Pike; Stalemate in China; United States Submarines Patrol Japanese Shipping Lanes
 - **Status (25):** Absolute National Defense Sphere; American Volunteer Group Expands; Anti-Japanese Volunteer Armies; Artificial Harbors; Attrition; Free France; Government Evacuates to Kuibyshev; Government in Exile; Hobart's Funnies; Hokushin-ron; Irredentismo Italiano; Japanese Mandate for the South Seas Islands; Landkreuzers; People's Liberation Army; Polish Sovereignty; Quantity has a Quality All Its Own; SHAEF; Senegalese Tirailleurs; Spanish Troops Seize Gibraltar; Tank Desant; Turkey Opens the Straits; USMC; Victory Gardens; War Bonds; Westwall
-- **Events (30):** American Public Sympathizes with Chinese People; Armée de Terre; Battles of Khalkhin Gol; Cash and Carry Replaces Neutrality Acts; Dutch East Indies; Fall Weiss; Foreign Legion; France Combattante; Free Forces of the Low Countries; Free French Allies; Giuliani, Cappellini, and Torelli; Kuril Islands Landing Operation; La Royale; Ledo and Burma Roads; Les Forces Navales Françaises Libres; Operation Herkules; Polskie Państwo Podziemne; Production Initiative; Reza Shah supports Axis; Rhin et Danube; Sea Lion; Shoot First and Argue Afterwards; Siberian Transfer; Spain; Strategic Planning; Sweden Supports Finland; The Brazilian Expeditionary Force; The Hundred Regiments Offensive; Turkey Joins Axis; Wafdist Uprising
+- **Events (30):** American Public Sympathizes with Chinese People; Armée de Terre; Battles of Khalkhin Gol; Cash and Carry Replaces Neutrality Acts; Dutch East Indies; Fall Weiss; Foreign Legion; France Combattante; Free Forces of the Low Countries; Free French Allies; Giuliani, Cappellini, and Torelli; Kuril Islands Landing Operation; La Royale; Ledo and Burma Roads; Les Forces Navales Françaises Libres; Operation Herkules; Polskie Państwo Podziemne; Production Initiative; Reza Shah Supports Axis; Rhin et Danube; Sea Lion; Shoot First and Argue Afterwards; Siberian Transfer; Spain; Strategic Planning; Sweden Supports Finland; The Brazilian Expeditionary Force; The Hundred Regiments Offensive; Turkey Joins Axis; Wafdist Uprising
 - **Response (15):** Alpini; Chinese Civil War; Endless Expanses; French Patriots Join Allies; Heavy Tanks; Imperial Manchukuo Army; Japan Arms Indian Nationalists; Kantai Kessen; Marco Polo Bridge Incident; Operation Unthinkable; Retreat and Regroup; SNLF Paratroopers; Submarines Support Fleet; Thailand; Élan
 
-## 8. English inconsistencies found along the way
+## 8. Capitalisation
 
-These are worth fixing in the English source before translating:
+**English:** game terms are capitalised in card text, as in the board game: Army, Navy, Air Force, Victory Point, Axis, Allied, Home space, Play step, and card types ("Economic Warfare card", "Build Army card", "Status card"). Never abbreviate a card type, so "Economic Warfare card", not "EW card".
 
-- Card texts say "Southeast Asia"; the country label is "South East Asia".
-- Card texts say "Mediterranean"; the country label is "Mediterranean Sea".
-- Capitalisation: "Bay Of Bengal", "Sea Of Japan", "Occupation Of Czechoslovakia".
-- Typos and spacing in card names:
-  - "Flying Fortresse" should be "Flying Fortress(es)".
-  - "Volksturm" should be "Volkssturm".
-  - "General Winter " has a trailing space.
-  - "Greater East Asia Co Prosperity Sphere" should be "Co-Prosperity".
-- `FactionAdjactiveLabels` uses "United Kingdom" and "United States" as adjectives ("United Kingdom Army"), consistent with the card texts. Dutch should still use "Brits" and "Amerikaans". The code name also has a typo, "Adjactive".
+**Dutch:**
+- **Card types** start with a capital, in the same form everywhere:
+  - "kaart Economische oorlogvoering", "kaart Leger bouwen", "kaart Vloot bouwen", "kaart Landslag", "kaart Zeeslag"
+  - "Statuskaart", "Reactiekaart", "Gebeurteniskaart", "Versterkingskaart", "Luchtkrachtkaart"
+- **Teams** are capitalised: "de As", "de Geallieerden". The adjective "geallieerd(e)" is lower case.
+- **Everything else** is lower case in running text: leger, vloot, luchtmacht, overwinningspunt, thuisgebied, speelstap, aflegstapel, trekstapel. A capital appears only at the start of a sentence or on a standalone label ("Leger", "Vloot").
+
+## 9. English fixes made (2026-11-24)
+
+- **Country names:** "Bay Of Bengal" → "Bay of Bengal", "Sea Of Japan" → "Sea of Japan", "South East Asia" → "Southeast Asia" (matches the card texts), "South East Pacific" → "Southeast Pacific", "Pacific North West" → "Pacific Northwest". Only the display labels changed; the IDs (`SOUTH_EAST_ASIA`, …) are untouched.
+- **Card names:**
+  - "Flying Fortresse" → "Flying Fortresses"
+  - "Volksturm" → "Volkssturm"
+  - "General Winter " → "General Winter"
+  - "Greater East Asia Co-Prosperity Sphere" → "Greater East Asia Co-Prosperity Sphere"
+  - "Occupation of Czechoslovakia" → "Occupation of Czechoslovakia"
+  - "Reza Shah Supports Axis" → "Reza Shah Supports Axis"
+- **Card texts:**
+  - "EW card" → "Economic Warfare card" (5 cards)
+  - "the Mediterranean" → "the Mediterranean Sea" (6 cards)
+  - "in in" (German Reinforcement Counterattack), "then. build" (Guadalcanal), "army" → "Army" (Ardennes Offensive), "gain a +1" (Japanese Fleet Blockades Vladivostok)
+  - missing full stops on 5 cards
+  - Guns and Butter now says "battle a land space; or battle a sea space"
+  - Occupation of Czechoslovakia now says "if you neither battled a land space nor eliminated a unit"
+- **Scenario descriptions:** "status and response cards" → "Status and Response cards", "victory points" → "Victory Points".

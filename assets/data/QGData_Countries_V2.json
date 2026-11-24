@@ -262,7 +262,7 @@
     {
         "UniqueName": "BAY_OF_BENGAL",
         "UniqueNameCamelCase": "BayOfBengal",
-        "Label": "Bay Of Bengal",
+        "Label": "Bay of Bengal",
         "Number": 5,
         "Type": 1,
         "IsSupply": "false",
@@ -2236,7 +2236,7 @@
     {
         "UniqueName": "PACIFIC_NORTH_WEST",
         "UniqueNameCamelCase": "PacificNorthWest",
-        "Label": "Pacific North West",
+        "Label": "Pacific Northwest",
         "Number": 35,
         "Type": 0,
         "IsSupply": "false",
@@ -2495,7 +2495,7 @@
     {
         "UniqueName": "SEA_OF_JAPAN",
         "UniqueNameCamelCase": "SeaOfJapan",
-        "Label": "Sea Of Japan",
+        "Label": "Sea of Japan",
         "Number": 39,
         "Type": 1,
         "IsSupply": "false",
@@ -2769,7 +2769,7 @@
     {
         "UniqueName": "SOUTH_EAST_ASIA",
         "UniqueNameCamelCase": "SouthEastAsia",
-        "Label": "South East Asia",
+        "Label": "Southeast Asia",
         "Number": 43,
         "Type": 0,
         "IsSupply": "false",
@@ -2837,7 +2837,7 @@
     {
         "UniqueName": "SOUTH_EAST_PACIFIC",
         "UniqueNameCamelCase": "SouthEastPacific",
-        "Label": "South East Pacific",
+        "Label": "Southeast Pacific",
         "Number": 44,
         "Type": 1,
         "IsSupply": "false",

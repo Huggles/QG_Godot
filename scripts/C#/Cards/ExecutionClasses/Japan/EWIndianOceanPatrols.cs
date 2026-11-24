@@ -10,7 +10,7 @@ public partial class EWIndianOceanPatrols : EWCardLogic
     /// both the step and <see cref="Targets"/>, so hovering shows exactly what this card is worth.</summary>
     private List<UnitState> ScoringUnits(BoardState board)
     {
-        // Adjacent for Japan: a Navy beyond a strait the Allies hold (Middle East, South East Asia) is not beside the bay.
+        // Adjacent for Japan: a Navy beyond a strait the Allies hold (Middle East, Southeast Asia) is not beside the bay.
         List<int> besideBay = board.AdjacentCountryIds(Faction, CountryState.ForEnum(Country.BayOfBengal));
         return board.ActiveUnits(Faction)
             .Where(u => u.Type == UnitType.NAVY
