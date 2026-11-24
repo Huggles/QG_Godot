@@ -58,10 +58,12 @@ Translated:
 - the fixed text on in-game screens: chat, round track, prompts, reaction controls, connection and error dialogs, score history, card distribution, turn badge
 - scenario titles and descriptions (`SCENARIO_<NAME>_TITLE`, falling back to the scenario file)
 - sound-effect names (`SFX_<NAME>`, falling back to `settings.json`)
+- factions, countries, units, card types and turn steps on standalone labels, through `GameTerms` (see `docs/LOCALIZATION_GLOSSARY.md`)
+- card text on every card face (`CARD_<UniqueName>_TEXT`, via `CardState.DisplayText`). Card names stay English by decision.
 
 Data-driven text uses `Localization.TranslateOr(key, english)` or `Localization.KeyOr(key, english)`, so the data file keeps its English and a translation is optional per item.
 
 Still English (see `docs/LOCALIZATION_INVENTORY.md`):
 - text the host sends to other players: lobby chat lines, end reasons, prompts, action labels
-- faction, country, card and card-type names
-- card text, tutorials, history and card art
+- names inside sentences (history, prompts, action labels)
+- tutorials, mutator bulletin text, and the card art

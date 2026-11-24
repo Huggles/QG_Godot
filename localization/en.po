@@ -1803,3 +1803,763 @@ msgstr "Playing: {0}"
 
 msgid "HUD_MINIMENU_SHOW_HAND"
 msgstr "Show the {0} hand"
+
+# ---- Card texts: base game ----
+
+msgid "CARD_EventMilitaryDictatorshipsInTheBalkans_TEXT"
+msgstr "Recruit an Italian Army in the Balkans: then eliminate an Allied Army in Ukraine."
+
+msgid "CARD_StatusDiveBombers_TEXT"
+msgstr "Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to battle in the same or adjacent land space to the one battled."
+
+msgid "CARD_StatusWolfPacks_TEXT"
+msgstr "German EW cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia."
+
+msgid "CARD_StatusBlitzkrieg_TEXT"
+msgstr "Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to build an Army in the space battled."
+
+msgid "CARD_StatusBiasForAction_TEXT"
+msgstr "Use once per turn when you build an Army. Discard the top 1 card of your draw deck to battle a land space adjacent to the Army just built."
+
+msgid "CARD_StatusSuperiorPlanning_TEXT"
+msgstr "Use once per turn at the beginning of your turn. Examine the top 4 cards of your draw deck and put them back in the order of your choice."
+
+msgid "CARD_StatusAbundantResources_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point for each German Army in Ukraine, Kazakhstan, or Russia."
+
+msgid "CARD_StatusSyntheticFuel_TEXT"
+msgstr "Use once per turn when you build an Army. Discard the top 2 cards of your draw deck to build an Army adjacent to the Army just built."
+
+msgid "CARD_EWSubmarinesRaidMurmanskConvoy_TEXT"
+msgstr "For each German Army or Navy in or adjacent to Scandinavia: gain +1 Victory Point and the Soviet Union must discard the top 2 cards of its draw deck."
+
+msgid "CARD_StatusAtlanticWall_TEXT"
+msgstr "Use once per turn when an Axis Army is battled in Western Europe. The country initiating the battle must discard the top 3 cards of its draw deck."
+
+msgid "CARD_StatusVolksturm_TEXT"
+msgstr "Use once per turn, at the beginning of your turn. Discard the top 1 card of your draw deck to recruit an Army in Germany. (This is in addition to your Play step.)"
+
+msgid "CARD_EWSubmarinesoftheMonsoonGroup_TEXT"
+msgstr "The Allied country of your choice must discard the top 2 cards of its draw deck. Gain +2 Victory Points."
+
+msgid "CARD_EventBroadFront_TEXT"
+msgstr "Conduct up to 3 battles, each in a space that was occupied by a Soviet Army adjacent to a German Army at the beginning of the turn."
+
+msgid "CARD_EventGunsAndButter_TEXT"
+msgstr "This card can be used to: build an Army; build a Navy; land battle; or sea battle."
+
+msgid "CARD_EWSubmarinesEnforceBlockade_TEXT"
+msgstr "For each German Army adjacent to the North Sea, gain +1 Victory Point and the United Kingdom must discard the top 2 cards of its draw deck."
+
+msgid "CARD_StatusSwedishIronOre_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if a German Navy is in the Baltic Sea; then gain +1 Victory Point if a German Army is in Scandinavia."
+
+msgid "CARD_EWSubmarinesLeadtheBattleoftheAtlantic_TEXT"
+msgstr "For each German Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 2 cards of its draw deck."
+
+msgid "CARD_EWVWeapons_TEXT"
+msgstr "If a German Army is in Western Europe, gain +3 Victory Points and the United Kingdom must discard the top 1 card of its draw deck."
+
+msgid "CARD_StatusConscription_TEXT"
+msgstr "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army."
+
+msgid "CARD_EventPlunder_Germany_TEXT"
+msgstr "Gain +1 Victory Point for each German Army or Navy outside Germany."
+
+msgid "CARD_EventForcedConscription_TEXT"
+msgstr "Recruit 1 or 2 Armies in or adjacent to Germany."
+
+msgid "CARD_StatusJetFighters_TEXT"
+msgstr "When you are the target of an EW card, reduce the number of cards you must discard by 3 (minimum 0)."
+
+msgid "CARD_EWSubmarinesPreyonUnprotectedShipping_TEXT"
+msgstr "The United Kingdom must discard the top 2 cards of its draw deck; and 3 more if there is no Allied Navy in the North Sea. Gain +1 Victory Point."
+
+msgid "CARD_EventTheAutobahn_TEXT"
+msgstr "One at a time, once per Army, you may eliminate each German Army on the board and then build that Army."
+
+msgid "CARD_StatusMackenzieKingDraftstheNationalResourcesMobilizationAct_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if a United Kingdom Navy is in the North Atlantic; then gain +1 Victory Point if a United Kingdom Army is in Canada."
+
+msgid "CARD_StatusAustraliaFormstheDirectorateofManpower_TEXT"
+msgstr "Whenever you may build an Army, you may instead recruit that Army in Australia."
+
+msgid "CARD_StatusLordLinlithgowDeclaresIndiatoBeatWar_TEXT"
+msgstr "Whenever you may build an Army, you may instead recruit that Army in India."
+
+msgid "CARD_EWBomberCommand_TEXT"
+msgstr "Your choice of Germany or Italy must discard the top 4 cards of its draw deck."
+
+msgid "CARD_EventSingaporeFortified_TEXT"
+msgstr "Recruit an Army in Southeast Asia and then a Navy in the South China Sea."
+
+msgid "CARD_EWMaltaSubmarines_TEXT"
+msgstr "Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean."
+
+msgid "CARD_EventKingPeterEnthronedinYugoslavia_TEXT"
+msgstr "Eliminate an Axis Army in the Balkans; then recruit an Army in the Balkans."
+
+msgid "CARD_StatusResistance_TEXT"
+msgstr "During your Play step, instead of playing a card from hand, discard 2 cards from your hand to battle in Western Europe or Italy."
+
+msgid "CARD_ResponseASWTactics_TEXT"
+msgstr "Use immediately after an Axis player plays an EW card. Ignore the game text of that EW card."
+
+msgid "CARD_ResponseDefensivePosture_TEXT"
+msgstr "Use when your supplied Army is about to be removed. Do not remove that Army this turn."
+
+msgid "CARD_ResponseDestroyers_TEXT"
+msgstr "Use when a supplied United States or United Kingdom Navy is about to be removed. Do not remove that Navy this turn."
+
+msgid "CARD_EventIncreasedCommonwealthSupport_TEXT"
+msgstr "Recruit a United Kingdom Army in India, Australia, or Canada."
+
+msgid "CARD_ResponseEnigmaCodeCracked_TEXT"
+msgstr "Use immediately after Germany uses a Status card's game text. Discard the Status card just after is has been used."
+
+msgid "CARD_StatusTheRoyalNavy_TEXT"
+msgstr "Use once per turn when you battle a sea space. Discard 2 cards from your hand to battle the same or a different sea space."
+
+msgid "CARD_ResponseLoyaltotheCrown_TEXT"
+msgstr "Use immediately after an Axis Army is built in India, Australia, or Canada. Eliminate the Army just built."
+
+msgid "CARD_ResponseRationing_TEXT"
+msgstr "Use during your Play step after playing a card. Instead of placing that card in your discard pile, shuffle it into your draw deck."
+
+msgid "CARD_EventGeneralSmutsStrengthensTiestoUK_TEXT"
+msgstr "Recruit an Army in Africa and a Navy in the Southern Ocean or the Bay of Bengal."
+
+msgid "CARD_ResponseRAF_TEXT"
+msgstr "Use when your piece in or adjacent to the United Kingdom is about to be removed. Do not remove that piece this turn."
+
+msgid "CARD_EWSubmarinesSupportPacificIslands_TEXT"
+msgstr "For each Japanese Navy in or adjacent to the East Pacific, gain +2 Victory Points and the United States must discard the top 2 cards of its draw deck."
+
+msgid "CARD_ResponseChinaOffensive_TEXT"
+msgstr "Use when you battle in China or an adjacent land space. Build an Army in the space battled: then battle in China or an adjacent land space."
+
+msgid "CARD_ResponseDestroyerTransport_TEXT"
+msgstr "Use when you battle a sea space. Build 1 or 2 Armies adjacent to the space just battled."
+
+msgid "CARD_EWIndianOceanPatrols_TEXT"
+msgstr "For each Japanese Navy in or adjacent to the Bay of Bengal, gain +2 Victory Points and the United Kingdom must discard the top 2 cards of its draw deck."
+
+msgid "CARD_ResponseTruk_TEXT"
+msgstr "Use anytime during your turn. All Japanese pieces in or adjacent to the Central Pacific are in supply for the rest of this turn."
+
+msgid "CARD_StatusImperialDesigns_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if a Japanese Army is in Iwo Jima or the Philippines. (Only +1 Victory Point can be earned.)"
+
+msgid "CARD_ResponseKwantungArmy_TEXT"
+msgstr "Use when a supplied Japanese Army is about to be removed from China, Szechuan, Mongolia, or Vladivostok. Do not remove that Army this turn."
+
+msgid "CARD_StatusUnimpededMerchantShipping_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if the Allies do not have an Army in Hawaii."
+
+msgid "CARD_ResponseBanzaiCharge_TEXT"
+msgstr "Use when you battle a land space. Battle in the same or an adjacent land space to the one just battled."
+
+msgid "CARD_StatusForwardBases_TEXT"
+msgstr "During your Victory step, gain +2 Victory Points if a Japanese Army is in Hawaii, Pacific Northwest, or New Zealand. (Only +2 Victory Point can be earned.)"
+
+msgid "CARD_ResponseKamikaze_TEXT"
+msgstr "Use immediately after an Allied Navy is built adjacent to a Japanese piece. Eliminate the Navy just built."
+
+msgid "CARD_StatusGreaterEastAsiaCoProsperitySphere_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point for each Japanese Army in Indonesia, New Guinea, or Southeast Asia."
+
+msgid "CARD_ResponseFallOfSingapore_TEXT"
+msgstr "Use when you battle in Southeast Asia. Battle the South China Sea; then recruit an Army in Southeast Asia."
+
+msgid "CARD_ResponseSurpriseAttack_TEXT"
+msgstr "Use when you battle a sea space. Battle a sea space; then battle a land space."
+
+msgid "CARD_ResponseMobileForce_TEXT"
+msgstr "Use at the beginning of your turn. Recruit a Navy in or adjacent to the North Pacific."
+
+msgid "CARD_ResponseBattleshipRepair_TEXT"
+msgstr "Use when your supplied Navy is about to be removed. Do not remove that Navy this turn."
+
+msgid "CARD_ResponseSpecialNavalLandingForces_TEXT"
+msgstr "Use when you build a Navy. Build two Armies adjacent to the space where you built the Navy."
+
+msgid "CARD_EventMaoTsetung_TEXT"
+msgstr "Eliminate an Axis Army in China or Szechuan."
+
+msgid "CARD_EventTitosPartisans_TEXT"
+msgstr "Eliminate an Axis Army in the Balkans; Then recruit a Soviet or United Kingdom Army in the Balkans."
+
+msgid "CARD_EventGeneralWinter_TEXT"
+msgstr "Eliminate 1 or 2 Axis Armies in or adjacent to Moscow."
+
+msgid "CARD_EventGermanSovietTreatyofFriendshipCooperationandDemarcation_TEXT"
+msgstr "Recruit an Army in Russia and an Army in Eastern Europe."
+
+msgid "CARD_EventTransSiberianRailroad_TEXT"
+msgstr "One at a time, once per Army, you may eliminate each SovietArmy on the board and then build that Army."
+
+msgid "CARD_ResponseDefenseoftheMotherland_TEXT"
+msgstr "Use at the beginning of your turn. Recruit an Army in or adjacent to Moscow; then eliminate an Axis Army in Moscow."
+
+msgid "CARD_ResponseStalingrad_TEXT"
+msgstr "Use when your Army in Ukraine is about to be removed. Do not remove that Army this turn."
+
+msgid "CARD_ResponseLeningrad_TEXT"
+msgstr "Use when your Army in Russia is about to be removed. Do not remove that Army this turn."
+
+msgid "CARD_ResponseRasputitsa_TEXT"
+msgstr "Use immediately after an Axis Army is built in or adjacent to Moscow. Eliminate the Army just built."
+
+msgid "CARD_ResponseMoscow_TEXT"
+msgstr "Use when your Army in Moscow is about to be removed. Do not remove that Army this turn."
+
+msgid "CARD_StatusShverniksEvacuationCouncil_TEXT"
+msgstr "Soviet Armies are never out of supply. Armies must still be built adjacent to another supplied piece, or in your Home space."
+
+msgid "CARD_StatusFrontalAssault_TEXT"
+msgstr "Use once per turn when you battle a land space. Discard 2 cards from your hand to battle in the same or adjacent land space to the one battled."
+
+msgid "CARD_StatusWomenConscripts_TEXT"
+msgstr "Use when you play a Build Army card for your Play step. Place that Build Army card on the top of your draw deck instead of discarding it."
+
+msgid "CARD_StatusStavkaFormsArtilleryCorps_TEXT"
+msgstr "Use once per turn when you battle a land space. Discard a card from hand to battle the same space."
+
+msgid "CARD_StatusGuards_TEXT"
+msgstr "During your Play step, instead of playing a card from hand, discard 2 cards from your hand to play a Build Army card from your discard pile."
+
+msgid "CARD_StatusScorchedEarth_TEXT"
+msgstr "Ukraine is not a Supply space for the Axis."
+
+msgid "CARD_EventPlunder_Italy_TEXT"
+msgstr "Gain +1 Victory Point for each Italian Army or Navy outside Italy."
+
+msgid "CARD_EventItalyAttacksCommunists_TEXT"
+msgstr "Build an Army in Ukraine and an Army in Russia."
+
+msgid "CARD_EWDecimaFlottigliaMASFrogmen_TEXT"
+msgstr "The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean. Gain +1 Victory Point."
+
+msgid "CARD_EventGermanAidinGreece_TEXT"
+msgstr "Eliminate an Allied Army in the Balkans; then recruit a German Army in the Balkans."
+
+msgid "CARD_StatusImperoItaliano_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point for each Axis Army in North Africa, Africa, or Middle East."
+
+msgid "CARD_StatusAntiCommunistSentiment_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point for each Italian Army in Russia or Ukraine."
+
+msgid "CARD_StatusBravado_TEXT"
+msgstr "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to battle a land space."
+
+msgid "CARD_StatusBalkanResources_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if an Italian Army is in the Balkans."
+
+msgid "CARD_EventDivisionAzul_TEXT"
+msgstr "Discard a random Soviet Response card from the table. You may not inspect the Response card discarded."
+
+msgid "CARD_ResponseGermanReinforcementsCounterattack_TEXT"
+msgstr "Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space."
+
+msgid "CARD_ResponseSkilledPilots_TEXT"
+msgstr "When you are the target of an EW card, reduce the number of cards you must discard by 5 (minimum 0)"
+
+msgid "CARD_ResponseRomanianReinforcements_TEXT"
+msgstr "Use immediately after a supplied German Army is removed. Recruit an Italian Army in that space."
+
+msgid "CARD_EventAfrikaKorps_TEXT"
+msgstr "Recruit a German Army in North Africa and then a German Navy in the Mediterranean."
+
+msgid "CARD_EWRegiaMarinaClosesShippingLanes_TEXT"
+msgstr "For each Italian Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 1 card of its draw deck."
+
+msgid "CARD_ResponseMonteCassino_TEXT"
+msgstr "Use when an Axis Army in Italy is about to be removed. Do not remove that Army this turn."
+
+msgid "CARD_EventItalianEastAfrica_TEXT"
+msgstr "Build an Army in North Africa and then a Navy in the Bay of Bengal."
+
+msgid "CARD_StatusMareNostrum_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point for each Italian Navy on the board."
+
+msgid "CARD_StatusAmphibiousLandings_TEXT"
+msgstr "Use once per turn when you battle a land space. If the space battled is adjacent to a supplied United States Navy, discard the top 1 card of your draw deck to build an Army in the space battled."
+
+msgid "CARD_StatusFlyingFortresses_TEXT"
+msgstr "Use when you play an EW card. Add 2 to the number of cards the Axis country must discard."
+
+msgid "CARD_EventOperationMagic_TEXT"
+msgstr "Discard a random Japanese Response card from the table. You may not inspect the Response card discarded."
+
+msgid "CARD_EventGuadalcanal_TEXT"
+msgstr "Recruit an Army in New Zealand; then. build a Navy adjacent to New Zealand."
+
+msgid "CARD_EWB29Superfortress_TEXT"
+msgstr "If a United States Army is within 3 spaces of Germany, Germany must discard the top 5 cards of its draw deck."
+
+msgid "CARD_EventLendLease_TEXT"
+msgstr "Your choice of the United Kingdom or the Soviet Union may play a card and then draw a card."
+
+msgid "CARD_EWB26Marauder_TEXT"
+msgstr "If a United States Army is within 3 spaces of an Axis Home space, that country must discard the top 4 cards of its draw deck."
+
+msgid "CARD_StatusRadar_TEXT"
+msgstr "Use once per turn, when your supplied Navy is battled. Discard the top 2 cards of your draw deck and do not remove that Navy."
+
+msgid "CARD_StatusRosietheRiveter_TEXT"
+msgstr "Use once per turn at the beginning of your Discard step. Take 1 or 2 cards from your hand and place them on the bottom of your draw deck."
+
+msgid "CARD_EventFlexibleResources_TEXT"
+msgstr "Play a card of your choice from your discard pile."
+
+msgid "CARD_StatusAircraftCarriers_TEXT"
+msgstr "Use once per turn when you battle a sea space. Discard the top 1 card of your draw deck to build a Navy in the space battled."
+
+msgid "CARD_StatusSuperiorShipyards_TEXT"
+msgstr "Use once per turn when you build a Navy. Discard the top 1 card of your draw deck to build an additional Navy."
+
+msgid "CARD_StatusWartimeProduction_TEXT"
+msgstr "Use once per turn when you build an Army. Discard the top 1 card of your draw deck to build an additional Army."
+
+msgid "CARD_EventTheaterShift_TEXT"
+msgstr "One at a time, once per piece, you may eliminate each United States Army and Navy on the board and then build that piece."
+
+msgid "CARD_EWFirestormBombing_TEXT"
+msgstr "If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck"
+
+msgid "CARD_EventMurmanskConvoy_TEXT"
+msgstr "Recruit a Soviet Army in Russia; then the Soviet Union may build an Army."
+
+msgid "CARD_EventArsenalofDemocracy_TEXT"
+msgstr "The United Kingdom may build an Army and a Navy in the order of its choice."
+
+msgid "CARD_EWSBDDauntless_TEXT"
+msgstr "If a United States Navy is within 2 spaces of Japan, Japan must discard the top 4 cards of its draw deck."
+
+msgid "CARD_EventFleetDeployedtoPearlHarbor_TEXT"
+msgstr "Recruit an Army in Hawaii; then build a Navy adjacent to Hawaii."
+
+msgid "CARD_EWB24Liberator_TEXT"
+msgstr "If a United States Army is within 2 spaces of Italy, Italy must discard the top 4 cards of its draw deck."
+
+msgid "CARD_EventPattonAdvances_TEXT"
+msgstr "Build an Army in Western Europe: then battle in Germany or Italy."
+
+msgid "CARD_EventFreeFrenchAllies_TEXT"
+msgstr "The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa"
+
+msgid "CARD_StatusAmericanVolunteerGroupExpands_TEXT"
+msgstr "Allied Armies in Szechuan are always in supply. During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to recruit an Army in Szechuan."
+
+msgid "CARD_EventVasilevskyTakesCommandInTheFarEast_TEXT"
+msgstr "Recruit an Army in Vladivostok; then battle in China"
+
+msgid "CARD_StatusFreeFrance_TEXT"
+msgstr "During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army in Western Europe."
+
+msgid "CARD_EventLedoAndBurmaRoads_TEXT"
+msgstr "Build an Army in Southeast Asia; then battle in China or Szechuan"
+
+msgid "CARD_StatusOccupationOfCzechoslovakia_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if you did not perform a land battle or eliminated a unit. "
+
+msgid "CARD_EventArdennesOffensive_TEXT"
+msgstr "Battle in Western Europe. Then build an army in Western Europe."
+
+msgid "CARD_EventDutchEastIndies_TEXT"
+msgstr "Recruit an Army in Indonesia and an Army in New Guinea, and then a Navy in the South China Sea."
+
+# ---- Card texts: Total War ----
+
+msgid "CARD_BolsterNavajoCodeTalkers_TEXT"
+msgstr "Use at the beginning of your Play step. Take a Bolster card from your hand and place it face down on the table. You may use it as if it were a Response card."
+
+msgid "CARD_EWOilEmbargo_TEXT"
+msgstr "Germany, Italy, and Japan must each choose to remove a piece from the board or discard the top 2 cards of its draw deck."
+
+msgid "CARD_BolsterRangers_TEXT"
+msgstr "Use when you deploy or marshal an Air Force. Discard the top 1 card of your draw deck to eliminate an Army adjacent to that Air Force."
+
+msgid "CARD_BolsterPappyBoyington_TEXT"
+msgstr "Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to deploy an Air Force in or adjacent to the Central Pacific."
+
+msgid "CARD_BolsterOurPhilosophyOfGovernment_TEXT"
+msgstr "Use at the beginning of your Draw step. Discard the top 2 cards of your draw deck to allow the United Kingdom to place a Response card from its discard pile face down on the table."
+
+msgid "CARD_StatusWarBonds_TEXT"
+msgstr "When you Reallocate Resources, you may take a card from your discard pile instead of your draw deck."
+
+msgid "CARD_BolsterFlyingTigers_TEXT"
+msgstr "Use at the beginning of your Air step. Deploy a Chinese Air Force, or a Chinese Air Force may gain air superiority."
+
+msgid "CARD_BolsterEagleSquadrons_TEXT"
+msgstr "Use at the beginning of your Air step. The United Kingdom may deploy an Air Force."
+
+msgid "CARD_StatusUSMC_TEXT"
+msgstr "Use when you build a Navy in or adjacent to a sea space with 'Pacific' in the title. Discard the top 1 card of your draw deck to battle a land space adjacent to the Navy just built."
+
+msgid "CARD_BolsterPacificBases_TEXT"
+msgstr "Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to recruit an Army in a space adjacent to the Central Pacific."
+
+msgid "CARD_EventShootFirstAndArgueAfterwards_TEXT"
+msgstr "Build a Navy in a sea space with 'Pacific' in the title, then battle a sea space adjacent to the Navy just built."
+
+msgid "CARD_EventTheBrazilianExpeditionaryForce_TEXT"
+msgstr "Build an Army in Latin America and a Navy in the South Atlantic or the Southern Ocean."
+
+msgid "CARD_EventCashAndCarryReplacesNeutralityActs_TEXT"
+msgstr "Recruit any 1 available Allied Army or Navy in or adjacent to the corresponding country's Home space."
+
+msgid "CARD_EventAmericanPublicSympathizesWithChinesePeople_TEXT"
+msgstr "Build a Chinese Army."
+
+msgid "CARD_BolsterAGreatSleepingGiant_TEXT"
+msgstr "Use when you build a Navy in a space with 'Pacific' in the title. Discard the top 1 card of your draw deck to build an Army or Navy in an adjacent space."
+
+msgid "CARD_BolsterP51Mustang_TEXT"
+msgstr "Use when you play an Economic Warfare card. The country attacked must discard an additional card for each United States Air Force within 2 spaces of the opponent's Home space."
+
+msgid "CARD_StatusAntiJapaneseVolunteerArmies_TEXT"
+msgstr "Each time a Chinese Army is battled, built, or recruited, the Japanese player must discard 1 card from its hand."
+
+msgid "CARD_BolsterCarpetBombing_TEXT"
+msgstr "Use when you battle. Discard an Economic Warfare card from your hand to battle the same space again."
+
+msgid "CARD_EWDoolittlesBombers_TEXT"
+msgstr "Use if you have a supplied Navy within 3 spaces of Japan. Japan must discard the top 1 card of its draw deck. Gain 3 Victory Points."
+
+msgid "CARD_StatusArtificialHarbors_TEXT"
+msgstr "Use once per turn when you build a Navy. Discard the top 1 card of your draw deck to build an Army adjacent to the Navy just built."
+
+msgid "CARD_StatusSHAEF_TEXT"
+msgstr "France, the United States, and the United Kingdom may trace supply through each other's pieces, including the Army in the Supply space."
+
+msgid "CARD_StatusVictoryGardens_TEXT"
+msgstr "The United States only has to discard 1 card from its hand to use Reallocate Resources."
+
+msgid "CARD_EWStalemateInChina_TEXT"
+msgstr "For each Chinese Army or Air Force on the board, Japan must discard the top 2 cards of its draw deck."
+
+msgid "CARD_EventTheHundredRegimentsOffensive_TEXT"
+msgstr "Battle a land space adjacent to a supplied Chinese piece."
+
+msgid "CARD_EWUnitedStatesSubmarinesPatrolJapaneseShippingLanes_TEXT"
+msgstr "For each United States Navy within 2 spaces of Japan, Japan must discard the top 2 cards of its draw deck."
+
+msgid "CARD_BolsterAdmiralGrafSpee_TEXT"
+msgstr "Use when you build a Navy. Discard the top 1 card of your draw deck to battle the North Sea, North Atlantic, or South Atlantic."
+
+msgid "CARD_BolsterJu52sAirliftSupplies_TEXT"
+msgstr "Use at the beginning of your Play step. If you have an Air Force on the board, all German pieces are in supply for the rest of the turn."
+
+msgid "CARD_BolsterOperationWeserubung_TEXT"
+msgstr "Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to recruit an Army in Scandinavia."
+
+msgid "CARD_BolsterFallschirmjager_TEXT"
+msgstr "Use at the beginning of your Play step. Discard the top 1 card of your draw deck to battle a land space adjacent to your Air Force."
+
+msgid "CARD_EventSwedenSupportsFinland_TEXT"
+msgstr "To use, Germany or the Soviet Union must have an Army in Russia. Build a Navy in the Baltic and recruit an Army in Scandinavia."
+
+msgid "CARD_Bolster128cmFlakzwilling40_TEXT"
+msgstr "Use when an Allied player gains air superiority to eliminate an Italian Air Force. The Air Force used to gain air superiority is eliminated."
+
+msgid "CARD_EWElektrobootSubmarines_TEXT"
+msgstr "The Allied country of your choice must discard the top 1 card of its draw deck. Gain +2 Victory Points."
+
+msgid "CARD_BolsterTacticalInnovations_TEXT"
+msgstr "Use at the beginning of your Play step. Discard your Status card from the table to place a Status card from your hand on the table."
+
+msgid "CARD_StatusLandkreuzers_TEXT"
+msgstr "Use every time a German Army is battled. The country initiating the battle must discard the top 2 cards of its draw deck."
+
+msgid "CARD_StatusWestwall_TEXT"
+msgstr "Use every time an Axis Army is battled in Germany. The country initiating the battle must discard the top 3 cards of its draw deck."
+
+msgid "CARD_EventSeaLion_TEXT"
+msgstr "Build a Navy in the North Sea, then battle the United Kingdom space."
+
+msgid "CARD_EventProductionInitiative_TEXT"
+msgstr "Take your choice of 1 Status card from your draw deck and play it. Then shuffle your draw deck."
+
+msgid "CARD_BolsterCloudCover_TEXT"
+msgstr "Use at the beginning of your Play step. Air Defense cannot be used this turn."
+
+msgid "CARD_EventStrategicPlanning_TEXT"
+msgstr "Take your choice of 1 or 2 cards from your draw deck and add them to your hand, then discard 1 card from your hand. Shuffle your draw deck."
+
+msgid "CARD_BolsterTheBlitz_TEXT"
+msgstr "Use when you play an Economic Warfare card. The United Kingdom must discard the top 2 cards of its draw deck for each German Air Force within 2 spaces of the United Kingdom."
+
+msgid "CARD_BolsterJu87_TEXT"
+msgstr "Use when you deploy or marshal an Air Force. Discard the top 1 card of your draw deck to battle a land space adjacent to that Air Force."
+
+msgid "CARD_EventTurkeyJoinsAxis_TEXT"
+msgstr "Build a Navy in the Black Sea, then recruit an Army in the Middle East."
+
+msgid "CARD_EWArkhangelskFalls_TEXT"
+msgstr "To use, the Axis must have Armies in both Scandinavia and Russia. The Soviet Union must discard the top 5 cards of its draw deck. Gain +1 Victory Point."
+
+msgid "CARD_EventFallWeiss_TEXT"
+msgstr "Discard the top 1 card of your draw deck to recruit an Army in Eastern Europe. Then play another card from your hand."
+
+msgid "CARD_BolsterG7eTorpedo_TEXT"
+msgstr "Use when you play an Economic Warfare card with the word \"Submarines\" in the title. Discard the top 1 card of your draw deck to battle a sea space."
+
+msgid "CARD_StatusTankDesant_TEXT"
+msgstr "Use when you build an Army. Discard both a Build Army card and a Land Battle card from your hand to battle a land space adjacent to the Army just built."
+
+msgid "CARD_BolsterAsianReserves_TEXT"
+msgstr "Use at the beginning of your Draw step. Take 2 Build Army cards from your discard pile and add them to your hand."
+
+msgid "CARD_StatusAttrition_TEXT"
+msgstr "During your Discard step, gain +1 Victory Point for each Build Army card you discard from your hand."
+
+msgid "CARD_ResponseEndlessExpanses_TEXT"
+msgstr "Use at any time. Do not remove Soviet Armies in Siberia and/or Kazakhstan this turn."
+
+msgid "CARD_EventBattlesOfKhalkhinGol_TEXT"
+msgstr "Recruit an Army in Mongolia, then battle Vladivostok or China."
+
+msgid "CARD_BolsterOperationZet_TEXT"
+msgstr "Use at the beginning of your Air step. Deploy a Chinese Air Force, or a Chinese Air Force may gain air superiority."
+
+msgid "CARD_BolsterFortressRebuilt_TEXT"
+msgstr "Use at the beginning of your Draw step. Discard a Build Army card from your hand to place a Response card from your discard pile face down on the table."
+
+msgid "CARD_BolsterZhukovDrivesWest_TEXT"
+msgstr "Use when you battle Russia, Eastern Europe, Ukraine, or the Balkans. Discard a Build Army card from your hand to build an Army in the space just battled."
+
+msgid "CARD_EventSiberianTransfer_TEXT"
+msgstr "Recruit an Army in or adjacent to Siberia."
+
+msgid "CARD_BolsterParatroops_TEXT"
+msgstr "Use when you deploy or marshal an Air Force. Discard a Build Army card from your hand to build an Army adjacent to that Air Force."
+
+msgid "CARD_StatusPeoplesLiberationArmy_TEXT"
+msgstr "Chinese Armies are always in supply. During your Play step, instead of playing a card from your hand, you may recruit a Chinese Army in Szechuan, China, or Mongolia."
+
+msgid "CARD_StatusQuantityHasAQualityAllItsOwn_TEXT"
+msgstr "Use once per turn when you build an Army. Discard a Build Army card from your hand to build an additional Army."
+
+msgid "CARD_BolsterVitebskGate_TEXT"
+msgstr "Use at the beginning of your Victory step. Discard a Build Army card and 2 other cards from your hand to eliminate an Axis Army in Moscow or Russia."
+
+msgid "CARD_EventKurilIslandsLandingOperation_TEXT"
+msgstr "Build a Navy in the Sea of Japan, then battle the Japan space."
+
+msgid "CARD_BolsterBattleOfMoscow_TEXT"
+msgstr "Use immediately after your last Army on the board is removed. Discard a Build Army card from your hand to eliminate an Axis Army in or adjacent to Moscow."
+
+msgid "CARD_ResponseHeavyTanks_TEXT"
+msgstr "Use when your Army is battled. The attacker must discard 4 cards from its hand or your Army is not removed."
+
+msgid "CARD_BolsterCavalryCorps_TEXT"
+msgstr "Use at the beginning of your Play step. Discard a Build Army card from your hand and eliminate a Soviet Army from the board. Then build an Army."
+
+msgid "CARD_StatusGovernmentEvacuatesToKuibyshev_TEXT"
+msgstr "Siberia is now the Soviet Union Home space, and a Supply space for the Soviet Union (only). Place a Home space marker on Siberia. Moscow is no longer a Supply space for any country."
+
+msgid "CARD_ResponseRetreatAndRegroup_TEXT"
+msgstr "Use when your Army in Moscow or Ukraine is removed. Recruit Armies in both Siberia and Kazakhstan."
+
+msgid "CARD_ResponseJapanArmsIndianNationalists_TEXT"
+msgstr "Use when you battle in India. Build an Army in India."
+
+msgid "CARD_ResponseMarcoPoloBridgeIncident_TEXT"
+msgstr "Use at the beginning of your Play step. Battle in China or an adjacent land space."
+
+msgid "CARD_EWFuGoBalloonBombs_TEXT"
+msgstr "Gain +1 Victory Point. Instead of discarding this card, you may discard 3 other cards from hand and return this card to your hand."
+
+msgid "CARD_ResponseSubmarinesSupportFleet_TEXT"
+msgstr "Use when you build a Navy. Sea battle 1 or 2 times adjacent to the Navy just built."
+
+msgid "CARD_ResponseSNLFParatroopers_TEXT"
+msgstr "Use when you build a Navy. Land battle 1 or 2 times adjacent to the Navy just built."
+
+msgid "CARD_StatusJapaneseMandateForTheSouthSeasIslands_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if you have a Navy in the Central Pacific."
+
+msgid "CARD_EWJapaneseFleetBlockadesVladivostok_TEXT"
+msgstr "For each Japanese Navy and Air Force in the Sea of Japan, gain a +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck."
+
+msgid "CARD_ResponseKantaiKessen_TEXT"
+msgstr "Use at the beginning of your Play step. Battle a sea space."
+
+msgid "CARD_BolsterMitsubishiJ8M_TEXT"
+msgstr "Use at the beginning of your Draw step. Eliminate an Allied Air Force adjacent to your Air Force."
+
+msgid "CARD_StatusAbsoluteNationalDefenseSphere_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if you have 3 or more Navies on the board."
+
+msgid "CARD_BolsterTorai_TEXT"
+msgstr "Use when you gain air superiority in or adjacent to the Central Pacific. Discard a Response card from your hand to battle the space from which the enemy Air Force was just removed."
+
+msgid "CARD_BolsterImperialJapaneseNavy_TEXT"
+msgstr "Use when you build a Navy. Discard a Response card from your hand to build an additional Navy."
+
+msgid "CARD_BolsterNagumoCommandsTheFirstAirFleet_TEXT"
+msgstr "Use when you deploy or marshal an Air Force to a sea space. Discard a Response card from your hand to battle a space adjacent to that Air Force."
+
+msgid "CARD_ResponseImperialManchukuoArmy_TEXT"
+msgstr "Use at the beginning of your Play step. Recruit an Army in China."
+
+msgid "CARD_BolsterYamamotoAboardTheYamato_TEXT"
+msgstr "Use at the beginning of your Play step. Discard a Response card from your hand to deploy an Air Force in a space with your supplied Navy."
+
+msgid "CARD_EWBombingOfChongqing_TEXT"
+msgstr "For each Japanese Air Force in or adjacent to Szechuan, gain +1 Victory Point and the United States must discard the top 2 cards of its draw deck."
+
+msgid "CARD_BolsterThePacificEmpire_TEXT"
+msgstr "Use during your Victory step. Score +1 Victory Point for each Japanese Navy that occupies a space with \"Pacific\" in the title."
+
+msgid "CARD_BolsterIslandFortresses_TEXT"
+msgstr "Use at the beginning of your Victory step. Discard a Response card from your hand to recruit an Army in Indonesia, New Guinea, Iwo Jima, or the Philippines."
+
+msgid "CARD_StatusHokushinRon_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point for each Army you have in Vladivostok and Siberia."
+
+msgid "CARD_ResponseChineseCivilWar_TEXT"
+msgstr "Use at the beginning of your Play step. Eliminate a Chinese Army."
+
+msgid "CARD_ResponseThailand_TEXT"
+msgstr "Use at the beginning of your Play step. Recruit an Army in Southeast Asia."
+
+msgid "CARD_BolsterCodeOfBushido_TEXT"
+msgstr "Use when your Army is battled. Discard a Response card from your hand and do not remove the Army due to that battle."
+
+msgid "CARD_BolsterWarsawUprising_TEXT"
+msgstr "Use at the beginning of your Victory step. Discard 2 cards from your hand to recruit an Army in Eastern Europe."
+
+msgid "CARD_ResponseFrenchPatriotsJoinAllies_TEXT"
+msgstr "Use immediately after the United States, France, or the United Kingdom battles in North Africa, Africa, Middle East, or Western Europe. Recruit a French Army in the space battled."
+
+msgid "CARD_BolsterBletchleyPark_TEXT"
+msgstr "Use when the Axis declares its intention to use a Bolster card, but before any text is resolved. Discard 1 card from hand to discard the Axis Bolster card without resolving its text."
+
+msgid "CARD_EventFranceCombattante_TEXT"
+msgstr "Build a French Army."
+
+msgid "CARD_BolsterKeepCalmandCarryOn_TEXT"
+msgstr "Use when the Axis declares its intention to use a Status card, but before any text is resolved. Discard 1 card from your hand to prevent the Axis from using that Status card this turn."
+
+msgid "CARD_StatusPolishSovereignty_TEXT"
+msgstr "United Kingdom Armies in Eastern Europe are always in supply. During your Play step, instead of playing a card from hand, you may recruit a United Kingdom Army in Eastern Europe."
+
+msgid "CARD_BolsterMaginotLine_TEXT"
+msgstr "Use at any time. Discard 4 cards from hand to prevent a French Army in Western Europe from being removed this turn."
+
+msgid "CARD_EventLesForcesNavalesFrancaisesLibres_TEXT"
+msgstr "Build a French Navy."
+
+msgid "CARD_StatusHobartsFunnies_TEXT"
+msgstr "Axis Status cards are ignored during the United Kingdom turn."
+
+msgid "CARD_EventFreeForcesoftheLowCountries_TEXT"
+msgstr "Recruit a French Army in Western Europe, or battle Western Europe if a supplied French piece is adjacent."
+
+msgid "CARD_EventRhinetDanube_TEXT"
+msgstr "Battle a land space adjacent to a supplied French piece."
+
+msgid "CARD_BolsterArmeedelAir_TEXT"
+msgstr "Use at the beginning of your Air step. Deploy a French Air Force."
+
+msgid "CARD_BolsterSpecialAirServiceRaidsAirfields_TEXT"
+msgstr "Use at the beginning of your Play step. Discard 2 cards from your hand to eliminate an Axis Air Force adjacent to your Air Force."
+
+msgid "CARD_StatusGovernmentinExile_TEXT"
+msgstr "If Western Europe is occupied by an Axis Army, the United Kingdom is France's Home space."
+
+msgid "CARD_EventLaRoyale_TEXT"
+msgstr "Build a French Navy."
+
+msgid "CARD_BolsterBritishColonialForces_TEXT"
+msgstr "Use at the beginning of your Victory step. Discard 2 cards from your hand to recruit an Army in North Africa, Middle East, Southeast Asia, or Indonesia."
+
+msgid "CARD_StatusSenegaleseTirailleurs_TEXT"
+msgstr "Allied Armies in Africa are always in supply. During your Play step, instead of playing a card from hand, you may recruit a French Army in Africa."
+
+msgid "CARD_ResponseElan_TEXT"
+msgstr "Use when a French Army is about to be removed. Do not remove that Army this turn."
+
+msgid "CARD_EventPolskiePanstwoPodziemne_TEXT"
+msgstr "Eliminate an Axis Army in Eastern Europe."
+
+msgid "CARD_EventForeignLegion_TEXT"
+msgstr "Recruit a French Army in Africa, North Africa, Madagascar, Southeast Asia, New Guinea, or the Middle East."
+
+msgid "CARD_EventArmeedeTerre_TEXT"
+msgstr "Build a French Army."
+
+msgid "CARD_StatusTurkeyOpensTheStraits_TEXT"
+msgstr "For the Axis, the Middle East is adjacent to the Balkans, and the Black Sea is adjacent to the Mediterranean Sea."
+
+msgid "CARD_EventSpain_TEXT"
+msgstr "Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean or North Sea."
+
+msgid "CARD_BolsterSupermarina_TEXT"
+msgstr "Use during your Victory step. Gain +1 Victory Point per Italian Navy on the board."
+
+msgid "CARD_ResponseAlpini_TEXT"
+msgstr "Use when your Army is battled in or adjacent to Italy. Do not remove that Army."
+
+msgid "CARD_BolsterBETASOM_TEXT"
+msgstr "Use when Germany plays an Economic Warfare card with the word \"Submarines\" in its title. The Allied country targeted by the card must discard 3 additional cards from the top of its draw deck."
+
+msgid "CARD_BolsterPactOfSteel_TEXT"
+msgstr "Use at any time. Germany may discard between 0 and 5 cards from its hand, then Italy may take the same number of random cards from its discard pile and place them on top of its draw deck."
+
+msgid "CARD_ResponseOperationUnthinkable_TEXT"
+msgstr "Use immediately after the Soviet Union builds an Army. If the United Kingdom or United States has an Army adjacent to the Soviet Army just built, eliminate that Soviet Army."
+
+msgid "CARD_BolsterGoldenSquareCoup_TEXT"
+msgstr "Use at the beginning of your Victory step. Recruit an Army in the Middle East."
+
+msgid "CARD_EventRezaShahSupportsAxis_TEXT"
+msgstr "Eliminate an Allied Army in the Middle East."
+
+msgid "CARD_EWOperationPike_TEXT"
+msgstr "If the United Kingdom has an Army within 2 spaces of Ukraine, the Soviet Union must discard the top 2 cards of its draw deck. Gain +1 Victory Point."
+
+msgid "CARD_StatusSpanishTroopsSeizeGibraltar_TEXT"
+msgstr "The North Sea and Mediterranean are never adjacent for the Allies, and always adjacent for the Axis."
+
+msgid "CARD_BolsterRegiaAeronautica_TEXT"
+msgstr "Use when you are the target of an Economic Warfare card. Remove your Air Force from the board instead of discarding cards."
+
+msgid "CARD_EventWafdistUprising_TEXT"
+msgstr "Eliminate an Allied Army in North Africa."
+
+msgid "CARD_EWOperationLobster_TEXT"
+msgstr "The United Kingdom must discard the top 2 cards of its draw deck."
+
+msgid "CARD_EventOperationHerkules_TEXT"
+msgstr "Recruit an Italian Navy and a German Navy in the Mediterranean."
+
+msgid "CARD_EventGiulianiCappelliniAndTorelli_TEXT"
+msgstr "Germany, Italy, and Japan takes a random card from their discard pile and places it on top of their draw decks. Gain +1 Victory Point."
+
+msgid "CARD_BolsterItalyCompletesCarriers_TEXT"
+msgstr "Use at the beginning of your Play step. Discard 1 card from your hand to deploy or marshal an Air Force in a space with your Navy."
+
+msgid "CARD_StatusIrredentismoItaliano_TEXT"
+msgstr "During your Victory step, gain +1 Victory Point if you have an Army in Western Europe."
+
+msgid "CARD_BolsterSomaliland_TEXT"
+msgstr "Use at the beginning of your Victory step. Recruit an Army in Africa."
+
+msgid "CARD_EventLedoAndBurmaRoads_TotalWar_TEXT"
+msgstr "To use, the Allies must have an Army in Southeast Asia. Recruit a Chinese Army in China or Szechuan, or eliminate an Axis Army in China or Szechuan."
+
+msgid "CARD_EventDutchEastIndies_TotalWar_TEXT"
+msgstr "Recruit French Armies in both Indonesia and New Guinea, and a French Navy in the South China Sea."
+
+msgid "CARD_StatusAmericanVolunteerGroupExpands_TotalWar_TEXT"
+msgstr "Allied Armies in Szechuan are always in supply. During your Play step, instead of playing a card from hand, you may recruit a Chinese Army in Szechuan."
+
+msgid "CARD_StatusFreeFrance_TotalWar_TEXT"
+msgstr "French pieces are always in supply. (Other rules about building new pieces still apply.)"
+
+msgid "CARD_EventFreeFrenchAllies_TotalWar_TEXT"
+msgstr "Recruit 1 or 2 French Armies in Western Europe, Africa, and/or North Africa."

@@ -2364,3 +2364,1015 @@ msgstr "Speelt: {0}"
 #. en: Show the {0} hand
 msgid "HUD_MINIMENU_SHOW_HAND"
 msgstr "Toon de hand van {0}"
+
+# ---- Card texts: base game ----
+
+#. en: Recruit an Italian Army in the Balkans: then eliminate an Allied Army in Ukraine.
+msgid "CARD_EventMilitaryDictatorshipsInTheBalkans_TEXT"
+msgstr "Rekruteer een Italiaans leger in de Balkan: elimineer daarna een geallieerd leger in Oekraïne."
+
+#. en: Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to battle in the same or adjacent land space to the one battled.
+msgid "CARD_StatusDiveBombers_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een landgebied aanvalt. Leg de bovenste kaart van je trekstapel af om hetzelfde of een aangrenzend landgebied aan te vallen."
+
+#. en: German EW cards containing the word \"Submarines\" discard 2 extra Allied cards (in total); 3 if a German Army occupies Scandinavia.
+msgid "CARD_StatusWolfPacks_TEXT"
+msgstr "Duitse kaarten Economische oorlogvoering met het woord \"Submarines\" laten 2 extra geallieerde kaarten afleggen (in totaal); 3 als een Duits leger Scandinavië bezet."
+
+#. en: Use once per turn when you battle a land space. Discard the top 1 card of your draw deck to build an Army in the space battled.
+msgid "CARD_StatusBlitzkrieg_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een landgebied aanvalt. Leg de bovenste kaart van je trekstapel af om een leger in het aangevallen gebied te bouwen."
+
+#. en: Use once per turn when you build an Army. Discard the top 1 card of your draw deck to battle a land space adjacent to the Army just built.
+msgid "CARD_StatusBiasForAction_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een leger bouwt. Leg de bovenste kaart van je trekstapel af om een landgebied grenzend aan het zojuist gebouwde leger aan te vallen."
+
+#. en: Use once per turn at the beginning of your turn. Examine the top 4 cards of your draw deck and put them back in the order of your choice.
+msgid "CARD_StatusSuperiorPlanning_TEXT"
+msgstr "Gebruik eenmaal per beurt aan het begin van je beurt. Bekijk de bovenste 4 kaarten van je trekstapel en leg ze terug in een volgorde naar keuze."
+
+#. en: During your Victory step, gain +1 Victory Point for each German Army in Ukraine, Kazakhstan, or Russia.
+msgid "CARD_StatusAbundantResources_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt voor elk Duits leger in Oekraïne, Kazachstan of Rusland."
+
+#. en: Use once per turn when you build an Army. Discard the top 2 cards of your draw deck to build an Army adjacent to the Army just built.
+msgid "CARD_StatusSyntheticFuel_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een leger bouwt. Leg de bovenste 2 kaarten van je trekstapel af om een leger grenzend aan het zojuist gebouwde leger te bouwen."
+
+#. en: For each German Army or Navy in or adjacent to Scandinavia: gain +1 Victory Point and the Soviet Union must discard the top 2 cards of its draw deck.
+msgid "CARD_EWSubmarinesRaidMurmanskConvoy_TEXT"
+msgstr "Voor elk Duits leger of elke Duitse vloot in of grenzend aan Scandinavië: krijg +1 overwinningspunt en de Sovjet-Unie moet de bovenste 2 kaarten van haar trekstapel afleggen."
+
+#. en: Use once per turn when an Axis Army is battled in Western Europe. The country initiating the battle must discard the top 3 cards of its draw deck.
+msgid "CARD_StatusAtlanticWall_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer een leger van de As in West-Europa wordt aangevallen. Het aanvallende land moet de bovenste 3 kaarten van zijn trekstapel afleggen."
+
+#. en: Use once per turn, at the beginning of your turn. Discard the top 1 card of your draw deck to recruit an Army in Germany. (This is in addition to your Play step.)
+msgid "CARD_StatusVolksturm_TEXT"
+msgstr "Gebruik eenmaal per beurt, aan het begin van je beurt. Leg de bovenste kaart van je trekstapel af om een leger in Duitsland te rekruteren. (Dit komt bovenop je speelstap.)"
+
+#. en: The Allied country of your choice must discard the top 2 cards of its draw deck. Gain +2 Victory Points.
+msgid "CARD_EWSubmarinesoftheMonsoonGroup_TEXT"
+msgstr "Het geallieerde land van je keuze moet de bovenste 2 kaarten van zijn trekstapel afleggen. Krijg +2 overwinningspunten."
+
+#. en: Conduct up to 3 battles, each in a space that was occupied by a Soviet Army adjacent to a German Army at the beginning of the turn.
+msgid "CARD_EventBroadFront_TEXT"
+msgstr "Voer tot 3 aanvallen uit, elk in een gebied dat aan het begin van de beurt bezet was door een Sovjetleger grenzend aan een Duits leger."
+
+#. en: This card can be used to: build an Army; build a Navy; land battle; or sea battle.
+msgid "CARD_EventGunsAndButter_TEXT"
+msgstr "Je kunt deze kaart gebruiken om: een leger te bouwen; een vloot te bouwen; een landgebied aan te vallen; of een zeegebied aan te vallen."
+
+#. en: For each German Army adjacent to the North Sea, gain +1 Victory Point and the United Kingdom must discard the top 2 cards of its draw deck.
+msgid "CARD_EWSubmarinesEnforceBlockade_TEXT"
+msgstr "Voor elk Duits leger grenzend aan de Noordzee krijg je +1 overwinningspunt en moet het Verenigd Koninkrijk de bovenste 2 kaarten van zijn trekstapel afleggen."
+
+#. en: During your Victory step, gain +1 Victory Point if a German Navy is in the Baltic Sea; then gain +1 Victory Point if a German Army is in Scandinavia.
+msgid "CARD_StatusSwedishIronOre_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als een Duitse vloot in de Oostzee is; krijg daarna +1 overwinningspunt als een Duits leger in Scandinavië is."
+
+#. en: For each German Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 2 cards of its draw deck.
+msgid "CARD_EWSubmarinesLeadtheBattleoftheAtlantic_TEXT"
+msgstr "Voor elke Duitse vloot op het bord krijg je +1 overwinningspunt en moet het Verenigd Koninkrijk de bovenste 2 kaarten van zijn trekstapel afleggen."
+
+#. en: If a German Army is in Western Europe, gain +3 Victory Points and the United Kingdom must discard the top 1 card of its draw deck.
+msgid "CARD_EWVWeapons_TEXT"
+msgstr "Als een Duits leger in West-Europa is, krijg je +3 overwinningspunten en moet het Verenigd Koninkrijk de bovenste kaart van zijn trekstapel afleggen."
+
+#. en: During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army.
+msgid "CARD_StatusConscription_TEXT"
+msgstr "Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, de bovenste 2 kaarten van je trekstapel af om een leger te bouwen."
+
+#. en: Gain +1 Victory Point for each German Army or Navy outside Germany.
+msgid "CARD_EventPlunder_Germany_TEXT"
+msgstr "Krijg +1 overwinningspunt voor elk Duits leger of elke Duitse vloot buiten Duitsland."
+
+#. en: Recruit 1 or 2 Armies in or adjacent to Germany.
+msgid "CARD_EventForcedConscription_TEXT"
+msgstr "Rekruteer 1 of 2 legers in of grenzend aan Duitsland."
+
+#. en: When you are the target of an EW card, reduce the number of cards you must discard by 3 (minimum 0).
+msgid "CARD_StatusJetFighters_TEXT"
+msgstr "Wanneer je het doelwit bent van een kaart Economische oorlogvoering, verminder je het aantal kaarten dat je moet afleggen met 3 (minimaal 0)."
+
+#. en: The United Kingdom must discard the top 2 cards of its draw deck; and 3 more if there is no Allied Navy in the North Sea. Gain +1 Victory Point.
+msgid "CARD_EWSubmarinesPreyonUnprotectedShipping_TEXT"
+msgstr "Het Verenigd Koninkrijk moet de bovenste 2 kaarten van zijn trekstapel afleggen; en nog 3 als er geen geallieerde vloot in de Noordzee is. Krijg +1 overwinningspunt."
+
+#. en: One at a time, once per Army, you may eliminate each German Army on the board and then build that Army.
+msgid "CARD_EventTheAutobahn_TEXT"
+msgstr "Je mag één voor één, eenmaal per leger, elk Duits leger op het bord elimineren en dat leger daarna bouwen."
+
+#. en: During your Victory step, gain +1 Victory Point if a United Kingdom Navy is in the North Atlantic; then gain +1 Victory Point if a United Kingdom Army is in Canada.
+msgid "CARD_StatusMackenzieKingDraftstheNationalResourcesMobilizationAct_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als een Britse vloot in de Noord-Atlantische Oceaan is; krijg daarna +1 overwinningspunt als een Brits leger in Canada is."
+
+#. en: Whenever you may build an Army, you may instead recruit that Army in Australia.
+msgid "CARD_StatusAustraliaFormstheDirectorateofManpower_TEXT"
+msgstr "Wanneer je een leger mag bouwen, mag je dat leger in plaats daarvan in Australië rekruteren."
+
+#. en: Whenever you may build an Army, you may instead recruit that Army in India.
+msgid "CARD_StatusLordLinlithgowDeclaresIndiatoBeatWar_TEXT"
+msgstr "Wanneer je een leger mag bouwen, mag je dat leger in plaats daarvan in India rekruteren."
+
+#. en: Your choice of Germany or Italy must discard the top 4 cards of its draw deck.
+msgid "CARD_EWBomberCommand_TEXT"
+msgstr "Duitsland of Italië, naar jouw keuze, moet de bovenste 4 kaarten van zijn trekstapel afleggen."
+
+#. en: Recruit an Army in Southeast Asia and then a Navy in the South China Sea.
+msgid "CARD_EventSingaporeFortified_TEXT"
+msgstr "Rekruteer een leger in Zuidoost-Azië en daarna een vloot in de Zuid-Chinese Zee."
+
+#. en: Germany and Italy each must choose to either discard the top 2 cards of its draw deck or eliminate a Navy in the Mediterranean.
+msgid "CARD_EWMaltaSubmarines_TEXT"
+msgstr "Duitsland en Italië moeten elk kiezen: de bovenste 2 kaarten van de eigen trekstapel afleggen of een vloot in de Middellandse Zee elimineren."
+
+#. en: Eliminate an Axis Army in the Balkans; then recruit an Army in the Balkans.
+msgid "CARD_EventKingPeterEnthronedinYugoslavia_TEXT"
+msgstr "Elimineer een leger van de As in de Balkan; rekruteer daarna een leger in de Balkan."
+
+#. en: During your Play step, instead of playing a card from hand, discard 2 cards from your hand to battle in Western Europe or Italy.
+msgid "CARD_StatusResistance_TEXT"
+msgstr "Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, 2 kaarten uit je hand af om in West-Europa of Italië aan te vallen."
+
+#. en: Use immediately after an Axis player plays an EW card. Ignore the game text of that EW card.
+msgid "CARD_ResponseASWTactics_TEXT"
+msgstr "Gebruik onmiddellijk nadat een speler van de As een kaart Economische oorlogvoering speelt. Negeer de speltekst van die kaart."
+
+#. en: Use when your supplied Army is about to be removed. Do not remove that Army this turn.
+msgid "CARD_ResponseDefensivePosture_TEXT"
+msgstr "Gebruik wanneer je bevoorrade leger verwijderd zou worden. Verwijder dat leger deze beurt niet."
+
+#. en: Use when a supplied United States or United Kingdom Navy is about to be removed. Do not remove that Navy this turn.
+msgid "CARD_ResponseDestroyers_TEXT"
+msgstr "Gebruik wanneer een bevoorrade Amerikaanse of Britse vloot verwijderd zou worden. Verwijder die vloot deze beurt niet."
+
+#. en: Recruit a United Kingdom Army in India, Australia, or Canada.
+msgid "CARD_EventIncreasedCommonwealthSupport_TEXT"
+msgstr "Rekruteer een Brits leger in India, Australië of Canada."
+
+#. en: Use immediately after Germany uses a Status card's game text. Discard the Status card just after is has been used.
+msgid "CARD_ResponseEnigmaCodeCracked_TEXT"
+msgstr "Gebruik onmiddellijk nadat Duitsland de speltekst van een Statuskaart gebruikt. Leg die Statuskaart af zodra ze is gebruikt."
+
+#. en: Use once per turn when you battle a sea space. Discard 2 cards from your hand to battle the same or a different sea space.
+msgid "CARD_StatusTheRoyalNavy_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een zeegebied aanvalt. Leg 2 kaarten uit je hand af om hetzelfde of een ander zeegebied aan te vallen."
+
+#. en: Use immediately after an Axis Army is built in India, Australia, or Canada. Eliminate the Army just built.
+msgid "CARD_ResponseLoyaltotheCrown_TEXT"
+msgstr "Gebruik onmiddellijk nadat een leger van de As in India, Australië of Canada is gebouwd. Elimineer het zojuist gebouwde leger."
+
+#. en: Use during your Play step after playing a card. Instead of placing that card in your discard pile, shuffle it into your draw deck.
+msgid "CARD_ResponseRationing_TEXT"
+msgstr "Gebruik tijdens je speelstap nadat je een kaart hebt gespeeld. In plaats van die kaart op je aflegstapel te leggen, schud je haar in je trekstapel."
+
+#. en: Recruit an Army in Africa and a Navy in the Southern Ocean or the Bay of Bengal.
+msgid "CARD_EventGeneralSmutsStrengthensTiestoUK_TEXT"
+msgstr "Rekruteer een leger in Afrika en een vloot in de Zuidelijke Oceaan of de Golf van Bengalen."
+
+#. en: Use when your piece in or adjacent to the United Kingdom is about to be removed. Do not remove that piece this turn.
+msgid "CARD_ResponseRAF_TEXT"
+msgstr "Gebruik wanneer je stuk in of grenzend aan het Verenigd Koninkrijk verwijderd zou worden. Verwijder dat stuk deze beurt niet."
+
+#. en: For each Japanese Navy in or adjacent to the East Pacific, gain +2 Victory Points and the United States must discard the top 2 cards of its draw deck.
+msgid "CARD_EWSubmarinesSupportPacificIslands_TEXT"
+msgstr "Voor elke Japanse vloot in of grenzend aan de Oostelijke Stille Oceaan krijg je +2 overwinningspunten en moeten de Verenigde Staten de bovenste 2 kaarten van hun trekstapel afleggen."
+
+#. en: Use when you battle in China or an adjacent land space. Build an Army in the space battled: then battle in China or an adjacent land space.
+msgid "CARD_ResponseChinaOffensive_TEXT"
+msgstr "Gebruik wanneer je in China of een aangrenzend landgebied aanvalt. Bouw een leger in het aangevallen gebied: val daarna aan in China of een aangrenzend landgebied."
+
+#. en: Use when you battle a sea space. Build 1 or 2 Armies adjacent to the space just battled.
+msgid "CARD_ResponseDestroyerTransport_TEXT"
+msgstr "Gebruik wanneer je een zeegebied aanvalt. Bouw 1 of 2 legers grenzend aan het zojuist aangevallen gebied."
+
+#. en: For each Japanese Navy in or adjacent to the Bay of Bengal, gain +2 Victory Points and the United Kingdom must discard the top 2 cards of its draw deck.
+msgid "CARD_EWIndianOceanPatrols_TEXT"
+msgstr "Voor elke Japanse vloot in of grenzend aan de Golf van Bengalen krijg je +2 overwinningspunten en moet het Verenigd Koninkrijk de bovenste 2 kaarten van zijn trekstapel afleggen."
+
+#. en: Use anytime during your turn. All Japanese pieces in or adjacent to the Central Pacific are in supply for the rest of this turn.
+msgid "CARD_ResponseTruk_TEXT"
+msgstr "Gebruik op elk moment tijdens je beurt. Alle Japanse stukken in of grenzend aan de Centrale Stille Oceaan zijn de rest van deze beurt bevoorraad."
+
+#. en: During your Victory step, gain +1 Victory Point if a Japanese Army is in Iwo Jima or the Philippines. (Only +1 Victory Point can be earned.)
+msgid "CARD_StatusImperialDesigns_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als een Japans leger op Iwo Jima of de Filipijnen is. (Je kunt maar +1 overwinningspunt krijgen.)"
+
+#. en: Use when a supplied Japanese Army is about to be removed from China, Szechuan, Mongolia, or Vladivostok. Do not remove that Army this turn.
+msgid "CARD_ResponseKwantungArmy_TEXT"
+msgstr "Gebruik wanneer een bevoorraad Japans leger uit China, Sichuan, Mongolië of Vladivostok verwijderd zou worden. Verwijder dat leger deze beurt niet."
+
+#. en: During your Victory step, gain +1 Victory Point if the Allies do not have an Army in Hawaii.
+msgid "CARD_StatusUnimpededMerchantShipping_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als de Geallieerden geen leger op Hawaï hebben."
+
+#. en: Use when you battle a land space. Battle in the same or an adjacent land space to the one just battled.
+msgid "CARD_ResponseBanzaiCharge_TEXT"
+msgstr "Gebruik wanneer je een landgebied aanvalt. Val hetzelfde of een aangrenzend landgebied aan."
+
+#. en: During your Victory step, gain +2 Victory Points if a Japanese Army is in Hawaii, Pacific Northwest, or New Zealand. (Only +2 Victory Point can be earned.)
+msgid "CARD_StatusForwardBases_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +2 overwinningspunten als een Japans leger op Hawaï, in het Pacifisch Noordwesten of in Nieuw-Zeeland is. (Je kunt maar +2 overwinningspunten krijgen.)"
+
+#. en: Use immediately after an Allied Navy is built adjacent to a Japanese piece. Eliminate the Navy just built.
+msgid "CARD_ResponseKamikaze_TEXT"
+msgstr "Gebruik onmiddellijk nadat een geallieerde vloot grenzend aan een Japans stuk is gebouwd. Elimineer de zojuist gebouwde vloot."
+
+#. en: During your Victory step, gain +1 Victory Point for each Japanese Army in Indonesia, New Guinea, or Southeast Asia.
+msgid "CARD_StatusGreaterEastAsiaCoProsperitySphere_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt voor elk Japans leger in Indonesië, Nieuw-Guinea of Zuidoost-Azië."
+
+#. en: Use when you battle in Southeast Asia. Battle the South China Sea; then recruit an Army in Southeast Asia.
+msgid "CARD_ResponseFallOfSingapore_TEXT"
+msgstr "Gebruik wanneer je in Zuidoost-Azië aanvalt. Val de Zuid-Chinese Zee aan; rekruteer daarna een leger in Zuidoost-Azië."
+
+#. en: Use when you battle a sea space. Battle a sea space; then battle a land space.
+msgid "CARD_ResponseSurpriseAttack_TEXT"
+msgstr "Gebruik wanneer je een zeegebied aanvalt. Val een zeegebied aan; val daarna een landgebied aan."
+
+#. en: Use at the beginning of your turn. Recruit a Navy in or adjacent to the North Pacific.
+msgid "CARD_ResponseMobileForce_TEXT"
+msgstr "Gebruik aan het begin van je beurt. Rekruteer een vloot in of grenzend aan de Noordelijke Stille Oceaan."
+
+#. en: Use when your supplied Navy is about to be removed. Do not remove that Navy this turn.
+msgid "CARD_ResponseBattleshipRepair_TEXT"
+msgstr "Gebruik wanneer je bevoorrade vloot verwijderd zou worden. Verwijder die vloot deze beurt niet."
+
+#. en: Use when you build a Navy. Build two Armies adjacent to the space where you built the Navy.
+msgid "CARD_ResponseSpecialNavalLandingForces_TEXT"
+msgstr "Gebruik wanneer je een vloot bouwt. Bouw twee legers grenzend aan het gebied waar je de vloot hebt gebouwd."
+
+#. en: Eliminate an Axis Army in China or Szechuan.
+msgid "CARD_EventMaoTsetung_TEXT"
+msgstr "Elimineer een leger van de As in China of Sichuan."
+
+#. en: Eliminate an Axis Army in the Balkans; Then recruit a Soviet or United Kingdom Army in the Balkans.
+msgid "CARD_EventTitosPartisans_TEXT"
+msgstr "Elimineer een leger van de As in de Balkan; rekruteer daarna een Sovjet- of Brits leger in de Balkan."
+
+#. en: Eliminate 1 or 2 Axis Armies in or adjacent to Moscow.
+msgid "CARD_EventGeneralWinter_TEXT"
+msgstr "Elimineer 1 of 2 legers van de As in of grenzend aan Moskou."
+
+#. en: Recruit an Army in Russia and an Army in Eastern Europe.
+msgid "CARD_EventGermanSovietTreatyofFriendshipCooperationandDemarcation_TEXT"
+msgstr "Rekruteer een leger in Rusland en een leger in Oost-Europa."
+
+#. en: One at a time, once per Army, you may eliminate each SovietArmy on the board and then build that Army.
+msgid "CARD_EventTransSiberianRailroad_TEXT"
+msgstr "Eén voor één, eenmaal per leger, mag je elk Sovjetleger op het bord elimineren en dat leger daarna bouwen."
+
+#. en: Use at the beginning of your turn. Recruit an Army in or adjacent to Moscow; then eliminate an Axis Army in Moscow.
+msgid "CARD_ResponseDefenseoftheMotherland_TEXT"
+msgstr "Gebruik aan het begin van je beurt. Rekruteer een leger in of grenzend aan Moskou; elimineer daarna een leger van de As in Moskou."
+
+#. en: Use when your Army in Ukraine is about to be removed. Do not remove that Army this turn.
+msgid "CARD_ResponseStalingrad_TEXT"
+msgstr "Gebruik wanneer je leger in Oekraïne verwijderd zou worden. Verwijder dat leger deze beurt niet."
+
+#. en: Use when your Army in Russia is about to be removed. Do not remove that Army this turn.
+msgid "CARD_ResponseLeningrad_TEXT"
+msgstr "Gebruik wanneer je leger in Rusland verwijderd zou worden. Verwijder dat leger deze beurt niet."
+
+#. en: Use immediately after an Axis Army is built in or adjacent to Moscow. Eliminate the Army just built.
+msgid "CARD_ResponseRasputitsa_TEXT"
+msgstr "Gebruik onmiddellijk nadat een leger van de As in of grenzend aan Moskou is gebouwd. Elimineer het zojuist gebouwde leger."
+
+#. en: Use when your Army in Moscow is about to be removed. Do not remove that Army this turn.
+msgid "CARD_ResponseMoscow_TEXT"
+msgstr "Gebruik wanneer je leger in Moskou verwijderd zou worden. Verwijder dat leger deze beurt niet."
+
+#. en: Soviet Armies are never out of supply. Armies must still be built adjacent to another supplied piece, or in your Home space.
+msgid "CARD_StatusShverniksEvacuationCouncil_TEXT"
+msgstr "Sovjetlegers zijn nooit onbevoorraad. Legers moeten nog steeds grenzend aan een ander bevoorraad stuk of in je thuisgebied gebouwd worden."
+
+#. en: Use once per turn when you battle a land space. Discard 2 cards from your hand to battle in the same or adjacent land space to the one battled.
+msgid "CARD_StatusFrontalAssault_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een landgebied aanvalt. Leg 2 kaarten uit je hand af om hetzelfde of een aangrenzend landgebied aan te vallen."
+
+#. en: Use when you play a Build Army card for your Play step. Place that Build Army card on the top of your draw deck instead of discarding it.
+msgid "CARD_StatusWomenConscripts_TEXT"
+msgstr "Gebruik wanneer je in je speelstap een kaart Leger bouwen speelt. Leg die kaart Leger bouwen bovenop je trekstapel in plaats van die af te leggen."
+
+#. en: Use once per turn when you battle a land space. Discard a card from hand to battle the same space.
+msgid "CARD_StatusStavkaFormsArtilleryCorps_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een landgebied aanvalt. Leg een kaart uit je hand af om hetzelfde gebied aan te vallen."
+
+#. en: During your Play step, instead of playing a card from hand, discard 2 cards from your hand to play a Build Army card from your discard pile.
+msgid "CARD_StatusGuards_TEXT"
+msgstr "Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, 2 kaarten uit je hand af om een kaart Leger bouwen uit je aflegstapel te spelen."
+
+#. en: Ukraine is not a Supply space for the Axis.
+msgid "CARD_StatusScorchedEarth_TEXT"
+msgstr "Oekraïne is geen bevoorradingsgebied voor de As."
+
+#. en: Gain +1 Victory Point for each Italian Army or Navy outside Italy.
+msgid "CARD_EventPlunder_Italy_TEXT"
+msgstr "Krijg +1 overwinningspunt voor elk Italiaans leger of elke Italiaanse vloot buiten Italië."
+
+#. en: Build an Army in Ukraine and an Army in Russia.
+msgid "CARD_EventItalyAttacksCommunists_TEXT"
+msgstr "Bouw een leger in Oekraïne en een leger in Rusland."
+
+#. en: The United Kingdom must discard the top 1 card of its draw deck; and 1 more if there is no Allied Navy in the Mediterranean. Gain +1 Victory Point.
+msgid "CARD_EWDecimaFlottigliaMASFrogmen_TEXT"
+msgstr "Het Verenigd Koninkrijk moet de bovenste kaart van zijn trekstapel afleggen, en nog 1 als er geen geallieerde vloot in de Middellandse Zee is. Krijg +1 overwinningspunt."
+
+#. en: Eliminate an Allied Army in the Balkans; then recruit a German Army in the Balkans.
+msgid "CARD_EventGermanAidinGreece_TEXT"
+msgstr "Elimineer een geallieerd leger in de Balkan; rekruteer daarna een Duits leger in de Balkan."
+
+#. en: During your Victory step, gain +1 Victory Point for each Axis Army in North Africa, Africa, or Middle East.
+msgid "CARD_StatusImperoItaliano_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt voor elk leger van de As in Noord-Afrika, Afrika of het Midden-Oosten."
+
+#. en: During your Victory step, gain +1 Victory Point for each Italian Army in Russia or Ukraine.
+msgid "CARD_StatusAntiCommunistSentiment_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt voor elk Italiaans leger in Rusland of Oekraïne."
+
+#. en: During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to battle a land space.
+msgid "CARD_StatusBravado_TEXT"
+msgstr "Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, de bovenste 2 kaarten van je trekstapel af om een landgebied aan te vallen."
+
+#. en: During your Victory step, gain +1 Victory Point if an Italian Army is in the Balkans.
+msgid "CARD_StatusBalkanResources_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als er een Italiaans leger in de Balkan is."
+
+#. en: Discard a random Soviet Response card from the table. You may not inspect the Response card discarded.
+msgid "CARD_EventDivisionAzul_TEXT"
+msgstr "Leg een willekeurige Sovjet-Reactiekaart van tafel af. Je mag de afgelegde Reactiekaart niet bekijken."
+
+#. en: Use immediately after a supplied Italian Army is removed. Recruit a German Army in in that space.
+msgid "CARD_ResponseGermanReinforcementsCounterattack_TEXT"
+msgstr "Gebruik onmiddellijk nadat een bevoorraad Italiaans leger is verwijderd. Rekruteer een Duits leger in dat gebied."
+
+#. en: When you are the target of an EW card, reduce the number of cards you must discard by 5 (minimum 0)
+msgid "CARD_ResponseSkilledPilots_TEXT"
+msgstr "Wanneer je het doelwit bent van een kaart Economische oorlogvoering, verlaag je het aantal kaarten dat je moet afleggen met 5 (minimaal 0)"
+
+#. en: Use immediately after a supplied German Army is removed. Recruit an Italian Army in that space.
+msgid "CARD_ResponseRomanianReinforcements_TEXT"
+msgstr "Gebruik onmiddellijk nadat een bevoorraad Duits leger is verwijderd. Rekruteer een Italiaans leger in dat gebied."
+
+#. en: Recruit a German Army in North Africa and then a German Navy in the Mediterranean.
+msgid "CARD_EventAfrikaKorps_TEXT"
+msgstr "Rekruteer een Duits leger in Noord-Afrika en daarna een Duitse vloot in de Middellandse Zee."
+
+#. en: For each Italian Navy on the board, gain +1 Victory Point and the United Kingdom must discard the top 1 card of its draw deck.
+msgid "CARD_EWRegiaMarinaClosesShippingLanes_TEXT"
+msgstr "Voor elke Italiaanse vloot op het bord: krijg +1 overwinningspunt en het Verenigd Koninkrijk moet de bovenste kaart van zijn trekstapel afleggen."
+
+#. en: Use when an Axis Army in Italy is about to be removed. Do not remove that Army this turn.
+msgid "CARD_ResponseMonteCassino_TEXT"
+msgstr "Gebruik wanneer een leger van de As in Italië verwijderd zou worden. Verwijder dat leger deze beurt niet."
+
+#. en: Build an Army in North Africa and then a Navy in the Bay of Bengal.
+msgid "CARD_EventItalianEastAfrica_TEXT"
+msgstr "Bouw een leger in Noord-Afrika en daarna een vloot in de Golf van Bengalen."
+
+#. en: During your Victory step, gain +1 Victory Point for each Italian Navy on the board.
+msgid "CARD_StatusMareNostrum_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt voor elke Italiaanse vloot op het bord."
+
+#. en: Use once per turn when you battle a land space. If the space battled is adjacent to a supplied United States Navy, discard the top 1 card of your draw deck to build an Army in the space battled.
+msgid "CARD_StatusAmphibiousLandings_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een landgebied aanvalt. Grenst het aangevallen gebied aan een bevoorrade Amerikaanse vloot, leg dan de bovenste kaart van je trekstapel af om een leger in het aangevallen gebied te bouwen."
+
+#. en: Use when you play an EW card. Add 2 to the number of cards the Axis country must discard.
+msgid "CARD_StatusFlyingFortresses_TEXT"
+msgstr "Gebruik wanneer je een kaart Economische oorlogvoering speelt. Het land van de As moet 2 kaarten extra afleggen."
+
+#. en: Discard a random Japanese Response card from the table. You may not inspect the Response card discarded.
+msgid "CARD_EventOperationMagic_TEXT"
+msgstr "Leg een willekeurige Japanse Reactiekaart van tafel af. Je mag de afgelegde Reactiekaart niet bekijken."
+
+#. en: Recruit an Army in New Zealand; then. build a Navy adjacent to New Zealand.
+msgid "CARD_EventGuadalcanal_TEXT"
+msgstr "Rekruteer een leger in Nieuw-Zeeland; bouw daarna een vloot grenzend aan Nieuw-Zeeland."
+
+#. en: If a United States Army is within 3 spaces of Germany, Germany must discard the top 5 cards of its draw deck.
+msgid "CARD_EWB29Superfortress_TEXT"
+msgstr "Als een Amerikaans leger binnen 3 gebieden van Duitsland is, moet Duitsland de bovenste 5 kaarten van zijn trekstapel afleggen."
+
+#. en: Your choice of the United Kingdom or the Soviet Union may play a card and then draw a card.
+msgid "CARD_EventLendLease_TEXT"
+msgstr "Het Verenigd Koninkrijk of de Sovjet-Unie (naar keuze) mag een kaart spelen en daarna een kaart trekken."
+
+#. en: If a United States Army is within 3 spaces of an Axis Home space, that country must discard the top 4 cards of its draw deck.
+msgid "CARD_EWB26Marauder_TEXT"
+msgstr "Als een Amerikaans leger binnen 3 gebieden van een thuisgebied van de As is, moet dat land de bovenste 4 kaarten van zijn trekstapel afleggen."
+
+#. en: Use once per turn, when your supplied Navy is battled. Discard the top 2 cards of your draw deck and do not remove that Navy.
+msgid "CARD_StatusRadar_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je bevoorrade vloot wordt aangevallen. Leg de bovenste 2 kaarten van je trekstapel af en verwijder die vloot niet."
+
+#. en: Use once per turn at the beginning of your Discard step. Take 1 or 2 cards from your hand and place them on the bottom of your draw deck.
+msgid "CARD_StatusRosietheRiveter_TEXT"
+msgstr "Gebruik eenmaal per beurt aan het begin van je aflegstap. Leg 1 of 2 kaarten uit je hand onderop je trekstapel."
+
+#. en: Play a card of your choice from your discard pile.
+msgid "CARD_EventFlexibleResources_TEXT"
+msgstr "Speel een kaart naar keuze uit je aflegstapel."
+
+#. en: Use once per turn when you battle a sea space. Discard the top 1 card of your draw deck to build a Navy in the space battled.
+msgid "CARD_StatusAircraftCarriers_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een zeegebied aanvalt. Leg de bovenste kaart van je trekstapel af om een vloot in het aangevallen gebied te bouwen."
+
+#. en: Use once per turn when you build a Navy. Discard the top 1 card of your draw deck to build an additional Navy.
+msgid "CARD_StatusSuperiorShipyards_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een vloot bouwt. Leg de bovenste kaart van je trekstapel af om een extra vloot te bouwen."
+
+#. en: Use once per turn when you build an Army. Discard the top 1 card of your draw deck to build an additional Army.
+msgid "CARD_StatusWartimeProduction_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een leger bouwt. Leg de bovenste kaart van je trekstapel af om een extra leger te bouwen."
+
+#. en: One at a time, once per piece, you may eliminate each United States Army and Navy on the board and then build that piece.
+msgid "CARD_EventTheaterShift_TEXT"
+msgstr "Eén voor één, eenmaal per stuk, mag je elk Amerikaans leger en elke Amerikaanse vloot op het bord elimineren en dat stuk daarna bouwen."
+
+#. en: If a United States Army or Navy is adjacent to an Axis Home space, that country must discard the top 7 cards of its draw deck
+msgid "CARD_EWFirestormBombing_TEXT"
+msgstr "Als een Amerikaans leger of een Amerikaanse vloot grenst aan een thuisgebied van de As, moet dat land de bovenste 7 kaarten van zijn trekstapel afleggen"
+
+#. en: Recruit a Soviet Army in Russia; then the Soviet Union may build an Army.
+msgid "CARD_EventMurmanskConvoy_TEXT"
+msgstr "Rekruteer een Sovjetleger in Rusland; daarna mag de Sovjet-Unie een leger bouwen."
+
+#. en: The United Kingdom may build an Army and a Navy in the order of its choice.
+msgid "CARD_EventArsenalofDemocracy_TEXT"
+msgstr "Het Verenigd Koninkrijk mag een leger en een vloot bouwen, in een volgorde naar keuze."
+
+#. en: If a United States Navy is within 2 spaces of Japan, Japan must discard the top 4 cards of its draw deck.
+msgid "CARD_EWSBDDauntless_TEXT"
+msgstr "Als een Amerikaanse vloot binnen 2 gebieden van Japan is, moet Japan de bovenste 4 kaarten van zijn trekstapel afleggen."
+
+#. en: Recruit an Army in Hawaii; then build a Navy adjacent to Hawaii.
+msgid "CARD_EventFleetDeployedtoPearlHarbor_TEXT"
+msgstr "Rekruteer een leger in Hawaï; bouw daarna een vloot grenzend aan Hawaï."
+
+#. en: If a United States Army is within 2 spaces of Italy, Italy must discard the top 4 cards of its draw deck.
+msgid "CARD_EWB24Liberator_TEXT"
+msgstr "Als een Amerikaans leger binnen 2 gebieden van Italië is, moet Italië de bovenste 4 kaarten van zijn trekstapel afleggen."
+
+#. en: Build an Army in Western Europe: then battle in Germany or Italy.
+msgid "CARD_EventPattonAdvances_TEXT"
+msgstr "Bouw een leger in West-Europa; val daarna Duitsland of Italië aan."
+
+#. en: The United Kingdom may recruit an Army in Western Europe, North Africa, or Africa
+msgid "CARD_EventFreeFrenchAllies_TEXT"
+msgstr "Het Verenigd Koninkrijk mag een leger rekruteren in West-Europa, Noord-Afrika of Afrika"
+
+#. en: Allied Armies in Szechuan are always in supply. During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to recruit an Army in Szechuan.
+msgid "CARD_StatusAmericanVolunteerGroupExpands_TEXT"
+msgstr "Geallieerde legers in Sichuan zijn altijd bevoorraad. Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, de bovenste 2 kaarten van je trekstapel af om een leger in Sichuan te rekruteren."
+
+#. en: Recruit an Army in Vladivostok; then battle in China
+msgid "CARD_EventVasilevskyTakesCommandInTheFarEast_TEXT"
+msgstr "Rekruteer een leger in Vladivostok; val daarna China aan"
+
+#. en: During your Play step, instead of playing a card from hand, discard the top 2 cards of your draw deck to build an Army in Western Europe.
+msgid "CARD_StatusFreeFrance_TEXT"
+msgstr "Leg tijdens je speelstap, in plaats van een kaart uit je hand te spelen, de bovenste 2 kaarten van je trekstapel af om een leger in West-Europa te bouwen."
+
+#. en: Build an Army in Southeast Asia; then battle in China or Szechuan
+msgid "CARD_EventLedoAndBurmaRoads_TEXT"
+msgstr "Bouw een leger in Zuidoost-Azië; val daarna China of Sichuan aan"
+
+#. en: During your Victory step, gain +1 Victory Point if you did not perform a land battle or eliminated a unit. 
+msgid "CARD_StatusOccupationOfCzechoslovakia_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als je geen landgebied hebt aangevallen en geen eenheid hebt geëlimineerd."
+
+#. en: Battle in Western Europe. Then build an army in Western Europe.
+msgid "CARD_EventArdennesOffensive_TEXT"
+msgstr "Val West-Europa aan. Bouw daarna een leger in West-Europa."
+
+#. en: Recruit an Army in Indonesia and an Army in New Guinea, and then a Navy in the South China Sea.
+msgid "CARD_EventDutchEastIndies_TEXT"
+msgstr "Rekruteer een leger in Indonesië en een leger in Nieuw-Guinea, en daarna een vloot in de Zuid-Chinese Zee."
+
+# ---- Card texts: Total War ----
+
+#. en: Use at the beginning of your Play step. Take a Bolster card from your hand and place it face down on the table. You may use it as if it were a Response card.
+msgid "CARD_BolsterNavajoCodeTalkers_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Leg een Versterkingskaart uit je hand gedekt op tafel. Je mag die gebruiken alsof het een Reactiekaart is."
+
+#. en: Germany, Italy, and Japan must each choose to remove a piece from the board or discard the top 2 cards of its draw deck.
+msgid "CARD_EWOilEmbargo_TEXT"
+msgstr "Duitsland, Italië en Japan moeten elk kiezen: een stuk van het bord verwijderen of de bovenste 2 kaarten van hun trekstapel afleggen."
+
+#. en: Use when you deploy or marshal an Air Force. Discard the top 1 card of your draw deck to eliminate an Army adjacent to that Air Force.
+msgid "CARD_BolsterRangers_TEXT"
+msgstr "Gebruik wanneer je een luchtmacht inzet of hergroepeert. Leg de bovenste kaart van je trekstapel af om een leger grenzend aan die luchtmacht te elimineren."
+
+#. en: Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to deploy an Air Force in or adjacent to the Central Pacific.
+msgid "CARD_BolsterPappyBoyington_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Leg de bovenste kaart van je trekstapel af om een luchtmacht in of grenzend aan de Centrale Stille Oceaan in te zetten."
+
+#. en: Use at the beginning of your Draw step. Discard the top 2 cards of your draw deck to allow the United Kingdom to place a Response card from its discard pile face down on the table.
+msgid "CARD_BolsterOurPhilosophyOfGovernment_TEXT"
+msgstr "Gebruik aan het begin van je trekstap. Leg de bovenste 2 kaarten van je trekstapel af, zodat het Verenigd Koninkrijk een Reactiekaart uit zijn aflegstapel gedekt op tafel mag leggen."
+
+#. en: When you Reallocate Resources, you may take a card from your discard pile instead of your draw deck.
+msgid "CARD_StatusWarBonds_TEXT"
+msgstr "Wanneer je Reallocate Resources gebruikt, mag je een kaart uit je aflegstapel nemen in plaats van uit je trekstapel."
+
+#. en: Use at the beginning of your Air step. Deploy a Chinese Air Force, or a Chinese Air Force may gain air superiority.
+msgid "CARD_BolsterFlyingTigers_TEXT"
+msgstr "Gebruik aan het begin van je luchtstap. Zet een Chinese luchtmacht in, of een Chinese luchtmacht mag luchtoverwicht verkrijgen."
+
+#. en: Use at the beginning of your Air step. The United Kingdom may deploy an Air Force.
+msgid "CARD_BolsterEagleSquadrons_TEXT"
+msgstr "Gebruik aan het begin van je luchtstap. Het Verenigd Koninkrijk mag een luchtmacht inzetten."
+
+#. en: Use when you build a Navy in or adjacent to a sea space with 'Pacific' in the title. Discard the top 1 card of your draw deck to battle a land space adjacent to the Navy just built.
+msgid "CARD_StatusUSMC_TEXT"
+msgstr "Gebruik wanneer je een vloot bouwt in of grenzend aan een zeegebied met 'Stille Oceaan' in de naam. Leg de bovenste kaart van je trekstapel af om een landgebied grenzend aan de zojuist gebouwde vloot aan te vallen."
+
+#. en: Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to recruit an Army in a space adjacent to the Central Pacific.
+msgid "CARD_BolsterPacificBases_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Leg de bovenste kaart van je trekstapel af om een leger te rekruteren in een gebied grenzend aan de Centrale Stille Oceaan."
+
+#. en: Build a Navy in a sea space with 'Pacific' in the title, then battle a sea space adjacent to the Navy just built.
+msgid "CARD_EventShootFirstAndArgueAfterwards_TEXT"
+msgstr "Bouw een vloot in een zeegebied met 'Stille Oceaan' in de naam en val dan een zeegebied aan dat grenst aan de zojuist gebouwde vloot."
+
+#. en: Build an Army in Latin America and a Navy in the South Atlantic or the Southern Ocean.
+msgid "CARD_EventTheBrazilianExpeditionaryForce_TEXT"
+msgstr "Bouw een leger in Latijns-Amerika en een vloot in de Zuid-Atlantische Oceaan of de Zuidelijke Oceaan."
+
+#. en: Recruit any 1 available Allied Army or Navy in or adjacent to the corresponding country's Home space.
+msgid "CARD_EventCashAndCarryReplacesNeutralityActs_TEXT"
+msgstr "Rekruteer 1 willekeurig beschikbaar geallieerd leger of geallieerde vloot in of grenzend aan het thuisgebied van het bijbehorende land."
+
+#. en: Build a Chinese Army.
+msgid "CARD_EventAmericanPublicSympathizesWithChinesePeople_TEXT"
+msgstr "Bouw een Chinees leger."
+
+#. en: Use when you build a Navy in a space with 'Pacific' in the title. Discard the top 1 card of your draw deck to build an Army or Navy in an adjacent space.
+msgid "CARD_BolsterAGreatSleepingGiant_TEXT"
+msgstr "Gebruik wanneer je een vloot bouwt in een gebied met 'Stille Oceaan' in de naam. Leg de bovenste kaart van je trekstapel af om een leger of vloot in een aangrenzend gebied te bouwen."
+
+#. en: Use when you play an Economic Warfare card. The country attacked must discard an additional card for each United States Air Force within 2 spaces of the opponent's Home space.
+msgid "CARD_BolsterP51Mustang_TEXT"
+msgstr "Gebruik wanneer je een kaart Economische oorlogvoering speelt. Het aangevallen land moet een extra kaart afleggen voor elke Amerikaanse luchtmacht binnen 2 gebieden van het thuisgebied van de tegenstander."
+
+#. en: Each time a Chinese Army is battled, built, or recruited, the Japanese player must discard 1 card from its hand.
+msgid "CARD_StatusAntiJapaneseVolunteerArmies_TEXT"
+msgstr "Elke keer dat een Chinees leger wordt aangevallen, gebouwd of gerekruteerd, moet de Japanse speler 1 kaart uit zijn hand afleggen."
+
+#. en: Use when you battle. Discard an Economic Warfare card from your hand to battle the same space again.
+msgid "CARD_BolsterCarpetBombing_TEXT"
+msgstr "Gebruik wanneer je aanvalt. Leg een kaart Economische oorlogvoering uit je hand af om hetzelfde gebied opnieuw aan te vallen."
+
+#. en: Use if you have a supplied Navy within 3 spaces of Japan. Japan must discard the top 1 card of its draw deck. Gain 3 Victory Points.
+msgid "CARD_EWDoolittlesBombers_TEXT"
+msgstr "Gebruik als je een bevoorrade vloot binnen 3 gebieden van Japan hebt. Japan moet de bovenste kaart van zijn trekstapel afleggen. Krijg 3 overwinningspunten."
+
+#. en: Use once per turn when you build a Navy. Discard the top 1 card of your draw deck to build an Army adjacent to the Navy just built.
+msgid "CARD_StatusArtificialHarbors_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een vloot bouwt. Leg de bovenste kaart van je trekstapel af om een leger grenzend aan de zojuist gebouwde vloot te bouwen."
+
+#. en: France, the United States, and the United Kingdom may trace supply through each other's pieces, including the Army in the Supply space.
+msgid "CARD_StatusSHAEF_TEXT"
+msgstr "Frankrijk, de Verenigde Staten en het Verenigd Koninkrijk mogen bevoorrading leiden via elkaars stukken, ook via het leger in het bevoorradingsgebied."
+
+#. en: The United States only has to discard 1 card from its hand to use Reallocate Resources.
+msgid "CARD_StatusVictoryGardens_TEXT"
+msgstr "De Verenigde Staten hoeven maar 1 kaart uit hun hand af te leggen om Reallocate Resources te gebruiken."
+
+#. en: For each Chinese Army or Air Force on the board, Japan must discard the top 2 cards of its draw deck.
+msgid "CARD_EWStalemateInChina_TEXT"
+msgstr "Voor elk Chinees leger of elke Chinese luchtmacht op het bord moet Japan de bovenste 2 kaarten van zijn trekstapel afleggen."
+
+#. en: Battle a land space adjacent to a supplied Chinese piece.
+msgid "CARD_EventTheHundredRegimentsOffensive_TEXT"
+msgstr "Val een landgebied aan dat grenst aan een bevoorraad Chinees stuk."
+
+#. en: For each United States Navy within 2 spaces of Japan, Japan must discard the top 2 cards of its draw deck.
+msgid "CARD_EWUnitedStatesSubmarinesPatrolJapaneseShippingLanes_TEXT"
+msgstr "Voor elke Amerikaanse vloot binnen 2 gebieden van Japan moet Japan de bovenste 2 kaarten van zijn trekstapel afleggen."
+
+#. en: Use when you build a Navy. Discard the top 1 card of your draw deck to battle the North Sea, North Atlantic, or South Atlantic.
+msgid "CARD_BolsterAdmiralGrafSpee_TEXT"
+msgstr "Gebruik wanneer je een vloot bouwt. Leg de bovenste kaart van je trekstapel af om de Noordzee, de Noord-Atlantische Oceaan of de Zuid-Atlantische Oceaan aan te vallen."
+
+#. en: Use at the beginning of your Play step. If you have an Air Force on the board, all German pieces are in supply for the rest of the turn.
+msgid "CARD_BolsterJu52sAirliftSupplies_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Als je een luchtmacht op het bord hebt, zijn alle Duitse stukken de rest van de beurt bevoorraad."
+
+#. en: Use at the beginning of your Victory step. Discard the top 1 card of your draw deck to recruit an Army in Scandinavia.
+msgid "CARD_BolsterOperationWeserubung_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Leg de bovenste kaart van je trekstapel af om een leger in Scandinavië te rekruteren."
+
+#. en: Use at the beginning of your Play step. Discard the top 1 card of your draw deck to battle a land space adjacent to your Air Force.
+msgid "CARD_BolsterFallschirmjager_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Leg de bovenste kaart van je trekstapel af om een landgebied grenzend aan je luchtmacht aan te vallen."
+
+#. en: To use, Germany or the Soviet Union must have an Army in Russia. Build a Navy in the Baltic and recruit an Army in Scandinavia.
+msgid "CARD_EventSwedenSupportsFinland_TEXT"
+msgstr "Alleen te gebruiken als Duitsland of de Sovjet-Unie een leger in Rusland heeft. Bouw een vloot in de Oostzee en rekruteer een leger in Scandinavië."
+
+#. en: Use when an Allied player gains air superiority to eliminate an Italian Air Force. The Air Force used to gain air superiority is eliminated.
+msgid "CARD_Bolster128cmFlakzwilling40_TEXT"
+msgstr "Gebruik wanneer een geallieerde speler luchtoverwicht verkrijgt om een Italiaanse luchtmacht te elimineren. De luchtmacht waarmee luchtoverwicht werd verkregen, wordt geëlimineerd."
+
+#. en: The Allied country of your choice must discard the top 1 card of its draw deck. Gain +2 Victory Points.
+msgid "CARD_EWElektrobootSubmarines_TEXT"
+msgstr "Het geallieerde land van je keuze moet de bovenste kaart van zijn trekstapel afleggen. Krijg +2 overwinningspunten."
+
+#. en: Use at the beginning of your Play step. Discard your Status card from the table to place a Status card from your hand on the table.
+msgid "CARD_BolsterTacticalInnovations_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Leg je Statuskaart van tafel af om een Statuskaart uit je hand op tafel te leggen."
+
+#. en: Use every time a German Army is battled. The country initiating the battle must discard the top 2 cards of its draw deck.
+msgid "CARD_StatusLandkreuzers_TEXT"
+msgstr "Gebruik elke keer dat een Duits leger wordt aangevallen. Het aanvallende land moet de bovenste 2 kaarten van zijn trekstapel afleggen."
+
+#. en: Use every time an Axis Army is battled in Germany. The country initiating the battle must discard the top 3 cards of its draw deck.
+msgid "CARD_StatusWestwall_TEXT"
+msgstr "Gebruik elke keer dat een leger van de As in Duitsland wordt aangevallen. Het aanvallende land moet de bovenste 3 kaarten van zijn trekstapel afleggen."
+
+#. en: Build a Navy in the North Sea, then battle the United Kingdom space.
+msgid "CARD_EventSeaLion_TEXT"
+msgstr "Bouw een vloot in de Noordzee en val dan het gebied Verenigd Koninkrijk aan."
+
+#. en: Take your choice of 1 Status card from your draw deck and play it. Then shuffle your draw deck.
+msgid "CARD_EventProductionInitiative_TEXT"
+msgstr "Kies 1 Statuskaart uit je trekstapel en speel die. Schud daarna je trekstapel."
+
+#. en: Use at the beginning of your Play step. Air Defense cannot be used this turn.
+msgid "CARD_BolsterCloudCover_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Air Defense kan deze beurt niet worden gebruikt."
+
+#. en: Take your choice of 1 or 2 cards from your draw deck and add them to your hand, then discard 1 card from your hand. Shuffle your draw deck.
+msgid "CARD_EventStrategicPlanning_TEXT"
+msgstr "Kies 1 of 2 kaarten uit je trekstapel en neem ze in je hand, en leg dan 1 kaart uit je hand af. Schud je trekstapel."
+
+#. en: Use when you play an Economic Warfare card. The United Kingdom must discard the top 2 cards of its draw deck for each German Air Force within 2 spaces of the United Kingdom.
+msgid "CARD_BolsterTheBlitz_TEXT"
+msgstr "Gebruik wanneer je een kaart Economische oorlogvoering speelt. Het Verenigd Koninkrijk moet de bovenste 2 kaarten van zijn trekstapel afleggen voor elke Duitse luchtmacht binnen 2 gebieden van het Verenigd Koninkrijk."
+
+#. en: Use when you deploy or marshal an Air Force. Discard the top 1 card of your draw deck to battle a land space adjacent to that Air Force.
+msgid "CARD_BolsterJu87_TEXT"
+msgstr "Gebruik wanneer je een luchtmacht inzet of hergroepeert. Leg de bovenste kaart van je trekstapel af om een landgebied grenzend aan die luchtmacht aan te vallen."
+
+#. en: Build a Navy in the Black Sea, then recruit an Army in the Middle East.
+msgid "CARD_EventTurkeyJoinsAxis_TEXT"
+msgstr "Bouw een vloot in de Zwarte Zee en rekruteer dan een leger in het Midden-Oosten."
+
+#. en: To use, the Axis must have Armies in both Scandinavia and Russia. The Soviet Union must discard the top 5 cards of its draw deck. Gain +1 Victory Point.
+msgid "CARD_EWArkhangelskFalls_TEXT"
+msgstr "Alleen te gebruiken als de As legers in zowel Scandinavië als Rusland heeft. De Sovjet-Unie moet de bovenste 5 kaarten van haar trekstapel afleggen. Krijg +1 overwinningspunt."
+
+#. en: Discard the top 1 card of your draw deck to recruit an Army in Eastern Europe. Then play another card from your hand.
+msgid "CARD_EventFallWeiss_TEXT"
+msgstr "Leg de bovenste kaart van je trekstapel af om een leger in Oost-Europa te rekruteren. Speel daarna nog een kaart uit je hand."
+
+#. en: Use when you play an Economic Warfare card with the word \"Submarines\" in the title. Discard the top 1 card of your draw deck to battle a sea space.
+msgid "CARD_BolsterG7eTorpedo_TEXT"
+msgstr "Gebruik wanneer je een kaart Economische oorlogvoering speelt met het woord \"Submarines\" in de naam. Leg de bovenste kaart van je trekstapel af om een zeegebied aan te vallen."
+
+#. en: Use when you build an Army. Discard both a Build Army card and a Land Battle card from your hand to battle a land space adjacent to the Army just built.
+msgid "CARD_StatusTankDesant_TEXT"
+msgstr "Gebruik wanneer je een leger bouwt. Leg zowel een kaart Leger bouwen als een kaart Landslag uit je hand af om een landgebied grenzend aan het zojuist gebouwde leger aan te vallen."
+
+#. en: Use at the beginning of your Draw step. Take 2 Build Army cards from your discard pile and add them to your hand.
+msgid "CARD_BolsterAsianReserves_TEXT"
+msgstr "Gebruik aan het begin van je trekstap. Neem 2 kaarten Leger bouwen uit je aflegstapel in je hand."
+
+#. en: During your Discard step, gain +1 Victory Point for each Build Army card you discard from your hand.
+msgid "CARD_StatusAttrition_TEXT"
+msgstr "Krijg tijdens je aflegstap +1 overwinningspunt voor elke kaart Leger bouwen die je uit je hand aflegt."
+
+#. en: Use at any time. Do not remove Soviet Armies in Siberia and/or Kazakhstan this turn.
+msgid "CARD_ResponseEndlessExpanses_TEXT"
+msgstr "Gebruik op elk moment. Verwijder deze beurt geen Sovjetlegers in Siberië en/of Kazachstan."
+
+#. en: Recruit an Army in Mongolia, then battle Vladivostok or China.
+msgid "CARD_EventBattlesOfKhalkhinGol_TEXT"
+msgstr "Rekruteer een leger in Mongolië en val dan Vladivostok of China aan."
+
+#. en: Use at the beginning of your Air step. Deploy a Chinese Air Force, or a Chinese Air Force may gain air superiority.
+msgid "CARD_BolsterOperationZet_TEXT"
+msgstr "Gebruik aan het begin van je luchtstap. Zet een Chinese luchtmacht in, of een Chinese luchtmacht mag luchtoverwicht verkrijgen."
+
+#. en: Use at the beginning of your Draw step. Discard a Build Army card from your hand to place a Response card from your discard pile face down on the table.
+msgid "CARD_BolsterFortressRebuilt_TEXT"
+msgstr "Gebruik aan het begin van je trekstap. Leg een kaart Leger bouwen uit je hand af om een Reactiekaart uit je aflegstapel gedekt op tafel te leggen."
+
+#. en: Use when you battle Russia, Eastern Europe, Ukraine, or the Balkans. Discard a Build Army card from your hand to build an Army in the space just battled.
+msgid "CARD_BolsterZhukovDrivesWest_TEXT"
+msgstr "Gebruik wanneer je Rusland, Oost-Europa, Oekraïne of de Balkan aanvalt. Leg een kaart Leger bouwen uit je hand af om een leger te bouwen in het zojuist aangevallen gebied."
+
+#. en: Recruit an Army in or adjacent to Siberia.
+msgid "CARD_EventSiberianTransfer_TEXT"
+msgstr "Rekruteer een leger in of grenzend aan Siberië."
+
+#. en: Use when you deploy or marshal an Air Force. Discard a Build Army card from your hand to build an Army adjacent to that Air Force.
+msgid "CARD_BolsterParatroops_TEXT"
+msgstr "Gebruik wanneer je een luchtmacht inzet of hergroepeert. Leg een kaart Leger bouwen uit je hand af om een leger grenzend aan die luchtmacht te bouwen."
+
+#. en: Chinese Armies are always in supply. During your Play step, instead of playing a card from your hand, you may recruit a Chinese Army in Szechuan, China, or Mongolia.
+msgid "CARD_StatusPeoplesLiberationArmy_TEXT"
+msgstr "Chinese legers zijn altijd bevoorraad. Tijdens je speelstap mag je, in plaats van een kaart uit je hand te spelen, een Chinees leger rekruteren in Sichuan, China of Mongolië."
+
+#. en: Use once per turn when you build an Army. Discard a Build Army card from your hand to build an additional Army.
+msgid "CARD_StatusQuantityHasAQualityAllItsOwn_TEXT"
+msgstr "Gebruik eenmaal per beurt wanneer je een leger bouwt. Leg een kaart Leger bouwen uit je hand af om een extra leger te bouwen."
+
+#. en: Use at the beginning of your Victory step. Discard a Build Army card and 2 other cards from your hand to eliminate an Axis Army in Moscow or Russia.
+msgid "CARD_BolsterVitebskGate_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Leg een kaart Leger bouwen en 2 andere kaarten uit je hand af om een leger van de As in Moskou of Rusland te elimineren."
+
+#. en: Build a Navy in the Sea of Japan, then battle the Japan space.
+msgid "CARD_EventKurilIslandsLandingOperation_TEXT"
+msgstr "Bouw een vloot in de Japanse Zee en val dan het gebied Japan aan."
+
+#. en: Use immediately after your last Army on the board is removed. Discard a Build Army card from your hand to eliminate an Axis Army in or adjacent to Moscow.
+msgid "CARD_BolsterBattleOfMoscow_TEXT"
+msgstr "Gebruik onmiddellijk nadat je laatste leger op het bord is verwijderd. Leg een kaart Leger bouwen uit je hand af om een leger van de As in of grenzend aan Moskou te elimineren."
+
+#. en: Use when your Army is battled. The attacker must discard 4 cards from its hand or your Army is not removed.
+msgid "CARD_ResponseHeavyTanks_TEXT"
+msgstr "Gebruik wanneer je leger wordt aangevallen. De aanvaller moet 4 kaarten uit zijn hand afleggen, anders wordt je leger niet verwijderd."
+
+#. en: Use at the beginning of your Play step. Discard a Build Army card from your hand and eliminate a Soviet Army from the board. Then build an Army.
+msgid "CARD_BolsterCavalryCorps_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Leg een kaart Leger bouwen uit je hand af en elimineer een Sovjetleger van het bord. Bouw daarna een leger."
+
+#. en: Siberia is now the Soviet Union Home space, and a Supply space for the Soviet Union (only). Place a Home space marker on Siberia. Moscow is no longer a Supply space for any country.
+msgid "CARD_StatusGovernmentEvacuatesToKuibyshev_TEXT"
+msgstr "Siberië is nu het thuisgebied van de Sovjet-Unie en een bevoorradingsgebied voor (alleen) de Sovjet-Unie. Leg een thuisgebiedmarker op Siberië. Moskou is voor geen enkel land meer een bevoorradingsgebied."
+
+#. en: Use when your Army in Moscow or Ukraine is removed. Recruit Armies in both Siberia and Kazakhstan.
+msgid "CARD_ResponseRetreatAndRegroup_TEXT"
+msgstr "Gebruik wanneer je leger in Moskou of Oekraïne wordt verwijderd. Rekruteer legers in zowel Siberië als Kazachstan."
+
+#. en: Use when you battle in India. Build an Army in India.
+msgid "CARD_ResponseJapanArmsIndianNationalists_TEXT"
+msgstr "Gebruik wanneer je in India aanvalt. Bouw een leger in India."
+
+#. en: Use at the beginning of your Play step. Battle in China or an adjacent land space.
+msgid "CARD_ResponseMarcoPoloBridgeIncident_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Val China of een aangrenzend landgebied aan."
+
+#. en: Gain +1 Victory Point. Instead of discarding this card, you may discard 3 other cards from hand and return this card to your hand.
+msgid "CARD_EWFuGoBalloonBombs_TEXT"
+msgstr "Krijg +1 overwinningspunt. In plaats van deze kaart af te leggen, mag je 3 andere kaarten uit je hand afleggen en deze kaart terug in je hand nemen."
+
+#. en: Use when you build a Navy. Sea battle 1 or 2 times adjacent to the Navy just built.
+msgid "CARD_ResponseSubmarinesSupportFleet_TEXT"
+msgstr "Gebruik wanneer je een vloot bouwt. Val 1 of 2 keer een zeegebied aan dat grenst aan de zojuist gebouwde vloot."
+
+#. en: Use when you build a Navy. Land battle 1 or 2 times adjacent to the Navy just built.
+msgid "CARD_ResponseSNLFParatroopers_TEXT"
+msgstr "Gebruik wanneer je een vloot bouwt. Val 1 of 2 keer een landgebied aan dat grenst aan de zojuist gebouwde vloot."
+
+#. en: During your Victory step, gain +1 Victory Point if you have a Navy in the Central Pacific.
+msgid "CARD_StatusJapaneseMandateForTheSouthSeasIslands_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als je een vloot in de Centrale Stille Oceaan hebt."
+
+#. en: For each Japanese Navy and Air Force in the Sea of Japan, gain a +1 Victory Point and the Soviet Union must discard the top 1 card of its draw deck.
+msgid "CARD_EWJapaneseFleetBlockadesVladivostok_TEXT"
+msgstr "Krijg voor elke Japanse vloot en luchtmacht in de Japanse Zee +1 overwinningspunt, en de Sovjet-Unie moet de bovenste kaart van haar trekstapel afleggen."
+
+#. en: Use at the beginning of your Play step. Battle a sea space.
+msgid "CARD_ResponseKantaiKessen_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Val een zeegebied aan."
+
+#. en: Use at the beginning of your Draw step. Eliminate an Allied Air Force adjacent to your Air Force.
+msgid "CARD_BolsterMitsubishiJ8M_TEXT"
+msgstr "Gebruik aan het begin van je trekstap. Elimineer een geallieerde luchtmacht grenzend aan je luchtmacht."
+
+#. en: During your Victory step, gain +1 Victory Point if you have 3 or more Navies on the board.
+msgid "CARD_StatusAbsoluteNationalDefenseSphere_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als je 3 of meer vloten op het bord hebt."
+
+#. en: Use when you gain air superiority in or adjacent to the Central Pacific. Discard a Response card from your hand to battle the space from which the enemy Air Force was just removed.
+msgid "CARD_BolsterTorai_TEXT"
+msgstr "Gebruik wanneer je luchtoverwicht verkrijgt in of grenzend aan de Centrale Stille Oceaan. Leg een Reactiekaart uit je hand af om het gebied aan te vallen waaruit de vijandelijke luchtmacht zojuist is verwijderd."
+
+#. en: Use when you build a Navy. Discard a Response card from your hand to build an additional Navy.
+msgid "CARD_BolsterImperialJapaneseNavy_TEXT"
+msgstr "Gebruik wanneer je een vloot bouwt. Leg een Reactiekaart uit je hand af om een extra vloot te bouwen."
+
+#. en: Use when you deploy or marshal an Air Force to a sea space. Discard a Response card from your hand to battle a space adjacent to that Air Force.
+msgid "CARD_BolsterNagumoCommandsTheFirstAirFleet_TEXT"
+msgstr "Gebruik wanneer je een luchtmacht in een zeegebied inzet of daarheen hergroepeert. Leg een Reactiekaart uit je hand af om een gebied aan te vallen dat grenst aan die luchtmacht."
+
+#. en: Use at the beginning of your Play step. Recruit an Army in China.
+msgid "CARD_ResponseImperialManchukuoArmy_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Rekruteer een leger in China."
+
+#. en: Use at the beginning of your Play step. Discard a Response card from your hand to deploy an Air Force in a space with your supplied Navy.
+msgid "CARD_BolsterYamamotoAboardTheYamato_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Leg een Reactiekaart uit je hand af om een luchtmacht in te zetten in een gebied met je bevoorrade vloot."
+
+#. en: For each Japanese Air Force in or adjacent to Szechuan, gain +1 Victory Point and the United States must discard the top 2 cards of its draw deck.
+msgid "CARD_EWBombingOfChongqing_TEXT"
+msgstr "Krijg voor elke Japanse luchtmacht in of grenzend aan Sichuan +1 overwinningspunt, en de Verenigde Staten moeten de bovenste 2 kaarten van hun trekstapel afleggen."
+
+#. en: Use during your Victory step. Score +1 Victory Point for each Japanese Navy that occupies a space with \"Pacific\" in the title.
+msgid "CARD_BolsterThePacificEmpire_TEXT"
+msgstr "Gebruik tijdens je overwinningsstap. Krijg +1 overwinningspunt voor elke Japanse vloot in een gebied met \"Stille Oceaan\" in de naam."
+
+#. en: Use at the beginning of your Victory step. Discard a Response card from your hand to recruit an Army in Indonesia, New Guinea, Iwo Jima, or the Philippines.
+msgid "CARD_BolsterIslandFortresses_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Leg een Reactiekaart uit je hand af om een leger te rekruteren in Indonesië, Nieuw-Guinea, Iwo Jima of de Filipijnen."
+
+#. en: During your Victory step, gain +1 Victory Point for each Army you have in Vladivostok and Siberia.
+msgid "CARD_StatusHokushinRon_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt voor elk leger dat je in Vladivostok en Siberië hebt."
+
+#. en: Use at the beginning of your Play step. Eliminate a Chinese Army.
+msgid "CARD_ResponseChineseCivilWar_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Elimineer een Chinees leger."
+
+#. en: Use at the beginning of your Play step. Recruit an Army in Southeast Asia.
+msgid "CARD_ResponseThailand_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Rekruteer een leger in Zuidoost-Azië."
+
+#. en: Use when your Army is battled. Discard a Response card from your hand and do not remove the Army due to that battle.
+msgid "CARD_BolsterCodeOfBushido_TEXT"
+msgstr "Gebruik wanneer je leger wordt aangevallen. Leg een Reactiekaart uit je hand af en verwijder het leger niet door die aanval."
+
+#. en: Use at the beginning of your Victory step. Discard 2 cards from your hand to recruit an Army in Eastern Europe.
+msgid "CARD_BolsterWarsawUprising_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Leg 2 kaarten uit je hand af om een leger te rekruteren in Oost-Europa."
+
+#. en: Use immediately after the United States, France, or the United Kingdom battles in North Africa, Africa, Middle East, or Western Europe. Recruit a French Army in the space battled.
+msgid "CARD_ResponseFrenchPatriotsJoinAllies_TEXT"
+msgstr "Gebruik onmiddellijk nadat de Verenigde Staten, Frankrijk of het Verenigd Koninkrijk aanvalt in Noord-Afrika, Afrika, het Midden-Oosten of West-Europa. Rekruteer een Frans leger in het aangevallen gebied."
+
+#. en: Use when the Axis declares its intention to use a Bolster card, but before any text is resolved. Discard 1 card from hand to discard the Axis Bolster card without resolving its text.
+msgid "CARD_BolsterBletchleyPark_TEXT"
+msgstr "Gebruik wanneer de As aankondigt een Versterkingskaart te gebruiken, maar voordat er tekst is uitgevoerd. Leg 1 kaart uit je hand af om die Versterkingskaart van de As af te leggen zonder de tekst uit te voeren."
+
+#. en: Build a French Army.
+msgid "CARD_EventFranceCombattante_TEXT"
+msgstr "Bouw een Frans leger."
+
+#. en: Use when the Axis declares its intention to use a Status card, but before any text is resolved. Discard 1 card from your hand to prevent the Axis from using that Status card this turn.
+msgid "CARD_BolsterKeepCalmandCarryOn_TEXT"
+msgstr "Gebruik wanneer de As aankondigt een Statuskaart te gebruiken, maar voordat er tekst is uitgevoerd. Leg 1 kaart uit je hand af om te voorkomen dat de As die Statuskaart deze beurt gebruikt."
+
+#. en: United Kingdom Armies in Eastern Europe are always in supply. During your Play step, instead of playing a card from hand, you may recruit a United Kingdom Army in Eastern Europe.
+msgid "CARD_StatusPolishSovereignty_TEXT"
+msgstr "Britse legers in Oost-Europa zijn altijd bevoorraad. Tijdens je speelstap mag je, in plaats van een kaart uit je hand te spelen, een Brits leger in Oost-Europa rekruteren."
+
+#. en: Use at any time. Discard 4 cards from hand to prevent a French Army in Western Europe from being removed this turn.
+msgid "CARD_BolsterMaginotLine_TEXT"
+msgstr "Gebruik op elk moment. Leg 4 kaarten uit je hand af om te voorkomen dat een Frans leger in West-Europa deze beurt wordt verwijderd."
+
+#. en: Build a French Navy.
+msgid "CARD_EventLesForcesNavalesFrancaisesLibres_TEXT"
+msgstr "Bouw een Franse vloot."
+
+#. en: Axis Status cards are ignored during the United Kingdom turn.
+msgid "CARD_StatusHobartsFunnies_TEXT"
+msgstr "Statuskaarten van de As worden genegeerd tijdens de beurt van het Verenigd Koninkrijk."
+
+#. en: Recruit a French Army in Western Europe, or battle Western Europe if a supplied French piece is adjacent.
+msgid "CARD_EventFreeForcesoftheLowCountries_TEXT"
+msgstr "Rekruteer een Frans leger in West-Europa, of val West-Europa aan als een bevoorraad Frans stuk eraan grenst."
+
+#. en: Battle a land space adjacent to a supplied French piece.
+msgid "CARD_EventRhinetDanube_TEXT"
+msgstr "Val een landgebied aan dat grenst aan een bevoorraad Frans stuk."
+
+#. en: Use at the beginning of your Air step. Deploy a French Air Force.
+msgid "CARD_BolsterArmeedelAir_TEXT"
+msgstr "Gebruik aan het begin van je luchtstap. Zet een Franse luchtmacht in."
+
+#. en: Use at the beginning of your Play step. Discard 2 cards from your hand to eliminate an Axis Air Force adjacent to your Air Force.
+msgid "CARD_BolsterSpecialAirServiceRaidsAirfields_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Leg 2 kaarten uit je hand af om een luchtmacht van de As te elimineren die grenst aan je luchtmacht."
+
+#. en: If Western Europe is occupied by an Axis Army, the United Kingdom is France's Home space.
+msgid "CARD_StatusGovernmentinExile_TEXT"
+msgstr "Als West-Europa bezet is door een leger van de As, is het Verenigd Koninkrijk het thuisgebied van Frankrijk."
+
+#. en: Build a French Navy.
+msgid "CARD_EventLaRoyale_TEXT"
+msgstr "Bouw een Franse vloot."
+
+#. en: Use at the beginning of your Victory step. Discard 2 cards from your hand to recruit an Army in North Africa, Middle East, Southeast Asia, or Indonesia.
+msgid "CARD_BolsterBritishColonialForces_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Leg 2 kaarten uit je hand af om een leger te rekruteren in Noord-Afrika, het Midden-Oosten, Zuidoost-Azië of Indonesië."
+
+#. en: Allied Armies in Africa are always in supply. During your Play step, instead of playing a card from hand, you may recruit a French Army in Africa.
+msgid "CARD_StatusSenegaleseTirailleurs_TEXT"
+msgstr "Geallieerde legers in Afrika zijn altijd bevoorraad. Tijdens je speelstap mag je, in plaats van een kaart uit je hand te spelen, een Frans leger in Afrika rekruteren."
+
+#. en: Use when a French Army is about to be removed. Do not remove that Army this turn.
+msgid "CARD_ResponseElan_TEXT"
+msgstr "Gebruik wanneer een Frans leger op het punt staat verwijderd te worden. Verwijder dat leger deze beurt niet."
+
+#. en: Eliminate an Axis Army in Eastern Europe.
+msgid "CARD_EventPolskiePanstwoPodziemne_TEXT"
+msgstr "Elimineer een leger van de As in Oost-Europa."
+
+#. en: Recruit a French Army in Africa, North Africa, Madagascar, Southeast Asia, New Guinea, or the Middle East.
+msgid "CARD_EventForeignLegion_TEXT"
+msgstr "Rekruteer een Frans leger in Afrika, Noord-Afrika, Madagaskar, Zuidoost-Azië, Nieuw-Guinea of het Midden-Oosten."
+
+#. en: Build a French Army.
+msgid "CARD_EventArmeedeTerre_TEXT"
+msgstr "Bouw een Frans leger."
+
+#. en: For the Axis, the Middle East is adjacent to the Balkans, and the Black Sea is adjacent to the Mediterranean Sea.
+msgid "CARD_StatusTurkeyOpensTheStraits_TEXT"
+msgstr "Voor de As grenst het Midden-Oosten aan de Balkan, en grenst de Zwarte Zee aan de Middellandse Zee."
+
+#. en: Build an Army in Western Europe or North Africa; then build a Navy in the Mediterranean or North Sea.
+msgid "CARD_EventSpain_TEXT"
+msgstr "Bouw een leger in West-Europa of Noord-Afrika; bouw daarna een vloot in de Middellandse Zee of de Noordzee."
+
+#. en: Use during your Victory step. Gain +1 Victory Point per Italian Navy on the board.
+msgid "CARD_BolsterSupermarina_TEXT"
+msgstr "Gebruik tijdens je overwinningsstap. Krijg +1 overwinningspunt per Italiaanse vloot op het bord."
+
+#. en: Use when your Army is battled in or adjacent to Italy. Do not remove that Army.
+msgid "CARD_ResponseAlpini_TEXT"
+msgstr "Gebruik wanneer je leger wordt aangevallen in of grenzend aan Italië. Verwijder dat leger niet."
+
+#. en: Use when Germany plays an Economic Warfare card with the word \"Submarines\" in its title. The Allied country targeted by the card must discard 3 additional cards from the top of its draw deck.
+msgid "CARD_BolsterBETASOM_TEXT"
+msgstr "Gebruik wanneer Duitsland een kaart Economische oorlogvoering speelt met het woord \"Submarines\" in de naam. Het geallieerde land waarop de kaart gericht is, moet 3 extra kaarten van de bovenkant van zijn trekstapel afleggen."
+
+#. en: Use at any time. Germany may discard between 0 and 5 cards from its hand, then Italy may take the same number of random cards from its discard pile and place them on top of its draw deck.
+msgid "CARD_BolsterPactOfSteel_TEXT"
+msgstr "Gebruik op elk moment. Duitsland mag 0 tot 5 kaarten uit zijn hand afleggen, daarna mag Italië evenveel willekeurige kaarten uit zijn aflegstapel nemen en bovenop zijn trekstapel leggen."
+
+#. en: Use immediately after the Soviet Union builds an Army. If the United Kingdom or United States has an Army adjacent to the Soviet Army just built, eliminate that Soviet Army.
+msgid "CARD_ResponseOperationUnthinkable_TEXT"
+msgstr "Gebruik onmiddellijk nadat de Sovjet-Unie een leger bouwt. Als het Verenigd Koninkrijk of de Verenigde Staten een leger heeft dat grenst aan het zojuist gebouwde Sovjetleger, elimineer dan dat Sovjetleger."
+
+#. en: Use at the beginning of your Victory step. Recruit an Army in the Middle East.
+msgid "CARD_BolsterGoldenSquareCoup_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Rekruteer een leger in het Midden-Oosten."
+
+#. en: Eliminate an Allied Army in the Middle East.
+msgid "CARD_EventRezaShahSupportsAxis_TEXT"
+msgstr "Elimineer een geallieerd leger in het Midden-Oosten."
+
+#. en: If the United Kingdom has an Army within 2 spaces of Ukraine, the Soviet Union must discard the top 2 cards of its draw deck. Gain +1 Victory Point.
+msgid "CARD_EWOperationPike_TEXT"
+msgstr "Als het Verenigd Koninkrijk een leger binnen 2 gebieden van Oekraïne heeft, moet de Sovjet-Unie de bovenste 2 kaarten van haar trekstapel afleggen. Krijg +1 overwinningspunt."
+
+#. en: The North Sea and Mediterranean are never adjacent for the Allies, and always adjacent for the Axis.
+msgid "CARD_StatusSpanishTroopsSeizeGibraltar_TEXT"
+msgstr "De Noordzee en de Middellandse Zee grenzen voor de Geallieerden nooit aan elkaar, en voor de As altijd."
+
+#. en: Use when you are the target of an Economic Warfare card. Remove your Air Force from the board instead of discarding cards.
+msgid "CARD_BolsterRegiaAeronautica_TEXT"
+msgstr "Gebruik wanneer je het doelwit bent van een kaart Economische oorlogvoering. Verwijder je luchtmacht van het bord in plaats van kaarten af te leggen."
+
+#. en: Eliminate an Allied Army in North Africa.
+msgid "CARD_EventWafdistUprising_TEXT"
+msgstr "Elimineer een geallieerd leger in Noord-Afrika."
+
+#. en: The United Kingdom must discard the top 2 cards of its draw deck.
+msgid "CARD_EWOperationLobster_TEXT"
+msgstr "Het Verenigd Koninkrijk moet de bovenste 2 kaarten van zijn trekstapel afleggen."
+
+#. en: Recruit an Italian Navy and a German Navy in the Mediterranean.
+msgid "CARD_EventOperationHerkules_TEXT"
+msgstr "Rekruteer een Italiaanse vloot en een Duitse vloot in de Middellandse Zee."
+
+#. en: Germany, Italy, and Japan takes a random card from their discard pile and places it on top of their draw decks. Gain +1 Victory Point.
+msgid "CARD_EventGiulianiCappelliniAndTorelli_TEXT"
+msgstr "Duitsland, Italië en Japan nemen elk een willekeurige kaart uit hun aflegstapel en leggen die bovenop hun trekstapel. Krijg +1 overwinningspunt."
+
+#. en: Use at the beginning of your Play step. Discard 1 card from your hand to deploy or marshal an Air Force in a space with your Navy.
+msgid "CARD_BolsterItalyCompletesCarriers_TEXT"
+msgstr "Gebruik aan het begin van je speelstap. Leg 1 kaart uit je hand af om een luchtmacht in te zetten of te hergroeperen in een gebied met je vloot."
+
+#. en: During your Victory step, gain +1 Victory Point if you have an Army in Western Europe.
+msgid "CARD_StatusIrredentismoItaliano_TEXT"
+msgstr "Krijg tijdens je overwinningsstap +1 overwinningspunt als je een leger in West-Europa hebt."
+
+#. en: Use at the beginning of your Victory step. Recruit an Army in Africa.
+msgid "CARD_BolsterSomaliland_TEXT"
+msgstr "Gebruik aan het begin van je overwinningsstap. Rekruteer een leger in Afrika."
+
+#. en: To use, the Allies must have an Army in Southeast Asia. Recruit a Chinese Army in China or Szechuan, or eliminate an Axis Army in China or Szechuan.
+msgid "CARD_EventLedoAndBurmaRoads_TotalWar_TEXT"
+msgstr "Alleen te gebruiken als de Geallieerden een leger in Zuidoost-Azië hebben. Rekruteer een Chinees leger in China of Sichuan, of elimineer een leger van de As in China of Sichuan."
+
+#. en: Recruit French Armies in both Indonesia and New Guinea, and a French Navy in the South China Sea.
+msgid "CARD_EventDutchEastIndies_TotalWar_TEXT"
+msgstr "Rekruteer Franse legers in zowel Indonesië als Nieuw-Guinea, en een Franse vloot in de Zuid-Chinese Zee."
+
+#. en: Allied Armies in Szechuan are always in supply. During your Play step, instead of playing a card from hand, you may recruit a Chinese Army in Szechuan.
+msgid "CARD_StatusAmericanVolunteerGroupExpands_TotalWar_TEXT"
+msgstr "Geallieerde legers in Sichuan zijn altijd bevoorraad. Tijdens je speelstap mag je, in plaats van een kaart uit je hand te spelen, een Chinees leger in Sichuan rekruteren."
+
+#. en: French pieces are always in supply. (Other rules about building new pieces still apply.)
+msgid "CARD_StatusFreeFrance_TotalWar_TEXT"
+msgstr "Franse stukken zijn altijd bevoorraad. (Andere regels over het bouwen van nieuwe stukken blijven gelden.)"
+
+#. en: Recruit 1 or 2 French Armies in Western Europe, Africa, and/or North Africa.
+msgid "CARD_EventFreeFrenchAllies_TotalWar_TEXT"
+msgstr "Rekruteer 1 of 2 Franse legers in West-Europa, Afrika en/of Noord-Afrika."

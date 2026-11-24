@@ -93,9 +93,12 @@ public partial class CardState : StateObject
     /// the synthetic CardData when the Bulletin was registered.
     ///
     /// CardData.Label has no equivalent override: a card's title never changes.
+    ///
+    /// In the player's language: the key <c>CARD_&lt;UniqueName&gt;_TEXT</c>, falling back to the card
+    /// data's English. Display only; <see cref="CardData"/>.Text stays the English the CLI and the wire use.
     /// </summary>
     [JsonIgnore]
-    public virtual string DisplayText => CardData.Text;
+    public virtual string DisplayText => Localization.TranslateOr($"CARD_{CardData.UniqueName}_TEXT", CardData.Text);
 
     // Constructor
     public CardState(CardData cardData)
