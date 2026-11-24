@@ -55,7 +55,7 @@ alignment = 1
 [node name="Kicker" type="Label" parent="Column" unique_id=1402117002]
 layout_mode = 2
 theme_type_variation = &"MenuKicker"
-text = "WORLD WAR II  ·  1939 – 1945"
+text = "MENU_KICKER"
 
 [node name="TitleBlock" type="VBoxContainer" parent="Column" unique_id=1402117003]
 layout_mode = 2
@@ -65,14 +65,14 @@ theme_override_constants/separation = -30
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
 theme_override_font_sizes/font_size = 96
-text = "QUARTERMASTER"
+text = "MENU_TITLE_TOP"
 
 [node name="TitleBottom" type="Label" parent="Column/TitleBlock" unique_id=1402117005]
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
 theme_override_colors/font_color = Color(0.851, 0.678, 0.361, 1)
 theme_override_font_sizes/font_size = 96
-text = "GENERAL"
+text = "MENU_TITLE_BOTTOM"
 
 [node name="Rule" type="HBoxContainer" parent="Column" unique_id=1402117006]
 layout_mode = 2
@@ -107,7 +107,7 @@ mouse_filter = 2
 [node name="PlayHeader" type="Label" parent="Column" unique_id=1402117011]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "PLAY"
+text = "MENU_HDR_PLAY"
 
 [node name="TutorialButton" parent="Column" instance=ExtResource("5_cmd")]
 unique_name_in_owner = true
@@ -129,7 +129,7 @@ mouse_filter = 2
 [node name="MultiplayerHeader" type="Label" parent="Column" unique_id=1402117013]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "MULTIPLAYER"
+text = "MENU_HDR_MULTIPLAYER"
 
 [node name="MultiplayerHostButton" parent="Column" unique_id=1302279736 instance=ExtResource("5_cmd")]
 unique_name_in_owner = true

@@ -125,6 +125,10 @@ debug_error_history={
 ]
 }
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://localization/en.po", "res://localization/nl.po")
+
 [layer_names]
 
 3d_render/layer_1="Player Render Layer"

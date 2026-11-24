@@ -1,0 +1,288 @@
+# Quartermaster General: Dutch translation.
+# Every msgid is a translation key, never display text. See docs/LOCALIZATION.md.
+msgid ""
+msgstr ""
+"Project-Id-Version: Quartermaster General\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ---- Common ----
+
+#. en: Close
+msgid "COMMON_BTN_CLOSE"
+msgstr "Sluiten"
+
+#. en: Apply
+msgid "COMMON_BTN_APPLY"
+msgstr "Toepassen"
+
+# ---- Main menu ----
+
+#. en: WORLD WAR II  ·  1939 – 1945
+msgid "MENU_KICKER"
+msgstr "TWEEDE WERELDOORLOG  ·  1939 – 1945"
+
+#. en: QUARTERMASTER
+msgid "MENU_TITLE_TOP"
+msgstr "QUARTERMASTER"
+
+#. en: GENERAL
+msgid "MENU_TITLE_BOTTOM"
+msgstr "GENERAL"
+
+#. en: PLAY
+msgid "MENU_HDR_PLAY"
+msgstr "SPELEN"
+
+#. en: MULTIPLAYER
+msgid "MENU_HDR_MULTIPLAYER"
+msgstr "MULTIPLAYER"
+
+#. en: Tutorial
+msgid "MENU_BTN_TUTORIAL"
+msgstr "Tutorial"
+
+#. en: Skirmish
+msgid "MENU_BTN_SKIRMISH"
+msgstr "Schermutseling"
+
+#. en: Load Game
+msgid "MENU_BTN_LOAD_GAME"
+msgstr "Spel laden"
+
+#. en: Host Game
+msgid "MENU_BTN_HOST_GAME"
+msgstr "Spel hosten"
+
+#. en: Join Game
+msgid "MENU_BTN_JOIN_GAME"
+msgstr "Deelnemen aan spel"
+
+#. en: Leaderboard
+msgid "MENU_BTN_LEADERBOARD"
+msgstr "Ranglijst"
+
+#. en: Settings
+msgid "MENU_BTN_SETTINGS"
+msgstr "Instellingen"
+
+#. en: Quit
+msgid "MENU_BTN_QUIT"
+msgstr "Afsluiten"
+
+#. en: {0} invited you to their game.
+msgid "MENU_INVITE_PROMPT"
+msgstr "{0} heeft je uitgenodigd voor een spel."
+
+# ---- Settings ----
+
+#. en: Settings
+msgid "SETTINGS_TITLE"
+msgstr "Instellingen"
+
+#. en: General
+msgid "SETTINGS_TAB_GENERAL"
+msgstr "Algemeen"
+
+#. en: Video
+msgid "SETTINGS_TAB_VIDEO"
+msgstr "Beeld"
+
+#. en: Audio
+msgid "SETTINGS_TAB_AUDIO"
+msgstr "Geluid"
+
+#. en: Gameplay
+msgid "SETTINGS_TAB_GAMEPLAY"
+msgstr "Spel"
+
+# ---- Settings: General ----
+
+#. en: LANGUAGE
+msgid "SETTINGS_GENERAL_LANGUAGE_SECTION"
+msgstr "TAAL"
+
+#. en: Language
+msgid "SETTINGS_GENERAL_LANGUAGE_LABEL"
+msgstr "Taal"
+
+#. en: The language the game is shown in. A change takes effect straight away.
+msgid "SETTINGS_GENERAL_LANGUAGE_HINT"
+msgstr "De taal waarin het spel wordt getoond. Een wijziging gaat direct in."
+
+# ---- Settings: Video ----
+
+#. en: DISPLAY
+msgid "SETTINGS_VIDEO_DISPLAY_SECTION"
+msgstr "WEERGAVE"
+
+#. en: Display Mode
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_LABEL"
+msgstr "Weergavemodus"
+
+#. en: Windowed
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_WINDOWED"
+msgstr "Venster"
+
+#. en: Windowed Fullscreen
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_BORDERLESS"
+msgstr "Volledig scherm (venster)"
+
+#. en: Fullscreen (exclusive)
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_EXCLUSIVE"
+msgstr "Volledig scherm (exclusief)"
+
+#. en: Resolution
+msgid "SETTINGS_VIDEO_RESOLUTION_LABEL"
+msgstr "Resolutie"
+
+#. en: Both fullscreen modes run at your desktop resolution. The board is drawn for a 16:9 screen, so only 16:9 sizes are offered.
+msgid "SETTINGS_VIDEO_RESOLUTION_HINT"
+msgstr "Beide volledig-schermmodi draaien op de resolutie van je bureaublad. Het bord is getekend voor een 16:9-scherm, dus alleen 16:9-formaten worden aangeboden."
+
+# ---- Settings: Audio ----
+
+#. en: VOLUME
+msgid "SETTINGS_AUDIO_VOLUME_SECTION"
+msgstr "VOLUME"
+
+#. en: Master
+msgid "SETTINGS_AUDIO_MASTER_LABEL"
+msgstr "Hoofdvolume"
+
+#. en: Music
+msgid "SETTINGS_AUDIO_MUSIC_LABEL"
+msgstr "Muziek"
+
+#. en: Sound Effects
+msgid "SETTINGS_AUDIO_SFX_LABEL"
+msgstr "Geluidseffecten"
+
+#. en: SOUNDS
+msgid "SETTINGS_AUDIO_SOUNDS_SECTION"
+msgstr "GELUIDEN"
+
+# ---- Settings: Gameplay ----
+
+#. en: PACE
+msgid "SETTINGS_GAMEPLAY_PACE_SECTION"
+msgstr "TEMPO"
+
+#. en: Presentation Speed
+msgid "SETTINGS_GAMEPLAY_SPEED_LABEL"
+msgstr "Animatiesnelheid"
+
+#. en: Slow
+msgid "SETTINGS_GAMEPLAY_SPEED_SLOW"
+msgstr "Langzaam"
+
+#. en: Normal
+msgid "SETTINGS_GAMEPLAY_SPEED_NORMAL"
+msgstr "Normaal"
+
+#. en: Fast
+msgid "SETTINGS_GAMEPLAY_SPEED_FAST"
+msgstr "Snel"
+
+#. en: How fast animations play and how long the game pauses between them.
+msgid "SETTINGS_GAMEPLAY_SPEED_HINT"
+msgstr "Hoe snel animaties afspelen en hoe lang het spel ertussen pauzeert."
+
+#. en: Auto-skip Messages
+msgid "SETTINGS_GAMEPLAY_AUTO_DISMISS_LABEL"
+msgstr "Berichten automatisch sluiten"
+
+#. en: Messages that only report what happened close themselves after a moment instead of waiting for a click.
+msgid "SETTINGS_GAMEPLAY_AUTO_DISMISS_HINT"
+msgstr "Berichten die alleen melden wat er gebeurd is, sluiten zichzelf na een moment in plaats van op een klik te wachten."
+
+#. en: Only Ask When I Can React
+msgid "SETTINGS_GAMEPLAY_REACTION_PROMPTS_LABEL"
+msgstr "Alleen vragen als ik kan reageren"
+
+#. en: A reaction window with nothing you can play is answered for you, so it never stops the game. The toggle in each faction's info row still changes it for one game.
+msgid "SETTINGS_GAMEPLAY_REACTION_PROMPTS_HINT"
+msgstr "Een reactievenster waarin je niets kunt spelen, wordt voor je beantwoord, zodat het spel er nooit op stilvalt. De schakelaar in de inforegel van elke factie wijzigt dit nog steeds voor één spel."
+
+#. en: CARDS
+msgid "SETTINGS_GAMEPLAY_CARDS_SECTION"
+msgstr "KAARTEN"
+
+#. en: Pop-up Card Size
+msgid "SETTINGS_GAMEPLAY_MODAL_CARD_SIZE_LABEL"
+msgstr "Kaartgrootte in pop-ups"
+
+#. en: How big cards are drawn in pop-ups that show drawn, discarded or offered cards. Bigger cards are easier to read; smaller ones leave more of the board in view.
+msgid "SETTINGS_GAMEPLAY_MODAL_CARD_SIZE_HINT"
+msgstr "Hoe groot kaarten worden getekend in pop-ups met getrokken, afgelegde of aangeboden kaarten. Grotere kaarten zijn beter leesbaar; kleinere laten meer van het bord zien."
+
+#. en: Show Active Cards
+msgid "SETTINGS_GAMEPLAY_ACTIVE_CARDS_LABEL"
+msgstr "Actieve kaarten tonen"
+
+#. en: When choosing a card to play, your Status and Response cards already on the table are drawn beside your hand, next to the cards you can activate instead of playing.
+msgid "SETTINGS_GAMEPLAY_ACTIVE_CARDS_HINT"
+msgstr "Bij het kiezen van een kaart worden je Status- en Response-kaarten die al op tafel liggen naast je hand getoond, bij de kaarten die je kunt activeren in plaats van spelen."
+
+#. en: Open Faction Banners
+msgid "SETTINGS_GAMEPLAY_PENNANTS_OPEN_LABEL"
+msgstr "Factiebanieren open"
+
+#. en: The faction banners down the left start slid open, showing each faction's hand, score and pieces in reserve. Click a banner to open or close it either way.
+msgid "SETTINGS_GAMEPLAY_PENNANTS_OPEN_HINT"
+msgstr "De factiebanieren aan de linkerkant staan bij de start uitgeschoven, met de hand, score en reservestukken van elke factie. Klik op een banier om die alsnog te openen of te sluiten."
+
+#. en: Faction Banner Size
+msgid "SETTINGS_GAMEPLAY_BANNER_SIZE_LABEL"
+msgstr "Grootte factiebanieren"
+
+#. en: How big the flagpole and faction banners down the left are drawn, with the cards fanned out of each flag.
+msgid "SETTINGS_GAMEPLAY_BANNER_SIZE_HINT"
+msgstr "Hoe groot de vlaggenmast en de factiebanieren aan de linkerkant worden getekend, met de kaarten die uit elke vlag waaieren."
+
+#. en: CHAT
+msgid "SETTINGS_GAMEPLAY_CHAT_SECTION"
+msgstr "CHAT"
+
+#. en: Hide Chat After
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_LABEL"
+msgstr "Chat verbergen na"
+
+#. en: Never
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_NEVER"
+msgstr "Nooit"
+
+#. en: 5 seconds
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_5S"
+msgstr "5 seconden"
+
+#. en: 10 seconds
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_10S"
+msgstr "10 seconden"
+
+#. en: How long the chat stays on screen after a player message or once the mouse leaves it.
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_HINT"
+msgstr "Hoe lang de chat in beeld blijft na een bericht van een speler of zodra de muis hem verlaat."
+
+#. en: DIAGNOSTICS
+msgid "SETTINGS_GAMEPLAY_DIAGNOSTICS_SECTION"
+msgstr "DIAGNOSE"
+
+#. en: Debug Logging
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_LABEL"
+msgstr "Debuglogging"
+
+#. en: Info
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_INFO"
+msgstr "Info"
+
+#. en: Finest
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_FINEST"
+msgstr "Zeer gedetailleerd"
+
+#. en: How much detail is written to the console. Finest is loud and only useful when diagnosing a problem.
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_HINT"
+msgstr "Hoeveel detail er naar de console wordt geschreven. Zeer gedetailleerd is erg uitvoerig en alleen nuttig bij het opsporen van een probleem."

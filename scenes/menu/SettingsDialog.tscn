@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://ckrn0xvadtrd3" path="res://scripts/C#/Menu/VideoSettingsPanel.cs" id="3_video"]
 [ext_resource type="Script" uid="uid://blykbmr06abmr" path="res://scripts/C#/Menu/AudioSettingsPanel.cs" id="4_audio"]
 [ext_resource type="Script" uid="uid://bgmplystngspnl" path="res://scripts/C#/Menu/GameplaySettingsPanel.cs" id="5_gameplay"]
+[ext_resource type="Script" path="res://scripts/C#/Menu/GeneralSettingsPanel.cs" id="6_general"]
 [ext_resource type="PackedScene" uid="uid://b8qgactbtn02" path="res://scenes/menu/MenuActionButton.tscn" id="8_voqsf"]
 
 [node name="SettingsDialog" unique_id=981918145 instance=ExtResource("1_shell")]
@@ -14,7 +15,7 @@ script = ExtResource("2_script")
 custom_minimum_size = Vector2(920, 0)
 
 [node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="0" unique_id=647576227]
-text = "Settings"
+text = "SETTINGS_TITLE"
 
 [node name="Tabs" type="TabContainer" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="1" unique_id=1793021974]
 unique_name_in_owner = true
@@ -23,16 +24,55 @@ layout_mode = 2
 tab_alignment = 1
 current_tab = 0
 
-[node name="Video" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="1" unique_id=665061009]
+[node name="General" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="1" unique_id=1904471101]
+layout_mode = 2
+theme_override_constants/separation = 10
+script = ExtResource("6_general")
+metadata/_tab_index = 0
+
+[node name="LanguageSection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/General"]
+layout_mode = 2
+theme_type_variation = &"MenuSection"
+text = "SETTINGS_GENERAL_LANGUAGE_SECTION"
+
+[node name="LanguageSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/General"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LanguageRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/General/LanguageSetting"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="LanguageLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/General/LanguageSetting/LanguageRow" unique_id=1904471102]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SETTINGS_GENERAL_LANGUAGE_LABEL"
+
+[node name="LanguageOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/General/LanguageSetting/LanguageRow" unique_id=1904471103]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+size_flags_vertical = 4
+auto_translate_mode = 2
+
+[node name="LanguageHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/General/LanguageSetting" unique_id=1904471104]
+layout_mode = 2
+theme_type_variation = &"MenuMuted"
+theme_override_font_sizes/font_size = 17
+text = "SETTINGS_GENERAL_LANGUAGE_HINT"
+autowrap_mode = 3
+
+[node name="Video" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="2" unique_id=665061009]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
 script = ExtResource("3_video")
-metadata/_tab_index = 0
+metadata/_tab_index = 1
 
 [node name="DisplaySection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "DISPLAY"
+text = "SETTINGS_VIDEO_DISPLAY_SECTION"
 
 [node name="DisplayModeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video"]
 layout_mode = 2
@@ -41,7 +81,7 @@ theme_override_constants/separation = 16
 [node name="DisplayModeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow" unique_id=1060291231]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Display Mode"
+text = "SETTINGS_VIDEO_DISPLAY_MODE_LABEL"
 
 [node name="DisplayModeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/DisplayModeRow" unique_id=398782208]
 unique_name_in_owner = true
@@ -50,11 +90,11 @@ layout_mode = 2
 size_flags_vertical = 4
 selected = 0
 item_count = 3
-popup/item_0/text = "Windowed"
+popup/item_0/text = "SETTINGS_VIDEO_DISPLAY_MODE_WINDOWED"
 popup/item_0/id = 0
-popup/item_1/text = "Windowed Fullscreen"
+popup/item_1/text = "SETTINGS_VIDEO_DISPLAY_MODE_BORDERLESS"
 popup/item_1/id = 1
-popup/item_2/text = "Fullscreen (exclusive)"
+popup/item_2/text = "SETTINGS_VIDEO_DISPLAY_MODE_EXCLUSIVE"
 popup/item_2/id = 2
 
 
@@ -69,19 +109,20 @@ theme_override_constants/separation = 16
 [node name="ResolutionLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionSetting/ResolutionRow" unique_id=1299310788]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Resolution"
+text = "SETTINGS_VIDEO_RESOLUTION_LABEL"
 
 [node name="ResolutionOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionSetting/ResolutionRow" unique_id=2108154630]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(380, 0)
 layout_mode = 2
 size_flags_vertical = 4
+auto_translate_mode = 2
 
 [node name="ResolutionHint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video/ResolutionSetting" unique_id=2115484642]
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "Both fullscreen modes run at your desktop resolution. The board is drawn for a 16:9 screen, so only 16:9 sizes are offered."
+text = "SETTINGS_VIDEO_RESOLUTION_HINT"
 autowrap_mode = 3
 
 [node name="ApplyRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Video" unique_id=1959486721]
@@ -92,17 +133,17 @@ alignment = 2
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Audio" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="2" unique_id=409647964]
+[node name="Audio" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="3" unique_id=409647964]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
 script = ExtResource("4_audio")
-metadata/_tab_index = 1
+metadata/_tab_index = 2
 
 [node name="VolumeSection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "VOLUME"
+text = "SETTINGS_AUDIO_VOLUME_SECTION"
 
 [node name="MasterVolumeRow" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 layout_mode = 2
@@ -111,7 +152,7 @@ theme_override_constants/separation = 16
 [node name="MasterVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio/MasterVolumeRow" unique_id=899753237]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Master"
+text = "SETTINGS_AUDIO_MASTER_LABEL"
 
 [node name="MasterVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio/MasterVolumeRow" unique_id=2005317525]
 unique_name_in_owner = true
@@ -129,7 +170,7 @@ theme_override_constants/separation = 16
 [node name="MusicVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio/MusicVolumeRow" unique_id=1630490876]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Music"
+text = "SETTINGS_AUDIO_MUSIC_LABEL"
 
 [node name="MusicVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio/MusicVolumeRow" unique_id=851515162]
 unique_name_in_owner = true
@@ -147,7 +188,7 @@ theme_override_constants/separation = 16
 [node name="SfxVolumeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio/SfxVolumeRow" unique_id=20949931]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Sound Effects"
+text = "SETTINGS_AUDIO_SFX_LABEL"
 
 [node name="SfxVolumeSlider" type="HSlider" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio/SfxVolumeRow" unique_id=771873444]
 unique_name_in_owner = true
@@ -166,19 +207,19 @@ mouse_filter = 2
 [node name="SoundsSection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "SOUNDS"
+text = "SETTINGS_AUDIO_SOUNDS_SECTION"
 
 [node name="SfxSettingsContainer" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Audio" unique_id=856387836]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Gameplay" type="ScrollContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="3" unique_id=1904471001]
+[node name="Gameplay" type="ScrollContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs" index="4" unique_id=1904471001]
 visible = false
 layout_mode = 2
 follow_focus = true
 horizontal_scroll_mode = 0
-metadata/_tab_index = 2
+metadata/_tab_index = 3
 
 [node name="GameplayMargin" type="MarginContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay"]
 layout_mode = 2
@@ -194,7 +235,7 @@ script = ExtResource("5_gameplay")
 [node name="PaceSection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "PACE"
+text = "SETTINGS_GAMEPLAY_PACE_SECTION"
 
 [node name="SpeedSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
@@ -207,7 +248,7 @@ theme_override_constants/separation = 16
 [node name="SpeedLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/SpeedSetting/SpeedRow" unique_id=1904471003]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Presentation Speed"
+text = "SETTINGS_GAMEPLAY_SPEED_LABEL"
 
 [node name="SpeedOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/SpeedSetting/SpeedRow" unique_id=1904471004]
 unique_name_in_owner = true
@@ -216,11 +257,11 @@ layout_mode = 2
 size_flags_vertical = 4
 selected = 1
 item_count = 3
-popup/item_0/text = "Slow"
+popup/item_0/text = "SETTINGS_GAMEPLAY_SPEED_SLOW"
 popup/item_0/id = 0
-popup/item_1/text = "Normal"
+popup/item_1/text = "SETTINGS_GAMEPLAY_SPEED_NORMAL"
 popup/item_1/id = 1
-popup/item_2/text = "Fast"
+popup/item_2/text = "SETTINGS_GAMEPLAY_SPEED_FAST"
 popup/item_2/id = 2
 
 
@@ -228,7 +269,7 @@ popup/item_2/id = 2
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "How fast animations play and how long the game pauses between them."
+text = "SETTINGS_GAMEPLAY_SPEED_HINT"
 autowrap_mode = 3
 
 [node name="AutoDismissSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -242,7 +283,7 @@ theme_override_constants/separation = 16
 [node name="AutoDismissLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/AutoDismissSetting/AutoDismissRow" unique_id=1904471007]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Auto-skip Messages"
+text = "SETTINGS_GAMEPLAY_AUTO_DISMISS_LABEL"
 
 [node name="AutoDismissToggle" type="CheckButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/AutoDismissSetting/AutoDismissRow" unique_id=1904471008]
 unique_name_in_owner = true
@@ -255,7 +296,7 @@ button_pressed = true
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "Messages that only report what happened close themselves after a moment instead of waiting for a click."
+text = "SETTINGS_GAMEPLAY_AUTO_DISMISS_HINT"
 autowrap_mode = 3
 
 [node name="ReactionPromptsSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -269,7 +310,7 @@ theme_override_constants/separation = 16
 [node name="ReactionPromptsLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ReactionPromptsSetting/ReactionPromptsRow" unique_id=1904471024]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Only Ask When I Can React"
+text = "SETTINGS_GAMEPLAY_REACTION_PROMPTS_LABEL"
 
 [node name="ReactionPromptsToggle" type="CheckButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ReactionPromptsSetting/ReactionPromptsRow" unique_id=1904471025]
 unique_name_in_owner = true
@@ -281,7 +322,7 @@ size_flags_vertical = 4
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "A reaction window with nothing you can play is answered for you, so it never stops the game. The toggle in each faction's info row still changes it for one game."
+text = "SETTINGS_GAMEPLAY_REACTION_PROMPTS_HINT"
 autowrap_mode = 3
 
 [node name="CardsGap" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -292,7 +333,7 @@ mouse_filter = 2
 [node name="CardsSection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "CARDS"
+text = "SETTINGS_GAMEPLAY_CARDS_SECTION"
 
 [node name="ModalCardSizeSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
@@ -305,13 +346,14 @@ theme_override_constants/separation = 16
 [node name="ModalCardSizeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ModalCardSizeSetting/ModalCardSizeRow" unique_id=1904471028]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Pop-up Card Size"
+text = "SETTINGS_GAMEPLAY_MODAL_CARD_SIZE_LABEL"
 
 [node name="ModalCardSizeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ModalCardSizeSetting/ModalCardSizeRow" unique_id=1904471029]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(380, 0)
 layout_mode = 2
 size_flags_vertical = 4
+auto_translate_mode = 2
 selected = 3
 item_count = 6
 popup/item_0/text = "70%"
@@ -332,7 +374,7 @@ popup/item_5/id = 120
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "How big cards are drawn in pop-ups that show drawn, discarded or offered cards. Bigger cards are easier to read; smaller ones leave more of the board in view."
+text = "SETTINGS_GAMEPLAY_MODAL_CARD_SIZE_HINT"
 autowrap_mode = 3
 
 [node name="ActiveCardsSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -346,7 +388,7 @@ theme_override_constants/separation = 16
 [node name="ActiveCardsLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ActiveCardsSetting/ActiveCardsRow" unique_id=1904471016]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Show Active Cards"
+text = "SETTINGS_GAMEPLAY_ACTIVE_CARDS_LABEL"
 
 [node name="ActiveCardsToggle" type="CheckButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ActiveCardsSetting/ActiveCardsRow" unique_id=1904471017]
 unique_name_in_owner = true
@@ -358,7 +400,7 @@ size_flags_vertical = 4
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "When choosing a card to play, your Status and Response cards already on the table are drawn beside your hand, next to the cards you can activate instead of playing."
+text = "SETTINGS_GAMEPLAY_ACTIVE_CARDS_HINT"
 autowrap_mode = 3
 
 [node name="PennantsOpenSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -372,7 +414,7 @@ theme_override_constants/separation = 16
 [node name="PennantsOpenLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/PennantsOpenSetting/PennantsOpenRow" unique_id=1904471040]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Open Faction Banners"
+text = "SETTINGS_GAMEPLAY_PENNANTS_OPEN_LABEL"
 
 [node name="PennantsOpenToggle" type="CheckButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/PennantsOpenSetting/PennantsOpenRow" unique_id=1904471041]
 unique_name_in_owner = true
@@ -384,7 +426,7 @@ size_flags_vertical = 4
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "The faction banners down the left start slid open, showing each faction's hand, score and pieces in reserve. Click a banner to open or close it either way."
+text = "SETTINGS_GAMEPLAY_PENNANTS_OPEN_HINT"
 autowrap_mode = 3
 
 [node name="BannerSizeSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -398,13 +440,14 @@ theme_override_constants/separation = 16
 [node name="BannerSizeLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/BannerSizeSetting/BannerSizeRow" unique_id=1904471043]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Faction Banner Size"
+text = "SETTINGS_GAMEPLAY_BANNER_SIZE_LABEL"
 
 [node name="BannerSizeOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/BannerSizeSetting/BannerSizeRow" unique_id=1904471044]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(380, 0)
 layout_mode = 2
 size_flags_vertical = 4
+auto_translate_mode = 2
 selected = 2
 item_count = 5
 popup/item_0/text = "80%"
@@ -422,7 +465,7 @@ popup/item_4/id = 120
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "How big the flagpole and faction banners down the left are drawn, with the cards fanned out of each flag."
+text = "SETTINGS_GAMEPLAY_BANNER_SIZE_HINT"
 autowrap_mode = 3
 
 [node name="ChatGap" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -433,7 +476,7 @@ mouse_filter = 2
 [node name="ChatSection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "CHAT"
+text = "SETTINGS_GAMEPLAY_CHAT_SECTION"
 
 [node name="ChatHideSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
@@ -446,7 +489,7 @@ theme_override_constants/separation = 16
 [node name="ChatHideLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ChatHideSetting/ChatHideRow" unique_id=1904471020]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Hide Chat After"
+text = "SETTINGS_GAMEPLAY_CHAT_HIDE_LABEL"
 
 [node name="ChatHideOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/ChatHideSetting/ChatHideRow" unique_id=1904471021]
 unique_name_in_owner = true
@@ -455,11 +498,11 @@ layout_mode = 2
 size_flags_vertical = 4
 selected = 1
 item_count = 3
-popup/item_0/text = "Never"
+popup/item_0/text = "SETTINGS_GAMEPLAY_CHAT_HIDE_NEVER"
 popup/item_0/id = 0
-popup/item_1/text = "5 seconds"
+popup/item_1/text = "SETTINGS_GAMEPLAY_CHAT_HIDE_5S"
 popup/item_1/id = 5
-popup/item_2/text = "10 seconds"
+popup/item_2/text = "SETTINGS_GAMEPLAY_CHAT_HIDE_10S"
 popup/item_2/id = 10
 
 
@@ -467,7 +510,7 @@ popup/item_2/id = 10
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "How long the chat stays on screen after a player message or once the mouse leaves it."
+text = "SETTINGS_GAMEPLAY_CHAT_HIDE_HINT"
 autowrap_mode = 3
 
 [node name="DebugGap" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
@@ -478,7 +521,7 @@ mouse_filter = 2
 [node name="DebugSection" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "DIAGNOSTICS"
+text = "SETTINGS_GAMEPLAY_DIAGNOSTICS_SECTION"
 
 [node name="DebugLevelSetting" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings"]
 layout_mode = 2
@@ -491,7 +534,7 @@ theme_override_constants/separation = 16
 [node name="DebugLevelLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/DebugLevelSetting/DebugLevelRow" unique_id=1904471012]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Debug Logging"
+text = "SETTINGS_GAMEPLAY_DEBUG_LEVEL_LABEL"
 
 [node name="DebugLevelOption" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/Tabs/Gameplay/GameplayMargin/GameplaySettings/DebugLevelSetting/DebugLevelRow" unique_id=1904471013]
 unique_name_in_owner = true
@@ -500,9 +543,9 @@ layout_mode = 2
 size_flags_vertical = 4
 selected = 0
 item_count = 2
-popup/item_0/text = "Info"
+popup/item_0/text = "SETTINGS_GAMEPLAY_DEBUG_LEVEL_INFO"
 popup/item_0/id = 0
-popup/item_1/text = "Finest"
+popup/item_1/text = "SETTINGS_GAMEPLAY_DEBUG_LEVEL_FINEST"
 popup/item_1/id = 1
 
 
@@ -510,7 +553,7 @@ popup/item_1/id = 1
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "How much detail is written to the console. Finest is loud and only useful when diagnosing a problem."
+text = "SETTINGS_GAMEPLAY_DEBUG_LEVEL_HINT"
 autowrap_mode = 3
 
 [node name="Separator" type="HSeparator" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="2" unique_id=311857598]

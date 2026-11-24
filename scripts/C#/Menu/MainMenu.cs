@@ -119,14 +119,14 @@ public partial class MainMenu : Control
 		var settings         = GetNode<MenuPanelButton>("%SettingsButton");
 		var quit             = GetNode<MenuPanelButton>("%QuitButton");
 
-		tutorial.ButtonText        = "Tutorial";
-		skirmish.ButtonText        = "Skirmish";
-		loadGame.ButtonText        = "Load Game";
-		multiplayerHost.ButtonText = "Host Game";
-		multiplayerJoin.ButtonText = "Join Game";
-		leaderboard.ButtonText     = "Leaderboard";
-		settings.ButtonText        = "Settings";
-		quit.ButtonText            = "Quit";
+		tutorial.ButtonText        = "MENU_BTN_TUTORIAL";
+		skirmish.ButtonText        = "MENU_BTN_SKIRMISH";
+		loadGame.ButtonText        = "MENU_BTN_LOAD_GAME";
+		multiplayerHost.ButtonText = "MENU_BTN_HOST_GAME";
+		multiplayerJoin.ButtonText = "MENU_BTN_JOIN_GAME";
+		leaderboard.ButtonText     = "MENU_BTN_LEADERBOARD";
+		settings.ButtonText        = "MENU_BTN_SETTINGS";
+		quit.ButtonText            = "MENU_BTN_QUIT";
 
 		tutorial.Pressed        += OnTutorialPressed;
 		skirmish.Pressed        += OnSkirmishPressed;
@@ -275,7 +275,7 @@ public partial class MainMenu : Control
 			// A toast, not a dialog: the invite arrived unannounced, so it must not stop the player
 			// doing whatever they were already doing on the menu.
 			bool join = await MenuToast.ShowAsync(this,
-				$"{inviter} invited you to their game.", "Join Game");
+				string.Format(Tr("MENU_INVITE_PROMPT"), inviter), Tr("MENU_BTN_JOIN_GAME"));
 
 			if (!IsInstanceValid(this) || !join) return;
 

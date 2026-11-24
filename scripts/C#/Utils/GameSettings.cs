@@ -68,6 +68,12 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     private static readonly int[] BannerChoices = { 80, 90, 100, 110, 120 };
 
+    /// <summary>
+    /// The language the game is shown in, as a code from <see cref="Localization.SupportedLanguages"/>.
+    /// A first launch takes the operating system's language when the game has it.
+    /// </summary>
+    public string Language { get; private set; } = Localization.FallbackLanguage;
+
     /// <summary>Last server address entered on the join screen, restored on the next launch.</summary>
     public string LastJoinIp { get; private set; } = "127.0.0.1";
 
@@ -213,6 +219,14 @@ public partial class GameSettings : SingletonNode<GameSettings>
 
     /// <summary>Same guard as <see cref="ValidChatHide"/>: only sizes the picker offers.</summary>
     private static int ValidBannerPercent(int percent) => System.Array.IndexOf(BannerChoices, percent) >= 0 ? percent : 100;
+    /// <summary>Saves the language and switches to it straight away; open screens re-translate in place.</summary>
+    public void SetLanguage(string code)
+    {
+        Language = Localization.IsSupported(code) ? code : Localization.FallbackLanguage;
+        Save();
+        Localization.Apply(Language);
+    }
+
     public void SetLastJoinAddress(string ip, int port) { LastJoinIp = ip; LastJoinPort = port; Save(); }
 
     /// <summary>
@@ -270,6 +284,13 @@ public partial class GameSettings : SingletonNode<GameSettings>
         base._Ready();
         GD.Print("GameSettings Ready");
         Load();
+        // Before any scene: GameSettings is an early autoload, so the menu is built in this language.
+        // A `--language xx` launch or the locale/test project setting (Godot's own test switches) wins
+        // over the saved choice for that run.
+        if (!Localization.IsForcedAtLaunch())
+        {
+            Localization.Apply(Language);
+        }
 
         // Same shape as AudioManager._Ready pushing the saved levels onto the buses: the values are
         // loaded here, so this is where they first reach the thing they describe. A dev build's
@@ -293,8 +314,12 @@ public partial class GameSettings : SingletonNode<GameSettings>
     public void Load()
     {
         var config = new ConfigFile();
+        Language = Localization.DefaultLanguage();
         if (config.Load(ConfigPath) == Error.Ok)
         {
+            // A hand-edited or stale code (a language since removed) falls back like a first launch.
+            string language = config.GetValue(Section, "language", Language).AsString();
+            Language = Localization.IsSupported(language) ? language : Localization.DefaultLanguage();
             var saved = config.GetValue(Section, "presentation_speed", (int)GameSpeed.Normal).As<int>();
             // Clamp in case a saved VeryFast (3) value exists from before the redesign.
             PresentationSpeed = (GameSpeed)Math.Clamp(saved, 0, 2);
@@ -375,6 +400,7 @@ public partial class GameSettings : SingletonNode<GameSettings>
     private void Save()
     {
         var config = new ConfigFile();
+        config.SetValue(Section, "language",            Language);
         config.SetValue(Section, "presentation_speed", (int)PresentationSpeed);
         config.SetValue(Section, "debug_level",         (int)DebugLevel);
         // debug_multiplayer is deliberately not persisted — it is a runtime-only, command-line

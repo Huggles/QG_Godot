@@ -1,0 +1,222 @@
+# Quartermaster General: English translation.
+# Every msgid is a translation key, never display text. See docs/LOCALIZATION.md.
+msgid ""
+msgstr ""
+"Project-Id-Version: Quartermaster General\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ---- Common ----
+
+msgid "COMMON_BTN_CLOSE"
+msgstr "Close"
+
+msgid "COMMON_BTN_APPLY"
+msgstr "Apply"
+
+# ---- Main menu ----
+
+msgid "MENU_KICKER"
+msgstr "WORLD WAR II  ·  1939 – 1945"
+
+msgid "MENU_TITLE_TOP"
+msgstr "QUARTERMASTER"
+
+msgid "MENU_TITLE_BOTTOM"
+msgstr "GENERAL"
+
+msgid "MENU_HDR_PLAY"
+msgstr "PLAY"
+
+msgid "MENU_HDR_MULTIPLAYER"
+msgstr "MULTIPLAYER"
+
+msgid "MENU_BTN_TUTORIAL"
+msgstr "Tutorial"
+
+msgid "MENU_BTN_SKIRMISH"
+msgstr "Skirmish"
+
+msgid "MENU_BTN_LOAD_GAME"
+msgstr "Load Game"
+
+msgid "MENU_BTN_HOST_GAME"
+msgstr "Host Game"
+
+msgid "MENU_BTN_JOIN_GAME"
+msgstr "Join Game"
+
+msgid "MENU_BTN_LEADERBOARD"
+msgstr "Leaderboard"
+
+msgid "MENU_BTN_SETTINGS"
+msgstr "Settings"
+
+msgid "MENU_BTN_QUIT"
+msgstr "Quit"
+
+msgid "MENU_INVITE_PROMPT"
+msgstr "{0} invited you to their game."
+
+# ---- Settings ----
+
+msgid "SETTINGS_TITLE"
+msgstr "Settings"
+
+msgid "SETTINGS_TAB_GENERAL"
+msgstr "General"
+
+msgid "SETTINGS_TAB_VIDEO"
+msgstr "Video"
+
+msgid "SETTINGS_TAB_AUDIO"
+msgstr "Audio"
+
+msgid "SETTINGS_TAB_GAMEPLAY"
+msgstr "Gameplay"
+
+# ---- Settings: General ----
+
+msgid "SETTINGS_GENERAL_LANGUAGE_SECTION"
+msgstr "LANGUAGE"
+
+msgid "SETTINGS_GENERAL_LANGUAGE_LABEL"
+msgstr "Language"
+
+msgid "SETTINGS_GENERAL_LANGUAGE_HINT"
+msgstr "The language the game is shown in. A change takes effect straight away."
+
+# ---- Settings: Video ----
+
+msgid "SETTINGS_VIDEO_DISPLAY_SECTION"
+msgstr "DISPLAY"
+
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_LABEL"
+msgstr "Display Mode"
+
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_WINDOWED"
+msgstr "Windowed"
+
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_BORDERLESS"
+msgstr "Windowed Fullscreen"
+
+msgid "SETTINGS_VIDEO_DISPLAY_MODE_EXCLUSIVE"
+msgstr "Fullscreen (exclusive)"
+
+msgid "SETTINGS_VIDEO_RESOLUTION_LABEL"
+msgstr "Resolution"
+
+msgid "SETTINGS_VIDEO_RESOLUTION_HINT"
+msgstr "Both fullscreen modes run at your desktop resolution. The board is drawn for a 16:9 screen, so only 16:9 sizes are offered."
+
+# ---- Settings: Audio ----
+
+msgid "SETTINGS_AUDIO_VOLUME_SECTION"
+msgstr "VOLUME"
+
+msgid "SETTINGS_AUDIO_MASTER_LABEL"
+msgstr "Master"
+
+msgid "SETTINGS_AUDIO_MUSIC_LABEL"
+msgstr "Music"
+
+msgid "SETTINGS_AUDIO_SFX_LABEL"
+msgstr "Sound Effects"
+
+msgid "SETTINGS_AUDIO_SOUNDS_SECTION"
+msgstr "SOUNDS"
+
+# ---- Settings: Gameplay ----
+
+msgid "SETTINGS_GAMEPLAY_PACE_SECTION"
+msgstr "PACE"
+
+msgid "SETTINGS_GAMEPLAY_SPEED_LABEL"
+msgstr "Presentation Speed"
+
+msgid "SETTINGS_GAMEPLAY_SPEED_SLOW"
+msgstr "Slow"
+
+msgid "SETTINGS_GAMEPLAY_SPEED_NORMAL"
+msgstr "Normal"
+
+msgid "SETTINGS_GAMEPLAY_SPEED_FAST"
+msgstr "Fast"
+
+msgid "SETTINGS_GAMEPLAY_SPEED_HINT"
+msgstr "How fast animations play and how long the game pauses between them."
+
+msgid "SETTINGS_GAMEPLAY_AUTO_DISMISS_LABEL"
+msgstr "Auto-skip Messages"
+
+msgid "SETTINGS_GAMEPLAY_AUTO_DISMISS_HINT"
+msgstr "Messages that only report what happened close themselves after a moment instead of waiting for a click."
+
+msgid "SETTINGS_GAMEPLAY_REACTION_PROMPTS_LABEL"
+msgstr "Only Ask When I Can React"
+
+msgid "SETTINGS_GAMEPLAY_REACTION_PROMPTS_HINT"
+msgstr "A reaction window with nothing you can play is answered for you, so it never stops the game. The toggle in each faction's info row still changes it for one game."
+
+msgid "SETTINGS_GAMEPLAY_CARDS_SECTION"
+msgstr "CARDS"
+
+msgid "SETTINGS_GAMEPLAY_MODAL_CARD_SIZE_LABEL"
+msgstr "Pop-up Card Size"
+
+msgid "SETTINGS_GAMEPLAY_MODAL_CARD_SIZE_HINT"
+msgstr "How big cards are drawn in pop-ups that show drawn, discarded or offered cards. Bigger cards are easier to read; smaller ones leave more of the board in view."
+
+msgid "SETTINGS_GAMEPLAY_ACTIVE_CARDS_LABEL"
+msgstr "Show Active Cards"
+
+msgid "SETTINGS_GAMEPLAY_ACTIVE_CARDS_HINT"
+msgstr "When choosing a card to play, your Status and Response cards already on the table are drawn beside your hand, next to the cards you can activate instead of playing."
+
+msgid "SETTINGS_GAMEPLAY_PENNANTS_OPEN_LABEL"
+msgstr "Open Faction Banners"
+
+msgid "SETTINGS_GAMEPLAY_PENNANTS_OPEN_HINT"
+msgstr "The faction banners down the left start slid open, showing each faction's hand, score and pieces in reserve. Click a banner to open or close it either way."
+
+msgid "SETTINGS_GAMEPLAY_BANNER_SIZE_LABEL"
+msgstr "Faction Banner Size"
+
+msgid "SETTINGS_GAMEPLAY_BANNER_SIZE_HINT"
+msgstr "How big the flagpole and faction banners down the left are drawn, with the cards fanned out of each flag."
+
+msgid "SETTINGS_GAMEPLAY_CHAT_SECTION"
+msgstr "CHAT"
+
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_LABEL"
+msgstr "Hide Chat After"
+
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_NEVER"
+msgstr "Never"
+
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_5S"
+msgstr "5 seconds"
+
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_10S"
+msgstr "10 seconds"
+
+msgid "SETTINGS_GAMEPLAY_CHAT_HIDE_HINT"
+msgstr "How long the chat stays on screen after a player message or once the mouse leaves it."
+
+msgid "SETTINGS_GAMEPLAY_DIAGNOSTICS_SECTION"
+msgstr "DIAGNOSTICS"
+
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_LABEL"
+msgstr "Debug Logging"
+
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_INFO"
+msgstr "Info"
+
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_FINEST"
+msgstr "Finest"
+
+msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_HINT"
+msgstr "How much detail is written to the console. Finest is loud and only useful when diagnosing a problem."

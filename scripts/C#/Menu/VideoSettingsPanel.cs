@@ -55,7 +55,7 @@ public partial class VideoSettingsPanel : VBoxContainer
         _displayMode.ItemSelected += OnDisplayModeSelected;
         _resolution.ItemSelected  += OnResolutionSelected;
         _applyButton.Pressed      += OnApplyPressed;
-        _applyButton.ButtonText = "Apply";
+        _applyButton.ButtonText = "COMMON_BTN_APPLY";
 
         RefreshState();
     }

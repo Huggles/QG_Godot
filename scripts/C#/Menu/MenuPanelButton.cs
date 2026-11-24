@@ -177,6 +177,12 @@ public partial class MenuPanelButton : Button
 		{
 			_held = false;
 		}
+		// The caption is translated here rather than by the label itself (see ApplyLabelText), so a
+		// language change has to re-apply it.
+		else if (what == NotificationTranslationChanged)
+		{
+			ApplyLabelText();
+		}
 	}
 
 	public override void _GuiInput(InputEvent @event)
@@ -226,16 +232,24 @@ public partial class MenuPanelButton : Button
 	/// <summary>
 	/// A plain Label centres itself through its alignment properties, so the text goes in raw; a
 	/// RichTextLabel needs the centring in the markup instead.
+	///
+	/// <see cref="ButtonText"/> holds a translation key. It is translated here, not by the label's own
+	/// auto-translation, because the RichTextLabel's markup would stop the key from ever matching; the
+	/// label's auto-translation is switched off so the result is not looked up a second time.
 	/// </summary>
 	private void ApplyLabelText()
 	{
-		switch (_label)
+		Control label = _label;
+		if (label == null) return;
+		label.AutoTranslateMode = AutoTranslateModeEnum.Disabled;
+		string text = Tr(_pendingText);
+		switch (label)
 		{
 			case RichTextLabel rich:
-				rich.Text = $"[center]{_pendingText}[/center]";
+				rich.Text = $"[center]{text}[/center]";
 				break;
-			case Label label:
-				label.Text = _pendingText;
+			case Label plain:
+				plain.Text = text;
 				break;
 		}
 	}
