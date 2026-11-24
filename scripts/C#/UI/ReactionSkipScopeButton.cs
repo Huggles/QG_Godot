@@ -33,16 +33,16 @@ public partial class ReactionSkipScopeButton : MenuPanelButton
 
         ButtonText = Scope switch
         {
-            ReactionSkipScope.ROUND => "Skip rest of round",
-            ReactionSkipScope.UNTIL_ACTIVATABLE => "Only ask when I can react",
-            _ => "Skip rest of turn step",
+            ReactionSkipScope.ROUND => "HUD_REACTION_SKIP_ROUND",
+            ReactionSkipScope.UNTIL_ACTIVATABLE => "HUD_REACTION_SKIP_UNTIL_ACTIVATABLE",
+            _ => "HUD_REACTION_SKIP_TURN_STEP",
         };
 
         // Spell the limit out: the button does not sign away the reactions everyone can already see
         // you holding, only the empty prompts that exist to cover your face-down cards.
         TooltipText = Scope == ReactionSkipScope.UNTIL_ACTIVATABLE
-            ? "Stop showing me empty reaction windows. You will still be asked the moment any of your cards can actually react."
-            : "Stop asking me for reactions. You will still be asked when you have a face-up card that can react.";
+            ? "HUD_REACTION_TOOLTIP_SKIP_UNTIL_ACTIVATABLE"
+            : "HUD_REACTION_TOOLTIP_SKIP_SCOPE";
 
         if (SessionIdentity.IsLocalAuthority(this))
         {

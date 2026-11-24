@@ -153,7 +153,7 @@ public partial class TurnSequenceStrip : Control
 	private void ShowHint(int index)
 	{
 		TurnStepText text = TurnStepText.For(_order[index]);
-		HintTitle.Text = (text.Optional ? $"{text.Name} Step (optional)" : $"{text.Name} Step").ToUpperInvariant();
+		HintTitle.Text = string.Format(Tr(text.Optional ? "HUD_STEP_HINT_TITLE_OPTIONAL" : "HUD_STEP_HINT_TITLE"), text.Name).ToUpperInvariant();
 		HintRule.Text = WrapToWidth(text.Rule, HintRule.GetThemeFont("font"), HintRule.LabelSettings.FontSize, HintMaxWidth);
 
 		_hinted = index;

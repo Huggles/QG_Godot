@@ -115,12 +115,12 @@ public partial class LeaderboardDialog : MenuModal
 
 			if (!SteamworksApi.IsAvailable)
 			{
-				SetStatus($"Steam is unavailable: {SteamworksApi.UnavailableReason}.", ColorError);
+				SetStatus(string.Format(Tr("LEADERBOARD_STATUS_STEAM_UNAVAILABLE"), SteamworksApi.UnavailableReason), ColorError);
 				return;
 			}
 
 			_refreshButton.Disabled = true;
-			SetStatus("Loading rankings…", ColorInfo);
+			SetStatus(Tr("LEADERBOARD_STATUS_LOADING"), ColorInfo);
 
 			List<LeaderboardRow> rows = await SteamworksApi.Instance.GetLeaderboardAsync(LeaderboardName);
 
@@ -168,14 +168,14 @@ public partial class LeaderboardDialog : MenuModal
 
 		if (rows.Count == 0)
 		{
-			SetStatus("Nobody has been ranked yet — you are the first.", ColorInfo);
+			SetStatus(Tr("LEADERBOARD_STATUS_EMPTY"), ColorInfo);
 			return;
 		}
 
 		SetStatus(
 			localRanked
-				? $"{rows.Count} ranked player(s)."
-				: $"{rows.Count} ranked player(s). Your entry has not appeared yet — you start at {StartingElo}.",
+				? string.Format(Tr(rows.Count == 1 ? "LEADERBOARD_STATUS_COUNT_ONE" : "LEADERBOARD_STATUS_COUNT_OTHER"), rows.Count)
+				: string.Format(Tr(rows.Count == 1 ? "LEADERBOARD_STATUS_COUNT_UNRANKED_ONE" : "LEADERBOARD_STATUS_COUNT_UNRANKED_OTHER"), rows.Count, StartingElo),
 			ColorInfo);
 	}
 
@@ -197,8 +197,8 @@ public partial class LeaderboardDialog : MenuModal
 		panel.AddChild(row);
 
 		row.AddChild(MakeLabel("#",      18, new Vector2(60, 0),  ColorInfo));
-		row.AddChild(MakeLabel("Player", 18, Vector2.Zero,        ColorInfo, expand: true));
-		row.AddChild(MakeLabel("Rating", 18, new Vector2(90, 0),  ColorInfo, alignRight: true));
+		row.AddChild(MakeLabel("LEADERBOARD_HDR_PLAYER", 18, Vector2.Zero,        ColorInfo, expand: true));
+		row.AddChild(MakeLabel("LEADERBOARD_HDR_RATING", 18, new Vector2(90, 0),  ColorInfo, alignRight: true));
 
 		return panel;
 	}

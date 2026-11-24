@@ -188,7 +188,7 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	{
 		string cause = string.IsNullOrWhiteSpace(causeText)
 			? string.Empty
-			: $"\n[color={CauseColour}]Cause: {causeText}[/color]";
+			: $"\n[color={CauseColour}]{string.Format(Tr("HUD_TRIGGER_CAUSE"), causeText)}[/color]";
 
 		(string prompt, bool summaryOnPromptLine) = PromptFor(kind);
 		// A prompt that asks its own question keeps the summary on the next line, as the answer to it.
@@ -223,14 +223,14 @@ public partial class TriggerContextDisplay : Control, LoadableUI
 	/// </returns>
 	private static (string Prompt, bool SummaryOnPromptLine) PromptFor(TriggerKind kind) => kind switch
 	{
-		TriggerKind.BLOCK    => (Prompt(BlockIcon, BlockColour, "Do you want to block this action?"), false),
-		TriggerKind.AFTER    => (Prompt(AfterIcon, AfterColour, "Do you want to react to this action?"), false),
+		TriggerKind.BLOCK    => (Prompt(BlockIcon, BlockColour, TranslationServer.Translate("HUD_TRIGGER_ASK_BLOCK")), false),
+		TriggerKind.AFTER    => (Prompt(AfterIcon, AfterColour, TranslationServer.Translate("HUD_TRIGGER_ASK_REACT")), false),
 		// No question of ours: a Bulletin is the scenario asking one of its own, and the summary IS that
 		// question — so the icon only says where it came from, and stands beside it.
 		TriggerKind.BULLETIN => (Prompt(BulletinIcon, BulletinColour, null), true),
 		// A prompt that carries a trigger without being a window of its own — the faction's own play,
 		// reached while a reaction is live. It asks nothing about the trigger, so it only names it.
-		_                    => ("[b]Reacting to:[/b]", false),
+		_                    => (TranslationServer.Translate("HUD_TRIGGER_REACTING_TO"), false),
 	};
 
 	private static string Prompt(string iconPath, string colour, string question)

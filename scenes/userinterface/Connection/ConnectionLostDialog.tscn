@@ -26,25 +26,25 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(190, 44)
 layout_mode = 2
-text = "Wait"
+text = "HUD_CONN_BTN_WAIT"
 
 [node name="SaveQuitButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="1"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(190, 44)
 layout_mode = 2
-text = "Save & Quit"
+text = "HUD_CONN_BTN_SAVE_QUIT"
 
 [node name="BotButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(190, 44)
 layout_mode = 2
-text = "Bot takes over"
+text = "HUD_CONN_BTN_BOT"
 
 [node name="QuitButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="3"]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(190, 44)
 layout_mode = 2
-text = "Quit"
+text = "HUD_CONN_BTN_QUIT"
 
 [editable path="Root/Centre/Panel"]

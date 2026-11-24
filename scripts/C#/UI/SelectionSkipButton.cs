@@ -23,7 +23,7 @@ public partial class SelectionSkipButton : MenuPanelButton
     {
         base._Ready();
 
-        ButtonText = "Skip";
+        ButtonText = "HUD_BTN_SKIP";
 
         if (SessionIdentity.IsLocalAuthority(this))
         {

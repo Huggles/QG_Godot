@@ -64,7 +64,7 @@ public partial class GameMenuModal : MenuModal
         if (!Multiplayer.IsServer() || GameContext.IsDedicatedServer)
         {
             saveButton.Disabled    = true;
-            saveButton.TooltipText = "Only the host can save the game. Ask them to save it.";
+            saveButton.TooltipText = "GAMEMENU_TOOLTIP_HOST_ONLY";
         }
         else if (GameFlow.Instance?.Program?.AllowsSaving == false)
         {
@@ -136,13 +136,13 @@ public partial class GameMenuModal : MenuModal
             Visible = false;
 
             if (!immediate)
-                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Save queued",
-                    $"'{displayName}' will be saved as soon as the current action finishes. Stay in the game until it is saved.");
+                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, Tr("GAMEMENU_SAVE_QUEUED_TITLE"),
+                    string.Format(Tr("GAMEMENU_SAVE_QUEUED_BODY"), displayName));
             else if (path != null)
-                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Game saved", displayName);
+                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, Tr("GAMEMENU_SAVED_TITLE"), displayName);
             else
-                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, "Could not save",
-                    "The save file could not be written. See the log for details.");
+                await MenuNotice.ShowMessageAsync(GetTree().CurrentScene, Tr("GAMEMENU_SAVE_FAILED_TITLE"),
+                    Tr("GAMEMENU_SAVE_FAILED_BODY"));
 
             if (!IsInstanceValid(this) || Resolved) return;
             Visible = true;
@@ -206,9 +206,8 @@ public partial class GameMenuModal : MenuModal
         try
         {
             Visible = false;
-            bool quit = await MenuNotice.ShowConfirmAsync(GetTree().CurrentScene, "Save not written yet",
-                "Your save is waiting for the current action to finish and has not been written. " +
-                "Quit now and it will be lost.", "Quit anyway");
+            bool quit = await MenuNotice.ShowConfirmAsync(GetTree().CurrentScene, Tr("GAMEMENU_QUIT_UNSAVED_TITLE"),
+                Tr("GAMEMENU_QUIT_UNSAVED_BODY"), Tr("GAMEMENU_BTN_QUIT_ANYWAY"));
 
             if (!IsInstanceValid(this) || Resolved) return;
             if (quit)

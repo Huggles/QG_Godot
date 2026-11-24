@@ -68,6 +68,8 @@ public partial class RoundTrack : PanelContainer
 		_plate.BorderColor = last ? AmberBorderColor : BrassEdgeColor;
 		_plate.SetBorderWidthAll(last ? 2 : 1);
 		Heading.LabelSettings.FontColor = last ? AmberColor : CreamColor;
-		Heading.Text = (last ? $"Last round {round}" : $"Round {round} of {max}").ToUpperInvariant();
+		Heading.Text = (last
+			? string.Format(Tr("HUD_ROUND_LAST"), round)
+			: string.Format(Tr("HUD_ROUND_OF"), round, max)).ToUpperInvariant();
 	}
 }

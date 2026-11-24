@@ -100,13 +100,13 @@ public partial class InviteFriendsDialog : MenuModal
 
 		if (!SteamworksApi.IsAvailable)
 		{
-			SetStatus($"Steam is unavailable: {SteamworksApi.UnavailableReason}.", ColorError);
+			SetStatus(string.Format(Tr("INVITE_STATUS_STEAM_UNAVAILABLE"), SteamworksApi.UnavailableReason), ColorError);
 			return;
 		}
 
 		if (SteamworksApi.Instance.CurrentLobbyId == 0)
 		{
-			SetStatus("You are not in a Steam lobby, so there is nothing to invite anyone to.", ColorError);
+			SetStatus(Tr("INVITE_STATUS_NO_LOBBY"), ColorError);
 			return;
 		}
 
@@ -116,8 +116,8 @@ public partial class InviteFriendsDialog : MenuModal
 
 		SetStatus(
 			friends.Count == 0
-				? "None of your friends are online right now."
-				: $"{friends.Count} friend(s) online. Friends already playing are listed first.",
+				? Tr("INVITE_STATUS_NONE_ONLINE")
+				: string.Format(Tr(friends.Count == 1 ? "INVITE_STATUS_COUNT_ONE" : "INVITE_STATUS_COUNT_OTHER"), friends.Count),
 			ColorInfo);
 	}
 
@@ -175,17 +175,17 @@ public partial class InviteFriendsDialog : MenuModal
 		var invite = new Button { CustomMinimumSize = new Vector2(120, 44) };
 		if (friend.AlreadyInLobby)
 		{
-			invite.Text     = "In lobby";
+			invite.Text     = "INVITE_BTN_IN_LOBBY";
 			invite.Disabled = true;
 		}
 		else if (_invited.Contains(friend.SteamId))
 		{
-			invite.Text     = "Invited";
+			invite.Text     = "INVITE_BTN_INVITED";
 			invite.Disabled = true;
 		}
 		else
 		{
-			invite.Text = "Invite";
+			invite.Text = "INVITE_BTN_INVITE";
 			SteamFriend capFriend = friend;
 			Button      capButton = invite;
 			invite.Pressed += () => OnInvitePressed(capFriend, capButton);
@@ -197,14 +197,14 @@ public partial class InviteFriendsDialog : MenuModal
 
 	private static string StatusText(SteamFriend friend)
 	{
-		if (friend.InThisGame) return "In game";
+		if (friend.InThisGame) return "INVITE_PRESENCE_IN_GAME";
 		return friend.Presence switch
 		{
-			SteamPresence.LookingToPlay => "Looking to play",
-			SteamPresence.Away          => "Away",
-			SteamPresence.Busy          => "Busy",
-			SteamPresence.Snooze        => "Snoozing",
-			_                           => "Online",
+			SteamPresence.LookingToPlay => "INVITE_PRESENCE_LOOKING_TO_PLAY",
+			SteamPresence.Away          => "INVITE_PRESENCE_AWAY",
+			SteamPresence.Busy          => "INVITE_PRESENCE_BUSY",
+			SteamPresence.Snooze        => "INVITE_PRESENCE_SNOOZING",
+			_                           => "INVITE_PRESENCE_ONLINE",
 		};
 	}
 
@@ -228,16 +228,16 @@ public partial class InviteFriendsDialog : MenuModal
 		{
 			// Steam offers no callback for this, so a false return is the entire failure signal.
 			DebugUtilities.PrintPeerError($"Steam: could not invite {friend.Name} ({friend.SteamId})");
-			button.Text = "Failed";
-			SetStatus($"Could not invite {friend.Name} — Steam refused the invite.", ColorError);
+			button.Text = "INVITE_BTN_FAILED";
+			SetStatus(string.Format(Tr("INVITE_STATUS_REFUSED"), friend.Name), ColorError);
 			return;
 		}
 
 		DebugUtilities.PrintPeer($"Steam: invited {friend.Name} ({friend.SteamId}) to lobby");
 		_invited.Add(friend.SteamId);
-		button.Text     = "Invited";
+		button.Text     = "INVITE_BTN_INVITED";
 		button.Disabled = true;
-		SetStatus($"Invited {friend.Name}.", ColorInfo);
+		SetStatus(string.Format(Tr("INVITE_STATUS_INVITED"), friend.Name), ColorInfo);
 
 		StartCooldown(friend.SteamId, button);
 	}
@@ -256,7 +256,7 @@ public partial class InviteFriendsDialog : MenuModal
 
 			// The row may have been rebuilt in the meantime, taking this button with it.
 			if (!IsInstanceValid(button)) return;
-			button.Text     = "Invite";
+			button.Text     = "INVITE_BTN_INVITE";
 			button.Disabled = false;
 		};
 	}

@@ -56,14 +56,14 @@ public partial class PlayerInfoDisplay : PanelContainer, LoadableUI
 
         // Determine if player is host
         bool isHost = PlayerFactionRegistry.IsLocalPlayerHost();
-        _roleLabel.Text = isHost ? "Host" : "Client";
+        _roleLabel.Text = isHost ? "HUD_PLAYERINFO_HOST" : "HUD_PLAYERINFO_CLIENT";
 
         // Get player's factions
         List<Faction> factions = PlayerFactionRegistry.GetLocalPlayerFactions();
         
         if (factions.Count == 0)
         {
-            _factionsLabel.Text = "No factions assigned";
+            _factionsLabel.Text = "HUD_PLAYERINFO_NO_FACTIONS";
         }
         else
         {

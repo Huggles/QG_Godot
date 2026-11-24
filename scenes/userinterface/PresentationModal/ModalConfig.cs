@@ -14,8 +14,8 @@ public class ModalConfig
     public ModalSelectionMode Mode { get; private set; }
     public int MinSelections { get; private set; }
     public int MaxSelections { get; private set; }   // -1 = unlimited
-    public string ApplyLabel { get; private set; } = "Apply";
-    public string CancelLabel { get; private set; } = "Cancel";
+    public string ApplyLabel { get; private set; } = "COMMON_BTN_APPLY";
+    public string CancelLabel { get; private set; } = "HUD_MODAL_BTN_CANCEL";
 
     public bool AutoDismiss { get; private set; } = false;
 
@@ -62,7 +62,7 @@ public class ModalConfig
 
     /// <summary>Show-only: no selection, Cancel="Close" button, no Apply button.</summary>
     public static ModalConfig Display(string title, List<PresentationItem> items)
-        => new ModalConfig { Title = title, Items = items, Mode = ModalSelectionMode.Display, MinSelections = 0, MaxSelections = 0, CancelLabel = "Close" };
+        => new ModalConfig { Title = title, Items = items, Mode = ModalSelectionMode.Display, MinSelections = 0, MaxSelections = 0, CancelLabel = "COMMON_BTN_CLOSE" };
 
     /// <summary>Pick exactly one item. Cancel hidden when required=true.</summary>
     public static ModalConfig SelectOne(string title, List<PresentationItem> items, bool required = true)

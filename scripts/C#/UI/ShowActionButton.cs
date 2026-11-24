@@ -20,7 +20,7 @@ public partial class ShowActionButton : MenuPanelButton
 	public override void _Ready()
 	{
 		base._Ready();
-		ButtonText = "Show my action";
+		ButtonText = "HUD_BTN_SHOW_MY_ACTION";
 		Visible = false;
 		AddIcon();
 		AddShine();

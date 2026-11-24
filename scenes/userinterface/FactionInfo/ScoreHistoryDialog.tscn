@@ -23,7 +23,7 @@ script = ExtResource("2_script")
 custom_minimum_size = Vector2(860, 0)
 
 [node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
-text = "Score History"
+text = "HUD_SCORE_TITLE"
 
 [node name="FactionButtons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
 unique_name_in_owner = true
@@ -69,6 +69,6 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "Close"
+text = "COMMON_BTN_CLOSE"
 
 [editable path="Root/Centre/Panel"]

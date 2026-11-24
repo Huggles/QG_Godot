@@ -97,13 +97,15 @@ public partial class PlayersPanel : PanelContainer
 
     private static (string, Color) Status(PlayerConnectionRow row)
     {
-        if (row.IsHost) return ("host", QuietColor);
+        if (row.IsHost) return (TranslationServer.Translate("HUD_PLAYERS_STATUS_HOST"), QuietColor);
         return row.State switch
         {
-            SeatState.Bot => ("bot", QuietColor),
-            SeatState.Rejoining => ("rejoining…", FairColor),
-            SeatState.Absent => (row.SecondsLeft > 0 ? $"reconnecting… {row.SecondsLeft}s" : "disconnected", BadColor),
-            SeatState.Unstable => ("unstable", FairColor),
+            SeatState.Bot => (TranslationServer.Translate("HUD_PLAYERS_STATUS_BOT"), QuietColor),
+            SeatState.Rejoining => (TranslationServer.Translate("HUD_PLAYERS_STATUS_REJOINING"), FairColor),
+            SeatState.Absent => (row.SecondsLeft > 0
+                ? string.Format(TranslationServer.Translate("HUD_PLAYERS_STATUS_RECONNECTING"), row.SecondsLeft)
+                : TranslationServer.Translate("HUD_PLAYERS_STATUS_DISCONNECTED"), BadColor),
+            SeatState.Unstable => (TranslationServer.Translate("HUD_PLAYERS_STATUS_UNSTABLE"), FairColor),
             _ => ($"{row.PingMs} ms", row.PingMs < 80 ? GoodColor : row.PingMs < 200 ? FairColor : BadColor),
         };
     }

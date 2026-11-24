@@ -178,7 +178,7 @@ public partial class MultiplayerLobby : Control
 		Multiplayer.ConnectionFailed   += OnConnectionFailed;
 		Multiplayer.ServerDisconnected += OnServerDisconnected;
 		
-		UpdateStatusLabel("Waiting to host or join...");
+		UpdateStatusLabel("LOBBY_STATUS_WAITING");
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 
@@ -243,7 +243,7 @@ public partial class MultiplayerLobby : Control
 			MainMenu.ClearLobbyIntent();
 
 			int me = SessionIdentity.LocalPeerId(this);
-			UpdateStatusLabel("Connected – waiting for lobby data...");
+			UpdateStatusLabel("LOBBY_STATUS_CONNECTED");
 			AddPlayerRow(me, $"{LocalDisplayName()} (You)", LocalDisplayName());
 			// Deferred so this node has finished entering the tree before the RPC goes out.
 			CallDeferred(nameof(RequestLobbyStateFromHost));
@@ -489,14 +489,14 @@ public partial class MultiplayerLobby : Control
 		if (err != Error.Ok)
 		{
 			DebugUtilities.PrintPeerError($"Failed to create server: {err}");
-			UpdateStatusLabel($"Failed to host: {err}");
+			UpdateStatusLabel(string.Format(Tr("LOBBY_STATUS_HOST_FAILED"), err));
 			return;
 		}
 		
 		Multiplayer.MultiplayerPeer = peer;
 		_isHost                     = true;
 		DebugUtilities.PrintPeer($"Server started on port {DEFAULT_PORT}");
-		UpdateStatusLabel($"Hosting on port {DEFAULT_PORT}");
+		UpdateStatusLabel(string.Format(Tr("LOBBY_STATUS_HOSTING_PORT"), DEFAULT_PORT));
 
 		EnterHostUiState();
 	}
@@ -513,7 +513,7 @@ public partial class MultiplayerLobby : Control
 		if (peer == null)
 		{
 			DebugUtilities.PrintPeerError($"Failed to host via Steam: {error}");
-			UpdateStatusLabel($"Failed to host via Steam — {error}");
+			UpdateStatusLabel(string.Format(Tr("LOBBY_STATUS_STEAM_HOST_FAILED"), error));
 			SteamworksApi.Instance?.LeaveCurrentLobby();
 			return;
 		}
@@ -524,7 +524,7 @@ public partial class MultiplayerLobby : Control
 		_steamLobbyId   = lobbyId;
 
 		DebugUtilities.PrintPeer($"Steam host started on lobby {lobbyId}");
-		UpdateStatusLabel($"Hosting via Steam as {LocalDisplayName()}");
+		UpdateStatusLabel(string.Format(Tr("LOBBY_STATUS_HOSTING_STEAM"), LocalDisplayName()));
 
 		EnterHostUiState();
 		_inviteButton.Visible = true;
@@ -716,13 +716,13 @@ public partial class MultiplayerLobby : Control
 		if (err != Error.Ok)
 		{
 			DebugUtilities.PrintPeerError($"Failed to create client: {err}");
-			UpdateStatusLabel($"Failed to join: {err}");
+			UpdateStatusLabel(string.Format(Tr("LOBBY_STATUS_JOIN_FAILED"), err));
 			return;
 		}
 		
 		Multiplayer.MultiplayerPeer = peer;
 		DebugUtilities.PrintPeer($"Connecting to {ip}:{DEFAULT_PORT}");
-		UpdateStatusLabel($"Connecting to {ip}:{DEFAULT_PORT}...");
+		UpdateStatusLabel(string.Format(Tr("LOBBY_STATUS_CONNECTING"), ip, DEFAULT_PORT));
 	}
 
 	/// <summary>Start counts down in the chat first; pressing it again during the count cancels.</summary>
@@ -742,7 +742,7 @@ public partial class MultiplayerLobby : Control
 
 		_countdown = CountdownSeconds;
 		Rpc(nameof(SetFactionsLocked), true);
-		((MenuPanelButton)_startGameButton).ButtonText = "Cancel";
+		((MenuPanelButton)_startGameButton).ButtonText = "LOBBY_BTN_CANCEL";
 		Rpc(nameof(PostHostLine), $"Game starts in {_countdown}");
 		_countdownTimer.Start();
 	}
@@ -771,7 +771,7 @@ public partial class MultiplayerLobby : Control
 		if (_countdown < 0) return;
 		_countdown = -1;
 		_countdownTimer.Stop();
-		((MenuPanelButton)_startGameButton).ButtonText = "Start Game";
+		((MenuPanelButton)_startGameButton).ButtonText = "LOBBY_BTN_START";
 		Rpc(nameof(SetFactionsLocked), false);
 		Rpc(nameof(PostHostLine), reason);
 		UpdateStartGameButton();
@@ -1118,7 +1118,7 @@ public partial class MultiplayerLobby : Control
 		// Never disabled mid-countdown: the button is how the host cancels it.
 		_startGameButton.Disabled    = !canStart && _countdown < 0;
 		_startGameButton.TooltipText = canStart
-			? "All factions accounted for – ready to start!"
+			? "LOBBY_TOOLTIP_READY"
 			: problem;
 	}
 
@@ -1444,7 +1444,7 @@ public partial class MultiplayerLobby : Control
 	{
 		DebugUtilities.PrintPeer("Connected to server");
 		int me = SessionIdentity.LocalPeerId(this);
-		UpdateStatusLabel("Connected – waiting for lobby data...");
+		UpdateStatusLabel("LOBBY_STATUS_CONNECTED");
 		AddPlayerRow(me, $"{LocalDisplayName()} (You)", LocalDisplayName());
 
 		// Same reason as the adopted-peer branch in ReadyInternal: the host cannot work a client's name
@@ -1458,13 +1458,13 @@ public partial class MultiplayerLobby : Control
 	private void OnConnectionFailed()
 	{
 		DebugUtilities.PrintPeerError("Connection failed");
-		UpdateStatusLabel("Connection failed!");
+		UpdateStatusLabel("LOBBY_STATUS_CONNECTION_FAILED");
 	}
 
 	private void OnServerDisconnected()
 	{
 		DebugUtilities.PrintPeerError("Server disconnected");
-		UpdateStatusLabel("Disconnected from server");
+		UpdateStatusLabel("LOBBY_STATUS_DISCONNECTED");
 		ClearAllRows();
 		_assignments.Clear();
 		_randomClaims.Clear();
@@ -1584,7 +1584,7 @@ public partial class MultiplayerLobby : Control
 			IgnoreTextureSize    = true,
 			CustomMinimumSize    = new Vector2(0, FlagHeight),
 			SizeFlagsHorizontal  = Control.SizeFlags.ExpandFill,
-			TooltipText          = "Random – take whatever nobody picked, drawn when the game starts"
+			TooltipText          = "LOBBY_TOOLTIP_RANDOM"
 		};
 
 		int capRandomPeerId = peerId;
@@ -1758,7 +1758,7 @@ public partial class MultiplayerLobby : Control
 
 		List<string> missing = ExpansionRegistry.Unavailable(enabled);
 		if (missing.Count > 0)
-			UpdateStatusLabel($"The host chose {ExpansionIds.Describe(enabled)}, which cannot be played here: {string.Join("; ", missing)}");
+			UpdateStatusLabel(string.Format(Tr("LOBBY_STATUS_EXPANSIONS_MISSING"), ExpansionIds.Describe(enabled), string.Join("; ", missing)));
 	}
 
 	/// <summary>Client → host, alongside ReportPlayerName: the expansions this peer's install can play.</summary>

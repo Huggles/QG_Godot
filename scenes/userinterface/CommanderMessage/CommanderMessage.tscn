@@ -112,7 +112,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_continue_hover")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_continue")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_continue")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_continue")
-text = "CONTINUE  ▶"
+text = "HUD_COMMANDER_BTN_CONTINUE"
 
 [node name="Frame" type="NinePatchRect" parent="TextModal" unique_id=1739657984]
 layout_mode = 2

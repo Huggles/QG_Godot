@@ -55,8 +55,8 @@ public partial class JoinOptionsDialog : MenuModal
 
 	private static string SteamUnavailableReason()
 	{
-		if (!SteamworksApi.IsAvailable)    return $"Steam is unavailable: {SteamworksApi.UnavailableReason}.";
-		if (!SteamPeerFactory.IsSupported) return "This build has no Steam networking support.";
+		if (!SteamworksApi.IsAvailable)    return string.Format((string)TranslationServer.Translate("JOIN_STEAM_UNAVAILABLE"), SteamworksApi.UnavailableReason);
+		if (!SteamPeerFactory.IsSupported) return TranslationServer.Translate("JOIN_NO_STEAM_NETWORKING");
 		return null;
 	}
 

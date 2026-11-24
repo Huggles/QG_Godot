@@ -52,12 +52,12 @@ theme_override_constants/separation = 14
 [node name="Kicker" type="Label" parent="Card/FormContainer" unique_id=1902117003]
 layout_mode = 2
 theme_type_variation = &"MenuKicker"
-text = "MULTIPLAYER  ·  STEAM"
+text = "FRIENDS_KICKER"
 
 [node name="TitleLabel" type="Label" parent="Card/FormContainer" unique_id=205470879]
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
-text = "FRIENDS' GAMES"
+text = "FRIENDS_TITLE"
 
 [node name="HeaderRule" type="HSeparator" parent="Card/FormContainer" unique_id=1902117004]
 layout_mode = 2

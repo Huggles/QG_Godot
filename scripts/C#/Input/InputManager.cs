@@ -157,7 +157,7 @@ public partial class InputManager : Node2D
 		// only finds out about the discard once the modal opens has already spent the choice.
 		if (SelectionSkipButton.Current != null)
 		{
-			SelectionSkipButton.Current.ButtonText = skipText ?? (passCostText == null ? "Skip" : $"Skip ({passCostText})");
+			SelectionSkipButton.Current.ButtonText = skipText ?? (passCostText == null ? "HUD_BTN_SKIP" : string.Format(Tr("HUD_BTN_SKIP_COST"), passCostText));
 			SelectionSkipButton.Current.Show();
 		}
 		EventBus.Instance.SelectionSkipped += OnPlayCardSkipped;
@@ -228,21 +228,23 @@ public partial class InputManager : Node2D
 	{
 		string text = title ?? kind switch
 		{
-			TriggerKind.BLOCK => hasOptions ? "Choose a block reaction" : "No block available",
-			TriggerKind.AFTER => hasOptions ? "Choose an after reaction" : "No reaction available",
+			TriggerKind.BLOCK => T(hasOptions ? "HUD_INPUT_CHOOSE_BLOCK" : "HUD_INPUT_NO_BLOCK"),
+			TriggerKind.AFTER => T(hasOptions ? "HUD_INPUT_CHOOSE_AFTER" : "HUD_INPUT_NO_REACTION"),
 			_ when isHandPlay => (hasOptions, passCostText) switch
 			{
-				(true,  null) => "Choose a card",
-				(true,  _)    => $"Choose a card, or pass ({passCostText})",
-				(false, null) => "Nothing you can play",
-				(false, _)    => $"Nothing you can play — you must pass ({passCostText})",
+				(true,  null) => T("HUD_INPUT_CHOOSE_CARD"),
+				(true,  _)    => string.Format(T("HUD_INPUT_CHOOSE_CARD_OR_PASS"), passCostText),
+				(false, null) => T("HUD_INPUT_NOTHING_TO_PLAY"),
+				(false, _)    => string.Format(T("HUD_INPUT_NOTHING_TO_PLAY_MUST_PASS"), passCostText),
 			},
-			_                 => hasOptions ? "Choose a card" : "No reaction available",
+			_                 => T(hasOptions ? "HUD_INPUT_CHOOSE_CARD" : "HUD_INPUT_NO_REACTION"),
 		};
 
 		if (answering is not { Count: > 0 }) return text;
 		return $"{string.Join(", ", answering.Select(FactionLabel))}: {text}";
 	}
+
+	private static string T(string key) => TranslationServer.Translate(key);
 
 	private static string FactionLabel(Faction faction) =>
 		FactionState.ForEnum(faction)?.FactionLabel ?? faction.ToString();
@@ -387,7 +389,7 @@ public partial class InputManager : Node2D
 		// selections too, and none of those set their own text — a cost left on it would follow the
 		// hand-play prompt onto the very next board selection.
 		if (SelectionSkipButton.Current != null)
-			SelectionSkipButton.Current.ButtonText = "Skip";
+			SelectionSkipButton.Current.ButtonText = "HUD_BTN_SKIP";
 		SelectionSkipButton.Current?.Hide();
 		FactionHandDisplay.Current.Hide();
 		// The trigger context is its own node now, so hiding the hand no longer takes it down with it.

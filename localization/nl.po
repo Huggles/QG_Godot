@@ -286,3 +286,1485 @@ msgstr "Zeer gedetailleerd"
 #. en: How much detail is written to the console. Finest is loud and only useful when diagnosing a problem.
 msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_HINT"
 msgstr "Hoeveel detail er naar de console wordt geschreven. Zeer gedetailleerd is erg uitvoerig en alleen nuttig bij het opsporen van een probleem."
+
+# ---- Settings: Audio sound names ----
+
+#. en: Input Request
+msgid "SFX_INPUTREQUEST"
+msgstr "Jouw zet"
+
+#. en: Ping
+msgid "SFX_PING"
+msgstr "Ping"
+
+#. en: Airhorn
+msgid "SFX_AIRHORN"
+msgstr "Luchthoorn"
+
+#. en: Menu Button Click
+msgid "SFX_MENUBUTTONCLICK"
+msgstr "Klik op menuknop"
+
+#. en: Metal Click
+msgid "SFX_MENUBUTTONCLICK1"
+msgstr "Metalen klik"
+
+# ---- Scenarios ----
+
+#. en: Standard Game
+msgid "SCENARIO_BASIC_TITLE"
+msgstr "Standaardspel"
+
+#. en: All factions begin deployed to home territories with no pre-loaded cards.
+msgid "SCENARIO_BASIC_DESCRIPTION"
+msgstr "Alle facties beginnen in hun thuisgebieden, zonder vooraf gespeelde kaarten."
+
+#. en: One Round Blitz
+msgid "SCENARIO_ONEROUND_TITLE"
+msgstr "Blitz van één ronde"
+
+#. en: A single round format with random starting victory points and quick, chaotic action.
+msgid "SCENARIO_ONEROUND_DESCRIPTION"
+msgstr "Eén ronde met willekeurige start-overwinningspunten en snelle, chaotische actie."
+
+#. en: All Cards In Play
+msgid "SCENARIO_ALLCARDS_TITLE"
+msgstr "Alle kaarten in het spel"
+
+#. en: Every faction's status and response cards are already played so you can test interactions immediately.
+msgid "SCENARIO_ALLCARDS_DESCRIPTION"
+msgstr "De Status- en Response-kaarten van elke factie liggen al op tafel, zodat je interacties meteen kunt testen."
+
+#. en: Tutorial 1: Your First Turn
+msgid "SCENARIO_TUTORIAL_01_TITLE"
+msgstr "Tutorial 1: Je eerste beurt"
+
+#. en: Three guided rounds. Fixed hands, no surprises, and the commander tells you what to do.
+msgid "SCENARIO_TUTORIAL_01_DESCRIPTION"
+msgstr "Drie begeleide rondes. Vaste handen, geen verrassingen, en de commandant vertelt je wat je moet doen."
+
+#. en: Tutorial 2: Status and Response Cards
+msgid "SCENARIO_TUTORIAL_02_TITLE"
+msgstr "Tutorial 2: Status- en Response-kaarten"
+
+#. en: Command Germany with two Status cards already on the table. Chain them, then watch five rivals answer with Responses, Events, recruits, straits and Reallocate Resources.
+msgid "SCENARIO_TUTORIAL_02_DESCRIPTION"
+msgstr "Voer het bevel over Duitsland met twee Status-kaarten al op tafel. Combineer ze en zie hoe vijf rivalen antwoorden met Responses, Events, rekruten, zeestraten en Reallocate Resources."
+
+# ---- Game options (Skirmish and Lobby) ----
+
+#. en: Seed
+msgid "GAMEOPTS_SEED_LABEL"
+msgstr "Seed"
+
+#. en: random
+msgid "GAMEOPTS_SEED_PLACEHOLDER"
+msgstr "willekeurig"
+
+#. en: Randomize
+msgid "GAMEOPTS_RANDOMIZE"
+msgstr "Willekeurig"
+
+#. en: Discard cards at start
+msgid "GAMEOPTS_DISCARD_AT_START"
+msgstr "Kaarten afleggen bij start"
+
+#. en: On: deal 10 cards and every player immediately discards 3. Off: deal 7 and start.
+msgid "GAMEOPTS_DISCARD_TOOLTIP"
+msgstr "Aan: deel 10 kaarten uit en elke speler legt er direct 3 af. Uit: deel 7 uit en begin."
+
+#. en: Faction intro at start
+msgid "GAMEOPTS_FACTION_INTRO"
+msgstr "Factie-intro bij start"
+
+#. en: On: after loading, the camera visits each capital and names the faction and its player.
+msgid "GAMEOPTS_FACTION_INTRO_TOOLTIP"
+msgstr "Aan: na het laden bezoekt de camera elke hoofdstad en noemt de factie en zijn speler."
+
+# ---- Multiplayer lobby ----
+
+#. en: QUARTERMASTER GENERAL  ·  MULTIPLAYER
+msgid "LOBBY_KICKER"
+msgstr "QUARTERMASTER GENERAL  ·  MULTIPLAYER"
+
+#. en: LOBBY
+msgid "LOBBY_TITLE"
+msgstr "LOBBY"
+
+#. en: Waiting to host or join...
+msgid "LOBBY_STATUS_WAITING"
+msgstr "Wachten op hosten of deelnemen..."
+
+#. en: COMMANDERS
+msgid "LOBBY_HDR_COMMANDERS"
+msgstr "BEVELHEBBERS"
+
+#. en: Claim your factions on your own row  —  Axis, then Allies, or the random pick on the right.
+msgid "LOBBY_PLAYERS_HINT"
+msgstr "Claim je facties op je eigen rij  —  As, dan Geallieerden, of de willekeurige keuze rechts."
+
+#. en: GAME OPTIONS
+msgid "LOBBY_HDR_GAME_OPTIONS"
+msgstr "SPELOPTIES"
+
+#. en: CHAT
+msgid "LOBBY_HDR_CHAT"
+msgstr "CHAT"
+
+#. en: Message the lobby
+msgid "LOBBY_CHAT_PLACEHOLDER"
+msgstr "Bericht aan de lobby"
+
+#. en: Leave
+msgid "LOBBY_BTN_LEAVE"
+msgstr "Verlaten"
+
+#. en: Invite Friends
+msgid "LOBBY_BTN_INVITE"
+msgstr "Vrienden uitnodigen"
+
+#. en: Start Game
+msgid "LOBBY_BTN_START"
+msgstr "Spel starten"
+
+#. en: Connected – waiting for lobby data...
+msgid "LOBBY_STATUS_CONNECTED"
+msgstr "Verbonden – wachten op lobbygegevens..."
+
+#. en: Failed to host: {0}
+msgid "LOBBY_STATUS_HOST_FAILED"
+msgstr "Hosten mislukt: {0}"
+
+#. en: Hosting on port {0}
+msgid "LOBBY_STATUS_HOSTING_PORT"
+msgstr "Host op poort {0}"
+
+#. en: Failed to host via Steam — {0}
+msgid "LOBBY_STATUS_STEAM_HOST_FAILED"
+msgstr "Hosten via Steam mislukt — {0}"
+
+#. en: Hosting via Steam as {0}
+msgid "LOBBY_STATUS_HOSTING_STEAM"
+msgstr "Host via Steam als {0}"
+
+#. en: Failed to join: {0}
+msgid "LOBBY_STATUS_JOIN_FAILED"
+msgstr "Deelnemen mislukt: {0}"
+
+#. en: Connecting to {0}:{1}...
+msgid "LOBBY_STATUS_CONNECTING"
+msgstr "Verbinden met {0}:{1}..."
+
+#. en: Cancel
+msgid "LOBBY_BTN_CANCEL"
+msgstr "Annuleren"
+
+#. en: All factions accounted for – ready to start!
+msgid "LOBBY_TOOLTIP_READY"
+msgstr "Alle facties verdeeld – klaar om te starten!"
+
+#. en: Connection failed!
+msgid "LOBBY_STATUS_CONNECTION_FAILED"
+msgstr "Verbinding mislukt!"
+
+#. en: Disconnected from server
+msgid "LOBBY_STATUS_DISCONNECTED"
+msgstr "Verbinding met server verbroken"
+
+#. en: Random – take whatever nobody picked, drawn when the game starts
+msgid "LOBBY_TOOLTIP_RANDOM"
+msgstr "Willekeurig – neem wat niemand koos, geloot bij de start van het spel"
+
+#. en: The host chose {0}, which cannot be played here: {1}
+msgid "LOBBY_STATUS_EXPANSIONS_MISSING"
+msgstr "De host koos {0}, wat hier niet speelbaar is: {1}"
+
+# ---- Skirmish ----
+
+#. en: NEW GAME  ·  VERSUS THE AI
+msgid "SKIRMISH_KICKER"
+msgstr "NIEUW SPEL  ·  TEGEN DE AI"
+
+#. en: SKIRMISH
+msgid "SKIRMISH_TITLE"
+msgstr "SCHERMUTSELING"
+
+#. en: SCENARIO
+msgid "SKIRMISH_HDR_SCENARIO"
+msgstr "SCENARIO"
+
+#. en: Select a scenario to see its description.
+msgid "SKIRMISH_DESCRIPTION_PLACEHOLDER"
+msgstr "Kies een scenario om de beschrijving te zien."
+
+#. en: OPTIONS
+msgid "SKIRMISH_HDR_OPTIONS"
+msgstr "OPTIES"
+
+#. en: Opponents
+msgid "SKIRMISH_OPPONENTS_LABEL"
+msgstr "Tegenstanders"
+
+#. en: Normal: the original AI. Hard: values its pieces, the income within reach, its cards and its deck — a stronger, slightly slower opponent.
+msgid "SKIRMISH_AI_TOOLTIP"
+msgstr "Normaal: de oorspronkelijke AI. Moeilijk: weegt zijn stukken, het bereikbare inkomen, zijn kaarten en zijn stapel — een sterkere, iets tragere tegenstander."
+
+#. en: YOUR FACTIONS
+msgid "SKIRMISH_HDR_YOUR_FACTIONS"
+msgstr "JOUW FACTIES"
+
+#. en: Click a faction to hand it to the AI, or take it back.
+msgid "SKIRMISH_SEATS_HINT"
+msgstr "Klik op een factie om hem aan de AI te geven, of neem hem terug."
+
+#. en: Normal AI
+msgid "SKIRMISH_AI_NORMAL"
+msgstr "Normale AI"
+
+#. en: Hard AI
+msgid "SKIRMISH_AI_HARD"
+msgstr "Moeilijke AI"
+
+#. en: Start Game
+msgid "SKIRMISH_BTN_START"
+msgstr "Spel starten"
+
+#. en: Back
+msgid "SKIRMISH_BTN_BACK"
+msgstr "Terug"
+
+#. en: AXIS
+msgid "SKIRMISH_COL_AXIS"
+msgstr "AS"
+
+#. en: ALLIES
+msgid "SKIRMISH_COL_ALLIES"
+msgstr "GEALLIEERDEN"
+
+#. en: Play as {0}
+msgid "SKIRMISH_SEAT_TOOLTIP"
+msgstr "Speel als {0}"
+
+#. en: You are watching: all six factions are played by the AI.
+msgid "SKIRMISH_SUMMARY_WATCHING"
+msgstr "Je kijkt toe: alle zes facties worden door de AI gespeeld."
+
+#. en: You command {0} faction  ·  the AI plays {1}
+msgid "SKIRMISH_SUMMARY_ONE"
+msgstr "Jij voert {0} factie aan  ·  de AI speelt {1}"
+
+#. en: You command {0} factions  ·  the AI plays {1}
+msgid "SKIRMISH_SUMMARY_OTHER"
+msgstr "Jij voert {0} facties aan  ·  de AI speelt {1}"
+
+#. en: none
+msgid "SKIRMISH_SUMMARY_AI_NONE"
+msgstr "geen"
+
+#. en: YOU
+msgid "SKIRMISH_SEAT_YOU"
+msgstr "JIJ"
+
+#. en: No scenario selected.
+msgid "SKIRMISH_NO_SCENARIO"
+msgstr "Geen scenario gekozen."
+
+# ---- Menu scenario picker ----
+
+#. en: No scenarios available. Make sure the scenario files are present in assets/data/scenarios.
+msgid "MENU_PICKER_NO_SCENARIOS"
+msgstr "Geen scenario's beschikbaar. Controleer of de scenariobestanden in assets/data/scenarios staan."
+
+#. en: Expansion: {0}
+msgid "MENU_PICKER_EXPANSION"
+msgstr "Uitbreiding: {0}"
+
+# ---- Host options ----
+
+#. en: Host Game
+msgid "HOST_TITLE"
+msgstr "Spel hosten"
+
+#. en: Hosts through Steam, so no port forwarding is needed.
+msgid "HOST_HINT"
+msgstr "Host via Steam, dus port forwarding is niet nodig."
+
+#. en: Everyone who joins needs the expansions you tick.
+msgid "HOST_EXPANSION_HINT"
+msgstr "Iedereen die deelneemt heeft de uitbreidingen nodig die je aanvinkt."
+
+#. en: Players
+msgid "HOST_PLAYERS_LABEL"
+msgstr "Spelers"
+
+#. en: Visibility
+msgid "HOST_VISIBILITY_LABEL"
+msgstr "Zichtbaarheid"
+
+#. en: Friends only
+msgid "HOST_PRIVACY_FRIENDS"
+msgstr "Alleen vrienden"
+
+#. en: Private (invite only)
+msgid "HOST_PRIVACY_PRIVATE"
+msgstr "Privé (alleen op uitnodiging)"
+
+#. en: Friends-only games appear in your friends' game list. Private games do not — invite players from the lobby instead.
+msgid "HOST_PRIVACY_HINT"
+msgstr "Spellen voor alleen vrienden staan in de spellenlijst van je vrienden. Privéspellen niet — nodig spelers dan uit vanuit de lobby."
+
+#. en: CANCEL
+msgid "HOST_BTN_CANCEL"
+msgstr "ANNULEREN"
+
+#. en: Hosts over a direct connection instead. Players join with your IP address, and port 7777 may need forwarding.
+msgid "HOST_IP_TOOLTIP"
+msgstr "Host in plaats daarvan via een directe verbinding. Spelers nemen deel met je IP-adres, en poort 7777 moet mogelijk worden doorgestuurd."
+
+#. en: Host over IP instead
+msgid "HOST_BTN_IP_INSTEAD"
+msgstr "Liever via IP hosten"
+
+#. en: CREATE STEAM LOBBY
+msgid "HOST_BTN_CREATE_LOBBY"
+msgstr "STEAM-LOBBY MAKEN"
+
+#. en: Host over IP
+msgid "HOST_BTN_IP"
+msgstr "Via IP hosten"
+
+#. en: The save was played with these, so they cannot be changed.
+msgid "HOST_EXPANSION_HINT_FIXED"
+msgstr "Het opgeslagen spel is hiermee gespeeld, dus ze kunnen niet worden gewijzigd."
+
+#. en: Steam is unavailable: {0}.
+msgid "HOST_STEAM_UNAVAILABLE"
+msgstr "Steam is niet beschikbaar: {0}."
+
+#. en: This build has no Steam networking support.
+msgid "HOST_NO_STEAM_NETWORKING"
+msgstr "Deze build ondersteunt geen Steam-netwerk."
+
+#. en: Creating Steam lobby...
+msgid "HOST_CREATING_LOBBY"
+msgstr "Steam-lobby maken..."
+
+#. en: Could not create a Steam lobby
+msgid "HOST_LOBBY_FAILED_TITLE"
+msgstr "Kon geen Steam-lobby maken"
+
+#. en: Steam did not create the lobby. You can still host over Godot networking.
+msgid "HOST_LOBBY_FAILED_MESSAGE"
+msgstr "Steam heeft de lobby niet gemaakt. Je kunt nog steeds hosten via Godot-netwerk."
+
+# ---- Join game ----
+
+#. en: MULTIPLAYER  ·  DIRECT CONNECTION
+msgid "JOIN_KICKER"
+msgstr "MULTIPLAYER  ·  DIRECTE VERBINDING"
+
+#. en: JOIN GAME
+msgid "JOIN_TITLE"
+msgstr "DEELNEMEN AAN SPEL"
+
+#. en: SERVER ADDRESS
+msgid "JOIN_ADDRESS_LABEL"
+msgstr "SERVERADRES"
+
+#. en: PORT
+msgid "JOIN_PORT_LABEL"
+msgstr "POORT"
+
+#. en: Join
+msgid "JOIN_BTN_JOIN"
+msgstr "Deelnemen"
+
+#. en: Leave
+msgid "JOIN_BTN_LEAVE"
+msgstr "Verlaten"
+
+#. en: Enter the host's address, then press Join.
+msgid "JOIN_STATUS_PROMPT"
+msgstr "Vul het adres van de host in en druk op Deelnemen."
+
+#. en: Enter a server address.
+msgid "JOIN_STATUS_NO_ADDRESS"
+msgstr "Vul een serveradres in."
+
+#. en: Invalid port — must be a number between 1 and 65535.
+msgid "JOIN_STATUS_BAD_PORT"
+msgstr "Ongeldige poort — moet een getal tussen 1 en 65535 zijn."
+
+#. en: Failed to join: {0}
+msgid "JOIN_STATUS_FAILED"
+msgstr "Deelnemen mislukt: {0}"
+
+#. en: Connecting to {0}:{1}...
+msgid "JOIN_STATUS_CONNECTING"
+msgstr "Verbinden met {0}:{1}..."
+
+#. en: Connected — joining...
+msgid "JOIN_STATUS_CONNECTED"
+msgstr "Verbonden — deelnemen..."
+
+#. en: Rejoining the game...
+msgid "JOIN_STATUS_REJOINING"
+msgstr "Opnieuw deelnemen aan het spel..."
+
+#. en: Connection failed — check the address and that the host is running.
+msgid "JOIN_STATUS_CONNECTION_FAILED"
+msgstr "Verbinding mislukt — controleer het adres en of de host draait."
+
+#. en: Connection timed out — is the host running and the port reachable?
+msgid "JOIN_STATUS_TIMED_OUT"
+msgstr "Verbinding verlopen — draait de host en is de poort bereikbaar?"
+
+# ---- Join options ----
+
+#. en: Join Game
+msgid "JOIN_OPTIONS_TITLE"
+msgstr "Deelnemen aan spel"
+
+#. en: Join by IP
+msgid "JOIN_BTN_BY_IP"
+msgstr "Deelnemen via IP"
+
+#. en: Friends' Games
+msgid "JOIN_BTN_FRIENDS"
+msgstr "Spellen van vrienden"
+
+#. en: Joining by IP needs the host's address. Friends' games are found through Steam.
+msgid "JOIN_OPTIONS_HINT"
+msgstr "Deelnemen via IP vraagt het adres van de host. Spellen van vrienden worden via Steam gevonden."
+
+#. en: CANCEL
+msgid "JOIN_BTN_CANCEL"
+msgstr "ANNULEREN"
+
+#. en: Steam is unavailable: {0}.
+msgid "JOIN_STEAM_UNAVAILABLE"
+msgstr "Steam is niet beschikbaar: {0}."
+
+#. en: This build has no Steam networking support.
+msgid "JOIN_NO_STEAM_NETWORKING"
+msgstr "Deze build ondersteunt geen Steam-netwerk."
+
+# ---- Load game ----
+
+#. en: CAMPAIGN ARCHIVE
+msgid "LOAD_KICKER"
+msgstr "CAMPAGNEARCHIEF"
+
+#. en: LOAD GAME
+msgid "LOAD_TITLE"
+msgstr "SPEL LADEN"
+
+#. en: Back
+msgid "LOAD_BTN_BACK"
+msgstr "Terug"
+
+#. en: No saved games yet. Save from the in-game menu with Escape.
+msgid "LOAD_STATUS_EMPTY"
+msgstr "Nog geen opgeslagen spellen. Sla op via het spelmenu met Escape."
+
+#. en: {0} saved game.
+msgid "LOAD_STATUS_COUNT_ONE"
+msgstr "{0} opgeslagen spel."
+
+#. en: {0} saved games.
+msgid "LOAD_STATUS_COUNT_OTHER"
+msgstr "{0} opgeslagen spellen."
+
+#. en: (unnamed)
+msgid "LOAD_UNNAMED"
+msgstr "(naamloos)"
+
+#. en: Skirmish
+msgid "LOAD_TYPE_SKIRMISH"
+msgstr "Schermutseling"
+
+#. en: Online
+msgid "LOAD_TYPE_ONLINE"
+msgstr "Online"
+
+#. en: Ranked
+msgid "LOAD_TYPE_RANKED"
+msgstr "Ranked"
+
+#. en: Load
+msgid "LOAD_BTN_LOAD"
+msgstr "Laden"
+
+#. en: Delete
+msgid "LOAD_BTN_DELETE"
+msgstr "Verwijderen"
+
+#. en: That save could not be read. See the log for details.
+msgid "LOAD_ERROR_UNREADABLE"
+msgstr "Die save kon niet worden gelezen. Zie het log voor details."
+
+#. en: That save was written by an incompatible version ({0}).
+msgid "LOAD_ERROR_VERSION"
+msgstr "Die save is gemaakt met een incompatibele versie ({0})."
+
+#. en: That save carries no scenario and cannot be restored.
+msgid "LOAD_ERROR_NO_SCENARIO"
+msgstr "Die save bevat geen scenario en kan niet worden hersteld."
+
+#. en: That save was played with {0}, which cannot be played here: {1}.
+msgid "LOAD_ERROR_EXPANSIONS"
+msgstr "Die save is gespeeld met {0}, en dat kan hier niet: {1}."
+
+#. en: Delete save?
+msgid "LOAD_CONFIRM_DELETE_TITLE"
+msgstr "Save verwijderen?"
+
+#. en: That save could not be deleted. See the log for details.
+msgid "LOAD_ERROR_DELETE"
+msgstr "Die save kon niet worden verwijderd. Zie het log voor details."
+
+# ---- Leaderboard ----
+
+#. en: Leaderboard
+msgid "LEADERBOARD_TITLE"
+msgstr "Ranglijst"
+
+#. en: REFRESH
+msgid "LEADERBOARD_BTN_REFRESH"
+msgstr "VERNIEUWEN"
+
+#. en: CLOSE
+msgid "LEADERBOARD_BTN_CLOSE"
+msgstr "SLUITEN"
+
+#. en: Steam is unavailable: {0}.
+msgid "LEADERBOARD_STATUS_STEAM_UNAVAILABLE"
+msgstr "Steam is niet beschikbaar: {0}."
+
+#. en: Loading rankings…
+msgid "LEADERBOARD_STATUS_LOADING"
+msgstr "Ranglijst laden…"
+
+#. en: Nobody has been ranked yet — you are the first.
+msgid "LEADERBOARD_STATUS_EMPTY"
+msgstr "Nog niemand staat op de ranglijst — jij bent de eerste."
+
+#. en: {0} ranked player.
+msgid "LEADERBOARD_STATUS_COUNT_ONE"
+msgstr "{0} speler op de ranglijst."
+
+#. en: {0} ranked players.
+msgid "LEADERBOARD_STATUS_COUNT_OTHER"
+msgstr "{0} spelers op de ranglijst."
+
+#. en: {0} ranked player. Your entry has not appeared yet — you start at {1}.
+msgid "LEADERBOARD_STATUS_COUNT_UNRANKED_ONE"
+msgstr "{0} speler op de ranglijst. Jouw plek staat er nog niet — je begint op {1}."
+
+#. en: {0} ranked players. Your entry has not appeared yet — you start at {1}.
+msgid "LEADERBOARD_STATUS_COUNT_UNRANKED_OTHER"
+msgstr "{0} spelers op de ranglijst. Jouw plek staat er nog niet — je begint op {1}."
+
+#. en: Player
+msgid "LEADERBOARD_HDR_PLAYER"
+msgstr "Speler"
+
+#. en: Rating
+msgid "LEADERBOARD_HDR_RATING"
+msgstr "Rating"
+
+# ---- Invite friends ----
+
+#. en: Invite Friends
+msgid "INVITE_TITLE"
+msgstr "Vrienden uitnodigen"
+
+#. en: REFRESH
+msgid "INVITE_BTN_REFRESH"
+msgstr "VERNIEUWEN"
+
+#. en: CLOSE
+msgid "INVITE_BTN_CLOSE"
+msgstr "SLUITEN"
+
+#. en: Steam is unavailable: {0}.
+msgid "INVITE_STATUS_STEAM_UNAVAILABLE"
+msgstr "Steam is niet beschikbaar: {0}."
+
+#. en: You are not in a Steam lobby, so there is nothing to invite anyone to.
+msgid "INVITE_STATUS_NO_LOBBY"
+msgstr "Je zit niet in een Steam-lobby, dus er is niets om iemand voor uit te nodigen."
+
+#. en: None of your friends are online right now.
+msgid "INVITE_STATUS_NONE_ONLINE"
+msgstr "Geen van je vrienden is nu online."
+
+#. en: {0} friend online. Friends already playing are listed first.
+msgid "INVITE_STATUS_COUNT_ONE"
+msgstr "{0} vriend online. Vrienden die al spelen staan bovenaan."
+
+#. en: {0} friends online. Friends already playing are listed first.
+msgid "INVITE_STATUS_COUNT_OTHER"
+msgstr "{0} vrienden online. Vrienden die al spelen staan bovenaan."
+
+#. en: In lobby
+msgid "INVITE_BTN_IN_LOBBY"
+msgstr "In lobby"
+
+#. en: Invited
+msgid "INVITE_BTN_INVITED"
+msgstr "Uitgenodigd"
+
+#. en: Invite
+msgid "INVITE_BTN_INVITE"
+msgstr "Uitnodigen"
+
+#. en: In game
+msgid "INVITE_PRESENCE_IN_GAME"
+msgstr "In het spel"
+
+#. en: Looking to play
+msgid "INVITE_PRESENCE_LOOKING_TO_PLAY"
+msgstr "Wil spelen"
+
+#. en: Away
+msgid "INVITE_PRESENCE_AWAY"
+msgstr "Afwezig"
+
+#. en: Busy
+msgid "INVITE_PRESENCE_BUSY"
+msgstr "Bezet"
+
+#. en: Snoozing
+msgid "INVITE_PRESENCE_SNOOZING"
+msgstr "Sluimert"
+
+#. en: Online
+msgid "INVITE_PRESENCE_ONLINE"
+msgstr "Online"
+
+#. en: Failed
+msgid "INVITE_BTN_FAILED"
+msgstr "Mislukt"
+
+#. en: Could not invite {0} — Steam refused the invite.
+msgid "INVITE_STATUS_REFUSED"
+msgstr "Kon {0} niet uitnodigen — Steam weigerde de uitnodiging."
+
+#. en: Invited {0}.
+msgid "INVITE_STATUS_INVITED"
+msgstr "{0} uitgenodigd."
+
+# ---- Friends' games ----
+
+#. en: MULTIPLAYER  ·  STEAM
+msgid "FRIENDS_KICKER"
+msgstr "MULTIPLAYER  ·  STEAM"
+
+#. en: FRIENDS' GAMES
+msgid "FRIENDS_TITLE"
+msgstr "SPELLEN VAN VRIENDEN"
+
+#. en: Refresh
+msgid "FRIENDS_BTN_REFRESH"
+msgstr "Vernieuwen"
+
+#. en: Back
+msgid "FRIENDS_BTN_BACK"
+msgstr "Terug"
+
+#. en: Steam is unavailable: {0}.
+msgid "FRIENDS_STATUS_STEAM_UNAVAILABLE"
+msgstr "Steam is niet beschikbaar: {0}."
+
+#. en: your friend's game
+msgid "FRIENDS_DESC_FRIEND_GAME"
+msgstr "het spel van je vriend"
+
+#. en: Looking for friends' games...
+msgid "FRIENDS_STATUS_SEARCHING"
+msgstr "Zoeken naar spellen van vrienden..."
+
+#. en: No friends are hosting a game right now.
+msgid "FRIENDS_STATUS_NONE"
+msgstr "Er host nu geen enkele vriend een spel."
+
+#. en: {0} game found.
+msgid "FRIENDS_STATUS_COUNT_ONE"
+msgstr "{0} spel gevonden."
+
+#. en: {0} games found.
+msgid "FRIENDS_STATUS_COUNT_OTHER"
+msgstr "{0} spellen gevonden."
+
+#. en: Wrong version
+msgid "FRIENDS_BTN_WRONG_VERSION"
+msgstr "Verkeerde versie"
+
+#. en: Needs DLC
+msgid "FRIENDS_BTN_NEEDS_DLC"
+msgstr "DLC nodig"
+
+#. en: Full
+msgid "FRIENDS_BTN_FULL"
+msgstr "Vol"
+
+#. en: Join
+msgid "FRIENDS_BTN_JOIN"
+msgstr "Deelnemen"
+
+#. en: This game is played with {0}, which you do not have.
+msgid "FRIENDS_TOOLTIP_NEEDS_DLC"
+msgstr "Dit spel wordt gespeeld met {0}, en dat heb je niet."
+
+#. en: Host is on the same version as you.
+msgid "FRIENDS_TOOLTIP_VERSION_SAME"
+msgstr "De host heeft dezelfde versie als jij."
+
+#. en: Host is on {0}; you are on v{1}. Both need the same version to play together.
+msgid "FRIENDS_TOOLTIP_VERSION_DIFFERENT"
+msgstr "De host heeft {0}; jij hebt v{1}. Jullie hebben dezelfde versie nodig om samen te spelen."
+
+#. en: an unknown version
+msgid "FRIENDS_VERSION_UNKNOWN"
+msgstr "een onbekende versie"
+
+#. en: {0}'s game
+msgid "FRIENDS_DESC_HOST_GAME"
+msgstr "het spel van {0}"
+
+#. en: Joining {0}...
+msgid "FRIENDS_STATUS_JOINING"
+msgstr "Deelnemen aan {0}..."
+
+#. en: Could not join — {0}
+msgid "FRIENDS_ERROR_JOIN"
+msgstr "Kon niet deelnemen — {0}"
+
+#. en: Could not connect — {0}
+msgid "FRIENDS_ERROR_CONNECT"
+msgstr "Kon geen verbinding maken — {0}"
+
+#. en: Connecting...
+msgid "FRIENDS_STATUS_CONNECTING"
+msgstr "Verbinden..."
+
+#. en: Connected — joining...
+msgid "FRIENDS_STATUS_CONNECTED"
+msgstr "Verbonden — deelnemen..."
+
+#. en: Rejoining the game...
+msgid "FRIENDS_STATUS_REJOINING"
+msgstr "Opnieuw deelnemen aan het spel..."
+
+#. en: Connection failed — the host may have closed the game.
+msgid "FRIENDS_ERROR_FAILED"
+msgstr "Verbinding mislukt — de host heeft het spel misschien gesloten."
+
+#. en: Connection timed out — the host may no longer be reachable.
+msgid "FRIENDS_ERROR_TIMEOUT"
+msgstr "Verbinding verlopen — de host is misschien niet meer bereikbaar."
+
+# ---- Tutorials ----
+
+#. en: TUTORIALS
+msgid "TUTORIALS_TITLE"
+msgstr "TUTORIALS"
+
+#. en: No tutorials found.
+msgid "TUTORIALS_EMPTY"
+msgstr "Geen tutorials gevonden."
+
+#. en: Back
+msgid "TUTORIALS_BTN_BACK"
+msgstr "Terug"
+
+# ---- Victory ----
+
+#. en: Main Menu
+msgid "VICTORY_BTN_MAIN_MENU"
+msgstr "Hoofdmenu"
+
+#. en: [center][font_size=42][b]No Result[/b][/font_size][/center]
+msgid "VICTORY_NO_RESULT"
+msgstr "[center][font_size=42][b]Geen uitslag[/b][/font_size][/center]"
+
+#. en: AXIS VICTORY
+msgid "VICTORY_BANNER_AXIS"
+msgstr "OVERWINNING VOOR DE AS"
+
+#. en: ALLIES VICTORY
+msgid "VICTORY_BANNER_ALLIES"
+msgstr "OVERWINNING VOOR DE GEALLIEERDEN"
+
+#. en: Axis {0}  —  Allies {1}
+msgid "VICTORY_SCORE_LINE"
+msgstr "As {0}  —  Geallieerden {1}"
+
+#. en: Game ended: {0} (Round {1})
+msgid "VICTORY_ENDED"
+msgstr "Spel beëindigd: {0} (ronde {1})"
+
+#. en: Rating {0}
+msgid "VICTORY_RATING"
+msgstr "Rating {0}"
+
+#. en: Axis
+msgid "VICTORY_TEAM_AXIS"
+msgstr "As"
+
+#. en: Allies
+msgid "VICTORY_TEAM_ALLIES"
+msgstr "Geallieerden"
+
+#. en: {0} pts
+msgid "VICTORY_POINTS"
+msgstr "{0} ptn"
+
+#. en: R{0}: {1}
+msgid "VICTORY_ROUND_POINTS"
+msgstr "R{0}: {1}"
+
+#. en: no points scored
+msgid "VICTORY_NO_POINTS"
+msgstr "geen punten gescoord"
+
+# ---- Disclaimer ----
+
+#. en: BETA BUILD  ·  PLEASE READ
+msgid "DISCLAIMER_KICKER"
+msgstr "BÈTABUILD  ·  LEES DIT EERST"
+
+#. en: BEFORE YOU PLAY
+msgid "DISCLAIMER_TITLE"
+msgstr "VOORDAT JE SPEELT"
+
+#. en: •  [b]This is a beta version of the game.[/b] It is still under active development: rules, cards, artwork, interface and balance are all being worked on, and anything you see here may change, break or disappear in a later build. Saved games may not survive an update. If something looks wrong, it may well be — please report it rather than assume it was intended.\n\n•  [b]All gameplay and assets are based on the board game designed by Ian Brody.[/b] The rules, the cards, the factions and the design as a whole originate with him, and all intellectual property in them remains his. This digital version is an unofficial fan project, made without his involvement or endorsement, and claims no ownership over any part of it. It is not a commercial product: it is not sold, carries no purchases or advertising, and is not intended to make a profit for anyone involved in it.\n\n•  [b]This version is not intended for distribution.[/b] It is provided to you personally, for testing. Do not pass the build, its files, or your access to it on to anyone outside the beta program. Doing so may result in removal from the beta program and a lifelong ban from future access.\n\nChoosing Accept confirms you have read and understood the above.
+msgid "DISCLAIMER_BODY"
+msgstr "•  [b]Dit is een bètaversie van het spel.[/b] Het spel is nog volop in ontwikkeling: aan de regels, kaarten, artwork, interface en balans wordt allemaal nog gewerkt, en alles wat je hier ziet kan in een latere build veranderen, kapotgaan of verdwijnen. Opgeslagen spellen overleven een update misschien niet. Ziet iets er verkeerd uit, dan is het dat waarschijnlijk ook — meld het liever dan aan te nemen dat het zo bedoeld is.\n\n•  [b]Alle gameplay en assets zijn gebaseerd op het bordspel ontworpen door Ian Brody.[/b] De regels, de kaarten, de facties en het ontwerp als geheel zijn van hem afkomstig, en al het intellectueel eigendom daarvan blijft bij hem. Deze digitale versie is een onofficieel fanproject, gemaakt zonder zijn betrokkenheid of goedkeuring, en claimt geen eigendom over enig deel ervan. Het is geen commercieel product: het wordt niet verkocht, bevat geen aankopen of advertenties, en is niet bedoeld om winst te maken voor wie er ook bij betrokken is.\n\n•  [b]Deze versie is niet bedoeld voor verspreiding.[/b] Ze is persoonlijk aan jou verstrekt, om te testen. Geef de build, de bestanden of je toegang niet door aan iemand buiten het bètaprogramma. Doe je dat wel, dan kun je uit het bètaprogramma worden verwijderd en levenslang worden uitgesloten van toekomstige toegang.\n\nDoor Accepteren te kiezen bevestig je dat je het bovenstaande hebt gelezen en begrepen."
+
+#. en: Accept
+msgid "DISCLAIMER_BTN_ACCEPT"
+msgstr "Accepteren"
+
+#. en: Decline
+msgid "DISCLAIMER_BTN_DECLINE"
+msgstr "Weigeren"
+
+# ---- Game menu ----
+
+#. en: Game Menu
+msgid "GAMEMENU_TITLE"
+msgstr "Spelmenu"
+
+#. en: Resume
+msgid "GAMEMENU_BTN_RESUME"
+msgstr "Hervatten"
+
+#. en: Save Game
+msgid "GAMEMENU_BTN_SAVE"
+msgstr "Spel opslaan"
+
+#. en: Quit to Main Menu
+msgid "GAMEMENU_BTN_QUIT"
+msgstr "Naar hoofdmenu"
+
+#. en: The game keeps running while this menu is open. Only the host can save.
+msgid "GAMEMENU_HINT"
+msgstr "Het spel loopt door terwijl dit menu open is. Alleen de host kan opslaan."
+
+#. en: Only the host can save the game. Ask them to save it.
+msgid "GAMEMENU_TOOLTIP_HOST_ONLY"
+msgstr "Alleen de host kan het spel opslaan. Vraag de host om op te slaan."
+
+#. en: Save queued
+msgid "GAMEMENU_SAVE_QUEUED_TITLE"
+msgstr "Opslaan in de wachtrij"
+
+#. en: '{0}' will be saved as soon as the current action finishes. Stay in the game until it is saved.
+msgid "GAMEMENU_SAVE_QUEUED_BODY"
+msgstr "'{0}' wordt opgeslagen zodra de huidige actie klaar is. Blijf in het spel tot het is opgeslagen."
+
+#. en: Game saved
+msgid "GAMEMENU_SAVED_TITLE"
+msgstr "Spel opgeslagen"
+
+#. en: Could not save
+msgid "GAMEMENU_SAVE_FAILED_TITLE"
+msgstr "Opslaan mislukt"
+
+#. en: The save file could not be written. See the log for details.
+msgid "GAMEMENU_SAVE_FAILED_BODY"
+msgstr "Het savebestand kon niet worden geschreven. Zie het log voor details."
+
+#. en: Save not written yet
+msgid "GAMEMENU_QUIT_UNSAVED_TITLE"
+msgstr "Save nog niet geschreven"
+
+#. en: Your save is waiting for the current action to finish and has not been written. Quit now and it will be lost.
+msgid "GAMEMENU_QUIT_UNSAVED_BODY"
+msgstr "Je save wacht tot de huidige actie klaar is en is nog niet geschreven. Stop je nu, dan gaat hij verloren."
+
+#. en: Quit anyway
+msgid "GAMEMENU_BTN_QUIT_ANYWAY"
+msgstr "Toch stoppen"
+
+# ---- Notices and toasts ----
+
+#. en: OK
+msgid "NOTICE_BTN_OK"
+msgstr "OK"
+
+#. en: CONFIRM
+msgid "NOTICE_BTN_CONFIRM"
+msgstr "BEVESTIGEN"
+
+#. en: CANCEL
+msgid "NOTICE_BTN_CANCEL"
+msgstr "ANNULEREN"
+
+#. en: IGNORE
+msgid "TOAST_BTN_IGNORE"
+msgstr "NEGEREN"
+
+#. en: OK
+msgid "TOAST_BTN_OK"
+msgstr "OK"
+
+# ---- HUD chat ----
+
+#. en: Show messages from players
+msgid "HUD_CHAT_TOOLTIP_FILTER_PLAYERS"
+msgstr "Berichten van spelers tonen"
+
+#. en: Player
+msgid "HUD_CHAT_FILTER_PLAYERS"
+msgstr "Speler"
+
+#. en: Show messages from the game
+msgid "HUD_CHAT_TOOLTIP_FILTER_GAME"
+msgstr "Berichten van het spel tonen"
+
+#. en: Game
+msgid "HUD_CHAT_FILTER_GAME"
+msgstr "Spel"
+
+#. en: Switch channel (Tab while typing)
+msgid "HUD_CHAT_TOOLTIP_CHANNEL"
+msgstr "Kanaal wisselen (Tab tijdens typen)"
+
+#. en: All
+msgid "HUD_CHAT_CHANNEL_ALL"
+msgstr "Iedereen"
+
+#. en: Message everyone (Tab: team)
+msgid "HUD_CHAT_PLACEHOLDER_ALL"
+msgstr "Bericht aan iedereen (Tab: team)"
+
+#. en: Team
+msgid "HUD_CHAT_CHANNEL_TEAM"
+msgstr "Team"
+
+#. en: Message your team (Tab: all)
+msgid "HUD_CHAT_PLACEHOLDER_TEAM"
+msgstr "Bericht aan je team (Tab: iedereen)"
+
+#. en: [Team] 
+msgid "HUD_CHAT_TEAM_PREFIX"
+msgstr "[Team] "
+
+# ---- HUD round track ----
+
+#. en: Last round {0}
+msgid "HUD_ROUND_LAST"
+msgstr "Laatste ronde {0}"
+
+#. en: Round {0} of {1}
+msgid "HUD_ROUND_OF"
+msgstr "Ronde {0} van {1}"
+
+# ---- Connection lost dialog ----
+
+#. en: Wait
+msgid "HUD_CONN_BTN_WAIT"
+msgstr "Wachten"
+
+#. en: Save & Quit
+msgid "HUD_CONN_BTN_SAVE_QUIT"
+msgstr "Opslaan en afsluiten"
+
+#. en: Bot takes over
+msgid "HUD_CONN_BTN_BOT"
+msgstr "Bot neemt over"
+
+#. en: Quit
+msgid "HUD_CONN_BTN_QUIT"
+msgstr "Afsluiten"
+
+#. en: {0} lost connection
+msgid "HUD_CONN_LOST_TITLE"
+msgstr "{0} heeft geen verbinding meer"
+
+#. en: The game is paused. Wait for them to reconnect, save the game and quit, or let a bot play their factions.
+msgid "HUD_CONN_LOST_MESSAGE_CAN_SAVE"
+msgstr "Het spel is gepauzeerd. Wacht tot ze opnieuw verbinden, sla het spel op en sluit af, of laat een bot hun facties spelen."
+
+#. en: The game is paused. Wait for them to reconnect, quit, or let a bot play their factions. The game is in the middle of an action, so it cannot be saved right now.
+msgid "HUD_CONN_LOST_MESSAGE_NO_SAVE"
+msgstr "Het spel is gepauzeerd. Wacht tot ze opnieuw verbinden, sluit af, of laat een bot hun facties spelen. Er loopt nog een actie, dus het spel kan nu niet worden opgeslagen."
+
+#. en: The host has disconnected
+msgid "HUD_CONN_HOST_LOST_TITLE"
+msgstr "De host heeft de verbinding verbroken"
+
+#. en: The game cannot continue without the host.
+msgid "HUD_CONN_HOST_LOST_MESSAGE"
+msgstr "Het spel kan niet verder zonder de host."
+
+# ---- Connection banner ----
+
+#. en: {0} is rejoining
+msgid "HUD_CONN_REJOINING"
+msgstr "{0} doet weer mee"
+
+#. en: Catching up on the game…
+msgid "HUD_CONN_CATCHING_UP"
+msgstr "Spel wordt bijgewerkt…"
+
+#. en: Reconnecting… {0}s
+msgid "HUD_CONN_RECONNECTING"
+msgstr "Opnieuw verbinden… {0}s"
+
+#. en: The game is paused
+msgid "HUD_CONN_GAME_PAUSED"
+msgstr "Het spel is gepauzeerd"
+
+#. en: Waiting for {0} to reconnect
+msgid "HUD_CONN_WAITING_FOR"
+msgstr "Wachten tot {0} opnieuw verbindt"
+
+#. en: Connection to the host lost
+msgid "HUD_CONN_HOST_UNREACHABLE"
+msgstr "Verbinding met de host verbroken"
+
+# ---- Error popup ----
+
+#. en: An error occurred
+msgid "HUD_ERROR_TITLE"
+msgstr "Er is een fout opgetreden"
+
+#. en: ▸ Stack trace
+msgid "HUD_ERROR_STACK_TRACE_SHOW"
+msgstr "▸ Stacktrace"
+
+#. en: Copy
+msgid "HUD_ERROR_BTN_COPY"
+msgstr "Kopiëren"
+
+#. en: ◂ Prev
+msgid "HUD_ERROR_BTN_PREV"
+msgstr "◂ Vorige"
+
+#. en: Next ▸
+msgid "HUD_ERROR_BTN_NEXT"
+msgstr "Volgende ▸"
+
+#. en: Quit to menu
+msgid "HUD_ERROR_BTN_QUIT_TO_MENU"
+msgstr "Naar hoofdmenu"
+
+#. en: Continue
+msgid "HUD_ERROR_BTN_CONTINUE"
+msgstr "Doorgaan"
+
+#. en: Retry
+msgid "HUD_ERROR_BTN_RETRY"
+msgstr "Opnieuw"
+
+#. en: Error history ({0})
+msgid "HUD_ERROR_HISTORY_COUNT"
+msgstr "Foutgeschiedenis ({0})"
+
+#. en: An error occurred (recovered)
+msgid "HUD_ERROR_TITLE_RECOVERED"
+msgstr "Er is een fout opgetreden (hersteld)"
+
+#. en: An unrecoverable error occurred
+msgid "HUD_ERROR_TITLE_UNRECOVERABLE"
+msgstr "Er is een onherstelbare fout opgetreden"
+
+#. en: RECOVERED · no popup was shown
+msgid "HUD_ERROR_RECOVERED_NOTE"
+msgstr "HERSTELD · er is geen pop-up getoond"
+
+#. en: Skip input
+msgid "HUD_ERROR_BTN_SKIP_INPUT"
+msgstr "Invoer overslaan"
+
+#. en: Gives up on the input and continues the step as if the player had passed. A required choice (e.g. discarding down to the hand limit) will not happen at all.
+msgid "HUD_ERROR_TOOLTIP_SKIP_INPUT"
+msgstr "Geeft de invoer op en zet de stap voort alsof de speler heeft gepast. Een verplichte keuze (bijv. afleggen tot de handlimiet) gebeurt dan helemaal niet."
+
+#. en: the player
+msgid "HUD_ERROR_THE_PLAYER"
+msgstr "de speler"
+
+#. en: Asks {0} for the same input again, with a fresh timer. Nothing has been skipped yet.
+msgid "HUD_ERROR_TOOLTIP_RETRY"
+msgstr "Vraagt {0} opnieuw om dezelfde invoer, met een nieuwe timer. Er is nog niets overgeslagen."
+
+#. en: Closes this window. Nothing is waiting — the game is not paused.
+msgid "HUD_ERROR_TOOLTIP_CLOSE"
+msgstr "Sluit dit venster. Er wacht niets — het spel is niet gepauzeerd."
+
+#. en: Dismiss
+msgid "HUD_ERROR_BTN_DISMISS"
+msgstr "Wegklikken"
+
+#. en: Only the host can resume the turn loop.
+msgid "HUD_ERROR_TOOLTIP_DISMISS"
+msgstr "Alleen de host kan het spel hervatten."
+
+#. en: Unavailable: the game state was modified before clients were notified, so peers have diverged.
+msgid "HUD_ERROR_TOOLTIP_CONTINUE_UNAVAILABLE"
+msgstr "Niet beschikbaar: de spelstatus is gewijzigd voordat clients bericht kregen, dus de spelers lopen niet meer gelijk."
+
+#. en: Skips the rest of the failed step and resumes play. The game state may be inconsistent.
+msgid "HUD_ERROR_TOOLTIP_CONTINUE"
+msgstr "Slaat de rest van de mislukte stap over en hervat het spel. De spelstatus kan inconsistent zijn."
+
+#. en: Error history
+msgid "HUD_ERROR_HISTORY"
+msgstr "Foutgeschiedenis"
+
+#. en: No errors recorded this session.
+msgid "HUD_ERROR_NONE_RECORDED"
+msgstr "Geen fouten vastgelegd in deze sessie."
+
+#. en: ▾ Stack trace
+msgid "HUD_ERROR_STACK_TRACE_HIDE"
+msgstr "▾ Stacktrace"
+
+# ---- Input timer ----
+
+#. en: Waiting for input
+msgid "HUD_TIMER_WAITING_FOR_INPUT"
+msgstr "Wachten op invoer"
+
+#. en: Host only: time out this input request now
+msgid "HUD_TIMER_TOOLTIP_FORCE_TIMEOUT"
+msgstr "Alleen host: laat dit invoerverzoek nu verlopen"
+
+#. en: Your input
+msgid "HUD_TIMER_YOUR_INPUT"
+msgstr "Jouw invoer"
+
+#. en: Waiting on {0}
+msgid "HUD_TIMER_WAITING_ON"
+msgstr "Wachten op {0}"
+
+#. en: Waiting on {0} input...
+msgid "HUD_WAITING_ON_INPUT"
+msgstr "Wachten op invoer van {0}..."
+
+# ---- Deck composition ----
+
+#. en: CARD DISTRIBUTION
+msgid "HUD_DECK_TITLE"
+msgstr "KAARTVERDELING"
+
+#. en: Cards in each faction's deck at the start of the game
+msgid "HUD_DECK_SUBTITLE"
+msgstr "Kaarten in de stapel van elke factie bij de start van het spel"
+
+#. en: Total
+msgid "HUD_DECK_TOTAL"
+msgstr "Totaal"
+
+# ---- Score history ----
+
+#. en: Score History
+msgid "HUD_SCORE_TITLE"
+msgstr "Scoreverloop"
+
+#. en: [color=#bbbbbb]No points scored yet.[/color]
+msgid "HUD_SCORE_NO_POINTS"
+msgstr "[color=#bbbbbb]Nog geen punten gescoord.[/color]"
+
+#. en: [color=#d9ad5c]Round {0}[/color]  [color=#bbbbbb]{1} VP[/color]
+msgid "HUD_SCORE_ROUND_LINE"
+msgstr "[color=#d9ad5c]Ronde {0}[/color]  [color=#bbbbbb]{1} OP[/color]"
+
+#. en: [color=#d9ad5c]Start[/color]  [color=#bbbbbb]{0} VP[/color]
+msgid "HUD_SCORE_START_LINE"
+msgstr "[color=#d9ad5c]Start[/color]  [color=#bbbbbb]{0} OP[/color]"
+
+# ---- Faction info ----
+
+#. en: No cards
+msgid "HUD_PILE_EMPTY"
+msgstr "Geen kaarten"
+
+#. en: Cards in hand
+msgid "HUD_FACTION_TOOLTIP_HAND"
+msgstr "Kaarten in hand"
+
+#. en: Victory points
+msgid "HUD_FACTION_TOOLTIP_VP"
+msgstr "Overwinningspunten"
+
+#. en: Armies in reserve
+msgid "HUD_FACTION_TOOLTIP_ARMIES"
+msgstr "Legers in reserve"
+
+#. en: Navies in reserve
+msgid "HUD_FACTION_TOOLTIP_NAVIES"
+msgstr "Vloten in reserve"
+
+#. en: Click to show or hide the hand, score and pieces
+msgid "HUD_FACTION_TOOLTIP_TOGGLE"
+msgstr "Klik om hand, score en stukken te tonen of te verbergen"
+
+# ---- Commander message ----
+
+#. en: CONTINUE  ▶
+msgid "HUD_COMMANDER_BTN_CONTINUE"
+msgstr "DOORGAAN  ▶"
+
+# ---- Presentation modal ----
+
+#. en: Cancel
+msgid "HUD_MODAL_BTN_CANCEL"
+msgstr "Annuleren"
+
+#. en: Hide — put this aside without answering it, and bring it back with Show my action.
+msgid "HUD_MODAL_TOOLTIP_PARK"
+msgstr "Verbergen — leg dit opzij zonder te antwoorden en haal het terug met Toon mijn actie."
+
+# ---- Mini menu ----
+
+#. en: Menu (Esc)
+msgid "HUD_MINIMENU_TOOLTIP_MENU"
+msgstr "Menu (Esc)"
+
+#. en: Cards in each deck at the start of the game
+msgid "HUD_MINIMENU_TOOLTIP_DECKS"
+msgstr "Kaarten in elke stapel bij de start van het spel"
+
+#. en: Score history
+msgid "HUD_MINIMENU_TOOLTIP_SCORE"
+msgstr "Scoreverloop"
+
+# ---- Players panel ----
+
+#. en: host
+msgid "HUD_PLAYERS_STATUS_HOST"
+msgstr "host"
+
+#. en: bot
+msgid "HUD_PLAYERS_STATUS_BOT"
+msgstr "bot"
+
+#. en: rejoining…
+msgid "HUD_PLAYERS_STATUS_REJOINING"
+msgstr "doet weer mee…"
+
+#. en: reconnecting… {0}s
+msgid "HUD_PLAYERS_STATUS_RECONNECTING"
+msgstr "opnieuw verbinden… {0}s"
+
+#. en: disconnected
+msgid "HUD_PLAYERS_STATUS_DISCONNECTED"
+msgstr "verbinding verbroken"
+
+#. en: unstable
+msgid "HUD_PLAYERS_STATUS_UNSTABLE"
+msgstr "instabiel"
+
+# ---- Turn sequence ----
+
+#. en: {0} Step (optional)
+msgid "HUD_STEP_HINT_TITLE_OPTIONAL"
+msgstr "Stap: {0} (optioneel)"
+
+#. en: {0} Step
+msgid "HUD_STEP_HINT_TITLE"
+msgstr "Stap: {0}"
+
+# ---- Trigger context ----
+
+#. en: Cause: {0}
+msgid "HUD_TRIGGER_CAUSE"
+msgstr "Oorzaak: {0}"
+
+#. en: Do you want to block this action?
+msgid "HUD_TRIGGER_ASK_BLOCK"
+msgstr "Wil je deze actie blokkeren?"
+
+#. en: Do you want to react to this action?
+msgid "HUD_TRIGGER_ASK_REACT"
+msgstr "Wil je op deze actie reageren?"
+
+#. en: [b]Reacting to:[/b]
+msgid "HUD_TRIGGER_REACTING_TO"
+msgstr "[b]Reactie op:[/b]"
+
+# ---- Reaction skip buttons ----
+
+#. en: Skip rest of round
+msgid "HUD_REACTION_SKIP_ROUND"
+msgstr "Rest van ronde overslaan"
+
+#. en: Only ask when I can react
+msgid "HUD_REACTION_SKIP_UNTIL_ACTIVATABLE"
+msgstr "Alleen vragen als ik kan reageren"
+
+#. en: Skip rest of turn step
+msgid "HUD_REACTION_SKIP_TURN_STEP"
+msgstr "Rest van stap overslaan"
+
+#. en: Stop showing me empty reaction windows. You will still be asked the moment any of your cards can actually react.
+msgid "HUD_REACTION_TOOLTIP_SKIP_UNTIL_ACTIVATABLE"
+msgstr "Toon me geen lege reactievensters meer. Je wordt nog steeds gevraagd zodra een van je kaarten echt kan reageren."
+
+#. en: Stop asking me for reactions. You will still be asked when you have a face-up card that can react.
+msgid "HUD_REACTION_TOOLTIP_SKIP_SCOPE"
+msgstr "Vraag me niet meer om reacties. Je wordt nog steeds gevraagd als je een open kaart hebt die kan reageren."
+
+# ---- Turn badge ----
+
+#. en: {0}'s turn
+msgid "HUD_TURN_BADGE"
+msgstr "{0} is aan de beurt"
+
+# ---- Faction intro ----
+
+#. en: Esc   skip intro
+msgid "HUD_INTRO_SKIP"
+msgstr "Esc   intro overslaan"
+
+#. en: You
+msgid "HUD_INTRO_YOU"
+msgstr "Jij"
+
+# ---- HUD buttons ----
+
+#. en: Show my action
+msgid "HUD_BTN_SHOW_MY_ACTION"
+msgstr "Toon mijn actie"
+
+#. en: Skip
+msgid "HUD_BTN_SKIP"
+msgstr "Overslaan"
+
+# ---- Player info ----
+
+#. en: Host
+msgid "HUD_PLAYERINFO_HOST"
+msgstr "Host"
+
+#. en: Client
+msgid "HUD_PLAYERINFO_CLIENT"
+msgstr "Client"
+
+#. en: No factions assigned
+msgid "HUD_PLAYERINFO_NO_FACTIONS"
+msgstr "Geen facties toegewezen"
+
+# ---- Card prompt ----
+
+#. en: Skip ({0})
+msgid "HUD_BTN_SKIP_COST"
+msgstr "Overslaan ({0})"
+
+#. en: Choose a block reaction
+msgid "HUD_INPUT_CHOOSE_BLOCK"
+msgstr "Kies een blokreactie"
+
+#. en: No block available
+msgid "HUD_INPUT_NO_BLOCK"
+msgstr "Geen blokkade mogelijk"
+
+#. en: Choose an after reaction
+msgid "HUD_INPUT_CHOOSE_AFTER"
+msgstr "Kies een reactie achteraf"
+
+#. en: No reaction available
+msgid "HUD_INPUT_NO_REACTION"
+msgstr "Geen reactie mogelijk"
+
+#. en: Choose a card
+msgid "HUD_INPUT_CHOOSE_CARD"
+msgstr "Kies een kaart"
+
+#. en: Choose a card, or pass ({0})
+msgid "HUD_INPUT_CHOOSE_CARD_OR_PASS"
+msgstr "Kies een kaart, of pas ({0})"
+
+#. en: Nothing you can play
+msgid "HUD_INPUT_NOTHING_TO_PLAY"
+msgstr "Je kunt niets spelen"
+
+#. en: Nothing you can play — you must pass ({0})
+msgid "HUD_INPUT_NOTHING_TO_PLAY_MUST_PASS"
+msgstr "Je kunt niets spelen — je moet passen ({0})"
+
+# ---- Card pick ----
+
+#. en: any cards
+msgid "HUD_PICK_ANY_CARDS"
+msgstr "willekeurig veel kaarten"
+
+#. en: up to {0}
+msgid "HUD_PICK_UP_TO"
+msgstr "maximaal {0}"
+
+#. en: {0} or more cards
+msgid "HUD_PICK_N_OR_MORE"
+msgstr "{0} of meer kaarten"
+
+#. en: {0} to {1} cards
+msgid "HUD_PICK_N_TO_M"
+msgstr "{0} tot {1} kaarten"
+
+#. en: Click {0} to discard
+msgid "HUD_PICK_HINT_DISCARD"
+msgstr "Klik {0} aan om af te leggen"
+
+#. en: {0} card
+msgid "HUD_PICK_CARDS_ONE"
+msgstr "{0} kaart"
+
+#. en: {0} cards
+msgid "HUD_PICK_CARDS_OTHER"
+msgstr "{0} kaarten"
+
+#. en: Select {0} more
+msgid "HUD_PICK_SELECT_MORE"
+msgstr "Kies er nog {0}"
+
+#. en: Discard nothing
+msgid "HUD_PICK_DISCARD_NOTHING"
+msgstr "Niets afleggen"
+
+#. en: Discard {0} card
+msgid "HUD_PICK_DISCARD_N_ONE"
+msgstr "{0} kaart afleggen"
+
+#. en: Discard {0} cards
+msgid "HUD_PICK_DISCARD_N_OTHER"
+msgstr "{0} kaarten afleggen"
+
+# ---- Discard prompt ----
+
+#. en: Select {0} card to discard
+msgid "HUD_DISCARD_SELECT_N_ONE"
+msgstr "Kies {0} kaart om af te leggen"
+
+#. en: Select {0} cards to discard
+msgid "HUD_DISCARD_SELECT_N_OTHER"
+msgstr "Kies {0} kaarten om af te leggen"
+
+#. en: Select card(s) to discard (or skip)
+msgid "HUD_DISCARD_SELECT_OPTIONAL"
+msgstr "Kies kaart(en) om af te leggen (of sla over)"

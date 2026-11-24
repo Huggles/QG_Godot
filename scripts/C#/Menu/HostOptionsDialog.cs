@@ -95,7 +95,7 @@ public partial class HostOptionsDialog : MenuModal
 		_steamOptions.Visible  = false;
 		_confirmButton.Visible = false;
 		GetNode<Label>("%Hint").Visible = false;
-		ipButton.Text = "Host over IP";
+		ipButton.Text = "HOST_BTN_IP";
 		ipButton.Flat = false;
 		ipButton.CustomMinimumSize = _confirmButton.CustomMinimumSize;
 		ipButton.CallDeferred(Control.MethodName.GrabFocus);
@@ -117,7 +117,7 @@ public partial class HostOptionsDialog : MenuModal
 		if (_fixedExpansions == null) return;
 
 		_expansionToggles.SetEditable(false);
-		GetNode<Label>("%ExpansionHint").Text = "The save was played with these, so they cannot be changed.";
+		GetNode<Label>("%ExpansionHint").Text = "HOST_EXPANSION_HINT_FIXED";
 	}
 
 	private List<string> ChosenExpansions => _fixedExpansions ?? _expansionToggles.Checked;
@@ -125,8 +125,8 @@ public partial class HostOptionsDialog : MenuModal
 	/// <summary>Null when Steam hosting is possible, otherwise the reason to show the player.</summary>
 	private static string SteamUnavailableReason()
 	{
-		if (!SteamworksApi.IsAvailable)   return $"Steam is unavailable: {SteamworksApi.UnavailableReason}.";
-		if (!SteamPeerFactory.IsSupported) return "This build has no Steam networking support.";
+		if (!SteamworksApi.IsAvailable)   return string.Format((string)TranslationServer.Translate("HOST_STEAM_UNAVAILABLE"), SteamworksApi.UnavailableReason);
+		if (!SteamPeerFactory.IsSupported) return TranslationServer.Translate("HOST_NO_STEAM_NETWORKING");
 		return null;
 	}
 

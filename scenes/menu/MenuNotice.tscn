@@ -29,7 +29,7 @@ theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "OK"
+text = "NOTICE_BTN_OK"
 
 [node name="ConfirmButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/ButtonRow" index="1"]
 theme_type_variation = &"MenuPrimaryButton"
@@ -37,6 +37,6 @@ unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "CONFIRM"
+text = "NOTICE_BTN_CONFIRM"
 
 [editable path="Root/Centre/Panel"]

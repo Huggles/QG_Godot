@@ -26,24 +26,24 @@ public partial class TutorialScreen : Control
 		foreach (ScenarioInfo scenario in tutorials)
 		{
 			var button = buttonScene.Instantiate<MenuPanelButton>();
-			button.ButtonText = scenario.Title;
+			button.ButtonText = scenario.DisplayTitle;
 			button.Pressed += () => StartTutorial(scenario);
 			list.AddChild(button);
 
-			if (!string.IsNullOrEmpty(scenario.Description))
+			if (!string.IsNullOrEmpty(scenario.DisplayDescription))
 				list.AddChild(Indented(new Label
 				{
-					Text = scenario.Description,
+					Text = scenario.DisplayDescription,
 					ThemeTypeVariation = "MenuMuted",
 					AutowrapMode = TextServer.AutowrapMode.WordSmart,
 				}));
 		}
 
 		if (tutorials.Count == 0)
-			list.AddChild(new Label { Text = "No tutorials found.", ThemeTypeVariation = "MenuMuted" });
+			list.AddChild(new Label { Text = "TUTORIALS_EMPTY", ThemeTypeVariation = "MenuMuted" });
 
 		var back = GetNode<MenuPanelButton>("%BackButton");
-		back.ButtonText = "Back";
+		back.ButtonText = "TUTORIALS_BTN_BACK";
 		back.Pressed += OnBackPressed;
 	}
 

@@ -1,3 +1,4 @@
+using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,12 +13,15 @@ public sealed class CardPick
     public int Max { get; }
     /// <summary>The confirm label while nothing is picked, e.g. naming the Total War discard-nothing VP.</summary>
     public string EmptyLabel { get; }
-    /// <summary>The confirm button's verb ("Discard 2 cards"), and what the hint says the cards are clicked for.</summary>
+    /// <summary>
+    /// The confirm button's verb ("Discard 2 cards"), and what the hint says the cards are clicked for. Null (the
+    /// default) means a discard, worded by whole translated sentences; a caller's own verb is used as given.
+    /// </summary>
     public string Verb { get; }
     public string Purpose { get; }
     public List<int> Selected { get; } = new();
 
-    public CardPick(int min, int max, string emptyLabel = null, string verb = "Discard", string purpose = "discard")
+    public CardPick(int min, int max, string emptyLabel = null, string verb = null, string purpose = null)
     {
         Min = min;
         Max = max;
@@ -32,21 +36,32 @@ public sealed class CardPick
     public bool CanConfirm => Selected.Count >= Min && (Max < 0 || Selected.Count <= Max);
 
     /// <summary>The line above the confirm button, naming how many cards the pick wants.</summary>
-    public string HintText => $"Click {(Min, Max) switch
+    public string HintText
     {
-        _ when Min == Max => Cards(Min),
-        (0, < 0) => "any cards",
-        (0, _) => $"up to {Cards(Max)}",
-        (_, < 0) => $"{Min} or more cards",
-        _ => $"{Min} to {Max} cards",
-    }} to {Purpose}";
+        get
+        {
+            string count = (Min, Max) switch
+            {
+                _ when Min == Max => Cards(Min),
+                (0, < 0) => T("HUD_PICK_ANY_CARDS"),
+                (0, _) => string.Format(T("HUD_PICK_UP_TO"), Cards(Max)),
+                (_, < 0) => string.Format(T("HUD_PICK_N_OR_MORE"), Min),
+                _ => string.Format(T("HUD_PICK_N_TO_M"), Min, Max),
+            };
+            return Purpose == null ? string.Format(T("HUD_PICK_HINT_DISCARD"), count) : $"Click {count} to {Purpose}";
+        }
+    }
 
-    private static string Cards(int count) => $"{count} {(count == 1 ? "card" : "cards")}";
+    private static string Cards(int count) => string.Format(T(count == 1 ? "HUD_PICK_CARDS_ONE" : "HUD_PICK_CARDS_OTHER"), count);
+
+    private static string T(string key) => TranslationServer.Translate(key);
 
     public string ConfirmLabel => Selected.Count < Min
-        ? $"Select {Min - Selected.Count} more"
-        : Selected.Count == 0 ? EmptyLabel ?? $"{Verb} nothing"
-        : $"{Verb} {Selected.Count} {(Selected.Count == 1 ? "card" : "cards")}";
+        ? string.Format(T("HUD_PICK_SELECT_MORE"), Min - Selected.Count)
+        : Selected.Count == 0 ? EmptyLabel ?? (Verb == null ? T("HUD_PICK_DISCARD_NOTHING") : $"{Verb} nothing")
+        : Verb == null
+            ? string.Format(T(Selected.Count == 1 ? "HUD_PICK_DISCARD_N_ONE" : "HUD_PICK_DISCARD_N_OTHER"), Selected.Count)
+            : $"{Verb} {Cards(Selected.Count)}";
 
     /// <summary>
     /// Picks or unpicks <paramref name="cardId"/> and returns every card whose state changed. A full

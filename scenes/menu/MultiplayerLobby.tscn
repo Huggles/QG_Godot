@@ -54,7 +54,7 @@ theme_override_constants/separation = -4
 [node name="Kicker" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Header" unique_id=1602117003]
 layout_mode = 2
 theme_type_variation = &"MenuKicker"
-text = "QUARTERMASTER GENERAL  ·  MULTIPLAYER"
+text = "LOBBY_KICKER"
 
 [node name="TitleRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Header" unique_id=1602117004]
 layout_mode = 2
@@ -63,7 +63,7 @@ theme_override_constants/separation = 28
 [node name="TitleLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Header/TitleRow" unique_id=1943808276]
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
-text = "LOBBY"
+text = "LOBBY_TITLE"
 
 [node name="StatusLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Header/TitleRow" unique_id=1882174419]
 unique_name_in_owner = true
@@ -71,7 +71,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 8
 theme_type_variation = &"MenuMuted"
-text = "Waiting to host or join..."
+text = "LOBBY_STATUS_WAITING"
 horizontal_alignment = 2
 
 [node name="RestoreLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Header" unique_id=1704412910]
@@ -102,12 +102,12 @@ theme_override_constants/separation = 12
 [node name="PlayersLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/PlayersPanel/VBoxContainer" unique_id=599921257]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "COMMANDERS"
+text = "LOBBY_HDR_COMMANDERS"
 
 [node name="PlayersHint" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/PlayersPanel/VBoxContainer" unique_id=1602117006]
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
-text = "Claim your factions on your own row  —  Axis, then Allies, or the random pick on the right."
+text = "LOBBY_PLAYERS_HINT"
 autowrap_mode = 3
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/PlayersPanel/VBoxContainer" unique_id=117382540]
@@ -139,11 +139,11 @@ theme_override_constants/separation = 14
 [node name="ScenarioLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=2132674987]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "GAME OPTIONS"
+text = "LOBBY_HDR_GAME_OPTIONS"
 
 [node name="SeedLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=188894307]
 layout_mode = 2
-text = "Seed"
+text = "GAMEOPTS_SEED_LABEL"
 
 [node name="SeedRow" type="HBoxContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=65703041]
 layout_mode = 2
@@ -154,13 +154,13 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "random"
+placeholder_text = "GAMEOPTS_SEED_PLACEHOLDER"
 
 [node name="RandomizeSeedButton" type="Button" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer/SeedRow" unique_id=1900950696]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-text = "Randomize"
+text = "GAMEOPTS_RANDOMIZE"
 
 [node name="OptionsGap" type="Control" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=1602117007]
 custom_minimum_size = Vector2(0, 4)
@@ -170,15 +170,15 @@ mouse_filter = 2
 [node name="OpeningDiscardCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=344424219]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "On: deal 10 cards and every player immediately discards 3. Off: deal 7 and start."
+tooltip_text = "GAMEOPTS_DISCARD_TOOLTIP"
 button_pressed = true
-text = "Discard cards at start"
+text = "GAMEOPTS_DISCARD_AT_START"
 
 [node name="FactionIntroCheckBox" type="CheckBox" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ScenarioPanel/VBoxContainer" unique_id=1873405521]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "On: after loading, the camera visits each capital and names the faction and its player."
-text = "Faction intro at start"
+tooltip_text = "GAMEOPTS_FACTION_INTRO_TOOLTIP"
+text = "GAMEOPTS_FACTION_INTRO"
 
 [node name="ChatPanel" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn"]
 material = ExtResource("5_frost")
@@ -193,7 +193,7 @@ theme_override_constants/separation = 12
 [node name="ChatLabel" type="Label" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel/VBoxContainer"]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "CHAT"
+text = "LOBBY_HDR_CHAT"
 
 [node name="MessagesInset" type="PanelContainer" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/SideColumn/ChatPanel/VBoxContainer"]
 layout_mode = 2
@@ -214,7 +214,7 @@ selection_enabled = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-placeholder_text = "Message the lobby"
+placeholder_text = "LOBBY_CHAT_PLACEHOLDER"
 
 [node name="BottomSpacer" type="Control" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer" unique_id=1602117009]
 layout_mode = 2
@@ -228,7 +228,7 @@ theme_override_constants/separation = 16
 [node name="LeaveButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ActionRow" unique_id=1093857721 instance=ExtResource("6_action")]
 unique_name_in_owner = true
 layout_mode = 2
-ButtonText = "Leave"
+ButtonText = "LOBBY_BTN_LEAVE"
 
 [node name="ActionSpacer" type="Control" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ActionRow" unique_id=1602117008]
 layout_mode = 2
@@ -240,13 +240,13 @@ unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(260, 64)
 layout_mode = 2
-ButtonText = "Invite Friends"
+ButtonText = "LOBBY_BTN_INVITE"
 
 [node name="StartGameButton" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/ActionRow" unique_id=313149031 instance=ExtResource("7_primary")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(340, 64)
 layout_mode = 2
-ButtonText = "Start Game"
+ButtonText = "LOBBY_BTN_START"
 
 [node name="BrassFrame" type="ColorRect" parent="MultiplayerLobby/CanvasLayer/MarginContainer/VBoxContainer/Body/PlayersPanel"]
 layout_mode = 2

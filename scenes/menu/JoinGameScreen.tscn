@@ -54,12 +54,12 @@ theme_override_constants/separation = 14
 [node name="Kicker" type="Label" parent="Card/FormContainer" unique_id=1702117003]
 layout_mode = 2
 theme_type_variation = &"MenuKicker"
-text = "MULTIPLAYER  ·  DIRECT CONNECTION"
+text = "JOIN_KICKER"
 
 [node name="TitleLabel" type="Label" parent="Card/FormContainer" unique_id=191252396]
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
-text = "JOIN GAME"
+text = "JOIN_TITLE"
 
 [node name="HeaderRule" type="HSeparator" parent="Card/FormContainer" unique_id=1702117004]
 layout_mode = 2
@@ -81,7 +81,7 @@ theme_override_constants/separation = 8
 [node name="IpLabel" type="Label" parent="Card/FormContainer/Fields/AddressColumn" unique_id=663842362]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "SERVER ADDRESS"
+text = "JOIN_ADDRESS_LABEL"
 
 [node name="IpInput" type="LineEdit" parent="Card/FormContainer/Fields/AddressColumn" unique_id=284536560]
 unique_name_in_owner = true
@@ -97,7 +97,7 @@ theme_override_constants/separation = 8
 [node name="PortLabel" type="Label" parent="Card/FormContainer/Fields/PortColumn" unique_id=1556742149]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "PORT"
+text = "JOIN_PORT_LABEL"
 
 [node name="PortInput" type="LineEdit" parent="Card/FormContainer/Fields/PortColumn" unique_id=1458125045]
 unique_name_in_owner = true

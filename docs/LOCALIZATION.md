@@ -54,12 +54,14 @@ A key missing from a language falls back to English (`internationalization/local
 ## Status
 
 Translated:
-- the main menu
-- the Settings dialog
+- all menu screens: main menu, Settings, Skirmish, Lobby, Host/Join, Friends' games, Load Game, Leaderboard, Invite, Tutorials list, Victory, Disclaimer, the in-game Esc menu, notices and toasts
+- the fixed text on in-game screens: chat, round track, prompts, reaction controls, connection and error dialogs, score history, card distribution, turn badge
+- scenario titles and descriptions (`SCENARIO_<NAME>_TITLE`, falling back to the scenario file)
+- sound-effect names (`SFX_<NAME>`, falling back to `settings.json`)
 
-Not yet translated:
-- the other menu screens (Skirmish, Lobby, Load/Join, Tutorial, Victory, dialogs, toasts)
-- in-game UI
-- cards
-- faction and country names
-- sound-effect setting names
+Data-driven text uses `Localization.TranslateOr(key, english)` or `Localization.KeyOr(key, english)`, so the data file keeps its English and a translation is optional per item.
+
+Still English (see `docs/LOCALIZATION_INVENTORY.md`):
+- text the host sends to other players: lobby chat lines, end reasons, prompts, action labels
+- faction, country, card and card-type names
+- card text, tutorials, history and card art

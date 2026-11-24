@@ -170,9 +170,9 @@ public partial class ChatBox : PanelContainer
     private void RefreshChannel()
     {
         bool team = _channel == ChatChannel.Team;
-        ChannelButton.Text = team ? "Team" : "All";
+        ChannelButton.Text = team ? "HUD_CHAT_CHANNEL_TEAM" : "HUD_CHAT_CHANNEL_ALL";
         ChannelButton.AddThemeColorOverride("font_color", team ? TeamColor : Colors.White);
-        MessageInput.PlaceholderText = team ? "Message your team (Tab: all)" : "Message everyone (Tab: team)";
+        MessageInput.PlaceholderText = team ? "HUD_CHAT_PLACEHOLDER_TEAM" : "HUD_CHAT_PLACEHOLDER_ALL";
     }
 
     /// <summary>One formatted line; the lobby chat shares it. AddText rather than BBCode, so nothing typed is parsed as markup.</summary>
@@ -196,7 +196,7 @@ public partial class ChatBox : PanelContainer
         if (message.Channel == ChatChannel.Team)
         {
             messages.PushColor(TeamColor);
-            messages.AddText("[Team] ");
+            messages.AddText(TranslationServer.Translate("HUD_CHAT_TEAM_PREFIX"));
             messages.Pop();
         }
         messages.PushColor(message.IsOwn ? OwnNameColor : OtherNameColor);

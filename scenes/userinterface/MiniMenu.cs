@@ -46,16 +46,16 @@ public partial class MiniMenu : Control
 	public override void _Ready()
 	{
 		MiniMenuModal.Visible = false;
-		GameMenuButton.TextureButton.TooltipText = "Menu (Esc)";
+		GameMenuButton.TextureButton.TooltipText = "HUD_MINIMENU_TOOLTIP_MENU";
 		// Unlike Escape, a click opens the menu even over a prompt: it is an explicit ask, and Resume hands the prompt back.
 		GameMenuButton.TextureButton.Pressed += () => GameMenuModal.Open(GetTree().CurrentScene);
 		VisibilityButton.TextureButton.Pressed += OnVisibilityButtonPressed;
 		ShowActionButton.Pressed += OnShowActionButtonPressed;
 
 		// On the inner button: it stops the mouse, so a tooltip on the margin around it would never show.
-		DeckCompositionButton.TextureButton.TooltipText = "Cards in each deck at the start of the game";
+		DeckCompositionButton.TextureButton.TooltipText = "HUD_MINIMENU_TOOLTIP_DECKS";
 		DeckCompositionButton.TextureButton.Pressed += DeckCompositionPanel.Toggle;
-		ScoreHistoryButton.TextureButton.TooltipText = "Score history";
+		ScoreHistoryButton.TextureButton.TooltipText = "HUD_MINIMENU_TOOLTIP_SCORE";
 		ScoreHistoryButton.TextureButton.Pressed += OnScoreHistoryButtonPressed;
 
 		ToggleCountryLabelsButton.ButtonPressed = GameSettings.ShowCountryLabels;

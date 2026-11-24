@@ -7,14 +7,14 @@
 script = ExtResource("2_script")
 
 [node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
-text = "Host Game"
+text = "HOST_TITLE"
 
 [node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "Hosts through Steam, so no port forwarding is needed."
+text = "HOST_HINT"
 autowrap_mode = 3
 
 [node name="WarningLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
@@ -46,7 +46,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "Everyone who joins needs the expansions you tick."
+text = "HOST_EXPANSION_HINT"
 autowrap_mode = 3
 
 [node name="SteamOptions" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="5"]
@@ -61,7 +61,7 @@ theme_override_constants/separation = 12
 [node name="PlayersLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/SteamOptions/PlayersRow" index="0"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Players"
+text = "HOST_PLAYERS_LABEL"
 
 [node name="MaxPlayers" type="SpinBox" parent="Root/Centre/Panel/ContentContainer/Box/SteamOptions/PlayersRow" index="1"]
 unique_name_in_owner = true
@@ -78,16 +78,16 @@ theme_override_constants/separation = 12
 [node name="PrivacyLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box/SteamOptions/PrivacyRow" index="0"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Visibility"
+text = "HOST_VISIBILITY_LABEL"
 
 [node name="Privacy" type="OptionButton" parent="Root/Centre/Panel/ContentContainer/Box/SteamOptions/PrivacyRow" index="1"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 item_count = 2
-popup/item_0/text = "Friends only"
+popup/item_0/text = "HOST_PRIVACY_FRIENDS"
 popup/item_0/id = 1
-popup/item_1/text = "Private (invite only)"
+popup/item_1/text = "HOST_PRIVACY_PRIVATE"
 popup/item_1/id = 0
 selected = 0
 
@@ -95,7 +95,7 @@ selected = 0
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "Friends-only games appear in your friends' game list. Private games do not — invite players from the lobby instead."
+text = "HOST_PRIVACY_HINT"
 autowrap_mode = 3
 
 [node name="Buttons" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="6"]
@@ -107,7 +107,7 @@ theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "CANCEL"
+text = "HOST_BTN_CANCEL"
 
 [node name="Spacer" type="Control" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="1"]
 layout_mode = 2
@@ -116,10 +116,10 @@ size_flags_horizontal = 3
 [node name="IpButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="2"]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Hosts over a direct connection instead. Players join with your IP address, and port 7777 may need forwarding."
+tooltip_text = "HOST_IP_TOOLTIP"
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 16
-text = "Host over IP instead"
+text = "HOST_BTN_IP_INSTEAD"
 flat = true
 
 [node name="ConfirmButton" type="Button" parent="Root/Centre/Panel/ContentContainer/Box/Buttons" index="3"]
@@ -127,6 +127,6 @@ theme_type_variation = &"MenuPrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(260, 44)
 layout_mode = 2
-text = "CREATE STEAM LOBBY"
+text = "HOST_BTN_CREATE_LOBBY"
 
 [editable path="Root/Centre/Panel"]

@@ -81,4 +81,4 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 40)
 layout_mode = 2
 size_flags_vertical = 4
-text = "IGNORE"
+text = "TOAST_BTN_IGNORE"

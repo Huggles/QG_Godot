@@ -38,22 +38,22 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 0)
 layout_mode = 2
 focus_mode = 0
-tooltip_text = "Show messages from players"
+tooltip_text = "HUD_CHAT_TOOLTIP_FILTER_PLAYERS"
 theme_override_font_sizes/font_size = 12
 toggle_mode = true
 button_pressed = true
-text = "Player"
+text = "HUD_CHAT_FILTER_PLAYERS"
 
 [node name="GameFilterButton" type="Button" parent="Margin/VBox/FilterRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 0)
 layout_mode = 2
 focus_mode = 0
-tooltip_text = "Show messages from the game"
+tooltip_text = "HUD_CHAT_TOOLTIP_FILTER_GAME"
 theme_override_font_sizes/font_size = 12
 toggle_mode = true
 button_pressed = true
-text = "Game"
+text = "HUD_CHAT_FILTER_GAME"
 
 [node name="Messages" type="RichTextLabel" parent="Margin/VBox"]
 unique_name_in_owner = true
@@ -73,13 +73,13 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(52, 0)
 layout_mode = 2
 focus_mode = 0
-tooltip_text = "Switch channel (Tab while typing)"
+tooltip_text = "HUD_CHAT_TOOLTIP_CHANNEL"
 theme_override_font_sizes/font_size = 12
-text = "All"
+text = "HUD_CHAT_CHANNEL_ALL"
 
 [node name="MessageInput" type="LineEdit" parent="Margin/VBox/InputRow"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
-placeholder_text = "Message everyone (Tab: team)"
+placeholder_text = "HUD_CHAT_PLACEHOLDER_ALL"

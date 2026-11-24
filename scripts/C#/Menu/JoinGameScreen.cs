@@ -50,8 +50,8 @@ public partial class JoinGameScreen : Control
 		_joinButton  = GetNode<MenuPanelButton>("%JoinButton");
 		_leaveButton = GetNode<MenuPanelButton>("%LeaveButton");
 
-		_joinButton.ButtonText  = "Join";
-		_leaveButton.ButtonText = "Leave";
+		_joinButton.ButtonText  = "JOIN_BTN_JOIN";
+		_leaveButton.ButtonText = "JOIN_BTN_LEAVE";
 
 		_ipInput.Text   = GameSettings.Instance.LastJoinIp;
 		_portInput.Text = GameSettings.Instance.LastJoinPort.ToString();
@@ -66,7 +66,7 @@ public partial class JoinGameScreen : Control
 		Multiplayer.ConnectedToServer += OnConnectedToServer;
 		Multiplayer.ConnectionFailed  += OnConnectionFailed;
 
-		SetStatus("Enter the host's address, then press Join.", ColorInfo);
+		SetStatus(Tr("JOIN_STATUS_PROMPT"), ColorInfo);
 		_ipInput.GrabFocus();
 		_ipInput.SelectAll();
 	}
@@ -100,14 +100,14 @@ public partial class JoinGameScreen : Control
 
 		if (string.IsNullOrEmpty(ip))
 		{
-			SetStatus("Enter a server address.", ColorError);
+			SetStatus(Tr("JOIN_STATUS_NO_ADDRESS"), ColorError);
 			_ipInput.GrabFocus();
 			return;
 		}
 
 		if (!int.TryParse(_portInput.Text.Trim(), out int port) || port < 1 || port > 65535)
 		{
-			SetStatus("Invalid port — must be a number between 1 and 65535.", ColorError);
+			SetStatus(Tr("JOIN_STATUS_BAD_PORT"), ColorError);
 			_portInput.GrabFocus();
 			return;
 		}
@@ -119,7 +119,7 @@ public partial class JoinGameScreen : Control
 		if (err != Error.Ok)
 		{
 			DebugUtilities.PrintPeerError($"Failed to create client: {err}");
-			SetStatus($"Failed to join: {err}", ColorError);
+			SetStatus(string.Format(Tr("JOIN_STATUS_FAILED"), err), ColorError);
 			return;
 		}
 
@@ -127,7 +127,7 @@ public partial class JoinGameScreen : Control
 		GameSettings.Instance.SetLastJoinAddress(ip, port);
 
 		SetConnecting(true);
-		SetStatus($"Connecting to {ip}:{port}...", ColorInfo);
+		SetStatus(string.Format(Tr("JOIN_STATUS_CONNECTING"), ip, port), ColorInfo);
 		StartTimeoutGuard();
 	}
 
@@ -149,7 +149,7 @@ public partial class JoinGameScreen : Control
 	{
 		DebugUtilities.PrintPeer("JoinGameScreen: connected, asking the host where to go");
 		_attempt++; // connected: the connect timeout no longer applies, the hello has its own
-		SetStatus("Connected — joining...", ColorInfo);
+		SetStatus(Tr("JOIN_STATUS_CONNECTED"), ColorInfo);
 		Guard.FireAndForget(EnterAfterHelloAsync, "JoinGameScreen.Hello");
 	}
 
@@ -165,7 +165,7 @@ public partial class JoinGameScreen : Control
 				SceneFlow.ChangeScene(this, LobbyScenePath);
 				break;
 			case RejoinService.HelloResult.Rejoin:
-				SetStatus("Rejoining the game...", ColorInfo);
+				SetStatus(Tr("JOIN_STATUS_REJOINING"), ColorInfo);
 				break;
 			default:
 				Multiplayer.MultiplayerPeer?.Close();
@@ -178,7 +178,7 @@ public partial class JoinGameScreen : Control
 	private void OnConnectionFailed()
 	{
 		DebugUtilities.PrintPeerError("JoinGameScreen: connection failed");
-		AbortAttempt("Connection failed — check the address and that the host is running.");
+		AbortAttempt(Tr("JOIN_STATUS_CONNECTION_FAILED"));
 	}
 
 	// ══════════════════════════════════════════════════════════════════════════
@@ -197,7 +197,7 @@ public partial class JoinGameScreen : Control
 			if (!IsInstanceValid(this)) return;
 			if (attempt != _attempt || !_connecting) return; // superseded or already resolved
 			DebugUtilities.PrintPeerError("JoinGameScreen: connection attempt timed out");
-			AbortAttempt("Connection timed out — is the host running and the port reachable?");
+			AbortAttempt(Tr("JOIN_STATUS_TIMED_OUT"));
 		};
 	}
 

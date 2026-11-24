@@ -53,8 +53,8 @@ public partial class SteamFriendLobbiesScreen : Control
 		_refreshButton = GetNode<MenuPanelButton>("%RefreshButton");
 		_leaveButton   = GetNode<MenuPanelButton>("%LeaveButton");
 
-		_refreshButton.ButtonText = "Refresh";
-		_leaveButton.ButtonText   = "Back";
+		_refreshButton.ButtonText = "FRIENDS_BTN_REFRESH";
+		_leaveButton.ButtonText   = "FRIENDS_BTN_BACK";
 
 		_refreshButton.Pressed += OnRefreshPressed;
 		_leaveButton.Pressed   += OnLeavePressed;
@@ -64,7 +64,7 @@ public partial class SteamFriendLobbiesScreen : Control
 
 		if (!SteamworksApi.IsAvailable)
 		{
-			SetStatus($"Steam is unavailable: {SteamworksApi.UnavailableReason}.", ColorError);
+			SetStatus(string.Format(Tr("FRIENDS_STATUS_STEAM_UNAVAILABLE"), SteamworksApi.UnavailableReason), ColorError);
 			return;
 		}
 
@@ -73,7 +73,7 @@ public partial class SteamFriendLobbiesScreen : Control
 		long invite = MainMenu.ConsumePendingInvite();
 		if (invite != 0)
 		{
-			Guard.FireAndForget(() => JoinAsync(invite, "your friend's game"), "SteamFriendLobbies.Invite");
+			Guard.FireAndForget(() => JoinAsync(invite, Tr("FRIENDS_DESC_FRIEND_GAME")), "SteamFriendLobbies.Invite");
 			return;
 		}
 
@@ -106,7 +106,7 @@ public partial class SteamFriendLobbiesScreen : Control
 	{
 		if (_busy) return;
 		SetBusy(true);
-		SetStatus("Looking for friends' games...", ColorInfo);
+		SetStatus(Tr("FRIENDS_STATUS_SEARCHING"), ColorInfo);
 
 		try
 		{
@@ -116,8 +116,8 @@ public partial class SteamFriendLobbiesScreen : Control
 			RebuildRows(lobbies);
 			SetStatus(
 				lobbies.Count == 0
-					? "No friends are hosting a game right now."
-					: $"{lobbies.Count} game(s) found.",
+					? Tr("FRIENDS_STATUS_NONE")
+					: string.Format(Tr(lobbies.Count == 1 ? "FRIENDS_STATUS_COUNT_ONE" : "FRIENDS_STATUS_COUNT_OTHER"), lobbies.Count),
 				ColorInfo);
 		}
 		finally
@@ -163,9 +163,9 @@ public partial class SteamFriendLobbiesScreen : Control
 		// just says so up front.
 		var join = new Button
 		{
-			Text = !lobby.SameVersionAsLocal ? "Wrong version" : lobby.MissingExpansion ? "Needs DLC" : lobby.IsFull ? "Full" : "Join",
+			Text = !lobby.SameVersionAsLocal ? "FRIENDS_BTN_WRONG_VERSION" : lobby.MissingExpansion ? "FRIENDS_BTN_NEEDS_DLC" : lobby.IsFull ? "FRIENDS_BTN_FULL" : "FRIENDS_BTN_JOIN",
 			Disabled = lobby.IsFull || !lobby.SameVersionAsLocal || lobby.MissingExpansion,
-			TooltipText = lobby.MissingExpansion ? $"This game is played with {lobby.ExpansionNames}, which you do not have." : string.Empty,
+			TooltipText = lobby.MissingExpansion ? string.Format(Tr("FRIENDS_TOOLTIP_NEEDS_DLC"), lobby.ExpansionNames) : string.Empty,
 			CustomMinimumSize = new Vector2(120, 44),
 		};
 		join.Pressed += () => OnJoinPressed(lobby);
@@ -182,8 +182,10 @@ public partial class SteamFriendLobbiesScreen : Control
 		label.AddThemeColorOverride("font_color",
 			lobby.SameVersionAsLocal ? new Color(0.7f, 0.7f, 0.7f) : new Color(1f, 0.75f, 0.3f));
 		label.TooltipText = lobby.SameVersionAsLocal
-			? "Host is on the same version as you."
-			: $"Host is on {(string.IsNullOrWhiteSpace(lobby.GameVersion) ? "an unknown version" : "v" + lobby.GameVersion)}; you are on v{BuildInfo.Version}. Both need the same version to play together.";
+			? "FRIENDS_TOOLTIP_VERSION_SAME"
+			: string.Format(TranslationServer.Translate("FRIENDS_TOOLTIP_VERSION_DIFFERENT"),
+				string.IsNullOrWhiteSpace(lobby.GameVersion) ? TranslationServer.Translate("FRIENDS_VERSION_UNKNOWN") : "v" + lobby.GameVersion,
+				BuildInfo.Version);
 		label.MouseFilter = MouseFilterEnum.Stop; // a Label ignores the mouse by default, which hides its tooltip
 		return label;
 	}
@@ -202,7 +204,7 @@ public partial class SteamFriendLobbiesScreen : Control
 	private void OnJoinPressed(FriendLobby lobby)
 	{
 		if (_busy) return;
-		Guard.FireAndForget(() => JoinAsync(lobby.LobbyId, $"{lobby.HostName}'s game"),
+		Guard.FireAndForget(() => JoinAsync(lobby.LobbyId, string.Format(Tr("FRIENDS_DESC_HOST_GAME"), lobby.HostName)),
 			"SteamFriendLobbies.Join");
 	}
 
@@ -214,14 +216,14 @@ public partial class SteamFriendLobbiesScreen : Control
 	{
 		if (_busy) return;
 		SetBusy(true);
-		SetStatus($"Joining {description}...", ColorInfo);
+		SetStatus(string.Format(Tr("FRIENDS_STATUS_JOINING"), description), ColorInfo);
 
 		(bool ok, string error) = await SteamworksApi.Instance.JoinLobbyAsync(lobbyId);
 		if (!IsInstanceValid(this)) return;
 
 		if (!ok)
 		{
-			AbortAttempt($"Could not join — {error}");
+			AbortAttempt(string.Format(Tr("FRIENDS_ERROR_JOIN"), error));
 			return;
 		}
 
@@ -229,13 +231,13 @@ public partial class SteamFriendLobbiesScreen : Control
 		if (peer == null)
 		{
 			SteamworksApi.Instance.LeaveCurrentLobby();
-			AbortAttempt($"Could not connect — {peerError}");
+			AbortAttempt(string.Format(Tr("FRIENDS_ERROR_CONNECT"), peerError));
 			return;
 		}
 
 		Multiplayer.MultiplayerPeer = peer;
 		MainMenu.SetJoinSteam(lobbyId);
-		SetStatus("Connecting...", ColorInfo);
+		SetStatus(Tr("FRIENDS_STATUS_CONNECTING"), ColorInfo);
 		StartTimeoutGuard();
 	}
 
@@ -244,7 +246,7 @@ public partial class SteamFriendLobbiesScreen : Control
 		DebugUtilities.PrintPeer("SteamFriendLobbiesScreen: connected, asking the host where to go");
 		_handedOff = true;
 		_attempt++; // connected: the connect timeout no longer applies, the hello has its own
-		SetStatus("Connected — joining...", ColorInfo);
+		SetStatus(Tr("FRIENDS_STATUS_CONNECTED"), ColorInfo);
 		Guard.FireAndForget(EnterAfterHelloAsync, "SteamFriendLobbiesScreen.Hello");
 	}
 
@@ -260,7 +262,7 @@ public partial class SteamFriendLobbiesScreen : Control
 				SceneFlow.ChangeScene(this, LobbyScenePath);
 				break;
 			case RejoinService.HelloResult.Rejoin:
-				SetStatus("Rejoining the game...", ColorInfo);
+				SetStatus(Tr("FRIENDS_STATUS_REJOINING"), ColorInfo);
 				break;
 			default:
 				_handedOff = false;
@@ -276,7 +278,7 @@ public partial class SteamFriendLobbiesScreen : Control
 	{
 		DebugUtilities.PrintPeerError("SteamFriendLobbiesScreen: connection failed");
 		SteamworksApi.Instance?.LeaveCurrentLobby();
-		AbortAttempt("Connection failed — the host may have closed the game.");
+		AbortAttempt(Tr("FRIENDS_ERROR_FAILED"));
 	}
 
 	private void OnLeavePressed()
@@ -303,7 +305,7 @@ public partial class SteamFriendLobbiesScreen : Control
 			DebugUtilities.PrintPeerError("SteamFriendLobbiesScreen: connection attempt timed out");
 			Multiplayer.MultiplayerPeer = null;
 			SteamworksApi.Instance?.LeaveCurrentLobby();
-			AbortAttempt("Connection timed out — the host may no longer be reachable.");
+			AbortAttempt(Tr("FRIENDS_ERROR_TIMEOUT"));
 		};
 	}
 

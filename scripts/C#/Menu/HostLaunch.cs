@@ -24,7 +24,7 @@ public static class HostLaunch
     public static async Task<long> CreateSteamLobbyAsync(Node parent, HostOptionsDialog.Result choice,
                                                          string scenarioTitle)
     {
-        MenuNotice busy = MenuNotice.ShowBusy(parent, "Creating Steam lobby...");
+        MenuNotice busy = MenuNotice.ShowBusy(parent, TranslationServer.Translate("HOST_CREATING_LOBBY"));
 
         long lobbyId = await SteamworksApi.Instance.CreateLobbyAsync(choice.Privacy, choice.MaxPlayers);
 
@@ -33,8 +33,8 @@ public static class HostLaunch
 
         if (lobbyId == 0)
         {
-            await MenuNotice.ShowMessageAsync(parent, "Could not create a Steam lobby",
-                "Steam did not create the lobby. You can still host over Godot networking.");
+            await MenuNotice.ShowMessageAsync(parent, TranslationServer.Translate("HOST_LOBBY_FAILED_TITLE"),
+                TranslationServer.Translate("HOST_LOBBY_FAILED_MESSAGE"));
             return 0;
         }
 

@@ -92,7 +92,12 @@ public partial class AudioSettingsPanel : VBoxContainer
             // Same label-left, control-right row as every other setting in the dialog.
             HBoxContainer row = new();
             row.AddThemeConstantOverride("separation", 16);
-            row.AddChild(new Label { Text = setting.Label ?? setting.Name, SizeFlagsHorizontal = SizeFlags.ExpandFill });
+            // Names come from settings.json in English; a key SFX_<NAME> translates one when the .po has it.
+            row.AddChild(new Label
+            {
+                Text = Localization.KeyOr(SfxKey(setting.Name), setting.Label ?? setting.Name),
+                SizeFlagsHorizontal = SizeFlags.ExpandFill,
+            });
             container.AddChild(row);
 
             OptionButton picker = new OptionButton
@@ -105,7 +110,7 @@ public partial class AudioSettingsPanel : VBoxContainer
             for (int i = 0; i < setting.SoundFiles.Count; i++)
             {
                 SfxSoundFileData option = setting.SoundFiles[i];
-                picker.AddItem(option.Label ?? option.Name, i);
+                picker.AddItem(Localization.KeyOr(SfxKey(option.Name), option.Label ?? option.Name), i);
                 if (option.Name == selected?.Name)
                 {
                     picker.Selected = i;
@@ -140,4 +145,7 @@ public partial class AudioSettingsPanel : VBoxContainer
         // is exactly what the player should be hearing back.
         AudioManager.PlaySfxSetting(settingName);
     }
+
+    /// <summary>Translation key for a cue or sound by its data name, e.g. inputRequest → SFX_INPUTREQUEST.</summary>
+    private static string SfxKey(string name) => "SFX_" + (name ?? "").ToUpperInvariant();
 }

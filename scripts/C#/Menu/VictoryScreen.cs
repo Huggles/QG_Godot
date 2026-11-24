@@ -22,7 +22,7 @@ public partial class VictoryScreen : Control
     private void ReadyInternal()
     {
         var mainMenu = GetNode<MenuPanelButton>("%MainMenuButton");
-        mainMenu.ButtonText = "Main Menu";
+        mainMenu.ButtonText = "VICTORY_BTN_MAIN_MENU";
         mainMenu.Pressed += OnMainMenuPressed;
 
         var title   = GetNode<RichTextLabel>("%TitleLabel");
@@ -33,7 +33,7 @@ public partial class VictoryScreen : Control
 
         if (PendingResult == null)
         {
-            title.Text = "[center][font_size=42][b]No Result[/b][/font_size][/center]";
+            title.Text = Tr("VICTORY_NO_RESULT");
             return;
         }
 
@@ -53,14 +53,14 @@ public partial class VictoryScreen : Control
     private static void BuildTitle(RichTextLabel title, GameResult r)
     {
         Color winColor = r.WinningTeam == FactionTeam.AXIS ? AxisColor : AlliesColor;
-        string winName = r.WinningTeam == FactionTeam.AXIS ? "AXIS" : "ALLIES";
-        string banner  = $"[color={winColor.ToHtml(false)}]{winName} VICTORY[/color]";
+        string winText = TranslationServer.Translate(r.WinningTeam == FactionTeam.AXIS ? "VICTORY_BANNER_AXIS" : "VICTORY_BANNER_ALLIES");
+        string banner  = $"[color={winColor.ToHtml(false)}]{winText}[/color]";
 
         title.Text =
             $"[center][font_size=64][b]{banner}[/b][/font_size]\n" +
             $"[font_size=24][color={NeutralColor.ToHtml(false)}]" +
-            $"Axis {r.AxisTotal}  —  Allies {r.AlliesTotal}\n" +
-            $"Game ended: {r.EndReason} (Round {r.FinalRound})[/color][/font_size]" +
+            string.Format(TranslationServer.Translate("VICTORY_SCORE_LINE"), r.AxisTotal, r.AlliesTotal) + "\n" +
+            string.Format(TranslationServer.Translate("VICTORY_ENDED"), r.EndReason, r.FinalRound) + "[/color][/font_size]" +
             RatingLine(r.LocalRatingChange) + "[/center]";
     }
 
@@ -68,14 +68,14 @@ public partial class VictoryScreen : Control
     {
         if (change == null) return string.Empty;
         Color color = change.Delta >= 0 ? new Color("#9fd98a") : AxisColor;
-        return $"\n[font_size=24][color={color.ToHtml(false)}]Rating {change.Delta:+0;-0}[/color]" +
+        return $"\n[font_size=24][color={color.ToHtml(false)}]{string.Format(TranslationServer.Translate("VICTORY_RATING"), change.Delta.ToString("+0;-0"))}[/color]" +
                $"[color={NeutralColor.ToHtml(false)}]  ({string.Join(", ", change.Reasons)})[/color][/font_size]";
     }
 
     private static void BuildColumn(HBoxContainer parent, GameResult r, FactionTeam team, Color teamColor)
     {
         int teamTotal = team == FactionTeam.AXIS ? r.AxisTotal : r.AlliesTotal;
-        string teamName = team == FactionTeam.AXIS ? "Axis" : "Allies";
+        string teamName = TranslationServer.Translate(team == FactionTeam.AXIS ? "VICTORY_TEAM_AXIS" : "VICTORY_TEAM_ALLIES");
 
         var column = new VBoxContainer();
         column.CustomMinimumSize = new Vector2(520, 0);
@@ -84,7 +84,7 @@ public partial class VictoryScreen : Control
 
         var header = NewLabel();
         header.Text = $"[b][font_size=34][color={teamColor.ToHtml(false)}]{teamName}[/color][/font_size][/b]" +
-                      $"  [font_size=28][color={NeutralColor.ToHtml(false)}]{teamTotal} pts[/color][/font_size]";
+                      $"  [font_size=28][color={NeutralColor.ToHtml(false)}]{string.Format(TranslationServer.Translate("VICTORY_POINTS"), teamTotal)}[/color][/font_size]";
         column.AddChild(header);
 
         foreach (FactionResult faction in r.Factions.Where(f => f.Team == team).OrderByDescending(f => f.Total))
@@ -127,12 +127,12 @@ public partial class VictoryScreen : Control
         string name = faction.FactionData?.Label ?? PrettyName(faction.Faction);
 
         string breakdown = faction.PerRound.Count > 0
-            ? string.Join("   ", faction.PerRound.Select(pr => $"R{pr.Round}: {pr.Points}"))
-            : "no points scored";
+            ? string.Join("   ", faction.PerRound.Select(pr => string.Format(TranslationServer.Translate("VICTORY_ROUND_POINTS"), pr.Round, pr.Points)))
+            : TranslationServer.Translate("VICTORY_NO_POINTS");
 
         return
             $"[font_size=24][b][color={nameColor.ToHtml(false)}]{name}[/color][/b]  " +
-            $"[color={NeutralColor.ToHtml(false)}]{faction.Total} pts[/color][/font_size]\n" +
+            $"[color={NeutralColor.ToHtml(false)}]{string.Format(TranslationServer.Translate("VICTORY_POINTS"), faction.Total)}[/color][/font_size]\n" +
             $"[font_size=16][color=#999999]{breakdown}[/color][/font_size]";
     }
 

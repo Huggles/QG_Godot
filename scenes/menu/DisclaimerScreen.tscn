@@ -52,12 +52,12 @@ theme_override_constants/separation = 18
 [node name="Kicker" type="Label" parent="Centre/Card/Box"]
 layout_mode = 2
 theme_type_variation = &"MenuKicker"
-text = "BETA BUILD  ·  PLEASE READ"
+text = "DISCLAIMER_KICKER"
 
 [node name="Title" type="Label" parent="Centre/Card/Box"]
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
-text = "BEFORE YOU PLAY"
+text = "DISCLAIMER_TITLE"
 
 [node name="HeaderRule" type="HSeparator" parent="Centre/Card/Box"]
 layout_mode = 2
@@ -69,13 +69,7 @@ theme_override_constants/line_separation = 4
 theme_override_font_sizes/normal_font_size = 21
 theme_override_font_sizes/bold_font_size = 21
 bbcode_enabled = true
-text = "•  [b]This is a beta version of the game.[/b] It is still under active development: rules, cards, artwork, interface and balance are all being worked on, and anything you see here may change, break or disappear in a later build. Saved games may not survive an update. If something looks wrong, it may well be — please report it rather than assume it was intended.
-
-•  [b]All gameplay and assets are based on the board game designed by Ian Brody.[/b] The rules, the cards, the factions and the design as a whole originate with him, and all intellectual property in them remains his. This digital version is an unofficial fan project, made without his involvement or endorsement, and claims no ownership over any part of it. It is not a commercial product: it is not sold, carries no purchases or advertising, and is not intended to make a profit for anyone involved in it.
-
-•  [b]This version is not intended for distribution.[/b] It is provided to you personally, for testing. Do not pass the build, its files, or your access to it on to anyone outside the beta program. Doing so may result in removal from the beta program and a lifelong ban from future access.
-
-Choosing Accept confirms you have read and understood the above."
+text = "DISCLAIMER_BODY"
 fit_content = true
 scroll_active = false
 

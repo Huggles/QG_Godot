@@ -19,8 +19,7 @@ using System.Collections.Generic;
 public static class MenuScenarioPicker
 {
 	/// <summary>Shown in the description panel when the scenario directory turned up nothing.</summary>
-	public const string NoScenariosMessage =
-		"No scenarios available. Make sure the scenario files are present in assets/data/scenarios.";
+	public static string NoScenariosMessage => TranslationServer.Translate("MENU_PICKER_NO_SCENARIOS");
 
 	/// <summary>
 	/// Fill the picker, carrying each entry's AvailableScenarios index as the item's id.
@@ -41,7 +40,7 @@ public static class MenuScenarioPicker
 		{
 			if (scenarios[i].IsTutorial) continue;
 			if (GameContext.IsProductionBuild && scenarios[i].IsDebug) continue;
-			picker.AddItem(scenarios[i].Title, i);
+			picker.AddItem(scenarios[i].DisplayTitle, i);
 		}
 	}
 

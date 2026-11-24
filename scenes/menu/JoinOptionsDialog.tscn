@@ -8,7 +8,7 @@
 script = ExtResource("2_script")
 
 [node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" index="0"]
-text = "Join Game"
+text = "JOIN_OPTIONS_TITLE"
 
 [node name="Choices" type="HBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" index="1"]
 layout_mode = 2
@@ -19,19 +19,19 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(330, 130)
 layout_mode = 2
-ButtonText = "Join by IP"
+ButtonText = "JOIN_BTN_BY_IP"
 
 [node name="FriendsButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(330, 130)
 layout_mode = 2
-ButtonText = "Friends' Games"
+ButtonText = "JOIN_BTN_FRIENDS"
 
 [node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="2"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "Joining by IP needs the host's address. Friends' games are found through Steam."
+text = "JOIN_OPTIONS_HINT"
 autowrap_mode = 3
 
 [node name="WarningLabel" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" index="3"]
@@ -53,6 +53,6 @@ theme_type_variation = &"MenuSecondaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
-text = "CANCEL"
+text = "JOIN_BTN_CANCEL"
 
 [editable path="Root/Centre/Panel"]

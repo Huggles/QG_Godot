@@ -24,7 +24,7 @@ public partial class MenuToast : CanvasLayer
 	private readonly TaskCompletionSource<bool> _answered = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 	private string _message    = "";
-	private string _acceptText = "OK";
+	private string _acceptText = "TOAST_BTN_OK";
 
 	/// <summary>Set the moment the toast is answered, so a second click cannot resolve it twice.</summary>
 	private bool _resolved;
@@ -59,7 +59,8 @@ public partial class MenuToast : CanvasLayer
 		GetNode<Label>("%MessageLabel").Text = _message;
 
 		Button accept = GetNode<Button>("%AcceptButton");
-		accept.Text     = _acceptText.ToUpperInvariant();
+		// Translated before upper-casing: a caller may pass a key or text already translated.
+		accept.Text     = Tr(_acceptText).ToUpperInvariant();
 		accept.Pressed += Accept;
 
 		GetNode<Button>("%DismissButton").Pressed += Dismiss;

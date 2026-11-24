@@ -220,3 +220,1135 @@ msgstr "Finest"
 
 msgid "SETTINGS_GAMEPLAY_DEBUG_LEVEL_HINT"
 msgstr "How much detail is written to the console. Finest is loud and only useful when diagnosing a problem."
+
+# ---- Settings: Audio sound names ----
+
+msgid "SFX_INPUTREQUEST"
+msgstr "Input Request"
+
+msgid "SFX_PING"
+msgstr "Ping"
+
+msgid "SFX_AIRHORN"
+msgstr "Airhorn"
+
+msgid "SFX_MENUBUTTONCLICK"
+msgstr "Menu Button Click"
+
+msgid "SFX_MENUBUTTONCLICK1"
+msgstr "Metal Click"
+
+# ---- Scenarios ----
+
+msgid "SCENARIO_BASIC_TITLE"
+msgstr "Standard Game"
+
+msgid "SCENARIO_BASIC_DESCRIPTION"
+msgstr "All factions begin deployed to home territories with no pre-loaded cards."
+
+msgid "SCENARIO_ONEROUND_TITLE"
+msgstr "One Round Blitz"
+
+msgid "SCENARIO_ONEROUND_DESCRIPTION"
+msgstr "A single round format with random starting victory points and quick, chaotic action."
+
+msgid "SCENARIO_ALLCARDS_TITLE"
+msgstr "All Cards In Play"
+
+msgid "SCENARIO_ALLCARDS_DESCRIPTION"
+msgstr "Every faction's status and response cards are already played so you can test interactions immediately."
+
+msgid "SCENARIO_TUTORIAL_01_TITLE"
+msgstr "Tutorial 1: Your First Turn"
+
+msgid "SCENARIO_TUTORIAL_01_DESCRIPTION"
+msgstr "Three guided rounds. Fixed hands, no surprises, and the commander tells you what to do."
+
+msgid "SCENARIO_TUTORIAL_02_TITLE"
+msgstr "Tutorial 2: Status and Response Cards"
+
+msgid "SCENARIO_TUTORIAL_02_DESCRIPTION"
+msgstr "Command Germany with two Status cards already on the table. Chain them, then watch five rivals answer with Responses, Events, recruits, straits and Reallocate Resources."
+
+# ---- Game options (Skirmish and Lobby) ----
+
+msgid "GAMEOPTS_SEED_LABEL"
+msgstr "Seed"
+
+msgid "GAMEOPTS_SEED_PLACEHOLDER"
+msgstr "random"
+
+msgid "GAMEOPTS_RANDOMIZE"
+msgstr "Randomize"
+
+msgid "GAMEOPTS_DISCARD_AT_START"
+msgstr "Discard cards at start"
+
+msgid "GAMEOPTS_DISCARD_TOOLTIP"
+msgstr "On: deal 10 cards and every player immediately discards 3. Off: deal 7 and start."
+
+msgid "GAMEOPTS_FACTION_INTRO"
+msgstr "Faction intro at start"
+
+msgid "GAMEOPTS_FACTION_INTRO_TOOLTIP"
+msgstr "On: after loading, the camera visits each capital and names the faction and its player."
+
+# ---- Multiplayer lobby ----
+
+msgid "LOBBY_KICKER"
+msgstr "QUARTERMASTER GENERAL  ·  MULTIPLAYER"
+
+msgid "LOBBY_TITLE"
+msgstr "LOBBY"
+
+msgid "LOBBY_STATUS_WAITING"
+msgstr "Waiting to host or join..."
+
+msgid "LOBBY_HDR_COMMANDERS"
+msgstr "COMMANDERS"
+
+msgid "LOBBY_PLAYERS_HINT"
+msgstr "Claim your factions on your own row  —  Axis, then Allies, or the random pick on the right."
+
+msgid "LOBBY_HDR_GAME_OPTIONS"
+msgstr "GAME OPTIONS"
+
+msgid "LOBBY_HDR_CHAT"
+msgstr "CHAT"
+
+msgid "LOBBY_CHAT_PLACEHOLDER"
+msgstr "Message the lobby"
+
+msgid "LOBBY_BTN_LEAVE"
+msgstr "Leave"
+
+msgid "LOBBY_BTN_INVITE"
+msgstr "Invite Friends"
+
+msgid "LOBBY_BTN_START"
+msgstr "Start Game"
+
+msgid "LOBBY_STATUS_CONNECTED"
+msgstr "Connected – waiting for lobby data..."
+
+msgid "LOBBY_STATUS_HOST_FAILED"
+msgstr "Failed to host: {0}"
+
+msgid "LOBBY_STATUS_HOSTING_PORT"
+msgstr "Hosting on port {0}"
+
+msgid "LOBBY_STATUS_STEAM_HOST_FAILED"
+msgstr "Failed to host via Steam — {0}"
+
+msgid "LOBBY_STATUS_HOSTING_STEAM"
+msgstr "Hosting via Steam as {0}"
+
+msgid "LOBBY_STATUS_JOIN_FAILED"
+msgstr "Failed to join: {0}"
+
+msgid "LOBBY_STATUS_CONNECTING"
+msgstr "Connecting to {0}:{1}..."
+
+msgid "LOBBY_BTN_CANCEL"
+msgstr "Cancel"
+
+msgid "LOBBY_TOOLTIP_READY"
+msgstr "All factions accounted for – ready to start!"
+
+msgid "LOBBY_STATUS_CONNECTION_FAILED"
+msgstr "Connection failed!"
+
+msgid "LOBBY_STATUS_DISCONNECTED"
+msgstr "Disconnected from server"
+
+msgid "LOBBY_TOOLTIP_RANDOM"
+msgstr "Random – take whatever nobody picked, drawn when the game starts"
+
+msgid "LOBBY_STATUS_EXPANSIONS_MISSING"
+msgstr "The host chose {0}, which cannot be played here: {1}"
+
+# ---- Skirmish ----
+
+msgid "SKIRMISH_KICKER"
+msgstr "NEW GAME  ·  VERSUS THE AI"
+
+msgid "SKIRMISH_TITLE"
+msgstr "SKIRMISH"
+
+msgid "SKIRMISH_HDR_SCENARIO"
+msgstr "SCENARIO"
+
+msgid "SKIRMISH_DESCRIPTION_PLACEHOLDER"
+msgstr "Select a scenario to see its description."
+
+msgid "SKIRMISH_HDR_OPTIONS"
+msgstr "OPTIONS"
+
+msgid "SKIRMISH_OPPONENTS_LABEL"
+msgstr "Opponents"
+
+msgid "SKIRMISH_AI_TOOLTIP"
+msgstr "Normal: the original AI. Hard: values its pieces, the income within reach, its cards and its deck — a stronger, slightly slower opponent."
+
+msgid "SKIRMISH_HDR_YOUR_FACTIONS"
+msgstr "YOUR FACTIONS"
+
+msgid "SKIRMISH_SEATS_HINT"
+msgstr "Click a faction to hand it to the AI, or take it back."
+
+msgid "SKIRMISH_AI_NORMAL"
+msgstr "Normal AI"
+
+msgid "SKIRMISH_AI_HARD"
+msgstr "Hard AI"
+
+msgid "SKIRMISH_BTN_START"
+msgstr "Start Game"
+
+msgid "SKIRMISH_BTN_BACK"
+msgstr "Back"
+
+msgid "SKIRMISH_COL_AXIS"
+msgstr "AXIS"
+
+msgid "SKIRMISH_COL_ALLIES"
+msgstr "ALLIES"
+
+msgid "SKIRMISH_SEAT_TOOLTIP"
+msgstr "Play as {0}"
+
+msgid "SKIRMISH_SUMMARY_WATCHING"
+msgstr "You are watching: all six factions are played by the AI."
+
+msgid "SKIRMISH_SUMMARY_ONE"
+msgstr "You command {0} faction  ·  the AI plays {1}"
+
+msgid "SKIRMISH_SUMMARY_OTHER"
+msgstr "You command {0} factions  ·  the AI plays {1}"
+
+msgid "SKIRMISH_SUMMARY_AI_NONE"
+msgstr "none"
+
+msgid "SKIRMISH_SEAT_YOU"
+msgstr "YOU"
+
+msgid "SKIRMISH_NO_SCENARIO"
+msgstr "No scenario selected."
+
+# ---- Menu scenario picker ----
+
+msgid "MENU_PICKER_NO_SCENARIOS"
+msgstr "No scenarios available. Make sure the scenario files are present in assets/data/scenarios."
+
+msgid "MENU_PICKER_EXPANSION"
+msgstr "Expansion: {0}"
+
+# ---- Host options ----
+
+msgid "HOST_TITLE"
+msgstr "Host Game"
+
+msgid "HOST_HINT"
+msgstr "Hosts through Steam, so no port forwarding is needed."
+
+msgid "HOST_EXPANSION_HINT"
+msgstr "Everyone who joins needs the expansions you tick."
+
+msgid "HOST_PLAYERS_LABEL"
+msgstr "Players"
+
+msgid "HOST_VISIBILITY_LABEL"
+msgstr "Visibility"
+
+msgid "HOST_PRIVACY_FRIENDS"
+msgstr "Friends only"
+
+msgid "HOST_PRIVACY_PRIVATE"
+msgstr "Private (invite only)"
+
+msgid "HOST_PRIVACY_HINT"
+msgstr "Friends-only games appear in your friends' game list. Private games do not — invite players from the lobby instead."
+
+msgid "HOST_BTN_CANCEL"
+msgstr "CANCEL"
+
+msgid "HOST_IP_TOOLTIP"
+msgstr "Hosts over a direct connection instead. Players join with your IP address, and port 7777 may need forwarding."
+
+msgid "HOST_BTN_IP_INSTEAD"
+msgstr "Host over IP instead"
+
+msgid "HOST_BTN_CREATE_LOBBY"
+msgstr "CREATE STEAM LOBBY"
+
+msgid "HOST_BTN_IP"
+msgstr "Host over IP"
+
+msgid "HOST_EXPANSION_HINT_FIXED"
+msgstr "The save was played with these, so they cannot be changed."
+
+msgid "HOST_STEAM_UNAVAILABLE"
+msgstr "Steam is unavailable: {0}."
+
+msgid "HOST_NO_STEAM_NETWORKING"
+msgstr "This build has no Steam networking support."
+
+msgid "HOST_CREATING_LOBBY"
+msgstr "Creating Steam lobby..."
+
+msgid "HOST_LOBBY_FAILED_TITLE"
+msgstr "Could not create a Steam lobby"
+
+msgid "HOST_LOBBY_FAILED_MESSAGE"
+msgstr "Steam did not create the lobby. You can still host over Godot networking."
+
+# ---- Join game ----
+
+msgid "JOIN_KICKER"
+msgstr "MULTIPLAYER  ·  DIRECT CONNECTION"
+
+msgid "JOIN_TITLE"
+msgstr "JOIN GAME"
+
+msgid "JOIN_ADDRESS_LABEL"
+msgstr "SERVER ADDRESS"
+
+msgid "JOIN_PORT_LABEL"
+msgstr "PORT"
+
+msgid "JOIN_BTN_JOIN"
+msgstr "Join"
+
+msgid "JOIN_BTN_LEAVE"
+msgstr "Leave"
+
+msgid "JOIN_STATUS_PROMPT"
+msgstr "Enter the host's address, then press Join."
+
+msgid "JOIN_STATUS_NO_ADDRESS"
+msgstr "Enter a server address."
+
+msgid "JOIN_STATUS_BAD_PORT"
+msgstr "Invalid port — must be a number between 1 and 65535."
+
+msgid "JOIN_STATUS_FAILED"
+msgstr "Failed to join: {0}"
+
+msgid "JOIN_STATUS_CONNECTING"
+msgstr "Connecting to {0}:{1}..."
+
+msgid "JOIN_STATUS_CONNECTED"
+msgstr "Connected — joining..."
+
+msgid "JOIN_STATUS_REJOINING"
+msgstr "Rejoining the game..."
+
+msgid "JOIN_STATUS_CONNECTION_FAILED"
+msgstr "Connection failed — check the address and that the host is running."
+
+msgid "JOIN_STATUS_TIMED_OUT"
+msgstr "Connection timed out — is the host running and the port reachable?"
+
+# ---- Join options ----
+
+msgid "JOIN_OPTIONS_TITLE"
+msgstr "Join Game"
+
+msgid "JOIN_BTN_BY_IP"
+msgstr "Join by IP"
+
+msgid "JOIN_BTN_FRIENDS"
+msgstr "Friends' Games"
+
+msgid "JOIN_OPTIONS_HINT"
+msgstr "Joining by IP needs the host's address. Friends' games are found through Steam."
+
+msgid "JOIN_BTN_CANCEL"
+msgstr "CANCEL"
+
+msgid "JOIN_STEAM_UNAVAILABLE"
+msgstr "Steam is unavailable: {0}."
+
+msgid "JOIN_NO_STEAM_NETWORKING"
+msgstr "This build has no Steam networking support."
+
+# ---- Load game ----
+
+msgid "LOAD_KICKER"
+msgstr "CAMPAIGN ARCHIVE"
+
+msgid "LOAD_TITLE"
+msgstr "LOAD GAME"
+
+msgid "LOAD_BTN_BACK"
+msgstr "Back"
+
+msgid "LOAD_STATUS_EMPTY"
+msgstr "No saved games yet. Save from the in-game menu with Escape."
+
+msgid "LOAD_STATUS_COUNT_ONE"
+msgstr "{0} saved game."
+
+msgid "LOAD_STATUS_COUNT_OTHER"
+msgstr "{0} saved games."
+
+msgid "LOAD_UNNAMED"
+msgstr "(unnamed)"
+
+msgid "LOAD_TYPE_SKIRMISH"
+msgstr "Skirmish"
+
+msgid "LOAD_TYPE_ONLINE"
+msgstr "Online"
+
+msgid "LOAD_TYPE_RANKED"
+msgstr "Ranked"
+
+msgid "LOAD_BTN_LOAD"
+msgstr "Load"
+
+msgid "LOAD_BTN_DELETE"
+msgstr "Delete"
+
+msgid "LOAD_ERROR_UNREADABLE"
+msgstr "That save could not be read. See the log for details."
+
+msgid "LOAD_ERROR_VERSION"
+msgstr "That save was written by an incompatible version ({0})."
+
+msgid "LOAD_ERROR_NO_SCENARIO"
+msgstr "That save carries no scenario and cannot be restored."
+
+msgid "LOAD_ERROR_EXPANSIONS"
+msgstr "That save was played with {0}, which cannot be played here: {1}."
+
+msgid "LOAD_CONFIRM_DELETE_TITLE"
+msgstr "Delete save?"
+
+msgid "LOAD_ERROR_DELETE"
+msgstr "That save could not be deleted. See the log for details."
+
+# ---- Leaderboard ----
+
+msgid "LEADERBOARD_TITLE"
+msgstr "Leaderboard"
+
+msgid "LEADERBOARD_BTN_REFRESH"
+msgstr "REFRESH"
+
+msgid "LEADERBOARD_BTN_CLOSE"
+msgstr "CLOSE"
+
+msgid "LEADERBOARD_STATUS_STEAM_UNAVAILABLE"
+msgstr "Steam is unavailable: {0}."
+
+msgid "LEADERBOARD_STATUS_LOADING"
+msgstr "Loading rankings…"
+
+msgid "LEADERBOARD_STATUS_EMPTY"
+msgstr "Nobody has been ranked yet — you are the first."
+
+msgid "LEADERBOARD_STATUS_COUNT_ONE"
+msgstr "{0} ranked player."
+
+msgid "LEADERBOARD_STATUS_COUNT_OTHER"
+msgstr "{0} ranked players."
+
+msgid "LEADERBOARD_STATUS_COUNT_UNRANKED_ONE"
+msgstr "{0} ranked player. Your entry has not appeared yet — you start at {1}."
+
+msgid "LEADERBOARD_STATUS_COUNT_UNRANKED_OTHER"
+msgstr "{0} ranked players. Your entry has not appeared yet — you start at {1}."
+
+msgid "LEADERBOARD_HDR_PLAYER"
+msgstr "Player"
+
+msgid "LEADERBOARD_HDR_RATING"
+msgstr "Rating"
+
+# ---- Invite friends ----
+
+msgid "INVITE_TITLE"
+msgstr "Invite Friends"
+
+msgid "INVITE_BTN_REFRESH"
+msgstr "REFRESH"
+
+msgid "INVITE_BTN_CLOSE"
+msgstr "CLOSE"
+
+msgid "INVITE_STATUS_STEAM_UNAVAILABLE"
+msgstr "Steam is unavailable: {0}."
+
+msgid "INVITE_STATUS_NO_LOBBY"
+msgstr "You are not in a Steam lobby, so there is nothing to invite anyone to."
+
+msgid "INVITE_STATUS_NONE_ONLINE"
+msgstr "None of your friends are online right now."
+
+msgid "INVITE_STATUS_COUNT_ONE"
+msgstr "{0} friend online. Friends already playing are listed first."
+
+msgid "INVITE_STATUS_COUNT_OTHER"
+msgstr "{0} friends online. Friends already playing are listed first."
+
+msgid "INVITE_BTN_IN_LOBBY"
+msgstr "In lobby"
+
+msgid "INVITE_BTN_INVITED"
+msgstr "Invited"
+
+msgid "INVITE_BTN_INVITE"
+msgstr "Invite"
+
+msgid "INVITE_PRESENCE_IN_GAME"
+msgstr "In game"
+
+msgid "INVITE_PRESENCE_LOOKING_TO_PLAY"
+msgstr "Looking to play"
+
+msgid "INVITE_PRESENCE_AWAY"
+msgstr "Away"
+
+msgid "INVITE_PRESENCE_BUSY"
+msgstr "Busy"
+
+msgid "INVITE_PRESENCE_SNOOZING"
+msgstr "Snoozing"
+
+msgid "INVITE_PRESENCE_ONLINE"
+msgstr "Online"
+
+msgid "INVITE_BTN_FAILED"
+msgstr "Failed"
+
+msgid "INVITE_STATUS_REFUSED"
+msgstr "Could not invite {0} — Steam refused the invite."
+
+msgid "INVITE_STATUS_INVITED"
+msgstr "Invited {0}."
+
+# ---- Friends' games ----
+
+msgid "FRIENDS_KICKER"
+msgstr "MULTIPLAYER  ·  STEAM"
+
+msgid "FRIENDS_TITLE"
+msgstr "FRIENDS' GAMES"
+
+msgid "FRIENDS_BTN_REFRESH"
+msgstr "Refresh"
+
+msgid "FRIENDS_BTN_BACK"
+msgstr "Back"
+
+msgid "FRIENDS_STATUS_STEAM_UNAVAILABLE"
+msgstr "Steam is unavailable: {0}."
+
+msgid "FRIENDS_DESC_FRIEND_GAME"
+msgstr "your friend's game"
+
+msgid "FRIENDS_STATUS_SEARCHING"
+msgstr "Looking for friends' games..."
+
+msgid "FRIENDS_STATUS_NONE"
+msgstr "No friends are hosting a game right now."
+
+msgid "FRIENDS_STATUS_COUNT_ONE"
+msgstr "{0} game found."
+
+msgid "FRIENDS_STATUS_COUNT_OTHER"
+msgstr "{0} games found."
+
+msgid "FRIENDS_BTN_WRONG_VERSION"
+msgstr "Wrong version"
+
+msgid "FRIENDS_BTN_NEEDS_DLC"
+msgstr "Needs DLC"
+
+msgid "FRIENDS_BTN_FULL"
+msgstr "Full"
+
+msgid "FRIENDS_BTN_JOIN"
+msgstr "Join"
+
+msgid "FRIENDS_TOOLTIP_NEEDS_DLC"
+msgstr "This game is played with {0}, which you do not have."
+
+msgid "FRIENDS_TOOLTIP_VERSION_SAME"
+msgstr "Host is on the same version as you."
+
+msgid "FRIENDS_TOOLTIP_VERSION_DIFFERENT"
+msgstr "Host is on {0}; you are on v{1}. Both need the same version to play together."
+
+msgid "FRIENDS_VERSION_UNKNOWN"
+msgstr "an unknown version"
+
+msgid "FRIENDS_DESC_HOST_GAME"
+msgstr "{0}'s game"
+
+msgid "FRIENDS_STATUS_JOINING"
+msgstr "Joining {0}..."
+
+msgid "FRIENDS_ERROR_JOIN"
+msgstr "Could not join — {0}"
+
+msgid "FRIENDS_ERROR_CONNECT"
+msgstr "Could not connect — {0}"
+
+msgid "FRIENDS_STATUS_CONNECTING"
+msgstr "Connecting..."
+
+msgid "FRIENDS_STATUS_CONNECTED"
+msgstr "Connected — joining..."
+
+msgid "FRIENDS_STATUS_REJOINING"
+msgstr "Rejoining the game..."
+
+msgid "FRIENDS_ERROR_FAILED"
+msgstr "Connection failed — the host may have closed the game."
+
+msgid "FRIENDS_ERROR_TIMEOUT"
+msgstr "Connection timed out — the host may no longer be reachable."
+
+# ---- Tutorials ----
+
+msgid "TUTORIALS_TITLE"
+msgstr "TUTORIALS"
+
+msgid "TUTORIALS_EMPTY"
+msgstr "No tutorials found."
+
+msgid "TUTORIALS_BTN_BACK"
+msgstr "Back"
+
+# ---- Victory ----
+
+msgid "VICTORY_BTN_MAIN_MENU"
+msgstr "Main Menu"
+
+msgid "VICTORY_NO_RESULT"
+msgstr "[center][font_size=42][b]No Result[/b][/font_size][/center]"
+
+msgid "VICTORY_BANNER_AXIS"
+msgstr "AXIS VICTORY"
+
+msgid "VICTORY_BANNER_ALLIES"
+msgstr "ALLIES VICTORY"
+
+msgid "VICTORY_SCORE_LINE"
+msgstr "Axis {0}  —  Allies {1}"
+
+msgid "VICTORY_ENDED"
+msgstr "Game ended: {0} (Round {1})"
+
+msgid "VICTORY_RATING"
+msgstr "Rating {0}"
+
+msgid "VICTORY_TEAM_AXIS"
+msgstr "Axis"
+
+msgid "VICTORY_TEAM_ALLIES"
+msgstr "Allies"
+
+msgid "VICTORY_POINTS"
+msgstr "{0} pts"
+
+msgid "VICTORY_ROUND_POINTS"
+msgstr "R{0}: {1}"
+
+msgid "VICTORY_NO_POINTS"
+msgstr "no points scored"
+
+# ---- Disclaimer ----
+
+msgid "DISCLAIMER_KICKER"
+msgstr "BETA BUILD  ·  PLEASE READ"
+
+msgid "DISCLAIMER_TITLE"
+msgstr "BEFORE YOU PLAY"
+
+msgid "DISCLAIMER_BODY"
+msgstr "•  [b]This is a beta version of the game.[/b] It is still under active development: rules, cards, artwork, interface and balance are all being worked on, and anything you see here may change, break or disappear in a later build. Saved games may not survive an update. If something looks wrong, it may well be — please report it rather than assume it was intended.\n\n•  [b]All gameplay and assets are based on the board game designed by Ian Brody.[/b] The rules, the cards, the factions and the design as a whole originate with him, and all intellectual property in them remains his. This digital version is an unofficial fan project, made without his involvement or endorsement, and claims no ownership over any part of it. It is not a commercial product: it is not sold, carries no purchases or advertising, and is not intended to make a profit for anyone involved in it.\n\n•  [b]This version is not intended for distribution.[/b] It is provided to you personally, for testing. Do not pass the build, its files, or your access to it on to anyone outside the beta program. Doing so may result in removal from the beta program and a lifelong ban from future access.\n\nChoosing Accept confirms you have read and understood the above."
+
+msgid "DISCLAIMER_BTN_ACCEPT"
+msgstr "Accept"
+
+msgid "DISCLAIMER_BTN_DECLINE"
+msgstr "Decline"
+
+# ---- Game menu ----
+
+msgid "GAMEMENU_TITLE"
+msgstr "Game Menu"
+
+msgid "GAMEMENU_BTN_RESUME"
+msgstr "Resume"
+
+msgid "GAMEMENU_BTN_SAVE"
+msgstr "Save Game"
+
+msgid "GAMEMENU_BTN_QUIT"
+msgstr "Quit to Main Menu"
+
+msgid "GAMEMENU_HINT"
+msgstr "The game keeps running while this menu is open. Only the host can save."
+
+msgid "GAMEMENU_TOOLTIP_HOST_ONLY"
+msgstr "Only the host can save the game. Ask them to save it."
+
+msgid "GAMEMENU_SAVE_QUEUED_TITLE"
+msgstr "Save queued"
+
+msgid "GAMEMENU_SAVE_QUEUED_BODY"
+msgstr "'{0}' will be saved as soon as the current action finishes. Stay in the game until it is saved."
+
+msgid "GAMEMENU_SAVED_TITLE"
+msgstr "Game saved"
+
+msgid "GAMEMENU_SAVE_FAILED_TITLE"
+msgstr "Could not save"
+
+msgid "GAMEMENU_SAVE_FAILED_BODY"
+msgstr "The save file could not be written. See the log for details."
+
+msgid "GAMEMENU_QUIT_UNSAVED_TITLE"
+msgstr "Save not written yet"
+
+msgid "GAMEMENU_QUIT_UNSAVED_BODY"
+msgstr "Your save is waiting for the current action to finish and has not been written. Quit now and it will be lost."
+
+msgid "GAMEMENU_BTN_QUIT_ANYWAY"
+msgstr "Quit anyway"
+
+# ---- Notices and toasts ----
+
+msgid "NOTICE_BTN_OK"
+msgstr "OK"
+
+msgid "NOTICE_BTN_CONFIRM"
+msgstr "CONFIRM"
+
+msgid "NOTICE_BTN_CANCEL"
+msgstr "CANCEL"
+
+msgid "TOAST_BTN_IGNORE"
+msgstr "IGNORE"
+
+msgid "TOAST_BTN_OK"
+msgstr "OK"
+
+# ---- HUD chat ----
+
+msgid "HUD_CHAT_TOOLTIP_FILTER_PLAYERS"
+msgstr "Show messages from players"
+
+msgid "HUD_CHAT_FILTER_PLAYERS"
+msgstr "Player"
+
+msgid "HUD_CHAT_TOOLTIP_FILTER_GAME"
+msgstr "Show messages from the game"
+
+msgid "HUD_CHAT_FILTER_GAME"
+msgstr "Game"
+
+msgid "HUD_CHAT_TOOLTIP_CHANNEL"
+msgstr "Switch channel (Tab while typing)"
+
+msgid "HUD_CHAT_CHANNEL_ALL"
+msgstr "All"
+
+msgid "HUD_CHAT_PLACEHOLDER_ALL"
+msgstr "Message everyone (Tab: team)"
+
+msgid "HUD_CHAT_CHANNEL_TEAM"
+msgstr "Team"
+
+msgid "HUD_CHAT_PLACEHOLDER_TEAM"
+msgstr "Message your team (Tab: all)"
+
+msgid "HUD_CHAT_TEAM_PREFIX"
+msgstr "[Team] "
+
+# ---- HUD round track ----
+
+msgid "HUD_ROUND_LAST"
+msgstr "Last round {0}"
+
+msgid "HUD_ROUND_OF"
+msgstr "Round {0} of {1}"
+
+# ---- Connection lost dialog ----
+
+msgid "HUD_CONN_BTN_WAIT"
+msgstr "Wait"
+
+msgid "HUD_CONN_BTN_SAVE_QUIT"
+msgstr "Save & Quit"
+
+msgid "HUD_CONN_BTN_BOT"
+msgstr "Bot takes over"
+
+msgid "HUD_CONN_BTN_QUIT"
+msgstr "Quit"
+
+msgid "HUD_CONN_LOST_TITLE"
+msgstr "{0} lost connection"
+
+msgid "HUD_CONN_LOST_MESSAGE_CAN_SAVE"
+msgstr "The game is paused. Wait for them to reconnect, save the game and quit, or let a bot play their factions."
+
+msgid "HUD_CONN_LOST_MESSAGE_NO_SAVE"
+msgstr "The game is paused. Wait for them to reconnect, quit, or let a bot play their factions. The game is in the middle of an action, so it cannot be saved right now."
+
+msgid "HUD_CONN_HOST_LOST_TITLE"
+msgstr "The host has disconnected"
+
+msgid "HUD_CONN_HOST_LOST_MESSAGE"
+msgstr "The game cannot continue without the host."
+
+# ---- Connection banner ----
+
+msgid "HUD_CONN_REJOINING"
+msgstr "{0} is rejoining"
+
+msgid "HUD_CONN_CATCHING_UP"
+msgstr "Catching up on the game…"
+
+msgid "HUD_CONN_RECONNECTING"
+msgstr "Reconnecting… {0}s"
+
+msgid "HUD_CONN_GAME_PAUSED"
+msgstr "The game is paused"
+
+msgid "HUD_CONN_WAITING_FOR"
+msgstr "Waiting for {0} to reconnect"
+
+msgid "HUD_CONN_HOST_UNREACHABLE"
+msgstr "Connection to the host lost"
+
+# ---- Error popup ----
+
+msgid "HUD_ERROR_TITLE"
+msgstr "An error occurred"
+
+msgid "HUD_ERROR_STACK_TRACE_SHOW"
+msgstr "▸ Stack trace"
+
+msgid "HUD_ERROR_BTN_COPY"
+msgstr "Copy"
+
+msgid "HUD_ERROR_BTN_PREV"
+msgstr "◂ Prev"
+
+msgid "HUD_ERROR_BTN_NEXT"
+msgstr "Next ▸"
+
+msgid "HUD_ERROR_BTN_QUIT_TO_MENU"
+msgstr "Quit to menu"
+
+msgid "HUD_ERROR_BTN_CONTINUE"
+msgstr "Continue"
+
+msgid "HUD_ERROR_BTN_RETRY"
+msgstr "Retry"
+
+msgid "HUD_ERROR_HISTORY_COUNT"
+msgstr "Error history ({0})"
+
+msgid "HUD_ERROR_TITLE_RECOVERED"
+msgstr "An error occurred (recovered)"
+
+msgid "HUD_ERROR_TITLE_UNRECOVERABLE"
+msgstr "An unrecoverable error occurred"
+
+msgid "HUD_ERROR_RECOVERED_NOTE"
+msgstr "RECOVERED · no popup was shown"
+
+msgid "HUD_ERROR_BTN_SKIP_INPUT"
+msgstr "Skip input"
+
+msgid "HUD_ERROR_TOOLTIP_SKIP_INPUT"
+msgstr "Gives up on the input and continues the step as if the player had passed. A required choice (e.g. discarding down to the hand limit) will not happen at all."
+
+msgid "HUD_ERROR_THE_PLAYER"
+msgstr "the player"
+
+msgid "HUD_ERROR_TOOLTIP_RETRY"
+msgstr "Asks {0} for the same input again, with a fresh timer. Nothing has been skipped yet."
+
+msgid "HUD_ERROR_TOOLTIP_CLOSE"
+msgstr "Closes this window. Nothing is waiting — the game is not paused."
+
+msgid "HUD_ERROR_BTN_DISMISS"
+msgstr "Dismiss"
+
+msgid "HUD_ERROR_TOOLTIP_DISMISS"
+msgstr "Only the host can resume the turn loop."
+
+msgid "HUD_ERROR_TOOLTIP_CONTINUE_UNAVAILABLE"
+msgstr "Unavailable: the game state was modified before clients were notified, so peers have diverged."
+
+msgid "HUD_ERROR_TOOLTIP_CONTINUE"
+msgstr "Skips the rest of the failed step and resumes play. The game state may be inconsistent."
+
+msgid "HUD_ERROR_HISTORY"
+msgstr "Error history"
+
+msgid "HUD_ERROR_NONE_RECORDED"
+msgstr "No errors recorded this session."
+
+msgid "HUD_ERROR_STACK_TRACE_HIDE"
+msgstr "▾ Stack trace"
+
+# ---- Input timer ----
+
+msgid "HUD_TIMER_WAITING_FOR_INPUT"
+msgstr "Waiting for input"
+
+msgid "HUD_TIMER_TOOLTIP_FORCE_TIMEOUT"
+msgstr "Host only: time out this input request now"
+
+msgid "HUD_TIMER_YOUR_INPUT"
+msgstr "Your input"
+
+msgid "HUD_TIMER_WAITING_ON"
+msgstr "Waiting on {0}"
+
+msgid "HUD_WAITING_ON_INPUT"
+msgstr "Waiting on {0} input..."
+
+# ---- Deck composition ----
+
+msgid "HUD_DECK_TITLE"
+msgstr "CARD DISTRIBUTION"
+
+msgid "HUD_DECK_SUBTITLE"
+msgstr "Cards in each faction's deck at the start of the game"
+
+msgid "HUD_DECK_TOTAL"
+msgstr "Total"
+
+# ---- Score history ----
+
+msgid "HUD_SCORE_TITLE"
+msgstr "Score History"
+
+msgid "HUD_SCORE_NO_POINTS"
+msgstr "[color=#bbbbbb]No points scored yet.[/color]"
+
+msgid "HUD_SCORE_ROUND_LINE"
+msgstr "[color=#d9ad5c]Round {0}[/color]  [color=#bbbbbb]{1} VP[/color]"
+
+msgid "HUD_SCORE_START_LINE"
+msgstr "[color=#d9ad5c]Start[/color]  [color=#bbbbbb]{0} VP[/color]"
+
+# ---- Faction info ----
+
+msgid "HUD_PILE_EMPTY"
+msgstr "No cards"
+
+msgid "HUD_FACTION_TOOLTIP_HAND"
+msgstr "Cards in hand"
+
+msgid "HUD_FACTION_TOOLTIP_VP"
+msgstr "Victory points"
+
+msgid "HUD_FACTION_TOOLTIP_ARMIES"
+msgstr "Armies in reserve"
+
+msgid "HUD_FACTION_TOOLTIP_NAVIES"
+msgstr "Navies in reserve"
+
+msgid "HUD_FACTION_TOOLTIP_TOGGLE"
+msgstr "Click to show or hide the hand, score and pieces"
+
+# ---- Commander message ----
+
+msgid "HUD_COMMANDER_BTN_CONTINUE"
+msgstr "CONTINUE  ▶"
+
+# ---- Presentation modal ----
+
+msgid "HUD_MODAL_BTN_CANCEL"
+msgstr "Cancel"
+
+msgid "HUD_MODAL_TOOLTIP_PARK"
+msgstr "Hide — put this aside without answering it, and bring it back with Show my action."
+
+# ---- Mini menu ----
+
+msgid "HUD_MINIMENU_TOOLTIP_MENU"
+msgstr "Menu (Esc)"
+
+msgid "HUD_MINIMENU_TOOLTIP_DECKS"
+msgstr "Cards in each deck at the start of the game"
+
+msgid "HUD_MINIMENU_TOOLTIP_SCORE"
+msgstr "Score history"
+
+# ---- Players panel ----
+
+msgid "HUD_PLAYERS_STATUS_HOST"
+msgstr "host"
+
+msgid "HUD_PLAYERS_STATUS_BOT"
+msgstr "bot"
+
+msgid "HUD_PLAYERS_STATUS_REJOINING"
+msgstr "rejoining…"
+
+msgid "HUD_PLAYERS_STATUS_RECONNECTING"
+msgstr "reconnecting… {0}s"
+
+msgid "HUD_PLAYERS_STATUS_DISCONNECTED"
+msgstr "disconnected"
+
+msgid "HUD_PLAYERS_STATUS_UNSTABLE"
+msgstr "unstable"
+
+# ---- Turn sequence ----
+
+msgid "HUD_STEP_HINT_TITLE_OPTIONAL"
+msgstr "{0} Step (optional)"
+
+msgid "HUD_STEP_HINT_TITLE"
+msgstr "{0} Step"
+
+# ---- Trigger context ----
+
+msgid "HUD_TRIGGER_CAUSE"
+msgstr "Cause: {0}"
+
+msgid "HUD_TRIGGER_ASK_BLOCK"
+msgstr "Do you want to block this action?"
+
+msgid "HUD_TRIGGER_ASK_REACT"
+msgstr "Do you want to react to this action?"
+
+msgid "HUD_TRIGGER_REACTING_TO"
+msgstr "[b]Reacting to:[/b]"
+
+# ---- Reaction skip buttons ----
+
+msgid "HUD_REACTION_SKIP_ROUND"
+msgstr "Skip rest of round"
+
+msgid "HUD_REACTION_SKIP_UNTIL_ACTIVATABLE"
+msgstr "Only ask when I can react"
+
+msgid "HUD_REACTION_SKIP_TURN_STEP"
+msgstr "Skip rest of turn step"
+
+msgid "HUD_REACTION_TOOLTIP_SKIP_UNTIL_ACTIVATABLE"
+msgstr "Stop showing me empty reaction windows. You will still be asked the moment any of your cards can actually react."
+
+msgid "HUD_REACTION_TOOLTIP_SKIP_SCOPE"
+msgstr "Stop asking me for reactions. You will still be asked when you have a face-up card that can react."
+
+# ---- Turn badge ----
+
+msgid "HUD_TURN_BADGE"
+msgstr "{0}'s turn"
+
+# ---- Faction intro ----
+
+msgid "HUD_INTRO_SKIP"
+msgstr "Esc   skip intro"
+
+msgid "HUD_INTRO_YOU"
+msgstr "You"
+
+# ---- HUD buttons ----
+
+msgid "HUD_BTN_SHOW_MY_ACTION"
+msgstr "Show my action"
+
+msgid "HUD_BTN_SKIP"
+msgstr "Skip"
+
+# ---- Player info ----
+
+msgid "HUD_PLAYERINFO_HOST"
+msgstr "Host"
+
+msgid "HUD_PLAYERINFO_CLIENT"
+msgstr "Client"
+
+msgid "HUD_PLAYERINFO_NO_FACTIONS"
+msgstr "No factions assigned"
+
+# ---- Card prompt ----
+
+msgid "HUD_BTN_SKIP_COST"
+msgstr "Skip ({0})"
+
+msgid "HUD_INPUT_CHOOSE_BLOCK"
+msgstr "Choose a block reaction"
+
+msgid "HUD_INPUT_NO_BLOCK"
+msgstr "No block available"
+
+msgid "HUD_INPUT_CHOOSE_AFTER"
+msgstr "Choose an after reaction"
+
+msgid "HUD_INPUT_NO_REACTION"
+msgstr "No reaction available"
+
+msgid "HUD_INPUT_CHOOSE_CARD"
+msgstr "Choose a card"
+
+msgid "HUD_INPUT_CHOOSE_CARD_OR_PASS"
+msgstr "Choose a card, or pass ({0})"
+
+msgid "HUD_INPUT_NOTHING_TO_PLAY"
+msgstr "Nothing you can play"
+
+msgid "HUD_INPUT_NOTHING_TO_PLAY_MUST_PASS"
+msgstr "Nothing you can play — you must pass ({0})"
+
+# ---- Card pick ----
+
+msgid "HUD_PICK_ANY_CARDS"
+msgstr "any cards"
+
+msgid "HUD_PICK_UP_TO"
+msgstr "up to {0}"
+
+msgid "HUD_PICK_N_OR_MORE"
+msgstr "{0} or more cards"
+
+msgid "HUD_PICK_N_TO_M"
+msgstr "{0} to {1} cards"
+
+msgid "HUD_PICK_HINT_DISCARD"
+msgstr "Click {0} to discard"
+
+msgid "HUD_PICK_CARDS_ONE"
+msgstr "{0} card"
+
+msgid "HUD_PICK_CARDS_OTHER"
+msgstr "{0} cards"
+
+msgid "HUD_PICK_SELECT_MORE"
+msgstr "Select {0} more"
+
+msgid "HUD_PICK_DISCARD_NOTHING"
+msgstr "Discard nothing"
+
+msgid "HUD_PICK_DISCARD_N_ONE"
+msgstr "Discard {0} card"
+
+msgid "HUD_PICK_DISCARD_N_OTHER"
+msgstr "Discard {0} cards"
+
+# ---- Discard prompt ----
+
+msgid "HUD_DISCARD_SELECT_N_ONE"
+msgstr "Select {0} card to discard"
+
+msgid "HUD_DISCARD_SELECT_N_OTHER"
+msgstr "Select {0} cards to discard"
+
+msgid "HUD_DISCARD_SELECT_OPTIONAL"
+msgstr "Select card(s) to discard (or skip)"

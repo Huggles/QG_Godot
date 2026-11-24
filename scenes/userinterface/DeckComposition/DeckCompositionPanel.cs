@@ -109,7 +109,7 @@ public partial class DeckCompositionPanel : CenterContainer
 				Table.AddChild(NumberCell(counts.GetValueOrDefault((faction, types[row])), faction, tint));
 		}
 
-		Table.AddChild(Cell("Total", RowLabelColor, NumberColor, HorizontalAlignment.Left));
+		Table.AddChild(Cell("HUD_DECK_TOTAL", RowLabelColor, NumberColor, HorizontalAlignment.Left));
 		foreach (Faction faction in factions)
 			Table.AddChild(NumberCell(types.Sum(type => counts.GetValueOrDefault((faction, type))), faction, 0.5f));
 	}

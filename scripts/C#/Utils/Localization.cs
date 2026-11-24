@@ -41,6 +41,25 @@ public static class Localization
     }
 
     /// <summary>
+    /// The translation of <paramref name="key"/>, or <paramref name="fallback"/> when no language has
+    /// it. For text that comes from data files: the file keeps its English, and a translation is
+    /// added per key when there is one.
+    /// </summary>
+    public static string TranslateOr(string key, string fallback)
+    {
+        string translated = TranslationServer.Translate(key);
+        return translated == key ? fallback : translated;
+    }
+
+    /// <summary>
+    /// <paramref name="key"/> when some language has it, otherwise <paramref name="fallback"/>. For
+    /// assigning data-driven text to a Label/Button/OptionButton item: a key is then auto-translated
+    /// by the control and follows a live language change, while text without a key shows as is.
+    /// </summary>
+    public static string KeyOr(string key, string fallback)
+        => TranslationServer.Translate(key) == key ? fallback : key;
+
+    /// <summary>
     /// True when the launch already picked a locale: <c>--language xx</c> on the command line or the
     /// <c>internationalization/locale/test</c> project setting. Godot strips its own flags from
     /// <see cref="OS.GetCmdlineArgs"/>, so this is read off the result instead: left alone, the

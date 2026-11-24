@@ -97,7 +97,7 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 			ParkButton.Pressed += OnParkButtonPressed;
 			ParkButton.Visible = false;
 			// Names the action, because the button itself is now just a glyph in the title bar.
-			ParkButton.TooltipText = "Hide — put this aside without answering it, and bring it back with Show my action.";
+			ParkButton.TooltipText = "HUD_MODAL_TOOLTIP_PARK";
 		}
 	}
 
@@ -443,8 +443,8 @@ public partial class PresentationModal : PanelContainer, LoadableUI
 		ConfirmButton.Text = count == 0 && _activeConfig.EmptyApplyLabel != null
 			? _activeConfig.EmptyApplyLabel.ToUpperInvariant()
 			: _activeConfig.MinSelections > 0
-			? $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count}/{_activeConfig.MinSelections})"
-			: $"{_activeConfig.ApplyLabel.ToUpperInvariant()} ({count})";
+			? $"{Tr(_activeConfig.ApplyLabel).ToUpperInvariant()} ({count}/{_activeConfig.MinSelections})"
+			: $"{Tr(_activeConfig.ApplyLabel).ToUpperInvariant()} ({count})";
 	}
 
 	// ── Button handlers ──────────────────────────────────────────────────────

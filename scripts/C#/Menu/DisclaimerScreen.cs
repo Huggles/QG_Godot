@@ -30,8 +30,8 @@ public partial class DisclaimerScreen : Control
 		var accept  = GetNode<MenuPanelButton>("%AcceptButton");
 		var decline = GetNode<MenuPanelButton>("%DeclineButton");
 
-		accept.ButtonText  = "Accept";
-		decline.ButtonText = "Decline";
+		accept.ButtonText  = "DISCLAIMER_BTN_ACCEPT";
+		decline.ButtonText = "DISCLAIMER_BTN_DECLINE";
 
 		accept.Pressed  += OnAcceptPressed;
 		decline.Pressed += OnDeclinePressed;

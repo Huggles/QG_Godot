@@ -54,7 +54,7 @@ public partial class LoadGameScreen : Control
         _statusLabel = GetNode<RichTextLabel>("%StatusLabel");
         _backButton  = GetNode<MenuPanelButton>("%BackButton");
 
-        _backButton.ButtonText = "Back";
+        _backButton.ButtonText = "LOAD_BTN_BACK";
         _backButton.Pressed   += OnBackPressed;
 
         Refresh();
@@ -66,8 +66,8 @@ public partial class LoadGameScreen : Control
         RebuildRows(saves);
 
         SetStatus(saves.Count == 0
-            ? "No saved games yet. Save from the in-game menu with Escape."
-            : $"{saves.Count} saved game(s).", ColorInfo);
+            ? Tr("LOAD_STATUS_EMPTY")
+            : string.Format(Tr(saves.Count == 1 ? "LOAD_STATUS_COUNT_ONE" : "LOAD_STATUS_COUNT_OTHER"), saves.Count), ColorInfo);
     }
 
     private void RebuildRows(List<SaveGameMeta> saves)
@@ -89,26 +89,34 @@ public partial class LoadGameScreen : Control
         row.AddThemeConstantOverride("separation", 10);
         panel.AddChild(row);
 
-        Label nameLabel = MakeLabel(save.DisplayName ?? "(unnamed)", 22, Vector2.Zero);
+        Label nameLabel = MakeLabel(save.DisplayName ?? Tr("LOAD_UNNAMED"), 22, Vector2.Zero);
         nameLabel.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         nameLabel.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
         row.AddChild(nameLabel);
 
-        row.AddChild(MakeLabel(save.GameType.ToString(), 20, new Vector2(110, 0)));
+        row.AddChild(MakeLabel(GameTypeKey(save.GameType), 20, new Vector2(110, 0)));
         row.AddChild(MakeLabel(FormatSavedAt(save.SavedAtIso), 20, new Vector2(200, 0)));
 
         // Plain Buttons, not MenuPanelButton: a row action wants a compact size, and these two need a
         // Disabled that genuinely blocks while another load is in flight.
-        Button loadButton = new() { Text = "Load", CustomMinimumSize = new Vector2(120, 44) };
+        Button loadButton = new() { Text = "LOAD_BTN_LOAD", CustomMinimumSize = new Vector2(120, 44) };
         loadButton.Pressed += () => OnLoadPressed(save);
         row.AddChild(loadButton);
 
-        Button deleteButton = new() { Text = "Delete", CustomMinimumSize = new Vector2(120, 44) };
+        Button deleteButton = new() { Text = "LOAD_BTN_DELETE", CustomMinimumSize = new Vector2(120, 44) };
         deleteButton.Pressed += () => OnDeletePressed(save);
         row.AddChild(deleteButton);
 
         return panel;
     }
+
+    private static string GameTypeKey(SaveGameType type) => type switch
+    {
+        SaveGameType.Skirmish => "LOAD_TYPE_SKIRMISH",
+        SaveGameType.Online   => "LOAD_TYPE_ONLINE",
+        SaveGameType.Ranked   => "LOAD_TYPE_RANKED",
+        _                     => type.ToString(),
+    };
 
     private static Label MakeLabel(string text, int fontSize, Vector2 minSize)
     {
@@ -147,19 +155,19 @@ public partial class LoadGameScreen : Control
             SaveGame save = SaveGameService.Load(meta.FilePath);
             if (save == null)
             {
-                SetStatus("That save could not be read. See the log for details.", ColorError);
+                SetStatus(Tr("LOAD_ERROR_UNREADABLE"), ColorError);
                 return;
             }
 
             if (save.Version != SaveGame.CurrentVersion)
             {
-                SetStatus($"That save was written by an incompatible version ({save.Version}).", ColorError);
+                SetStatus(string.Format(Tr("LOAD_ERROR_VERSION"), save.Version), ColorError);
                 return;
             }
 
             if (string.IsNullOrEmpty(save.ScenarioJsonBase64))
             {
-                SetStatus("That save carries no scenario and cannot be restored.", ColorError);
+                SetStatus(Tr("LOAD_ERROR_NO_SCENARIO"), ColorError);
                 return;
             }
 
@@ -169,7 +177,7 @@ public partial class LoadGameScreen : Control
             List<string> missing = ExpansionRegistry.Unavailable(save.Expansions);
             if (missing.Count > 0)
             {
-                SetStatus($"That save was played with {ExpansionIds.Describe(save.Expansions)}, which cannot be played here: {string.Join("; ", missing)}.", ColorError);
+                SetStatus(string.Format(Tr("LOAD_ERROR_EXPANSIONS"), ExpansionIds.Describe(save.Expansions), string.Join("; ", missing)), ColorError);
                 return;
             }
 
@@ -282,15 +290,15 @@ public partial class LoadGameScreen : Control
         SetBusy(true);
         try
         {
-            bool confirmed = await MenuNotice.ShowConfirmAsync(this, "Delete save?",
-                meta.DisplayName ?? "(unnamed)", "Delete");
+            bool confirmed = await MenuNotice.ShowConfirmAsync(this, Tr("LOAD_CONFIRM_DELETE_TITLE"),
+                meta.DisplayName ?? Tr("LOAD_UNNAMED"), Tr("LOAD_BTN_DELETE"));
 
             if (!IsInstanceValid(this) || !confirmed) return;
 
             if (SaveGameService.Delete(meta.FilePath))
                 Refresh();
             else
-                SetStatus("That save could not be deleted. See the log for details.", ColorError);
+                SetStatus(Tr("LOAD_ERROR_DELETE"), ColorError);
         }
         finally
         {

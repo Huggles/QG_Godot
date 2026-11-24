@@ -30,11 +30,8 @@ public partial class ConnectionLostDialog : MenuModal
     public static Task<Choice> PromptHostAsync(Node parent, string names, bool canSave, out ConnectionLostDialog dialog)
     {
         dialog = Scene.Instantiate<ConnectionLostDialog>();
-        dialog._title = $"{names} lost connection";
-        dialog._message = canSave
-            ? "The game is paused. Wait for them to reconnect, save the game and quit, or let a bot play their factions."
-            : "The game is paused. Wait for them to reconnect, quit, or let a bot play their factions. " +
-              "The game is in the middle of an action, so it cannot be saved right now.";
+        dialog._title = string.Format(TranslationServer.Translate("HUD_CONN_LOST_TITLE"), names);
+        dialog._message = TranslationServer.Translate(canSave ? "HUD_CONN_LOST_MESSAGE_CAN_SAVE" : "HUD_CONN_LOST_MESSAGE_NO_SAVE");
         dialog._canSave = canSave;
         parent.AddChild(dialog);
         return dialog._result.Task;
@@ -44,8 +41,8 @@ public partial class ConnectionLostDialog : MenuModal
     public static Task<Choice> PromptHostLostAsync(Node parent)
     {
         ConnectionLostDialog dialog = Scene.Instantiate<ConnectionLostDialog>();
-        dialog._title = "The host has disconnected";
-        dialog._message = "The game cannot continue without the host.";
+        dialog._title = "HUD_CONN_HOST_LOST_TITLE";
+        dialog._message = "HUD_CONN_HOST_LOST_MESSAGE";
         dialog._hostLost = true;
         parent.AddChild(dialog);
         return dialog._result.Task;
@@ -71,7 +68,7 @@ public partial class ConnectionLostDialog : MenuModal
 
         wait.Visible = save.Visible = bot.Visible = !_hostLost;
         quit.Visible = _hostLost;
-        save.Text = _canSave ? "Save & Quit" : "Quit";
+        save.Text = _canSave ? "HUD_CONN_BTN_SAVE_QUIT" : "HUD_CONN_BTN_QUIT";
 
         wait.Pressed += () => Resolve(Choice.Wait);
         save.Pressed += () => Resolve(Choice.SaveAndQuit);

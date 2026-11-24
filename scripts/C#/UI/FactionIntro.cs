@@ -249,7 +249,7 @@ public partial class FactionIntro : CanvasLayer
 
         _barTop = Bar(new Vector2(0, 0), view.X);
         _barBottom = Bar(new Vector2(0, view.Y - BarHeight), view.X);
-        Label skip = Caps("Esc   skip intro", 15, Muted);
+        Label skip = Caps("HUD_INTRO_SKIP", 15, Muted);
         skip.Position = new Vector2(view.X - 260, (BarHeight - 22) / 2);
         skip.Size = new Vector2(220, 22);
         skip.HorizontalAlignment = HorizontalAlignment.Right;
@@ -325,7 +325,7 @@ public partial class FactionIntro : CanvasLayer
         _factionBar.Color = data.FactionColor;
 
         bool ai = PlayerFactionRegistry.IsFactionAi(faction);
-        _player.Text = ai ? FactionDisplay.AiName : PlayerFactionRegistry.GetDisplayNameForFaction(faction) ?? "You";
+        _player.Text = ai ? FactionDisplay.AiName : PlayerFactionRegistry.GetDisplayNameForFaction(faction) ?? Tr("HUD_INTRO_YOU");
     }
 
     /// <summary>The card sits beside the capital at <paramref name="at"/>, on its side, kept on screen.</summary>

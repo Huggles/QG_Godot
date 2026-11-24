@@ -106,10 +106,11 @@ public partial class MenuNotice : MenuModal
 
 		// In confirm mode the OK button becomes the way OUT, and a second button carries the action, so
 		// the destructive choice is never the one under the cursor by default.
-		okButton.Text = "CANCEL";
+		okButton.Text = "NOTICE_BTN_CANCEL";
 
 		Button confirmButton = GetNode<Button>("%ConfirmButton");
-		confirmButton.Text    = _confirmText.ToUpperInvariant();
+		// Translated before upper-casing: a caller may pass a key or text already translated.
+		confirmButton.Text    = Tr(_confirmText).ToUpperInvariant();
 		confirmButton.Visible = true;
 		confirmButton.Pressed += () =>
 		{

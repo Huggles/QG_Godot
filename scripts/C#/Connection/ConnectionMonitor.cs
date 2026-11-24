@@ -386,16 +386,16 @@ public partial class ConnectionMonitor : Node
         if (absent.Count == 0)
         {
             string returning = string.Join(", ", rejoining.Select(r => r.Name));
-            EnsureBanner().Show($"{returning} is rejoining", "Catching up on the game…", false);
+            EnsureBanner().Show(string.Format(Tr("HUD_CONN_REJOINING"), returning), Tr("HUD_CONN_CATCHING_UP"), false);
             return;
         }
 
         string names = string.Join(", ", absent.Select(r => r.Name));
         int left = absent.Max(r => r.SecondsLeft);
-        string detail = left > 0 ? $"Reconnecting… {left}s" : "The game is paused";
+        string detail = left > 0 ? string.Format(Tr("HUD_CONN_RECONNECTING"), left) : Tr("HUD_CONN_GAME_PAUSED");
 
         bool offerOptions = IsHost && _dialog == null && left == 0;
-        EnsureBanner().Show($"Waiting for {names} to reconnect", detail, offerOptions);
+        EnsureBanner().Show(string.Format(Tr("HUD_CONN_WAITING_FOR"), names), detail, offerOptions);
     }
 
     // ── Client ───────────────────────────────────────────────────────────────
@@ -412,8 +412,8 @@ public partial class ConnectionMonitor : Node
         }
 
         if (silence > UnreachableAfter)
-            EnsureBanner().Show("Connection to the host lost",
-                $"Reconnecting… {(int)Math.Ceiling(DisconnectAfter - silence)}s", false);
+            EnsureBanner().Show(Tr("HUD_CONN_HOST_UNREACHABLE"),
+                string.Format(Tr("HUD_CONN_RECONNECTING"), (int)Math.Ceiling(DisconnectAfter - silence)), false);
         else if (!_rows.Any(r => Holds(r.State)))
             Banner?.Hide();
     }

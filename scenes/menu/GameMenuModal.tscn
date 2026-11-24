@@ -8,7 +8,7 @@
 script = ExtResource("2_script")
 
 [node name="Title" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="0" unique_id=647576227]
-text = "Game Menu"
+text = "GAMEMENU_TITLE"
 
 [node name="Choices" type="VBoxContainer" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="1" unique_id=2098525958]
 layout_mode = 2
@@ -19,31 +19,31 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(680, 60)
 layout_mode = 2
-ButtonText = "Resume"
+ButtonText = "GAMEMENU_BTN_RESUME"
 
 [node name="SaveGameButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="1" unique_id=744120593 instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(680, 60)
 layout_mode = 2
-ButtonText = "Save Game"
+ButtonText = "GAMEMENU_BTN_SAVE"
 
 [node name="SettingsButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="2" unique_id=1867989050 instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(680, 60)
 layout_mode = 2
-ButtonText = "Settings"
+ButtonText = "MENU_BTN_SETTINGS"
 
 [node name="QuitToMenuButton" parent="Root/Centre/Panel/ContentContainer/Box/Choices" index="3" unique_id=901806904 instance=ExtResource("3_btn")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(680, 60)
 layout_mode = 2
-ButtonText = "Quit to Main Menu"
+ButtonText = "GAMEMENU_BTN_QUIT"
 
 [node name="Hint" type="Label" parent="Root/Centre/Panel/ContentContainer/Box" parent_id_path=PackedInt32Array(1398055271) index="2" unique_id=203831937]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.73, 0.73, 0.73, 1)
 theme_override_font_sizes/font_size = 18
-text = "The game keeps running while this menu is open. Only the host can save."
+text = "GAMEMENU_HINT"
 horizontal_alignment = 1
 autowrap_mode = 3
 

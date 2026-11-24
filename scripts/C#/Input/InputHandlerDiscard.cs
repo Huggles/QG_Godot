@@ -27,9 +27,9 @@ public partial class InputHandlerDiscard
         // offers cards from elsewhere (the discard pile) and keeps the modal.
         if (required)
             return await PickFromHand(faction, cardIds, CardPick.Exactly(minimumDiscards),
-                $"Select {minimumDiscards} {(minimumDiscards == 1 ? "card" : "cards")} to discard");
+                string.Format(TranslationServer.Translate(minimumDiscards == 1 ? "HUD_DISCARD_SELECT_N_ONE" : "HUD_DISCARD_SELECT_N_OTHER"), minimumDiscards));
 
-        string title = "Select card(s) to discard (or skip)";
+        string title = TranslationServer.Translate("HUD_DISCARD_SELECT_OPTIONAL");
         PlayerActionLabel.ShowText($"{faction.Label()}: {title}", faction);
         List<PresentationItem> presentationItems = PresentationItemCard.FromCardIds(cardIds, true);
         ModalResult result = await ModalStack.Current.Show(ModalConfig.SelectMany(title, presentationItems, minimumDiscards));

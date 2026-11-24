@@ -59,20 +59,20 @@ theme_override_constants/separation = -2
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
 theme_override_font_sizes/font_size = 32
-text = "CARD DISTRIBUTION"
+text = "HUD_DECK_TITLE"
 
 [node name="Caption" type="Label" parent="Plate/Rows/Header/Titles"]
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
 theme_override_font_sizes/font_size = 17
-text = "Cards in each faction's deck at the start of the game"
+text = "HUD_DECK_SUBTITLE"
 
 [node name="CloseButton" type="Button" parent="Plate/Rows/Header"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 size_flags_vertical = 0
-tooltip_text = "Close"
+tooltip_text = "COMMON_BTN_CLOSE"
 theme_type_variation = &"MenuSecondaryButton"
 icon = ExtResource("x_close")
 icon_alignment = 1

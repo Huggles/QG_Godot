@@ -104,8 +104,8 @@ public partial class SkirmishScreen : Control
 
 		// Item ids are the enum values, so the pick reads straight back as an AiDifficulty.
 		_aiDifficultyPicker = GetNode<OptionButton>("%AiDifficultyOptionButton");
-		_aiDifficultyPicker.AddItem("Normal AI", (int)AiDifficulty.Normal);
-		_aiDifficultyPicker.AddItem("Hard AI", (int)AiDifficulty.Hard);
+		_aiDifficultyPicker.AddItem("SKIRMISH_AI_NORMAL", (int)AiDifficulty.Normal);
+		_aiDifficultyPicker.AddItem("SKIRMISH_AI_HARD", (int)AiDifficulty.Hard);
 		_aiDifficultyPicker.Select(_aiDifficultyPicker.GetItemIndex((int)GameManager.PendingAiDifficulty));
 		_aiDifficultyPicker.ItemSelected += _ => RenderAllSeats(); // the seats name the difficulty
 
@@ -113,8 +113,8 @@ public partial class SkirmishScreen : Control
 		_randomizeSeedButton = GetNode<Button>("%RandomizeSeedButton");
 		MenuSeedField.Bind(_seedInput, _randomizeSeedButton);
 
-		_startGameButton.ButtonText = "Start Game";
-		_backButton.ButtonText = "Back";
+		_startGameButton.ButtonText = "SKIRMISH_BTN_START";
+		_backButton.ButtonText = "SKIRMISH_BTN_BACK";
 
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 
@@ -136,7 +136,7 @@ public partial class SkirmishScreen : Control
 				gameManager.SetSelectedScenarioByIndex(MenuScenarioPicker.ScenarioIndexAt(_scenarioPicker, 0));
 			}
 
-			UpdateDescription(gameManager.SelectedScenario.Description);
+			UpdateDescription(gameManager.SelectedScenario.DisplayDescription);
 			_openingDiscardCheckBox.ButtonPressed = gameManager.SelectedScenario.OpeningDiscard;
 			_expansionToggles.Set(gameManager.SelectedScenario.Expansions);
 		}
@@ -165,8 +165,8 @@ public partial class SkirmishScreen : Control
 	private void BuildSeats()
 	{
 		_seatGrid.Columns = 2;
-		_seatGrid.AddChild(new Label { Text = "AXIS", ThemeTypeVariation = "MenuSection" });
-		_seatGrid.AddChild(new Label { Text = "ALLIES", ThemeTypeVariation = "MenuSection" });
+		_seatGrid.AddChild(new Label { Text = "SKIRMISH_COL_AXIS", ThemeTypeVariation = "MenuSection" });
+		_seatGrid.AddChild(new Label { Text = "SKIRMISH_COL_ALLIES", ThemeTypeVariation = "MenuSection" });
 
 		List<Faction> axis   = AllPlayableFactions.Where(AxisSet.Contains).ToList();
 		List<Faction> allies = AllPlayableFactions.Where(faction => !AxisSet.Contains(faction)).ToList();
@@ -230,7 +230,7 @@ public partial class SkirmishScreen : Control
 		// Added last so it draws and hits on top of the whole row, which also buys focus traversal and
 		// a tooltip for free. A PanelContainer sizes every child to its content rect, so this covers
 		// the row exactly rather than needing its own layout.
-		Button click = new() { Flat = true, TooltipText = $"Play as {FactionNames[faction]}" };
+		Button click = new() { Flat = true, TooltipText = string.Format(Tr("SKIRMISH_SEAT_TOOLTIP"), FactionNames[faction]) };
 		click.Pressed += () => OnSeatPressed(faction);
 		click.MouseEntered += () => { _hovered = faction; RenderSeat(faction); };
 		click.MouseExited += () =>
@@ -259,9 +259,9 @@ public partial class SkirmishScreen : Control
 		foreach (Faction faction in _seats.Keys) RenderSeat(faction);
 
 		if (_seatsLabel != null)
-			_seatsLabel.Text = "YOUR FACTIONS";
+			_seatsLabel.Text = "SKIRMISH_HDR_YOUR_FACTIONS";
 		if (_seatsHint != null)
-			_seatsHint.Text = "Click a faction to hand it to the AI, or take it back.";
+			_seatsHint.Text = "SKIRMISH_SEATS_HINT";
 		RenderSummary();
 	}
 
@@ -270,8 +270,9 @@ public partial class SkirmishScreen : Control
 		int human = _seats.Keys.Count(EffectiveHuman);
 		int ai = _seats.Count - human;
 		_seatsSummary.Text = human == 0
-			? "You are watching: all six factions are played by the AI."
-			: $"You command {human} {(human == 1 ? "faction" : "factions")}  ·  the AI plays {(ai == 0 ? "none" : ai.ToString())}";
+			? Tr("SKIRMISH_SUMMARY_WATCHING")
+			: string.Format(Tr(human == 1 ? "SKIRMISH_SUMMARY_ONE" : "SKIRMISH_SUMMARY_OTHER"),
+				human, ai == 0 ? Tr("SKIRMISH_SUMMARY_AI_NONE") : ai.ToString());
 	}
 
 	/// <summary>
@@ -293,7 +294,7 @@ public partial class SkirmishScreen : Control
 
 		bool hovered = _hovered == faction;
 
-		seat.Controller.Text = mine ? "YOU" : $"AI - {(AiDifficulty)_aiDifficultyPicker.GetSelectedId()}".ToUpperInvariant();
+		seat.Controller.Text = mine ? "SKIRMISH_SEAT_YOU" : $"AI - {(AiDifficulty)_aiDifficultyPicker.GetSelectedId()}".ToUpperInvariant();
 		seat.Controller.AddThemeColorOverride("font_color", mine ? MenuBrass : MenuMuted);
 		seat.Name.AddThemeColorOverride("font_color", mine || hovered ? MenuText : MenuMuted);
 		seat.Flag.Modulate = mine || hovered ? Colors.White : new Color(0.5f, 0.5f, 0.5f, 0.75f);
@@ -315,7 +316,7 @@ public partial class SkirmishScreen : Control
 			return;
 
 		gameManager.SetSelectedScenarioByIndex(index);
-		UpdateDescription(gameManager.AvailableScenarios[index].Description);
+		UpdateDescription(gameManager.AvailableScenarios[index].DisplayDescription);
 
 		// A plain assignment, deliberately NOT the lobby's SetOpeningDiscard unsubscribe/resubscribe
 		// dance: that exists because the lobby's box has a Toggled handler that RPCs to clients, so
@@ -334,7 +335,7 @@ public partial class SkirmishScreen : Control
 		var gameManager = GetNode<GameManager>("/root/GameManager");
 		if (gameManager.SelectedScenario == null)
 		{
-			UpdateDescription("No scenario selected.");
+			UpdateDescription(Tr("SKIRMISH_NO_SCENARIO"));
 			return;
 		}
 

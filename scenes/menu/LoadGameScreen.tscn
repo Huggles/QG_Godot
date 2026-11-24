@@ -52,12 +52,12 @@ theme_override_constants/separation = 14
 [node name="Kicker" type="Label" parent="Card/FormContainer" unique_id=1802117003]
 layout_mode = 2
 theme_type_variation = &"MenuKicker"
-text = "CAMPAIGN ARCHIVE"
+text = "LOAD_KICKER"
 
 [node name="TitleLabel" type="Label" parent="Card/FormContainer" unique_id=1704412883]
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
-text = "LOAD GAME"
+text = "LOAD_TITLE"
 
 [node name="HeaderRule" type="HSeparator" parent="Card/FormContainer" unique_id=1802117004]
 layout_mode = 2

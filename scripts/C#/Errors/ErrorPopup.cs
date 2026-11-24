@@ -103,7 +103,7 @@ public partial class ErrorPopup : CanvasLayer
 
         _titleLabel = new Label
         {
-            Text = "An error occurred",
+            Text = "HUD_ERROR_TITLE",
             SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
         };
         _titleLabel.AddThemeColorOverride("font_color", new Color(1f, 0.42f, 0.38f));
@@ -143,7 +143,7 @@ public partial class ErrorPopup : CanvasLayer
         // ── Stack trace (collapsed by default) ───────────────────────────────
         _traceToggle = new Button
         {
-            Text = "▸ Stack trace",
+            Text = Tr("HUD_ERROR_STACK_TRACE_SHOW"),
             ToggleMode = true,
             Alignment = HorizontalAlignment.Left,
             Flat = true
@@ -175,32 +175,32 @@ public partial class ErrorPopup : CanvasLayer
         buttonRow.AddThemeConstantOverride("separation", 10);
         box.AddChild(buttonRow);
 
-        Button copyButton = new Button { Text = "Copy" };
+        Button copyButton = new Button { Text = "HUD_ERROR_BTN_COPY" };
         copyButton.Pressed += OnCopyPressed;
         buttonRow.AddChild(copyButton);
 
-        _prevButton = new Button { Text = "◂ Prev" };
+        _prevButton = new Button { Text = "HUD_ERROR_BTN_PREV" };
         _prevButton.Pressed += () => Navigate(-1);
         buttonRow.AddChild(_prevButton);
 
-        _nextButton = new Button { Text = "Next ▸" };
+        _nextButton = new Button { Text = "HUD_ERROR_BTN_NEXT" };
         _nextButton.Pressed += () => Navigate(1);
         buttonRow.AddChild(_nextButton);
 
         buttonRow.AddChild(new Control { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill });
 
-        _quitButton = new Button { Text = "Quit to menu" };
+        _quitButton = new Button { Text = "HUD_ERROR_BTN_QUIT_TO_MENU" };
         _quitButton.Pressed += OnQuitPressed;
         buttonRow.AddChild(_quitButton);
 
-        _continueButton = new Button { Text = "Continue" };
+        _continueButton = new Button { Text = "HUD_ERROR_BTN_CONTINUE" };
         _continueButton.Pressed += OnContinuePressed;
         buttonRow.AddChild(_continueButton);
 
         // Last, so it sits rightmost where the primary action goes. Only ever visible for a timed-out
         // input request, where the request itself is still holding the turn loop and can therefore be
         // asked again — an ordinary failure has already unwound its step, leaving nothing to re-send.
-        _retryButton = new Button { Text = "Retry" };
+        _retryButton = new Button { Text = "HUD_ERROR_BTN_RETRY" };
         _retryButton.Pressed += OnRetryPressed;
         buttonRow.AddChild(_retryButton);
     }
@@ -288,12 +288,12 @@ public partial class ErrorPopup : CanvasLayer
         bool awaitingInput = (ErrorReporter.Instance?.HasPendingInputDecision ?? false) && isHost;
 
         _titleLabel.Text = _historyMode
-            ? $"Error history ({total})"
+            ? string.Format(Tr("HUD_ERROR_HISTORY_COUNT"), total)
             : _current.Severity switch
             {
-                ErrorSeverity.Soft => "An error occurred (recovered)",
-                ErrorSeverity.Unrecoverable => "An unrecoverable error occurred",
-                _ => "An error occurred"
+                ErrorSeverity.Soft => Tr("HUD_ERROR_TITLE_RECOVERED"),
+                ErrorSeverity.Unrecoverable => Tr("HUD_ERROR_TITLE_UNRECOVERABLE"),
+                _ => Tr("HUD_ERROR_TITLE")
             };
 
         string occurrences = _current.Occurrences > 1 ? $"  ×{_current.Occurrences}" : "";
@@ -301,7 +301,7 @@ public partial class ErrorPopup : CanvasLayer
 
         // Make it obvious why a recorded error was never seen.
         string recoveredNote = _current.Severity == ErrorSeverity.Soft
-            ? "RECOVERED · no popup was shown\n"
+            ? Tr("HUD_ERROR_RECOVERED_NOTE") + "\n"
             : "";
         _originLabel.Text = recoveredNote + _current.OriginSummary;
 
@@ -324,47 +324,42 @@ public partial class ErrorPopup : CanvasLayer
             // Checked before `stalled` on purpose. The loop is being held by a live await inside
             // SendInputRequest, so the actionable choice is about that request; Continue must resolve it
             // rather than call RequestResume, which would advance the very step still being held.
-            _continueButton.Text = "Skip input";
+            _continueButton.Text = "HUD_ERROR_BTN_SKIP_INPUT";
             _continueButton.Disabled = false;
-            _continueButton.TooltipText =
-                "Gives up on the input and continues the step as if the player had passed. " +
-                "A required choice (e.g. discarding down to the hand limit) will not happen at all.";
+            _continueButton.TooltipText = "HUD_ERROR_TOOLTIP_SKIP_INPUT";
             string who = _current?.TargetFaction.HasValue == true
                 ? _current.TargetFaction.Value.ToString()
-                : "the player";
-            _retryButton.TooltipText =
-                $"Asks {who} for the same input again, with a fresh timer. Nothing has been skipped yet.";
+                : Tr("HUD_ERROR_THE_PLAYER");
+            _retryButton.TooltipText = string.Format(Tr("HUD_ERROR_TOOLTIP_RETRY"), who);
         }
         else if (!stalled)
         {
             // Nothing is waiting on the player — this is a browse, not a decision. Offering Continue
             // here would advance the turn loop past a step that never failed.
-            _continueButton.Text = "Close";
+            _continueButton.Text = "COMMON_BTN_CLOSE";
             _continueButton.Disabled = false;
-            _continueButton.TooltipText = "Closes this window. Nothing is waiting — the game is not paused.";
+            _continueButton.TooltipText = "HUD_ERROR_TOOLTIP_CLOSE";
         }
         else if (!isHost)
         {
-            _continueButton.Text = "Dismiss";
+            _continueButton.Text = "HUD_ERROR_BTN_DISMISS";
             _continueButton.Disabled = false;
-            _continueButton.TooltipText = "Only the host can resume the turn loop.";
+            _continueButton.TooltipText = "HUD_ERROR_TOOLTIP_DISMISS";
         }
         else if (!canResume)
         {
             // Mid-mutation before the change reached clients: peers are already divergent and the
             // resync repair path in NetworkApi.RequestResync is commented out, so there is nothing
             // honest to continue into.
-            _continueButton.Text = "Continue";
+            _continueButton.Text = "HUD_ERROR_BTN_CONTINUE";
             _continueButton.Disabled = true;
-            _continueButton.TooltipText =
-                "Unavailable: the game state was modified before clients were notified, so peers have diverged.";
+            _continueButton.TooltipText = "HUD_ERROR_TOOLTIP_CONTINUE_UNAVAILABLE";
         }
         else
         {
-            _continueButton.Text = "Continue";
+            _continueButton.Text = "HUD_ERROR_BTN_CONTINUE";
             _continueButton.Disabled = false;
-            _continueButton.TooltipText =
-                "Skips the rest of the failed step and resumes play. The game state may be inconsistent.";
+            _continueButton.TooltipText = "HUD_ERROR_TOOLTIP_CONTINUE";
         }
 
         // Retry is the default for a timed-out input: it is the only choice that loses nothing, and Enter
@@ -379,11 +374,11 @@ public partial class ErrorPopup : CanvasLayer
     /// </summary>
     private void RenderEmpty()
     {
-        _titleLabel.Text = "Error history";
+        _titleLabel.Text = "HUD_ERROR_HISTORY";
         _counterLabel.Text = "";
         _originLabel.Text = "";
         _contextLabel.Text = "";
-        _messageLabel.Text = "No errors recorded this session.";
+        _messageLabel.Text = Tr("HUD_ERROR_NONE_RECORDED");
         _traceText.Text = "";
 
         _traceToggle.Visible = false;
@@ -393,7 +388,7 @@ public partial class ErrorPopup : CanvasLayer
         _quitButton.Visible = false;
         _retryButton.Visible = false;
 
-        _continueButton.Text = "Close";
+        _continueButton.Text = "COMMON_BTN_CLOSE";
         _continueButton.Disabled = false;
         _continueButton.TooltipText = "";
         _continueButton.GrabFocus();
@@ -419,7 +414,7 @@ public partial class ErrorPopup : CanvasLayer
     private void OnTraceToggled(bool pressed)
     {
         _traceScroll.Visible = pressed;
-        _traceToggle.Text = pressed ? "▾ Stack trace" : "▸ Stack trace";
+        _traceToggle.Text = Tr(pressed ? "HUD_ERROR_STACK_TRACE_HIDE" : "HUD_ERROR_STACK_TRACE_SHOW");
     }
 
     private void OnCopyPressed()

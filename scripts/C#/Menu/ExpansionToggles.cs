@@ -26,7 +26,7 @@ public sealed class ExpansionToggles
             box.Name = $"Expansion_{expansion.Manifest.Id}";
             box.UniqueNameInOwner = false;
             box.Visible = true; // the host dialog copies a hidden template
-            box.Text = $"Expansion: {expansion.Manifest.DisplayName}";
+            box.Text = string.Format((string)TranslationServer.Translate("MENU_PICKER_EXPANSION"), expansion.Manifest.DisplayName);
             box.ButtonPressed = false;
             box.TooltipText = expansion.UnavailableReason ?? string.Empty;
 

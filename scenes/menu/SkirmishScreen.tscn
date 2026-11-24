@@ -64,12 +64,12 @@ theme_override_constants/separation = -4
 [node name="Kicker" type="Label" parent="Card/Margin/Layout/Header" unique_id=1502117005]
 layout_mode = 2
 theme_type_variation = &"MenuKicker"
-text = "NEW GAME  ·  VERSUS THE AI"
+text = "SKIRMISH_KICKER"
 
 [node name="TitleLabel" type="Label" parent="Card/Margin/Layout/Header" unique_id=334728534]
 layout_mode = 2
 theme_type_variation = &"MenuTitle"
-text = "SKIRMISH"
+text = "SKIRMISH_TITLE"
 
 [node name="HeaderRule" type="HSeparator" parent="Card/Margin/Layout" unique_id=1502117006]
 layout_mode = 2
@@ -87,7 +87,7 @@ theme_override_constants/separation = 14
 [node name="ScenarioLabel" type="Label" parent="Card/Margin/Layout/Columns/Left" unique_id=866633671]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "SCENARIO"
+text = "SKIRMISH_HDR_SCENARIO"
 
 [node name="ScenarioOptionButton" type="OptionButton" parent="Card/Margin/Layout/Columns/Left" unique_id=1587846790]
 unique_name_in_owner = true
@@ -105,7 +105,7 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 21
 bbcode_enabled = true
-text = "Select a scenario to see its description."
+text = "SKIRMISH_DESCRIPTION_PLACEHOLDER"
 fit_content = true
 
 [node name="OptionsGap" type="Control" parent="Card/Margin/Layout/Columns/Left" unique_id=1502117009]
@@ -116,7 +116,7 @@ mouse_filter = 2
 [node name="OptionsLabel" type="Label" parent="Card/Margin/Layout/Columns/Left" unique_id=1502117010]
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "OPTIONS"
+text = "SKIRMISH_HDR_OPTIONS"
 
 [node name="SeedRow" type="HBoxContainer" parent="Card/Margin/Layout/Columns/Left" unique_id=2112580064]
 layout_mode = 2
@@ -125,20 +125,20 @@ theme_override_constants/separation = 12
 [node name="SeedLabel" type="Label" parent="Card/Margin/Layout/Columns/Left/SeedRow" unique_id=1197556295]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
-text = "Seed"
+text = "GAMEOPTS_SEED_LABEL"
 
 [node name="SeedInput" type="LineEdit" parent="Card/Margin/Layout/Columns/Left/SeedRow" unique_id=134324777]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "random"
+placeholder_text = "GAMEOPTS_SEED_PLACEHOLDER"
 
 [node name="RandomizeSeedButton" type="Button" parent="Card/Margin/Layout/Columns/Left/SeedRow" unique_id=397362117]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
-text = "Randomize"
+text = "GAMEOPTS_RANDOMIZE"
 
 [node name="AiRow" type="HBoxContainer" parent="Card/Margin/Layout/Columns/Left" unique_id=1502117011]
 layout_mode = 2
@@ -147,26 +147,26 @@ theme_override_constants/separation = 12
 [node name="AiLabel" type="Label" parent="Card/Margin/Layout/Columns/Left/AiRow" unique_id=1502117012]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
-text = "Opponents"
+text = "SKIRMISH_OPPONENTS_LABEL"
 
 [node name="AiDifficultyOptionButton" type="OptionButton" parent="Card/Margin/Layout/Columns/Left/AiRow" unique_id=1740263519]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "Normal: the original AI. Hard: values its pieces, the income within reach, its cards and its deck — a stronger, slightly slower opponent."
+tooltip_text = "SKIRMISH_AI_TOOLTIP"
 
 [node name="OpeningDiscardCheckBox" type="CheckBox" parent="Card/Margin/Layout/Columns/Left" unique_id=311420004]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
-text = "Discard cards at start"
+text = "GAMEOPTS_DISCARD_AT_START"
 
 [node name="FactionIntroCheckBox" type="CheckBox" parent="Card/Margin/Layout/Columns/Left" unique_id=1873405522]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "On: after loading, the camera visits each capital and names the faction and its player."
-text = "Faction intro at start"
+tooltip_text = "GAMEOPTS_FACTION_INTRO_TOOLTIP"
+text = "GAMEOPTS_FACTION_INTRO"
 
 [node name="Right" type="VBoxContainer" parent="Card/Margin/Layout/Columns" unique_id=1502117013]
 layout_mode = 2
@@ -177,13 +177,13 @@ theme_override_constants/separation = 14
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MenuSection"
-text = "YOUR FACTIONS"
+text = "SKIRMISH_HDR_YOUR_FACTIONS"
 
 [node name="SeatsHint" type="Label" parent="Card/Margin/Layout/Columns/Right" unique_id=1502117014]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"MenuMuted"
-text = "Click a faction to hand it to the AI, or take it back."
+text = "SKIRMISH_SEATS_HINT"
 autowrap_mode = 3
 
 [node name="SeatGrid" type="GridContainer" parent="Card/Margin/Layout/Columns/Right" unique_id=311420002]

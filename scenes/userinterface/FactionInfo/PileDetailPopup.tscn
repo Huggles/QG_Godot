@@ -54,7 +54,7 @@ unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.6)
 layout_mode = 2
 theme = ExtResource("ig_theme")
-text = "No cards"
+text = "HUD_PILE_EMPTY"
 
 [node name="PileFooter" type="RichTextLabel" parent="PileDetailPanel/Margin/VBox"]
 unique_name_in_owner = true

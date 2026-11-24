@@ -16,6 +16,29 @@ public class ScenarioInfo
     public string Description { get; set; }
 
     /// <summary>
+    /// <see cref="Title"/> in the player's language: the key <c>SCENARIO_&lt;NAME&gt;_TITLE</c> (the file
+    /// name, upper-cased), falling back to the file's own English. For anything shown on screen;
+    /// <see cref="Title"/> stays English for save names and logs.
+    /// </summary>
+    [JsonIgnore]
+    public string DisplayTitle => Localization.TranslateOr(KeyPrefix + "_TITLE", Title);
+
+    /// <summary><see cref="Description"/> in the player's language, the same way as <see cref="DisplayTitle"/>.</summary>
+    [JsonIgnore]
+    public string DisplayDescription => Localization.TranslateOr(KeyPrefix + "_DESCRIPTION", Description);
+
+    /// <summary>Scenario_Basic → SCENARIO_BASIC, Tutorial_01 → SCENARIO_TUTORIAL_01.</summary>
+    private string KeyPrefix
+    {
+        get
+        {
+            string name = Name ?? "";
+            if (name.StartsWith("Scenario_")) name = name.Substring("Scenario_".Length);
+            return "SCENARIO_" + name.ToUpperInvariant();
+        }
+    }
+
+    /// <summary>
     /// This scenario's answer to InitialGameStateData.OpeningDiscard, mirrored here so the lobby can
     /// show it on the checkbox the moment a scenario is picked — without opening and deserializing
     /// the whole file. Defaults to true, matching the data model.

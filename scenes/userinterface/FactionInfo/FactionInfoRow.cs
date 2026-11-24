@@ -173,11 +173,11 @@ public partial class FactionInfoRow : Control
 		_cloth.SetShaderParameter("phase", GD.Randf() * 10f);
 		Cloth.Material = _cloth;
 
-		FactionInfoButton.TooltipText = $"{data.Label}\n{ToggleHint}";
-		HandButton.TooltipText = "Cards in hand";
-		GetNode<Control>("%ScoreCell").TooltipText = "Victory points";
-		ArmyCell.TooltipText = "Armies in reserve";
-		GetNode<Control>("%NavyCell").TooltipText = "Navies in reserve";
+		FactionInfoButton.TooltipText = $"{data.Label}\n{Tr(ToggleHint)}";
+		HandButton.TooltipText = "HUD_FACTION_TOOLTIP_HAND";
+		GetNode<Control>("%ScoreCell").TooltipText = "HUD_FACTION_TOOLTIP_VP";
+		ArmyCell.TooltipText = "HUD_FACTION_TOOLTIP_ARMIES";
+		GetNode<Control>("%NavyCell").TooltipText = "HUD_FACTION_TOOLTIP_NAVIES";
 
 		// Each count label recolours independently, so neither may share a LabelSettings instance.
 		ArmyCountLabel.LabelSettings = (LabelSettings)ArmyCountLabel.LabelSettings.Duplicate();
@@ -253,7 +253,7 @@ public partial class FactionInfoRow : Control
 	/// <summary>The strip along the flag's top the name takes; the counts drop below it.</summary>
 	private const float NameBand = 17f;
 	private const int NameFontSize = 12;
-	private const string ToggleHint = "Click to show or hide the hand, score and pieces";
+	private const string ToggleHint = "HUD_FACTION_TOOLTIP_TOGGLE";
 
 	/// <summary>
 	/// Prints who plays this faction along the top of the flag, in the same white-on-black ink as the
@@ -280,7 +280,7 @@ public partial class FactionInfoRow : Control
 			MouseFilter = MouseFilterEnum.Ignore,
 			LabelSettings = new LabelSettings { Font = NameFont, FontSize = NameFontSize, FontColor = Ink, OutlineSize = 4, OutlineColor = Colors.Black },
 		});
-		FactionInfoButton.TooltipText = $"{FactionState.FactionData.Label} — {name}\n{ToggleHint}";
+		FactionInfoButton.TooltipText = $"{FactionState.FactionData.Label} — {name}\n{Tr(ToggleHint)}";
 	}
 
 	// ── Event handlers ───────────────────────────────────────────────────────

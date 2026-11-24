@@ -380,7 +380,7 @@ public abstract partial class InputRequest
             // Suppressed rather than relabelled for a bot: TimeoutSeconds is the host's 15-minute
             // backstop, and a fifteen-minute countdown over a decision that takes a second misinforms.
             // AiSeatInputProvider renders "Waiting on <faction> input…" instead, which carries no clock.
-            if (asked) InputTimerDisplay.Current?.Start(TimeoutSeconds, "Your input");
+            if (asked) InputTimerDisplay.Current?.Start(TimeoutSeconds, TranslationServer.Translate("HUD_TIMER_YOUR_INPUT"));
 
             try
             {
@@ -430,7 +430,7 @@ public abstract partial class InputRequest
             // so the countdown is cleared where the waiting text already is — NetworkApi's
             // InputRequestAnswered (this faction's prompt closed) and AbortInputRequest (the host gave
             // up on it).
-            InputTimerDisplay.Current?.Start(TimeoutSeconds, $"Waiting on {AwaitingLabel()}");
+            InputTimerDisplay.Current?.Start(TimeoutSeconds, string.Format(TranslationServer.Translate("HUD_TIMER_WAITING_ON"), AwaitingLabel()));
         }
     }
 
@@ -497,7 +497,7 @@ public abstract partial class InputRequest
             PresentationServices.Notification.HideActionText();
             return;
         }
-        PresentationServices.Notification.ShowActionText($"Waiting on {AwaitingLabel()} input...");
+        PresentationServices.Notification.ShowActionText(string.Format(TranslationServer.Translate("HUD_WAITING_ON_INPUT"), AwaitingLabel()));
     }
 
     private static string AwaitingLabel() =>

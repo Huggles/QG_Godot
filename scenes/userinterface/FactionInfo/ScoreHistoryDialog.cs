@@ -122,11 +122,11 @@ public partial class ScoreHistoryDialog : MenuModal
 
 		var rounds = VPHistory.Summaries(faction).GroupBy(s => s.Round).OrderByDescending(g => g.Key).ToList();
 		if (rounds.Count == 0)
-			lines.Add("[color=#bbbbbb]No points scored yet.[/color]");
+			lines.Add(TranslationServer.Translate("HUD_SCORE_NO_POINTS"));
 
 		foreach (IGrouping<int, VPTurnSummary> round in rounds)
 		{
-			lines.Add($"\n[color=#d9ad5c]Round {round.Key}[/color]  [color=#bbbbbb]{round.Sum(s => s.TotalScore):+#;-#;0} VP[/color]");
+			lines.Add("\n" + string.Format(TranslationServer.Translate("HUD_SCORE_ROUND_LINE"), round.Key, round.Sum(s => s.TotalScore).ToString("+#;-#;0")));
 			foreach (VPTurnSummary summary in round)
 			{
 				string whose = summary.Faction == faction ? string.Empty : $" ({summary.Faction.Label()})";
@@ -136,7 +136,7 @@ public partial class ScoreHistoryDialog : MenuModal
 		}
 
 		int start = VPHistory.StartingPoints(faction);
-		if (start != 0) lines.Add($"\n[color=#d9ad5c]Start[/color]  [color=#bbbbbb]{start} VP[/color]");
+		if (start != 0) lines.Add("\n" + string.Format(TranslationServer.Translate("HUD_SCORE_START_LINE"), start));
 		return string.Join("\n", lines);
 	}
 }
