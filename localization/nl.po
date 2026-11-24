@@ -225,7 +225,7 @@ msgstr "Actieve kaarten tonen"
 
 #. en: When choosing a card to play, your Status and Response cards already on the table are drawn beside your hand, next to the cards you can activate instead of playing.
 msgid "SETTINGS_GAMEPLAY_ACTIVE_CARDS_HINT"
-msgstr "Bij het kiezen van een kaart worden je Status- en Response-kaarten die al op tafel liggen naast je hand getoond, bij de kaarten die je kunt activeren in plaats van spelen."
+msgstr "Bij het kiezen van een kaart worden je Status- en Reactiekaarten die al op tafel liggen naast je hand getoond, bij de kaarten die je kunt activeren in plaats van spelen."
 
 #. en: Open Faction Banners
 msgid "SETTINGS_GAMEPLAY_PENNANTS_OPEN_LABEL"
@@ -333,7 +333,7 @@ msgstr "Alle kaarten in het spel"
 
 #. en: Every faction's status and response cards are already played so you can test interactions immediately.
 msgid "SCENARIO_ALLCARDS_DESCRIPTION"
-msgstr "De Status- en Response-kaarten van elke factie liggen al op tafel, zodat je interacties meteen kunt testen."
+msgstr "De Status- en Reactiekaarten van elke factie liggen al op tafel, zodat je interacties meteen kunt testen."
 
 #. en: Tutorial 1: Your First Turn
 msgid "SCENARIO_TUTORIAL_01_TITLE"
@@ -345,11 +345,11 @@ msgstr "Drie begeleide rondes. Vaste handen, geen verrassingen, en de commandant
 
 #. en: Tutorial 2: Status and Response Cards
 msgid "SCENARIO_TUTORIAL_02_TITLE"
-msgstr "Tutorial 2: Status- en Response-kaarten"
+msgstr "Tutorial 2: Status- en Reactiekaarten"
 
 #. en: Command Germany with two Status cards already on the table. Chain them, then watch five rivals answer with Responses, Events, recruits, straits and Reallocate Resources.
 msgid "SCENARIO_TUTORIAL_02_DESCRIPTION"
-msgstr "Voer het bevel over Duitsland met twee Status-kaarten al op tafel. Combineer ze en zie hoe vijf rivalen antwoorden met Responses, Events, rekruten, zeestraten en Reallocate Resources."
+msgstr "Voer het bevel over Duitsland met twee Statuskaarten al op tafel. Combineer ze en zie hoe vijf rivalen antwoorden met Reacties, Gebeurtenissen, rekruten, zeestraten en Reallocate Resources."
 
 # ---- Game options (Skirmish and Lobby) ----
 
@@ -1768,3 +1768,599 @@ msgstr "Kies {0} kaarten om af te leggen"
 #. en: Select card(s) to discard (or skip)
 msgid "HUD_DISCARD_SELECT_OPTIONAL"
 msgstr "Kies kaart(en) om af te leggen (of sla over)"
+
+# ---- Factions ----
+
+#. en: Germany
+msgid "FACTION_GERMANY"
+msgstr "Duitsland"
+
+#. en: United Kingdom
+msgid "FACTION_UNITED_KINGDOM"
+msgstr "Verenigd Koninkrijk"
+
+#. en: Japan
+msgid "FACTION_JAPAN"
+msgstr "Japan"
+
+#. en: Soviet Union
+msgid "FACTION_SOVIET"
+msgstr "Sovjet-Unie"
+
+#. en: Italy
+msgid "FACTION_ITALY"
+msgstr "Italië"
+
+#. en: United States
+msgid "FACTION_UNITED_STATES"
+msgstr "Verenigde Staten"
+
+#. en: France
+msgid "FACTION_FRANCE"
+msgstr "Frankrijk"
+
+#. en: China
+msgid "FACTION_CHINA"
+msgstr "China"
+
+# ---- Faction units and piles (one key per combination: Dutch adjectives inflect) ----
+
+#. en: German Army
+msgid "FACTION_GERMANY_ARMY"
+msgstr "Duits leger"
+
+#. en: German Navy
+msgid "FACTION_GERMANY_NAVY"
+msgstr "Duitse vloot"
+
+#. en: German Air Force
+msgid "FACTION_GERMANY_AIR_FORCE"
+msgstr "Duitse luchtmacht"
+
+#. en: German Discard Pile
+msgid "FACTION_GERMANY_DISCARD_PILE"
+msgstr "Duitse aflegstapel"
+
+#. en: German Status Cards
+msgid "FACTION_GERMANY_STATUS_CARDS"
+msgstr "Duitse Statuskaarten"
+
+#. en: German Response Cards
+msgid "FACTION_GERMANY_RESPONSE_CARDS"
+msgstr "Duitse Reactiekaarten"
+
+#. en: United Kingdom Army
+msgid "FACTION_UNITED_KINGDOM_ARMY"
+msgstr "Brits leger"
+
+#. en: United Kingdom Navy
+msgid "FACTION_UNITED_KINGDOM_NAVY"
+msgstr "Britse vloot"
+
+#. en: United Kingdom Air Force
+msgid "FACTION_UNITED_KINGDOM_AIR_FORCE"
+msgstr "Britse luchtmacht"
+
+#. en: United Kingdom Discard Pile
+msgid "FACTION_UNITED_KINGDOM_DISCARD_PILE"
+msgstr "Britse aflegstapel"
+
+#. en: United Kingdom Status Cards
+msgid "FACTION_UNITED_KINGDOM_STATUS_CARDS"
+msgstr "Britse Statuskaarten"
+
+#. en: United Kingdom Response Cards
+msgid "FACTION_UNITED_KINGDOM_RESPONSE_CARDS"
+msgstr "Britse Reactiekaarten"
+
+#. en: Japanese Army
+msgid "FACTION_JAPAN_ARMY"
+msgstr "Japans leger"
+
+#. en: Japanese Navy
+msgid "FACTION_JAPAN_NAVY"
+msgstr "Japanse vloot"
+
+#. en: Japanese Air Force
+msgid "FACTION_JAPAN_AIR_FORCE"
+msgstr "Japanse luchtmacht"
+
+#. en: Japanese Discard Pile
+msgid "FACTION_JAPAN_DISCARD_PILE"
+msgstr "Japanse aflegstapel"
+
+#. en: Japanese Status Cards
+msgid "FACTION_JAPAN_STATUS_CARDS"
+msgstr "Japanse Statuskaarten"
+
+#. en: Japanese Response Cards
+msgid "FACTION_JAPAN_RESPONSE_CARDS"
+msgstr "Japanse Reactiekaarten"
+
+#. en: Soviet Army
+msgid "FACTION_SOVIET_ARMY"
+msgstr "Sovjetleger"
+
+#. en: Soviet Navy
+msgid "FACTION_SOVIET_NAVY"
+msgstr "Sovjetvloot"
+
+#. en: Soviet Air Force
+msgid "FACTION_SOVIET_AIR_FORCE"
+msgstr "Sovjetluchtmacht"
+
+#. en: Soviet Discard Pile
+msgid "FACTION_SOVIET_DISCARD_PILE"
+msgstr "Sovjet-aflegstapel"
+
+#. en: Soviet Status Cards
+msgid "FACTION_SOVIET_STATUS_CARDS"
+msgstr "Sovjet-Statuskaarten"
+
+#. en: Soviet Response Cards
+msgid "FACTION_SOVIET_RESPONSE_CARDS"
+msgstr "Sovjet-Reactiekaarten"
+
+#. en: Italian Army
+msgid "FACTION_ITALY_ARMY"
+msgstr "Italiaans leger"
+
+#. en: Italian Navy
+msgid "FACTION_ITALY_NAVY"
+msgstr "Italiaanse vloot"
+
+#. en: Italian Air Force
+msgid "FACTION_ITALY_AIR_FORCE"
+msgstr "Italiaanse luchtmacht"
+
+#. en: Italian Discard Pile
+msgid "FACTION_ITALY_DISCARD_PILE"
+msgstr "Italiaanse aflegstapel"
+
+#. en: Italian Status Cards
+msgid "FACTION_ITALY_STATUS_CARDS"
+msgstr "Italiaanse Statuskaarten"
+
+#. en: Italian Response Cards
+msgid "FACTION_ITALY_RESPONSE_CARDS"
+msgstr "Italiaanse Reactiekaarten"
+
+#. en: United States Army
+msgid "FACTION_UNITED_STATES_ARMY"
+msgstr "Amerikaans leger"
+
+#. en: United States Navy
+msgid "FACTION_UNITED_STATES_NAVY"
+msgstr "Amerikaanse vloot"
+
+#. en: United States Air Force
+msgid "FACTION_UNITED_STATES_AIR_FORCE"
+msgstr "Amerikaanse luchtmacht"
+
+#. en: United States Discard Pile
+msgid "FACTION_UNITED_STATES_DISCARD_PILE"
+msgstr "Amerikaanse aflegstapel"
+
+#. en: United States Status Cards
+msgid "FACTION_UNITED_STATES_STATUS_CARDS"
+msgstr "Amerikaanse Statuskaarten"
+
+#. en: United States Response Cards
+msgid "FACTION_UNITED_STATES_RESPONSE_CARDS"
+msgstr "Amerikaanse Reactiekaarten"
+
+#. en: French Army
+msgid "FACTION_FRANCE_ARMY"
+msgstr "Frans leger"
+
+#. en: French Navy
+msgid "FACTION_FRANCE_NAVY"
+msgstr "Franse vloot"
+
+#. en: French Air Force
+msgid "FACTION_FRANCE_AIR_FORCE"
+msgstr "Franse luchtmacht"
+
+#. en: French Discard Pile
+msgid "FACTION_FRANCE_DISCARD_PILE"
+msgstr "Franse aflegstapel"
+
+#. en: French Status Cards
+msgid "FACTION_FRANCE_STATUS_CARDS"
+msgstr "Franse Statuskaarten"
+
+#. en: French Response Cards
+msgid "FACTION_FRANCE_RESPONSE_CARDS"
+msgstr "Franse Reactiekaarten"
+
+#. en: Chinese Army
+msgid "FACTION_CHINA_ARMY"
+msgstr "Chinees leger"
+
+#. en: Chinese Navy
+msgid "FACTION_CHINA_NAVY"
+msgstr "Chinese vloot"
+
+#. en: Chinese Air Force
+msgid "FACTION_CHINA_AIR_FORCE"
+msgstr "Chinese luchtmacht"
+
+#. en: Chinese Discard Pile
+msgid "FACTION_CHINA_DISCARD_PILE"
+msgstr "Chinese aflegstapel"
+
+#. en: Chinese Status Cards
+msgid "FACTION_CHINA_STATUS_CARDS"
+msgstr "Chinese Statuskaarten"
+
+#. en: Chinese Response Cards
+msgid "FACTION_CHINA_RESPONSE_CARDS"
+msgstr "Chinese Reactiekaarten"
+
+# ---- Teams ----
+
+#. en: Axis
+msgid "TEAM_AXIS"
+msgstr "As"
+
+#. en: Allies
+msgid "TEAM_ALLIES"
+msgstr "Geallieerden"
+
+# ---- Countries ----
+
+#. en: Africa
+msgid "COUNTRY_AFRICA"
+msgstr "Afrika"
+
+#. en: Australia
+msgid "COUNTRY_AUSTRALIA"
+msgstr "Australië"
+
+#. en: Balkans
+msgid "COUNTRY_BALKANS"
+msgstr "Balkan"
+
+#. en: Baltic Sea
+msgid "COUNTRY_BALTIC_SEA"
+msgstr "Oostzee"
+
+#. en: Bay Of Bengal
+msgid "COUNTRY_BAY_OF_BENGAL"
+msgstr "Golf van Bengalen"
+
+#. en: Black Sea
+msgid "COUNTRY_BLACK_SEA"
+msgstr "Zwarte Zee"
+
+#. en: Canada
+msgid "COUNTRY_CANADA"
+msgstr "Canada"
+
+#. en: Caspian Sea
+msgid "COUNTRY_CASPIAN_SEA"
+msgstr "Kaspische Zee"
+
+#. en: Central Pacific
+msgid "COUNTRY_CENTRAL_PACIFIC"
+msgstr "Centrale Stille Oceaan"
+
+#. en: China
+msgid "COUNTRY_CHINA"
+msgstr "China"
+
+#. en: Eastern Europe
+msgid "COUNTRY_EASTERN_EUROPE"
+msgstr "Oost-Europa"
+
+#. en: East Pacific
+msgid "COUNTRY_EAST_PACIFIC"
+msgstr "Oostelijke Stille Oceaan"
+
+#. en: Germany
+msgid "COUNTRY_GERMANY"
+msgstr "Duitsland"
+
+#. en: Hawaii
+msgid "COUNTRY_HAWAII"
+msgstr "Hawaï"
+
+#. en: Iceland
+msgid "COUNTRY_ICELAND"
+msgstr "IJsland"
+
+#. en: India
+msgid "COUNTRY_INDIA"
+msgstr "India"
+
+#. en: Indian Ocean
+msgid "COUNTRY_INDIAN_OCEAN"
+msgstr "Indische Oceaan"
+
+#. en: Indonesia
+msgid "COUNTRY_INDONESIA"
+msgstr "Indonesië"
+
+#. en: Italy
+msgid "COUNTRY_ITALY"
+msgstr "Italië"
+
+#. en: Iwo Jima
+msgid "COUNTRY_IWO_JIMA"
+msgstr "Iwo Jima"
+
+#. en: Japan
+msgid "COUNTRY_JAPAN"
+msgstr "Japan"
+
+#. en: Kazakhstan
+msgid "COUNTRY_KAZAKHSTAN"
+msgstr "Kazachstan"
+
+#. en: Latin America
+msgid "COUNTRY_LATIN_AMERICA"
+msgstr "Latijns-Amerika"
+
+#. en: Madagascar
+msgid "COUNTRY_MADAGASCAR"
+msgstr "Madagaskar"
+
+#. en: Mediterranean Sea
+msgid "COUNTRY_MEDITERRANEAN_SEA"
+msgstr "Middellandse Zee"
+
+#. en: Middle East
+msgid "COUNTRY_MIDDLE_EAST"
+msgstr "Midden-Oosten"
+
+#. en: Mongolia
+msgid "COUNTRY_MONGOLIA"
+msgstr "Mongolië"
+
+#. en: Moscow
+msgid "COUNTRY_MOSCOW"
+msgstr "Moskou"
+
+#. en: New Guinea
+msgid "COUNTRY_NEW_GUINEA"
+msgstr "Nieuw-Guinea"
+
+#. en: New Zealand
+msgid "COUNTRY_NEW_ZEALAND"
+msgstr "Nieuw-Zeeland"
+
+#. en: North Africa
+msgid "COUNTRY_NORTH_AFRICA"
+msgstr "Noord-Afrika"
+
+#. en: North Atlantic
+msgid "COUNTRY_NORTH_ATLANTIC"
+msgstr "Noord-Atlantische Oceaan"
+
+#. en: North Pacific
+msgid "COUNTRY_NORTH_PACIFIC"
+msgstr "Noordelijke Stille Oceaan"
+
+#. en: North Sea
+msgid "COUNTRY_NORTH_SEA"
+msgstr "Noordzee"
+
+#. en: Pacific North West
+msgid "COUNTRY_PACIFIC_NORTH_WEST"
+msgstr "Pacifisch Noordwesten"
+
+#. en: Philippines
+msgid "COUNTRY_PHILIPPINES"
+msgstr "Filipijnen"
+
+#. en: Russia
+msgid "COUNTRY_RUSSIA"
+msgstr "Rusland"
+
+#. en: Scandinavia
+msgid "COUNTRY_SCANDINAVIA"
+msgstr "Scandinavië"
+
+#. en: Sea Of Japan
+msgid "COUNTRY_SEA_OF_JAPAN"
+msgstr "Japanse Zee"
+
+#. en: Siberia
+msgid "COUNTRY_SIBERIA"
+msgstr "Siberië"
+
+#. en: South Atlantic
+msgid "COUNTRY_SOUTH_ATLANTIC"
+msgstr "Zuid-Atlantische Oceaan"
+
+#. en: South China Sea
+msgid "COUNTRY_SOUTH_CHINA_SEA"
+msgstr "Zuid-Chinese Zee"
+
+#. en: South East Asia
+msgid "COUNTRY_SOUTH_EAST_ASIA"
+msgstr "Zuidoost-Azië"
+
+#. en: South East Pacific
+msgid "COUNTRY_SOUTH_EAST_PACIFIC"
+msgstr "Zuidoostelijke Stille Oceaan"
+
+#. en: Southern Ocean
+msgid "COUNTRY_SOUTHERN_OCEAN"
+msgstr "Zuidelijke Oceaan"
+
+#. en: South Pacific
+msgid "COUNTRY_SOUTH_PACIFIC"
+msgstr "Zuidelijke Stille Oceaan"
+
+#. en: Szechuan
+msgid "COUNTRY_SZECHUAN"
+msgstr "Sichuan"
+
+#. en: Ukraine
+msgid "COUNTRY_UKRAINE"
+msgstr "Oekraïne"
+
+#. en: United Kingdom
+msgid "COUNTRY_UNITED_KINGDOM"
+msgstr "Verenigd Koninkrijk"
+
+#. en: US East
+msgid "COUNTRY_US_EAST"
+msgstr "Oost-VS"
+
+#. en: US West
+msgid "COUNTRY_US_WEST"
+msgstr "West-VS"
+
+#. en: Vladivostok
+msgid "COUNTRY_VLADIVOSTOK"
+msgstr "Vladivostok"
+
+#. en: Western Europe
+msgid "COUNTRY_WESTERN_EUROPE"
+msgstr "West-Europa"
+
+# ---- Units ----
+
+#. en: Army
+msgid "UNIT_ARMY"
+msgstr "Leger"
+
+#. en: Armies
+msgid "UNIT_ARMY_PLURAL"
+msgstr "Legers"
+
+#. en: Navy
+msgid "UNIT_NAVY"
+msgstr "Vloot"
+
+#. en: Navies
+msgid "UNIT_NAVY_PLURAL"
+msgstr "Vloten"
+
+#. en: Air Force
+msgid "UNIT_AIR_FORCE"
+msgstr "Luchtmacht"
+
+#. en: Air Forces
+msgid "UNIT_AIR_FORCE_PLURAL"
+msgstr "Luchtmachten"
+
+# ---- Card types ----
+
+#. en: Build Army
+msgid "CARDTYPE_BUILD_ARMY"
+msgstr "Leger bouwen"
+
+#. en: Build Navy
+msgid "CARDTYPE_BUILD_NAVY"
+msgstr "Vloot bouwen"
+
+#. en: Land Battle
+msgid "CARDTYPE_LAND_BATTLE"
+msgstr "Landslag"
+
+#. en: Sea Battle
+msgid "CARDTYPE_SEA_BATTLE"
+msgstr "Zeeslag"
+
+#. en: Event
+msgid "CARDTYPE_EVENT"
+msgstr "Gebeurtenis"
+
+#. en: Status
+msgid "CARDTYPE_STATUS"
+msgstr "Status"
+
+#. en: Response
+msgid "CARDTYPE_RESPONSE"
+msgstr "Reactie"
+
+#. en: Economic Warfare
+msgid "CARDTYPE_ECONOMIC_WARFARE"
+msgstr "Economische oorlogvoering"
+
+#. en: Air Power
+msgid "CARDTYPE_AIR_POWER"
+msgstr "Luchtkracht"
+
+#. en: Bolster
+msgid "CARDTYPE_BOLSTER"
+msgstr "Versterking"
+
+# ---- Turn steps ----
+
+#. en: Play
+msgid "TURNSTEP_PLAY_CARD_NAME"
+msgstr "Spelen"
+
+#. en: Play or discard one card from your hand.
+msgid "TURNSTEP_PLAY_CARD_RULE"
+msgstr "Speel of leg één kaart uit je hand af."
+
+#. en: Supply
+msgid "TURNSTEP_SUPPLY_NAME"
+msgstr "Bevoorrading"
+
+#. en: Remove your unsupplied pieces from the board.
+msgid "TURNSTEP_SUPPLY_RULE"
+msgstr "Verwijder je onbevoorrade stukken van het bord."
+
+#. en: Victory
+msgid "TURNSTEP_VICTORY_POINT_NAME"
+msgstr "Overwinning"
+
+#. en: Collect Victory Points.
+msgid "TURNSTEP_VICTORY_POINT_RULE"
+msgstr "Verzamel overwinningspunten."
+
+#. en: Discard
+msgid "TURNSTEP_DISCARD_NAME"
+msgstr "Afleggen"
+
+#. en: Discard as many cards as you want from your hand.
+msgid "TURNSTEP_DISCARD_RULE"
+msgstr "Leg zoveel kaarten uit je hand af als je wilt."
+
+#. en: Draw
+msgid "TURNSTEP_DRAW_NAME"
+msgstr "Trekken"
+
+#. en: Draw until your hand has seven cards.
+msgid "TURNSTEP_DRAW_RULE"
+msgstr "Trek tot je zeven kaarten in je hand hebt."
+
+#. en: Air
+msgid "TURNSTEP_AIR_NAME"
+msgstr "Lucht"
+
+#. en: Deploy or marshal an Air Force, or gain air superiority.
+msgid "TURNSTEP_AIR_RULE"
+msgstr "Zet een luchtmacht in of hergroepeer er een, of verkrijg luchtoverwicht."
+
+# ---- In-game: faction labels ----
+
+#. en: {0}: armies in reserve
+msgid "HUD_RESERVE_ARMIES"
+msgstr "{0}: legers in voorraad"
+
+#. en: {0}: navies in reserve
+msgid "HUD_RESERVE_NAVIES"
+msgstr "{0}: vloten in voorraad"
+
+#. en: {0}: air forces in reserve
+msgid "HUD_RESERVE_AIR_FORCES"
+msgstr "{0}: luchtmachten in voorraad"
+
+#. en: [font_size=22][color=#d9ad5c]{0}[/color] — {1} VP[/font_size]
+msgid "HUD_SCORE_FACTION_HEADER"
+msgstr "[font_size=22][color=#d9ad5c]{0}[/color] — {1} OP[/font_size]"
+
+#. en: Playing: {0}
+msgid "HUD_PLAYERINFO_PLAYING"
+msgstr "Speelt: {0}"
+
+#. en: Show the {0} hand
+msgid "HUD_MINIMENU_SHOW_HAND"
+msgstr "Toon de hand van {0}"

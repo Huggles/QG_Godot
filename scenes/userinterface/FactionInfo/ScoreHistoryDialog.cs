@@ -74,7 +74,7 @@ public partial class ScoreHistoryDialog : MenuModal
 			CustomMinimumSize = new Vector2(104, 62),
 			SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
 			Text = VPHistory.CombinedScore(faction).ToString(),
-			TooltipText = data.Label,
+			TooltipText = GameTerms.FactionName(faction),
 			ButtonPressed = faction == _selected,
 		};
 		button.SetMeta("faction", (int)faction);
@@ -118,7 +118,7 @@ public partial class ScoreHistoryDialog : MenuModal
 	private static string BreakdownText(Faction faction)
 	{
 		FactionData data = StaticGameData.FactionDataMap[faction];
-		List<string> lines = new() { $"[font_size=22][color=#d9ad5c]{data.Label}[/color] — {VPHistory.CombinedScore(faction)} VP[/font_size]" };
+		List<string> lines = new() { string.Format(TranslationServer.Translate("HUD_SCORE_FACTION_HEADER"), GameTerms.FactionName(faction), VPHistory.CombinedScore(faction)) };
 
 		var rounds = VPHistory.Summaries(faction).GroupBy(s => s.Round).OrderByDescending(g => g.Key).ToList();
 		if (rounds.Count == 0)
@@ -129,7 +129,7 @@ public partial class ScoreHistoryDialog : MenuModal
 			lines.Add("\n" + string.Format(TranslationServer.Translate("HUD_SCORE_ROUND_LINE"), round.Key, round.Sum(s => s.TotalScore).ToString("+#;-#;0")));
 			foreach (VPTurnSummary summary in round)
 			{
-				string whose = summary.Faction == faction ? string.Empty : $" ({summary.Faction.Label()})";
+				string whose = summary.Faction == faction ? string.Empty : $" ({GameTerms.FactionName(summary.Faction)})";
 				foreach (VPEntry entry in summary.victoryPointEntries)
 					lines.Add($"   {entry.Description}{whose}");
 			}

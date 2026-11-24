@@ -102,7 +102,7 @@ public partial class DeckCompositionPanel : CenterContainer
 
 		for (int row = 0; row < types.Count; row++)
 		{
-			Table.AddChild(Cell(types[row].Label(), RowLabelColor, NumberColor, HorizontalAlignment.Left));
+			Table.AddChild(Cell(GameTerms.CardTypeName(types[row]), RowLabelColor, NumberColor, HorizontalAlignment.Left));
 			// Alternate rows a shade apart so a row can be read across six tinted columns.
 			float tint = row % 2 == 0 ? 0.30f : 0.22f;
 			foreach (Faction faction in factions)
@@ -130,7 +130,7 @@ public partial class DeckCompositionPanel : CenterContainer
 	private static Control HeaderCell(Faction faction)
 	{
 		FactionData data = StaticGameData.FactionDataMap.GetValueOrDefault(faction);
-		Control cell = Cell(faction.Label(), data?.FactionColor ?? Colors.Gray, data?.FactionColorText ?? Colors.White, HorizontalAlignment.Center);
+		Control cell = Cell(GameTerms.FactionName(faction), data?.FactionColor ?? Colors.Gray, data?.FactionColorText ?? Colors.White, HorizontalAlignment.Center);
 		// Wraps "United Kingdom" over two lines at the column's width, as the rulebook does.
 		Label label = cell.GetChild<Label>(0);
 		label.CustomMinimumSize = new Vector2(FactionColumnWidth, 0);

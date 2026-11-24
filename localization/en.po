@@ -1352,3 +1352,454 @@ msgstr "Select {0} cards to discard"
 
 msgid "HUD_DISCARD_SELECT_OPTIONAL"
 msgstr "Select card(s) to discard (or skip)"
+
+# ---- Factions ----
+
+msgid "FACTION_GERMANY"
+msgstr "Germany"
+
+msgid "FACTION_UNITED_KINGDOM"
+msgstr "United Kingdom"
+
+msgid "FACTION_JAPAN"
+msgstr "Japan"
+
+msgid "FACTION_SOVIET"
+msgstr "Soviet Union"
+
+msgid "FACTION_ITALY"
+msgstr "Italy"
+
+msgid "FACTION_UNITED_STATES"
+msgstr "United States"
+
+msgid "FACTION_FRANCE"
+msgstr "France"
+
+msgid "FACTION_CHINA"
+msgstr "China"
+
+# ---- Faction units and piles (one key per combination: Dutch adjectives inflect) ----
+
+msgid "FACTION_GERMANY_ARMY"
+msgstr "German Army"
+
+msgid "FACTION_GERMANY_NAVY"
+msgstr "German Navy"
+
+msgid "FACTION_GERMANY_AIR_FORCE"
+msgstr "German Air Force"
+
+msgid "FACTION_GERMANY_DISCARD_PILE"
+msgstr "German Discard Pile"
+
+msgid "FACTION_GERMANY_STATUS_CARDS"
+msgstr "German Status Cards"
+
+msgid "FACTION_GERMANY_RESPONSE_CARDS"
+msgstr "German Response Cards"
+
+msgid "FACTION_UNITED_KINGDOM_ARMY"
+msgstr "United Kingdom Army"
+
+msgid "FACTION_UNITED_KINGDOM_NAVY"
+msgstr "United Kingdom Navy"
+
+msgid "FACTION_UNITED_KINGDOM_AIR_FORCE"
+msgstr "United Kingdom Air Force"
+
+msgid "FACTION_UNITED_KINGDOM_DISCARD_PILE"
+msgstr "United Kingdom Discard Pile"
+
+msgid "FACTION_UNITED_KINGDOM_STATUS_CARDS"
+msgstr "United Kingdom Status Cards"
+
+msgid "FACTION_UNITED_KINGDOM_RESPONSE_CARDS"
+msgstr "United Kingdom Response Cards"
+
+msgid "FACTION_JAPAN_ARMY"
+msgstr "Japanese Army"
+
+msgid "FACTION_JAPAN_NAVY"
+msgstr "Japanese Navy"
+
+msgid "FACTION_JAPAN_AIR_FORCE"
+msgstr "Japanese Air Force"
+
+msgid "FACTION_JAPAN_DISCARD_PILE"
+msgstr "Japanese Discard Pile"
+
+msgid "FACTION_JAPAN_STATUS_CARDS"
+msgstr "Japanese Status Cards"
+
+msgid "FACTION_JAPAN_RESPONSE_CARDS"
+msgstr "Japanese Response Cards"
+
+msgid "FACTION_SOVIET_ARMY"
+msgstr "Soviet Army"
+
+msgid "FACTION_SOVIET_NAVY"
+msgstr "Soviet Navy"
+
+msgid "FACTION_SOVIET_AIR_FORCE"
+msgstr "Soviet Air Force"
+
+msgid "FACTION_SOVIET_DISCARD_PILE"
+msgstr "Soviet Discard Pile"
+
+msgid "FACTION_SOVIET_STATUS_CARDS"
+msgstr "Soviet Status Cards"
+
+msgid "FACTION_SOVIET_RESPONSE_CARDS"
+msgstr "Soviet Response Cards"
+
+msgid "FACTION_ITALY_ARMY"
+msgstr "Italian Army"
+
+msgid "FACTION_ITALY_NAVY"
+msgstr "Italian Navy"
+
+msgid "FACTION_ITALY_AIR_FORCE"
+msgstr "Italian Air Force"
+
+msgid "FACTION_ITALY_DISCARD_PILE"
+msgstr "Italian Discard Pile"
+
+msgid "FACTION_ITALY_STATUS_CARDS"
+msgstr "Italian Status Cards"
+
+msgid "FACTION_ITALY_RESPONSE_CARDS"
+msgstr "Italian Response Cards"
+
+msgid "FACTION_UNITED_STATES_ARMY"
+msgstr "United States Army"
+
+msgid "FACTION_UNITED_STATES_NAVY"
+msgstr "United States Navy"
+
+msgid "FACTION_UNITED_STATES_AIR_FORCE"
+msgstr "United States Air Force"
+
+msgid "FACTION_UNITED_STATES_DISCARD_PILE"
+msgstr "United States Discard Pile"
+
+msgid "FACTION_UNITED_STATES_STATUS_CARDS"
+msgstr "United States Status Cards"
+
+msgid "FACTION_UNITED_STATES_RESPONSE_CARDS"
+msgstr "United States Response Cards"
+
+msgid "FACTION_FRANCE_ARMY"
+msgstr "French Army"
+
+msgid "FACTION_FRANCE_NAVY"
+msgstr "French Navy"
+
+msgid "FACTION_FRANCE_AIR_FORCE"
+msgstr "French Air Force"
+
+msgid "FACTION_FRANCE_DISCARD_PILE"
+msgstr "French Discard Pile"
+
+msgid "FACTION_FRANCE_STATUS_CARDS"
+msgstr "French Status Cards"
+
+msgid "FACTION_FRANCE_RESPONSE_CARDS"
+msgstr "French Response Cards"
+
+msgid "FACTION_CHINA_ARMY"
+msgstr "Chinese Army"
+
+msgid "FACTION_CHINA_NAVY"
+msgstr "Chinese Navy"
+
+msgid "FACTION_CHINA_AIR_FORCE"
+msgstr "Chinese Air Force"
+
+msgid "FACTION_CHINA_DISCARD_PILE"
+msgstr "Chinese Discard Pile"
+
+msgid "FACTION_CHINA_STATUS_CARDS"
+msgstr "Chinese Status Cards"
+
+msgid "FACTION_CHINA_RESPONSE_CARDS"
+msgstr "Chinese Response Cards"
+
+# ---- Teams ----
+
+msgid "TEAM_AXIS"
+msgstr "Axis"
+
+msgid "TEAM_ALLIES"
+msgstr "Allies"
+
+# ---- Countries ----
+
+msgid "COUNTRY_AFRICA"
+msgstr "Africa"
+
+msgid "COUNTRY_AUSTRALIA"
+msgstr "Australia"
+
+msgid "COUNTRY_BALKANS"
+msgstr "Balkans"
+
+msgid "COUNTRY_BALTIC_SEA"
+msgstr "Baltic Sea"
+
+msgid "COUNTRY_BAY_OF_BENGAL"
+msgstr "Bay Of Bengal"
+
+msgid "COUNTRY_BLACK_SEA"
+msgstr "Black Sea"
+
+msgid "COUNTRY_CANADA"
+msgstr "Canada"
+
+msgid "COUNTRY_CASPIAN_SEA"
+msgstr "Caspian Sea"
+
+msgid "COUNTRY_CENTRAL_PACIFIC"
+msgstr "Central Pacific"
+
+msgid "COUNTRY_CHINA"
+msgstr "China"
+
+msgid "COUNTRY_EASTERN_EUROPE"
+msgstr "Eastern Europe"
+
+msgid "COUNTRY_EAST_PACIFIC"
+msgstr "East Pacific"
+
+msgid "COUNTRY_GERMANY"
+msgstr "Germany"
+
+msgid "COUNTRY_HAWAII"
+msgstr "Hawaii"
+
+msgid "COUNTRY_ICELAND"
+msgstr "Iceland"
+
+msgid "COUNTRY_INDIA"
+msgstr "India"
+
+msgid "COUNTRY_INDIAN_OCEAN"
+msgstr "Indian Ocean"
+
+msgid "COUNTRY_INDONESIA"
+msgstr "Indonesia"
+
+msgid "COUNTRY_ITALY"
+msgstr "Italy"
+
+msgid "COUNTRY_IWO_JIMA"
+msgstr "Iwo Jima"
+
+msgid "COUNTRY_JAPAN"
+msgstr "Japan"
+
+msgid "COUNTRY_KAZAKHSTAN"
+msgstr "Kazakhstan"
+
+msgid "COUNTRY_LATIN_AMERICA"
+msgstr "Latin America"
+
+msgid "COUNTRY_MADAGASCAR"
+msgstr "Madagascar"
+
+msgid "COUNTRY_MEDITERRANEAN_SEA"
+msgstr "Mediterranean Sea"
+
+msgid "COUNTRY_MIDDLE_EAST"
+msgstr "Middle East"
+
+msgid "COUNTRY_MONGOLIA"
+msgstr "Mongolia"
+
+msgid "COUNTRY_MOSCOW"
+msgstr "Moscow"
+
+msgid "COUNTRY_NEW_GUINEA"
+msgstr "New Guinea"
+
+msgid "COUNTRY_NEW_ZEALAND"
+msgstr "New Zealand"
+
+msgid "COUNTRY_NORTH_AFRICA"
+msgstr "North Africa"
+
+msgid "COUNTRY_NORTH_ATLANTIC"
+msgstr "North Atlantic"
+
+msgid "COUNTRY_NORTH_PACIFIC"
+msgstr "North Pacific"
+
+msgid "COUNTRY_NORTH_SEA"
+msgstr "North Sea"
+
+msgid "COUNTRY_PACIFIC_NORTH_WEST"
+msgstr "Pacific North West"
+
+msgid "COUNTRY_PHILIPPINES"
+msgstr "Philippines"
+
+msgid "COUNTRY_RUSSIA"
+msgstr "Russia"
+
+msgid "COUNTRY_SCANDINAVIA"
+msgstr "Scandinavia"
+
+msgid "COUNTRY_SEA_OF_JAPAN"
+msgstr "Sea Of Japan"
+
+msgid "COUNTRY_SIBERIA"
+msgstr "Siberia"
+
+msgid "COUNTRY_SOUTH_ATLANTIC"
+msgstr "South Atlantic"
+
+msgid "COUNTRY_SOUTH_CHINA_SEA"
+msgstr "South China Sea"
+
+msgid "COUNTRY_SOUTH_EAST_ASIA"
+msgstr "South East Asia"
+
+msgid "COUNTRY_SOUTH_EAST_PACIFIC"
+msgstr "South East Pacific"
+
+msgid "COUNTRY_SOUTHERN_OCEAN"
+msgstr "Southern Ocean"
+
+msgid "COUNTRY_SOUTH_PACIFIC"
+msgstr "South Pacific"
+
+msgid "COUNTRY_SZECHUAN"
+msgstr "Szechuan"
+
+msgid "COUNTRY_UKRAINE"
+msgstr "Ukraine"
+
+msgid "COUNTRY_UNITED_KINGDOM"
+msgstr "United Kingdom"
+
+msgid "COUNTRY_US_EAST"
+msgstr "US East"
+
+msgid "COUNTRY_US_WEST"
+msgstr "US West"
+
+msgid "COUNTRY_VLADIVOSTOK"
+msgstr "Vladivostok"
+
+msgid "COUNTRY_WESTERN_EUROPE"
+msgstr "Western Europe"
+
+# ---- Units ----
+
+msgid "UNIT_ARMY"
+msgstr "Army"
+
+msgid "UNIT_ARMY_PLURAL"
+msgstr "Armies"
+
+msgid "UNIT_NAVY"
+msgstr "Navy"
+
+msgid "UNIT_NAVY_PLURAL"
+msgstr "Navies"
+
+msgid "UNIT_AIR_FORCE"
+msgstr "Air Force"
+
+msgid "UNIT_AIR_FORCE_PLURAL"
+msgstr "Air Forces"
+
+# ---- Card types ----
+
+msgid "CARDTYPE_BUILD_ARMY"
+msgstr "Build Army"
+
+msgid "CARDTYPE_BUILD_NAVY"
+msgstr "Build Navy"
+
+msgid "CARDTYPE_LAND_BATTLE"
+msgstr "Land Battle"
+
+msgid "CARDTYPE_SEA_BATTLE"
+msgstr "Sea Battle"
+
+msgid "CARDTYPE_EVENT"
+msgstr "Event"
+
+msgid "CARDTYPE_STATUS"
+msgstr "Status"
+
+msgid "CARDTYPE_RESPONSE"
+msgstr "Response"
+
+msgid "CARDTYPE_ECONOMIC_WARFARE"
+msgstr "Economic Warfare"
+
+msgid "CARDTYPE_AIR_POWER"
+msgstr "Air Power"
+
+msgid "CARDTYPE_BOLSTER"
+msgstr "Bolster"
+
+# ---- Turn steps ----
+
+msgid "TURNSTEP_PLAY_CARD_NAME"
+msgstr "Play"
+
+msgid "TURNSTEP_PLAY_CARD_RULE"
+msgstr "Play or discard one card from your hand."
+
+msgid "TURNSTEP_SUPPLY_NAME"
+msgstr "Supply"
+
+msgid "TURNSTEP_SUPPLY_RULE"
+msgstr "Remove your unsupplied pieces from the board."
+
+msgid "TURNSTEP_VICTORY_POINT_NAME"
+msgstr "Victory"
+
+msgid "TURNSTEP_VICTORY_POINT_RULE"
+msgstr "Collect Victory Points."
+
+msgid "TURNSTEP_DISCARD_NAME"
+msgstr "Discard"
+
+msgid "TURNSTEP_DISCARD_RULE"
+msgstr "Discard as many cards as you want from your hand."
+
+msgid "TURNSTEP_DRAW_NAME"
+msgstr "Draw"
+
+msgid "TURNSTEP_DRAW_RULE"
+msgstr "Draw until your hand has seven cards."
+
+msgid "TURNSTEP_AIR_NAME"
+msgstr "Air"
+
+msgid "TURNSTEP_AIR_RULE"
+msgstr "Deploy or marshal an Air Force, or gain air superiority."
+
+# ---- In-game: faction labels ----
+
+msgid "HUD_RESERVE_ARMIES"
+msgstr "{0}: armies in reserve"
+
+msgid "HUD_RESERVE_NAVIES"
+msgstr "{0}: navies in reserve"
+
+msgid "HUD_RESERVE_AIR_FORCES"
+msgstr "{0}: air forces in reserve"
+
+msgid "HUD_SCORE_FACTION_HEADER"
+msgstr "[font_size=22][color=#d9ad5c]{0}[/color] — {1} VP[/font_size]"
+
+msgid "HUD_PLAYERINFO_PLAYING"
+msgstr "Playing: {0}"
+
+msgid "HUD_MINIMENU_SHOW_HAND"
+msgstr "Show the {0} hand"

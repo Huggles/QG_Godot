@@ -134,7 +134,7 @@ public partial class TurnBadge : Control
 		// GetValueOrDefault rather than FactionData.FlagTexture: that indexer throws for NONE and
 		// ALL, and this runs off a turn boundary that error recovery can leave in an odd state.
 		Flag.Texture = StaticGameData.FactionDataMap.GetValueOrDefault(faction)?.FlagTexture;
-		Caption.Text = string.Format(Tr("HUD_TURN_BADGE"), faction.Label());
+		Caption.Text = string.Format(Tr("HUD_TURN_BADGE"), GameTerms.FactionName(faction));
 
 		// Turns can be skipped through faster than the badge runs. Killing the previous fade rather
 		// than starting a second one alongside it is what stops two tweens writing modulate against

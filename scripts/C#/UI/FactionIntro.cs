@@ -320,8 +320,8 @@ public partial class FactionIntro : CanvasLayer
 
     private void Fill(Faction faction, FactionData data)
     {
-        _kicker.Text = data.Team ?? "";
-        _faction.Text = faction.Label();
+        _kicker.Text = data.Team == null ? "" : Localization.TranslateOr($"TEAM_{data.Team}", data.Team);
+        _faction.Text = GameTerms.FactionName(faction);
         _factionBar.Color = data.FactionColor;
 
         bool ai = PlayerFactionRegistry.IsFactionAi(faction);

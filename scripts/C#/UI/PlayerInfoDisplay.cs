@@ -68,24 +68,11 @@ public partial class PlayerInfoDisplay : PanelContainer, LoadableUI
         else
         {
             // Format faction names nicely
-            string factionNames = string.Join(", ", factions.Select(f => FactionToDisplayName(f)));
-            _factionsLabel.Text = $"Playing: {factionNames}";
+            string factionNames = string.Join(", ", factions.Select(GameTerms.FactionName));
+            _factionsLabel.Text = string.Format(Tr("HUD_PLAYERINFO_PLAYING"), factionNames);
         }
     }
 
-    private string FactionToDisplayName(Faction faction)
-    {
-        return faction switch
-        {
-            Faction.GERMANY => "Germany",
-            Faction.ITALY => "Italy",
-            Faction.JAPAN => "Japan",
-            Faction.SOVIET => "Soviet Union",
-            Faction.UNITED_KINGDOM => "UK",
-            Faction.UNITED_STATES => "USA",
-            _ => faction.ToString()
-        };
-    }
 
     public new void Show()
     {

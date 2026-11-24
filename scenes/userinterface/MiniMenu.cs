@@ -144,7 +144,7 @@ public partial class MiniMenu : Control
 			marginTextureButton.Name = $"{faction}CardBackButton";
 			marginTextureButton.TextureNormal = cardTexture;
 			marginTextureButton.TexturePressed = cardTexture;
-			marginTextureButton.TooltipText = $"Show the {faction} hand";
+			marginTextureButton.TooltipText = string.Format(Tr("HUD_MINIMENU_SHOW_HAND"), GameTerms.FactionName(faction));
 
 			MiniMenuContainer.AddChild(marginTextureButton);
 			// Captured rather than read back off the sender: the button carries no faction of its own.

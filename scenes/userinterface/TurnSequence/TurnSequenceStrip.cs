@@ -108,7 +108,7 @@ public partial class TurnSequenceStrip : Control
 			pill.MouseExited += () => HideHint(index);
 			pill.AddChild(new Label
 			{
-				Text = $"{i + 1}  {TurnStepText.For(_order[i]).Name}".ToUpperInvariant(),
+				Text = $"{i + 1}  {GameTerms.TurnStepName(_order[i])}".ToUpperInvariant(),
 				MouseFilter = MouseFilterEnum.Ignore,
 				LabelSettings = new LabelSettings { Font = PillFont, FontSize = 17, FontColor = CreamColor, OutlineSize = 5, OutlineColor = Colors.Black },
 			});
@@ -153,8 +153,8 @@ public partial class TurnSequenceStrip : Control
 	private void ShowHint(int index)
 	{
 		TurnStepText text = TurnStepText.For(_order[index]);
-		HintTitle.Text = string.Format(Tr(text.Optional ? "HUD_STEP_HINT_TITLE_OPTIONAL" : "HUD_STEP_HINT_TITLE"), text.Name).ToUpperInvariant();
-		HintRule.Text = WrapToWidth(text.Rule, HintRule.GetThemeFont("font"), HintRule.LabelSettings.FontSize, HintMaxWidth);
+		HintTitle.Text = string.Format(Tr(text.Optional ? "HUD_STEP_HINT_TITLE_OPTIONAL" : "HUD_STEP_HINT_TITLE"), GameTerms.TurnStepName(_order[index])).ToUpperInvariant();
+		HintRule.Text = WrapToWidth(GameTerms.TurnStepRule(_order[index]), HintRule.GetThemeFont("font"), HintRule.LabelSettings.FontSize, HintMaxWidth);
 
 		_hinted = index;
 		Hint.Visible = true;

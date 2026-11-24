@@ -76,7 +76,7 @@ public partial class CountryScene : Control
 		countrySceneInstance.CountryState.Tags.TagRemoved += countrySceneInstance.OnTagRemoved;
 		NodeUtilities.Instance.CountriesNode.AddChild(countrySceneInstance, false);
 
-		countrySceneInstance.CountryLabel.Text = countrySceneInstance.StaticCountryData.Label;
+		countrySceneInstance.CountryLabel.Text = GameTerms.CountryName(countrySceneInstance.StaticCountryData);
 		countrySceneInstance.CenterLabel(countrySceneInstance.StaticCountryData.LabelTransformData);
 
 		countrySceneInstance.CountrySpriteTextureRect.Texture = countrySceneInstance.StaticCountryData.Texture;

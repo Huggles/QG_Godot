@@ -173,7 +173,7 @@ public partial class FactionInfoRow : Control
 		_cloth.SetShaderParameter("phase", GD.Randf() * 10f);
 		Cloth.Material = _cloth;
 
-		FactionInfoButton.TooltipText = $"{data.Label}\n{Tr(ToggleHint)}";
+		FactionInfoButton.TooltipText = $"{GameTerms.FactionName(data.Faction)}\n{Tr(ToggleHint)}";
 		HandButton.TooltipText = "HUD_FACTION_TOOLTIP_HAND";
 		GetNode<Control>("%ScoreCell").TooltipText = "HUD_FACTION_TOOLTIP_VP";
 		ArmyCell.TooltipText = "HUD_FACTION_TOOLTIP_ARMIES";
@@ -280,7 +280,7 @@ public partial class FactionInfoRow : Control
 			MouseFilter = MouseFilterEnum.Ignore,
 			LabelSettings = new LabelSettings { Font = NameFont, FontSize = NameFontSize, FontColor = Ink, OutlineSize = 4, OutlineColor = Colors.Black },
 		});
-		FactionInfoButton.TooltipText = $"{FactionState.FactionData.Label} — {name}\n{Tr(ToggleHint)}";
+		FactionInfoButton.TooltipText = $"{GameTerms.FactionName(FactionState.FactionData.Faction)} — {name}\n{Tr(ToggleHint)}";
 	}
 
 	// ── Event handlers ───────────────────────────────────────────────────────
@@ -332,13 +332,13 @@ public partial class FactionInfoRow : Control
 	private void ShowPile(Control pile)
 	{
 		if (!HasPilePopup || FactionState?.DeckState is not { } deckState) return;
-		string adjective = FactionState.FactionData.FactionAdjactiveLabel;
+		Faction faction = FactionState.FactionData.Faction;
 		if (pile == DeckButton)
-			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Discard Pile", deckState.DiscardedCardIds);
+			PileDetailPopup.Current.ShowFor(pile, HeadArea, GameTerms.FactionDiscardPileLabel(faction), deckState.DiscardedCardIds);
 		else if (pile == _statusFan?.Zone)
-			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Status Cards", deckState.StatusCardIds, IgnoredFooter(deckState.StatusCardIds));
+			PileDetailPopup.Current.ShowFor(pile, HeadArea, GameTerms.FactionStatusCardsLabel(faction), deckState.StatusCardIds, IgnoredFooter(deckState.StatusCardIds));
 		else
-			PileDetailPopup.Current.ShowFor(pile, HeadArea, $"{adjective} Response Cards", deckState.ResponseCardIds);
+			PileDetailPopup.Current.ShowFor(pile, HeadArea, GameTerms.FactionResponseCardsLabel(faction), deckState.ResponseCardIds);
 	}
 
 	/// <summary>One line per status card that a card in play ignores, e.g. "Blitzkrieg: ignored by Hobart's Funnies".</summary>
@@ -584,8 +584,9 @@ public partial class FactionInfoRow : Control
 		HBoxContainer cell = (HBoxContainer)ArmyCell.Duplicate();
 		cell.UniqueNameInOwner = false;
 		FactionData data = StaticGameData.FactionDataMap[faction];
-		string pieces = type switch { UnitType.NAVY => "navies", UnitType.AIR_FORCE => "air forces", _ => "armies" };
-		cell.TooltipText = $"{data.Label}: {pieces} in reserve";
+		// One key per unit type, so the noun's form and the word order stay the translator's call.
+		string key = type switch { UnitType.NAVY => "HUD_RESERVE_NAVIES", UnitType.AIR_FORCE => "HUD_RESERVE_AIR_FORCES", _ => "HUD_RESERVE_ARMIES" };
+		cell.TooltipText = string.Format(Tr(key), GameTerms.FactionName(faction));
 		Pieces.AddChild(cell);
 
 		TextureRect icon = cell.GetNode<TextureRect>("ArmyIcon");
